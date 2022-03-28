@@ -1,0 +1,14 @@
+.table-row:nth-child(2n + 2) {
+    background-color: #161616;
+}
+
+.table-row-light:nth-child(2n + 2) {
+    background-color: #f3f3f3;
+}
+
+.table-row,
+.table-row-light {
+    td:first-child {
+        padding-left: 10px;
+    }
+}
