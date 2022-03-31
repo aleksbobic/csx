@@ -1,5 +1,4 @@
 import {
-    AspectRatio,
     Box,
     Center,
     Container,
@@ -7,9 +6,6 @@ import {
     HStack,
     Image,
     Link,
-    LinkBox,
-    LinkOverlay,
-    SimpleGrid,
     Text,
     useColorMode
 } from '@chakra-ui/react';
@@ -20,7 +16,7 @@ import logolight from 'images/logolight.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
-import { NavLink, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 
@@ -32,58 +28,6 @@ function HomePage() {
         store.track.trackPageChange();
         store.search.setSearchIsEmpty(false);
     });
-
-    const renderServerNetworks = () => {
-        const cardColor =
-            colorMode === 'light' ? 'blackAlpha.50' : 'blackAlpha.400';
-        const cardHoverColor =
-            colorMode === 'light' ? 'blackAlpha.50' : 'blackAlpha.400';
-
-        return store.core.availableDatasets.map(network => {
-            return (
-                <LinkBox as="article" key={network.name}>
-                    <AspectRatio
-                        ratio="1"
-                        backgroundColor={'transparent'}
-                        borderRadius="10px"
-                        border="1px solid"
-                        borderColor={cardColor}
-                        transition="all ease-in-out .3s"
-                        padding="20px"
-                        _hover={{
-                            backgroundColor: cardHoverColor,
-                            shadow: 'xl',
-                            borderColor: 'transparent'
-                        }}
-                    >
-                        <Box>
-                            <LinkOverlay
-                                as={NavLink}
-                                to={`/graph?id=${network.id}`}
-                                onClick={() =>
-                                    store.track.trackEvent(
-                                        'homepage',
-                                        'button click',
-                                        `network: ${network.id}`
-                                    )
-                                }
-                            >
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="bold"
-                                    padding="10px"
-                                    textTransform="uppercase"
-                                    textAlign="center"
-                                >
-                                    {network.name}
-                                </Text>
-                            </LinkOverlay>
-                        </Box>
-                    </AspectRatio>
-                </LinkBox>
-            );
-        });
-    };
 
     const renderFooter = () => (
         <Container
@@ -188,23 +132,6 @@ function HomePage() {
                     maxW="container.sm"
                 >
                     <SearchBarComponent style={{ marginTop: '0px' }} />
-                </Container>
-                <Container maxW="container.md" marginBottom="350px">
-                    <Heading
-                        size="xs"
-                        mb="20px"
-                        mt="50px"
-                        textAlign="center"
-                        opacity="0.5"
-                    >
-                        Locally Available Datasets
-                    </Heading>
-                    <SimpleGrid
-                        columns={{ sm: 3, md: 4, lg: 5, xl: 6 }}
-                        spacing="20px"
-                    >
-                        {renderServerNetworks()}
-                    </SimpleGrid>
                 </Container>
                 {renderFooter()}
             </Box>

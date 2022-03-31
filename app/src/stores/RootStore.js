@@ -9,13 +9,12 @@ import { TrackingStore } from './TrackingStore';
 import { ContextMenuStore } from './ContextMenuStore';
 import { GraphInstanceStore } from './GraphInstanceStore';
 import { CoreStore } from './CoreStore';
-import { tourSteps } from './TourSteps';
+import { WorkflowStore } from './WorkflowStore';
 
 export class RootStore {
     surveyLink = null;
 
     constructor() {
-        this.tourSteps = tourSteps;
         this.initAxios();
         this.graphInstance = new GraphInstanceStore(this);
         this.core = new CoreStore(this);
@@ -26,6 +25,7 @@ export class RootStore {
         this.search = new SearchStore(this);
         this.contextMenu = new ContextMenuStore(this);
         this.track = new TrackingStore(this);
+        this.workflow = new WorkflowStore(this);
         this.getSurveyLink();
     }
 

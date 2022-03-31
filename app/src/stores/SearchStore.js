@@ -3,6 +3,7 @@ import { makeAutoObservable } from 'mobx';
 
 export class SearchStore {
     nodeTypes = [];
+    newNodeTypes = [];
     anchor = '';
     links = [];
     schema = [];
@@ -12,12 +13,15 @@ export class SearchStore {
     currentDatasetIndex = 0;
     connector = '';
     searchIsEmpty = false;
+    advancedSearchQuery = '';
 
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
         this.getDatasets();
     }
+
+    setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
 
@@ -107,6 +111,12 @@ export class SearchStore {
             graph_type: graphType,
             visible_entries: []
         };
+
+        if (graphType === 'overview') {
+            params.anchor_properties = JSON.stringify(
+                this.store.schema.overviewDataNodeProperties
+            );
+        }
 
         if (
             graphType === 'detail' &&

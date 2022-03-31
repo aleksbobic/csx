@@ -11,7 +11,8 @@ export class GraphStore {
     graphData = {
         meta: {
             graphID: null,
-            query: ''
+            query: '',
+            anchorProperties: []
         },
         nodes: [],
         links: [],
@@ -67,7 +68,8 @@ export class GraphStore {
                 ...this.graphData.meta,
                 references: [],
                 nodeCount: 0,
-                linkCount: 0
+                linkCount: 0,
+                anchorProperties: []
             },
             nodes: [],
             links: [],
@@ -177,6 +179,7 @@ export class GraphStore {
                 nodes[i].label,
                 nodes[i].size
             );
+
             nodes[i].neighbours = neighbours[nodes[i].id];
             nodes[i].selected = false;
 
@@ -269,11 +272,12 @@ export class GraphStore {
             ? this.graphData
             : this.detailGraphData;
 
-        switch (
+        const selectedSchema =
             this.store.graphInstance.nodeColorScheme[
                 this.store.core.currentGraph
-            ]
-        ) {
+            ];
+
+        switch (selectedSchema) {
             case 'type':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
                     data.nodes[i].material.color.set(
@@ -292,9 +296,20 @@ export class GraphStore {
                     );
                 }
                 break;
-            default:
+            case 'none':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
                     data.nodes[i].material.color.set('white');
+                }
+                break;
+            default:
+                for (let i = 0; i < data.meta.nodeCount; i++) {
+                    data.nodes[i].material.color.set(
+                        this.store.graphInstance.nodeColorSchemeColors[
+                            this.store.core.currentGraph
+                        ][selectedSchema][
+                            data.nodes[i].properties[selectedSchema]
+                        ]
+                    );
                 }
                 break;
         }
@@ -381,22 +396,24 @@ export class GraphStore {
     };
 
     selectComponent = componentId => {
-        if (!this.graphData.selectedComponents.includes(componentId)) {
-            const nodesToSelect = this.graphData.nodes.filter(
-                node => node.component === componentId
-            );
-            this.selectNode(nodesToSelect);
-        } else {
-            const nodesToDeselect = this.graphData.nodes.filter(
-                node => node.component === componentId && node.selected
-            );
-
-            nodesToDeselect.forEach(node => {
-                const index = this.graphData.selectedNodes.findIndex(
-                    n => n.id === node.id
+        if (this.graphData.nodes) {
+            if (!this.graphData.selectedComponents.includes(componentId)) {
+                const nodesToSelect = this.graphData.nodes.filter(
+                    node => node.component === componentId
                 );
-                this.deselectNode(node, index);
-            });
+                this.selectNode(nodesToSelect);
+            } else {
+                const nodesToDeselect = this.graphData.nodes.filter(
+                    node => node.component === componentId && node.selected
+                );
+
+                nodesToDeselect.forEach(node => {
+                    const index = this.graphData.selectedNodes.findIndex(
+                        n => n.id === node.id
+                    );
+                    this.deselectNode(node, index);
+                });
+            }
         }
     };
 
@@ -419,7 +436,7 @@ export class GraphStore {
         let schema = this.store.schema.getServerSchema();
 
         if (complex) {
-            connector = this.store.search.connector || 'or';
+            connector = this.store.search.connector;
         }
 
         if (graphType === 'detail') {
@@ -438,8 +455,10 @@ export class GraphStore {
                         this.graphData['isEmpty'] = true;
                         this.store.search.setSearchIsEmpty(true);
                     } else {
-                        console.log(response);
                         this.store.core.toggleSpinner(true);
+                        console.log(response);
+                        this.store.search.newNodeTypes =
+                            response.meta.new_dimensions;
 
                         if (graphType === 'overview') {
                             // Handle overview graph data
@@ -462,6 +481,13 @@ export class GraphStore {
                             this.store.graphInstance.generateSchemeColorsFromArray(
                                 response.components.map(c => c.id),
                                 'component'
+                            );
+
+                            response.meta.anchor_properties.map(entry =>
+                                this.store.graphInstance.generateSchemeColorsFromArray(
+                                    entry.values,
+                                    entry.property
+                                )
                             );
 
                             const neighbours = this.generateNeighbours(
@@ -514,7 +540,9 @@ export class GraphStore {
                             this.graphData.meta = {
                                 ...this.graphData.meta,
                                 nodeCount: nodes.length,
-                                linkCount: response.edges.length
+                                linkCount: response.edges.length,
+                                anchorProperties:
+                                    response.meta.anchor_properties
                             };
 
                             this.graphData.perspectivesInGraph =
@@ -542,6 +570,8 @@ export class GraphStore {
                                 );
 
                             this.addNeighbourObjectsToNodes();
+
+                            this.store.schema.populateStoreData();
                         } else {
                             // Handle detail graph data
                             this.detailGraphData.meta.connector = connector
@@ -564,7 +594,10 @@ export class GraphStore {
                                 response.meta.table_data;
 
                             this.store.graphInstance.generateSchemeColorsFromArray(
-                                this.store.search.nodeTypes,
+                                [
+                                    ...this.store.search.nodeTypes,
+                                    ...this.store.search.newNodeTypes
+                                ],
                                 'type'
                             );
 

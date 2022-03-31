@@ -17,6 +17,8 @@ def get_edge_tuples(
     visible_features: List[str],
     schema: List[SchemaElement],
     anchor: str,
+    entries_with_nodes,
+    node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
     """Get node tuples that represent the graphs edges."""
 
@@ -24,63 +26,74 @@ def get_edge_tuples(
 
     # If anchor is not visible new edges have to be created between all features connected through the anchor feature
     if anchor not in visible_features:
-        anchor_edges = get_anchor_edges(schema, anchor)
-        anchor_features = get_anchor_features(anchor_edges, anchor)
+        anchor_features = get_anchor_features(schema, anchor)
 
     # Features connected through anchor will have an m to n conenction
     shortest_paths = get_shortest_schema_paths(
         features, visible_features, schema, anchor_features, anchor
     )
 
+    print("\n\n\n\n shortest paths: ", shortest_paths)
+
     edge_tuples = []
 
     # If shortest paths between various graph features have been identified use them to get actual graph edges
     if shortest_paths:
         for path in shortest_paths:
-            edge_tuples.extend(get_edges_based_on_path(df, path, anchor_features))
+            edge_tuples.extend(
+                get_edges_based_on_path(
+                    df, path, anchor_features, entries_with_nodes, node_ids_with_labels
+                )
+            )
 
         return edge_tuples
 
     for feature in visible_features:
         if feature in anchor_features:
             # generate edges for the selected dimension based on the newly connected edges
-            edge_tuples = get_single_column_edges(df, feature)
+            edge_tuples = get_single_column_edges(df, feature, entries_with_nodes)
             break
 
     return edge_tuples
 
 
 @use_timing
-def get_overview_graph_enriched_edge_tuples(
+def get_overview_edge_tuples(
     df: pd.DataFrame,
     anchor: str,
     links: List[str],
     nodes: List[Node],
-    link_nodes: List[str],
+    entries_with_nodes,
+    node_ids_with_labels,
 ) -> List[EnrichedEdgeTuple]:
     overview_schema_paths = get_overview_graph_schema(anchor, links)
 
     candidate_edges = []
 
     for path in overview_schema_paths:
-        candidate_edges.extend(get_edges_based_on_path(df, path, []))
+        candidate_edges.extend(
+            get_edges_based_on_path(
+                df, path, [], entries_with_nodes, node_ids_with_labels
+            )
+        )
 
     graph = nx.MultiGraph()
-    graph.add_nodes_from([node["label"] + node["feature"] for node in nodes])
+    graph.add_nodes_from([node["id"] for node in nodes])
     graph.add_edges_from(candidate_edges)
 
     edge_tuples = []
 
+    link_nodes = [node["id"] for node in nodes if node["feature"] in links]
+
     for node in graph.nodes:
         if node in link_nodes:
+
             temp_new_edge_tuples = combinations(list(graph.neighbors(node)), 2)
+
             node_instance = [
-                node_instance
-                for node_instance in nodes
-                if node_instance["label"] + node_instance["feature"] == node
+                node_instance for node_instance in nodes if node_instance["id"] == node
             ][0]
 
-            # TODO: Finish extending tuples with additional info
             edge_tuples.extend(
                 [
                     {
@@ -96,8 +109,8 @@ def get_overview_graph_enriched_edge_tuples(
 
 
 @use_timing
-def get_overview_graph_edges(
-    enriched_edge_tuples: List[EnrichedEdgeTuple], node_lookup: Dict[str, str]
+def get_overview_edges(
+    enriched_edge_tuples: List[EnrichedEdgeTuple],
 ) -> List[Edge]:
     """Generate a position for each node in graph."""
 
@@ -115,8 +128,8 @@ def get_overview_graph_edges(
             Edge,
             {
                 "id": uuid.uuid4().hex,
-                "source": node_lookup[edge[0]],
-                "target": node_lookup[edge[1]],
+                "source": edge[0],
+                "target": edge[1],
                 "visible": True,
                 "weight": round(edge_tuples_counts[edge] / norm_divisor, 2),
                 "connections": [
@@ -131,22 +144,18 @@ def get_overview_graph_edges(
 
 
 @use_timing
-def get_overview_graph_nx_edges(
-    enriched_edge_tuples: List[EnrichedEdgeTuple], node_lookup: Dict[str, str]
+def get_overview_nx_edges(
+    enriched_edge_tuples: List[EnrichedEdgeTuple],
 ) -> List[Tuple[str, str]]:
     """Get edges which can be used directly in a networkx graph."""
 
     edge_tuples = [edge_tuple["edge"] for edge_tuple in enriched_edge_tuples]
 
-    edge_tuples_counts = list(set(edge_tuples))
-
-    return [(node_lookup[edge[0]], node_lookup[edge[1]]) for edge in edge_tuples_counts]
+    return list(set(edge_tuples))
 
 
 @use_timing
-def get_edges(
-    edge_tuples: List[Tuple[str, str]], node_lookup: Dict[str, str]
-) -> List[Edge]:
+def get_edges(edge_tuples: List[Tuple[str, str]]) -> List[Edge]:
     """Get list of edge objects that can be used by the frontend."""
 
     edge_tuples_counts = Counter(edge_tuples)
@@ -156,8 +165,8 @@ def get_edges(
             Edge,
             {
                 "id": uuid.uuid4().hex,
-                "source": node_lookup[edge[0]],
-                "target": node_lookup[edge[1]],
+                "source": edge[0],
+                "target": edge[1],
                 "visible": True,
                 "weight": edge_tuples_counts[edge],
             },
@@ -167,25 +176,21 @@ def get_edges(
 
 
 @use_timing
-def get_nx_edges(
-    edge_tuples: List[Tuple[str, str]], node_lookup: Dict[str, str]
-) -> List[Tuple[str, str]]:
+def get_nx_edges(edge_tuples: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
     """Get edges which can be used directly in a networkx graph."""
 
-    edge_tuples_counts = list(set(edge_tuples))
-
-    return [(node_lookup[edge[0]], node_lookup[edge[1]]) for edge in edge_tuples_counts]
-
-
-def get_anchor_edges(schema: List[SchemaElement], anchor: str) -> List[SchemaElement]:
-    "Get schema edges connected to anchor node."
-    return [edge for edge in schema if edge["dest"] == anchor or edge["src"] == anchor]
+    # edge_tuples_counts = list(set(edge_tuples))
+    return list(set(edge_tuples))
+    # return [(node_lookup[edge[0]], node_lookup[edge[1]]) for edge in edge_tuples_counts]
 
 
-def get_anchor_features(anchor_edges: List[SchemaElement], anchor: str) -> List[str]:
+def get_anchor_features(schema: List[SchemaElement], anchor: str) -> List[str]:
     """Get features directly connected to anchor feature."""
+
     return [
-        edge["dest"] if edge["src"] == anchor else edge["src"] for edge in anchor_edges
+        edge["dest"] if edge["src"] == anchor else edge["src"]
+        for edge in schema
+        if edge["dest"] == anchor or edge["src"] == anchor
     ]
 
 
@@ -350,7 +355,9 @@ def get_shortest_schema_paths(
     return shortest_schema_paths
 
 
-def get_single_column_edges(df: pd.DataFrame, feature: str) -> List[Tuple[str, str]]:
+def get_single_column_edges(
+    df: pd.DataFrame, feature: str, entries_with_nodes
+) -> List[Tuple[str, str]]:
     """Get edges for a single feature by generating edges between all of its values in each row."""
 
     # TODO: Check if row[feature] contains only lists and only in that case create combinations otherwise return an empty list
@@ -366,23 +373,47 @@ def get_single_column_edges(df: pd.DataFrame, feature: str) -> List[Tuple[str, s
 
     edges = []
     edge_groups = df.apply(
-        lambda row: list(combinations(row[feature], 2)),
+        lambda row: {
+            "entry": row["entry"],
+            "edges": list(combinations(row[feature], 2)),
+        },
         axis=1,
     ).tolist()
 
     for group in edge_groups:
-        for entry in group:
-            if str(entry[0]) == "" or str(entry[1]) == "":
+
+        entry_nodes = entries_with_nodes[group.entry]
+
+        for edge in group["edges"]:
+            if str(edge[0]) == "" or str(edge[1]) == "":
                 continue
             # TODO: Check if this makes any sense
-            edges.append((str(entry[0]) + str(feature), str(entry[1]) + str(feature)))
+            src_val = next(
+                filter(
+                    lambda node: node["feature"] == feature and node["id"] == edge[0],
+                    entry_nodes,
+                )
+            )
+
+            dest_val = next(
+                filter(
+                    lambda node: node["feature"] == feature and node["id"] == edge[1],
+                    entry_nodes,
+                )
+            )
+
+            edges.append((src_val, dest_val))
 
     return edges
 
 
 # TODO: ignores relationships in the column itself those should be generated separately!
 def get_edges_based_on_path(
-    df: pd.DataFrame, path: List[SchemaElement], newly_conencted_nodes: List[str]
+    df: pd.DataFrame,
+    path: List[SchemaElement],
+    newly_conencted_nodes: List[str],
+    entries_with_nodes,
+    node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
     """Extract all relevant edges from row based on given path."""
 
@@ -391,7 +422,13 @@ def get_edges_based_on_path(
     edge_groups = cast(
         List[List[Tuple[str, str]]],
         df.apply(
-            lambda row: get_row_edge_based_on_path(row, path, newly_conencted_nodes),
+            lambda row: get_row_edge_based_on_path(
+                row,
+                path,
+                newly_conencted_nodes,
+                entries_with_nodes,
+                node_ids_with_labels,
+            ),
             axis=1,
         ).tolist(),
     )
@@ -414,7 +451,11 @@ def shortest_path_exists(
 
 
 def get_row_edge_based_on_path(
-    row: pd.Series, path: List[SchemaElement], newly_conencted_nodes: List[str]
+    row: pd.Series,
+    path: List[SchemaElement],
+    newly_conencted_nodes: List[str],
+    entries_with_nodes,
+    node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
     """Extract edge for single row based on given path"""
     generated_edges = []
@@ -431,23 +472,47 @@ def get_row_edge_based_on_path(
         src_type = link["src"]
         dest_type = link["dest"]
 
-        src_val = row[src_type]
-        dest_val = row[dest_type]
+        entry_nodes = entries_with_nodes[row.entry]
+
+        # src_val = row[src_type]
+        # dest_val = row[dest_type]
+
+        src_val = [
+            node["id"]
+            for node in list(
+                filter(lambda node: node["feature"] == src_type, entry_nodes)
+            )
+        ]
+
+        if len(src_val) == 1:
+            src_val = src_val[0]
+
+        dest_val = [
+            node["id"]
+            for node in list(
+                filter(lambda node: node["feature"] == dest_type, entry_nodes)
+            )
+        ]
+
+        if len(dest_val) == 1:
+            dest_val = dest_val[0]
 
         relationship = link["relationship"]
 
         if i == 0:
             # There are no existing edges so there is no need to chain our edges to existing edges
             for edge in generate_edges(src_val, dest_val, relationship):
-                if edge_has_empty_node(edge):
+                if edge_has_empty_node(edge, node_ids_with_labels):
                     continue
 
-                src = str(edge[0]) + str(
-                    dest_type if relationship == "manyToOne" else src_type
-                )
-                dest = str(edge[1]) + str(
-                    src_type if relationship == "manyToOne" else dest_type
-                )
+                src = edge[0]
+                # src = str(edge[0]) + str(
+                # src_type
+                # )
+                dest = edge[1]
+                # dest = str(edge[1]) + str(
+                #     dest_type
+                # )
 
                 if not edge_is_in_list(generated_edges, src, dest):
                     generated_edges.append((src, dest))
@@ -455,12 +520,14 @@ def get_row_edge_based_on_path(
         else:
             # There are existing edges therfore we have to chain our edges to existing edges
             for chained_edge in generate_edges(src_val, dest_val, relationship):
-                if edge_has_empty_node(chained_edge):
+                if edge_has_empty_node(chained_edge, node_ids_with_labels):
                     continue
                 for edge in generated_edges:
 
-                    src = str(chained_edge[0]) + str(src_type)
-                    dest = str(chained_edge[1]) + str(dest_type)
+                    # src = str(chained_edge[0]) + str(src_type)
+                    # dest = str(chained_edge[1]) + str(dest_type)
+                    src = chained_edge[0]
+                    dest = chained_edge[1]
 
                     if edge[1] == src and not edge_is_in_list(
                         chained_edges, edge[0], dest
@@ -510,7 +577,7 @@ def generate_edges(
         if not isinstance(src, list):
             src = [src]
 
-        return [[dest, entry] for entry in src]
+        return [[entry, dest] for entry in src]
 
     if relationship == "manyToMany":
         if not isinstance(src, list):
@@ -523,9 +590,13 @@ def generate_edges(
     return []
 
 
-def edge_has_empty_node(edge: Union[List[str], Tuple[str, str]]) -> bool:
+def edge_has_empty_node(
+    edge: Union[List[str], Tuple[str, str]], node_ids_with_labels
+) -> bool:
     """Check if edge contains an empty node."""
-    return not str(edge[0]) or not str(edge[1])
+    return not str(node_ids_with_labels[edge[0]]) or not str(
+        node_ids_with_labels[edge[1]]
+    )
 
 
 def edge_is_in_list(edges: List[Tuple[str, str]], dest: str, src: str) -> bool:

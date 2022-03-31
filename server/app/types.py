@@ -12,6 +12,7 @@ class Node(TypedDict):
     size: int
     x: Optional[int]
     y: Optional[int]
+    properties: Optional[dict]
 
 
 SchemaRelationship = Literal["oneToOne", "manyToOne", "oneToMany", "manyToMany"]

@@ -18,4 +18,5 @@ ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64
 RUN pip install --upgrade pip
 COPY ./server/requirements.txt /cs/requirements.txt
 RUN pip install -r requirements.txt
+RUN python -m spacy download en_core_web_sm
 COPY ./server /cs

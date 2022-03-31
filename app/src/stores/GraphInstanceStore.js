@@ -36,7 +36,9 @@ export class GraphInstanceStore {
         labelDistances: {
             600: 'small',
             1500: 'medium',
-            2400: 'large'
+            2400: 'large',
+            3300: 'x large',
+            4200: '2x large'
         },
         textHeight: 4.5
     };
@@ -422,20 +424,38 @@ export class GraphInstanceStore {
             : SELF_CENTRIC_TYPES.UNION;
     };
 
-    triggerSameEntry = () => {
+    triggerSameEntry = (withSelectedNodes = false) => {
         // Select all nodes which should be visible
-        const visibleNodeIds = [this.selfCentricOriginNode.id];
+        let visibleNodeIds;
+        let nodesWithPotentiallySameEntires;
+        let mainEntries;
 
-        const nodesWithPotentiallySameEntires = [
-            ...this.selfCentricOriginNode.neighbourObjects
-        ];
+        if (withSelectedNodes) {
+            visibleNodeIds =
+                this.store.graph.currentGraphData.selectedNodes.map(
+                    node => node.id
+                );
+            nodesWithPotentiallySameEntires =
+                this.store.graph.currentGraphData.selectedNodes
+                    .map(node => node.neighbourObjects)
+                    .flat();
+            mainEntries = this.store.graph.currentGraphData.selectedNodes
+                .map(node => node.entries)
+                .flat();
+        } else {
+            visibleNodeIds = [this.selfCentricOriginNode.id];
+            nodesWithPotentiallySameEntires = [
+                ...this.selfCentricOriginNode.neighbourObjects
+            ];
+            mainEntries = this.selfCentricOriginNode.entries;
+        }
 
         let i = 0;
 
         while (i < nodesWithPotentiallySameEntires.length) {
             if (
                 nodesWithPotentiallySameEntires[i]['entries'].some(entry =>
-                    this.selfCentricOriginNode.entries.includes(entry)
+                    mainEntries.includes(entry)
                 )
             ) {
                 visibleNodeIds.push(nodesWithPotentiallySameEntires[i].id);

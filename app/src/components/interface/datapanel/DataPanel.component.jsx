@@ -22,6 +22,13 @@ import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
 import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
+import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
+import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
+import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
+import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
+import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
+import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
+import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -85,11 +92,18 @@ function DataPanel() {
                 onEdgeUpdate={updateEdge}
                 nodeTypes={{
                     schemaNode: SchemaNode,
-                    overviewSchemaNode: OverviewSchemaNode
+                    overviewSchemaNode: OverviewSchemaNode,
+                    searchNode: SearchNode,
+                    connectorNode: ConnectorNode,
+                    filterNode: FilterNode,
+                    keywordExtractionNode: KeywordExtractionNode,
+                    countsNode: CountsNode,
+                    resultsNode: ResultsNode
                 }}
                 edgeTypes={{
                     schemaEdge: SchemaEdge,
-                    overviewCustomEdge: OverviewCustomEdge
+                    overviewCustomEdge: OverviewCustomEdge,
+                    searchEdge: SearchEdge
                 }}
             >
                 <Background gap={12} size={1} style={{ opacity: 0.5 }} />

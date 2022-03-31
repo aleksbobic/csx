@@ -68,9 +68,63 @@ function Settings() {
         );
     };
 
+    const renderColorSchemeSelectionElements = () => {
+        const colorSchemas = [
+            { value: 'none', label: 'None', tooltip: 'Nodes are not colored' },
+            {
+                value: 'component',
+                label: 'Node component',
+                tooltip: 'Color nodes based on their components'
+            }
+        ];
+
+        if (
+            store.core.isDetail &&
+            store.graphInstance.nodeColorSchemeColors[[store.core.currentGraph]]
+        ) {
+            colorSchemas.push({
+                value: 'type',
+                label: 'Node type',
+                tooltip: 'Color nodes based on their type'
+            });
+        }
+
+        if (
+            store.core.isOverview &&
+            store.graph.currentGraphData.meta.anchorProperties?.length
+        ) {
+            store.graph.currentGraphData.meta.anchorProperties.map(entry =>
+                colorSchemas.push({
+                    value: entry.property,
+                    label: entry.property,
+                    tooltip: `Color nodes based on node property ${entry.property}`
+                })
+            );
+        }
+
+        return colorSchemas.map(entry => (
+            <Radio
+                value={entry.value}
+                key={`node_cololr_schema${entry.value}`}
+                width="100%"
+            >
+                <Tooltip label={entry.tooltip}>
+                    <Text
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                        width="170px"
+                    >
+                        {entry.label}
+                    </Text>
+                </Tooltip>
+            </Radio>
+        ));
+    };
+
     const renderColorOptions = () => {
         return (
-            <FormLabel htmlFor="customColors">
+            <FormLabel htmlFor="customColors" width="100%">
                 <Heading size="sm" marginTop="10px" marginBottom="5px">
                     Color scheme:
                 </Heading>
@@ -83,27 +137,8 @@ function Settings() {
                     }
                     onChange={updateColorScheme}
                 >
-                    <Stack direction="column" spacing="1px">
-                        <Radio value="none">
-                            <Tooltip label="Don't color the nodes">
-                                None
-                            </Tooltip>
-                        </Radio>
-                        {location.pathname.startsWith('/graph/detail') &&
-                            store.graphInstance.nodeColorSchemeColors[
-                                [store.core.currentGraph]
-                            ] && (
-                                <Radio value="type">
-                                    <Tooltip label="Color nodes based on their type">
-                                        Node type
-                                    </Tooltip>
-                                </Radio>
-                            )}
-                        <Radio value="component">
-                            <Tooltip label="Color nodes based on their components">
-                                Node component
-                            </Tooltip>
-                        </Radio>
+                    <Stack direction="column" spacing="1px" width="100%">
+                        {renderColorSchemeSelectionElements()}
                     </Stack>
                 </RadioGroup>
             </FormLabel>
@@ -131,9 +166,9 @@ function Settings() {
                 </Text>
                 <Box width="100%" paddingLeft="10px" paddingRight="10px">
                     <Slider
-                        defaultValue={600}
+                        value={store.graphInstance.labels.visibilityDistance}
                         min={600}
-                        max={2400}
+                        max={4200}
                         step={900}
                         onChange={updateLabelDistance}
                     >
@@ -141,7 +176,7 @@ function Settings() {
                             <Box position="relative" right={10} />
                             <SliderFilledTrack bg="blue.300" />
                         </SliderTrack>
-                        <SliderThumb boxSize={3} />
+                        <SliderThumb boxSize={5} />
                     </Slider>
                 </Box>
             </>
@@ -265,7 +300,10 @@ function Settings() {
     };
 
     const renderDimensionsToggle = () => {
-        const tags = store.search.nodeTypes.map((property, index) => (
+        const tags = [
+            ...store.search.nodeTypes,
+            ...store.search.newNodeTypes
+        ].map((property, index) => (
             <Tag
                 key={index}
                 size="sm"

@@ -6,6 +6,7 @@ export class SchemaStore {
     edgeRelationshipTypes = ['1:1', '1:M', 'M:N', 'M:1'];
     data = [];
     overviewData = [];
+    overviewDataNodeProperties = [];
 
     colors = {
         link: '#4da344',
@@ -98,9 +99,6 @@ export class SchemaStore {
                 entry.targetPosition = 'top';
                 entry.sourcePosition = 'bottom';
 
-                // unfortunately we need this little hack to pass a slightly different position
-                // to notify react flow about the change. Moreover we are shifting the dagre node position
-                // (anchor=center center) to the top left so it matches the react flow node anchor point (top left).
                 entry.position = {
                     y: nodeWithPosition.y - 50 / 2,
                     x: nodeWithPosition.x - 200 / 2 + Math.random() * 500
@@ -124,7 +122,10 @@ export class SchemaStore {
             manyToOne: 'M:1'
         };
 
-        const features = this.store.search.nodeTypes;
+        const features = [
+            ...this.store.search.nodeTypes,
+            ...this.store.search.newNodeTypes
+        ];
         const anchor = this.store.search.anchor;
 
         features.forEach(node => {
@@ -149,8 +150,8 @@ export class SchemaStore {
                             ? this.colors.link
                             : this.colors.normal,
                     color: 'white',
-                    borderRadius: '50px',
-                    height: 30,
+                    borderRadius: '10px',
+                    height: 'auto',
                     borderWidth: 0,
                     padding: '5px',
                     minWidth: 50
@@ -162,32 +163,64 @@ export class SchemaStore {
             if (node === anchor) {
                 overviewSchema.push({
                     ...schemaNode,
+                    position: { x: 5, y: 200 },
                     data: {
                         ...schemaNode.data,
                         position: 'left',
-                        features: this.store.search.nodeTypes.filter(
+                        features: [
+                            ...this.store.search.nodeTypes,
+                            ...this.store.search.newNodeTypes
+                        ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
+                        properties: [
+                            ...this.store.search.nodeTypes,
+                            ...this.store.search.newNodeTypes
+                        ],
+                        addedProperties: this.overviewDataNodeProperties,
                         setAnchor: this.setAnchor,
+                        addProperty: this.addProperty,
+                        removeProperty: this.removeProperty,
                         addLinkNode: this.addLinkNode,
                         anchor: this.store.search.anchor
+                    },
+                    style: {
+                        ...schemaNode.style,
+                        borderRadius: '10px',
+                        height: 'auto'
                     },
                     id: '-1',
                     type: 'overviewSchemaNode'
                 });
                 overviewSchema.push({
                     ...schemaNode,
+                    position: { x: 500, y: 200 },
                     data: {
                         ...schemaNode.data,
                         position: 'right',
-                        features: this.store.search.nodeTypes.filter(
+                        features: [
+                            ...this.store.search.nodeTypes,
+                            ...this.store.search.newNodeTypes
+                        ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
+                        properties: [
+                            ...this.store.search.nodeTypes,
+                            ...this.store.search.newNodeTypes
+                        ],
+                        addedProperties: this.overviewDataNodeProperties,
                         setAnchor: this.setAnchor,
+                        addProperty: this.addProperty,
+                        removeProperty: this.removeProperty,
                         addLinkNode: this.addLinkNode,
                         anchor: this.store.search.anchor
+                    },
+                    style: {
+                        ...schemaNode.style,
+                        borderRadius: '10px',
+                        height: 'auto'
                     },
                     id: '-2',
                     type: 'overviewSchemaNode'
@@ -195,6 +228,7 @@ export class SchemaStore {
             } else if (this.store.search.links.includes(node)) {
                 overviewSchema.push({
                     ...schemaNode,
+                    position: { x: 250, y: 200 },
                     id: uuidv4(),
                     data: {
                         ...schemaNode.data,
@@ -247,38 +281,43 @@ export class SchemaStore {
         });
 
         this.data = this.generateNodePositions(schema);
-        this.overviewData = this.generateNodePositions(
-            overviewSchema.concat(overviewSchemaLinks)
-        );
+
+        this.overviewData = [...overviewSchema, ...overviewSchemaLinks];
     };
+
+    //TODO: implement a way to update schema when new values show up
 
     addLinkNode = () => {
         const newNodeId = uuidv4();
 
         this.overviewData.push({
             id: newNodeId,
+            position: { x: 250, y: 200 },
             type: 'overviewSchemaNode',
             data: {
                 label: null,
                 isAnchor: false,
                 setAnchor: this.setAnchor,
+                addProperty: this.addProperty,
+                removeProperty: this.removeProperty,
+                addedProperties: this.overviewDataNodeProperties,
                 isLink: true,
                 setLink: this.setLink,
                 removeLink: this.removeLinkNode,
                 position: 'both',
-                features: this.store.search.nodeTypes.filter(
-                    feature => !this.store.search.links.includes(feature)
-                ),
+                features: [
+                    ...this.store.search.nodeTypes,
+                    ...this.store.search.newNodeTypes
+                ].filter(feature => !this.store.search.links.includes(feature)),
                 anchor: this.store.search.anchor
             },
-            position: { x: 0, y: 0 },
             targetPosition: 'top',
             sourcePosition: 'bottom',
             style: {
                 background: this.colors.normal,
                 color: 'white',
-                borderRadius: '50px',
-                height: 30,
+                borderRadius: '10px',
+                height: 'auto',
                 borderWidth: 0,
                 padding: '5px',
                 minWidth: 50
@@ -302,7 +341,8 @@ export class SchemaStore {
             type: 'overviewCustomEdge'
         });
 
-        this.overviewData = this.generateNodePositions(this.overviewData);
+        // this.overviewData = this.generateNodePositions(this.overviewData);
+        this.overviewData = [...this.overviewData];
     };
 
     removeLinkNode = id => {
@@ -336,8 +376,8 @@ export class SchemaStore {
                         ? this.colors.link
                         : this.colors.normal,
                     color: 'white',
-                    borderRadius: '50px',
-                    height: 30,
+                    borderRadius: '10px',
+                    height: 'auto',
                     borderWidth: 0,
                     padding: '5px',
                     minWidth: 50
@@ -357,8 +397,8 @@ export class SchemaStore {
                         ? this.colors.link
                         : this.colors.normal,
                     color: 'white',
-                    borderRadius: '50px',
-                    height: 30,
+                    borderRadius: '10px',
+                    height: 'auto',
                     borderWidth: 0,
                     padding: '5px',
                     minWidth: 50,
@@ -400,8 +440,8 @@ export class SchemaStore {
                                 ? this.colors.normal
                                 : entry.style.background,
                         color: 'white',
-                        borderRadius: '50px',
-                        height: 30,
+                        borderRadius: '10px',
+                        height: 'auto',
                         borderWidth: 0,
                         padding: '5px',
                         minWidth: 50
@@ -462,8 +502,8 @@ export class SchemaStore {
                                 ? this.colors.link
                                 : entry.style.background,
                         color: 'white',
-                        borderRadius: '50px',
-                        height: 30,
+                        borderRadius: '10px',
+                        height: 'auto',
                         borderWidth: 0,
                         padding: '5px',
                         minWidth: 50
@@ -500,8 +540,8 @@ export class SchemaStore {
                                 ? this.colors.link
                                 : this.colors.normal,
                             color: 'white',
-                            borderRadius: '50px',
-                            height: 30,
+                            borderRadius: '10px',
+                            height: 'auto',
                             borderWidth: 0,
                             padding: '5px',
                             minWidth: 50,
@@ -525,8 +565,8 @@ export class SchemaStore {
                                 ? this.colors.link
                                 : this.colors.normal,
                             color: 'white',
-                            borderRadius: '50px',
-                            height: 30,
+                            borderRadius: '10px',
+                            height: 'auto',
                             borderWidth: 0,
                             padding: '5px',
                             minWidth: 50,
@@ -598,5 +638,16 @@ export class SchemaStore {
         this.data = this.data.filter(entry => entry['id'] !== id);
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+    };
+
+    addProperty = property => {
+        this.overviewDataNodeProperties.push(property);
+        this.overviewData = [...this.overviewData];
+    };
+
+    removeProperty = property => {
+        const propIndex = this.overviewDataNodeProperties.indexOf(property);
+        this.overviewDataNodeProperties.splice(propIndex, 1);
+        this.overviewData = [...this.overviewData];
     };
 }

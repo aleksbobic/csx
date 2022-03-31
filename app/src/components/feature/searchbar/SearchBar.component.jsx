@@ -25,6 +25,7 @@ function SearchBar(props) {
 
     const selectedDatasetChange = e => {
         store.search.useDataset(e.target.value);
+        store.workflow.resetWorkflow();
     };
 
     useEffect(() => {

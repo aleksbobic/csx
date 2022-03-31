@@ -7,3 +7,7 @@ networkx
 pandas
 pytest
 requests
+setuptools
+wheel
+spacy==3.0.7
+pytextrank
