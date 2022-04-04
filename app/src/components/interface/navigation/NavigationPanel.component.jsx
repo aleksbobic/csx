@@ -212,7 +212,9 @@ function NavigationPanelComponent() {
             bottom="75px"
             id="viewutils"
         >
-            {store.graphInstance.hoverData.length > 0 && renderHoverData()}
+            {store.graphInstance.hoverData.length > 0 &&
+                store.core.isOverview &&
+                renderHoverData()}
             <HStack spacing="10px">
                 <Tooltip label="Make Screenshot">
                     <IconButton

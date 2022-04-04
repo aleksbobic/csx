@@ -76,15 +76,19 @@ export class SchemaStore {
     };
 
     generateNodePositions = schema => {
-        const graph = new dagre.graphlib.Graph();
-        graph.setDefaultEdgeLabel(() => ({}));
-        graph.setGraph({ rankdir: 'LR', align: 'UR' });
+        const graph = new dagre.graphlib.Graph()
+            .setDefaultEdgeLabel(() => ({}))
+            .setGraph({ rankdir: 'TB', align: 'UL' });
 
         schema.forEach(entry => {
-            if (!('src' in entry)) {
+            if (!Object.keys(entry).includes('source')) {
                 graph.setNode(entry.id, {
-                    width: 200,
-                    height: 50
+                    width: 208,
+                    height: 32,
+                    position: {
+                        x: 0,
+                        y: 0
+                    }
                 });
             } else {
                 graph.setEdge(entry.source, entry.target);
@@ -94,14 +98,14 @@ export class SchemaStore {
         dagre.layout(graph);
 
         return schema.map(entry => {
-            if (!('src' in entry)) {
+            if (!Object.keys(entry).includes('source')) {
                 const nodeWithPosition = graph.node(entry.id);
                 entry.targetPosition = 'top';
                 entry.sourcePosition = 'bottom';
 
                 entry.position = {
-                    y: nodeWithPosition.y - 50 / 2,
-                    x: nodeWithPosition.x - 200 / 2 + Math.random() * 500
+                    y: nodeWithPosition.y - 32 / 2,
+                    x: nodeWithPosition.x - 208 / 2
                 };
             }
 
