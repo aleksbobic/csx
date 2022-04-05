@@ -45,6 +45,7 @@ function Table(props) {
         if (!data || !data.length) {
             return [];
         }
+
         return Object.keys(data[0])
             .filter(key => !key.endsWith('_id') && key !== 'entry')
             .map(key => {
@@ -83,13 +84,15 @@ function Table(props) {
         let key;
 
         if (store.core.isOverview) {
-            full_selector = `${selector}_${
-                cell.row.cells.find(
-                    cell =>
-                        cell.column.Header.toLowerCase() ===
-                        store.search.anchor.toLowerCase()
-                ).value
-            }_id`;
+            const cell_with_values = cell.row.cells.find(
+                cell =>
+                    cell.column.Header.toLowerCase() ===
+                    store.search.anchor.toLowerCase()
+            );
+
+            full_selector = Array.isArray(cell_with_values.value)
+                ? `${selector}_${cell_with_values.value[0]}_id`
+                : `${selector}_${cell_with_values.value}_id`;
 
             key = Object.keys(hidden_cols).find(
                 entry => entry.toLowerCase() === full_selector.toLowerCase()
@@ -142,6 +145,7 @@ function Table(props) {
                                     'item click',
                                     `focus on node: ${cell.value}}`
                                 );
+
                                 store.graphInstance.zoomToFitByNodeId(
                                     Array.isArray(cell.value)
                                         ? findID(cell, index)

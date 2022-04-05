@@ -1,7 +1,14 @@
-import { Flex, IconButton, Select, Text, Tooltip } from '@chakra-ui/react';
-import { Add, Anchor, Close } from 'css.gg';
+import {
+    Flex,
+    HStack,
+    IconButton,
+    Select,
+    Text,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Anchor, Close, MathPlus } from 'css.gg';
 import React from 'react';
-
 import { Handle } from 'react-flow-renderer';
 
 const overviewSchemaNode = ({ id, data }) => {
@@ -15,8 +22,8 @@ const overviewSchemaNode = ({ id, data }) => {
                     marginTop="-2px"
                     marginRight="10px"
                     value={data.anchor}
-                    background="#1e5c97"
-                    _hover={{ background: '#143e66' }}
+                    background="blackAlpha.600"
+                    _hover={{ background: 'blackAlpha.700' }}
                     onChange={e => {
                         data.setAnchor(e.target.value);
                     }}
@@ -39,8 +46,8 @@ const overviewSchemaNode = ({ id, data }) => {
                     marginTop="-2px"
                     marginRight="10px"
                     placeholder="Select link"
-                    background="#1c1c1c"
-                    _hover={{ background: '#080808' }}
+                    background="blackAlpha.600"
+                    _hover={{ background: 'blackAlpha.700' }}
                     onChange={e => {
                         data.setLink(e.target.value, id);
                     }}
@@ -59,32 +66,139 @@ const overviewSchemaNode = ({ id, data }) => {
         return <Text>{data.label}</Text>;
     };
 
-    return (
-        <>
-            {data.isAnchor && data.position === 'right' && (
-                <Tooltip label="Add new link node">
+    const renderAddLinkButton = position => (
+        <Flex
+            height="100%"
+            width="30px"
+            alignItems="center"
+            position="absolute"
+            top="0px"
+            left={position === 'right' ? '0px' : 'auto'}
+            right={position === 'right' ? 'auto' : '0px'}
+        >
+            <Tooltip label="Add new link node">
+                <IconButton
+                    top="0px"
+                    size="xs"
+                    marginLeft={position === 'right' ? '-34px' : 'auto'}
+                    marginRight={position === 'right' ? 'auto' : '-34px'}
+                    width="30px"
+                    height="30px"
+                    borderRadius="full"
+                    backgroundColor="blue.500"
+                    onClick={() => data.addLinkNode()}
+                    _hover={{ backgroundColor: 'blue.600' }}
+                    icon={
+                        <MathPlus
+                            style={{
+                                '--ggs': '0.7'
+                            }}
+                        />
+                    }
+                ></IconButton>
+            </Tooltip>
+        </Flex>
+    );
+
+    const renderAddNewPropertyArea = () => (
+        <VStack height="auto" width="100%" spacing="5px" padding="5px">
+            {data.addedProperties.map((property, i) => (
+                <Flex
+                    width="100%"
+                    key={`${i}_property_${property}`}
+                    height="24px"
+                    backgroundColor="blackAlpha.600"
+                    borderRadius="6px"
+                    alignItems="center"
+                    paddingLeft="10px"
+                    paddingRight="0"
+                    justifyContent="space-between"
+                >
+                    <Text fontSize="xs" fontWeight="bold">
+                        {property}
+                    </Text>
+                    <Tooltip label="Remove anchor property">
+                        <IconButton
+                            onClick={() => data.removeProperty(property)}
+                            size="xs"
+                            variant="ghost"
+                            icon={
+                                <Close
+                                    style={{
+                                        '--ggs': '0.7'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                </Flex>
+            ))}
+
+            <HStack
+                height="36px"
+                padding="3px 0px"
+                width="100%"
+                spacing="5"
+                style={{ marginTop: '0px' }}
+            >
+                <Select
+                    id={`${id}_property_selector`}
+                    size="xs"
+                    variant="filled"
+                    width="150px"
+                    marginTop="-2px"
+                    marginRight="10px"
+                    defaultValue={data.properties[0]}
+                    borderRadius="6px"
+                    background="blackAlpha.400"
+                    _hover={{ background: '#143e66' }}
+                >
+                    {data.properties
+                        .filter(
+                            property => !data.addedProperties.includes(property)
+                        )
+                        .map((feature, id) => (
+                            <option value={feature} key={id}>
+                                {feature}
+                            </option>
+                        ))}
+                </Select>
+                <Tooltip label="Add selected feature as anchor property">
                     <IconButton
-                        position="absolute"
-                        left="0px"
-                        top="0px"
                         size="xs"
-                        marginLeft="-34px"
-                        width="30px"
-                        height="30px"
                         borderRadius="full"
-                        backgroundColor="#3182ce"
-                        onClick={() => data.addLinkNode()}
-                        _hover={{ opacity: 0.8, backgroundColor: '#3182ce' }}
-                        icon={
-                            <Add
+                        backgroundColor="blackAlpha.300"
+                        onClick={() =>
+                            data.addProperty(
+                                document.getElementById(
+                                    `${id}_property_selector`
+                                ).value
+                            )
+                        }
+                        _hover={{
+                            backgroundColor: 'blue.600'
+                        }}
+                        style={{ marginLeft: '0px' }}
+                        rightIcon={
+                            <MathPlus
                                 style={{
+                                    marginLeft: '-8px',
+                                    marginTop: '0px',
                                     '--ggs': '0.7'
                                 }}
                             />
                         }
                     ></IconButton>
                 </Tooltip>
-            )}
+            </HStack>
+        </VStack>
+    );
+
+    return (
+        <>
+            {data.isAnchor &&
+                data.position === 'right' &&
+                renderAddLinkButton('right')}
             {['right', 'both'].includes(data.position) && (
                 <Handle
                     type="target"
@@ -96,8 +210,9 @@ const overviewSchemaNode = ({ id, data }) => {
             <Flex
                 alignItems="center"
                 fontSize="14px"
-                paddingLeft="10px"
-                paddingRight="5px"
+                padding={
+                    data.isAnchor ? '5px 5px 10px 10px' : '0px 5px 0px 10px'
+                }
             >
                 {renderLabel()}
                 {data.isAnchor && (
@@ -146,29 +261,23 @@ const overviewSchemaNode = ({ id, data }) => {
                     isConnectable={false}
                 />
             )}
-            {data.isAnchor && data.position === 'left' && (
-                <Tooltip label="Add new link node">
-                    <IconButton
-                        position="absolute"
-                        right="0px"
-                        top="0px"
-                        size="xs"
-                        marginRight="-34px"
-                        width="30px"
-                        height="30px"
-                        borderRadius="full"
-                        backgroundColor="#3182ce"
-                        onClick={() => data.addLinkNode()}
-                        _hover={{ opacity: 0.8, backgroundColor: '#3182ce' }}
-                        icon={
-                            <Add
-                                style={{
-                                    '--ggs': '0.7'
-                                }}
-                            />
-                        }
-                    ></IconButton>
-                </Tooltip>
+            {data.isAnchor &&
+                data.position === 'left' &&
+                renderAddLinkButton('left')}
+            {data.isAnchor && (
+                <Flex
+                    width="100%"
+                    justifyContent="center"
+                    height="auto"
+                    marginTop="0"
+                    borderTop="1px solid"
+                    borderTopColor="blackAlpha.300"
+                    backgroundColor="blackAlpha.400"
+                    borderBottomLeftRadius="8px"
+                    borderBottomRightRadius="8px"
+                >
+                    {renderAddNewPropertyArea()}
+                </Flex>
             )}
         </>
     );

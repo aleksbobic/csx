@@ -25,6 +25,7 @@ function SearchBar(props) {
 
     const selectedDatasetChange = e => {
         store.search.useDataset(e.target.value);
+        store.workflow.resetWorkflow();
     };
 
     useEffect(() => {
@@ -45,6 +46,7 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.core.setCurrentGraph('overview');
+                    store.core.resetVisibleDimensions();
                     history.push(
                         `/graph?query=${values.search}&dataset=${store.search.currentDataset}`
                     );

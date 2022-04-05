@@ -192,10 +192,12 @@ function GraphPage() {
     }, [store.core, toast]);
 
     useEffect(() => {
+        store.workflow.setShouldRunWorkflow(false);
+
         if (store.core.errorMessage) {
             renderToast();
         }
-    }, [store.core.errorMessage, renderToast]);
+    }, [store.core.errorMessage, renderToast, store.workflow]);
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">

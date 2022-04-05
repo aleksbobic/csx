@@ -21,84 +21,147 @@ def get_labels(df: pd.DataFrame, feature: str, isFeatureList: bool) -> Counter:
     return Counter(df[feature].tolist())
 
 
-def get_label_entries(df: pd.DataFrame, feature: str, label: str) -> List[str]:
+def get_label_entries(
+    df: pd.DataFrame, feature: str, label: str, isFeatureList: bool
+) -> List[str]:
     """Extract entry ids for a given feature, label tuple."""
+    if isFeatureList:
+        return df[df[feature].apply(lambda x: label in x)]["entry"].tolist()
+
     return df[df[feature] == label]["entry"].tolist()
 
 
-def get_list_label_entries(df: pd.DataFrame, feature: str, label: str) -> List[str]:
-    """Extract entry ids for a given list valued feature, label tuple."""
-    return df[df[feature].apply(lambda x: label in x)]["entry"].tolist()
+def get_anchor_property_values(search_results, anchor_properties: List[str]) -> List:
+    search_results_df = pd.DataFrame(search_results)
+
+    return [
+        {"values": search_results_df[prop].unique().tolist(), "property": prop}
+        for prop in anchor_properties
+    ]
+
+
+def enrich_node_with_props(
+    node: Node, df: pd.DataFrame, anchor_properties: List[str]
+) -> Node:
+    properties = {
+        feature: df[df[node["feature"]] == node["label"]][feature].values[0]
+        for feature in anchor_properties
+    }
+
+    node["properties"] = properties
+    return node
+
+
+@use_timing
+def enrich_nodes_with_props(
+    df: pd.DataFrame, nodes: List[Node], anchor: str, anchor_properties: List[str]
+) -> List[Node]:
+    return [
+        enrich_node_with_props(node, df, anchor_properties)
+        if node["feature"] == anchor
+        else node
+        for node in nodes
+    ]
 
 
 @use_timing
 def get_feature_nodes(
     df: pd.DataFrame, feature: str, size_factor: int = 2
-) -> List[Node]:
+):
+# -> List[Node]:
     """Generate list of node objects for all values of a given feature."""
 
-    featureIsList = isinstance(df[feature].iloc[0], list)
+    isFeatureList = isinstance(df[feature].iloc[0], list)
 
-    node_labels = get_labels(df, feature, featureIsList)
+    node_labels = get_labels(df, feature, isFeatureList)
 
-    if featureIsList:
-        return [
-            cast(
-                Node,
-                {
-                    "entries": get_list_label_entries(df, feature, node_label),
-                    "id": uuid.uuid4().hex,
-                    "label": node_label,
-                    "feature": feature,
-                    "community": 0,
-                    "component": 0,
-                    "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
-                },
-            )
-            for node_label in node_labels
-        ]
+    entry_list = {}
 
-    return [
-        cast(
-            Node,
-            {
-                "entries": get_label_entries(df, feature, node_label),
+    def expand_entities(node_label, node_labels):
+        node = {
+                "entries": get_label_entries(df, feature, node_label, isFeatureList),
                 "id": uuid.uuid4().hex,
                 "label": node_label,
                 "feature": feature,
                 "community": 0,
                 "component": 0,
                 "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
-            },
+            }
+
+        for entry in node["entries"]:
+            if entry in entry_list:
+                entry_list[entry].append(node)
+            else:
+                entry_list[entry] = [node]
+
+        return node
+
+    # return [
+    #     cast(
+    #         Node,
+    #         {
+    #             "entries": get_label_entries(df, feature, node_label, isFeatureList),
+    #             "id": uuid.uuid4().hex,
+    #             "label": node_label,
+    #             "feature": feature,
+    #             "community": 0,
+    #             "component": 0,
+    #             "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
+    #         },
+    #     )
+    #     for node_label in node_labels
+    # ]
+
+    nodes = [
+        cast(
+            Node,
+            expand_entities(node_label,node_labels),
         )
         for node_label in node_labels
     ]
 
-
-@use_timing
-def get_nodes(df: pd.DataFrame) -> List[Node]:
-    """Get node objects for each feature in dataframe."""
-
-    nodes = []
-
-    for feature in df.columns:
-
-        nodes.extend(get_feature_nodes(df, feature))
-
-    return nodes
+    return nodes, entry_list
 
 
 @use_timing
-def get_selected_nodes(df: pd.DataFrame, features: List[str]) -> List[Node]:
-    """Get node objects for each feature in dataframe."""
+def get_nodes(
+    df: pd.DataFrame,
+    links: List[str] = [],
+    anchor: str = "",
+    anchor_properties: List[str] = [],
+):
+    """Get node objects for each feature or each passed feature in dataframe."""
 
+    features = links + [anchor] if anchor != "" else links
     nodes = []
+    entries = {}
 
-    for feature in features:
+    if len(features) == 0:
+        for feature in df.columns:
+            new_nodes, new_entries = get_feature_nodes(df, feature, 5)
+            nodes.extend(new_nodes)
+            for entry in new_entries:
+                if entry in entries:
+                    entries[entry] = entries[entry] + new_entries[entry]
+                else:
+                    entries[entry] = new_entries[entry]
+    else:
+        for feature in features:
+            new_nodes, new_entries = get_feature_nodes(df, feature, 5)
+            nodes.extend(new_nodes)
+            for entry in new_entries:
+                if entry in entries:
+                    entries[entry] = entries[entry] + new_entries[entry]
+                else:
+                    entries[entry] = new_entries[entry]
+        nodes = enrich_nodes_with_props(df, nodes, anchor, anchor_properties)
 
-        nodes.extend(get_feature_nodes(df, feature, 5))
+    return nodes, entries
 
-    return nodes
+
+@use_timing
+def get_node_ids_with_labels(nodes):
+    return {node["id"]: node["label"] for node in nodes}
 
 
 # TODO: Check if this makes any sense, nodes are not uniquely identifiable like this
@@ -117,6 +180,7 @@ def get_positions(nodes: List[Node], edges) -> List[Node]:
     graph.add_edges_from(edges)
 
     positions = nx.circular_layout(graph, scale=500)
+
     for index, node in enumerate(nodes):
         if node["id"] in positions:
             nodes[index]["x"] = positions[node["id"]][0]

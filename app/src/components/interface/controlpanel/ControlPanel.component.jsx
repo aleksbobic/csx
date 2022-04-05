@@ -21,6 +21,7 @@ import SettingsComponent from 'components/feature/settings/Settings.component';
 import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
+    DisplayFullwidth,
     Eye,
     FormatSeparator,
     LayoutPin,
@@ -73,13 +74,20 @@ function ControlPanel() {
     };
 
     const renderColorLegend = () => {
-        const legendItems = Object.keys(
+        const selectedColorScheme =
+            store.graphInstance.nodeColorScheme[store.core.currentGraph];
+
+        let legendItems = Object.keys(
             store.graphInstance.nodeColorSchemeColors[store.core.currentGraph][
-                'type'
+                selectedColorScheme
             ]
-        ).filter(key =>
-            store.graph.detailGraphData.perspectivesInGraph.includes(key)
         );
+
+        if (selectedColorScheme === 'type') {
+            legendItems = legendItems.filter(key =>
+                store.graph.detailGraphData.perspectivesInGraph.includes(key)
+            );
+        }
 
         const legend = legendItems.map(key => {
             return (
@@ -91,10 +99,15 @@ function ControlPanel() {
                         backgroundColor={
                             store.graphInstance.nodeColorSchemeColors[
                                 store.core.currentGraph
-                            ]['type'][key]
+                            ][selectedColorScheme][key]
                         }
                     />
-                    <Text size="sm" whiteSpace="nowrap">
+                    <Text
+                        size="sm"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                    >
                         {key}
                     </Text>
                 </HStack>
@@ -111,6 +124,7 @@ function ControlPanel() {
                 position="absolute"
                 bottom="20px"
                 left="320px"
+                maxWidth="200px"
                 zIndex={20}
                 backgroundColor={legendBackgroundColor}
                 padding="10px"
@@ -118,8 +132,12 @@ function ControlPanel() {
                 style={{ backdropFilter: 'blur(2px)' }}
                 border="1px solid"
                 borderColor={legendBorderColor}
+                maxHeight="300px"
+                overflowY="scroll"
             >
-                <VStack>{legend}</VStack>
+                <VStack width="100%" paddingBottom="10px">
+                    {legend}
+                </VStack>
             </Flex>
         );
     };
@@ -213,6 +231,30 @@ function ControlPanel() {
                                 'show nodes with same entries as context node'
                             );
                             store.graphInstance.triggerSameEntry();
+                        }}
+                    />
+                </Tooltip>
+                <Tooltip label="Show connections with same entries as selected nodes">
+                    <IconButton
+                        borderRadius="6px"
+                        id="mutualentriesoriginbutton"
+                        isDisabled={
+                            store.graph.currentGraphData.selectedNodes.length <
+                            2
+                        }
+                        size="sm"
+                        style={{
+                            backdropFilter: 'blur(2px)',
+                            paddingTop: '1px'
+                        }}
+                        icon={<DisplayFullwidth style={{ '--ggs': '0.7' }} />}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'direct connections menu',
+                                'button click',
+                                'show nodes with same entries as context node'
+                            );
+                            store.graphInstance.triggerSameEntry(true);
                         }}
                     />
                 </Tooltip>
@@ -433,7 +475,10 @@ function ControlPanel() {
 
                     {renderDirectConnectionsMenu()}
 
-                    {store.graphInstance.selectedColorSchema === 'type' &&
+                    {store.core.currentGraph &&
+                        !['none', 'component'].includes(
+                            store.graphInstance.selectedColorSchema
+                        ) &&
                         renderColorLegend()}
                 </Slide>
             </Tabs>
