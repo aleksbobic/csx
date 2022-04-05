@@ -75,10 +75,16 @@ export class SchemaStore {
         return serverSchema;
     };
 
+    schemaContainsLinks = schema =>
+        schema.some(entry => Object.keys(entry).includes('source'));
+
     generateNodePositions = schema => {
         const graph = new dagre.graphlib.Graph()
             .setDefaultEdgeLabel(() => ({}))
-            .setGraph({ rankdir: 'TB', align: 'UL' });
+            .setGraph({
+                rankdir: this.schemaContainsLinks(schema) ? 'TB' : 'LR',
+                align: 'UL'
+            });
 
         schema.forEach(entry => {
             if (!Object.keys(entry).includes('source')) {
