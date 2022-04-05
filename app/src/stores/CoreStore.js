@@ -26,6 +26,10 @@ export class CoreStore {
         this.visibleDimensions[this.currentGraph] = dimensions;
     };
 
+    resetVisibleDimensions = () => {
+        this.visibleDimensions = { overview: [], detail: [] };
+    };
+
     setErrorMessage = message => {
         this.errorMessage = message;
     };

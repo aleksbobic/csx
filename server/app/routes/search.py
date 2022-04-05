@@ -11,6 +11,7 @@ import os
 import pandas as pd
 import spacy
 import pytextrank
+
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
@@ -33,6 +34,7 @@ def convert_query_to_df(query, search):
 
     return pd.DataFrame(elastic_list)
 
+
 def convert_filter_res_to_df(results):
     elastic_list = []
     for entry in results["hits"]["hits"]:
@@ -41,6 +43,7 @@ def convert_filter_res_to_df(results):
         elastic_list.append(entry_dict)
 
     return pd.DataFrame(elastic_list)
+
 
 def generate_advanced_query(query, search) -> pd.DataFrame:
     """Assemble query from multiple query phrases. Each call should return a dataframe."""
@@ -147,9 +150,6 @@ def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[D
         for entryId in node["entries"]:
             dataEntries[entryId][f"{node['feature']}_{node['label']}_id"] = node["id"]
 
-    for row in elastic_results:
-        if row["entry"] == "134":
-            print(row)
     return [{**dataEntries[row["entry"]], **row} for row in elastic_results]
 
 
@@ -217,7 +217,9 @@ def search(
     new_dimensions = []
 
     if len(id_list):
-        results = convert_filter_res_to_df(search.filter("terms", _id=id_list).execute())
+        results = convert_filter_res_to_df(
+            search.filter("terms", _id=id_list).execute()
+        )
     elif not isJson(query) or isNumber(query):
         es_query = Q(
             "multi_match",

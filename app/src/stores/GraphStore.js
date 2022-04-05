@@ -456,7 +456,6 @@ export class GraphStore {
                         this.store.search.setSearchIsEmpty(true);
                     } else {
                         this.store.core.toggleSpinner(true);
-                        console.log(response);
                         this.store.search.newNodeTypes =
                             response.meta.new_dimensions;
 

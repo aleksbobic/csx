@@ -46,6 +46,7 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.core.setCurrentGraph('overview');
+                    store.core.resetVisibleDimensions();
                     history.push(
                         `/graph?query=${values.search}&dataset=${store.search.currentDataset}`
                     );
