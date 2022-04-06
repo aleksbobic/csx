@@ -26,6 +26,7 @@ function SearchBar(props) {
     const selectedDatasetChange = e => {
         store.search.useDataset(e.target.value);
         store.workflow.resetWorkflow();
+        store.schema.resetOverviewNodeProperties();
     };
 
     useEffect(() => {
@@ -76,6 +77,9 @@ function SearchBar(props) {
                                     variant="filled"
                                     width="200px"
                                     borderEndRadius="0"
+                                    defaultValue={localStorage.getItem(
+                                        'currentDataset'
+                                    )}
                                     style={{
                                         paddingLeft: '40px',
                                         textTransform: 'uppercase',
