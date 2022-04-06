@@ -65,7 +65,7 @@ def get_overview_edge_tuples(
     nodes: List[Node],
     entries_with_nodes,
     node_ids_with_labels,
-) -> List[EnrichedEdgeTuple]:
+):
     overview_schema_paths = get_overview_graph_schema(anchor, links)
 
     candidate_edges = []
@@ -82,6 +82,7 @@ def get_overview_edge_tuples(
     graph.add_edges_from(candidate_edges)
 
     edge_tuples = []
+    edge_tuple_lookup = {}
 
     link_nodes = [node["id"] for node in nodes if node["feature"] in links]
 
@@ -94,29 +95,42 @@ def get_overview_edge_tuples(
                 node_instance for node_instance in nodes if node_instance["id"] == node
             ][0]
 
-            edge_tuples.extend(
-                [
-                    {
-                        "label": node_instance["label"],
-                        "feature": node_instance["feature"],
-                        "edge": edge,
-                    }
-                    for edge in temp_new_edge_tuples
-                ]
-            )
+            # edge_tuples.extend(
+            #     [
+            #         {
+            #             "label": node_instance["label"],
+            #             "feature": node_instance["feature"],
+            #             "edge": edge,
+            #         }
+            #         for edge in temp_new_edge_tuples
+            #     ]
+            # )
 
-    return edge_tuples
+            for edge in temp_new_edge_tuples:
+                if edge in edge_tuple_lookup:
+                    edge_tuple_lookup[edge].append(
+                        {
+                            "label": node_instance["label"],
+                            "feature": node_instance["feature"],
+                        }
+                    )
+                else:
+                    edge_tuple_lookup[edge] = [
+                        {
+                            "label": node_instance["label"],
+                            "feature": node_instance["feature"],
+                        }
+                    ]
+
+    return edge_tuple_lookup
+    # return edge_tuples, edge_tuple_lookup
 
 
 @use_timing
-def get_overview_edges(
-    enriched_edge_tuples: List[EnrichedEdgeTuple],
-) -> List[Edge]:
+def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
     """Generate a position for each node in graph."""
 
-    edge_tuples = [edge_tuple["edge"] for edge_tuple in enriched_edge_tuples]
-
-    edge_tuples_counts = Counter(edge_tuples)
+    edge_tuples_counts = Counter(nx_edges)
 
     if edge_tuples_counts.values():
         norm_divisor = max(edge_tuples_counts.values())
@@ -132,11 +146,7 @@ def get_overview_edges(
                 "target": edge[1],
                 "visible": True,
                 "weight": round(edge_tuples_counts[edge] / norm_divisor, 2),
-                "connections": [
-                    {"label": entry["label"], "feature": entry["feature"]}
-                    for entry in enriched_edge_tuples
-                    if entry["edge"] == edge
-                ],
+                "connections": edge_tuple_lookup[edge],
             },
         )
         for edge in edge_tuples_counts

@@ -73,11 +73,13 @@ def get_overview_graph(
 ):
     search_results_df = pd.DataFrame(search_results)
 
-    nodes, entries_with_nodes = get_nodes(search_results_df, links, anchor, anchor_properties)
+    nodes, entries_with_nodes = get_nodes(
+        search_results_df, links, anchor, anchor_properties
+    )
 
     node_ids_with_labels = get_node_ids_with_labels(nodes)
 
-    edge_tuples = get_overview_edge_tuples(
+    edge_tuple_lookup = get_overview_edge_tuples(
         search_results_df,
         anchor,
         links,
@@ -88,8 +90,9 @@ def get_overview_graph(
 
     nodes = [node for node in nodes if node["feature"] == anchor]
 
-    nx_edges = get_overview_nx_edges(edge_tuples)
-    edges = get_overview_edges(edge_tuples)
+    nx_edges = list(edge_tuple_lookup.keys())
+
+    edges = get_overview_edges(edge_tuple_lookup, nx_edges)
 
     nodes = get_positions(nodes, nx_edges)
 

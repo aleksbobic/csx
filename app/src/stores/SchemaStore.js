@@ -26,6 +26,8 @@ export class SchemaStore {
         makeAutoObservable(this);
     }
 
+    resetOverviewNodeProperties = () => (this.overviewDataNodeProperties = []);
+
     toggleRelationship = id => {
         this.data = this.data.map(entry => {
             if (entry['id'] === id) {
