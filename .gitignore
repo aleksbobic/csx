@@ -22,5 +22,5 @@ elasticsearch
 datasets
 metals.*
 
-server/app/data/config/
+server/app/data/config/*
 !server/app/data/config/jucssm.json
