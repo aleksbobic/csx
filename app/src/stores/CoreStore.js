@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
 export class CoreStore {
@@ -9,6 +10,14 @@ export class CoreStore {
     errorDetails = null;
     showSpinner = false;
     currentGraph = '';
+    fileUploadData = {
+        name: '',
+        columns: '',
+        defaults: {
+            anchor: '',
+            links: ['']
+        }
+    };
 
     visibleDimensions = { overview: [], detail: [] };
 
@@ -78,5 +87,30 @@ export class CoreStore {
             console.log('status ', error.response.status);
             console.log('headers ', error.response.headers);
         }
+    };
+
+    resetFileUploadData = () =>
+        (this.fileUploadData = {
+            name: '',
+            columns: '',
+            defaults: {
+                anchor: '',
+                links: ['']
+            }
+        });
+
+    uploadFile = async files => {
+        const formData = new FormData();
+        formData.append('file', files[0]);
+        const response = await axios.post('file/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        this.fileUploadData.name = response.data.name;
+        this.fileUploadData.columns = response.data.columns;
+
+        return true;
     };
 }

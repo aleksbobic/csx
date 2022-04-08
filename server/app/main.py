@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.util import router as util_router
 from app.routes.search import router as search_router
+from app.routes.file import router as file_router
 
 
 def get_application():
@@ -17,6 +18,7 @@ def get_application():
 
     app.include_router(util_router, prefix="/util")
     app.include_router(search_router, prefix="/search")
+    app.include_router(file_router, prefix="/file")
 
     return app
 
