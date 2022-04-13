@@ -12,12 +12,14 @@ export class CoreStore {
     currentGraph = '';
     fileUploadData = {
         name: '',
-        columns: '',
-        defaults: {
-            anchor: '',
-            links: ['']
-        }
+        defaults: {}
     };
+    fileUploadErrors = {
+        defaultVisible: false,
+        defaultSearchable: false,
+        defaultLinks: false
+    };
+    showFileUploadError = false;
 
     visibleDimensions = { overview: [], detail: [] };
 
@@ -92,12 +94,19 @@ export class CoreStore {
     resetFileUploadData = () =>
         (this.fileUploadData = {
             name: '',
-            columns: '',
-            defaults: {
-                anchor: '',
-                links: ['']
-            }
+            defaults: {}
         });
+
+    getDefaultNullValue = dataType => {
+        switch (dataType) {
+            case 'number':
+                return '0';
+            case 'list':
+                return '';
+            default:
+                return '';
+        }
+    };
 
     uploadFile = async files => {
         const formData = new FormData();
@@ -108,9 +117,68 @@ export class CoreStore {
             }
         });
 
+        Object.keys(response.data.columns).forEach(
+            column =>
+                (this.fileUploadData.defaults[column] = {
+                    name: column,
+                    isDefaultVisible: false,
+                    isDefaultSearch: false,
+                    isDefaultLink: false,
+                    dataType: response.data.columns[column],
+                    defaultNullValue: this.getDefaultNullValue(
+                        response.data.columns[column]
+                    ),
+                    removeIfNull: false
+                })
+        );
+
+        this.fileUploadData.originalName = response.data.name;
+        this.fileUploadData.anchor = Object.keys(response.data.columns)[0];
         this.fileUploadData.name = response.data.name;
-        this.fileUploadData.columns = response.data.columns;
 
         return true;
+    };
+
+    isVisibleByDefaultSelected = () =>
+        (this.fileUploadErrors.defaultVisible = !Object.keys(
+            this.fileUploadData.defaults
+        ).some(
+            column => this.fileUploadData.defaults[column].isDefaultVisible
+        ));
+
+    isDefaultLinkSelected = () =>
+        (this.fileUploadErrors.defaultLinks = !Object.keys(
+            this.fileUploadData.defaults
+        ).some(column => this.fileUploadData.defaults[column].isDefaultLink));
+
+    isDefaultSarchSelected = () =>
+        (this.fileUploadErrors.defaultSearchable = !Object.keys(
+            this.fileUploadData.defaults
+        ).some(column => this.fileUploadData.defaults[column].isDefaultSearch));
+
+    setDefaults = async () => {
+        this.isVisibleByDefaultSelected();
+        this.isDefaultLinkSelected();
+        this.isDefaultSarchSelected();
+        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
+            errorCode => this.fileUploadErrors[errorCode]
+        );
+
+        if (this.showFileUploadError) {
+            return;
+        }
+
+        const params = {
+            original_name: this.fileUploadData.originalName,
+            name: this.fileUploadData.name,
+            anchor: this.fileUploadData.anchor,
+            defaults: JSON.stringify(this.fileUploadData.defaults)
+        };
+
+        try {
+            await axios.get('file/settings', { params });
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
     };
 }
