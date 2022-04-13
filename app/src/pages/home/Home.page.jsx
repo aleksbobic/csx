@@ -33,8 +33,8 @@ function HomePage() {
     });
 
     const onDrop = async files => {
-        store.core.changeFileUploadModalVisiblity(true);
-        await store.core.uploadFile(files);
+        store.fileUpload.changeFileUploadModalVisiblity(true);
+        await store.fileUpload.uploadFile(files);
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({

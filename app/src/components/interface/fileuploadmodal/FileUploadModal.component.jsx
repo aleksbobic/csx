@@ -38,17 +38,17 @@ function FileUploadModal() {
     const [intervalCounter, setIntervalCounter] = useState(null);
 
     useEffect(() => {
-        if (store.core.showFileUploadModal) {
+        if (store.fileUpload.showFileUploadModal) {
             onOpen();
-        } else if (!store.core.showFileUploadModal && isOpen) {
+        } else if (!store.fileUpload.showFileUploadModal && isOpen) {
             onClose();
         }
-    }, [isOpen, onClose, onOpen, store.core.showFileUploadModal]);
+    }, [isOpen, onClose, onOpen, store.fileUpload.showFileUploadModal]);
 
     useEffect(() => {
         if (
-            (store.core.fileUploadData.name === '' ||
-                store.core.isPopulating) &&
+            (store.fileUpload.fileUploadData.name === '' ||
+                store.fileUpload.isPopulating) &&
             isOpen &&
             intervalCounter == null
         ) {
@@ -61,8 +61,8 @@ function FileUploadModal() {
             }, 750);
             setIntervalCounter(() => interval);
         } else if (
-            store.core.fileUploadData.name !== '' &&
-            !store.core.isPopulating &&
+            store.fileUpload.fileUploadData.name !== '' &&
+            !store.fileUpload.isPopulating &&
             isOpen &&
             intervalCounter !== null
         ) {
@@ -76,8 +76,8 @@ function FileUploadModal() {
         intervalCounter,
         isOpen,
         loadProgress,
-        store.core.fileUploadData.name,
-        store.core.isPopulating
+        store.fileUpload.fileUploadData.name,
+        store.fileUpload.isPopulating
     ]);
 
     const renderColumnTypeDropdown = (column, defaultType) => (
@@ -87,7 +87,10 @@ function FileUploadModal() {
             borderRadius="5px"
             variant="filled"
             onChange={val =>
-                store.core.changeFileUplodColumnType(column, val.target.value)
+                store.fileUpload.changeFileUplodColumnType(
+                    column,
+                    val.target.value
+                )
             }
         >
             <option value="string">string</option>
@@ -98,17 +101,21 @@ function FileUploadModal() {
 
     const renderColumnDropdown = () => (
         <Select
-            defaultValue={store.core.fileUploadData.anchor}
+            defaultValue={store.fileUpload.fileUploadData.anchor}
             size="sm"
             borderRadius="5px"
             variant="filled"
-            onChange={val => store.core.changeFileUplodAnchor(val.target.value)}
+            onChange={val =>
+                store.fileUpload.changeFileUplodAnchor(val.target.value)
+            }
         >
-            {Object.keys(store.core.fileUploadData.defaults).map(column => (
-                <option key={`deafult_anchor_${column}`} value={column}>
-                    {column}
-                </option>
-            ))}
+            {Object.keys(store.fileUpload.fileUploadData.defaults).map(
+                column => (
+                    <option key={`deafult_anchor_${column}`} value={column}>
+                        {column}
+                    </option>
+                )
+            )}
         </Select>
     );
 
@@ -124,9 +131,9 @@ function FileUploadModal() {
     };
 
     const generateErrorMessage = () => {
-        const errors = Object.keys(store.core.fileUploadErrors)
+        const errors = Object.keys(store.fileUpload.fileUploadErrors)
             .map(errorCode =>
-                store.core.fileUploadErrors[errorCode]
+                store.fileUpload.fileUploadErrors[errorCode]
                     ? getTextForErrorCode(errorCode)
                     : ''
             )
@@ -141,12 +148,252 @@ function FileUploadModal() {
         }
     };
 
+    const renderTableHeader = () => (
+        <Thead>
+            <Tr>
+                <Th width="24%">Column</Th>
+                <Th width="5%" padding="0px 4px">
+                    <Tooltip label="Visible by default">
+                        <Flex
+                            width="100%"
+                            height="100%"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <Eye style={{ '--ggs': '0.7' }} />
+                        </Flex>
+                    </Tooltip>
+                </Th>
+
+                <Th width="5%" padding="0px 4px">
+                    <Tooltip label="Use for searching">
+                        <Flex
+                            width="100%"
+                            height="100%"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <Search
+                                style={{
+                                    '--ggs': '0.7'
+                                }}
+                            />
+                        </Flex>
+                    </Tooltip>
+                </Th>
+
+                <Th width="5%" padding="0px 4px">
+                    <Tooltip label="Use as default link">
+                        <Flex
+                            width="100%"
+                            height="100%"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <LinkGG style={{ '--ggs': '0.7' }} />
+                        </Flex>
+                    </Tooltip>
+                </Th>
+                <Th width="18%">Data Type</Th>
+                <Th width="18%" paddingLeft="4px">
+                    Null replacement
+                </Th>
+                <Th width="5%" padding="0px 24px 0 4px">
+                    <Tooltip label="Remove row if null">
+                        <Flex
+                            width="100%"
+                            height="100%"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <ExtensionRemove
+                                style={{
+                                    '--ggs': '0.7'
+                                }}
+                            />
+                        </Flex>
+                    </Tooltip>
+                </Th>
+            </Tr>
+        </Thead>
+    );
+
+    const renderTableBody = () => (
+        <Tbody>
+            {Object.keys(store.fileUpload.fileUploadData.defaults).map(
+                (column, id) => (
+                    <Tr key={`upload_file_${id}`}>
+                        <Td width="24%">
+                            <Editable
+                                defaultValue={
+                                    store.fileUpload.fileUploadData.defaults[
+                                        column
+                                    ].name
+                                }
+                                backgroundColor="blackAlpha.300"
+                                borderRadius="5px"
+                                maxWidth="176px"
+                                onSubmit={val =>
+                                    store.fileUpload.changeColumnName(
+                                        column,
+                                        val
+                                    )
+                                }
+                            >
+                                <EditablePreview
+                                    padding="5px 23px"
+                                    width="100%"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                    height="30px"
+                                />
+                                <EditableInput
+                                    padding="5px 23px"
+                                    width="100%"
+                                    height="30px"
+                                />
+                            </Editable>
+                        </Td>
+
+                        <Td width="5%" paddingLeft="4px" paddingRight="4px">
+                            <Flex
+                                width="100%"
+                                height="100%"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Checkbox
+                                    checked={
+                                        store.fileUpload.fileUploadData
+                                            .defaults[column].isDefaultVisible
+                                    }
+                                    onChange={() =>
+                                        store.fileUpload.changeDefaultBoolToggle(
+                                            column,
+                                            'isDefaultVisible'
+                                        )
+                                    }
+                                />
+                            </Flex>
+                        </Td>
+                        <Td width="5%" paddingLeft="4px" paddingRight="4px">
+                            <Flex
+                                width="100%"
+                                height="100%"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Checkbox
+                                    checked={
+                                        store.fileUpload.fileUploadData
+                                            .defaults[column].isDefaultSearch
+                                    }
+                                    onChange={() =>
+                                        store.fileUpload.changeDefaultBoolToggle(
+                                            column,
+                                            'isDefaultSearch'
+                                        )
+                                    }
+                                />
+                            </Flex>
+                        </Td>
+                        <Td width="5%" paddingLeft="4px" paddingRight="4px">
+                            <Flex
+                                width="100%"
+                                height="100%"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Checkbox
+                                    checked={
+                                        store.fileUpload.fileUploadData
+                                            .defaults[column].isDefaultLink
+                                    }
+                                    onChange={() =>
+                                        store.fileUpload.changeDefaultBoolToggle(
+                                            column,
+                                            'isDefaultLink'
+                                        )
+                                    }
+                                />
+                            </Flex>
+                        </Td>
+                        <Td width="18%">
+                            {renderColumnTypeDropdown(
+                                column,
+                                store.fileUpload.fileUploadData.defaults[column]
+                                    .dataType
+                            )}
+                        </Td>
+                        <Td width="18%" paddingLeft="4px">
+                            <Editable
+                                defaultValue={
+                                    store.fileUpload.fileUploadData.defaults[
+                                        column
+                                    ].defaultNullValue
+                                }
+                                backgroundColor="blackAlpha.300"
+                                borderRadius="5px"
+                                minHeight="30px"
+                                onSubmit={val =>
+                                    store.fileUpload.changeNullReplacement(
+                                        column,
+                                        val
+                                    )
+                                }
+                            >
+                                <EditablePreview
+                                    padding="5px 23px"
+                                    width="100%"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                    height="30px"
+                                />
+                                <EditableInput
+                                    padding="5px 23px"
+                                    width="100%"
+                                    height="30px"
+                                />
+                            </Editable>
+                        </Td>
+                        <Td width="5%" padding="0px 24px 0 4px">
+                            <Flex
+                                width="100%"
+                                height="100%"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Checkbox
+                                    checked={
+                                        store.fileUpload.fileUploadData
+                                            .defaults[column].removeIfNull
+                                    }
+                                    onChange={() =>
+                                        store.fileUpload.changeDefaultBoolToggle(
+                                            column,
+                                            'removeIfNull'
+                                        )
+                                    }
+                                />
+                            </Flex>
+                        </Td>
+                    </Tr>
+                )
+            )}
+        </Tbody>
+    );
+
     const renderModalBody = () => {
-        if (store.core.fileUploadData.name === '' || store.core.isPopulating) {
+        if (
+            store.fileUpload.fileUploadData.name === '' ||
+            store.fileUpload.isPopulating
+        ) {
             return (
                 <ModalBody overflowY="scroll" marginBottom="20px">
                     <Heading size="sm" marginBottom="10px">
-                        {store.core.isPopulating
+                        {store.fileUpload.isPopulating
                             ? 'populating index'
                             : 'Processing Dataset'}
                     </Heading>
@@ -161,10 +408,10 @@ function FileUploadModal() {
                     Dataset name:{' '}
                 </Heading>
                 <Editable
-                    defaultValue={store.core.fileUploadData.name}
+                    defaultValue={store.fileUpload.fileUploadData.name}
                     backgroundColor="blackAlpha.300"
                     borderRadius="5px"
-                    onSubmit={val => store.core.changeDatasetName(val)}
+                    onSubmit={val => store.fileUpload.changeDatasetName(val)}
                 >
                     <EditablePreview padding="5px 23px" width="100%" />
                     <EditableInput padding="5px 23px" width="100%" />
@@ -181,77 +428,7 @@ function FileUploadModal() {
                         width="700px"
                     >
                         <Table style={{ tableLayout: 'fixed' }}>
-                            <Thead>
-                                <Tr>
-                                    <Th width="24%">Column</Th>
-                                    <Th width="5%" padding="0px 4px">
-                                        <Tooltip label="Visible by default">
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Eye
-                                                    style={{ '--ggs': '0.7' }}
-                                                />
-                                            </Flex>
-                                        </Tooltip>
-                                    </Th>
-
-                                    <Th width="5%" padding="0px 4px">
-                                        <Tooltip label="Use for searching">
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Search
-                                                    style={{
-                                                        '--ggs': '0.7'
-                                                    }}
-                                                />
-                                            </Flex>
-                                        </Tooltip>
-                                    </Th>
-
-                                    <Th width="5%" padding="0px 4px">
-                                        <Tooltip label="Use as default link">
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <LinkGG
-                                                    style={{ '--ggs': '0.7' }}
-                                                />
-                                            </Flex>
-                                        </Tooltip>
-                                    </Th>
-                                    <Th width="18%">Data Type</Th>
-                                    <Th width="18%" paddingLeft="4px">
-                                        Null replacement
-                                    </Th>
-                                    <Th width="5%" padding="0px 24px 0 4px">
-                                        <Tooltip label="Remove row if null">
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <ExtensionRemove
-                                                    style={{
-                                                        '--ggs': '0.7'
-                                                    }}
-                                                />
-                                            </Flex>
-                                        </Tooltip>
-                                    </Th>
-                                </Tr>
-                            </Thead>
+                            {renderTableHeader()}
                         </Table>
                     </TableContainer>
                     <TableContainer
@@ -263,189 +440,7 @@ function FileUploadModal() {
                         width="700px"
                     >
                         <Table style={{ tableLayout: 'fixed' }}>
-                            <Tbody>
-                                {Object.keys(
-                                    store.core.fileUploadData.defaults
-                                ).map((column, id) => (
-                                    <Tr key={`upload_file_${id}`}>
-                                        <Td width="24%">
-                                            <Editable
-                                                defaultValue={
-                                                    store.core.fileUploadData
-                                                        .defaults[column].name
-                                                }
-                                                backgroundColor="blackAlpha.300"
-                                                borderRadius="5px"
-                                                maxWidth="176px"
-                                                onSubmit={val =>
-                                                    store.core.changeColumnName(
-                                                        column,
-                                                        val
-                                                    )
-                                                }
-                                            >
-                                                <EditablePreview
-                                                    padding="5px 23px"
-                                                    width="100%"
-                                                    overflow="hidden"
-                                                    whiteSpace="nowrap"
-                                                    textOverflow="ellipsis"
-                                                    height="30px"
-                                                />
-                                                <EditableInput
-                                                    padding="5px 23px"
-                                                    width="100%"
-                                                    height="30px"
-                                                />
-                                            </Editable>
-                                        </Td>
-
-                                        <Td
-                                            width="5%"
-                                            paddingLeft="4px"
-                                            paddingRight="4px"
-                                        >
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Checkbox
-                                                    checked={
-                                                        store.core
-                                                            .fileUploadData
-                                                            .defaults[column]
-                                                            .isDefaultVisible
-                                                    }
-                                                    onChange={() =>
-                                                        store.core.changeDefaultBoolToggle(
-                                                            column,
-                                                            'isDefaultVisible'
-                                                        )
-                                                    }
-                                                />
-                                            </Flex>
-                                        </Td>
-                                        <Td
-                                            width="5%"
-                                            paddingLeft="4px"
-                                            paddingRight="4px"
-                                        >
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Checkbox
-                                                    checked={
-                                                        store.core
-                                                            .fileUploadData
-                                                            .defaults[column]
-                                                            .isDefaultSearch
-                                                    }
-                                                    onChange={() =>
-                                                        store.core.changeDefaultBoolToggle(
-                                                            column,
-                                                            'isDefaultSearch'
-                                                        )
-                                                    }
-                                                />
-                                            </Flex>
-                                        </Td>
-                                        <Td
-                                            width="5%"
-                                            paddingLeft="4px"
-                                            paddingRight="4px"
-                                        >
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Checkbox
-                                                    checked={
-                                                        store.core
-                                                            .fileUploadData
-                                                            .defaults[column]
-                                                            .isDefaultLink
-                                                    }
-                                                    onChange={() =>
-                                                        store.core.changeDefaultBoolToggle(
-                                                            column,
-                                                            'isDefaultLink'
-                                                        )
-                                                    }
-                                                />
-                                            </Flex>
-                                        </Td>
-                                        <Td width="18%">
-                                            {renderColumnTypeDropdown(
-                                                column,
-                                                store.core.fileUploadData
-                                                    .defaults[column].dataType
-                                            )}
-                                        </Td>
-                                        <Td width="18%" paddingLeft="4px">
-                                            <Editable
-                                                defaultValue={
-                                                    store.core.fileUploadData
-                                                        .defaults[column]
-                                                        .defaultNullValue
-                                                }
-                                                backgroundColor="blackAlpha.300"
-                                                borderRadius="5px"
-                                                minHeight="30px"
-                                                onSubmit={val =>
-                                                    store.core.changeNullReplacement(
-                                                        column,
-                                                        val
-                                                    )
-                                                }
-                                            >
-                                                <EditablePreview
-                                                    padding="5px 23px"
-                                                    width="100%"
-                                                    overflow="hidden"
-                                                    whiteSpace="nowrap"
-                                                    textOverflow="ellipsis"
-                                                    height="30px"
-                                                />
-                                                <EditableInput
-                                                    padding="5px 23px"
-                                                    width="100%"
-                                                    height="30px"
-                                                />
-                                            </Editable>
-                                        </Td>
-                                        <Td width="5%" padding="0px 24px 0 4px">
-                                            <Flex
-                                                width="100%"
-                                                height="100%"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                            >
-                                                <Checkbox
-                                                    checked={
-                                                        store.core
-                                                            .fileUploadData
-                                                            .defaults[column]
-                                                            .removeIfNull
-                                                    }
-                                                    onChange={() =>
-                                                        store.core.changeDefaultBoolToggle(
-                                                            column,
-                                                            'removeIfNull'
-                                                        )
-                                                    }
-                                                />
-                                            </Flex>
-                                        </Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
+                            {renderTableBody()}
                         </Table>
                     </TableContainer>
                 </Box>
@@ -453,7 +448,7 @@ function FileUploadModal() {
                     Default Anchor:
                 </Heading>
                 {renderColumnDropdown()}
-                {store.core.showFileUploadError && (
+                {store.fileUpload.showFileUploadError && (
                     <Text
                         fontSize="sm"
                         color="red.500"
@@ -468,11 +463,11 @@ function FileUploadModal() {
     };
 
     const populateIndex = () => {
-        store.core.setDefaults();
+        store.fileUpload.setDefaults();
     };
 
     const cancelFileUpload = () => {
-        store.core.cancelFileUpload();
+        store.fileUpload.cancelFileUpload();
     };
 
     return (
@@ -489,8 +484,8 @@ function FileUploadModal() {
                 <ModalHeader>Dataset Defaults Setup</ModalHeader>
                 {isOpen && renderModalBody()}
 
-                {store.core.fileUploadData.name !== '' &&
-                    !store.core.isPopulating && (
+                {store.fileUpload.fileUploadData.name !== '' &&
+                    !store.fileUpload.isPopulating && (
                         <ModalFooter>
                             <Button
                                 variant="outline"
