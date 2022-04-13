@@ -111,6 +111,7 @@ export class CoreStore {
     uploadFile = async files => {
         const formData = new FormData();
         formData.append('file', files[0]);
+
         const response = await axios.post('file/upload', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
@@ -132,11 +133,36 @@ export class CoreStore {
                 })
         );
 
-        this.fileUploadData.originalName = response.data.name;
-        this.fileUploadData.anchor = Object.keys(response.data.columns)[0];
-        this.fileUploadData.name = response.data.name;
+        this.changeOriginalName(response.data.name);
+        this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
+        this.changeDatasetName(response.data.name);
 
         return true;
+    };
+
+    changeOriginalName = val => (this.fileUploadData.originalName = val);
+
+    changeFileUplodColumnType = (column, columnType) => {
+        this.fileUploadData.defaults[column].defaultNullValue = columnType;
+    };
+
+    changeFileUplodAnchor = val => {
+        this.fileUploadData.anchor = val;
+    };
+
+    changeDefaultBoolToggle = (column, feature) => {
+        this.fileUploadData.defaults[column][feature] =
+            !this.fileUploadData.defaults[column][feature];
+    };
+
+    changeColumnName = (column, val) => {
+        this.fileUploadData.defaults[column].name = val;
+    };
+
+    changeDatasetName = val => (this.fileUploadData.name = val);
+
+    changeNullReplacement = (column, val) => {
+        this.fileUploadData.defaults[column].defaultNullValue = val;
     };
 
     isVisibleByDefaultSelected = () =>
@@ -177,6 +203,17 @@ export class CoreStore {
 
         try {
             await axios.get('file/settings', { params });
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    cancelFileUpload = async () => {
+        const params = { name: this.fileUploadData.originalName };
+
+        try {
+            await axios.get('file/cancel', { params });
+            this.resetFileUploadData();
         } catch (error) {
             this.store.core.handleError(error);
         }

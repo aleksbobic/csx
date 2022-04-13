@@ -94,25 +94,29 @@ def generateEntriesFromDataFrame(data, columns, index):
 
 @router.get("/settings")
 def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
-    print("anchor", anchor)
     defaults = json.loads(defaults)
 
     # Generate default config
-    config = {}
-    config["schemas"] = [{"name": "default", "relations": []}]
-    config["anchor"] = anchor
-    config["links"] = get_default_link_dimensions(defaults)
-    config["default_search_fields"] = get_default_searchable_dimensions(defaults)
-    config["default_visible_dimensions"] = get_default_visible_dimensions(defaults)
+    config = {
+        "default_visible_dimensions": get_default_visible_dimensions(defaults),
+        "anchor": anchor,
+        "links": get_default_link_dimensions(defaults),
+        "default_search_fields": get_default_searchable_dimensions(defaults),
+        "schemas": [{"name": "default", "relations": []}],
+    }
 
     with open(f"./app/data/config/{name}.json", "w") as f:
         json.dump(config, f)
 
     data = pd.read_csv(f"./app/data/files/{original_name}.csv")
-    data.rename(columns=get_renamed_dimensions(defaults), inplace=True)
-    data.dropna(
-        axis=0, subset=get_remove_row_if_null_dimensions(defaults), inplace=True
-    )
+
+    rename_mapping = get_renamed_dimensions(defaults)
+    if bool(rename_mapping):
+        data.rename(columns=rename_mapping, inplace=True)
+
+    null_dimensions = get_remove_row_if_null_dimensions(defaults)
+    if len(null_dimensions) != 0:
+        data.dropna(axis=0, subset=null_dimensions, inplace=True)
 
     columns = get_dimensions(defaults)
 
@@ -123,4 +127,10 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     os.remove(f"./app/data/files/{original_name}.csv")
 
+    return {"status": "success"}
+
+
+@router.get("/cancel")
+def cancel_dataset_upload(name: str):
+    os.remove(f"./app/data/files/{name}.csv")
     return {"status": "success"}

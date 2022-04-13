@@ -205,18 +205,15 @@ function HomePage() {
         </Container>
     );
 
-    const changeDefaultColumnType = (column, columnType) => {
-        store.core.fileUploadData.defaults[column].defaultNullValue =
-            columnType;
-    };
-
     const renderColumnTypeDropdown = (column, defaultType) => (
         <Select
             defaultValue={defaultType}
             size="sm"
             borderRadius="5px"
             variant="filled"
-            onChange={val => changeDefaultColumnType(column, val.target.value)}
+            onChange={val =>
+                store.core.changeFileUplodColumnType(column, val.target.value)
+            }
         >
             <option value="string">string</option>
             <option value="number">number</option>
@@ -224,17 +221,13 @@ function HomePage() {
         </Select>
     );
 
-    const changeAnchor = val => {
-        store.core.fileUploadData.anchor = val;
-    };
-
     const renderColumnDropdown = () => (
         <Select
             defaultValue={store.core.fileUploadData.anchor}
             size="sm"
             borderRadius="5px"
             variant="filled"
-            onChange={val => changeAnchor(val.target.value)}
+            onChange={val => store.core.changeFileUplodAnchor(val.target.value)}
         >
             {Object.keys(store.core.fileUploadData.defaults).map(column => (
                 <option key={`deafult_anchor_${column}`} value={column}>
@@ -244,27 +237,10 @@ function HomePage() {
         </Select>
     );
 
-    const changeDefaultBoolToggle = (column, feature) => {
-        store.core.fileUploadData.defaults[column][feature] =
-            !store.core.fileUploadData.defaults[column][feature];
-    };
-
-    const changeName = (column, val) => {
-        store.core.fileUploadData.defaults[column].name = val;
-    };
-
-    const changeDatasetName = val => {
-        store.core.fileUploadData.name = val;
-    };
-
-    const changeNullReplacement = (column, val) => {
-        store.core.fileUploadData.defaults[column].defaultNullValue = val;
-    };
-
     const renderModalBody = () => {
         if (store.core.fileUploadData.name === '') {
             return (
-                <ModalBody overflowY="scroll">
+                <ModalBody overflowY="scroll" marginBottom="20px">
                     <Heading size="sm" marginBottom="10px">
                         Processing Dataset
                     </Heading>
@@ -282,7 +258,7 @@ function HomePage() {
                     defaultValue={store.core.fileUploadData.name}
                     backgroundColor="blackAlpha.300"
                     borderRadius="5px"
-                    onSubmit={val => changeDatasetName(val)}
+                    onSubmit={val => store.core.changeDatasetName(val)}
                 >
                     <EditablePreview padding="5px 23px" width="100%" />
                     <EditableInput padding="5px 23px" width="100%" />
@@ -396,7 +372,10 @@ function HomePage() {
                                                 borderRadius="5px"
                                                 maxWidth="176px"
                                                 onSubmit={val =>
-                                                    changeName(column, val)
+                                                    store.core.changeColumnName(
+                                                        column,
+                                                        val
+                                                    )
                                                 }
                                             >
                                                 <EditablePreview
@@ -434,7 +413,7 @@ function HomePage() {
                                                             .isDefaultVisible
                                                     }
                                                     onChange={() =>
-                                                        changeDefaultBoolToggle(
+                                                        store.core.changeDefaultBoolToggle(
                                                             column,
                                                             'isDefaultVisible'
                                                         )
@@ -461,7 +440,7 @@ function HomePage() {
                                                             .isDefaultSearch
                                                     }
                                                     onChange={() =>
-                                                        changeDefaultBoolToggle(
+                                                        store.core.changeDefaultBoolToggle(
                                                             column,
                                                             'isDefaultSearch'
                                                         )
@@ -488,7 +467,7 @@ function HomePage() {
                                                             .isDefaultLink
                                                     }
                                                     onChange={() =>
-                                                        changeDefaultBoolToggle(
+                                                        store.core.changeDefaultBoolToggle(
                                                             column,
                                                             'isDefaultLink'
                                                         )
@@ -514,7 +493,7 @@ function HomePage() {
                                                 borderRadius="5px"
                                                 minHeight="30px"
                                                 onSubmit={val =>
-                                                    changeNullReplacement(
+                                                    store.core.changeNullReplacement(
                                                         column,
                                                         val
                                                     )
@@ -550,7 +529,7 @@ function HomePage() {
                                                             .removeIfNull
                                                     }
                                                     onChange={() =>
-                                                        changeDefaultBoolToggle(
+                                                        store.core.changeDefaultBoolToggle(
                                                             column,
                                                             'removeIfNull'
                                                         )
@@ -616,6 +595,11 @@ function HomePage() {
         onClose();
     };
 
+    const cancelFileUpload = () => {
+        store.core.cancelFileUpload();
+        onClose();
+    };
+
     const renderModal = () => (
         <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
             <ModalOverlay bg="none" backdropFilter="auto" backdropBlur="2px" />
@@ -623,14 +607,20 @@ function HomePage() {
                 <ModalHeader>Dataset Defaults Setup</ModalHeader>
                 {isOpen && renderModalBody()}
 
-                <ModalFooter>
-                    <Button variant="outline" mr={3} onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button variant="solid" onClick={() => populateIndex()}>
-                        Set defaults
-                    </Button>
-                </ModalFooter>
+                {store.core.fileUploadData.name !== '' && (
+                    <ModalFooter>
+                        <Button
+                            variant="outline"
+                            mr={3}
+                            onClick={cancelFileUpload}
+                        >
+                            Cancel
+                        </Button>
+                        <Button variant="solid" onClick={() => populateIndex()}>
+                            Set defaults
+                        </Button>
+                    </ModalFooter>
+                )}
             </ModalContent>
         </Modal>
     );
