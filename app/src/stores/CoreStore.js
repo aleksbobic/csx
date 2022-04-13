@@ -20,6 +20,8 @@ export class CoreStore {
         defaultLinks: false
     };
     showFileUploadError = false;
+    showFileUploadModal = false;
+    isPopulating = false;
 
     visibleDimensions = { overview: [], detail: [] };
 
@@ -27,6 +29,10 @@ export class CoreStore {
         this.store = store;
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setIsPopulatin = val => (this.isPopulating = val);
+
+    changeFileUploadModalVisiblity = val => (this.showFileUploadModal = val);
 
     setCurrentGraph = graphType => {
         this.currentGraph = graphType;
@@ -191,8 +197,10 @@ export class CoreStore {
         );
 
         if (this.showFileUploadError) {
-            return;
+            return false;
         }
+
+        this.setIsPopulatin(true);
 
         const params = {
             original_name: this.fileUploadData.originalName,
@@ -206,6 +214,10 @@ export class CoreStore {
         } catch (error) {
             this.store.core.handleError(error);
         }
+
+        this.resetFileUploadData();
+        this.changeFileUploadModalVisiblity(false);
+        this.setIsPopulatin(false);
     };
 
     cancelFileUpload = async () => {
@@ -214,8 +226,10 @@ export class CoreStore {
         try {
             await axios.get('file/cancel', { params });
             this.resetFileUploadData();
+            this.changeFileUploadModalVisiblity(false);
         } catch (error) {
             this.store.core.handleError(error);
+            this.changeFileUploadModalVisiblity(false);
         }
     };
 }
