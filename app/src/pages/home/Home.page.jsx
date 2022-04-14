@@ -181,15 +181,18 @@ function HomePage() {
                         paddingLeft="5px"
                         paddingRight="5px"
                         key={`dataset_list_${dataset}`}
-                        opacity="0.8"
+                        opacity="0.7"
                         transition="all 0.1s ease-in-out"
                         _hover={{ opacity: '1' }}
+                        role="group"
                     >
                         <Heading
                             flexGrow="1"
                             size="xs"
                             textAlign="left"
                             paddingLeft="10px"
+                            opacity="0.7"
+                            _groupHover={{ opacity: '1' }}
                         >
                             {dataset}
                         </Heading>
@@ -198,6 +201,8 @@ function HomePage() {
                                 flexGrow="0"
                                 size="sm"
                                 variant="ghost"
+                                opacity="0"
+                                _groupHover={{ opacity: '1' }}
                                 icon={
                                     <TrashEmpty
                                         style={{
@@ -215,6 +220,8 @@ function HomePage() {
                                 flexGrow="0"
                                 size="sm"
                                 variant="ghost"
+                                opacity="0"
+                                _groupHover={{ opacity: '1' }}
                                 icon={<Toolbox style={{ '--ggs': '0.7' }} />}
                             />
                         </Tooltip>
@@ -223,6 +230,8 @@ function HomePage() {
                                 flexGrow="0"
                                 size="sm"
                                 variant="solid"
+                                opacity="0.5"
+                                _groupHover={{ opacity: '1' }}
                                 icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
                             />
                         </Tooltip>
