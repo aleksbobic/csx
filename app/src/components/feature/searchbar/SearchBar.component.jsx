@@ -10,28 +10,23 @@ import {
 import { Database, Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function SearchBar(props) {
     const history = useHistory();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
-    const [selectedDataset, setSelectedDataset] = useState(
-        localStorage.getItem('currentDatasetIndex') || 0
-    );
+    const [selectedDataset, setSelectedDataset] = useState(0);
 
     const selectedDatasetChange = e => {
+        setSelectedDataset(e.target.value);
         store.search.useDataset(e.target.value);
         store.workflow.resetWorkflow();
         store.schema.resetOverviewNodeProperties();
     };
-
-    useEffect(() => {
-        setSelectedDataset(store.search.selectedDatasetIndex);
-    }, [store.search.selectedDatasetIndex]);
 
     const renderDatasetSelectionOptions = () => {
         return store.search.datasets.map((dataset, index) => (
@@ -47,9 +42,12 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.core.setCurrentGraph('overview');
+                    store.search.useDataset(selectedDataset);
                     store.core.resetVisibleDimensions();
+                    store.workflow.resetWorkflow();
+                    store.schema.resetOverviewNodeProperties();
                     history.push(
-                        `/graph?query=${values.search}&dataset=${store.search.currentDataset}`
+                        `/graph?query=${values.search}&dataset=${store.search.datasets[selectedDataset]}`
                     );
                 }}
             >
@@ -77,16 +75,13 @@ function SearchBar(props) {
                                     variant="filled"
                                     width="200px"
                                     borderEndRadius="0"
-                                    defaultValue={localStorage.getItem(
-                                        'currentDataset'
-                                    )}
+                                    defaultValue={selectedDataset}
                                     style={{
                                         paddingLeft: '40px',
                                         textTransform: 'uppercase',
                                         fontSize: '14px',
                                         fontWeight: 'bold'
                                     }}
-                                    value={selectedDataset}
                                 >
                                     {renderDatasetSelectionOptions()}
                                 </Select>
