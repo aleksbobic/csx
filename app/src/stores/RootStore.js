@@ -10,6 +10,7 @@ import { ContextMenuStore } from './ContextMenuStore';
 import { GraphInstanceStore } from './GraphInstanceStore';
 import { CoreStore } from './CoreStore';
 import { WorkflowStore } from './WorkflowStore';
+import { FileUploadStore } from './FileUploadStore';
 
 export class RootStore {
     surveyLink = null;
@@ -26,6 +27,7 @@ export class RootStore {
         this.contextMenu = new ContextMenuStore(this);
         this.track = new TrackingStore(this);
         this.workflow = new WorkflowStore(this);
+        this.fileUpload = new FileUploadStore(this);
         this.getSurveyLink();
     }
 

@@ -70,7 +70,9 @@ export class SearchStore {
                 );
             }
 
-            this.datasets = [...this.datasets, dataset_name];
+            if (!this.datasets.includes(dataset_name)) {
+                this.datasets = [...this.datasets, dataset_name];
+            }
         }
     };
 

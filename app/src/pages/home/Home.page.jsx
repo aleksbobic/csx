@@ -10,12 +10,15 @@ import {
     useColorMode
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
+import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
+import { FileAdd } from 'css.gg';
 import logo from 'images/logo.png';
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
@@ -28,6 +31,53 @@ function HomePage() {
         store.track.trackPageChange();
         store.search.setSearchIsEmpty(false);
     });
+
+    const onDrop = async files => {
+        store.fileUpload.changeFileUploadModalVisiblity(true);
+        await store.fileUpload.uploadFile(files);
+    };
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        accept: '.csv'
+    });
+
+    const renderFileUpload = () => (
+        <div
+            {...getRootProps()}
+            style={{
+                border: '1px dashed rgba(100,100,100,0.5)',
+                borderRadius: '7px',
+                height: '150px',
+                marginTop: '40px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                padding: '25px',
+                background: 'rgba(100,100,100,0.05)'
+            }}
+        >
+            <FileAdd
+                style={{ '--ggs': '1.2', marginBottom: '10px', opacity: 0.5 }}
+            />
+            <input {...getInputProps()} width="100%" height="100%" />
+            {isDragActive ? (
+                <p style={{ opacity: 0.5 }}>Drop your dataset files here ...</p>
+            ) : (
+                <p
+                    style={{
+                        opacity: 0.5,
+                        paddingLeft: '50px',
+                        paddingRight: '50px'
+                    }}
+                >
+                    Drop your dataset files here, or click to select files.
+                    Supported formats are .csv and .xlsx.
+                </p>
+            )}
+        </div>
+    );
 
     const renderFooter = () => (
         <Container
@@ -110,6 +160,7 @@ function HomePage() {
                 backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
                 paddingTop="150px"
             >
+                <FileUploadModalComponent />
                 <Center width="100%" minH="200px" flexDir="column">
                     <Image
                         src={logo}
@@ -132,6 +183,7 @@ function HomePage() {
                     maxW="container.sm"
                 >
                     <SearchBarComponent style={{ marginTop: '0px' }} />
+                    {renderFileUpload()}
                 </Container>
                 {renderFooter()}
             </Box>
