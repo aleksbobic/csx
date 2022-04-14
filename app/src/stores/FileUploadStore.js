@@ -22,7 +22,7 @@ export class FileUploadStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
-    setIsPopulatin = val => (this.isPopulating = val);
+    setIsPopulating = val => (this.isPopulating = val);
 
     changeFileUploadModalVisiblity = val => (this.showFileUploadModal = val);
 
@@ -129,7 +129,7 @@ export class FileUploadStore {
             return false;
         }
 
-        this.setIsPopulatin(true);
+        this.setIsPopulating(true);
 
         const params = {
             original_name: this.fileUploadData.originalName,
@@ -146,7 +146,8 @@ export class FileUploadStore {
 
         this.resetFileUploadData();
         this.changeFileUploadModalVisiblity(false);
-        this.setIsPopulatin(false);
+        this.setIsPopulating(false);
+        this.store.search.getDatasets();
     };
 
     cancelFileUpload = async () => {
