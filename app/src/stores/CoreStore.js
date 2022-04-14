@@ -11,11 +11,18 @@ export class CoreStore {
     currentGraph = '';
 
     visibleDimensions = { overview: [], detail: [] };
+    toastInfo = {
+        message: '',
+        type: 'info'
+    };
 
     constructor(store) {
         this.store = store;
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setToastMessage = message => (this.toastInfo.message = message);
+    setToastType = toastType => (this.toastInfo.type = toastType);
 
     setCurrentGraph = graphType => {
         this.currentGraph = graphType;

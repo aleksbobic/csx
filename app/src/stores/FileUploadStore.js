@@ -13,9 +13,8 @@ export class FileUploadStore {
     };
     showFileUploadError = false;
     showFileUploadModal = false;
+    showConfigChangeModal = false;
     isPopulating = false;
-
-    visibleDimensions = { overview: [], detail: [] };
 
     constructor(store) {
         this.store = store;
@@ -25,6 +24,9 @@ export class FileUploadStore {
     setIsPopulating = val => (this.isPopulating = val);
 
     changeFileUploadModalVisiblity = val => (this.showFileUploadModal = val);
+
+    changeConfigChangeModalVisiblity = val =>
+        (this.showConfigChangeModal = val);
 
     resetFileUploadData = () =>
         (this.fileUploadData = {
@@ -78,7 +80,7 @@ export class FileUploadStore {
     changeOriginalName = val => (this.fileUploadData.originalName = val);
 
     changeFileUplodColumnType = (column, columnType) => {
-        this.fileUploadData.defaults[column].defaultNullValue = columnType;
+        this.fileUploadData.defaults[column].dataType = columnType;
     };
 
     changeFileUplodAnchor = val => {
@@ -148,6 +150,8 @@ export class FileUploadStore {
         this.changeFileUploadModalVisiblity(false);
         this.setIsPopulating(false);
         this.store.search.getDatasets();
+        this.store.core.setToastType('success');
+        this.store.core.setToastMessage('New dataset added 🥳');
     };
 
     cancelFileUpload = async () => {
@@ -157,9 +161,60 @@ export class FileUploadStore {
             await axios.get('file/cancel', { params });
             this.resetFileUploadData();
             this.changeFileUploadModalVisiblity(false);
+            this.store.core.setToastType('info');
+            this.store.core.setToastMessage('File upload canceled 😢');
         } catch (error) {
             this.store.core.handleError(error);
             this.changeFileUploadModalVisiblity(false);
         }
+    };
+
+    populateDataFromConfig = (dataset, config) => {
+        Object.keys(config.dimension_types).forEach(dim => {
+            this.fileUploadData.defaults[dim] = {
+                name: dim,
+                isDefaultVisible:
+                    config.default_visible_dimensions.includes(dim),
+                isDefaultSearch: config.default_search_fields.includes(dim),
+                isDefaultLink: config.links.includes(dim),
+                dataType: config.dimension_types[dim]
+            };
+        });
+
+        this.fileUploadData.anchor = config.anchor;
+        this.fileUploadData.name = dataset;
+        this.changeConfigChangeModalVisiblity(true);
+    };
+
+    updateConfig = async () => {
+        this.isVisibleByDefaultSelected();
+        this.isDefaultLinkSelected();
+        this.isDefaultSarchSelected();
+        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
+            errorCode => this.fileUploadErrors[errorCode]
+        );
+
+        if (this.showFileUploadError) {
+            return false;
+        }
+
+        const params = {
+            name: this.fileUploadData.name,
+            anchor: this.fileUploadData.anchor,
+            defaults: JSON.stringify(this.fileUploadData.defaults)
+        };
+
+        try {
+            await axios.get('file/settingsupdate', { params });
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+
+        this.resetFileUploadData();
+        this.changeConfigChangeModalVisiblity(false);
+        this.store.search.getDatasets();
+
+        this.store.core.setToastType('success');
+        this.store.core.setToastMessage('Config successfully updated 🥳');
     };
 }

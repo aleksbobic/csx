@@ -11,9 +11,11 @@ import {
     SimpleGrid,
     Text,
     Tooltip,
-    useColorMode
+    useColorMode,
+    useToast
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
+import DatasetConfigModalComponent from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
 import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
 import { ArrowRight, FileAdd, Toolbox, TrashEmpty } from 'css.gg';
 import logo from 'images/logo.png';
@@ -28,6 +30,7 @@ import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 
 function HomePage() {
+    const toast = useToast();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
 
@@ -40,6 +43,21 @@ function HomePage() {
         store.fileUpload.changeFileUploadModalVisiblity(true);
         await store.fileUpload.uploadFile(files);
     };
+
+    useEffect(() => {
+        if (store.core.toastInfo.message !== '') {
+            toast({
+                description: store.core.toastInfo.message,
+                status: store.core.toastInfo.type,
+                duration: 2000,
+                isClosable: true,
+                onCloseComplete: () => store.core.setToastMessage(''),
+                containerStyle: {
+                    marginBottom: '20px'
+                }
+            });
+        }
+    }, [store.core, store.core.toastInfo.message, toast]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -224,6 +242,7 @@ function HomePage() {
                                 variant="ghost"
                                 opacity="0"
                                 _groupHover={{ opacity: '1' }}
+                                onClick={() => store.search.getConifg(dataset)}
                                 icon={<Toolbox style={{ '--ggs': '0.7' }} />}
                             />
                         </Tooltip>
@@ -251,6 +270,7 @@ function HomePage() {
                 paddingTop="150px"
             >
                 <FileUploadModalComponent />
+                <DatasetConfigModalComponent />
                 <Center width="100%" minH="200px" flexDir="column">
                     <Image
                         src={logo}

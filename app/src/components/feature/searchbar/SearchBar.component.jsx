@@ -93,6 +93,7 @@ function SearchBar(props) {
                                 paddingRight="50px"
                                 onChange={handleChange}
                                 value={values.search}
+                                autoComplete="off"
                                 borderStartRadius={
                                     props.datasetSelectorDisabled ? '4px' : '0'
                                 }

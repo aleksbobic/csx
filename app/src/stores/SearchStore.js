@@ -14,6 +14,7 @@ export class SearchStore {
     connector = '';
     searchIsEmpty = false;
     advancedSearchQuery = '';
+    datasetEdit = false;
 
     constructor(store) {
         this.store = store;
@@ -174,7 +175,29 @@ export class SearchStore {
 
         try {
             await axios.get('file/delete', { params });
+            this.store.core.setToastType('info');
+            this.store.core.setToastMessage(
+                `${dataset.charAt(0).toUpperCase()}${dataset.slice(
+                    1
+                )} dataset deleted 🙂`
+            );
             this.getDatasets();
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    getConifg = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            const results = await axios.get('file/config', { params });
+            this.store.fileUpload.populateDataFromConfig(
+                dataset,
+                results.data.config
+            );
         } catch (error) {
             this.store.core.handleError(error);
         }

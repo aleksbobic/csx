@@ -92,6 +92,10 @@ def generateEntriesFromDataFrame(data, columns, index):
         yield doc
 
 
+def get_dimension_types(defaults):
+    return {defaults[key]["name"]: defaults[key]["dataType"] for key in defaults}
+
+
 @router.get("/settings")
 def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     defaults = json.loads(defaults)
@@ -101,6 +105,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         "default_visible_dimensions": get_default_visible_dimensions(defaults),
         "anchor": anchor,
         "links": get_default_link_dimensions(defaults),
+        "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
         "schemas": [{"name": "default", "relations": []}],
     }
@@ -140,4 +145,31 @@ def cancel_dataset_upload(name: str):
 def delete_dataset(name: str):
     es.indices.delete(index=name)
     os.remove(f"./app/data/config/{name}.json")
+    return {"status": "success"}
+
+
+@router.get("/config")
+def get_dataset_config(name: str):
+    with open(f"./app/data/config/{name}.json") as f:
+        data = json.load(f)
+        return {"config": data}
+
+
+@router.get("/settingsupdate")
+def update_settings(name="", anchor="", defaults="{}"):
+    defaults = json.loads(defaults)
+
+    # Generate default config
+    config = {
+        "default_visible_dimensions": get_default_visible_dimensions(defaults),
+        "anchor": anchor,
+        "links": get_default_link_dimensions(defaults),
+        "dimension_types": get_dimension_types(defaults),
+        "default_search_fields": get_default_searchable_dimensions(defaults),
+        "schemas": [{"name": "default", "relations": []}],
+    }
+
+    with open(f"./app/data/config/{name}.json", "w") as f:
+        json.dump(config, f)
+
     return {"status": "success"}
