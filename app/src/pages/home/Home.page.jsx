@@ -1,4 +1,3 @@
-import { SettingsIcon } from '@chakra-ui/icons';
 import {
     Box,
     Center,
@@ -16,7 +15,7 @@ import {
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
 import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
-import { ArrowRight, FileAdd, ShapeHexagon, Toolbox, TrashEmpty } from 'css.gg';
+import { ArrowRight, FileAdd, Toolbox, TrashEmpty } from 'css.gg';
 import logo from 'images/logo.png';
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -203,6 +202,9 @@ function HomePage() {
                                 variant="ghost"
                                 opacity="0"
                                 _groupHover={{ opacity: '1' }}
+                                onClick={() =>
+                                    store.search.deleteDataset(dataset)
+                                }
                                 icon={
                                     <TrashEmpty
                                         style={{

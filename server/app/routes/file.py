@@ -134,3 +134,10 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 def cancel_dataset_upload(name: str):
     os.remove(f"./app/data/files/{name}.csv")
     return {"status": "success"}
+
+
+@router.get("/delete")
+def delete_dataset(name: str):
+    es.indices.delete(index=name)
+    os.remove(f"./app/data/config/{name}.json")
+    return {"status": "success"}

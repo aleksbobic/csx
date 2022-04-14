@@ -61,6 +61,8 @@ export class SearchStore {
         localStorage.setItem(`index_${dataset_name}`, JSON.stringify(dataset));
 
     initDatasets = datasets => {
+        this.datasets = [];
+
         for (let dataset_name in datasets) {
             // If dataset doesn't exist add it to the local storage
             if (!this.getLocalStorageDataset(dataset_name)) {
@@ -71,7 +73,7 @@ export class SearchStore {
             }
 
             if (!this.datasets.includes(dataset_name)) {
-                this.datasets = [...this.datasets, dataset_name];
+                this.datasets.push(dataset_name);
             }
         }
     };
@@ -162,6 +164,19 @@ export class SearchStore {
             return response.data;
         } catch (error) {
             return this.store.core.handleError(error);
+        }
+    };
+
+    deleteDataset = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            await axios.get('file/delete', { params });
+            this.getDatasets();
+        } catch (error) {
+            this.store.core.handleError(error);
         }
     };
 }
