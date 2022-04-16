@@ -285,6 +285,12 @@ function NavigationPanelComponent() {
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }
+                    style={{
+                        pointerEvents: !store.graph.currentGraphData.nodes
+                            .length
+                            ? 'none'
+                            : 'auto'
+                    }}
                 >
                     Graph
                 </Button>

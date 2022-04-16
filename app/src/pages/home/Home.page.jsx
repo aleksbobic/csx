@@ -25,7 +25,7 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 
@@ -33,15 +33,27 @@ function HomePage() {
     const toast = useToast();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
+    const history = useHistory();
 
     useEffect(() => {
         store.track.trackPageChange();
         store.search.setSearchIsEmpty(false);
+        store.graph.resetDetailGraphData();
+        store.graph.resetGraphData();
     });
 
     const onDrop = async files => {
         store.fileUpload.changeFileUploadModalVisiblity(true);
         await store.fileUpload.uploadFile(files);
+    };
+
+    const navigateToAdvancedSearch = dataset => {
+        store.core.setCurrentGraph('overview');
+        store.search.useDataset(store.search.datasets.indexOf(dataset));
+        store.core.resetVisibleDimensions();
+        store.workflow.resetWorkflow();
+        store.schema.resetOverviewNodeProperties();
+        history.push(`/search?dataset=${dataset}`);
     };
 
     useEffect(() => {
@@ -253,6 +265,9 @@ function HomePage() {
                                 variant="solid"
                                 opacity="0.5"
                                 _groupHover={{ opacity: '1' }}
+                                onClick={() =>
+                                    navigateToAdvancedSearch(dataset)
+                                }
                                 icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
                             />
                         </Tooltip>
