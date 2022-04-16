@@ -29,6 +29,9 @@ def uploadfile(file: UploadFile):
         else:
             columns[column] = "integer"
 
+    if not os.path.exists("./app/data/files"):
+        os.makedirs("./app/data/files")
+
     data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
     return {"name": file.filename.rpartition(".")[0], "columns": columns}
@@ -128,6 +131,9 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         "default_search_fields": get_default_searchable_dimensions(defaults),
         "schemas": [{"name": "default", "relations": []}],
     }
+
+    if not os.path.exists("./app/data/config"):
+        os.makedirs("./app/data/config")
 
     with open(f"./app/data/config/{name}.json", "w") as f:
         json.dump(config, f)
