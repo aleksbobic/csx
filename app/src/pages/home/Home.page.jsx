@@ -263,42 +263,44 @@ function HomePage() {
     };
 
     return (
-        store.search.datasets && (
-            <Box
-                className="App"
-                backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
-                paddingTop="150px"
-            >
-                <FileUploadModalComponent />
-                <DatasetConfigModalComponent />
-                <Center width="100%" minH="200px" flexDir="column">
-                    <Image
-                        src={logo}
-                        height="40px"
-                        alt="Collaboration spotting logo"
-                        marginBottom="10px"
-                    />
-                    <Heading
-                        fontSize="2xl"
-                        fontWeight="extrabold"
-                        marginBottom="20px"
-                        textAlign="center"
-                    >
-                        COLLABORATION SPOTTING X
-                    </Heading>
-                </Center>
-                <Container
-                    marginTop="20px"
-                    marginBottom="150px"
-                    maxW="container.sm"
+        <Box
+            className="App"
+            backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
+            paddingTop="150px"
+        >
+            <FileUploadModalComponent />
+            <DatasetConfigModalComponent />
+            <Center width="100%" minH="200px" flexDir="column">
+                <Image
+                    src={logo}
+                    height="40px"
+                    alt="Collaboration spotting logo"
+                    marginBottom="10px"
+                />
+                <Heading
+                    fontSize="2xl"
+                    fontWeight="extrabold"
+                    marginBottom="20px"
+                    textAlign="center"
                 >
-                    <SearchBarComponent style={{ marginTop: '0px' }} />
-                    {renderDatasetGrid()}
-                    {renderFileUpload()}
-                </Container>
-                {renderFooter()}
-            </Box>
-        )
+                    COLLABORATION SPOTTING X
+                </Heading>
+            </Center>
+            <Container
+                marginTop="20px"
+                marginBottom="150px"
+                maxW="container.sm"
+            >
+                {store.search.datasets.length > 0 && (
+                    <>
+                        <SearchBarComponent style={{ marginTop: '0px' }} />
+                        {renderDatasetGrid()}
+                    </>
+                )}
+                {renderFileUpload()}
+            </Container>
+            {renderFooter()}
+        </Box>
     );
 }
 

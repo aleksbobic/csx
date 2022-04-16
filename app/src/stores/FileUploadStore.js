@@ -4,6 +4,7 @@ import { makeAutoObservable } from 'mobx';
 export class FileUploadStore {
     fileUploadData = {
         name: '',
+        originalName: '',
         defaults: {}
     };
     fileUploadErrors = {
@@ -31,19 +32,9 @@ export class FileUploadStore {
     resetFileUploadData = () =>
         (this.fileUploadData = {
             name: '',
+            originalName: '',
             defaults: {}
         });
-
-    getDefaultNullValue = dataType => {
-        switch (dataType) {
-            case 'number':
-                return '0';
-            case 'list':
-                return '';
-            default:
-                return '';
-        }
-    };
 
     uploadFile = async files => {
         const formData = new FormData();
@@ -63,9 +54,6 @@ export class FileUploadStore {
                     isDefaultSearch: false,
                     isDefaultLink: false,
                     dataType: response.data.columns[column],
-                    defaultNullValue: this.getDefaultNullValue(
-                        response.data.columns[column]
-                    ),
                     removeIfNull: false
                 })
         );
@@ -97,10 +85,6 @@ export class FileUploadStore {
     };
 
     changeDatasetName = val => (this.fileUploadData.name = val);
-
-    changeNullReplacement = (column, val) => {
-        this.fileUploadData.defaults[column].defaultNullValue = val;
-    };
 
     isVisibleByDefaultSelected = () =>
         (this.fileUploadErrors.defaultVisible = !Object.keys(

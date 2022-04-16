@@ -1,5 +1,6 @@
 import {
     Button,
+    Flex,
     Heading,
     Modal,
     ModalBody,
@@ -7,77 +8,45 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
-    Progress,
+    Spinner,
     useDisclosure
 } from '@chakra-ui/react';
 import DatasetConfigComponent from 'components/feature/datasetconfig/DatasetConfig.component';
 import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [loadProgress, setLoadProgress] = useState(0);
-    const [intervalCounter, setIntervalCounter] = useState(null);
 
     useEffect(() => {
         if (store.fileUpload.showFileUploadModal) {
-            setLoadProgress(0);
             onOpen();
         } else if (!store.fileUpload.showFileUploadModal && isOpen) {
             onClose();
         }
     }, [isOpen, onClose, onOpen, store.fileUpload.showFileUploadModal]);
 
-    useEffect(() => {
-        if (
-            (store.fileUpload.fileUploadData.name === '' ||
-                store.fileUpload.isPopulating) &&
-            isOpen &&
-            intervalCounter == null
-        ) {
-            const interval = setInterval(() => {
-                setLoadProgress(prevProgress => {
-                    return prevProgress < 90
-                        ? prevProgress + Math.floor(Math.random() * 10)
-                        : prevProgress;
-                });
-            }, 750);
-            setIntervalCounter(() => interval);
-        } else if (
-            store.fileUpload.fileUploadData.name !== '' &&
-            !store.fileUpload.isPopulating &&
-            isOpen &&
-            intervalCounter !== null
-        ) {
-            return () => {
-                setLoadProgress(() => 0);
-                clearInterval(intervalCounter);
-                setIntervalCounter(() => null);
-            };
-        }
-    }, [
-        intervalCounter,
-        isOpen,
-        loadProgress,
-        store.fileUpload.fileUploadData.name,
-        store.fileUpload.isPopulating
-    ]);
-
     const renderModalBody = () => {
         if (
-            store.fileUpload.fileUploadData.name === '' ||
+            store.fileUpload.fileUploadData.originalName === '' ||
             store.fileUpload.isPopulating
         ) {
             return (
-                <ModalBody overflowY="scroll" marginBottom="20px">
-                    <Heading size="sm" marginBottom="10px">
+                <ModalBody
+                    overflowY="scroll"
+                    marginBottom="20px"
+                    marginTop="20px"
+                >
+                    <Heading size="sm" marginBottom="25px" textAlign="center">
                         {store.fileUpload.isPopulating
-                            ? 'populating index'
+                            ? 'Populating Index'
                             : 'Processing Dataset'}
                     </Heading>
-                    <Progress size="xs" value={loadProgress} />
+                    <Flex justifyContent="center">
+                        <Spinner size="xl" color="blue.500" thickness="2px" />
+                    </Flex>
                 </ModalBody>
             );
         }
@@ -87,14 +56,6 @@ function FileUploadModal() {
                 <DatasetConfigComponent />
             </ModalBody>
         );
-    };
-
-    const populateIndex = () => {
-        store.fileUpload.setDefaults();
-    };
-
-    const cancelFileUpload = () => {
-        store.fileUpload.cancelFileUpload();
     };
 
     return (
@@ -108,22 +69,26 @@ function FileUploadModal() {
         >
             <ModalOverlay bg="none" backdropFilter="auto" backdropBlur="2px" />
             <ModalContent width="748px" minWidth="748px" maxWidth="748px">
-                <ModalHeader>Dataset Defaults Setup</ModalHeader>
+                {store.fileUpload.fileUploadData.originalName !== '' &&
+                    !store.fileUpload.isPopulating && (
+                        <ModalHeader>Dataset Defaults Setup</ModalHeader>
+                    )}
+
                 {isOpen && renderModalBody()}
 
-                {store.fileUpload.fileUploadData.name !== '' &&
+                {store.fileUpload.fileUploadData.originalName !== '' &&
                     !store.fileUpload.isPopulating && (
                         <ModalFooter>
                             <Button
                                 variant="outline"
                                 mr={3}
-                                onClick={cancelFileUpload}
+                                onClick={store.fileUpload.cancelFileUpload}
                             >
                                 Cancel
                             </Button>
                             <Button
                                 variant="solid"
-                                onClick={() => populateIndex()}
+                                onClick={() => store.fileUpload.setDefaults()}
                             >
                                 Set defaults
                             </Button>

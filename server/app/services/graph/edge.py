@@ -33,8 +33,6 @@ def get_edge_tuples(
         features, visible_features, schema, anchor_features, anchor
     )
 
-    print("\n\n\n\n shortest paths: ", shortest_paths)
-
     edge_tuples = []
 
     # If shortest paths between various graph features have been identified use them to get actual graph edges

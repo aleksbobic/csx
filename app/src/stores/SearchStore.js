@@ -27,6 +27,9 @@ export class SearchStore {
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
 
     useDataset = index => {
+        if (!this.datasets.length) {
+            return;
+        }
         this.currentDataset = this.datasets[index];
         this.currentDatasetIndex = index;
 
@@ -65,13 +68,7 @@ export class SearchStore {
         this.datasets = [];
 
         for (let dataset_name in datasets) {
-            // If dataset doesn't exist add it to the local storage
-            if (!this.getLocalStorageDataset(dataset_name)) {
-                this.setLocalStorageDataset(
-                    dataset_name,
-                    datasets[dataset_name]
-                );
-            }
+            this.setLocalStorageDataset(dataset_name, datasets[dataset_name]);
 
             if (!this.datasets.includes(dataset_name)) {
                 this.datasets.push(dataset_name);
@@ -181,6 +178,7 @@ export class SearchStore {
                     1
                 )} dataset deleted 🙂`
             );
+            localStorage.removeItem(`index_${dataset}`);
             this.getDatasets();
         } catch (error) {
             this.store.core.handleError(error);

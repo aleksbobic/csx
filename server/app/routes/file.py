@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import os
+import ast
 
 from fastapi import APIRouter, UploadFile
 from elasticsearch import Elasticsearch
@@ -23,8 +24,10 @@ def uploadfile(file: UploadFile):
                 columns[column] = "list"
             else:
                 columns[column] = "string"
+        elif isinstance(columns[column], float):
+            columns[column] = "float"
         else:
-            columns[column] = "number"
+            columns[column] = "integer"
 
     data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
@@ -85,9 +88,25 @@ def get_dimensions(defaults):
     return [defaults[key]["name"] for key in defaults]
 
 
-def generateEntriesFromDataFrame(data, columns, index):
+def get_processed_row_val(val, val_type):
+    if val_type == "integer":
+        return str(round(val))
+    if val_type == "list":
+        try:
+            return ast.literal_eval(val)
+        except:
+            new_val = str(val)
+            if new_val == "":
+                return []
+            else:
+                return [new_val]
+    else:
+        return str(val)
+
+
+def generate_entries_from_dataframe(data, columns, index, data_types):
     for i, row in data.iterrows():
-        doc = {col: str(row[col]) for col in columns}
+        doc = {col: get_processed_row_val(row[col], data_types[col]) for col in columns}
         doc["_index"] = index
         yield doc
 
@@ -103,7 +122,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     # Generate default config
     config = {
         "default_visible_dimensions": get_default_visible_dimensions(defaults),
-        "anchor": anchor,
+        "anchor": defaults[anchor]["name"],
         "links": get_default_link_dimensions(defaults),
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
@@ -123,12 +142,18 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     if len(null_dimensions) != 0:
         data.dropna(axis=0, subset=null_dimensions, inplace=True)
 
+    for null_dim in null_dimensions:
+        data = data[data[null_dim] != ""]
+
     columns = get_dimensions(defaults)
 
     if not es.indices.exists(index=name):
         es.indices.create(index=name)
 
-    bulk(es, generateEntriesFromDataFrame(data, columns, name))
+    bulk(
+        es,
+        generate_entries_from_dataframe(data, columns, name, config["dimension_types"]),
+    )
 
     os.remove(f"./app/data/files/{original_name}.csv")
 

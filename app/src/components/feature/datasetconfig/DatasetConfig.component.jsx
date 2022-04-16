@@ -41,7 +41,8 @@ function DatasetConfig(props) {
                 }
             >
                 <option value="string">string</option>
-                <option value="number">number</option>
+                <option value="float">float</option>
+                <option value="integer">integer</option>
                 <option value="list">list</option>
             </Select>
         );
@@ -143,11 +144,6 @@ function DatasetConfig(props) {
                     </Tooltip>
                 </Th>
                 <Th width="18%">Data Type</Th>
-                {props.formType === 'upload' && (
-                    <Th width="18%" paddingLeft="4px">
-                        Null replacement
-                    </Th>
-                )}
                 {props.formType === 'upload' && (
                     <Th width="5%" padding="0px 24px 0 4px">
                         <Tooltip label="Remove row if null">
@@ -307,39 +303,6 @@ function DatasetConfig(props) {
                                     .dataType
                             )}
                         </Td>
-                        {props.formType === 'upload' && (
-                            <Td width="18%" paddingLeft="4px">
-                                <Editable
-                                    defaultValue={
-                                        store.fileUpload.fileUploadData
-                                            .defaults[column].defaultNullValue
-                                    }
-                                    backgroundColor="blackAlpha.300"
-                                    borderRadius="5px"
-                                    minHeight="30px"
-                                    onSubmit={val =>
-                                        store.fileUpload.changeNullReplacement(
-                                            column,
-                                            val
-                                        )
-                                    }
-                                >
-                                    <EditablePreview
-                                        padding="5px 23px"
-                                        width="100%"
-                                        overflow="hidden"
-                                        whiteSpace="nowrap"
-                                        textOverflow="ellipsis"
-                                        height="30px"
-                                    />
-                                    <EditableInput
-                                        padding="5px 23px"
-                                        width="100%"
-                                        height="30px"
-                                    />
-                                </Editable>
-                            </Td>
-                        )}
                         {props.formType === 'upload' && (
                             <Td width="5%" padding="0px 24px 0 4px">
                                 <Flex
