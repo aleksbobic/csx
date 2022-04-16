@@ -150,10 +150,15 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     if not es.indices.exists(index=name):
         es.indices.create(index=name)
 
-    bulk(
-        es,
-        generate_entries_from_dataframe(data, columns, name, config["dimension_types"]),
-    )
+    try:
+        bulk(
+            es,
+            generate_entries_from_dataframe(
+                data, columns, name, config["dimension_types"]
+            ),
+        )
+    except Exception as exception:
+        return exception
 
     os.remove(f"./app/data/files/{original_name}.csv")
 

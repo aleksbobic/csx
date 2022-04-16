@@ -339,17 +339,22 @@ function DatasetConfig(props) {
                     ? store.fileUpload.fileUploadData.name.toUpperCase()
                     : 'Dataset name:'}
             </Heading>
-            {props.formType === 'upload' && (
-                <Editable
-                    defaultValue={store.fileUpload.fileUploadData.name}
-                    backgroundColor="blackAlpha.300"
-                    borderRadius="5px"
-                    onSubmit={val => store.fileUpload.changeDatasetName(val)}
-                >
-                    <EditablePreview padding="5px 23px" width="100%" />
-                    <EditableInput padding="5px 23px" width="100%" />
-                </Editable>
-            )}
+            {props.formType === 'upload' &&
+                store.fileUpload.fileUploadData.originalName !== '' && (
+                    <Editable
+                        defaultValue={
+                            store.fileUpload.fileUploadData.originalName
+                        }
+                        backgroundColor="blackAlpha.300"
+                        borderRadius="5px"
+                        onSubmit={val =>
+                            store.fileUpload.changeDatasetName(val)
+                        }
+                    >
+                        <EditablePreview padding="5px 23px" width="100%" />
+                        <EditableInput padding="5px 23px" width="100%" />
+                    </Editable>
+                )}
 
             <Heading size="xs" marginBottom="10px" marginTop="10px">
                 Columns:{' '}

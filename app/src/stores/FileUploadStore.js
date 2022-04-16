@@ -166,7 +166,7 @@ export class FileUploadStore {
         });
 
         this.fileUploadData.anchor = config.anchor;
-        this.fileUploadData.name = dataset;
+        this.changeDatasetName(dataset);
         this.changeConfigChangeModalVisiblity(true);
     };
 
