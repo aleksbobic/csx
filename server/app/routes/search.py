@@ -237,12 +237,6 @@ def search(
 
     elastic_list = json.loads(results.to_json(orient="records"))
 
-    # elastic_list = []
-    # for entry in results["hits"]["hits"]:
-    #     entry_dict = entry["_source"].to_dict()
-    #     entry_dict["entry"] = entry["_id"]
-    #     elastic_list.append(entry_dict)
-
     all_dimensions = [
         property
         for property in es.indices.get(index=index)[index]["mappings"]["properties"]

@@ -2,16 +2,22 @@ import {
     Box,
     Center,
     Container,
+    Flex,
     Heading,
     HStack,
+    IconButton,
     Image,
     Link,
+    SimpleGrid,
     Text,
-    useColorMode
+    Tooltip,
+    useColorMode,
+    useToast
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
+import DatasetConfigModalComponent from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
 import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
-import { FileAdd } from 'css.gg';
+import { ArrowRight, FileAdd, Toolbox, TrashEmpty } from 'css.gg';
 import logo from 'images/logo.png';
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -19,23 +25,51 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 
 function HomePage() {
+    const toast = useToast();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
+    const history = useHistory();
 
     useEffect(() => {
         store.track.trackPageChange();
         store.search.setSearchIsEmpty(false);
+        store.graph.resetDetailGraphData();
+        store.graph.resetGraphData();
     });
 
     const onDrop = async files => {
         store.fileUpload.changeFileUploadModalVisiblity(true);
         await store.fileUpload.uploadFile(files);
     };
+
+    const navigateToAdvancedSearch = dataset => {
+        store.core.setCurrentGraph('overview');
+        store.search.useDataset(store.search.datasets.indexOf(dataset));
+        store.core.resetVisibleDimensions();
+        store.workflow.resetWorkflow();
+        store.schema.resetOverviewNodeProperties();
+        history.push(`/search?dataset=${dataset}`);
+    };
+
+    useEffect(() => {
+        if (store.core.toastInfo.message !== '') {
+            toast({
+                description: store.core.toastInfo.message,
+                status: store.core.toastInfo.type,
+                duration: 2000,
+                isClosable: true,
+                onCloseComplete: () => store.core.setToastMessage(''),
+                containerStyle: {
+                    marginBottom: '20px'
+                }
+            });
+        }
+    }, [store.core, store.core.toastInfo.message, toast]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -153,41 +187,135 @@ function HomePage() {
         </Container>
     );
 
-    return (
-        store.search.datasets && (
-            <Box
-                className="App"
-                backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
-                paddingTop="150px"
+    const renderDatasetGrid = () => {
+        return (
+            <SimpleGrid
+                columns={2}
+                spacing="10px"
+                marginTop="40px"
+                backgroundColor="blackAlpha.300"
+                padding="10px"
+                borderRadius="12px"
+                maxHeight="170px"
+                overflowY="scroll"
             >
-                <FileUploadModalComponent />
-                <Center width="100%" minH="200px" flexDir="column">
-                    <Image
-                        src={logo}
+                {store.search.datasets.map((dataset, index) => (
+                    <Flex
+                        backgroundColor="whiteAlpha.50"
+                        borderRadius="8px"
                         height="40px"
-                        alt="Collaboration spotting logo"
-                        marginBottom="10px"
-                    />
-                    <Heading
-                        fontSize="2xl"
-                        fontWeight="extrabold"
-                        marginBottom="20px"
-                        textAlign="center"
+                        justifyContent="center"
+                        alignItems="center"
+                        gap="5px"
+                        paddingLeft="5px"
+                        paddingRight="5px"
+                        key={`dataset_list_${dataset}`}
+                        opacity="0.7"
+                        transition="all 0.1s ease-in-out"
+                        _hover={{ opacity: '1' }}
+                        role="group"
                     >
-                        COLLABORATION SPOTTING X
-                    </Heading>
-                </Center>
-                <Container
-                    marginTop="20px"
-                    marginBottom="150px"
-                    maxW="container.sm"
+                        <Heading
+                            flexGrow="1"
+                            size="xs"
+                            textAlign="left"
+                            paddingLeft="10px"
+                            opacity="0.7"
+                            _groupHover={{ opacity: '1' }}
+                        >
+                            {dataset}
+                        </Heading>
+                        <Tooltip label={`Delete ${dataset}`}>
+                            <IconButton
+                                flexGrow="0"
+                                size="sm"
+                                variant="ghost"
+                                opacity="0"
+                                _groupHover={{ opacity: '1' }}
+                                onClick={() =>
+                                    store.search.deleteDataset(dataset)
+                                }
+                                icon={
+                                    <TrashEmpty
+                                        style={{
+                                            '--ggs': '0.7',
+                                            marginTop: '1px'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                        <Tooltip
+                            label={`Change default settings for  ${dataset}`}
+                        >
+                            <IconButton
+                                flexGrow="0"
+                                size="sm"
+                                variant="ghost"
+                                opacity="0"
+                                _groupHover={{ opacity: '1' }}
+                                onClick={() => store.search.getConifg(dataset)}
+                                icon={<Toolbox style={{ '--ggs': '0.7' }} />}
+                            />
+                        </Tooltip>
+                        <Tooltip label={`Explore entire ${dataset}`}>
+                            <IconButton
+                                flexGrow="0"
+                                size="sm"
+                                variant="solid"
+                                opacity="0.5"
+                                _groupHover={{ opacity: '1' }}
+                                onClick={() =>
+                                    navigateToAdvancedSearch(dataset)
+                                }
+                                icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
+                            />
+                        </Tooltip>
+                    </Flex>
+                ))}
+            </SimpleGrid>
+        );
+    };
+
+    return (
+        <Box
+            className="App"
+            backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
+            paddingTop="150px"
+        >
+            <FileUploadModalComponent />
+            <DatasetConfigModalComponent />
+            <Center width="100%" minH="200px" flexDir="column">
+                <Image
+                    src={logo}
+                    height="40px"
+                    alt="Collaboration spotting logo"
+                    marginBottom="10px"
+                />
+                <Heading
+                    fontSize="2xl"
+                    fontWeight="extrabold"
+                    marginBottom="20px"
+                    textAlign="center"
                 >
-                    <SearchBarComponent style={{ marginTop: '0px' }} />
-                    {renderFileUpload()}
-                </Container>
-                {renderFooter()}
-            </Box>
-        )
+                    COLLABORATION SPOTTING X
+                </Heading>
+            </Center>
+            <Container
+                marginTop="20px"
+                marginBottom="150px"
+                maxW="container.sm"
+            >
+                {store.search.datasets.length > 0 && (
+                    <>
+                        <SearchBarComponent style={{ marginTop: '0px' }} />
+                        {renderDatasetGrid()}
+                    </>
+                )}
+                {renderFileUpload()}
+            </Container>
+            {renderFooter()}
+        </Box>
     );
 }
 

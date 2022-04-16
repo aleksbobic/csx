@@ -14,6 +14,7 @@ export class SearchStore {
     connector = '';
     searchIsEmpty = false;
     advancedSearchQuery = '';
+    datasetEdit = false;
 
     constructor(store) {
         this.store = store;
@@ -26,6 +27,9 @@ export class SearchStore {
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
 
     useDataset = index => {
+        if (!this.datasets.length) {
+            return;
+        }
         this.currentDataset = this.datasets[index];
         this.currentDatasetIndex = index;
 
@@ -61,17 +65,13 @@ export class SearchStore {
         localStorage.setItem(`index_${dataset_name}`, JSON.stringify(dataset));
 
     initDatasets = datasets => {
+        this.datasets = [];
+
         for (let dataset_name in datasets) {
-            // If dataset doesn't exist add it to the local storage
-            if (!this.getLocalStorageDataset(dataset_name)) {
-                this.setLocalStorageDataset(
-                    dataset_name,
-                    datasets[dataset_name]
-                );
-            }
+            this.setLocalStorageDataset(dataset_name, datasets[dataset_name]);
 
             if (!this.datasets.includes(dataset_name)) {
-                this.datasets = [...this.datasets, dataset_name];
+                this.datasets.push(dataset_name);
             }
         }
     };
@@ -162,6 +162,42 @@ export class SearchStore {
             return response.data;
         } catch (error) {
             return this.store.core.handleError(error);
+        }
+    };
+
+    deleteDataset = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            await axios.get('file/delete', { params });
+            this.store.core.setToastType('info');
+            this.store.core.setToastMessage(
+                `${dataset.charAt(0).toUpperCase()}${dataset.slice(
+                    1
+                )} dataset deleted 🙂`
+            );
+            localStorage.removeItem(`index_${dataset}`);
+            this.getDatasets();
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    getConifg = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            const results = await axios.get('file/config', { params });
+            this.store.fileUpload.populateDataFromConfig(
+                dataset,
+                results.data.config
+            );
+        } catch (error) {
+            this.store.core.handleError(error);
         }
     };
 }
