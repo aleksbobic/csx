@@ -107,7 +107,7 @@ function HomePage() {
                     }}
                 >
                     Drop your dataset files here, or click to select files.
-                    Supported formats are .csv and .xlsx.
+                    Supported format is .csv.
                 </p>
             )}
         </div>
