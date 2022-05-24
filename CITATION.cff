@@ -1,6 +1,14 @@
-@inproceedings{bobic2021collaboration,
-    title={Collaboration Spotting X-A Visual Network Exploration Tool},
-    author={Bobic, Aleksandar and Le Goff, Jean-Marie and G{\"u}tl, Christian},
-    booktitle={in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021},
-    year={2021}
-}
+cff-version: 1.2.0
+preferred-citation:
+  type: conference-paper
+  authors:
+  - family-names: "Bobic"
+    given-names: "Aleksandar"
+  - family-names: "Le Goff"
+    given-names: "Jean-Marie"
+  - family-names: "Gütl"
+    given-names: "Christian"
+  title: "Collaboration Spotting X - A Visual Network Exploration Tool"
+  year: 2021
+  collection-title: "2021 Eighth International Conference on Social Network Analysis, Management and Security (SNAMS)"
+  doi: "10.1109/SNAMS53716.2021.9732139"
