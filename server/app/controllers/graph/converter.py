@@ -38,7 +38,11 @@ def get_graph(
 
     nodes, entries_with_nodes = get_nodes(search_results_df)
 
+    # print("\n\n\n\n\n\n entries with nodes: ", entries_with_nodes, "\n\n\n\n\n\n\n")
+    # print("\n\n\n\n\n\n nodes: ", nodes, "\n\n\n\n\n\n\n") <- these have the reversed values
+
     node_ids_with_labels = get_node_ids_with_labels(nodes)
+    # print("\n\n\n\n\n\n node ids with labels: ", node_ids_with_labels, "\n\n\n\n\n\n\n")
 
     edge_tuples = get_edge_tuples(
         search_results_df,
@@ -49,6 +53,8 @@ def get_graph(
         entries_with_nodes,
         node_ids_with_labels,
     )
+
+    # print("\n\n\n\n\n\n edge tuples: ", edge_tuples, "\n\n\n\n\n\n\n")
 
     nx_edges = get_nx_edges(edge_tuples)
     edges = get_edges(edge_tuples)
