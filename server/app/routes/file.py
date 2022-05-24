@@ -14,7 +14,7 @@ es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
 
 @router.post("/upload")
 def uploadfile(file: UploadFile):
-    data = pd.read_csv(file.file)
+    data = pd.read_csv(file.file, lineterminator="\n")
 
     columns = data.dtypes.to_dict()
 
@@ -138,7 +138,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     with open(f"./app/data/config/{name}.json", "w") as f:
         json.dump(config, f)
 
-    data = pd.read_csv(f"./app/data/files/{original_name}.csv")
+    data = pd.read_csv(f"./app/data/files/{original_name}.csv", lineterminator="\n")
 
     rename_mapping = get_renamed_dimensions(defaults)
     if bool(rename_mapping):

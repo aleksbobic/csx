@@ -83,7 +83,13 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
 
     if "query" not in query and "queries" not in query:
         return convert_query_to_df(
-            Q("match_phrase", **{query["feature"]: query["keyphrase"]}), search
+            Q(
+                "query_string",
+                query=f"*{query['keyphrase']}*",
+                type="phrase",
+                fields=[query["feature"]],
+            ),
+            search,
         )
 
     if query["action"] == "connect":
@@ -113,11 +119,19 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
                 drop=True
             )
         else:
-            return Q(
-                "bool",
-                must_not=[
-                    generate_advanced_query(entry, search) for entry in query["queries"]
-                ],
+            return convert_query_to_df(
+                Q(
+                    "bool",
+                    must_not=[
+                        Q(
+                            "query_string",
+                            query=f"*{query['queries'][0]['keyphrase']}*",
+                            type="phrase",
+                            fields=[query["queries"][0]["feature"]],
+                        )
+                    ],
+                ),
+                search,
             )
 
     return generate_advanced_query(query["query"], search)
@@ -222,8 +236,8 @@ def search(
         )
     elif not isJson(query) or isNumber(query):
         es_query = Q(
-            "multi_match",
-            query=query,
+            "query_string",
+            query=f"*{query}*",
             type="phrase",
             fields=default_search_fields,
         )
