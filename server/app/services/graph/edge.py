@@ -38,7 +38,6 @@ def get_edge_tuples(
     # If shortest paths between various graph features have been identified use them to get actual graph edges
     if shortest_paths:
         for path in shortest_paths:
-            print("\n\n\n the path", path)
             edge_tuples.extend(
                 get_edges_based_on_path(
                     df, path, anchor_features, entries_with_nodes, node_ids_with_labels
@@ -490,7 +489,10 @@ def get_row_edge_based_on_path(
             )
         }
 
-        src_val = [src_val_temp[label] for label in row[src_type]]
+        if isinstance(row[src_type], list):
+            src_val = [src_val_temp[label] for label in row[src_type]]
+        else:
+            src_val = [src_val_temp[row[src_type]]]
 
         if len(src_val) == 1:
             src_val = src_val[0]
@@ -502,7 +504,10 @@ def get_row_edge_based_on_path(
             )
         }
 
-        dest_val = [dest_val_temp[label] for label in row[dest_type]]
+        if isinstance(row[dest_type], list):
+            dest_val = [dest_val_temp[label] for label in row[dest_type]]
+        else:
+            dest_val = [dest_val_temp[row[dest_type]]]
 
         if len(dest_val) == 1:
             dest_val = dest_val[0]
