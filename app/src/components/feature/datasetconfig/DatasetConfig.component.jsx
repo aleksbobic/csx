@@ -6,6 +6,7 @@ import {
     EditablePreview,
     Flex,
     Heading,
+    Radio,
     Select,
     Table,
     TableContainer,
@@ -17,10 +18,10 @@ import {
     Tooltip,
     Tr
 } from '@chakra-ui/react';
-import { ExtensionRemove, Eye, Link as LinkGG, Search } from 'css.gg';
+import { Anchor, Link as LinkGG, Search } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
 import PropTypes from 'prop-types';
+import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function DatasetConfig(props) {
@@ -47,26 +48,6 @@ function DatasetConfig(props) {
             </Select>
         );
     };
-
-    const renderColumnDropdown = () => (
-        <Select
-            defaultValue={store.fileUpload.fileUploadData.anchor}
-            size="sm"
-            borderRadius="5px"
-            variant="filled"
-            onChange={val =>
-                store.fileUpload.changeFileUplodAnchor(val.target.value)
-            }
-        >
-            {Object.keys(store.fileUpload.fileUploadData.defaults).map(
-                column => (
-                    <option key={`deafult_anchor_${column}`} value={column}>
-                        {column}
-                    </option>
-                )
-            )}
-        </Select>
-    );
 
     const getTextForErrorCode = errorCode => {
         switch (errorCode) {
@@ -102,20 +83,31 @@ function DatasetConfig(props) {
             <Tr>
                 <Th width="24%">Column</Th>
                 <Th width="5%" padding="0px 4px">
-                    <Tooltip label="Visible by default">
+                    <Tooltip label="Use the values of this column as nodes in the overview graph.">
                         <Flex
                             width="100%"
                             height="100%"
                             justifyContent="center"
                             alignItems="center"
                         >
-                            <Eye style={{ '--ggs': '0.7' }} />
+                            <Anchor style={{ '--ggs': '0.7' }} />
                         </Flex>
                     </Tooltip>
                 </Th>
-
                 <Th width="5%" padding="0px 4px">
-                    <Tooltip label="Use for searching">
+                    <Tooltip label="Use the values of this column to create edges between nodes.">
+                        <Flex
+                            width="100%"
+                            height="100%"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <LinkGG style={{ '--ggs': '0.7' }} />
+                        </Flex>
+                    </Tooltip>
+                </Th>
+                <Th width="5%" padding="0px 4px">
+                    <Tooltip label="Search through these columns when you enter a search term on the homepage searchbar.">
                         <Flex
                             width="100%"
                             height="100%"
@@ -130,38 +122,7 @@ function DatasetConfig(props) {
                         </Flex>
                     </Tooltip>
                 </Th>
-
-                <Th width="5%" padding="0px 4px">
-                    <Tooltip label="Use as default link">
-                        <Flex
-                            width="100%"
-                            height="100%"
-                            justifyContent="center"
-                            alignItems="center"
-                        >
-                            <LinkGG style={{ '--ggs': '0.7' }} />
-                        </Flex>
-                    </Tooltip>
-                </Th>
                 <Th width="18%">Data Type</Th>
-                {props.formType === 'upload' && (
-                    <Th width="5%" padding="0px 24px 0 4px">
-                        <Tooltip label="Remove row if null">
-                            <Flex
-                                width="100%"
-                                height="100%"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <ExtensionRemove
-                                    style={{
-                                        '--ggs': '0.7'
-                                    }}
-                                />
-                            </Flex>
-                        </Tooltip>
-                    </Th>
-                )}
             </Tr>
         </Thead>
     );
@@ -240,15 +201,34 @@ function DatasetConfig(props) {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <Checkbox
-                                    defaultChecked={
+                                <Radio
+                                    isChecked={
                                         store.fileUpload.fileUploadData
-                                            .defaults[column].isDefaultVisible
+                                            .anchor === column
                                     }
                                     onChange={() =>
-                                        store.fileUpload.changeDefaultBoolToggle(
-                                            column,
-                                            'isDefaultVisible'
+                                        store.fileUpload.changeFileUplodAnchor(
+                                            column
+                                        )
+                                    }
+                                />
+                            </Flex>
+                        </Td>
+                        <Td width="5%" paddingLeft="4px" paddingRight="4px">
+                            <Flex
+                                width="100%"
+                                height="100%"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Radio
+                                    isChecked={
+                                        store.fileUpload.fileUploadData.link ===
+                                        column
+                                    }
+                                    onChange={() =>
+                                        store.fileUpload.changeDefaultLink(
+                                            column
                                         )
                                     }
                                 />
@@ -262,6 +242,11 @@ function DatasetConfig(props) {
                                 alignItems="center"
                             >
                                 <Checkbox
+                                    isDisabled={
+                                        store.fileUpload.fileUploadData
+                                            .defaults[column].dataType ===
+                                        'list'
+                                    }
                                     defaultChecked={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].isDefaultSearch
@@ -275,27 +260,6 @@ function DatasetConfig(props) {
                                 />
                             </Flex>
                         </Td>
-                        <Td width="5%" paddingLeft="4px" paddingRight="4px">
-                            <Flex
-                                width="100%"
-                                height="100%"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Checkbox
-                                    defaultChecked={
-                                        store.fileUpload.fileUploadData
-                                            .defaults[column].isDefaultLink
-                                    }
-                                    onChange={() =>
-                                        store.fileUpload.changeDefaultBoolToggle(
-                                            column,
-                                            'isDefaultLink'
-                                        )
-                                    }
-                                />
-                            </Flex>
-                        </Td>
                         <Td width="18%">
                             {renderColumnTypeDropdown(
                                 column,
@@ -303,29 +267,6 @@ function DatasetConfig(props) {
                                     .dataType
                             )}
                         </Td>
-                        {props.formType === 'upload' && (
-                            <Td width="5%" padding="0px 24px 0 4px">
-                                <Flex
-                                    width="100%"
-                                    height="100%"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                >
-                                    <Checkbox
-                                        checked={
-                                            store.fileUpload.fileUploadData
-                                                .defaults[column].removeIfNull
-                                        }
-                                        onChange={() =>
-                                            store.fileUpload.changeDefaultBoolToggle(
-                                                column,
-                                                'removeIfNull'
-                                            )
-                                        }
-                                    />
-                                </Flex>
-                            </Td>
-                        )}
                     </Tr>
                 )
             )}
@@ -366,8 +307,18 @@ function DatasetConfig(props) {
                     borderTopRadius="5px"
                     minWidth="700px"
                     width="700px"
+                    style={{
+                        position: 'relative',
+                        height: '100%'
+                    }}
                 >
-                    <Table style={{ tableLayout: 'fixed' }}>
+                    <Table
+                        style={{
+                            tableLayout: 'fixed',
+                            position: 'relative',
+                            height: '100%'
+                        }}
+                    >
                         {renderTableHeader()}
                     </Table>
                 </TableContainer>
@@ -379,15 +330,17 @@ function DatasetConfig(props) {
                     minWidth="700px"
                     width="700px"
                 >
-                    <Table style={{ tableLayout: 'fixed' }}>
+                    <Table
+                        style={{
+                            tableLayout: 'fixed',
+                            position: 'relative',
+                            height: '100%'
+                        }}
+                    >
                         {renderTableBody()}
                     </Table>
                 </TableContainer>
             </Box>
-            <Heading size="xs" marginBottom="10px" marginTop="10px">
-                Default Anchor:
-            </Heading>
-            {renderColumnDropdown()}
             {store.fileUpload.showFileUploadError && (
                 <Text
                     fontSize="sm"

@@ -20,7 +20,7 @@ def uploadfile(file: UploadFile):
 
     for column in list(columns.keys()):
         if columns[column] == object:
-            if isinstance(data.iloc[0][column], list):
+            if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
                 columns[column] = "list"
             else:
                 columns[column] = "string"

@@ -5,6 +5,8 @@ export class FileUploadStore {
     fileUploadData = {
         name: '',
         originalName: '',
+        anchor: '',
+        link: '',
         defaults: {}
     };
     fileUploadErrors = {
@@ -33,6 +35,8 @@ export class FileUploadStore {
         (this.fileUploadData = {
             name: '',
             originalName: '',
+            anchor: '',
+            link: '',
             defaults: {}
         });
 
@@ -72,12 +76,39 @@ export class FileUploadStore {
     };
 
     changeFileUplodAnchor = val => {
+        if (this.fileUploadData.anchor !== '') {
+            this.fileUploadData.defaults[this.fileUploadData.anchor][
+                'isDefaultVisible'
+            ] = false;
+        }
+
+        this.fileUploadData.defaults[val]['isDefaultVisible'] = true;
         this.fileUploadData.anchor = val;
+    };
+
+    changeDefaultLink = val => {
+        if (this.fileUploadData.link !== '') {
+            this.fileUploadData.defaults[this.fileUploadData.link][
+                'isDefaultLink'
+            ] = false;
+            this.fileUploadData.defaults[this.fileUploadData.link][
+                'isDefaultVisible'
+            ] = false;
+        }
+
+        this.fileUploadData.defaults[val]['isDefaultVisible'] = true;
+        this.fileUploadData.defaults[val]['isDefaultLink'] = true;
+        this.fileUploadData.link = val;
     };
 
     changeDefaultBoolToggle = (column, feature) => {
         this.fileUploadData.defaults[column][feature] =
             !this.fileUploadData.defaults[column][feature];
+
+        if (feature === 'isDefaultLink') {
+            this.fileUploadData.defaults[column]['isDefaultVisible'] =
+                !this.fileUploadData.defaults[column]['isDefaultVisible'];
+        }
     };
 
     changeColumnName = (column, val) => {
@@ -123,6 +154,8 @@ export class FileUploadStore {
             anchor: this.fileUploadData.anchor,
             defaults: JSON.stringify(this.fileUploadData.defaults)
         };
+
+        console.log(this.fileUploadData.defaults);
 
         try {
             await axios.get('file/settings', { params });
