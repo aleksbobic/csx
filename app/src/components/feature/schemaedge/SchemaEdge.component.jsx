@@ -52,7 +52,9 @@ export default function CustomEdge({
             >
                 <Tag
                     className="edgebutton"
-                    onClick={() => data.changeRelationship(id)}
+                    onClick={() =>
+                        data.changeRelationship(id, data.possibleRelationships)
+                    }
                     variant="solid"
                     borderRadius="full"
                     fontSize="xs"

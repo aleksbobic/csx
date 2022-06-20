@@ -132,6 +132,26 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         "schemas": [{"name": "default", "relations": []}],
     }
 
+    dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]
+    src_type = config["dimension_types"][defaults[anchor]["name"]]
+
+    initial_relationship = {
+        "dest": get_default_link_dimensions(defaults)[0],
+        "src": defaults[anchor]["name"],
+        "relationship": "",
+    }
+
+    if src_type == "list" and dest_type == "list":
+        initial_relationship["relationship"] = "manyToMany"
+    elif src_type == "list" and dest_type != "list":
+        initial_relationship["relationship"] = "ManyToOne"
+    elif src_type != "list" and dest_type == "list":
+        initial_relationship["relationship"] = "oneToMany"
+    else:
+        initial_relationship["relationship"] = "oneToOne"
+
+    config["schemas"][0]["relations"].append(initial_relationship)
+
     if not os.path.exists("./app/data/config"):
         os.makedirs("./app/data/config")
 

@@ -300,9 +300,9 @@ def get_datasets() -> dict:
         if "properties" not in index_instance.get()[index]["mappings"]:
             continue
 
-        datasets[index] = {
-            "types": list(index_instance.get()[index]["mappings"]["properties"].keys())
-        }
+        with open(f"./app/data/config/{index}.json") as f:
+            data = json.load(f)
+            datasets[index] = {"types": data["dimension_types"]}
 
         try:
             with open(f"./app/data/config/{index}.json") as config:

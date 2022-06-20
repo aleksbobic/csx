@@ -21,6 +21,8 @@ export class SchemaStore {
         'M:1': 'manyToOne'
     };
 
+    nameToId = {};
+
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
@@ -28,19 +30,18 @@ export class SchemaStore {
 
     resetOverviewNodeProperties = () => (this.overviewDataNodeProperties = []);
 
-    toggleRelationship = id => {
+    toggleRelationship = (id, possibleRelationships) => {
         this.data = this.data.map(entry => {
             if (entry['id'] === id) {
-                const currentRelIndex = this.edgeRelationshipTypes.indexOf(
+                const currentRelIndex = possibleRelationships.indexOf(
                     entry['data']['relationship']
                 );
 
-                if (currentRelIndex < this.edgeRelationshipTypes.length - 1) {
+                if (currentRelIndex < possibleRelationships.length - 1) {
                     entry['data']['relationship'] =
-                        this.edgeRelationshipTypes[currentRelIndex + 1];
+                        possibleRelationships[currentRelIndex + 1];
                 } else {
-                    entry['data']['relationship'] =
-                        this.edgeRelationshipTypes[0];
+                    entry['data']['relationship'] = possibleRelationships[0];
                 }
             }
 
@@ -126,7 +127,6 @@ export class SchemaStore {
         const overviewSchema = [];
         const overviewSchemaLinks = [];
 
-        const nameToId = {};
         const relToShortRel = {
             oneToOne: '1:1',
             oneToMany: '1:M',
@@ -135,7 +135,7 @@ export class SchemaStore {
         };
 
         const features = [
-            ...this.store.search.nodeTypes,
+            ...Object.keys(this.store.search.nodeTypes),
             ...this.store.search.newNodeTypes
         ];
         const anchor = this.store.search.anchor;
@@ -180,14 +180,14 @@ export class SchemaStore {
                         ...schemaNode.data,
                         position: 'left',
                         features: [
-                            ...this.store.search.nodeTypes,
+                            ...Object.keys(this.store.search.nodeTypes),
                             ...this.store.search.newNodeTypes
                         ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
                         properties: [
-                            ...this.store.search.nodeTypes,
+                            ...Object.keys(this.store.search.nodeTypes),
                             ...this.store.search.newNodeTypes
                         ],
                         addedProperties: this.overviewDataNodeProperties,
@@ -212,14 +212,14 @@ export class SchemaStore {
                         ...schemaNode.data,
                         position: 'right',
                         features: [
-                            ...this.store.search.nodeTypes,
+                            ...Object.keys(this.store.search.nodeTypes),
                             ...this.store.search.newNodeTypes
                         ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
                         properties: [
-                            ...this.store.search.nodeTypes,
+                            ...Object.keys(this.store.search.nodeTypes),
                             ...this.store.search.newNodeTypes
                         ],
                         addedProperties: this.overviewDataNodeProperties,
@@ -253,7 +253,7 @@ export class SchemaStore {
                 });
             }
 
-            nameToId[node] = schema.length - 1;
+            this.nameToId[node] = schema.length - 1;
         });
 
         overviewSchema.forEach(node => {
@@ -278,13 +278,21 @@ export class SchemaStore {
         });
 
         this.store?.search?.schema.forEach(edge => {
+            const possibleConnections = this.getPossibleConnections(
+                edge['src'],
+                edge['dest']
+            );
+
             schema.push({
-                id: `${nameToId[edge['src']]}${nameToId[edge['dest']]}`,
-                source: `${nameToId[edge['src']]}`,
-                target: `${nameToId[edge['dest']]}`,
+                id: `${this.nameToId[edge['src']]}${
+                    this.nameToId[edge['dest']]
+                }`,
+                source: `${this.nameToId[edge['src']]}`,
+                target: `${this.nameToId[edge['dest']]}`,
                 type: 'schemaEdge',
                 arrowHeadType: 'arrowclosed',
                 data: {
+                    possibleRelationships: possibleConnections,
                     relationship: relToShortRel[edge['relationship']],
                     changeRelationship: this.toggleRelationship,
                     removeEdge: this.removeSchemaConnection
@@ -318,7 +326,7 @@ export class SchemaStore {
                 removeLink: this.removeLinkNode,
                 position: 'both',
                 features: [
-                    ...this.store.search.nodeTypes,
+                    ...Object.keys(this.store.search.nodeTypes),
                     ...this.store.search.newNodeTypes
                 ].filter(feature => !this.store.search.links.includes(feature)),
                 anchor: this.store.search.anchor
@@ -479,11 +487,12 @@ export class SchemaStore {
                         (entry.data.isLink && !entry.data.label) ||
                         entry.data.isAnchor
                     ) {
-                        entry.data.features =
-                            this.store.search.nodeTypes.filter(
-                                feature =>
-                                    !this.store.search.links.includes(feature)
-                            );
+                        entry.data.features = Object.keys(
+                            this.store.search.nodeTypes
+                        ).filter(
+                            feature =>
+                                !this.store.search.links.includes(feature)
+                        );
                     }
 
                     if (entry.data.isAnchor || entry.data.isLink) {
@@ -591,7 +600,9 @@ export class SchemaStore {
                     (entry.data.isLink && !entry.data.label) ||
                     entry.data.isAnchor
                 ) {
-                    entry.data.features = this.store.search.nodeTypes.filter(
+                    entry.data.features = Object.keys(
+                        this.store.search.nodeTypes
+                    ).filter(
                         feature => !this.store.search.links.includes(feature)
                     );
                 }
@@ -612,7 +623,39 @@ export class SchemaStore {
         }
     };
 
+    getNodeNameFromId = id => {
+        let name = '';
+
+        Object.keys(this.nameToId).forEach(key => {
+            if (this.nameToId[key] === Number(id)) {
+                name = key;
+            }
+        });
+
+        return name;
+    };
+
+    getPossibleConnections = (source, target) => {
+        const src_type = this.store.search.nodeTypes[source];
+        const tar_type = this.store.search.nodeTypes[target];
+
+        if (src_type === 'list' && tar_type === 'list') {
+            return ['M:N', '1:1'];
+        } else if (src_type === 'list' && tar_type !== 'list') {
+            return ['M:1'];
+        } else if (src_type !== 'list' && tar_type === 'list') {
+            return ['1:M'];
+        } else {
+            return ['1:1'];
+        }
+    };
+
     addSchemaConnection = edge => {
+        const possibleConnections = this.getPossibleConnections(
+            this.getNodeNameFromId(edge['source']),
+            this.getNodeNameFromId(edge['target'])
+        );
+
         this.data = [
             ...this.data,
             {
@@ -622,7 +665,8 @@ export class SchemaStore {
                 type: 'schemaEdge',
                 arrowHeadType: 'arrowclosed',
                 data: {
-                    relationship: '1:1',
+                    possibleRelationships: possibleConnections,
+                    relationship: possibleConnections[0],
                     changeRelationship: this.toggleRelationship,
                     removeEdge: this.removeSchemaConnection
                 }

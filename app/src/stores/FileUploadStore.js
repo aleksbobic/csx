@@ -155,8 +155,6 @@ export class FileUploadStore {
             defaults: JSON.stringify(this.fileUploadData.defaults)
         };
 
-        console.log(this.fileUploadData.defaults);
-
         try {
             await axios.get('file/settings', { params });
         } catch (error) {

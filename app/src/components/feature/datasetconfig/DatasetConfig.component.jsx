@@ -10,9 +10,10 @@ import {
     Select,
     Table,
     TableContainer,
+    Tag,
+    TagLabel,
     Tbody,
     Td,
-    Text,
     Th,
     Thead,
     Tooltip,
@@ -342,14 +343,19 @@ function DatasetConfig(props) {
                 </TableContainer>
             </Box>
             {store.fileUpload.showFileUploadError && (
-                <Text
-                    fontSize="sm"
-                    color="red.500"
+                <Tag
+                    position="absolute"
+                    size="sm"
+                    borderRadius="4px"
+                    variant="solid"
+                    colorScheme="red"
+                    bottom="30px"
                     fontWeight="bold"
-                    marginTop="15px"
                 >
-                    Please select default {generateErrorMessage()}.
-                </Text>
+                    <TagLabel>
+                        Please select default {generateErrorMessage()}.
+                    </TagLabel>
+                </Tag>
             )}
         </>
     );

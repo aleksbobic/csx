@@ -69,21 +69,21 @@ export class WorkflowStore {
         const data = { children: [], parents: [] };
 
         if (nodeType === 'searchNode') {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
+            data.features = Object.keys(this.store.search.nodeTypes);
+            data.feature = Object.keys(this.store.search.nodeTypes)[0];
             data.keyphrase = '';
         }
 
         if (nodeType === 'filterNode') {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
+            data.features = Object.keys(this.store.search.nodeTypes);
+            data.feature = Object.keys(this.store.search.nodeTypes)[0];
             data.min = 0;
             data.max = 0;
         }
 
         if (['countsNode', 'keywordExtractionNode'].includes(nodeType)) {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
+            data.features = Object.keys(this.store.search.nodeTypes);
+            data.feature = Object.keys(this.store.search.nodeTypes)[0];
             data.newFeatureName = '';
         }
 

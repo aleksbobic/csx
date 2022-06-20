@@ -594,7 +594,7 @@ export class GraphStore {
 
                             this.store.graphInstance.generateSchemeColorsFromArray(
                                 [
-                                    ...this.store.search.nodeTypes,
+                                    ...Object.keys(this.store.search.nodeTypes),
                                     ...this.store.search.newNodeTypes
                                 ],
                                 'type'
