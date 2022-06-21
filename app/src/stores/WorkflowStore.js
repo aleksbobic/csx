@@ -43,11 +43,12 @@ export class WorkflowStore {
 
     actionNodeColors = {
         searchNode: '#3182ce',
-        filterNode: '#31cebf',
-        countsNode: '#31cebf',
+        filterNode: '#ce8631',
+        countsNode: '#ce8631',
         connectorNode: '#323232',
-        resultsNode: '#4da344',
-        keywordExtractionNode: '#31cebf'
+        resultsNode: '#3cd824',
+        keywordExtractionNode: '#ce8631',
+        background: '#161616'
     };
 
     actions = [];
@@ -71,6 +72,18 @@ export class WorkflowStore {
                 nodeTypes.includes(this.store.search.nodeTypes[entry[0]])
             )
             .map(entry => entry[0]);
+    };
+
+    deleteNode = nodeID => {
+        this.actions = [
+            ...this.actions.filter(
+                node =>
+                    (node.type !== 'searchEdge' && node.id !== nodeID) ||
+                    (node.type === 'searchEdge' &&
+                        node.source !== nodeID &&
+                        node.target !== nodeID)
+            )
+        ];
     };
 
     addNewAction = (nodeType, position) => {
@@ -109,13 +122,16 @@ export class WorkflowStore {
             data.runWorkflow = this.runWorkFlow;
         }
 
+        data.deleteNode = this.deleteNode;
+
         const newNode = {
             id: uuidv4(),
             type: nodeType,
             position,
             data,
             style: {
-                backgroundColor: this.actionNodeColors[nodeType],
+                border: `1px solid ${this.actionNodeColors[nodeType]}`,
+                backgroundColor: this.actionNodeColors['background'],
                 borderRadius: '10px',
                 padding: '3px'
             }

@@ -1,16 +1,19 @@
 import {
     Box,
     Heading,
+    HStack,
+    IconButton,
     Input,
     Select,
     Text,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
+import { Close } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
-const countsNode = ({ data, isConnectable }) => {
+const countsNode = ({ id, data, isConnectable }) => {
     const modifyFeatureName = value => {
         data.newFeatureName = value.target.value;
     };
@@ -39,7 +42,16 @@ const countsNode = ({ data, isConnectable }) => {
                     isConnectable={isConnectable}
                 />
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Count values in:</Heading>
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Count values</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
                     <Tooltip label="Dataset property">
                         <Select
                             margin="0px"
@@ -47,10 +59,15 @@ const countsNode = ({ data, isConnectable }) => {
                             size="sm"
                             defaultValue={data.feature}
                             borderRadius="5px"
-                            background="blackAlpha.500"
                             onChange={modifyFeature}
+                            background="whiteAlpha.200"
+                            opacity="0.8"
                             _hover={{
-                                background: 'blackAlpha.600',
+                                opacity: 1,
+                                cursor: 'pointer'
+                            }}
+                            _focus={{
+                                opacity: 1,
                                 cursor: 'pointer'
                             }}
                         >
@@ -64,9 +81,7 @@ const countsNode = ({ data, isConnectable }) => {
                             ))}
                         </Select>
                     </Tooltip>
-                    <Text fontSize="sm">
-                        Assing values to new feature named:{' '}
-                    </Text>
+                    <Text fontSize="sm">New count column name: </Text>
                     <Input
                         size="sm"
                         variant="filled"
@@ -76,9 +91,12 @@ const countsNode = ({ data, isConnectable }) => {
                         margin="0px"
                         borderRadius="5px"
                         onChange={modifyFeatureName}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
+                        opacity="0.8"
+                        background="whiteAlpha.200"
+                        _hover={{
+                            opacity: 1
+                        }}
+                        _focus={{ opacity: 1 }}
                     ></Input>
                 </VStack>
                 <Handle

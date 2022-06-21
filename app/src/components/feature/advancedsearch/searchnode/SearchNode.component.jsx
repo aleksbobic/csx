@@ -1,8 +1,18 @@
-import { Box, Heading, Input, Select, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Heading,
+    HStack,
+    IconButton,
+    Input,
+    Select,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
-const searchNode = ({ data, isConnectable }) => {
+const searchNode = ({ id, data, isConnectable }) => {
     const modifyKeyphrase = value => {
         data.keyphrase = value.target.value;
     };
@@ -19,7 +29,16 @@ const searchNode = ({ data, isConnectable }) => {
                 padding="8px"
             >
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Search</Heading>
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Search</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
                     <Tooltip label="Dataset property">
                         <Select
                             margin="0px"
@@ -27,10 +46,15 @@ const searchNode = ({ data, isConnectable }) => {
                             size="sm"
                             borderRadius="5px"
                             defaultValue={data.feature}
-                            background="blackAlpha.500"
                             onChange={modifyFeature}
+                            background="whiteAlpha.200"
+                            opacity="0.8"
                             _hover={{
-                                background: 'blackAlpha.600',
+                                opacity: 1,
+                                cursor: 'pointer'
+                            }}
+                            _focus={{
+                                opacity: 1,
                                 cursor: 'pointer'
                             }}
                         >
@@ -53,9 +77,12 @@ const searchNode = ({ data, isConnectable }) => {
                         margin="0px"
                         borderRadius="5px"
                         onChange={modifyKeyphrase}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
+                        opacity="0.8"
+                        background="whiteAlpha.200"
+                        _hover={{
+                            opacity: 1
+                        }}
+                        _focus={{ opacity: 1 }}
                     ></Input>
                 </VStack>
                 <Handle

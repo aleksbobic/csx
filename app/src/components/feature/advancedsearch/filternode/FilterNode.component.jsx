@@ -1,8 +1,18 @@
-import { Box, Heading, Input, Select, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Heading,
+    HStack,
+    IconButton,
+    Input,
+    Select,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
-const filterNode = ({ data, isConnectable }) => {
+const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
         data.min = value.target.value;
     };
@@ -23,7 +33,16 @@ const filterNode = ({ data, isConnectable }) => {
                 padding="8px"
             >
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Between</Heading>
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Filter</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
                     <Tooltip label="Dataset property">
                         <Select
                             margin="0px"
@@ -31,12 +50,17 @@ const filterNode = ({ data, isConnectable }) => {
                             size="sm"
                             borderRadius="5px"
                             defaultValue={data.feature}
-                            background="blackAlpha.500"
-                            onChange={modifyFeature}
+                            background="whiteAlpha.200"
+                            opacity="0.8"
                             _hover={{
-                                background: 'blackAlpha.600',
+                                opacity: 1,
                                 cursor: 'pointer'
                             }}
+                            _focus={{
+                                opacity: 1,
+                                cursor: 'pointer'
+                            }}
+                            onChange={modifyFeature}
                         >
                             {data.features.map((feature, index) => (
                                 <option
@@ -57,9 +81,12 @@ const filterNode = ({ data, isConnectable }) => {
                         defaultValue={data.min}
                         borderRadius="5px"
                         onChange={modifyMin}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
+                        opacity="0.8"
+                        background="whiteAlpha.200"
+                        _hover={{
+                            opacity: 1
+                        }}
+                        _focus={{ opacity: 1 }}
                     ></Input>
 
                     <Input
@@ -71,9 +98,12 @@ const filterNode = ({ data, isConnectable }) => {
                         defaultValue={data.max}
                         borderRadius="5px"
                         onChange={modifyMax}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
+                        opacity="0.8"
+                        background="whiteAlpha.200"
+                        _hover={{
+                            opacity: 1
+                        }}
+                        _focus={{ opacity: 1 }}
                     ></Input>
                 </VStack>
                 <Handle
