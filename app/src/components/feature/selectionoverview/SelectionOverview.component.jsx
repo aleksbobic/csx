@@ -1,5 +1,6 @@
 import {
     Box,
+    Flex,
     Heading,
     HStack,
     IconButton,
@@ -7,17 +8,18 @@ import {
     Tag,
     TagLabel,
     Text,
+    Tooltip,
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { Remove } from 'css.gg';
+import { ArcElement, Chart as ChartJS } from 'chart.js';
+import { MathPlus, Remove } from 'css.gg';
+import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
-import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
+import { RootStoreContext } from 'stores/RootStore';
 
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
@@ -314,21 +316,31 @@ function SelectionOverview(props) {
 
     return (
         <VStack spacing="10px" marginTop="50px">
-            <HStack maxHeight="200px" width="100%" marginTop="20px">
-                <VStack width="48%" height="200px">
-                    <Heading size="sm" textAlign="left" width="100%">
+            <HStack height="200px" width="100%" marginTop="20px">
+                <Flex width="48%" height="200px" flexDirection="column">
+                    <Heading
+                        size="sm"
+                        textAlign="left"
+                        width="100%"
+                        marginBottom="10px"
+                    >
                         Selected nodes
                     </Heading>
                     {renderSelectedNodes()}
-                </VStack>
-                <VStack width="48%" height="200px">
-                    <Heading size="sm" textAlign="left" width="100%">
+                </Flex>
+                <Flex width="48%" height="200px" flexDirection="column">
+                    <Heading
+                        size="sm"
+                        textAlign="left"
+                        width="100%"
+                        marginBottom="10px"
+                    >
                         Selected components
                     </Heading>
                     {renderSelectedComponents()}
-                </VStack>
+                </Flex>
             </HStack>
-            {store.core.isOverview &&
+            {/* {store.core.isOverview &&
                 store.graph.currentGraphData.selectedComponents.length && (
                     <HStack
                         maxHeight="200px"
@@ -348,7 +360,35 @@ function SelectionOverview(props) {
                             {renderEdgeValueStats()}
                         </VStack>
                     </HStack>
-                )}
+                )} */}
+            <HStack
+                maxHeight="200px"
+                width="100%"
+                style={{ marginTop: '50px' }}
+            >
+                <VStack width="48%" height="200px">
+                    <Box width="100%" height="100%" padding="20px">
+                        <Tooltip label="Add new statistic">
+                            <IconButton
+                                width="100%"
+                                height="100%"
+                                borderRadius="xl"
+                                onClick={() =>
+                                    store.stats.toggleStatsModalVisiblity(true)
+                                }
+                                icon={
+                                    <MathPlus
+                                        style={{
+                                            opacity: 0.5,
+                                            '--ggs': '2'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                    </Box>
+                </VStack>
+            </HStack>
         </VStack>
     );
 }
