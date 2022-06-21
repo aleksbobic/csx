@@ -5,12 +5,10 @@ import {
     IconButton,
     Input,
     Select,
-    Text,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
 import { Close } from 'css.gg';
-import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
 const keywordExtractionNode = ({ id, data, isConnectable }) => {
@@ -52,7 +50,7 @@ const keywordExtractionNode = ({ id, data, isConnectable }) => {
                             />
                         </Tooltip>
                     </HStack>
-                    <Tooltip label="Dataset property">
+                    <Tooltip label="Extract keywords from">
                         <Select
                             margin="0px"
                             variant="filled"
@@ -80,22 +78,23 @@ const keywordExtractionNode = ({ id, data, isConnectable }) => {
                             ))}
                         </Select>
                     </Tooltip>
-                    <Text fontSize="sm">New keyword column name: </Text>
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="text"
-                        placeholder="New feature name"
-                        margin="0px"
-                        borderRadius="5px"
-                        onChange={modifyFeatureName}
-                        opacity="0.8"
-                        background="whiteAlpha.200"
-                        _hover={{
-                            opacity: 1
-                        }}
-                        _focus={{ opacity: 1 }}
-                    ></Input>
+                    <Tooltip label="Name of the column containing the newly extracted keywords">
+                        <Input
+                            size="sm"
+                            variant="filled"
+                            type="text"
+                            placeholder="New feature name"
+                            margin="0px"
+                            borderRadius="5px"
+                            onChange={modifyFeatureName}
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                        ></Input>
+                    </Tooltip>
                 </VStack>
                 <Handle
                     type="source"

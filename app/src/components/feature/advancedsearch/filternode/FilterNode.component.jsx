@@ -43,7 +43,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             />
                         </Tooltip>
                     </HStack>
-                    <Tooltip label="Dataset property">
+                    <Tooltip label="Filter this property">
                         <Select
                             margin="0px"
                             variant="filled"
@@ -72,39 +72,42 @@ const filterNode = ({ id, data, isConnectable }) => {
                             ))}
                         </Select>
                     </Tooltip>
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="Number"
-                        placeholder="Min"
-                        margin="0px"
-                        defaultValue={data.min}
-                        borderRadius="5px"
-                        onChange={modifyMin}
-                        opacity="0.8"
-                        background="whiteAlpha.200"
-                        _hover={{
-                            opacity: 1
-                        }}
-                        _focus={{ opacity: 1 }}
-                    ></Input>
-
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="Number"
-                        placeholder="Max"
-                        margin="0px"
-                        defaultValue={data.max}
-                        borderRadius="5px"
-                        onChange={modifyMax}
-                        opacity="0.8"
-                        background="whiteAlpha.200"
-                        _hover={{
-                            opacity: 1
-                        }}
-                        _focus={{ opacity: 1 }}
-                    ></Input>
+                    <Tooltip label="From">
+                        <Input
+                            size="sm"
+                            variant="filled"
+                            type="Number"
+                            placeholder="Min"
+                            margin="0px"
+                            defaultValue={data.min}
+                            borderRadius="5px"
+                            onChange={modifyMin}
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                        ></Input>
+                    </Tooltip>
+                    <Tooltip label="To">
+                        <Input
+                            size="sm"
+                            variant="filled"
+                            type="Number"
+                            placeholder="Max"
+                            margin="0px"
+                            defaultValue={data.max}
+                            borderRadius="5px"
+                            onChange={modifyMax}
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                        ></Input>
+                    </Tooltip>
                 </VStack>
                 <Handle
                     type="source"

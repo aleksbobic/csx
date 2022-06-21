@@ -5,12 +5,10 @@ import {
     IconButton,
     Input,
     Select,
-    Text,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
 import { Close } from 'css.gg';
-import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
 const countsNode = ({ id, data, isConnectable }) => {
@@ -52,7 +50,7 @@ const countsNode = ({ id, data, isConnectable }) => {
                             />
                         </Tooltip>
                     </HStack>
-                    <Tooltip label="Dataset property">
+                    <Tooltip label="Column containing list values which should be counted.">
                         <Select
                             margin="0px"
                             variant="filled"
@@ -81,23 +79,24 @@ const countsNode = ({ id, data, isConnectable }) => {
                             ))}
                         </Select>
                     </Tooltip>
-                    <Text fontSize="sm">New count column name: </Text>
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="text"
-                        defaultValue={data.newFeatureName}
-                        placeholder="New feature name"
-                        margin="0px"
-                        borderRadius="5px"
-                        onChange={modifyFeatureName}
-                        opacity="0.8"
-                        background="whiteAlpha.200"
-                        _hover={{
-                            opacity: 1
-                        }}
-                        _focus={{ opacity: 1 }}
-                    ></Input>
+                    <Tooltip label="New column name which will contain the list value counts.">
+                        <Input
+                            size="sm"
+                            variant="filled"
+                            type="text"
+                            defaultValue={data.newFeatureName}
+                            placeholder="New feature name"
+                            margin="0px"
+                            borderRadius="5px"
+                            onChange={modifyFeatureName}
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                        ></Input>
+                    </Tooltip>
                 </VStack>
                 <Handle
                     type="source"
