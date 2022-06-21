@@ -122,6 +122,20 @@ export class SchemaStore {
         });
     };
 
+    getOverviewNodeProperties = () => {
+        if (this.store.search.nodeTypes[this.store.search.anchor] !== 'list') {
+            return Object.entries(this.store.search.nodeTypes)
+                .filter(
+                    entry =>
+                        entry[0] !== this.store.search.anchor &&
+                        this.store.search.nodeTypes[entry[0]] !== 'list'
+                )
+                .map(entry => entry[0]);
+        }
+
+        return [];
+    };
+
     populateStoreData = () => {
         const schema = [];
         const overviewSchema = [];
@@ -187,7 +201,7 @@ export class SchemaStore {
                                 !this.store.search.links.includes(feature)
                         ),
                         properties: [
-                            ...Object.keys(this.store.search.nodeTypes),
+                            ...this.getOverviewNodeProperties(),
                             ...this.store.search.newNodeTypes
                         ],
                         addedProperties: this.overviewDataNodeProperties,
@@ -409,6 +423,7 @@ export class SchemaStore {
         this.overviewData = this.overviewData.map(entry => {
             if ('isAnchor' in entry.data && entry.data.isAnchor) {
                 entry.data.label = anchor;
+                entry.data.properties = this.getOverviewNodeProperties();
 
                 entry.style = {
                     background: entry.data.isAnchor

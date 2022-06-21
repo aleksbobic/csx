@@ -264,7 +264,7 @@ const overviewSchemaNode = ({ id, data }) => {
             {data.isAnchor &&
                 data.position === 'left' &&
                 renderAddLinkButton('left')}
-            {data.isAnchor && (
+            {data.isAnchor && data.properties.length > 0 && (
                 <Flex
                     width="100%"
                     justifyContent="center"

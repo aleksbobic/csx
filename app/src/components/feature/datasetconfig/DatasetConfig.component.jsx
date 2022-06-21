@@ -203,6 +203,10 @@ function DatasetConfig(props) {
                                 alignItems="center"
                             >
                                 <Radio
+                                    isDisabled={
+                                        store.fileUpload.fileUploadData.link ===
+                                        column
+                                    }
                                     isChecked={
                                         store.fileUpload.fileUploadData
                                             .anchor === column
@@ -212,6 +216,11 @@ function DatasetConfig(props) {
                                             column
                                         )
                                     }
+                                    _disabled={{
+                                        cursor: 'not-allowed',
+                                        backgroundColor: 'whiteAlpha.100',
+                                        border: 'none'
+                                    }}
                                 />
                             </Flex>
                         </Td>
@@ -223,6 +232,10 @@ function DatasetConfig(props) {
                                 alignItems="center"
                             >
                                 <Radio
+                                    isDisabled={
+                                        store.fileUpload.fileUploadData
+                                            .anchor === column
+                                    }
                                     isChecked={
                                         store.fileUpload.fileUploadData.link ===
                                         column
@@ -232,6 +245,11 @@ function DatasetConfig(props) {
                                             column
                                         )
                                     }
+                                    _disabled={{
+                                        cursor: 'not-allowed',
+                                        backgroundColor: 'whiteAlpha.100',
+                                        border: 'none'
+                                    }}
                                 />
                             </Flex>
                         </Td>
