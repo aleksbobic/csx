@@ -74,8 +74,30 @@ function AdvancedSearch(props) {
         event.dataTransfer.dropEffect = 'move';
     };
 
+    const getFilteredActionNodeList = () => {
+        return store.workflow.actionNodeTypes.filter(node => {
+            switch (node.nodeType) {
+                case 'filterNode':
+                    return (
+                        store.workflow.getNodeTypesOfType(['integer', 'float'])
+                            .length > 0
+                    );
+                case 'countsNode':
+                    return (
+                        store.workflow.getNodeTypesOfType(['list']).length > 0
+                    );
+                case 'keywordExtractionNode':
+                    return (
+                        store.workflow.getNodeTypesOfType(['string']).length > 0
+                    );
+                default:
+                    return true;
+            }
+        });
+    };
+
     const renderNodeList = () => {
-        return store.workflow.actionNodeTypes.map((node, index) => (
+        return getFilteredActionNodeList().map((node, index) => (
             <Flex
                 key={`workflow_node_${index}`}
                 border="2px solid"

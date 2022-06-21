@@ -65,6 +65,14 @@ export class WorkflowStore {
         this.actions = [];
     };
 
+    getNodeTypesOfType = nodeTypes => {
+        return Object.entries(this.store.search.nodeTypes)
+            .filter(entry =>
+                nodeTypes.includes(this.store.search.nodeTypes[entry[0]])
+            )
+            .map(entry => entry[0]);
+    };
+
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
 
@@ -75,15 +83,21 @@ export class WorkflowStore {
         }
 
         if (nodeType === 'filterNode') {
-            data.features = Object.keys(this.store.search.nodeTypes);
-            data.feature = Object.keys(this.store.search.nodeTypes)[0];
+            data.features = this.getNodeTypesOfType(['integer', 'float']);
+            data.feature = this.getNodeTypesOfType(['integer', 'float'])[0];
             data.min = 0;
             data.max = 0;
         }
 
-        if (['countsNode', 'keywordExtractionNode'].includes(nodeType)) {
-            data.features = Object.keys(this.store.search.nodeTypes);
-            data.feature = Object.keys(this.store.search.nodeTypes)[0];
+        if (nodeType === 'countsNode') {
+            data.features = this.getNodeTypesOfType(['list']);
+            data.feature = this.getNodeTypesOfType(['list'])[0];
+            data.newFeatureName = '';
+        }
+
+        if (nodeType === 'keywordExtractionNode') {
+            data.features = this.getNodeTypesOfType(['string']);
+            data.feature = this.getNodeTypesOfType(['string'])[0];
             data.newFeatureName = '';
         }
 
