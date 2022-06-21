@@ -33,6 +33,7 @@ function DatasetConfig(props) {
             <Select
                 defaultValue={defaultType}
                 size="sm"
+                isDisabled={props.formType !== 'upload'}
                 borderRadius="5px"
                 variant="filled"
                 onChange={val =>

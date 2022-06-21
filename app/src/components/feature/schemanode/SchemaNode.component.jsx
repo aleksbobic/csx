@@ -10,7 +10,14 @@ const schemaNode = ({ data, isConnectable }) => {
             <Handle
                 type="target"
                 position="top"
-                style={{ bottom: 30, background: '#555' }}
+                style={{
+                    bottom: 30,
+                    background: '#555',
+                    borderRadius: '5px',
+                    height: '10px',
+                    width: '20px',
+                    marginTop: '-2px'
+                }}
                 isConnectable={isConnectable}
             />
             <Flex
@@ -70,7 +77,14 @@ const schemaNode = ({ data, isConnectable }) => {
             <Handle
                 type="source"
                 position="bottom"
-                style={{ top: 30, background: '#555' }}
+                style={{
+                    bottom: 0,
+                    background: '#555',
+                    marginBottom: '-8px',
+                    borderRadius: '5px',
+                    height: '10px',
+                    width: '20px'
+                }}
                 isConnectable={isConnectable}
             />
         </>

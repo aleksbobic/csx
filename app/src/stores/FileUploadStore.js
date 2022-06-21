@@ -196,6 +196,7 @@ export class FileUploadStore {
             };
         });
 
+        this.fileUploadData.link = config.links[0];
         this.fileUploadData.anchor = config.anchor;
         this.changeDatasetName(dataset);
         this.changeConfigChangeModalVisiblity(true);
