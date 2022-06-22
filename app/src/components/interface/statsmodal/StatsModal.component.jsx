@@ -1,37 +1,42 @@
 import {
     Box,
     Button,
+    FormControl,
+    FormLabel,
     Heading,
-    HStack,
     Modal,
     ModalBody,
     ModalContent,
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Select,
+    SimpleGrid,
     Tab,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
-    Text,
+    Tooltip,
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
-import { observer } from 'mobx-react';
-import { useContext, useEffect } from 'react';
-import { Bar, Doughnut } from 'react-chartjs-2';
-import { RootStoreContext } from 'stores/RootStore';
 import {
     ArcElement,
-    Chart as ChartJS,
-    Tooltip,
-    CategoryScale,
-    LinearScale,
     BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
     Title,
-    Legend
+    Tooltip as ChartJSTooltip
 } from 'chart.js';
+import { observer } from 'mobx-react';
+import { useContext, useEffect } from 'react';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { RootStoreContext } from 'stores/RootStore';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
@@ -42,20 +47,23 @@ function FileUploadModal() {
             onOpen();
         } else if (!store.stats.isStatsModalVisible && isOpen) {
             onClose();
+            store.stats.resetChartProps();
         }
-    }, [isOpen, onClose, onOpen, store.stats.isStatsModalVisible]);
+    }, [isOpen, onClose, onOpen, store.stats, store.stats.isStatsModalVisible]);
 
-    // useEffect(() => {
-    //     ChartJS.register(
-    //         ArcElement,
-    //         Tooltip,
-    //         CategoryScale,
-    //         LinearScale,
-    //         BarElement,
-    //         Title,
-    //         Legend
-    //     );
-    // });
+    useEffect(() => {
+        ChartJS.register(
+            ArcElement,
+            ChartJSTooltip,
+            CategoryScale,
+            LinearScale,
+            BarElement,
+            Title,
+            Legend,
+            PointElement,
+            LineElement
+        );
+    });
 
     const renderDoughnutPanel = () => {
         const chartData = {
@@ -65,27 +73,27 @@ function FileUploadModal() {
                     label: 'node values',
                     data: [5, 12, 3],
                     backgroundColor: ['#3182ce', '#ce317b', '#ce7c31'],
-                    borderColor: ['rgba(0,0,0,0)']
+                    borderColor: 'rgb(0,0,0,)'
                 }
             ]
         };
-
-        ChartJS.register(
-            ArcElement,
-            Tooltip,
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Legend
-        );
 
         return (
             <Doughnut
                 height="250px"
                 redraw={true}
                 data={chartData}
-                options={{ maintainAspectRatio: false }}
+                options={{
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Example Doughnut Chart'
+                        }
+                    }
+                }}
             />
         );
     };
@@ -98,20 +106,10 @@ function FileUploadModal() {
                     label: 'node values',
                     data: [5, 12, 3],
                     backgroundColor: '#3182ce',
-                    borderColor: 'rgba(255,0,0,0)'
+                    borderColor: 'rgb(0,0,0)'
                 }
             ]
         };
-
-        ChartJS.register(
-            ArcElement,
-            Tooltip,
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Legend
-        );
 
         return (
             <Bar
@@ -122,11 +120,6 @@ function FileUploadModal() {
                 options={{
                     maintainAspectRatio: false,
                     indexAxis: 'y',
-                    elements: {
-                        bar: {
-                            borderWidth: 2
-                        }
-                    },
                     responsive: true,
                     plugins: {
                         title: {
@@ -136,6 +129,121 @@ function FileUploadModal() {
                     }
                 }}
             />
+        );
+    };
+
+    const renderLinePanel = () => {
+        const chartData = {
+            labels: [
+                'First value',
+                'Second value',
+                'Third value',
+                'Fourth value',
+                'Fifth value'
+            ],
+            datasets: [
+                {
+                    label: 'node values',
+                    data: [5, 12, 3, 7, 4],
+                    backgroundColor: '#3182ce',
+                    borderColor: '#3182ce'
+                }
+            ]
+        };
+
+        return (
+            <Line
+                data={chartData}
+                width="100%"
+                height="250px"
+                redraw={true}
+                options={{
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Example Line Chart'
+                        }
+                    }
+                }}
+            />
+        );
+    };
+
+    const renderSelectionElements = () => {
+        return (
+            <Box>
+                <SimpleGrid columns={2} spacing={5}>
+                    <FormControl>
+                        <FormLabel htmlFor="dataTargetSelector">
+                            Network data:
+                        </FormLabel>
+                        <Tooltip
+                            label="All data means this chart will
+                reflect the distribution of values
+                over the entire network while
+                selection means it will only reflect
+                the distribution of values on the
+                data points you selected."
+                        >
+                            <Select
+                                id="dataTargetSelector"
+                                defaultValue="selection"
+                                size="sm"
+                                onChange={value =>
+                                    store.stats.changeChartNetworkData(
+                                        value.target.value
+                                    )
+                                }
+                            >
+                                <option value="selection">
+                                    Selection data
+                                </option>
+                                <option value="all">All data</option>
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel htmlFor="dataTargetSelector">
+                            Network elements:
+                        </FormLabel>
+                        <Tooltip label="Selecting nodes means that you would like to get the data from node properties while selecting edges means you would like to get the data from edges.">
+                            <Select
+                                size="sm"
+                                defaultValue="nodes"
+                                onChange={value =>
+                                    store.stats.changeChartNetworkElements(
+                                        value.target.value
+                                    )
+                                }
+                            >
+                                <option value="nodes">Nodes</option>
+                                <option value="edges">Edges</option>
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+
+                    <FormControl>
+                        <FormLabel htmlFor="dataTargetSelector">
+                            Element values:
+                        </FormLabel>
+                        <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
+                            <Select size="sm">
+                                {store.stats.getElementValues().map(entry => (
+                                    <option
+                                        key={`chart_selection_element_${entry.value}`}
+                                        value={entry.value}
+                                    >
+                                        {entry.label}
+                                    </option>
+                                ))}
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+                </SimpleGrid>
+            </Box>
         );
     };
 
@@ -149,6 +257,7 @@ function FileUploadModal() {
                     height="500px"
                     variant="unstyled"
                     size="sm"
+                    onChange={store.stats.changeSelectedChartType}
                 >
                     <TabList
                         width="200px"
@@ -157,42 +266,27 @@ function FileUploadModal() {
                         borderRadius="4px"
                         padding="8px"
                     >
-                        <Tab
-                            marginBottom="10px"
-                            fontWeight="bold"
-                            _selected={{
-                                color: 'white',
-                                bg: 'blue.500',
-                                borderRadius: '4px'
-                            }}
-                            _hover={{
-                                color: 'white',
-                                bg: 'blue.500',
-                                borderRadius: '4px',
-                                opacity: 0.5,
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Doughnut
-                        </Tab>
-                        <Tab
-                            marginBottom="10px"
-                            fontWeight="bold"
-                            _selected={{
-                                color: 'white',
-                                bg: 'blue.500',
-                                borderRadius: '4px'
-                            }}
-                            _hover={{
-                                color: 'white',
-                                bg: 'blue.500',
-                                borderRadius: '4px',
-                                opacity: 0.5,
-                                cursor: 'pointer'
-                            }}
-                        >
-                            Bar
-                        </Tab>
+                        {store.stats.chartTypes.map(entry => (
+                            <Tab
+                                key={`chart_tab_${entry}`}
+                                marginBottom="10px"
+                                fontWeight="bold"
+                                _selected={{
+                                    color: 'white',
+                                    bg: 'blue.500',
+                                    borderRadius: '4px'
+                                }}
+                                _hover={{
+                                    color: 'white',
+                                    bg: 'blue.500',
+                                    borderRadius: '4px',
+                                    opacity: 0.5,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {entry}
+                            </Tab>
+                        ))}
                     </TabList>
                     <TabPanels>
                         <TabPanel>
@@ -201,17 +295,25 @@ function FileUploadModal() {
                                 <Box height="250px" width="100%">
                                     {renderDoughnutPanel()}
                                 </Box>
-                                <Box>
-                                    <Text>Test</Text>
-                                </Box>
+                                {renderSelectionElements()}
                             </VStack>
                         </TabPanel>
                         <TabPanel>
                             <VStack width="100%" height="100%">
                                 <Heading size="sm">Bar Chart</Heading>
-                                <HStack width="100%" height="100%">
+                                <Box height="250px" width="100%">
                                     {renderBarPanel()}
-                                </HStack>
+                                </Box>
+                                {renderSelectionElements()}
+                            </VStack>
+                        </TabPanel>
+                        <TabPanel>
+                            <VStack width="100%" height="100%">
+                                <Heading size="sm">Line Chart</Heading>
+                                <Box height="250px" width="100%">
+                                    {renderLinePanel()}
+                                </Box>
+                                {renderSelectionElements()}
                             </VStack>
                         </TabPanel>
                     </TabPanels>
@@ -256,9 +358,9 @@ function FileUploadModal() {
                     </Button>
                     <Button
                         variant="solid"
-                        onClick={() => console.log('Adding stats')}
+                        onClick={() => store.stats.addChart()}
                     >
-                        Add stat
+                        Add chart
                     </Button>
                 </ModalFooter>
             </ModalContent>
