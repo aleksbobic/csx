@@ -230,7 +230,14 @@ function FileUploadModal() {
                             Element values:
                         </FormLabel>
                         <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
-                            <Select size="sm">
+                            <Select
+                                size="sm"
+                                onChange={value =>
+                                    store.stats.changeChartElementValue(
+                                        value.target.value
+                                    )
+                                }
+                            >
                                 {store.stats.getElementValues().map(entry => (
                                     <option
                                         key={`chart_selection_element_${entry.value}`}
