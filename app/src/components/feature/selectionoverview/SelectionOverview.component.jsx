@@ -161,6 +161,25 @@ function SelectionOverview(props) {
         />
     );
 
+    const renderVBarChart = (data, title) => (
+        <Bar
+            data={data}
+            width="100%"
+            height="250px"
+            redraw={true}
+            options={{
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                }
+            }}
+        />
+    );
+
     const renderDoughnutChart = (data, title) => (
         <Doughnut
             height="250px"
@@ -201,44 +220,113 @@ function SelectionOverview(props) {
         />
     );
 
+    const getEdgeChartData = chart => {
+        let values;
+        let title;
+        let chartObject;
+
+        switch (chart.element_values) {
+            case 'values':
+                values = store.stats.getEdgeValueCounts(
+                    chart.type,
+                    chart.display_limit
+                );
+                title = 'edge values';
+                break;
+            case 'types':
+                values = store.stats.getEdgeFeatureCounts(
+                    chart.type,
+                    chart.display_limit
+                );
+                title = 'edge types';
+                break;
+            default:
+                values = store.stats.getEdgeWeightCounts(
+                    chart.type,
+                    chart.display_limit
+                );
+                title = 'edge weights';
+                break;
+        }
+
+        switch (chart.type.toLowerCase()) {
+            case 'bar':
+                chartObject = renderBarChart(values, title);
+                break;
+            case 'line':
+                chartObject = renderLineChart(values, title);
+                break;
+            case 'vertical bar':
+                chartObject = renderVBarChart(values, title);
+                break;
+            default:
+                chartObject = renderDoughnutChart(values, title);
+                break;
+        }
+
+        return chartObject;
+    };
+
+    const getNodeChartData = chart => {
+        let values;
+        let title;
+        let chartObject;
+
+        switch (chart.element_values) {
+            case 'values':
+                values = store.stats.getNodeValueCounts(
+                    chart.type,
+                    chart.display_limit
+                );
+                title = 'node values';
+                break;
+            case 'types':
+                values = store.stats.getNodeFeatureCounts(
+                    chart.type,
+                    chart.display_limit
+                );
+                title = 'node types';
+                break;
+            default:
+                values = store.stats.getNodePropertyCounts(
+                    chart.type,
+                    chart.element_values,
+                    chart.display_limit
+                );
+                title = `property ${chart.element_values} values`;
+                break;
+        }
+
+        switch (chart.type.toLowerCase()) {
+            case 'bar':
+                chartObject = renderBarChart(values, title);
+                break;
+            case 'line':
+                chartObject = renderLineChart(values, title);
+                break;
+            case 'vertical bar':
+                chartObject = renderVBarChart(values, title);
+                break;
+            default:
+                chartObject = renderDoughnutChart(values, title);
+                break;
+        }
+
+        return chartObject;
+    };
+
     const renderCharts = () => {
         const chartList = store.stats.getChartListForDataset();
 
         const gridCharts = chartList
-            .filter(
-                chart =>
-                    chart.network_data === 'all' && chart.elements === 'edges'
-            )
+            .filter(chart => chart.network_data === 'all')
             .map((chart, index) => {
-                let values;
-                let title;
                 let chartObject;
 
-                switch (chart.element_values) {
-                    case 'values':
-                        values = store.stats.getEdgeValueCounts(chart.type);
-                        title = 'edge values';
-                        break;
-                    case 'types':
-                        values = store.stats.getEdgeFeatureCounts(chart.type);
-                        title = 'edge types';
-                        break;
-                    default:
-                        values = store.stats.getEdgeWeightCounts(chart.type);
-                        title = 'edge weights';
-                        break;
-                }
-
-                switch (chart.type.toLowerCase()) {
-                    case 'bar':
-                        chartObject = renderBarChart(values, title);
-                        break;
-                    case 'line':
-                        chartObject = renderLineChart(values, title);
-                        break;
-                    default:
-                        chartObject = renderDoughnutChart(values, title);
-                        break;
+                if (chart.elements === 'nodes') {
+                    chartObject = getNodeChartData(chart);
+                } else {
+                    chartObject = getEdgeChartData(chart);
                 }
 
                 return (
@@ -301,7 +389,7 @@ function SelectionOverview(props) {
                 gap={5}
             >
                 <GridItem
-                    key={'Selection chart add button'}
+                    key={'Selection chart selected nodes'}
                     height="200px"
                     padding="10px"
                     colSpan={1}
@@ -320,7 +408,7 @@ function SelectionOverview(props) {
                     {renderSelectedNodes()}
                 </GridItem>
                 <GridItem
-                    key={'Selection chart add button'}
+                    key={'Selection chart selected components'}
                     height="200px"
                     padding="10px"
                     colSpan={1}
