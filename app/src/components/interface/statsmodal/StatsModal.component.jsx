@@ -283,7 +283,7 @@ function FileUploadModal() {
                         >
                             <Select
                                 id="dataTargetSelector"
-                                defaultValue="selection"
+                                defaultValue="all"
                                 size="sm"
                                 onChange={value =>
                                     store.stats.changeChartNetworkData(

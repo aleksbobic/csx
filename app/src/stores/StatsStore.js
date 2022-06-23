@@ -166,10 +166,28 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: '#3182ce',
+                    backgroundColor: this.getGraphColors(labels),
                     borderColor: 'rgb(0,0,0)'
                 }
             ]
+        };
+    };
+
+    getGroupedBarChartData = (labels, data, label) => {
+        const datasets = [];
+
+        Object.keys(data).forEach((group, index) => {
+            datasets.push({
+                label: group,
+                data: data[group],
+                backgroundColor: this.getGraphColors(labels)[index],
+                borderColor: 'rgb(0,0,0)'
+            });
+        });
+
+        return {
+            labels: labels,
+            datasets: datasets
         };
     };
 
@@ -180,8 +198,8 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: '#3182ce',
-                    borderColor: 'rgb(0,0,0)'
+                    backgroundColor: this.getGraphColors(labels),
+                    borderColor: 'rgba(255,255,255,0.25)'
                 }
             ]
         };
@@ -201,201 +219,82 @@ export class StatsStore {
         };
     };
 
-    getEdgeValueCounts = (chartType, display_limit) => {
+    getEdgeCounts = (edgeProperty, chartType, display_limit) => {
         let values = [];
         let counts = [];
 
-        this.store.graph.currentGraphData.links.forEach(link => {
-            link.connections.forEach(connection => {
-                const labelLocation = values.indexOf(connection.label);
+        if (edgeProperty.type === 'basic') {
+            this.store.graph.currentGraphData.links.forEach(link => {
+                const labelLocation = values.indexOf(link[edgeProperty.prop]);
 
                 if (labelLocation >= 0) {
                     counts[labelLocation] += 1;
                 } else {
-                    values.push(connection.label);
+                    values.push(link[edgeProperty.prop]);
                     counts.push(1);
                 }
             });
-        });
+        } else {
+            this.store.graph.currentGraphData.links.forEach(link => {
+                link.connections.forEach(connection => {
+                    const labelLocation = values.indexOf(
+                        connection[edgeProperty.prop]
+                    );
 
-        if (display_limit > 0) {
-            values = values.slice(0, display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        if (display_limit < 0) {
-            values = values.slice(display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        switch (chartType) {
-            case 'bar':
-                return this.getBarChartData(values, counts, 'counts');
-            case 'line':
-                return this.getLineChartData(values, counts, 'counts');
-            default:
-                return this.getDoughnutChartData(values, counts, 'counts');
-        }
-    };
-
-    getEdgeWeightCounts = (chartType, display_limit) => {
-        let values = [];
-        let counts = [];
-
-        this.store.graph.currentGraphData.links.forEach(link => {
-            const labelLocation = values.indexOf(`Edge weight ${link.weight}`);
-
-            if (labelLocation >= 0) {
-                counts[labelLocation] += 1;
-            } else {
-                values.push(`Edge weight ${link.weight}`);
-                counts.push(1);
-            }
-        });
-
-        if (display_limit > 0) {
-            values = values.slice(0, display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        if (display_limit < 0) {
-            values = values.slice(display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        switch (chartType) {
-            case 'bar':
-                return this.getBarChartData(values, counts, 'counts');
-            case 'line':
-                return this.getLineChartData(values, counts, 'counts');
-            default:
-                return this.getDoughnutChartData(values, counts, 'counts');
-        }
-    };
-
-    getEdgeFeatureCounts = (chartType, display_limit) => {
-        let values = [];
-        let counts = [];
-
-        this.store.graph.currentGraphData.links.forEach(link => {
-            link.connections.forEach(connection => {
-                const labelLocation = values.indexOf(connection.feature);
-
-                if (labelLocation >= 0) {
-                    counts[labelLocation] += 1;
-                } else {
-                    values.push(connection.feature);
-                    counts.push(1);
-                }
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += 1;
+                    } else {
+                        values.push(connection[edgeProperty.prop]);
+                        counts.push(1);
+                    }
+                });
             });
-        });
-
-        if (display_limit > 0) {
-            values = values.slice(0, display_limit);
-            counts = counts.slice(0, display_limit);
         }
 
-        if (display_limit < 0) {
-            values = values.slice(display_limit);
-            counts = counts.slice(0, display_limit);
-        }
+        const [valuesSorted, countsSorted] = this.getSortedValues(
+            counts,
+            values,
+            display_limit
+        );
 
-        switch (chartType) {
+        return this.getChartDataBasedOnType(
+            valuesSorted,
+            countsSorted,
+            chartType
+        );
+    };
+
+    getNodeDataBasedOnNetworkSelection = network_data => {
+        switch (network_data) {
+            case 'selection':
+                return this.store.graph.currentGraphData.selectedNodes;
+
+            case 'visible':
+                return this.store.graph.currentGraphData.nodes.filter(
+                    node => node.visible
+                );
+
+            default:
+                return this.store.graph.currentGraphData.nodes;
+        }
+    };
+
+    getChartDataBasedOnType = (values, counts, chartType) => {
+        switch (chartType.toLowerCase()) {
             case 'bar':
                 return this.getBarChartData(values, counts, 'counts');
             case 'line':
                 return this.getLineChartData(values, counts, 'counts');
+            case 'grouped bar':
+                return this.getGroupedBarChartData(values, counts, 'counts');
             default:
                 return this.getDoughnutChartData(values, counts, 'counts');
         }
     };
 
-    getNodeValueCounts = (chartType, display_limit) => {
-        let values = [];
-        let counts = [];
-
-        this.store.graph.currentGraphData.nodes.forEach(node => {
-            const labelLocation = values.indexOf(node.label);
-
-            if (labelLocation >= 0) {
-                counts[labelLocation] += 1;
-            } else {
-                values.push(node.label);
-                counts.push(1);
-            }
-        });
-
-        if (display_limit > 0) {
-            values = values.slice(0, display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        if (display_limit < 0) {
-            values = values.slice(display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        switch (chartType) {
-            case 'bar':
-                return this.getBarChartData(values, counts, 'counts');
-            case 'line':
-                return this.getLineChartData(values, counts, 'counts');
-            default:
-                return this.getDoughnutChartData(values, counts, 'counts');
-        }
-    };
-
-    getNodeFeatureCounts = (chartType, display_limit) => {
-        let values = [];
-        let counts = [];
-
-        this.store.graph.currentGraphData.nodes.forEach(node => {
-            const labelLocation = values.indexOf(node.feature);
-
-            if (labelLocation >= 0) {
-                counts[labelLocation] += 1;
-            } else {
-                values.push(node.feature);
-                counts.push(1);
-            }
-        });
-
-        if (display_limit > 0) {
-            values = values.slice(0, display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        if (display_limit < 0) {
-            values = values.slice(display_limit);
-            counts = counts.slice(0, display_limit);
-        }
-
-        switch (chartType) {
-            case 'bar':
-                return this.getBarChartData(values, counts, 'counts');
-            case 'line':
-                return this.getLineChartData(values, counts, 'counts');
-            default:
-                return this.getDoughnutChartData(values, counts, 'counts');
-        }
-    };
-
-    getNodePropertyCounts = (chartType, property, display_limit) => {
-        let values = [];
-        const counts = [];
+    getSortedValues = (counts, values, display_limit) => {
         const valuesSorted = [];
         const countsSorted = [];
-
-        this.store.graph.currentGraphData.nodes.forEach(node => {
-            const labelLocation = values.indexOf(node.properties[property]);
-
-            if (labelLocation >= 0) {
-                counts[labelLocation] += 1;
-            } else {
-                values.push(node.properties[property]);
-                counts.push(1);
-            }
-        });
 
         values = values
             .map((val, index) => {
@@ -424,25 +323,107 @@ export class StatsStore {
             countsSorted.push(entry.counts);
         });
 
-        switch (chartType) {
-            case 'bar':
-                return this.getBarChartData(
-                    valuesSorted,
-                    countsSorted,
-                    'counts'
+        return [valuesSorted, countsSorted];
+    };
+
+    getNodeBasicProp = (node, prop) => node[prop];
+
+    getNodeAdvancedProp = (node, prop) => node.properties[prop];
+
+    getNodeGroups = (groupBy, data) => {
+        const groups = {};
+
+        let getNodeProp =
+            groupBy.type === 'basic'
+                ? this.getNodeBasicProp
+                : this.getNodeAdvancedProp;
+
+        data.forEach(node => {
+            const group = getNodeProp(node, groupBy.prop);
+
+            if (Object.keys(groups).includes(group)) {
+                groups[group].push(node);
+            } else {
+                groups[group] = [node];
+            }
+        });
+
+        return groups;
+    };
+
+    getNodeCounts = (
+        nodeProperty,
+        chartType,
+        display_limit,
+        network_data,
+        groupBy
+    ) => {
+        let data = this.getNodeDataBasedOnNetworkSelection(network_data);
+        let getNodeProp =
+            nodeProperty.type === 'basic'
+                ? this.getNodeBasicProp
+                : this.getNodeAdvancedProp;
+
+        if (groupBy) {
+            let groupedByCounts = {};
+
+            const groups = this.getNodeGroups(groupBy, data);
+
+            const uniqueValues = [
+                ...new Set(
+                    data.map(node => getNodeProp(node, nodeProperty.prop))
+                )
+            ];
+
+            Object.keys(groups).forEach(group => {
+                groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
+            });
+
+            Object.keys(groups).forEach(group => {
+                data = groups[group];
+
+                data.forEach(node => {
+                    const labelLocation = uniqueValues.indexOf(
+                        getNodeProp(node, nodeProperty.prop)
+                    );
+
+                    groupedByCounts[group][labelLocation] += 1;
+                });
+            });
+
+            return this.getChartDataBasedOnType(
+                uniqueValues,
+                groupedByCounts,
+                chartType
+            );
+        } else {
+            let values = [];
+            let counts = [];
+
+            data.forEach(node => {
+                const labelLocation = values.indexOf(
+                    getNodeProp(node, nodeProperty.prop)
                 );
-            case 'line':
-                return this.getLineChartData(
-                    valuesSorted,
-                    countsSorted,
-                    'counts'
-                );
-            default:
-                return this.getDoughnutChartData(
-                    valuesSorted,
-                    countsSorted,
-                    'counts'
-                );
+
+                if (labelLocation >= 0) {
+                    counts[labelLocation] += 1;
+                } else {
+                    values.push(getNodeProp(node, nodeProperty.prop));
+                    counts.push(1);
+                }
+            });
+
+            const [valuesSorted, countsSorted] = this.getSortedValues(
+                counts,
+                values,
+                display_limit
+            );
+
+            return this.getChartDataBasedOnType(
+                valuesSorted,
+                countsSorted,
+                chartType
+            );
         }
     };
 }

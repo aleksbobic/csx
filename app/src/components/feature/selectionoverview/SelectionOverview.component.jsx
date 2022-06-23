@@ -1,12 +1,10 @@
 import {
     Box,
-    Flex,
     Grid,
     GridItem,
     Heading,
     HStack,
     IconButton,
-    SimpleGrid,
     Stat,
     Tag,
     TagLabel,
@@ -15,11 +13,6 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { ArrowsH, ArrowsMergeAltH, Close, MathPlus, Remove } from 'css.gg';
-import { observer } from 'mobx-react';
-import PropTypes from 'prop-types';
-import { useContext, useEffect } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
 import {
     ArcElement,
     BarElement,
@@ -32,7 +25,12 @@ import {
     Title,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
+import { ArrowsH, ArrowsMergeAltH, Close, MathPlus, Remove } from 'css.gg';
+import { observer } from 'mobx-react';
+import PropTypes from 'prop-types';
+import { useContext, useEffect } from 'react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { RootStoreContext } from 'stores/RootStore';
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
 
@@ -151,6 +149,11 @@ function SelectionOverview(props) {
                 maintainAspectRatio: false,
                 indexAxis: 'y',
                 responsive: true,
+                scales: {
+                    y: {
+                        display: false
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
@@ -162,6 +165,30 @@ function SelectionOverview(props) {
     );
 
     const renderVBarChart = (data, title) => (
+        <Bar
+            data={data}
+            width="100%"
+            height="250px"
+            redraw={true}
+            options={{
+                maintainAspectRatio: false,
+                responsive: true,
+                scales: {
+                    x: {
+                        display: false
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    }
+                }
+            }}
+        />
+    );
+
+    const groupedBarChart = (data, title) => (
         <Bar
             data={data}
             width="100%"
@@ -210,175 +237,176 @@ function SelectionOverview(props) {
             options={{
                 maintainAspectRatio: false,
                 responsive: true,
+                scales: {
+                    x: {
+                        display: false
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
                         text: title
+                    },
+                    legend: {
+                        display: false
                     }
                 }
             }}
         />
     );
 
+    const getChartObject = (type, values, title) => {
+        switch (type.toLowerCase()) {
+            case 'bar':
+                return renderBarChart(values, title);
+
+            case 'line':
+                return renderLineChart(values, title);
+
+            case 'vertical bar':
+                return renderVBarChart(values, title);
+            case 'grouped bar':
+                return groupedBarChart(values, title);
+            default:
+                return renderDoughnutChart(values, title);
+        }
+    };
+
     const getEdgeChartData = chart => {
-        let values;
         let title;
-        let chartObject;
+        let edgeProperty;
 
         switch (chart.element_values) {
             case 'values':
-                values = store.stats.getEdgeValueCounts(
-                    chart.type,
-                    chart.display_limit
-                );
+                edgeProperty = { type: 'advanced', prop: 'label' };
                 title = 'edge values';
                 break;
             case 'types':
-                values = store.stats.getEdgeFeatureCounts(
-                    chart.type,
-                    chart.display_limit
-                );
+                edgeProperty = { type: 'advanced', prop: 'feature' };
                 title = 'edge types';
                 break;
             default:
-                values = store.stats.getEdgeWeightCounts(
-                    chart.type,
-                    chart.display_limit
-                );
+                edgeProperty = { type: 'basic', prop: 'weight' };
                 title = 'edge weights';
                 break;
         }
 
-        switch (chart.type.toLowerCase()) {
-            case 'bar':
-                chartObject = renderBarChart(values, title);
-                break;
-            case 'line':
-                chartObject = renderLineChart(values, title);
-                break;
-            case 'vertical bar':
-                chartObject = renderVBarChart(values, title);
-                break;
-            default:
-                chartObject = renderDoughnutChart(values, title);
-                break;
-        }
+        const values = store.stats.getEdgeCounts(
+            edgeProperty,
+            chart.type,
+            chart.display_limit
+        );
 
-        return chartObject;
+        return getChartObject(chart.type, values, title);
     };
 
+    const getNodeGroupByParam = groupBy => {
+        switch (groupBy) {
+            case 'values':
+                return { type: 'basic', prop: 'label' };
+            case 'types':
+                return { type: 'basic', prop: 'feature' };
+            default:
+                return { type: 'advanced', prop: groupBy };
+        }
+    };
     const getNodeChartData = chart => {
-        let values;
         let title;
-        let chartObject;
+        let nodeProperty;
+        let groupBy;
+
+        if (chart.type.toLowerCase() === 'grouped bar') {
+            groupBy = getNodeGroupByParam(chart.group_by);
+        }
 
         switch (chart.element_values) {
             case 'values':
-                values = store.stats.getNodeValueCounts(
-                    chart.type,
-                    chart.display_limit
-                );
+                nodeProperty = { type: 'basic', prop: 'label' };
                 title = 'node values';
                 break;
             case 'types':
-                values = store.stats.getNodeFeatureCounts(
-                    chart.type,
-                    chart.display_limit
-                );
+                nodeProperty = { type: 'basic', prop: 'feature' };
                 title = 'node types';
                 break;
             default:
-                values = store.stats.getNodePropertyCounts(
-                    chart.type,
-                    chart.element_values,
-                    chart.display_limit
-                );
+                nodeProperty = { type: 'advanced', prop: chart.element_values };
                 title = `property ${chart.element_values} values`;
                 break;
         }
 
-        switch (chart.type.toLowerCase()) {
-            case 'bar':
-                chartObject = renderBarChart(values, title);
-                break;
-            case 'line':
-                chartObject = renderLineChart(values, title);
-                break;
-            case 'vertical bar':
-                chartObject = renderVBarChart(values, title);
-                break;
-            default:
-                chartObject = renderDoughnutChart(values, title);
-                break;
-        }
+        const values = store.stats.getNodeCounts(
+            nodeProperty,
+            chart.type,
+            chart.display_limit,
+            chart.network_data,
+            groupBy
+        );
 
-        return chartObject;
+        return getChartObject(chart.type, values, title);
     };
 
     const renderCharts = () => {
         const chartList = store.stats.getChartListForDataset();
 
-        const gridCharts = chartList
-            .filter(chart => chart.network_data === 'all')
-            .map((chart, index) => {
-                let chartObject;
+        const gridCharts = chartList.map((chart, index) => {
+            let chartObject;
 
-                if (chart.elements === 'nodes') {
-                    chartObject = getNodeChartData(chart);
-                } else {
-                    chartObject = getEdgeChartData(chart);
-                }
+            if (chart.elements === 'nodes') {
+                chartObject = getNodeChartData(chart);
+            } else {
+                chartObject = getEdgeChartData(chart);
+            }
 
-                return (
-                    <GridItem
-                        key={`Selection chart ${index}`}
-                        height={chart.height}
-                        padding="10px"
-                        colSpan={chart.colSpan}
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius={8}
-                        position="relative"
-                    >
-                        {chartObject}
-                        <HStack position="absolute" top="6px" right="6px">
-                            {chart.colSpan === 1 ? (
-                                <Tooltip label="Expand">
-                                    <IconButton
-                                        icon={<ArrowsH />}
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() =>
-                                            store.stats.expandChart(chart.id)
-                                        }
-                                    />
-                                </Tooltip>
-                            ) : (
-                                <Tooltip label="Shrink">
-                                    <IconButton
-                                        icon={<ArrowsMergeAltH />}
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() =>
-                                            store.stats.shrinkChart(chart.id)
-                                        }
-                                    />
-                                </Tooltip>
-                            )}
-
-                            <Tooltip label="Remove chart">
+            return (
+                <GridItem
+                    key={`Selection chart ${index}`}
+                    height={chart.height}
+                    padding="10px"
+                    colSpan={chart.colSpan}
+                    backgroundColor="whiteAlpha.200"
+                    borderRadius={8}
+                    position="relative"
+                >
+                    {chartObject}
+                    <HStack position="absolute" top="6px" right="6px">
+                        {chart.colSpan === 1 ? (
+                            <Tooltip label="Expand">
                                 <IconButton
-                                    icon={<Close />}
+                                    icon={<ArrowsH />}
                                     size="sm"
                                     variant="ghost"
                                     onClick={() =>
-                                        store.stats.removeChart(chart.id)
+                                        store.stats.expandChart(chart.id)
                                     }
                                 />
                             </Tooltip>
-                        </HStack>
-                    </GridItem>
-                );
-            });
+                        ) : (
+                            <Tooltip label="Shrink">
+                                <IconButton
+                                    icon={<ArrowsMergeAltH />}
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                        store.stats.shrinkChart(chart.id)
+                                    }
+                                />
+                            </Tooltip>
+                        )}
+
+                        <Tooltip label="Remove chart">
+                            <IconButton
+                                icon={<Close />}
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                    store.stats.removeChart(chart.id)
+                                }
+                            />
+                        </Tooltip>
+                    </HStack>
+                </GridItem>
+            );
+        });
 
         return (
             <Grid
@@ -388,44 +416,48 @@ function SelectionOverview(props) {
                 templateColumns="repeat(2, 1fr)"
                 gap={5}
             >
-                <GridItem
-                    key={'Selection chart selected nodes'}
-                    height="200px"
-                    padding="10px"
-                    colSpan={1}
-                    backgroundColor="whiteAlpha.200"
-                    borderRadius={8}
-                    position="relative"
-                >
-                    <Heading
-                        size="sm"
-                        textAlign="left"
-                        width="100%"
-                        marginBottom="10px"
+                {store.graph.currentGraphData.selectedNodes.length > 0 && (
+                    <GridItem
+                        key={'Selection chart selected nodes'}
+                        height="200px"
+                        padding="10px"
+                        colSpan={1}
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius={8}
+                        position="relative"
                     >
-                        Selected nodes
-                    </Heading>
-                    {renderSelectedNodes()}
-                </GridItem>
-                <GridItem
-                    key={'Selection chart selected components'}
-                    height="200px"
-                    padding="10px"
-                    colSpan={1}
-                    backgroundColor="whiteAlpha.200"
-                    borderRadius={8}
-                    position="relative"
-                >
-                    <Heading
-                        size="sm"
-                        textAlign="left"
-                        width="100%"
-                        marginBottom="10px"
+                        <Heading
+                            size="sm"
+                            textAlign="left"
+                            width="100%"
+                            marginBottom="10px"
+                        >
+                            Selected nodes
+                        </Heading>
+                        {renderSelectedNodes()}
+                    </GridItem>
+                )}
+                {store.graph.currentGraphData.selectedComponents.length > 0 && (
+                    <GridItem
+                        key={'Selection chart selected components'}
+                        height="200px"
+                        padding="10px"
+                        colSpan={1}
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius={8}
+                        position="relative"
                     >
-                        Selected components
-                    </Heading>
-                    {renderSelectedComponents()}
-                </GridItem>
+                        <Heading
+                            size="sm"
+                            textAlign="left"
+                            width="100%"
+                            marginBottom="10px"
+                        >
+                            Selected components
+                        </Heading>
+                        {renderSelectedComponents()}
+                    </GridItem>
+                )}
                 {gridCharts}
                 <GridItem
                     key={'Selection chart add button'}
