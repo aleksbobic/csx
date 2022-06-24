@@ -6,6 +6,7 @@ export class StatsStore {
     isStatsModalVisible = false;
     chartTypes = ['Doughnut', 'Bar', 'Line', 'Vertical Bar', 'Grouped Bar'];
     newChartProps = {
+        network: 'all',
         type: 'doughnut',
         network_data: 'all',
         elements: 'nodes',
@@ -54,6 +55,7 @@ export class StatsStore {
 
     resetChartProps = () => {
         this.newChartProps = {
+            network: 'all',
             type: 'doughnut',
             network_data: 'all',
             elements: 'nodes',
@@ -76,6 +78,10 @@ export class StatsStore {
 
     changeSelectedChartType = index => {
         this.newChartProps.type = this.chartTypes[index];
+    };
+
+    changeChartNetwork = val => {
+        this.newChartProps.network = val;
     };
 
     changeChartNetworkData = val => {

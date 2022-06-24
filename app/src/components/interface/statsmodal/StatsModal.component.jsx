@@ -267,6 +267,27 @@ function FileUploadModal() {
             <Box>
                 <SimpleGrid columns={3} spacing={5}>
                     <FormControl>
+                        <FormLabel>Graph:</FormLabel>
+                        <Tooltip label="Select the network for which the chart should appear.">
+                            <Select
+                                defaultValue="all"
+                                size="sm"
+                                onChange={value =>
+                                    store.stats.changeChartNetwork(
+                                        value.target.value
+                                    )
+                                }
+                            >
+                                <option value="all">All networks</option>
+                                <option value="overview">
+                                    Overview network
+                                </option>
+                                <option value="detail">Detail network</option>
+                            </Select>
+                        </Tooltip>
+                    </FormControl>
+
+                    <FormControl>
                         <FormLabel htmlFor="dataTargetSelector">
                             Network data:
                         </FormLabel>

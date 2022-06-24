@@ -419,7 +419,12 @@ function SelectionOverview(props) {
         const chartList = store.stats.getChartListForDataset();
 
         const gridCharts = chartList
-            .filter(chart => props.types.includes(chart.network_data))
+            .filter(
+                chart =>
+                    props.types.includes(chart.network_data) &&
+                    (chart.network === 'all' ||
+                        chart.network === store.core.currentGraph)
+            )
             .map((chart, index) => {
                 let chartObject;
 
