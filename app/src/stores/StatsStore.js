@@ -176,11 +176,13 @@ export class StatsStore {
     getGroupedBarChartData = (labels, data, label) => {
         const datasets = [];
 
+        const groupColors = this.getGraphColors(Object.keys(data));
+
         Object.keys(data).forEach((group, index) => {
             datasets.push({
                 label: group,
                 data: data[group],
-                backgroundColor: this.getGraphColors(labels)[index],
+                backgroundColor: groupColors[index],
                 borderColor: 'rgb(0,0,0)'
             });
         });

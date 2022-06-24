@@ -163,7 +163,7 @@ function GraphDetails() {
     };
 
     return (
-        <VStack spacing="20px" height="100%">
+        <VStack spacing="20px" height="auto">
             <VStack width="100%">
                 <Heading width="100%" textAlign="left" size="md">
                     Graph search term(s):

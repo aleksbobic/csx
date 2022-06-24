@@ -265,10 +265,7 @@ function FileUploadModal() {
     const renderSelectionElements = selectionElementsType => {
         return (
             <Box>
-                <SimpleGrid
-                    columns={selectionElementsType === 'grouped' ? 3 : 2}
-                    spacing={5}
-                >
+                <SimpleGrid columns={3} spacing={5}>
                     <FormControl>
                         <FormLabel htmlFor="dataTargetSelector">
                             Network data:

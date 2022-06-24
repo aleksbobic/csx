@@ -123,6 +123,7 @@ function DataPanel() {
             >
                 <TabPanel padding="10px" paddingTop="60px" height="100%">
                     <GraphDetailsComponent />
+                    <SelectionOverview types={['all']} />
                 </TabPanel>
                 <TabPanel paddingLeft="0" paddingRight="0" paddingTop="15px">
                     <SelectionOverview />

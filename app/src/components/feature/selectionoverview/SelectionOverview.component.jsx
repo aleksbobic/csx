@@ -348,65 +348,67 @@ function SelectionOverview(props) {
     const renderCharts = () => {
         const chartList = store.stats.getChartListForDataset();
 
-        const gridCharts = chartList.map((chart, index) => {
-            let chartObject;
+        const gridCharts = chartList
+            .filter(chart => props.types.includes(chart.network_data))
+            .map((chart, index) => {
+                let chartObject;
 
-            if (chart.elements === 'nodes') {
-                chartObject = getNodeChartData(chart);
-            } else {
-                chartObject = getEdgeChartData(chart);
-            }
+                if (chart.elements === 'nodes') {
+                    chartObject = getNodeChartData(chart);
+                } else {
+                    chartObject = getEdgeChartData(chart);
+                }
 
-            return (
-                <GridItem
-                    key={`Selection chart ${index}`}
-                    height={chart.height}
-                    padding="10px"
-                    colSpan={chart.colSpan}
-                    backgroundColor="whiteAlpha.200"
-                    borderRadius={8}
-                    position="relative"
-                >
-                    {chartObject}
-                    <HStack position="absolute" top="6px" right="6px">
-                        {chart.colSpan === 1 ? (
-                            <Tooltip label="Expand">
+                return (
+                    <GridItem
+                        key={`Selection chart ${index}`}
+                        height={chart.height}
+                        padding="10px"
+                        colSpan={chart.colSpan}
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius={8}
+                        position="relative"
+                    >
+                        {chartObject}
+                        <HStack position="absolute" top="6px" right="6px">
+                            {chart.colSpan === 1 ? (
+                                <Tooltip label="Expand">
+                                    <IconButton
+                                        icon={<ArrowsH />}
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                            store.stats.expandChart(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+                            ) : (
+                                <Tooltip label="Shrink">
+                                    <IconButton
+                                        icon={<ArrowsMergeAltH />}
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() =>
+                                            store.stats.shrinkChart(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+                            )}
+
+                            <Tooltip label="Remove chart">
                                 <IconButton
-                                    icon={<ArrowsH />}
+                                    icon={<Close />}
                                     size="sm"
                                     variant="ghost"
                                     onClick={() =>
-                                        store.stats.expandChart(chart.id)
+                                        store.stats.removeChart(chart.id)
                                     }
                                 />
                             </Tooltip>
-                        ) : (
-                            <Tooltip label="Shrink">
-                                <IconButton
-                                    icon={<ArrowsMergeAltH />}
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() =>
-                                        store.stats.shrinkChart(chart.id)
-                                    }
-                                />
-                            </Tooltip>
-                        )}
-
-                        <Tooltip label="Remove chart">
-                            <IconButton
-                                icon={<Close />}
-                                size="sm"
-                                variant="ghost"
-                                onClick={() =>
-                                    store.stats.removeChart(chart.id)
-                                }
-                            />
-                        </Tooltip>
-                    </HStack>
-                </GridItem>
-            );
-        });
+                        </HStack>
+                    </GridItem>
+                );
+            });
 
         return (
             <Grid
@@ -416,55 +418,58 @@ function SelectionOverview(props) {
                 templateColumns="repeat(2, 1fr)"
                 gap={5}
             >
-                {store.graph.currentGraphData.selectedNodes.length > 0 && (
-                    <GridItem
-                        key={'Selection chart selected nodes'}
-                        height="200px"
-                        padding="10px"
-                        colSpan={1}
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius={8}
-                        position="relative"
-                    >
-                        <Heading
-                            size="sm"
-                            textAlign="left"
-                            width="100%"
-                            marginBottom="10px"
+                {props.types.includes('selection') &&
+                    store.graph.currentGraphData.selectedNodes.length > 0 && (
+                        <GridItem
+                            key={'Selection chart selected nodes'}
+                            height="200px"
+                            padding="10px"
+                            colSpan={1}
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius={8}
+                            position="relative"
                         >
-                            Selected nodes
-                        </Heading>
-                        {renderSelectedNodes()}
-                    </GridItem>
-                )}
-                {store.graph.currentGraphData.selectedComponents.length > 0 && (
-                    <GridItem
-                        key={'Selection chart selected components'}
-                        height="200px"
-                        padding="10px"
-                        colSpan={1}
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius={8}
-                        position="relative"
-                    >
-                        <Heading
-                            size="sm"
-                            textAlign="left"
-                            width="100%"
-                            marginBottom="10px"
+                            <Heading
+                                size="sm"
+                                textAlign="left"
+                                width="100%"
+                                marginBottom="10px"
+                            >
+                                Selected nodes
+                            </Heading>
+                            {renderSelectedNodes()}
+                        </GridItem>
+                    )}
+                {props.types.includes('selection') &&
+                    store.graph.currentGraphData.selectedComponents.length >
+                        0 && (
+                        <GridItem
+                            key={'Selection chart selected components'}
+                            height="200px"
+                            padding="10px"
+                            colSpan={1}
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius={8}
+                            position="relative"
                         >
-                            Selected components
-                        </Heading>
-                        {renderSelectedComponents()}
-                    </GridItem>
-                )}
+                            <Heading
+                                size="sm"
+                                textAlign="left"
+                                width="100%"
+                                marginBottom="10px"
+                            >
+                                Selected components
+                            </Heading>
+                            {renderSelectedComponents()}
+                        </GridItem>
+                    )}
                 {gridCharts}
                 <GridItem
-                    key={'Selection chart add button'}
+                    key={'Chart grid add button'}
                     height="200px"
                     padding="10px"
                     colSpan={1}
-                    backgroundColor="whiteAlpha.200"
+                    backgroundColor="transparent"
                     borderRadius={8}
                     position="relative"
                 >
@@ -566,8 +571,11 @@ function SelectionOverview(props) {
 }
 
 SelectionOverview.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number
+    types: PropTypes.array
+};
+
+SelectionOverview.defaultProps = {
+    types: ['selection', 'visible']
 };
 
 export default observer(SelectionOverview);
