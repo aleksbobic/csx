@@ -25,7 +25,16 @@ import {
     Title,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
-import { ArrowsH, ArrowsMergeAltH, Close, MathPlus, Remove } from 'css.gg';
+import {
+    ArrowsH,
+    ArrowsMergeAltH,
+    Close,
+    FormatText,
+    MathPlus,
+    Remove,
+    Ruler,
+    ToolbarTop
+} from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
@@ -139,7 +148,7 @@ function SelectionOverview(props) {
         );
     };
 
-    const renderBarChart = (data, title) => (
+    const renderBarChart = (data, title, chart) => (
         <Bar
             data={data}
             width="100%"
@@ -147,24 +156,35 @@ function SelectionOverview(props) {
             redraw={true}
             options={{
                 maintainAspectRatio: false,
-                indexAxis: 'y',
                 responsive: true,
                 scales: {
                     y: {
-                        display: false
+                        display: chart.labels.y.display,
+                        ticks: {
+                            diplay: chart.labels.y.display
+                        }
+                    },
+                    x: {
+                        display: chart.labels.x.display,
+                        ticks: {
+                            diplay: chart.labels.x.display
+                        }
                     }
                 },
                 plugins: {
                     title: {
                         display: true,
                         text: title
+                    },
+                    legend: {
+                        display: chart.legend
                     }
                 }
             }}
         />
     );
 
-    const renderVBarChart = (data, title) => (
+    const renderVBarChart = (data, title, chart) => (
         <Bar
             data={data}
             width="100%"
@@ -174,21 +194,33 @@ function SelectionOverview(props) {
                 maintainAspectRatio: false,
                 responsive: true,
                 scales: {
+                    y: {
+                        display: chart.labels.y.display,
+                        ticks: {
+                            diplay: chart.labels.y.display
+                        }
+                    },
                     x: {
-                        display: false
+                        display: chart.labels.x.display,
+                        ticks: {
+                            diplay: chart.labels.x.display
+                        }
                     }
                 },
                 plugins: {
                     title: {
                         display: true,
                         text: title
+                    },
+                    legend: {
+                        display: chart.legend
                     }
                 }
             }}
         />
     );
 
-    const groupedBarChart = (data, title) => (
+    const groupedBarChart = (data, title, chart) => (
         <Bar
             data={data}
             width="100%"
@@ -197,17 +229,34 @@ function SelectionOverview(props) {
             options={{
                 maintainAspectRatio: false,
                 responsive: true,
+                scales: {
+                    y: {
+                        display: chart.labels.y.display,
+                        ticks: {
+                            diplay: chart.labels.y.display
+                        }
+                    },
+                    x: {
+                        display: chart.labels.x.display,
+                        ticks: {
+                            diplay: chart.labels.x.display
+                        }
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
                         text: title
+                    },
+                    legend: {
+                        display: chart.legend
                     }
                 }
             }}
         />
     );
 
-    const renderDoughnutChart = (data, title) => (
+    const renderDoughnutChart = (data, title, chart) => (
         <Doughnut
             height="250px"
             redraw={true}
@@ -215,20 +264,34 @@ function SelectionOverview(props) {
             options={{
                 maintainAspectRatio: false,
                 responsive: true,
+                scales: {
+                    y: {
+                        display: chart.labels.y.display,
+                        ticks: {
+                            diplay: chart.labels.y.display
+                        }
+                    },
+                    x: {
+                        display: chart.labels.x.display,
+                        ticks: {
+                            diplay: chart.labels.x.display
+                        }
+                    }
+                },
                 plugins: {
                     title: {
                         display: true,
                         text: title
                     },
                     legend: {
-                        display: false
+                        display: chart.legend
                     }
                 }
             }}
         />
     );
 
-    const renderLineChart = (data, title) => (
+    const renderLineChart = (data, title, chart) => (
         <Line
             data={data}
             width="100%"
@@ -238,8 +301,17 @@ function SelectionOverview(props) {
                 maintainAspectRatio: false,
                 responsive: true,
                 scales: {
+                    y: {
+                        display: chart.labels.y.display,
+                        ticks: {
+                            diplay: chart.labels.y.display
+                        }
+                    },
                     x: {
-                        display: false
+                        display: chart.labels.x.display,
+                        ticks: {
+                            diplay: chart.labels.x.display
+                        }
                     }
                 },
                 plugins: {
@@ -248,27 +320,25 @@ function SelectionOverview(props) {
                         text: title
                     },
                     legend: {
-                        display: false
+                        display: chart.legend
                     }
                 }
             }}
         />
     );
 
-    const getChartObject = (type, values, title) => {
-        switch (type.toLowerCase()) {
+    const getChartObject = (chart, values, title) => {
+        switch (chart.type.toLowerCase()) {
             case 'bar':
-                return renderBarChart(values, title);
-
+                return renderBarChart(values, title, chart);
             case 'line':
-                return renderLineChart(values, title);
-
+                return renderLineChart(values, title, chart);
             case 'vertical bar':
-                return renderVBarChart(values, title);
+                return renderVBarChart(values, title, chart);
             case 'grouped bar':
-                return groupedBarChart(values, title);
+                return groupedBarChart(values, title, chart);
             default:
-                return renderDoughnutChart(values, title);
+                return renderDoughnutChart(values, title, chart);
         }
     };
 
@@ -297,7 +367,7 @@ function SelectionOverview(props) {
             chart.display_limit
         );
 
-        return getChartObject(chart.type, values, title);
+        return getChartObject(chart, values, title);
     };
 
     const getNodeGroupByParam = groupBy => {
@@ -342,7 +412,7 @@ function SelectionOverview(props) {
             groupBy
         );
 
-        return getChartObject(chart.type, values, title);
+        return getChartObject(chart, values, title);
     };
 
     const renderCharts = () => {
@@ -406,6 +476,46 @@ function SelectionOverview(props) {
                                 />
                             </Tooltip>
                         </HStack>
+
+                        {chart.colSpan === 2 && (
+                            <HStack
+                                position="absolute"
+                                bottom="6px"
+                                right="6px"
+                            >
+                                <Tooltip label="Toggle legend">
+                                    <IconButton
+                                        icon={<ToolbarTop />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.toggleLegend(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+
+                                <Tooltip label="Toggle axis labels">
+                                    <IconButton
+                                        icon={<Ruler />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.toggleAxisLabels(
+                                                chart.id
+                                            )
+                                        }
+                                    />
+                                </Tooltip>
+                            </HStack>
+                        )}
                     </GridItem>
                 );
             });

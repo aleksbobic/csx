@@ -11,7 +11,18 @@ export class StatsStore {
         elements: 'nodes',
         element_values: 'values',
         display_limit: 'all',
-        group_by: 'types'
+        group_by: 'types',
+        colSpan: 1,
+        height: '200px',
+        legend: false,
+        labels: {
+            x: {
+                display: false
+            },
+            y: {
+                display: false
+            }
+        }
     };
 
     charts = {};
@@ -48,7 +59,18 @@ export class StatsStore {
             elements: 'nodes',
             element_values: 'values',
             display_limit: 'all',
-            group_by: 'types'
+            group_by: 'types',
+            colSpan: 1,
+            height: '200px',
+            legend: false,
+            labels: {
+                x: {
+                    display: false
+                },
+                y: {
+                    display: false
+                }
+            }
         };
     };
 
@@ -136,7 +158,11 @@ export class StatsStore {
                 return chart;
             }
 
-            return { ...chart, colSpan: 2, height: '400px' };
+            return {
+                ...chart,
+                colSpan: 2,
+                height: '400px'
+            };
         });
     };
 
@@ -147,7 +173,55 @@ export class StatsStore {
                 return chart;
             }
 
-            return { ...chart, colSpan: 1, height: '200px' };
+            return {
+                ...chart,
+                colSpan: 1,
+                height: '200px',
+                legend: false,
+                labels: {
+                    x: {
+                        display: false
+                    },
+                    y: {
+                        display: false
+                    }
+                }
+            };
+        });
+    };
+
+    toggleLegend = id => {
+        const dataset = this.store.search.currentDataset;
+        this.charts[dataset] = this.charts[dataset].map(chart => {
+            if (chart.id !== id) {
+                return chart;
+            }
+
+            return {
+                ...chart,
+                legend: !chart.legend
+            };
+        });
+    };
+
+    toggleAxisLabels = id => {
+        const dataset = this.store.search.currentDataset;
+        this.charts[dataset] = this.charts[dataset].map(chart => {
+            if (chart.id !== id) {
+                return chart;
+            }
+
+            return {
+                ...chart,
+                labels: {
+                    x: {
+                        display: !chart.labels.x.display
+                    },
+                    y: {
+                        display: !chart.labels.y.display
+                    }
+                }
+            };
         });
     };
 
