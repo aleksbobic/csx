@@ -457,15 +457,29 @@ export class StatsStore {
                 )
             ];
 
+            const allValueCounts = new Array(uniqueValues.length).fill(0);
+
+            data.map(node => getNodeProp(node, nodeProperty.prop)).forEach(
+                value => {
+                    allValueCounts[uniqueValues.indexOf(value)] += 1;
+                }
+            );
+
             Object.keys(groups).forEach(group => {
                 groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
             });
+
+            const [valuesSorted] = this.getSortedValues(
+                allValueCounts,
+                uniqueValues,
+                display_limit
+            );
 
             Object.keys(groups).forEach(group => {
                 data = groups[group];
 
                 data.forEach(node => {
-                    const labelLocation = uniqueValues.indexOf(
+                    const labelLocation = valuesSorted.indexOf(
                         getNodeProp(node, nodeProperty.prop)
                     );
 
@@ -474,7 +488,7 @@ export class StatsStore {
             });
 
             return this.getChartDataBasedOnType(
-                uniqueValues,
+                valuesSorted,
                 groupedByCounts,
                 chartType
             );
