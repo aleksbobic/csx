@@ -377,7 +377,9 @@ function FileUploadModal() {
                     )}
 
                     {store.core.currentGraph === 'detail' &&
-                        store.stats.newChartProps.elements === 'nodes' && (
+                        store.stats.newChartProps.elements === 'nodes' &&
+                        store.stats.newChartProps.element_values !==
+                            'types' && (
                             <FormControl>
                                 <FormLabel>Show only:</FormLabel>
                                 <Tooltip label="These values will define which types of nodes you want to explore.">
