@@ -311,12 +311,153 @@ export class StatsStore {
         };
     };
 
-    getEdgeCounts = (edgeProperty, chartType, display_limit) => {
-        let values = [];
-        let counts = [];
+    getEdgeGroups = (groupBy, data) => {
+        console.log(groupBy);
+        console.log(data);
+        const groups = {};
+
+        if (groupBy.type === 'basic') {
+            data.forEach(link => {
+                const group = link[groupBy.prop];
+
+                if (Object.keys(groups).includes(group)) {
+                    groups[group].push(link);
+                } else {
+                    groups[group] = [link];
+                }
+            });
+        } else {
+            data.forEach(link => {
+                link.connections.forEach(connection => {
+                    const group = connection[groupBy.prop];
+
+                    if (Object.keys(groups).includes(group)) {
+                        groups[group].push(link);
+                    } else {
+                        groups[group] = [link];
+                    }
+                });
+            });
+        }
+
+        return groups;
+    };
+
+    getUniqueEdgeValues = (data, edgeProperty) => {
+        const uniqueValues = [];
 
         if (edgeProperty.type === 'basic') {
-            this.store.graph.currentGraphData.links.forEach(link => {
+            data.forEach(link => {
+                uniqueValues.push(link[edgeProperty.prop]);
+            });
+        } else {
+            data.forEach(link => {
+                link.connections.forEach(connection => {
+                    uniqueValues.push(connection[edgeProperty.prop]);
+                });
+            });
+        }
+        return [...new Set(uniqueValues)];
+    };
+
+    getEdgeAllValueCounts = (
+        allValueCounts,
+        data,
+        edgeProperty,
+        uniqueValues
+    ) => {
+        if (edgeProperty.type === 'basic') {
+            data.forEach(link => {
+                allValueCounts[
+                    uniqueValues.indexOf(link[edgeProperty.prop])
+                ] += 1;
+            });
+        } else {
+            data.forEach(link => {
+                link.connections.forEach(connection => {
+                    allValueCounts[
+                        uniqueValues.indexOf(connection[edgeProperty.prop])
+                    ] += 1;
+                });
+            });
+        }
+
+        return allValueCounts;
+    };
+
+    getEdgeCounts = (
+        edgeProperty,
+        chartType,
+        display_limit,
+        groupBy,
+        onlyVisible
+    ) => {
+        let values = [];
+        let counts = [];
+        let data = this.store.graph.currentGraphData.links;
+
+        if (onlyVisible) {
+            data = data.filter(link => link.visible);
+        }
+
+        if (groupBy) {
+            let groupedByCounts = {};
+            const groups = this.getEdgeGroups(groupBy, data);
+
+            const uniqueValues = this.getUniqueEdgeValues(data, edgeProperty);
+
+            let allValueCounts = new Array(uniqueValues.length).fill(0);
+
+            allValueCounts = this.getEdgeAllValueCounts(
+                allValueCounts,
+                data,
+                edgeProperty,
+                uniqueValues
+            );
+
+            Object.keys(groups).forEach(group => {
+                groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
+            });
+
+            const [valuesSorted] = this.getSortedValues(
+                allValueCounts,
+                uniqueValues,
+                display_limit
+            );
+
+            Object.keys(groups).forEach(group => {
+                data = groups[group];
+
+                if (edgeProperty.type === 'basic') {
+                    data.forEach(link => {
+                        const labelLocation = valuesSorted.indexOf(
+                            link[edgeProperty.prop]
+                        );
+
+                        groupedByCounts[group][labelLocation] += 1;
+                    });
+                } else {
+                    data.forEach(link => {
+                        link.connections.forEach(connection => {
+                            const labelLocation = valuesSorted.indexOf(
+                                connection[edgeProperty.prop]
+                            );
+
+                            groupedByCounts[group][labelLocation] += 1;
+                        });
+                    });
+                }
+            });
+
+            return this.getChartDataBasedOnType(
+                valuesSorted,
+                groupedByCounts,
+                chartType
+            );
+        }
+
+        if (edgeProperty.type === 'basic') {
+            data.forEach(link => {
                 const labelLocation = values.indexOf(link[edgeProperty.prop]);
 
                 if (labelLocation >= 0) {
@@ -327,7 +468,7 @@ export class StatsStore {
                 }
             });
         } else {
-            this.store.graph.currentGraphData.links.forEach(link => {
+            data.forEach(link => {
                 link.connections.forEach(connection => {
                     const labelLocation = values.indexOf(
                         connection[edgeProperty.prop]

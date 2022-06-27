@@ -1,5 +1,6 @@
 import {
     Box,
+    Container,
     Grid,
     GridItem,
     Heading,
@@ -205,6 +206,11 @@ function SelectionOverview(props) {
     const getEdgeChartData = chart => {
         let title;
         let edgeProperty;
+        let groupBy;
+
+        if (chart.type.toLowerCase() === 'grouped bar') {
+            groupBy = getEdgeGroupByParam(chart.group_by);
+        }
 
         switch (chart.element_values) {
             case 'values':
@@ -224,7 +230,9 @@ function SelectionOverview(props) {
         const values = store.stats.getEdgeCounts(
             edgeProperty,
             chart.type,
-            chart.display_limit
+            chart.display_limit,
+            groupBy,
+            chart.onlyVisible
         );
 
         return getChartObject(chart, values, title);
@@ -240,6 +248,18 @@ function SelectionOverview(props) {
                 return { type: 'advanced', prop: groupBy };
         }
     };
+
+    const getEdgeGroupByParam = groupBy => {
+        switch (groupBy) {
+            case 'values':
+                return { type: 'advanced', prop: 'label' };
+            case 'types':
+                return { type: 'advanced', prop: 'feature' };
+            default:
+                return { type: 'basic', prop: groupBy };
+        }
+    };
+
     const getNodeChartData = chart => {
         let title;
         let nodeProperty;
@@ -299,6 +319,7 @@ function SelectionOverview(props) {
                         key={`Selection chart ${index}`}
                         height={chart.height}
                         padding="10px"
+                        paddingBottom={chart.colSpan === 2 ? '50px' : '10px'}
                         colSpan={chart.colSpan}
                         backgroundColor="whiteAlpha.200"
                         borderRadius={8}
@@ -312,6 +333,10 @@ function SelectionOverview(props) {
                                         icon={<ArrowsH />}
                                         size="sm"
                                         variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
                                         onClick={() =>
                                             store.stats.expandChart(chart.id)
                                         }
@@ -323,6 +348,10 @@ function SelectionOverview(props) {
                                         icon={<ArrowsMergeAltH />}
                                         size="sm"
                                         variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
                                         onClick={() =>
                                             store.stats.shrinkChart(chart.id)
                                         }
@@ -335,6 +364,10 @@ function SelectionOverview(props) {
                                     icon={<Close />}
                                     size="sm"
                                     variant="ghost"
+                                    opacity={0.5}
+                                    _hover={{
+                                        opacity: 1
+                                    }}
                                     onClick={() =>
                                         store.stats.removeChart(chart.id)
                                     }
@@ -387,11 +420,13 @@ function SelectionOverview(props) {
 
         return (
             <Grid
-                padding={6}
                 maxHeight="100%"
                 width="100%"
-                templateColumns="repeat(2, 1fr)"
+                templateColumns={'repeat(2, 1fr)'}
                 gap={5}
+                margin="0"
+                marginBottom="70px"
+                padding="0"
             >
                 {props.types.includes('selection') &&
                     store.graph.currentGraphData.selectedNodes.length > 0 && (
