@@ -29,7 +29,6 @@ import {
     ArrowsH,
     ArrowsMergeAltH,
     Close,
-    FormatText,
     MathPlus,
     Remove,
     Ruler,
@@ -38,7 +37,7 @@ import {
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { Chart } from 'react-chartjs-2';
 import { RootStoreContext } from 'stores/RootStore';
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
@@ -148,197 +147,58 @@ function SelectionOverview(props) {
         );
     };
 
-    const renderBarChart = (data, title, chart) => (
-        <Bar
-            data={data}
-            width="100%"
-            height="250px"
-            redraw={true}
-            options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: {
-                        display: chart.labels.y.display,
-                        ticks: {
-                            diplay: chart.labels.y.display
+    const renderChart = (data, title, chart, chartType, options) => {
+        return (
+            <Chart
+                type={chartType}
+                height="250px"
+                redraw={true}
+                data={data}
+                options={{
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    indexAxis: options && options.indexAxis,
+                    scales: {
+                        y: {
+                            display: chart.labels.y.display,
+                            ticks: {
+                                diplay: chart.labels.y.display
+                            }
+                        },
+                        x: {
+                            display: chart.labels.x.display,
+                            ticks: {
+                                diplay: chart.labels.x.display
+                            }
                         }
                     },
-                    x: {
-                        display: chart.labels.x.display,
-                        ticks: {
-                            diplay: chart.labels.x.display
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        legend: {
+                            display: chart.legend
                         }
                     }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    },
-                    legend: {
-                        display: chart.legend
-                    }
-                }
-            }}
-        />
-    );
-
-    const renderVBarChart = (data, title, chart) => (
-        <Bar
-            data={data}
-            width="100%"
-            height="250px"
-            redraw={true}
-            options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: {
-                        display: chart.labels.y.display,
-                        ticks: {
-                            diplay: chart.labels.y.display
-                        }
-                    },
-                    x: {
-                        display: chart.labels.x.display,
-                        ticks: {
-                            diplay: chart.labels.x.display
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    },
-                    legend: {
-                        display: chart.legend
-                    }
-                }
-            }}
-        />
-    );
-
-    const groupedBarChart = (data, title, chart) => (
-        <Bar
-            data={data}
-            width="100%"
-            height="250px"
-            redraw={true}
-            options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: {
-                        display: chart.labels.y.display,
-                        ticks: {
-                            diplay: chart.labels.y.display
-                        }
-                    },
-                    x: {
-                        display: chart.labels.x.display,
-                        ticks: {
-                            diplay: chart.labels.x.display
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    },
-                    legend: {
-                        display: chart.legend
-                    }
-                }
-            }}
-        />
-    );
-
-    const renderDoughnutChart = (data, title, chart) => (
-        <Doughnut
-            height="250px"
-            redraw={true}
-            data={data}
-            options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: {
-                        display: chart.labels.y.display,
-                        ticks: {
-                            diplay: chart.labels.y.display
-                        }
-                    },
-                    x: {
-                        display: chart.labels.x.display,
-                        ticks: {
-                            diplay: chart.labels.x.display
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    },
-                    legend: {
-                        display: chart.legend
-                    }
-                }
-            }}
-        />
-    );
-
-    const renderLineChart = (data, title, chart) => (
-        <Line
-            data={data}
-            width="100%"
-            height="250px"
-            redraw={true}
-            options={{
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: {
-                        display: chart.labels.y.display,
-                        ticks: {
-                            diplay: chart.labels.y.display
-                        }
-                    },
-                    x: {
-                        display: chart.labels.x.display,
-                        ticks: {
-                            diplay: chart.labels.x.display
-                        }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: title
-                    },
-                    legend: {
-                        display: chart.legend
-                    }
-                }
-            }}
-        />
-    );
+                }}
+            />
+        );
+    };
 
     const getChartObject = (chart, values, title) => {
         switch (chart.type.toLowerCase()) {
             case 'bar':
-                return renderBarChart(values, title, chart);
-            case 'line':
-                return renderLineChart(values, title, chart);
+                return renderChart(values, title, chart, 'bar', {
+                    indexAxis: 'y'
+                });
             case 'vertical bar':
-                return renderVBarChart(values, title, chart);
             case 'grouped bar':
-                return groupedBarChart(values, title, chart);
+                return renderChart(values, title, chart, 'bar');
+            case 'line':
+                return renderChart(values, title, chart, 'line');
             default:
-                return renderDoughnutChart(values, title, chart);
+                return renderChart(values, title, chart, 'doughnut');
         }
     };
 
@@ -409,7 +269,8 @@ function SelectionOverview(props) {
             chart.type,
             chart.display_limit,
             chart.network_data,
-            groupBy
+            groupBy,
+            chart.onlyVisible
         );
 
         return getChartObject(chart, values, title);
@@ -422,8 +283,7 @@ function SelectionOverview(props) {
             .filter(
                 chart =>
                     props.types.includes(chart.network_data) &&
-                    (chart.network === 'all' ||
-                        chart.network === store.core.currentGraph)
+                    chart.network === store.core.currentGraph
             )
             .map((chart, index) => {
                 let chartObject;
@@ -595,7 +455,10 @@ function SelectionOverview(props) {
                                 height="100%"
                                 borderRadius="xl"
                                 onClick={() =>
-                                    store.stats.toggleStatsModalVisiblity(true)
+                                    store.stats.toggleStatsModalVisiblity(
+                                        true,
+                                        props.types
+                                    )
                                 }
                                 icon={
                                     <MathPlus

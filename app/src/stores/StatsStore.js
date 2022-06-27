@@ -5,10 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 export class StatsStore {
     isStatsModalVisible = false;
     chartTypes = ['Doughnut', 'Bar', 'Line', 'Vertical Bar', 'Grouped Bar'];
+    availableTypes = ['all'];
     newChartProps = {
-        network: 'all',
+        network: 'overview',
         type: 'doughnut',
         network_data: 'all',
+        onlyVisible: false,
         elements: 'nodes',
         element_values: 'values',
         display_limit: 'all',
@@ -33,7 +35,12 @@ export class StatsStore {
         makeAutoObservable(this);
     }
 
-    toggleStatsModalVisiblity = val => {
+    toggleStatsModalVisiblity = (val, types) => {
+        if (types) {
+            this.availableTypes = types;
+            this.newChartProps['network_data'] = types[0];
+        }
+
         this.isStatsModalVisible = val;
     };
 
@@ -55,8 +62,9 @@ export class StatsStore {
 
     resetChartProps = () => {
         this.newChartProps = {
-            network: 'all',
+            network: 'overview',
             type: 'doughnut',
+            onlyVisible: false,
             network_data: 'all',
             elements: 'nodes',
             element_values: 'values',
@@ -80,12 +88,12 @@ export class StatsStore {
         this.newChartProps.type = this.chartTypes[index];
     };
 
-    changeChartNetwork = val => {
-        this.newChartProps.network = val;
-    };
-
     changeChartNetworkData = val => {
         this.newChartProps.network_data = val;
+    };
+
+    changeIsOnlyVisible = val => {
+        this.newChartProps.onlyVisible = val;
     };
 
     changeChartNetworkElements = val => {
@@ -134,7 +142,8 @@ export class StatsStore {
                 ...this.newChartProps,
                 id: uuidv4(),
                 colSpan: 1,
-                height: '200px'
+                height: '200px',
+                network: this.store.core.currentGraph
             });
         } else {
             this.charts[dataset] = [
@@ -142,7 +151,8 @@ export class StatsStore {
                     ...this.newChartProps,
                     id: uuidv4(),
                     colSpan: 1,
-                    height: '200px'
+                    height: '200px',
+                    network: this.store.core.currentGraph
                 }
             ];
         }
@@ -346,19 +356,19 @@ export class StatsStore {
         );
     };
 
-    getNodeDataBasedOnNetworkSelection = network_data => {
-        switch (network_data) {
-            case 'selection':
-                return this.store.graph.currentGraphData.selectedNodes;
-
-            case 'visible':
-                return this.store.graph.currentGraphData.nodes.filter(
-                    node => node.visible
-                );
-
-            default:
-                return this.store.graph.currentGraphData.nodes;
+    getNodeDataBasedOnNetworkSelection = (network_data, onlyVisible) => {
+        let nodes;
+        if (network_data === 'selection') {
+            nodes = this.store.graph.currentGraphData.selectedNodes;
+        } else {
+            nodes = this.store.graph.currentGraphData.nodes;
         }
+
+        if (onlyVisible) {
+            return nodes.filter(node => node.visible);
+        }
+
+        return nodes;
     };
 
     getChartDataBasedOnType = (values, counts, chartType) => {
@@ -438,9 +448,13 @@ export class StatsStore {
         chartType,
         display_limit,
         network_data,
-        groupBy
+        groupBy,
+        onlyVisible
     ) => {
-        let data = this.getNodeDataBasedOnNetworkSelection(network_data);
+        let data = this.getNodeDataBasedOnNetworkSelection(
+            network_data,
+            onlyVisible
+        );
         let getNodeProp =
             nodeProperty.type === 'basic'
                 ? this.getNodeBasicProp

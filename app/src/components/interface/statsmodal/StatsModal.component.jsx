@@ -4,6 +4,7 @@ import {
     FormControl,
     FormLabel,
     Heading,
+    IconButton,
     Modal,
     ModalBody,
     ModalContent,
@@ -12,6 +13,7 @@ import {
     ModalOverlay,
     Select,
     SimpleGrid,
+    Switch,
     Tab,
     TabList,
     TabPanel,
@@ -33,6 +35,7 @@ import {
     Title,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
+import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect } from 'react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
@@ -267,54 +270,15 @@ function FileUploadModal() {
             <Box>
                 <SimpleGrid columns={3} spacing={5}>
                     <FormControl>
-                        <FormLabel>Graph:</FormLabel>
-                        <Tooltip label="Select the network for which the chart should appear.">
-                            <Select
-                                defaultValue="all"
-                                size="sm"
-                                onChange={value =>
-                                    store.stats.changeChartNetwork(
-                                        value.target.value
-                                    )
-                                }
-                            >
-                                <option value="all">All networks</option>
-                                <option value="overview">
-                                    Overview network
-                                </option>
-                                <option value="detail">Detail network</option>
-                            </Select>
-                        </Tooltip>
-                    </FormControl>
-
-                    <FormControl>
-                        <FormLabel htmlFor="dataTargetSelector">
-                            Network data:
-                        </FormLabel>
-                        <Tooltip
-                            label="All data means this chart will
-                reflect the distribution of values
-                over the entire network while
-                selection means it will only reflect
-                the distribution of values on the
-                data points you selected."
-                        >
-                            <Select
-                                id="dataTargetSelector"
-                                defaultValue="all"
-                                size="sm"
-                                onChange={value =>
-                                    store.stats.changeChartNetworkData(
-                                        value.target.value
-                                    )
-                                }
-                            >
-                                <option value="all">All data</option>
-                                <option value="selection">
-                                    Selection data
-                                </option>
-                                <option value="visible">Visible data</option>
-                            </Select>
+                        <FormLabel>Only Visible:</FormLabel>
+                        <Tooltip label="If turned on only data from visible nodes will be show in the chart.">
+                            <Switch
+                                onChange={value => {
+                                    store.stats.changeIsOnlyVisible(
+                                        value.target.checked
+                                    );
+                                }}
+                            />
                         </Tooltip>
                     </FormControl>
 
@@ -416,7 +380,12 @@ function FileUploadModal() {
 
     const renderModalBody = () => {
         return (
-            <ModalBody overflowY="scroll" width="748px">
+            <ModalBody
+                overflowY="scroll"
+                width="748px"
+                paddingTop="0"
+                paddingBottom="0"
+            >
                 <Tabs
                     isLazy={true}
                     orientation="vertical"
@@ -458,7 +427,6 @@ function FileUploadModal() {
                     <TabPanels>
                         <TabPanel>
                             <VStack width="100%" height="100%">
-                                <Heading size="sm">Doughnut Chart</Heading>
                                 <Box height="250px" width="100%">
                                     {renderDoughnutPanel()}
                                 </Box>
@@ -467,7 +435,6 @@ function FileUploadModal() {
                         </TabPanel>
                         <TabPanel>
                             <VStack width="100%" height="100%">
-                                <Heading size="sm">Bar Chart</Heading>
                                 <Box height="250px" width="100%">
                                     {renderBarPanel()}
                                 </Box>
@@ -476,7 +443,6 @@ function FileUploadModal() {
                         </TabPanel>
                         <TabPanel>
                             <VStack width="100%" height="100%">
-                                <Heading size="sm">Line Chart</Heading>
                                 <Box height="250px" width="100%">
                                     {renderLinePanel()}
                                 </Box>
@@ -485,7 +451,6 @@ function FileUploadModal() {
                         </TabPanel>
                         <TabPanel>
                             <VStack width="100%" height="100%">
-                                <Heading size="sm">Vertical Bar Chart</Heading>
                                 <Box height="250px" width="100%">
                                     {renderVerticalBarPanel()}
                                 </Box>
@@ -494,7 +459,6 @@ function FileUploadModal() {
                         </TabPanel>
                         <TabPanel>
                             <VStack width="100%" height="100%">
-                                <Heading size="sm">Vertical Bar Chart</Heading>
                                 <Box height="250px" width="100%">
                                     {renderGroupedBarPanel()}
                                 </Box>
@@ -527,22 +491,36 @@ function FileUploadModal() {
                 borderStyle="solid"
                 borderColor="blue.500"
             >
-                <ModalHeader>New Graph Statistics</ModalHeader>
+                <ModalHeader width="100%">
+                    <Heading
+                        textAlign="center"
+                        size="md"
+                        padding="0"
+                        marginTop="10px"
+                    >
+                        Chart Selection
+                    </Heading>
+                    <IconButton
+                        position="absolute"
+                        variant="ghost"
+                        size="sm"
+                        top="20px"
+                        right="20px"
+                        icon={<Close />}
+                        onClick={() =>
+                            store.stats.toggleStatsModalVisiblity(false)
+                        }
+                    />
+                </ModalHeader>
 
                 {isOpen && renderModalBody()}
 
                 <ModalFooter>
                     <Button
-                        variant="outline"
-                        mr={3}
-                        onClick={() =>
-                            store.stats.toggleStatsModalVisiblity(false)
-                        }
-                    >
-                        Cancel
-                    </Button>
-                    <Button
                         variant="solid"
+                        backgroundColor="blue.500"
+                        _hover={{ backgroundColor: 'blue.600' }}
+                        _active={{ backgroundColor: 'blue.700' }}
                         onClick={() => store.stats.addChart()}
                     >
                         Add chart
