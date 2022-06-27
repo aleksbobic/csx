@@ -614,11 +614,15 @@ export class StatsStore {
 
             const allValueCounts = new Array(uniqueValues.length).fill(0);
 
-            data.map(node => getNodeProp(node, nodeProperty.prop)).forEach(
-                value => {
-                    allValueCounts[uniqueValues.indexOf(value)] += 1;
-                }
-            );
+            data.map(node => {
+                return {
+                    value: getNodeProp(node, nodeProperty.prop),
+                    weight: node.entries.length
+                };
+            }).forEach(entry => {
+                allValueCounts[uniqueValues.indexOf(entry.value)] +=
+                    entry.weight;
+            });
 
             Object.keys(groups).forEach(group => {
                 groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
@@ -657,10 +661,10 @@ export class StatsStore {
                 );
 
                 if (labelLocation >= 0) {
-                    counts[labelLocation] += 1;
+                    counts[labelLocation] += node.weight.entries.length;
                 } else {
                     values.push(getNodeProp(node, nodeProperty.prop));
-                    counts.push(1);
+                    counts.push(node.entries.length);
                 }
             });
 
