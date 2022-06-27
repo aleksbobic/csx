@@ -1,13 +1,11 @@
 import {
     Box,
     Center,
-    Container,
     Grid,
     GridItem,
     Heading,
     HStack,
     IconButton,
-    Skeleton,
     SkeletonCircle,
     Stat,
     Tag,
@@ -300,7 +298,8 @@ function SelectionOverview(props) {
             chart.display_limit,
             chart.network_data,
             groupBy,
-            chart.onlyVisible
+            chart.onlyVisible,
+            chart.show_only
         );
 
         return getChartObject(chart, values, title);

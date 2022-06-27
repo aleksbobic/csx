@@ -12,6 +12,7 @@ export class StatsStore {
         network_data: 'all',
         onlyVisible: false,
         elements: 'nodes',
+        show_only: 'all',
         element_values: 'values',
         display_limit: 'all',
         group_by: 'types',
@@ -73,6 +74,7 @@ export class StatsStore {
             onlyVisible: false,
             network_data: 'all',
             elements: 'nodes',
+            show_only: 'all',
             element_values: 'values',
             display_limit: 'all',
             group_by: 'types',
@@ -116,6 +118,10 @@ export class StatsStore {
 
     changeChartGroupByValues = val => {
         this.newChartProps.group_by = val;
+    };
+
+    changeShowOnly = val => {
+        this.newChartProps.show_only = val;
     };
 
     getElementValues = () => {
@@ -527,7 +533,11 @@ export class StatsStore {
         );
     };
 
-    getNodeDataBasedOnNetworkSelection = (network_data, onlyVisible) => {
+    getNodeDataBasedOnNetworkSelection = (
+        network_data,
+        onlyVisible,
+        showOnly
+    ) => {
         let nodes;
         if (network_data === 'selection') {
             nodes = this.store.graph.currentGraphData.selectedNodes;
@@ -536,7 +546,11 @@ export class StatsStore {
         }
 
         if (onlyVisible) {
-            return nodes.filter(node => node.visible);
+            nodes = nodes.filter(node => node.visible);
+        }
+
+        if (showOnly !== 'all') {
+            nodes = nodes.filter(node => node.feature === showOnly);
         }
 
         return nodes;
@@ -620,11 +634,13 @@ export class StatsStore {
         display_limit,
         network_data,
         groupBy,
-        onlyVisible
+        onlyVisible,
+        show_only
     ) => {
         let data = this.getNodeDataBasedOnNetworkSelection(
             network_data,
-            onlyVisible
+            onlyVisible,
+            show_only
         );
         let getNodeProp =
             nodeProperty.type === 'basic'

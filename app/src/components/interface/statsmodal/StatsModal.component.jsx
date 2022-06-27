@@ -297,10 +297,9 @@ function FileUploadModal() {
                                 }
                             >
                                 <option value="nodes">Nodes</option>
-                                {store.core.currentGraph !== 'detail' &&
-                                    selectionElementsType !== 'grouped' && (
-                                        <option value="edges">Edges</option>
-                                    )}
+                                {selectionElementsType !== 'grouped' && (
+                                    <option value="edges">Edges</option>
+                                )}
                             </Select>
                         </Tooltip>
                     </FormControl>
@@ -376,6 +375,38 @@ function FileUploadModal() {
                             </Tooltip>
                         </FormControl>
                     )}
+
+                    {store.core.currentGraph === 'detail' &&
+                        store.stats.newChartProps.elements === 'nodes' && (
+                            <FormControl>
+                                <FormLabel>Show only:</FormLabel>
+                                <Tooltip label="These values will define which types of nodes you want to explore.">
+                                    <Select
+                                        size="sm"
+                                        onChange={value =>
+                                            store.stats.changeShowOnly(
+                                                value.target.value
+                                            )
+                                        }
+                                    >
+                                        <option value={'all'}>All</option>
+                                        {[
+                                            ...Object.keys(
+                                                store.search.nodeTypes
+                                            ),
+                                            ...store.search.newNodeTypes
+                                        ].map(entry => (
+                                            <option
+                                                key={`chart_selection_show_only_${entry}`}
+                                                value={entry}
+                                            >
+                                                {entry}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </Tooltip>
+                            </FormControl>
+                        )}
                 </SimpleGrid>
             </Box>
         );
