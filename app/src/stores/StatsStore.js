@@ -32,6 +32,12 @@ export class StatsStore {
 
     constructor(store) {
         this.store = store;
+
+        const configString = localStorage.getItem('chartConfig');
+        if (configString) {
+            this.charts = JSON.parse(configString);
+        }
+
         makeAutoObservable(this);
     }
 
@@ -158,6 +164,7 @@ export class StatsStore {
         }
 
         this.toggleStatsModalVisiblity(false);
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     removeChart = id => {
@@ -165,6 +172,8 @@ export class StatsStore {
         this.charts[dataset] = this.charts[dataset].filter(
             chart => chart.id !== id
         );
+
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     expandChart = id => {
@@ -180,6 +189,7 @@ export class StatsStore {
                 height: '400px'
             };
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     shrinkChart = id => {
@@ -204,6 +214,7 @@ export class StatsStore {
                 }
             };
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     toggleLegend = id => {
@@ -218,6 +229,7 @@ export class StatsStore {
                 legend: !chart.legend
             };
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     toggleAxisLabels = id => {
@@ -239,6 +251,7 @@ export class StatsStore {
                 }
             };
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
     getChartListForDataset = () => {
