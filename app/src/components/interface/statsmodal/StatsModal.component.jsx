@@ -297,7 +297,10 @@ function FileUploadModal() {
                                 }
                             >
                                 <option value="nodes">Nodes</option>
-                                <option value="edges">Edges</option>
+                                {store.core.currentGraph !== 'detail' &&
+                                    selectionElementsType !== 'grouped' && (
+                                        <option value="edges">Edges</option>
+                                    )}
                             </Select>
                         </Tooltip>
                     </FormControl>

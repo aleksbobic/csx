@@ -1,11 +1,14 @@
 import {
     Box,
+    Center,
     Container,
     Grid,
     GridItem,
     Heading,
     HStack,
     IconButton,
+    Skeleton,
+    SkeletonCircle,
     Stat,
     Tag,
     TagLabel,
@@ -149,6 +152,13 @@ function SelectionOverview(props) {
     };
 
     const renderChart = (data, title, chart, chartType, options) => {
+        if (!data.labels.length) {
+            return (
+                <Center width="100%" height="100%">
+                    <SkeletonCircle size="20px" />
+                </Center>
+            );
+        }
         return (
             <Chart
                 type={chartType}

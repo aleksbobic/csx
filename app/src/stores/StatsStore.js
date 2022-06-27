@@ -120,19 +120,32 @@ export class StatsStore {
 
     getElementValues = () => {
         if (this.newChartProps.elements === 'nodes') {
-            return [
+            let elementValues = [
                 { value: 'values', label: 'Node values' },
                 { value: 'types', label: 'Node types' }
-            ].concat(
-                this.store.schema.overviewDataNodeProperties.map(entry => {
-                    return {
-                        value: entry,
-                        label: entry.charAt(0).toUpperCase() + entry.slice(1)
-                    };
-                })
-            );
+            ];
+
+            if (this.store.core.currentGraph !== 'detail') {
+                elementValues = elementValues.concat(
+                    this.store.schema.overviewDataNodeProperties.map(entry => {
+                        return {
+                            value: entry,
+                            label:
+                                entry.charAt(0).toUpperCase() + entry.slice(1)
+                        };
+                    })
+                );
+            }
+
+            return elementValues;
         }
 
+        if (this.store.core.currentGraph === 'detail') {
+            this.newChartProps.element_values = 'weight';
+            return [{ value: 'weight', label: 'Edge weights' }];
+        }
+
+        this.newChartProps.element_values = 'values';
         return [
             { value: 'values', label: 'Edge values' },
             { value: 'types', label: 'Edge types' },
@@ -411,6 +424,10 @@ export class StatsStore {
 
         if (onlyVisible) {
             data = data.filter(link => link.visible);
+        }
+
+        if (!data.length) {
+            return { labels: [] };
         }
 
         if (groupBy) {
