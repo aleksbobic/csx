@@ -642,7 +642,8 @@ export class StatsStore {
                         getNodeProp(node, nodeProperty.prop)
                     );
 
-                    groupedByCounts[group][labelLocation] += 1;
+                    groupedByCounts[group][labelLocation] +=
+                        node.entries.length;
                 });
             });
 
@@ -661,7 +662,7 @@ export class StatsStore {
                 );
 
                 if (labelLocation >= 0) {
-                    counts[labelLocation] += node.weight.entries.length;
+                    counts[labelLocation] += node.entries.length;
                 } else {
                     values.push(getNodeProp(node, nodeProperty.prop));
                     counts.push(node.entries.length);
