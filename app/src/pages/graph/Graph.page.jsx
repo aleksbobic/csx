@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
+import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
 import { Close, Spinner } from 'css.gg';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
@@ -201,6 +202,7 @@ function GraphPage() {
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
+            <StatsModalComponent />
             <ContextMenuComponent />
             <GraphComponent
                 graphData={

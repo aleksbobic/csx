@@ -130,11 +130,6 @@ def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
 
     edge_tuples_counts = Counter(nx_edges)
 
-    if edge_tuples_counts.values():
-        norm_divisor = max(edge_tuples_counts.values())
-    else:
-        norm_divisor = 1
-
     return [
         cast(
             Edge,
@@ -143,7 +138,7 @@ def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
                 "source": edge[0],
                 "target": edge[1],
                 "visible": True,
-                "weight": round(edge_tuples_counts[edge] / norm_divisor, 2),
+                "weight": len(edge_tuple_lookup[edge]),
                 "connections": edge_tuple_lookup[edge],
             },
         )
