@@ -85,7 +85,7 @@ export class SchemaStore {
         const graph = new dagre.graphlib.Graph()
             .setDefaultEdgeLabel(() => ({}))
             .setGraph({
-                rankdir: this.schemaContainsLinks(schema) ? 'TB' : 'LR',
+                rankdir: 'LR',
                 align: 'UL'
             });
 
@@ -123,12 +123,17 @@ export class SchemaStore {
     };
 
     getOverviewNodeProperties = () => {
-        if (this.store.search.nodeTypes[this.store.search.anchor] !== 'list') {
-            return Object.entries(this.store.search.nodeTypes)
+        const data = {
+            ...this.store.search.newNodeTypes,
+            ...this.store.search.nodeTypes
+        };
+
+        if (data[this.store.search.anchor] !== 'list') {
+            return Object.entries(data)
                 .filter(
                     entry =>
                         entry[0] !== this.store.search.anchor &&
-                        this.store.search.nodeTypes[entry[0]] !== 'list'
+                        data[entry[0]] !== 'list'
                 )
                 .map(entry => entry[0]);
         }
@@ -150,7 +155,7 @@ export class SchemaStore {
 
         const features = [
             ...Object.keys(this.store.search.nodeTypes),
-            ...this.store.search.newNodeTypes
+            ...Object.keys(this.store.search.newNodeTypes)
         ];
         const anchor = this.store.search.anchor;
 
@@ -195,15 +200,12 @@ export class SchemaStore {
                         position: 'left',
                         features: [
                             ...Object.keys(this.store.search.nodeTypes),
-                            ...this.store.search.newNodeTypes
+                            ...Object.keys(this.store.search.newNodeTypes)
                         ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
-                        properties: [
-                            ...this.getOverviewNodeProperties(),
-                            ...this.store.search.newNodeTypes
-                        ],
+                        properties: [...this.getOverviewNodeProperties()],
                         addedProperties: this.overviewDataNodeProperties,
                         setAnchor: this.setAnchor,
                         addProperty: this.addProperty,
@@ -227,14 +229,14 @@ export class SchemaStore {
                         position: 'right',
                         features: [
                             ...Object.keys(this.store.search.nodeTypes),
-                            ...this.store.search.newNodeTypes
+                            ...Object.keys(this.store.search.newNodeTypes)
                         ].filter(
                             feature =>
                                 !this.store.search.links.includes(feature)
                         ),
                         properties: [
                             ...Object.keys(this.store.search.nodeTypes),
-                            ...this.store.search.newNodeTypes
+                            ...Object.keys(this.store.search.newNodeTypes)
                         ],
                         addedProperties: this.overviewDataNodeProperties,
                         setAnchor: this.setAnchor,
@@ -341,7 +343,7 @@ export class SchemaStore {
                 position: 'both',
                 features: [
                     ...Object.keys(this.store.search.nodeTypes),
-                    ...this.store.search.newNodeTypes
+                    ...Object.keys(this.store.search.newNodeTypes)
                 ].filter(feature => !this.store.search.links.includes(feature)),
                 anchor: this.store.search.anchor
             },
@@ -651,8 +653,13 @@ export class SchemaStore {
     };
 
     getPossibleConnections = (source, target) => {
-        const src_type = this.store.search.nodeTypes[source];
-        const tar_type = this.store.search.nodeTypes[target];
+        const types = {
+            ...this.store.search.nodeTypes,
+            ...this.store.search.newNodeTypes
+        };
+
+        const src_type = types[source];
+        const tar_type = types[target];
 
         if (src_type === 'list' && tar_type === 'list') {
             return ['M:N', '1:1'];
