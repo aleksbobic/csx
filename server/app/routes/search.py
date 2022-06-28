@@ -142,7 +142,14 @@ def get_new_features(query):
         return [get_new_features(entry) for entry in query["queries"]]
 
     if "newFeatureName" in query.keys():
-        return [query["newFeatureName"]] + get_new_features(query["query"])
+        if query["action"] == "count array":
+            return [
+                {"feature": query["newFeatureName"], "type": "integer"}
+            ] + get_new_features(query["query"])
+        elif query["action"] == "extract keywords":
+            return [
+                {"feature": query["newFeatureName"], "type": "list"}
+            ] + get_new_features(query["query"])
 
     if "query" not in query and "queries" not in query:
         return []
@@ -243,7 +250,11 @@ def search(
         )
         results = convert_query_to_df(es_query, search)
     else:
-        new_dimensions = get_new_features(json.loads(query))
+        new_dimensions = {
+            entry["feature"]: entry["type"]
+            for entry in get_new_features(json.loads(query))
+        }
+        print(f"\n\n\n query action is {new_dimensions}")
         results = generate_advanced_query(json.loads(query), search)
 
     if len(results.index) == 0:

@@ -302,7 +302,7 @@ function Settings() {
     const renderDimensionsToggle = () => {
         const tags = [
             ...Object.keys(store.search.nodeTypes),
-            ...store.search.newNodeTypes
+            ...Object.keys(store.search.newNodeTypes)
         ].map((property, index) => (
             <Tag
                 key={index}

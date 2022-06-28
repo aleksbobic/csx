@@ -396,7 +396,9 @@ function FileUploadModal() {
                                             ...Object.keys(
                                                 store.search.nodeTypes
                                             ),
-                                            ...store.search.newNodeTypes
+                                            ...Object.keys(
+                                                store.search.newNodeTypes
+                                            )
                                         ].map(entry => (
                                             <option
                                                 key={`chart_selection_show_only_${entry}`}
