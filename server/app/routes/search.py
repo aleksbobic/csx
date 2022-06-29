@@ -85,7 +85,7 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
         return convert_query_to_df(
             Q(
                 "query_string",
-                query=f"*{query['keyphrase']}*",
+                query=f"{query['keyphrase']}",
                 type="phrase",
                 fields=[query["feature"]],
             ),
@@ -125,7 +125,7 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
                     must_not=[
                         Q(
                             "query_string",
-                            query=f"*{query['queries'][0]['keyphrase']}*",
+                            query=f"{query['queries'][0]['keyphrase']}",
                             type="phrase",
                             fields=[query["queries"][0]["feature"]],
                         )
@@ -244,7 +244,7 @@ def search(
     elif not isJson(query) or isNumber(query):
         es_query = Q(
             "query_string",
-            query=f"*{query}*",
+            query=f"{query}",
             type="phrase",
             fields=default_search_fields,
         )
