@@ -107,9 +107,29 @@ export class GraphInstanceStore {
                 selectedNodeIds.includes(linkTarget);
         }
 
+        this.filterTabularData();
+
         this.isSelfCentric = true;
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
+    };
+
+    filterTabularData = () => {
+        const data = this.store.graph.currentGraphData;
+
+        this.store.graph.activeTableData = [];
+        const visibleNodeEntries = [
+            ...new Set(
+                this.store.graph.currentGraphData.nodes
+                    .filter(node => node.visible)
+                    .map(node => node.entries)
+                    .flat()
+            )
+        ];
+
+        data.activeTableData = data.tableData.filter(row =>
+            visibleNodeEntries.includes(row.entry)
+        );
     };
 
     ignoreSelected = event => {
@@ -221,6 +241,8 @@ export class GraphInstanceStore {
 
             this.isSelfCentric = false;
         }
+
+        this.filterTabularData();
     };
 
     triggerSelfCentric = () => {
@@ -254,6 +276,8 @@ export class GraphInstanceStore {
                 data.links[i].source.id === originNode.id ||
                 data.links[i].target.id === originNode.id;
         }
+
+        this.filterTabularData();
 
         this.isSelfCentric = true;
         this.selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
@@ -315,10 +339,7 @@ export class GraphInstanceStore {
     };
 
     getMutualNeighbours = selectedNodeIds => {
-        console.log(this.store.graph.currentGraphData.selectedNodes);
         return this.store.graph.currentGraphData.selectedNodes.map(node => {
-            console.log('\n\n\n');
-            console.log('node', node);
             return [...node.neighbours].filter((neighbourId, i, self) => {
                 return (
                     self.includes(neighbourId) &&
@@ -346,8 +367,6 @@ export class GraphInstanceStore {
             neighbours = mutualWithOrigin
                 ? this.getMutualNeighboursWithOrigin(selectedNodeIds)
                 : this.getMutualNeighbours(selectedNodeIds);
-
-            console.log(neighbours);
         } else {
             // Only nodes which are connected to at least one of the selected nodes
             neighbours = this.store.graph.currentGraphData.selectedNodes.map(
@@ -414,6 +433,8 @@ export class GraphInstanceStore {
                     );
             }
         }
+
+        this.filterTabularData();
 
         this.isSelfCentric = true;
         this.selfCentricType = null;
@@ -496,6 +517,8 @@ export class GraphInstanceStore {
                     this.store.graph.currentGraphData.links[i].target.id
                 );
         }
+
+        this.filterTabularData();
 
         this.isSelfCentric = true;
         this.selfCentricType = null;
