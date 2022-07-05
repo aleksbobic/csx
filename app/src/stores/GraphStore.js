@@ -709,14 +709,18 @@ export class GraphStore {
         node.fx = null;
         node.fy = null;
 
-        if (this.store.graphInstance.isSelfCentric) {
+        if (
+            this.store.graphInstance.isSelfCentric &&
+            this.store.graphInstance.selfCentricOriginNode
+        ) {
             if (
                 !this.currentGraphData.selectedNodes.length ||
-                this.currentGraphData.selectedNodes.findIndex(
-                    node =>
-                        node.id ===
-                        this.store.graphInstance.selfCentricOriginNode.id
-                ) === -1
+                (this.store.graphInstance.selfCentricOriginNode &&
+                    this.currentGraphData.selectedNodes.findIndex(
+                        node =>
+                            node.id ===
+                            this.store.graphInstance.selfCentricOriginNode.id
+                    ) === -1)
             ) {
                 this.store.graphInstance.resetSelfCentric();
             } else if (this.currentGraphData.selectedNodes.length === 1) {
@@ -726,24 +730,30 @@ export class GraphStore {
             }
         }
 
+        if (this.currentGraphData.selectedNodes.length === 0) {
+            this.store.graphInstance.resetSelfCentric();
+        }
+
         if (this.store.core.isOverview) {
             const nodeComponent = this.currentGraphData.components.find(
                 c => c.id === node.component
             );
 
-            nodeComponent.selectedNodesCount -= 1;
+            if (nodeComponent) {
+                nodeComponent.selectedNodesCount -= 1;
 
-            if (
-                nodeComponent.selectedNodesCount === 0 &&
-                nodeComponent.isSelected
-            ) {
-                nodeComponent.isSelected = false;
+                if (
+                    nodeComponent.selectedNodesCount === 0 &&
+                    nodeComponent.isSelected
+                ) {
+                    nodeComponent.isSelected = false;
 
-                const index =
-                    this.currentGraphData.selectedComponents.findIndex(
-                        cid => cid === nodeComponent.id
-                    );
-                this.currentGraphData.selectedComponents.splice(index, 1);
+                    const index =
+                        this.currentGraphData.selectedComponents.findIndex(
+                            cid => cid === nodeComponent.id
+                        );
+                    this.currentGraphData.selectedComponents.splice(index, 1);
+                }
             }
         }
     };
@@ -774,15 +784,20 @@ export class GraphStore {
                 const nodeComponent = this.graphData.components.find(
                     c => c.id === node.component
                 );
-                nodeComponent.selectedNodesCount += 1;
 
-                if (
-                    nodeComponent.selectedNodesCount ===
-                        nodeComponent.nodes.length &&
-                    !nodeComponent.isSelected
-                ) {
-                    nodeComponent.isSelected = true;
-                    this.graphData.selectedComponents.push(nodeComponent.id);
+                if (nodeComponent) {
+                    nodeComponent.selectedNodesCount += 1;
+
+                    if (
+                        nodeComponent.selectedNodesCount ===
+                            nodeComponent.nodes.length &&
+                        !nodeComponent.isSelected
+                    ) {
+                        nodeComponent.isSelected = true;
+                        this.graphData.selectedComponents.push(
+                            nodeComponent.id
+                        );
+                    }
                 }
             }
         } else {

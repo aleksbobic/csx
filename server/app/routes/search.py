@@ -254,7 +254,6 @@ def search(
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
-        print(f"\n\n\n query action is {new_dimensions}")
         results = generate_advanced_query(json.loads(query), search)
 
     if len(results.index) == 0:
