@@ -232,7 +232,12 @@ def get_shortest_schema_paths_from_src_leafs(
     shortest_schema_paths = []
 
     # We always have directed edges leading from the leaf to the anchor or from the anchor to the leaf
+
+    print("\n\n\n src leaf", src_leaf_nodes)
+    print("\n\n\n shortest_schema_path_candidates", shortest_schema_path_candidates)
+
     for node in src_leaf_nodes:
+        temp_shortest_path_length = 0
         temp_shortest_path = []
 
         for path in shortest_schema_path_candidates:
@@ -244,11 +249,16 @@ def get_shortest_schema_paths_from_src_leafs(
                 shortest_schema_paths.append(path)
                 continue
             elif path[0]["src"] == node:
-                if not temp_shortest_path or len(temp_shortest_path) > len(path):
-                    temp_shortest_path = path
+                if not temp_shortest_path or temp_shortest_path_length > len(path):
+                    temp_shortest_path_length = len(path)
+                    temp_shortest_path = []
+                    temp_shortest_path.append(path)
+                elif temp_shortest_path_length == len(path):
+                    temp_shortest_path.append(path)
 
-        if temp_shortest_path:
-            shortest_schema_paths.append(temp_shortest_path)
+        if len(temp_shortest_path) > 0:
+            for entry in temp_shortest_path:
+                shortest_schema_paths.append(entry)
     return shortest_schema_paths
 
 
@@ -340,6 +350,8 @@ def get_shortest_schema_paths(
         src_leaf_nodes, shortest_schema_path_candidates, anchor_visible, anchor_features
     )
 
+    print("\n\n\n DEST LEAF NODES:", dest_leaf_nodes)
+    print("\n\n\n\nshortest_schema_paths", shortest_schema_paths)
     for node in dest_leaf_nodes:
         temp_shortest_path = []
 
