@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class WorkflowStore {
     shouldRunWorkflow = false;
+    newWorkflowName = '';
+    workflows = {};
 
     actionNodeTypes = [
         {
@@ -53,12 +55,46 @@ export class WorkflowStore {
 
     actions = [];
 
+    setNewWorkflowName = val => (this.newWorkflowName = val);
+
+    saveNewWorkflow = () => {
+        console.log(
+            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.actions.length} actions`
+        );
+
+        if (!this.workflows[this.store.search.currentDataset]) {
+            this.workflows[this.store.search.currentDataset] = {};
+        }
+
+        this.workflows[this.store.search.currentDataset][this.newWorkflowName] =
+            this.actions;
+
+        localStorage.setItem('workflows', JSON.stringify(this.workflows));
+        this.newWorkflowName = '';
+    };
+
+    removeWorkflow = name => {
+        delete this.workflows[this.store.search.currentDataset][name];
+
+        localStorage.setItem('workflows', JSON.stringify(this.workflows));
+    };
+
+    loadWorkflow = name => {
+        this.actions = this.workflows[this.store.search.currentDataset][name];
+    };
+
     setShouldRunWorkflow = val => {
         this.shouldRunWorkflow = val;
     };
 
     constructor(store) {
         this.store = store;
+
+        const workflowString = localStorage.getItem('workflows');
+        if (workflowString) {
+            this.workflows = JSON.parse(workflowString);
+        }
+
         makeAutoObservable(this);
     }
 

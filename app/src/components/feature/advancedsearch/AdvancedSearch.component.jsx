@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
-import { ArrowRight, MathPlus } from 'css.gg';
+import { Check, ChevronRight, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -132,13 +132,9 @@ function AdvancedSearch(props) {
     };
 
     const renderSavedWorkflows = () => {
-        const savedWorkflows = [
-            'workflow 2',
-            'workflow 5',
-            'workflow potato and something else',
-            'fast workflow',
-            'slow workflow'
-        ];
+        const savedWorkflows = Object.keys(
+            store.workflow.workflows[store.search.currentDataset]
+        );
 
         return savedWorkflows.map(workflow => (
             <Flex
@@ -159,13 +155,32 @@ function AdvancedSearch(props) {
                         {workflow}
                     </Text>
                 </Tooltip>
-                <Tooltip label="Load workflow">
-                    <IconButton
-                        icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
-                        size="sm"
-                        marginLeft="6px"
-                    />
-                </Tooltip>
+                <HStack marginLeft="6px" spacing="0">
+                    <Tooltip label="Remove workflow">
+                        <IconButton
+                            icon={<Close style={{ '--ggs': '0.7' }} />}
+                            size="sm"
+                            variant="ghost"
+                            opacity="0.5"
+                            _hover={{ opacity: 1 }}
+                            onClick={() =>
+                                store.workflow.removeWorkflow(workflow)
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Load workflow">
+                        <IconButton
+                            icon={<ChevronRight style={{ '--ggs': '0.7' }} />}
+                            size="sm"
+                            variant="ghost"
+                            opacity="0.5"
+                            _hover={{ opacity: 1 }}
+                            onClick={() =>
+                                store.workflow.loadWorkflow(workflow)
+                            }
+                        />
+                    </Tooltip>
+                </HStack>
             </Flex>
         ));
     };
@@ -261,7 +276,11 @@ function AdvancedSearch(props) {
                         Saved workflows
                     </Heading>
                     <VStack maxHeight="130px" width="100%" overflowY="scroll">
-                        {renderSavedWorkflows()}
+                        {store.workflow.workflows &&
+                            store.workflow.workflows[
+                                store.search.currentDataset
+                            ] &&
+                            renderSavedWorkflows()}
                     </VStack>
                     <InputGroup size="sm" marginTop="20px">
                         <Input
@@ -269,10 +288,21 @@ function AdvancedSearch(props) {
                             size="sm"
                             variant="filled"
                             borderRadius="6px"
+                            value={store.workflow.newWorkflowName}
+                            onChange={e =>
+                                store.workflow.setNewWorkflowName(
+                                    e.target.value
+                                )
+                            }
                         />
                         <InputRightElement>
                             <Tooltip label="Save current workflow">
-                                <IconButton icon={<MathPlus />} size="sm" />
+                                <IconButton
+                                    disabled={!store.workflow.newWorkflowName}
+                                    icon={<Check />}
+                                    size="sm"
+                                    onClick={store.workflow.saveNewWorkflow}
+                                />
                             </Tooltip>
                         </InputRightElement>
                     </InputGroup>
