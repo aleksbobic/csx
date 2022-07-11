@@ -223,15 +223,15 @@ function SelectionOverview(props) {
         switch (chart.element_values) {
             case 'values':
                 edgeProperty = { type: 'advanced', prop: 'label' };
-                title = 'edge values';
+                title = chart.title ? chart.title : 'edge values';
                 break;
             case 'types':
                 edgeProperty = { type: 'advanced', prop: 'feature' };
-                title = 'edge types';
+                title = chart.title ? chart.title : 'edge types';
                 break;
             default:
                 edgeProperty = { type: 'basic', prop: 'weight' };
-                title = 'edge weights';
+                title = chart.title ? chart.title : 'edge weights';
                 break;
         }
 
@@ -280,15 +280,17 @@ function SelectionOverview(props) {
         switch (chart.element_values) {
             case 'values':
                 nodeProperty = { type: 'basic', prop: 'label' };
-                title = 'node values';
+                title = chart.title ? chart.title : 'node values';
                 break;
             case 'types':
                 nodeProperty = { type: 'basic', prop: 'feature' };
-                title = 'node types';
+                title = chart.title ? chart.title : 'node types';
                 break;
             default:
                 nodeProperty = { type: 'advanced', prop: chart.element_values };
-                title = `property ${chart.element_values} values`;
+                title = chart.title
+                    ? chart.title
+                    : `property ${chart.element_values} values`;
                 break;
         }
 

@@ -7,6 +7,7 @@ export class StatsStore {
     chartTypes = ['Doughnut', 'Bar', 'Line', 'Vertical Bar', 'Grouped Bar'];
     availableTypes = ['all'];
     newChartProps = {
+        title: '',
         network: 'overview',
         type: 'doughnut',
         network_data: 'all',
@@ -69,6 +70,7 @@ export class StatsStore {
 
     resetChartProps = () => {
         this.newChartProps = {
+            title: '',
             network: 'overview',
             type: 'doughnut',
             onlyVisible: false,
@@ -90,6 +92,10 @@ export class StatsStore {
                 }
             }
         };
+    };
+
+    changeChartTitle = val => {
+        this.newChartProps.title = val;
     };
 
     changeSelectedChartType = index => {

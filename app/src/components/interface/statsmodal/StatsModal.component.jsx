@@ -1,6 +1,9 @@
 import {
     Box,
     Button,
+    Editable,
+    EditableInput,
+    EditablePreview,
     FormControl,
     FormLabel,
     Heading,
@@ -267,10 +270,47 @@ function FileUploadModal() {
 
     const renderSelectionElements = selectionElementsType => {
         return (
-            <Box>
-                <SimpleGrid columns={3} spacing={5}>
-                    <FormControl>
-                        <FormLabel>Only Visible:</FormLabel>
+            <Box height="225px" overflowY="scroll">
+                <SimpleGrid columns={3} spacing={2}>
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
+                            Custom Title:
+                        </Heading>
+                        <Editable
+                            defaultValue={
+                                store.stats.newChartProps.title
+                                    ? store.stats.newChartProps.title
+                                    : 'Chart title'
+                            }
+                            onSubmit={val => store.stats.changeChartTitle(val)}
+                        >
+                            <EditablePreview
+                                padding="0"
+                                margin="0"
+                                width="100%"
+                                overflow="hidden"
+                                whiteSpace="nowrap"
+                                textOverflow="ellipsis"
+                            />
+                            <EditableInput
+                                padding="0"
+                                margin="0"
+                                width="100%"
+                            />
+                        </Editable>
+                    </FormControl>
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
+                            Only Visible:
+                        </Heading>
                         <Tooltip label="If turned on only data from visible nodes will be show in the chart.">
                             <Switch
                                 onChange={value => {
@@ -282,14 +322,19 @@ function FileUploadModal() {
                         </Tooltip>
                     </FormControl>
 
-                    <FormControl>
-                        <FormLabel htmlFor="dataTargetSelector">
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
                             Network elements:
-                        </FormLabel>
+                        </Heading>
                         <Tooltip label="Selecting nodes means that you would like to get the data from node properties while selecting edges means you would like to get the data from edges.">
                             <Select
                                 size="sm"
                                 defaultValue="nodes"
+                                variant="filled"
                                 onChange={value =>
                                     store.stats.changeChartNetworkElements(
                                         value.target.value
@@ -304,10 +349,14 @@ function FileUploadModal() {
                         </Tooltip>
                     </FormControl>
 
-                    <FormControl>
-                        <FormLabel htmlFor="dataTargetSelector">
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
                             Element values:
-                        </FormLabel>
+                        </Heading>
                         <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
                             <Select
                                 size="sm"
@@ -316,6 +365,7 @@ function FileUploadModal() {
                                         value.target.value
                                     )
                                 }
+                                variant="filled"
                             >
                                 {store.stats.getElementValues().map(entry => (
                                     <option
@@ -328,8 +378,14 @@ function FileUploadModal() {
                             </Select>
                         </Tooltip>
                     </FormControl>
-                    <FormControl>
-                        <FormLabel>Display limit:</FormLabel>
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
+                            Display limit:
+                        </Heading>
                         <Tooltip label="Indicate how many values you would like to view. The values starting with first represent the elements that occure most often while the values starting with last represent elements that are occuring less often.">
                             <Select
                                 size="sm"
@@ -338,6 +394,7 @@ function FileUploadModal() {
                                         value.target.value
                                     )
                                 }
+                                variant="filled"
                             >
                                 <option value="0">All</option>
                                 <option value="10">First 10</option>
@@ -350,8 +407,14 @@ function FileUploadModal() {
                         </Tooltip>
                     </FormControl>
                     {selectionElementsType === 'grouped' && (
-                        <FormControl>
-                            <FormLabel>Group by values:</FormLabel>
+                        <FormControl
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius="6px"
+                            padding="10px"
+                        >
+                            <Heading size="xs" marginBottom="6px">
+                                Group by values:
+                            </Heading>
                             <Tooltip label="These values will be shown on the chart instead of 'First group', 'Second group' etc. and they will be used to group the element values.">
                                 <Select
                                     size="sm"
@@ -360,6 +423,7 @@ function FileUploadModal() {
                                             value.target.value
                                         )
                                     }
+                                    variant="filled"
                                 >
                                     {store.stats
                                         .getElementValues()
@@ -380,8 +444,14 @@ function FileUploadModal() {
                         store.stats.newChartProps.elements === 'nodes' &&
                         store.stats.newChartProps.element_values !==
                             'types' && (
-                            <FormControl>
-                                <FormLabel>Show only:</FormLabel>
+                            <FormControl
+                                backgroundColor="whiteAlpha.200"
+                                borderRadius="6px"
+                                padding="10px"
+                            >
+                                <Heading size="xs" marginBottom="6px">
+                                    Show only:
+                                </Heading>
                                 <Tooltip label="These values will define which types of nodes you want to explore.">
                                     <Select
                                         size="sm"
@@ -390,6 +460,7 @@ function FileUploadModal() {
                                                 value.target.value
                                             )
                                         }
+                                        variant="filled"
                                     >
                                         <option value={'all'}>All</option>
                                         {[
@@ -418,12 +489,7 @@ function FileUploadModal() {
 
     const renderModalBody = () => {
         return (
-            <ModalBody
-                overflowY="scroll"
-                width="748px"
-                paddingTop="0"
-                paddingBottom="0"
-            >
+            <ModalBody width="748px" paddingTop="0" paddingBottom="0">
                 <Tabs
                     isLazy={true}
                     orientation="vertical"
