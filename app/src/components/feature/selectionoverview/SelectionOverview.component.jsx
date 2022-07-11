@@ -38,11 +38,12 @@ import {
 } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect } from 'react';
-import { Chart } from 'react-chartjs-2';
+import { useContext, useEffect, useRef } from 'react';
+import { Chart, getDatasetAtEvent, getElementAtEvent } from 'react-chartjs-2';
 import { RootStoreContext } from 'stores/RootStore';
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
+    const chartRef = useRef([]);
 
     const bgColor = useColorModeValue('gray.50', 'gray.800');
 
@@ -149,7 +150,14 @@ function SelectionOverview(props) {
         );
     };
 
-    const renderChart = (data, title, chart, chartType, options) => {
+    const renderChart = (
+        data,
+        title,
+        chart,
+        chartType,
+        chartIndex,
+        options
+    ) => {
         if (!data.labels.length) {
             return (
                 <Center width="100%" height="100%">
@@ -157,12 +165,22 @@ function SelectionOverview(props) {
                 </Center>
             );
         }
+
         return (
             <Chart
+                ref={element => (chartRef.current[chartIndex] = element)}
                 type={chartType}
                 height="250px"
                 redraw={true}
                 data={data}
+                onClick={event => {
+                    const { index } = getElementAtEvent(
+                        chartRef.current[chartIndex],
+                        event
+                    )[0];
+
+                    console.log(data.labels[index]);
+                }}
                 options={{
                     maintainAspectRatio: false,
                     responsive: true,
@@ -195,23 +213,23 @@ function SelectionOverview(props) {
         );
     };
 
-    const getChartObject = (chart, values, title) => {
+    const getChartObject = (chart, values, title, index) => {
         switch (chart.type.toLowerCase()) {
             case 'bar':
-                return renderChart(values, title, chart, 'bar', {
+                return renderChart(values, title, chart, 'bar', index, {
                     indexAxis: 'y'
                 });
             case 'vertical bar':
             case 'grouped bar':
-                return renderChart(values, title, chart, 'bar');
+                return renderChart(values, title, chart, 'bar', index);
             case 'line':
-                return renderChart(values, title, chart, 'line');
+                return renderChart(values, title, chart, 'line', index);
             default:
-                return renderChart(values, title, chart, 'doughnut');
+                return renderChart(values, title, chart, 'doughnut', index);
         }
     };
 
-    const getEdgeChartData = chart => {
+    const getEdgeChartData = (chart, index) => {
         let title;
         let edgeProperty;
         let groupBy;
@@ -243,7 +261,7 @@ function SelectionOverview(props) {
             chart.onlyVisible
         );
 
-        return getChartObject(chart, values, title);
+        return getChartObject(chart, values, title, index);
     };
 
     const getNodeGroupByParam = groupBy => {
@@ -268,7 +286,7 @@ function SelectionOverview(props) {
         }
     };
 
-    const getNodeChartData = chart => {
+    const getNodeChartData = (chart, index) => {
         let title;
         let nodeProperty;
         let groupBy;
@@ -304,8 +322,21 @@ function SelectionOverview(props) {
             chart.show_only
         );
 
-        return getChartObject(chart, values, title);
+        return getChartObject(chart, values, title, index);
     };
+
+    // useEffect(() => {
+    //     chartRef.current = chartRef.current.slice(
+    //         0,
+    //         store.stats
+    //             .getChartListForDataset()
+    //             .filter(
+    //                 chart =>
+    //                     props.types.includes(chart.network_data) &&
+    //                     chart.network === store.core.currentGraph
+    //             ).length
+    //     );
+    // }, [props.types, store.core.currentGraph, store.stats]);
 
     const renderCharts = () => {
         const chartList = store.stats.getChartListForDataset();
@@ -320,9 +351,9 @@ function SelectionOverview(props) {
                 let chartObject;
 
                 if (chart.elements === 'nodes') {
-                    chartObject = getNodeChartData(chart);
+                    chartObject = getNodeChartData(chart, index);
                 } else {
-                    chartObject = getEdgeChartData(chart);
+                    chartObject = getEdgeChartData(chart, index);
                 }
 
                 return (
