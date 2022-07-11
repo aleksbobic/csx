@@ -3,12 +3,17 @@ import {
     Flex,
     Heading,
     HStack,
+    IconButton,
+    Input,
+    InputGroup,
+    InputRightElement,
     Text,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
+import { ArrowRight, MathPlus } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -105,7 +110,7 @@ function AdvancedSearch(props) {
                 width="100%"
                 height="40px"
                 backgroundColor="blackAlpha.900"
-                borderRadius="full"
+                borderRadius="8px"
                 onDragStart={event => onDragStart(event, node.nodeType)}
                 draggable
                 cursor="pointer"
@@ -121,6 +126,45 @@ function AdvancedSearch(props) {
                     <Text fontSize="sm" fontWeight="bold">
                         {node.label}
                     </Text>
+                </Tooltip>
+            </Flex>
+        ));
+    };
+
+    const renderSavedWorkflows = () => {
+        const savedWorkflows = [
+            'workflow 2',
+            'workflow 5',
+            'workflow potato and something else',
+            'fast workflow',
+            'slow workflow'
+        ];
+
+        return savedWorkflows.map(workflow => (
+            <Flex
+                width="100%"
+                justifyContent="space-between"
+                alignItems="center"
+                backgroundColor="whiteAlpha.100"
+                borderRadius="6px"
+                paddingLeft="10px"
+            >
+                <Tooltip label={workflow}>
+                    <Text
+                        fontSize="sm"
+                        overflow="hidden"
+                        whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                    >
+                        {workflow}
+                    </Text>
+                </Tooltip>
+                <Tooltip label="Load workflow">
+                    <IconButton
+                        icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
+                        size="sm"
+                        marginLeft="6px"
+                    />
                 </Tooltip>
             </Flex>
         ));
@@ -164,7 +208,7 @@ function AdvancedSearch(props) {
             </Box>
             <Box
                 position="absolute"
-                right="10px"
+                right="15px"
                 width="220px"
                 backgroundColor="transparent"
                 marginLeft="0px"
@@ -178,14 +222,14 @@ function AdvancedSearch(props) {
             >
                 <VStack
                     alignItems="start"
-                    padding="20px 10px 20px"
+                    padding="20px"
                     backgroundColor="rgba(0,0,0,0.85)"
                     borderTopLeftRadius="10px"
                     borderTopRightRadius="10px"
                     borderBottomColor="#2d2d2d"
                     borderBottomWidth="1px"
                 >
-                    <Heading size="sm">Node types</Heading>
+                    <Heading size="sm">Search Nodes</Heading>
                     <Text fontSize="xs" fontWeight="bold" opacity="0.75">
                         Drag and drop nodes to create a custom search workflow
                     </Text>
@@ -193,14 +237,45 @@ function AdvancedSearch(props) {
                 <VStack
                     height="auto"
                     padding="10px 10px"
-                    marginBottom="10px"
                     backgroundColor="blackAlpha.500"
                     flexGrow="1"
-                    borderBottomLeftRadius="10px"
-                    borderBottomRightRadius="10px"
                     backdropFilter="blur(2px)"
                 >
                     {renderNodeList()}
+                </VStack>
+                <VStack
+                    borderTopColor="#2d2d2d"
+                    borderTopWidth="1px"
+                    backgroundColor="black"
+                    padding="10px 10px"
+                    borderBottomLeftRadius="10px"
+                    borderBottomRightRadius="10px"
+                >
+                    <Heading
+                        size="sm"
+                        textAlign="left"
+                        width="100%"
+                        marginBottom="6px"
+                        marginTop="6px"
+                    >
+                        Saved workflows
+                    </Heading>
+                    <VStack maxHeight="130px" width="100%" overflowY="scroll">
+                        {renderSavedWorkflows()}
+                    </VStack>
+                    <InputGroup size="sm" marginTop="20px">
+                        <Input
+                            placeholder="Workflow name ..."
+                            size="sm"
+                            variant="filled"
+                            borderRadius="6px"
+                        />
+                        <InputRightElement>
+                            <Tooltip label="Save current workflow">
+                                <IconButton icon={<MathPlus />} size="sm" />
+                            </Tooltip>
+                        </InputRightElement>
+                    </InputGroup>
                 </VStack>
             </Box>
         </HStack>
