@@ -270,7 +270,7 @@ function FileUploadModal() {
 
     const renderSelectionElements = selectionElementsType => {
         return (
-            <Box height="225px" overflowY="scroll">
+            <Box height="225px" overflowY="scroll" width="100%">
                 <SimpleGrid columns={3} spacing={2}>
                     <FormControl
                         backgroundColor="whiteAlpha.200"
@@ -291,6 +291,7 @@ function FileUploadModal() {
                             <EditablePreview
                                 padding="0"
                                 margin="0"
+                                maxWidth="100%"
                                 width="100%"
                                 overflow="hidden"
                                 whiteSpace="nowrap"
@@ -299,6 +300,7 @@ function FileUploadModal() {
                             <EditableInput
                                 padding="0"
                                 margin="0"
+                                maxWidth="100%"
                                 width="100%"
                             />
                         </Editable>
