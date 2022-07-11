@@ -5,7 +5,6 @@ import {
     EditableInput,
     EditablePreview,
     FormControl,
-    FormLabel,
     Heading,
     IconButton,
     Modal,

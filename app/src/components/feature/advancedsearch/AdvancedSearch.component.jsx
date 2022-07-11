@@ -138,6 +138,7 @@ function AdvancedSearch(props) {
 
         return savedWorkflows.map(workflow => (
             <Flex
+                key={`workflow_${workflow}`}
                 width="100%"
                 justifyContent="space-between"
                 alignItems="center"

@@ -80,7 +80,21 @@ export class WorkflowStore {
     };
 
     loadWorkflow = name => {
-        this.actions = this.workflows[this.store.search.currentDataset][name];
+        const loadedActions =
+            this.workflows[this.store.search.currentDataset][name];
+
+        const resultsNodes = loadedActions
+            .filter(node => node.type === 'resultsNode')
+            .map(node => {
+                node.data.runWorkflow = this.runWorkFlow;
+                return node;
+            });
+
+        const otherNodes = loadedActions.filter(
+            node => node.type !== 'resultsNode'
+        );
+
+        this.actions = [...otherNodes, ...resultsNodes];
     };
 
     setShouldRunWorkflow = val => {
