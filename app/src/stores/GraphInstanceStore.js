@@ -677,10 +677,10 @@ export class GraphInstanceStore {
                 this.store.graph.currentGraphData.links[i].visible = isVisible;
                 if (isVisible) {
                     visibleIds.push(
-                        this.store.graph.currentGraphData.links[i].source
+                        this.store.graph.currentGraphData.links[i].source.id
                     );
                     visibleIds.push(
-                        this.store.graph.currentGraphData.links[i].target
+                        this.store.graph.currentGraphData.links[i].target.id
                     );
                 }
             }
@@ -695,10 +695,10 @@ export class GraphInstanceStore {
                 this.store.graph.currentGraphData.links[i].visible = isVisible;
                 if (isVisible) {
                     visibleIds.push(
-                        this.store.graph.currentGraphData.links[i].source
+                        this.store.graph.currentGraphData.links[i].source.id
                     );
                     visibleIds.push(
-                        this.store.graph.currentGraphData.links[i].target
+                        this.store.graph.currentGraphData.links[i].target.id
                     );
                 }
             }
