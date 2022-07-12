@@ -8,6 +8,8 @@ export class StatsStore {
     availableTypes = ['all'];
     newChartProps = {
         title: '',
+        hoverLabel: '',
+        groupHoverLabel: '',
         network: 'overview',
         type: 'doughnut',
         network_data: 'all',
@@ -71,6 +73,8 @@ export class StatsStore {
     resetChartProps = () => {
         this.newChartProps = {
             title: '',
+            hoverLabel: '',
+            groupHoverLabel: '',
             network: 'overview',
             type: 'doughnut',
             onlyVisible: false,
@@ -96,6 +100,14 @@ export class StatsStore {
 
     changeChartTitle = val => {
         this.newChartProps.title = val;
+    };
+
+    changeChartHoverLabel = val => {
+        this.newChartProps.hoverLabel = val;
+    };
+
+    changeChartGroupHoverLabel = val => {
+        this.newChartProps.groupHoverLabel = val;
     };
 
     changeSelectedChartType = index => {

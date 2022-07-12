@@ -286,24 +286,109 @@ function FileUploadModal() {
                                     : 'Chart title'
                             }
                             onSubmit={val => store.stats.changeChartTitle(val)}
+                            height="28px"
                         >
                             <EditablePreview
-                                padding="0"
+                                padding="2px 6px"
                                 margin="0"
                                 maxWidth="100%"
                                 width="100%"
                                 overflow="hidden"
                                 whiteSpace="nowrap"
                                 textOverflow="ellipsis"
+                                backgroundColor="transparent"
+                                transition="all 0.1s ease-in-out"
+                                _hover={{ background: 'whiteAlpha.200' }}
                             />
                             <EditableInput
-                                padding="0"
+                                padding="2px 6px"
                                 margin="0"
                                 maxWidth="100%"
                                 width="100%"
                             />
                         </Editable>
                     </FormControl>
+                    <FormControl
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="6px"
+                        padding="10px"
+                    >
+                        <Heading size="xs" marginBottom="6px">
+                            Hover label:
+                        </Heading>
+                        <Editable
+                            defaultValue={
+                                store.stats.newChartProps.hoverLabel
+                                    ? store.stats.newChartProps.hoverLabel
+                                    : 'Hover label'
+                            }
+                            onSubmit={val =>
+                                store.stats.changeChartHoverLabel(val)
+                            }
+                            height="28px"
+                        >
+                            <EditablePreview
+                                padding="2px 6px"
+                                margin="0"
+                                maxWidth="100%"
+                                width="100%"
+                                overflow="hidden"
+                                whiteSpace="nowrap"
+                                textOverflow="ellipsis"
+                                backgroundColor="transparent"
+                                transition="all 0.1s ease-in-out"
+                                _hover={{ background: 'whiteAlpha.200' }}
+                            />
+                            <EditableInput
+                                padding="2px 6px"
+                                margin="0"
+                                maxWidth="100%"
+                                width="100%"
+                            />
+                        </Editable>
+                    </FormControl>
+                    {selectionElementsType === 'grouped' && (
+                        <FormControl
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius="6px"
+                            padding="10px"
+                        >
+                            <Heading size="xs" marginBottom="6px">
+                                Hover group label:
+                            </Heading>
+                            <Editable
+                                defaultValue={
+                                    store.stats.newChartProps.groupHoverLabel
+                                        ? store.stats.newChartProps
+                                              .groupHoverLabel
+                                        : 'Group hover label'
+                                }
+                                onSubmit={val =>
+                                    store.stats.changeChartGroupHoverLabel(val)
+                                }
+                                height="28px"
+                            >
+                                <EditablePreview
+                                    padding="2px 6px"
+                                    margin="0"
+                                    maxWidth="100%"
+                                    width="100%"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                    backgroundColor="transparent"
+                                    transition="all 0.1s ease-in-out"
+                                    _hover={{ background: 'whiteAlpha.200' }}
+                                />
+                                <EditableInput
+                                    padding="2px 6px"
+                                    margin="0"
+                                    maxWidth="100%"
+                                    width="100%"
+                                />
+                            </Editable>
+                        </FormControl>
+                    )}
                     <FormControl
                         backgroundColor="whiteAlpha.200"
                         borderRadius="6px"

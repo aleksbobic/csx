@@ -166,6 +166,40 @@ function SelectionOverview(props) {
             );
         }
 
+        const pluginOptins = {};
+
+        if (chart.hoverLabel) {
+            pluginOptins.tooltip = {
+                callbacks: {
+                    label: tooltipItem => {
+                        if (chart.groupHoverLabel) {
+                            return `${chart.groupHoverLabel}: ${tooltipItem.dataset.label}`;
+                        }
+
+                        return `${chart.hoverLabel}: ${tooltipItem.label}`;
+                    },
+                    afterLabel: tooltipItem => {
+                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                    }
+                }
+            };
+        } else {
+            pluginOptins.tooltip = {
+                callbacks: {
+                    label: tooltipItem => tooltipItem.label,
+                    afterLabel: tooltipItem => {
+                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                    }
+                }
+            };
+        }
+
+        if (chart.groupHoverLabel) {
+            pluginOptins.tooltip.callbacks.title = tooltipItems => {
+                return `${chart.hoverLabel}: ${tooltipItems[0].label}`;
+            };
+        }
+
         return (
             <Chart
                 ref={element => (chartRef.current[chartIndex] = element)}
@@ -223,7 +257,8 @@ function SelectionOverview(props) {
                         },
                         legend: {
                             display: chart.legend
-                        }
+                        },
+                        ...pluginOptins
                     }
                 }}
             />
