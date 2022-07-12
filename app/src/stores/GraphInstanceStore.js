@@ -660,8 +660,63 @@ export class GraphInstanceStore {
     };
 
     filterEdgesWithValue = (property, value) => {
-        console.log(property, value);
         this.toggleVisibleComponents(-1);
         this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        let visibleIds = [];
+
+        if (property.type === 'basic') {
+            for (let i = 0; i < linkCount; i++) {
+                let isVisible =
+                    this.store.graph.currentGraphData.links[i][
+                        property.prop
+                    ] === value;
+                this.store.graph.currentGraphData.links[i].visible = isVisible;
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].source
+                    );
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].target
+                    );
+                }
+            }
+        } else {
+            for (let i = 0; i < linkCount; i++) {
+                let isVisible = this.store.graph.currentGraphData.links[
+                    i
+                ].connections.find(
+                    connection => connection[property.prop] === value
+                );
+
+                this.store.graph.currentGraphData.links[i].visible = isVisible;
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].source
+                    );
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].target
+                    );
+                }
+            }
+        }
+
+        visibleIds = [...new Set(visibleIds)];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible = visibleIds.includes(
+                this.store.graph.currentGraphData.nodes[i].id
+            );
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
     };
 }

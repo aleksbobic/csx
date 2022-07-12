@@ -185,7 +185,7 @@ function SelectionOverview(props) {
                             data.labels[index]
                         );
                     } else {
-                        store.graphInstance.filterNodesWithValue(
+                        store.graphInstance.filterEdgesWithValue(
                             data.edgeProperty,
                             data.labels[index]
                         );
