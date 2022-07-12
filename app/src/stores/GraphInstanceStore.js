@@ -10,7 +10,8 @@ const SELF_CENTRIC_TYPES = {
     ORIGIN_INTERSECTION: 'origin_union',
     ONLY_SELECTED: 'only_selected_nodes',
     SAME_ENTRY: 'same_entry',
-    SELECTED_COMPONENT: 'selected_component'
+    SELECTED_COMPONENT: 'selected_component',
+    CHART_FILTER: 'chart_filter'
 };
 
 export class GraphInstanceStore {
@@ -613,4 +614,54 @@ export class GraphInstanceStore {
     get selectedColorSchema() {
         return this.nodeColorScheme[this.store.core.currentGraph];
     }
+
+    filterNodesWithValue = (property, value) => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        const getNodeProp =
+            property.type === 'basic'
+                ? this.store.stats.getNodeBasicProp
+                : this.store.stats.getNodeAdvancedProp;
+
+        const visibleIds = [];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible =
+                getNodeProp(
+                    this.store.graph.currentGraphData.nodes[i],
+                    property.prop
+                ) === value;
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+
+            if (isVisible) {
+                visibleIds.push(this.store.graph.currentGraphData.nodes[i].id);
+            }
+        }
+
+        for (let i = 0; i < linkCount; i++) {
+            this.store.graph.currentGraphData.links[i].visible =
+                visibleIds.includes(
+                    this.store.graph.currentGraphData.links[i].source.id
+                ) &&
+                visibleIds.includes(
+                    this.store.graph.currentGraphData.links[i].target.id
+                );
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
+    };
+
+    filterEdgesWithValue = (property, value) => {
+        console.log(property, value);
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+    };
 }

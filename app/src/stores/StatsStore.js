@@ -491,11 +491,14 @@ export class StatsStore {
                 }
             });
 
-            return this.getChartDataBasedOnType(
-                valuesSorted,
-                groupedByCounts,
-                chartType
-            );
+            return {
+                edgeProperty: edgeProperty,
+                ...this.getChartDataBasedOnType(
+                    valuesSorted,
+                    groupedByCounts,
+                    chartType
+                )
+            };
         }
 
         if (edgeProperty.type === 'basic') {
@@ -532,11 +535,14 @@ export class StatsStore {
             display_limit
         );
 
-        return this.getChartDataBasedOnType(
-            valuesSorted,
-            countsSorted,
-            chartType
-        );
+        return {
+            edgeProperty: edgeProperty,
+            ...this.getChartDataBasedOnType(
+                valuesSorted,
+                countsSorted,
+                chartType
+            )
+        };
     };
 
     getNodeDataBasedOnNetworkSelection = (
@@ -699,11 +705,14 @@ export class StatsStore {
                 });
             });
 
-            return this.getChartDataBasedOnType(
-                valuesSorted,
-                groupedByCounts,
-                chartType
-            );
+            return {
+                nodeProperty: nodeProperty,
+                ...this.getChartDataBasedOnType(
+                    valuesSorted,
+                    groupedByCounts,
+                    chartType
+                )
+            };
         } else {
             let values = [];
             let counts = [];
@@ -727,11 +736,14 @@ export class StatsStore {
                 display_limit
             );
 
-            return this.getChartDataBasedOnType(
-                valuesSorted,
-                countsSorted,
-                chartType
-            );
+            return {
+                nodeProperty: nodeProperty,
+                ...this.getChartDataBasedOnType(
+                    valuesSorted,
+                    countsSorted,
+                    chartType
+                )
+            };
         }
     };
 }

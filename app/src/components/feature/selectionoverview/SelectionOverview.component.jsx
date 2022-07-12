@@ -39,7 +39,7 @@ import {
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef } from 'react';
-import { Chart, getDatasetAtEvent, getElementAtEvent } from 'react-chartjs-2';
+import { Chart, getElementAtEvent } from 'react-chartjs-2';
 import { RootStoreContext } from 'stores/RootStore';
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
@@ -179,12 +179,29 @@ function SelectionOverview(props) {
                         event
                     )[0];
 
-                    console.log(data.labels[index]);
+                    if ('nodeProperty' in data) {
+                        store.graphInstance.filterNodesWithValue(
+                            data.nodeProperty,
+                            data.labels[index]
+                        );
+                    } else {
+                        store.graphInstance.filterNodesWithValue(
+                            data.edgeProperty,
+                            data.labels[index]
+                        );
+                    }
                 }}
                 options={{
                     maintainAspectRatio: false,
                     responsive: true,
                     indexAxis: options && options.indexAxis,
+                    onHover: (event, elements) => {
+                        if (elements.length) {
+                            event.native.target.style.cursor = 'pointer';
+                        } else {
+                            event.native.target.style.cursor = 'default';
+                        }
+                    },
                     scales: {
                         y: {
                             display: chart.labels.y.display,
@@ -213,19 +230,19 @@ function SelectionOverview(props) {
         );
     };
 
-    const getChartObject = (chart, values, title, index) => {
+    const getChartObject = (chart, data, title, index) => {
         switch (chart.type.toLowerCase()) {
             case 'bar':
-                return renderChart(values, title, chart, 'bar', index, {
+                return renderChart(data, title, chart, 'bar', index, {
                     indexAxis: 'y'
                 });
             case 'vertical bar':
             case 'grouped bar':
-                return renderChart(values, title, chart, 'bar', index);
+                return renderChart(data, title, chart, 'bar', index);
             case 'line':
-                return renderChart(values, title, chart, 'line', index);
+                return renderChart(data, title, chart, 'line', index);
             default:
-                return renderChart(values, title, chart, 'doughnut', index);
+                return renderChart(data, title, chart, 'doughnut', index);
         }
     };
 
@@ -253,7 +270,7 @@ function SelectionOverview(props) {
                 break;
         }
 
-        const values = store.stats.getEdgeCounts(
+        const data = store.stats.getEdgeCounts(
             edgeProperty,
             chart.type,
             chart.display_limit,
@@ -261,7 +278,7 @@ function SelectionOverview(props) {
             chart.onlyVisible
         );
 
-        return getChartObject(chart, values, title, index);
+        return getChartObject(chart, data, title, index);
     };
 
     const getNodeGroupByParam = groupBy => {
@@ -312,7 +329,7 @@ function SelectionOverview(props) {
                 break;
         }
 
-        const values = store.stats.getNodeCounts(
+        const data = store.stats.getNodeCounts(
             nodeProperty,
             chart.type,
             chart.display_limit,
@@ -322,21 +339,8 @@ function SelectionOverview(props) {
             chart.show_only
         );
 
-        return getChartObject(chart, values, title, index);
+        return getChartObject(chart, data, title, index);
     };
-
-    // useEffect(() => {
-    //     chartRef.current = chartRef.current.slice(
-    //         0,
-    //         store.stats
-    //             .getChartListForDataset()
-    //             .filter(
-    //                 chart =>
-    //                     props.types.includes(chart.network_data) &&
-    //                     chart.network === store.core.currentGraph
-    //             ).length
-    //     );
-    // }, [props.types, store.core.currentGraph, store.stats]);
 
     const renderCharts = () => {
         const chartList = store.stats.getChartListForDataset();
