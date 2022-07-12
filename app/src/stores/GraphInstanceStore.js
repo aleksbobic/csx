@@ -243,6 +243,7 @@ export class GraphInstanceStore {
             this.isSelfCentric = false;
         }
 
+        this.selfCentricType = null;
         this.filterTabularData();
     };
 
