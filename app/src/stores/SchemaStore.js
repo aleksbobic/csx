@@ -177,8 +177,6 @@ export class SchemaStore {
                     background:
                         node === anchor
                             ? this.colors.anchor
-                            : this.store.search.links.includes(node)
-                            ? this.colors.link
                             : this.colors.normal,
                     color: 'white',
                     borderRadius: '10px',
@@ -393,34 +391,6 @@ export class SchemaStore {
 
     setAnchor = anchor => {
         this.store.search.anchor = anchor;
-
-        this.data = this.data.map(entry => {
-            if ('isAnchor' in entry.data) {
-                entry.data.isAnchor = entry.data.label === anchor;
-                if (entry.data.label === anchor) {
-                    entry.data.isLink = false;
-
-                    this.store.search.links = this.store.search.links.filter(
-                        entry => entry !== anchor
-                    );
-                }
-
-                entry.style = {
-                    background: entry.data.isAnchor
-                        ? this.colors.anchor
-                        : entry.data.isLink
-                        ? this.colors.link
-                        : this.colors.normal,
-                    color: 'white',
-                    borderRadius: '10px',
-                    height: 'auto',
-                    borderWidth: 0,
-                    padding: '5px',
-                    minWidth: 50
-                };
-            }
-            return entry;
-        });
 
         this.overviewData = this.overviewData.map(entry => {
             if ('isAnchor' in entry.data && entry.data.isAnchor) {
