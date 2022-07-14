@@ -1,4 +1,12 @@
-import { Stat, StatHelpText, Text, useColorMode } from '@chakra-ui/react';
+import {
+    Stack,
+    Stat,
+    StatHelpText,
+    Tag,
+    Text,
+    useColorMode,
+    Wrap
+} from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -51,65 +59,106 @@ function TableBody(props) {
 
     const renderCellContent = cell => {
         const content = Array.isArray(cell.value) ? cell.value : [cell.value];
+        const isArray = content.length > 1;
+
+        if (!isArray) {
+            return (
+                <Text
+                    opacity="0.75"
+                    transition="all 0.25s ease-in-out"
+                    fontSize="sm"
+                    display="inline-block"
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    fontWeight="bold"
+                    maxWidth="150px"
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'data panel nodes tab',
+                            'item click',
+                            `focus on node: ${cell.value}}`
+                        );
+
+                        store.graphInstance.zoomToFitByNodeId(
+                            Array.isArray(cell.value)
+                                ? findID(cell, 0)
+                                : findID(cell)
+                        );
+                    }}
+                    _hover={{
+                        cursor: 'pointer',
+                        opacity: 1
+                    }}
+                >
+                    {content[0]}
+                </Text>
+            );
+        }
 
         return content.map((value, index) => {
             return (
-                <Stat key={index}>
-                    <StatHelpText
-                        margin="0"
+                <Tag
+                    key={index}
+                    backgroundColor="whiteAlpha.300"
+                    borderRadius="full"
+                    textAlign="center"
+                    size="sm"
+                    opacity="0.75"
+                    transition="all 0.25s ease-in-out"
+                    _hover={{
+                        cursor: 'pointer',
+                        opacity: 1
+                    }}
+                >
+                    <Text
+                        fontSize="sm"
+                        display="inline-block"
                         whiteSpace="nowrap"
                         overflow="hidden"
                         textOverflow="ellipsis"
                         fontWeight="bold"
-                        paddingRight="10px"
-                        title={value}
-                    >
-                        <Text
-                            opacity="0.75"
-                            transition="all 0.25s ease-in-out"
-                            fontSize="sm"
-                            display="inline-block"
-                            whiteSpace="nowrap"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
-                            maxWidth="200px"
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'data panel nodes tab',
-                                    'item click',
-                                    `focus on node: ${cell.value}}`
-                                );
+                        maxWidth="150px"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'data panel nodes tab',
+                                'item click',
+                                `focus on node: ${cell.value}}`
+                            );
 
-                                store.graphInstance.zoomToFitByNodeId(
-                                    Array.isArray(cell.value)
-                                        ? findID(cell, index)
-                                        : findID(cell)
-                                );
-                            }}
-                            _hover={{
-                                cursor: 'pointer',
-                                opacity: 1
-                            }}
-                        >
-                            {value}
-                        </Text>
-                    </StatHelpText>
-                </Stat>
+                            store.graphInstance.zoomToFitByNodeId(
+                                Array.isArray(cell.value)
+                                    ? findID(cell, index)
+                                    : findID(cell)
+                            );
+                        }}
+                    >
+                        {value}
+                    </Text>
+                </Tag>
             );
         });
     };
 
     const renderCell = cell => {
+        let styles = {
+            maxWidth: 'auto',
+            textAlign: 'left'
+        };
+
+        if (
+            cell.column.Header !==
+            cell.row.cells[cell.row.cells.length - 1].column.Header
+        ) {
+            styles.borderRight = '1px solid';
+            styles.borderRightColor = 'rgba(255,255,255,0.25)';
+        }
+
         return (
-            <td
-                key="1"
-                {...cell.getCellProps()}
-                style={{
-                    maxWidth: 'auto',
-                    textAlign: 'right'
-                }}
-            >
-                {cell.render(({ cell }) => renderCellContent(cell))}
+            <td key="1" {...cell.getCellProps()} style={styles}>
+                <Wrap padding="20px 10px">
+                    {cell.render(({ cell }) => renderCellContent(cell))}
+                </Wrap>
             </td>
         );
     };
@@ -126,6 +175,10 @@ function TableBody(props) {
                                 ? 'table-row-light'
                                 : 'table-row'
                         }
+                        style={{
+                            borderBottom: '1px solid',
+                            borderBottomColor: 'rgba(255,255,255,0.25)'
+                        }}
                     >
                         {row.cells.map(renderCell)}
                     </tr>

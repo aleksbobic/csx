@@ -69,7 +69,7 @@ function TableHead(props) {
                 style={{
                     color: 'white',
                     fontWeight: 'bold',
-                    textAlign: 'right',
+                    textAlign: 'left',
                     width: 'auto',
                     minWidth: '200px',
                     padding: '5px 10px',
