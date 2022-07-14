@@ -1,3 +1,4 @@
+from re import M
 import pandas as pd
 import json
 import os
@@ -118,6 +119,16 @@ def get_dimension_types(defaults):
     return {defaults[key]["name"]: defaults[key]["dataType"] for key in defaults}
 
 
+def get_elastic_type(dim_type):
+    if dim_type == "string":
+        return "text"
+    if dim_type == "integer":
+        return "integer"
+    if dim_type == "float":
+        return "float"
+    return "text"
+
+
 @router.get("/settings")
 def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     defaults = json.loads(defaults)
@@ -173,8 +184,17 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     columns = get_dimensions(defaults)
 
+    mapping = {
+        "mappings": {
+            "properties": {
+                dim: {"type": get_elastic_type(config["dimension_types"][dim])}
+                for dim in config["dimension_types"]
+            }
+        },
+    }
+
     if not es.indices.exists(index=name):
-        es.indices.create(index=name)
+        es.indices.create(index=name, body=mapping)
 
     try:
         bulk(

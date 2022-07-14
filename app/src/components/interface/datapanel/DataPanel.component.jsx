@@ -232,7 +232,6 @@ function DataPanel() {
                 variant="soft-rounded"
                 colorScheme="blue"
                 height="100%"
-                isLazy
             >
                 {renderTabButtons()}
                 {renderTablePanels()}
