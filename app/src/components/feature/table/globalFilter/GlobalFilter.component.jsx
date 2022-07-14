@@ -24,13 +24,23 @@ function GlobalFilter(props) {
                 paddingLeft="10px"
                 variant="filled"
                 value={globalFilterValue || ''}
-                onChange={e => {
-                    setGlobalFilterValue(e.target.value);
+                onChange={event => {
+                    setGlobalFilterValue(event.target.value);
+                }}
+                onKeyUp={event => {
+                    if (event.key === 'Enter' || event.keyCode === 13) {
+                        onChange();
+                    }
                 }}
                 placeholder={`${props.preGlobalFilteredRows.length} entries to search through...`}
             />
             <InputRightElement>
-                <IconButton size="sm" icon={<Search />} onClick={onChange} />
+                <IconButton
+                    variant="ghost"
+                    size="sm"
+                    icon={<Search style={{ '--ggs': '0.7' }} />}
+                    onClick={onChange}
+                />
             </InputRightElement>
         </InputGroup>
     );
