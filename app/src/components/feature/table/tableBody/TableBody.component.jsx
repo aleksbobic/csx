@@ -1,12 +1,4 @@
-import {
-    Stack,
-    Stat,
-    StatHelpText,
-    Tag,
-    Text,
-    useColorMode,
-    Wrap
-} from '@chakra-ui/react';
+import { Tag, Text, useColorMode, Wrap } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
