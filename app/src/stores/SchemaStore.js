@@ -249,7 +249,8 @@ export class SchemaStore {
                     style: {
                         ...schemaNode.style,
                         borderRadius: '10px',
-                        height: 'auto'
+                        height: 'auto',
+                        background: 'rgba(100,100,100,0.5)'
                     },
                     id: '-2',
                     type: 'overviewSchemaNode'
@@ -401,9 +402,10 @@ export class SchemaStore {
                 entry.data.properties = this.getOverviewNodeProperties();
 
                 entry.style = {
-                    background: entry.data.isAnchor
-                        ? this.colors.anchor
-                        : this.colors.normal,
+                    background:
+                        entry.data.isAnchor && entry.data.position === 'left'
+                            ? this.colors.anchor
+                            : 'rgba(100,100,100,0.5)',
                     color: 'white',
                     borderRadius: '10px',
                     height: 'auto',
