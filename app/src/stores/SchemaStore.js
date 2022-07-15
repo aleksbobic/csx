@@ -400,8 +400,6 @@ export class SchemaStore {
                 entry.style = {
                     background: entry.data.isAnchor
                         ? this.colors.anchor
-                        : entry.data.isLink
-                        ? this.colors.link
                         : this.colors.normal,
                     color: 'white',
                     borderRadius: '10px',
@@ -505,10 +503,7 @@ export class SchemaStore {
                     }
 
                     entry.style = {
-                        background:
-                            entry.data.label === link
-                                ? this.colors.link
-                                : entry.style.background,
+                        background: entry.style.background,
                         color: 'white',
                         borderRadius: '10px',
                         height: 'auto',
@@ -544,8 +539,6 @@ export class SchemaStore {
                         entry.style = {
                             background: entry.data.isAnchor
                                 ? this.colors.anchor
-                                : entry.data.isLink
-                                ? this.colors.link
                                 : this.colors.normal,
                             color: 'white',
                             borderRadius: '10px',
@@ -569,8 +562,6 @@ export class SchemaStore {
                         entry.style = {
                             background: entry.data.isAnchor
                                 ? this.colors.anchor
-                                : entry.data.isLink
-                                ? this.colors.link
                                 : this.colors.normal,
                             color: 'white',
                             borderRadius: '10px',
