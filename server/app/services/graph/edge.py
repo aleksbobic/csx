@@ -253,7 +253,6 @@ def get_shortest_schema_paths(
 ) -> List[List[SchemaElement]]:
     """Get shortest paths from schema nodes to the anchor schema node and from the anchor schema node to scehma nodes."""
 
-    # new stuff
     graph = nx.DiGraph()
     graph.add_nodes_from(features)
     for edge_data in schema:
@@ -299,45 +298,49 @@ def get_shortest_schema_paths(
         except:
             continue
 
-    new_shortest_schema_paths = []
+    shortest_schema_paths = []
 
-    for node in source_leaf_nodes:
+    shortest_schema_paths = add_shortest_path_from_leafs(
+        source_leaf_nodes, shortest_schema_paths, shortest_path_candidates, "src", graph
+    )
+    shortest_schema_paths = add_shortest_path_from_leafs(
+        source_leaf_nodes,
+        shortest_schema_paths,
+        shortest_path_candidates,
+        "dest",
+        graph,
+    )
+
+    return shortest_schema_paths
+
+
+def add_shortest_path_from_leafs(
+    leaf_nodes, shortest_schema_paths, shortest_path_candidates, position, graph
+):
+    for node in leaf_nodes:
         new_temp_shortest_path_from_src = []
         shortest_length = 0
 
         for path in shortest_path_candidates:
-            if path[0]["src"] == node:
-                if not new_temp_shortest_path_from_src or shortest_length >= len(path):
-                    if shortest_length == len(path):
-                        new_temp_shortest_path_from_src.append(path)
-                    else:
-                        new_temp_shortest_path_from_src = [path]
-                        shortest_length = len(path)
-
-        for entry in new_temp_shortest_path_from_src:
-            new_shortest_schema_paths.append(entry)
-
-    for node in target_leaf_nodes:
-        new_temp_shortest_path_from_src = []
-        shortest_length = 0
-
-        for path in shortest_path_candidates:
-            if path[-1]["dest"] == node:
-                if not new_temp_shortest_path_from_src or shortest_length >= len(path):
-                    if shortest_length == len(path):
-                        new_temp_shortest_path_from_src.append(path)
-                    else:
-                        new_temp_shortest_path_from_src = [path]
-                        shortest_length = len(path)
-
-        for entry in new_temp_shortest_path_from_src:
-            if not shortest_path_with_dest_exists(
-                new_shortest_schema_paths, entry[0]["src"], entry[-1]["dest"], graph
+            if (position == "src" and path[0]["src"] == node) or (
+                position == "dest" and path[-1]["dest"] == node
             ):
-                new_shortest_schema_paths.append(entry)
+                if not new_temp_shortest_path_from_src or shortest_length >= len(path):
+                    if shortest_length == len(path):
+                        new_temp_shortest_path_from_src.append(path)
+                    else:
+                        new_temp_shortest_path_from_src = [path]
+                        shortest_length = len(path)
 
-    print("\n\n\n after filtering shortest paths", new_shortest_schema_paths)
-    return new_shortest_schema_paths
+        for entry in new_temp_shortest_path_from_src:
+            if position == "src":
+                shortest_schema_paths.append(entry)
+            else:
+                if not shortest_path_with_dest_exists(
+                    shortest_schema_paths, entry[0]["src"], entry[-1]["dest"], graph
+                ):
+                    shortest_schema_paths.append(entry)
+    return shortest_schema_paths
 
 
 def get_single_column_edges(
@@ -428,7 +431,6 @@ def shortest_path_exists(
 ) -> bool:
     """Check if there exists a shortest schema path with given source or destination."""
 
-    print("shortest paths from check point", shortest_paths)
     for path in shortest_paths:
         if path[0]["src"] == src or path[-1]["dest"] == dest:
             return True
@@ -438,8 +440,6 @@ def shortest_path_exists(
 def shortest_path_with_dest_exists(
     shortest_paths: List[List[SchemaElement]], src: str, dest: str, graph
 ) -> bool:
-    print("\n\nshortest paths from check point", shortest_paths)
-    print("checking for dest: ", dest, " and source: ", src)
     for path in shortest_paths:
         if path[0]["src"] == src and path[-1]["dest"] == dest:
             return True
