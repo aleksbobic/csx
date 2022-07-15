@@ -1,5 +1,4 @@
-import { Flex, IconButton, Text, Tooltip } from '@chakra-ui/react';
-import { Anchor } from 'css.gg';
+import { Flex, Text } from '@chakra-ui/react';
 
 import { Handle } from 'react-flow-renderer';
 
@@ -22,32 +21,10 @@ const schemaNode = ({ data, isConnectable }) => {
             <Flex
                 alignItems="center"
                 fontSize="14px"
-                paddingLeft="10px"
+                paddingLeft="5px"
                 paddingRight="5px"
             >
                 <Text>{data.label}</Text>
-                <Tooltip label="Use as anchor">
-                    <IconButton
-                        marginLeft="10px"
-                        size="sm"
-                        minWidth="20px"
-                        height="20px"
-                        width="20px"
-                        variant="ghost"
-                        disabled={data.isAnchor}
-                        _disabled={{ opacity: 1, cursor: 'default' }}
-                        _hover={{ opacity: 1 }}
-                        onClick={() => data.setAnchor(data.label)}
-                        opacity={data.isAnchor ? 1 : 0.5}
-                        icon={
-                            <Anchor
-                                style={{
-                                    '--ggs': '0.7'
-                                }}
-                            />
-                        }
-                    />
-                </Tooltip>
             </Flex>
             <Handle
                 type="source"

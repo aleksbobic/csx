@@ -187,7 +187,10 @@ export class SchemaStore {
                 }
             };
 
-            schema.push(schemaNode);
+            schema.push({
+                ...schemaNode,
+                style: { ...schemaNode.style, background: this.colors.normal }
+            });
 
             if (node === anchor) {
                 overviewSchema.push({
