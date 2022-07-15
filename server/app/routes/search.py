@@ -283,9 +283,7 @@ def search(
 
         return graph_data
 
-    graph_data = get_graph(
-        elastic_list, all_dimensions, visible_dimensions, schema, anchor
-    )
+    graph_data = get_graph(elastic_list, all_dimensions, visible_dimensions, schema)
 
     graph_data["meta"] = {
         "new_dimensions": new_dimensions,

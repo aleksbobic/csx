@@ -29,8 +29,7 @@ def get_graph(
     search_results,
     features: List[str],
     visible_features: List[str],
-    schema: List[SchemaElement],
-    anchor: str,
+    schema: List[SchemaElement]
 ):
     """Convert results retrieved from elastic into a graph representation."""
 
@@ -45,7 +44,6 @@ def get_graph(
         features,
         visible_features,
         schema,
-        anchor,
         entries_with_nodes,
         node_ids_with_labels,
     )
