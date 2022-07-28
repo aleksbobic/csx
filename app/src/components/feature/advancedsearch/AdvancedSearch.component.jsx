@@ -29,6 +29,7 @@ import KeywordExtractionNode from './keywordextractionnode/KeywordExtractionNode
 import ResultsNode from './resultsNode/ResultsNode.component';
 import SearchEdge from './searchedge/SearchEdge.component';
 import SearchNode from './searchnode/SearchNode.component';
+import DatasetNode from './datasetNode/Dataset.component';
 
 function AdvancedSearch(props) {
     const reactFlowWrapper = useRef(null);
@@ -197,6 +198,7 @@ function AdvancedSearch(props) {
                 <ReactFlow
                     elements={store.workflow.actions}
                     nodeTypes={{
+                        datasetNode: DatasetNode,
                         searchNode: SearchNode,
                         filterNode: FilterNode,
                         keywordExtractionNode: KeywordExtractionNode,

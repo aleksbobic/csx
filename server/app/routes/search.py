@@ -57,6 +57,12 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
             search,
         )
 
+    if query["action"] == "get dataset":
+        return convert_query_to_df(
+            Q("match_all"),
+            search,
+        )
+
     if query["action"] == "extract keywords":
         source_feature = query["feature"]
         newFeatureName = query["newFeatureName"]

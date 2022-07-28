@@ -8,6 +8,11 @@ export class WorkflowStore {
 
     actionNodeTypes = [
         {
+            nodeType: 'datasetNode',
+            label: 'Dataset',
+            tooltip: 'Retrieve an entire dataset'
+        },
+        {
             nodeType: 'searchNode',
             label: 'Search',
             tooltip: 'Represents a single search keyword.'
@@ -45,6 +50,7 @@ export class WorkflowStore {
 
     actionNodeColors = {
         searchNode: '#3182ce',
+        datasetNode: '#3182ce',
         filterNode: '#ce8631',
         countsNode: '#ce8631',
         connectorNode: '#323232',
@@ -143,6 +149,10 @@ export class WorkflowStore {
             data.features = Object.keys(this.store.search.nodeTypes);
             data.feature = Object.keys(this.store.search.nodeTypes)[0];
             data.keyphrase = '';
+        }
+
+        if (nodeType === 'datasetNode') {
+            data.dataset = this.store.search.currentDataset;
         }
 
         if (nodeType === 'filterNode') {
@@ -249,19 +259,25 @@ export class WorkflowStore {
         const node = actions.find(element => element.id === id);
 
         if (node.data.parents.length === 0) {
-            if (node.type === 'searchNode') {
-                return {
-                    action: 'search',
-                    feature: node.data.feature,
-                    keyphrase: node.data.keyphrase
-                };
-            } else {
-                return {
-                    action: 'filter',
-                    feature: node.data.feature,
-                    min: node.data.min,
-                    max: node.data.max
-                };
+            switch (node.type) {
+                case 'searchNode':
+                    return {
+                        action: 'search',
+                        feature: node.data.feature,
+                        keyphrase: node.data.keyphrase
+                    };
+                case 'datasetNode':
+                    return {
+                        action: 'get dataset',
+                        dataset: node.data.dataset
+                    };
+                default:
+                    return {
+                        action: 'filter',
+                        feature: node.data.feature,
+                        min: node.data.min,
+                        max: node.data.max
+                    };
             }
         }
 
