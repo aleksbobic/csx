@@ -111,7 +111,8 @@ export class SearchStore {
             connector: connector ? connector : null,
             anchor: this.anchor,
             graph_type: graphType,
-            visible_entries: []
+            visible_entries: [],
+            user_id: this.store.core.userUuid
         };
 
         if (graphType === 'overview') {

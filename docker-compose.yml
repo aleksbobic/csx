@@ -59,3 +59,9 @@ services:
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data
     container_name: csx_elastic
+  redis:
+    image: redis:7.0.4
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis:/data

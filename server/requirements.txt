@@ -12,3 +12,4 @@ wheel
 spacy==3.0.7
 pytextrank
 python-multipart
+redis

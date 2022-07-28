@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import { v4 as uuidv4 } from 'uuid';
 
 export class CoreStore {
     availableDatasets = [];
@@ -9,6 +10,7 @@ export class CoreStore {
     errorDetails = null;
     showSpinner = false;
     currentGraph = '';
+    userUuid = null;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -18,6 +20,12 @@ export class CoreStore {
 
     constructor(store) {
         this.store = store;
+        this.userUuid = localStorage.getItem('useruuid');
+
+        if (!this.userUuid) {
+            localStorage.setItem('useruuid', uuidv4());
+        }
+
         makeAutoObservable(this, {}, { deep: true });
     }
 

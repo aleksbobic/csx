@@ -19,6 +19,9 @@ from app.controllers.graph.converter import get_graph, get_overview_graph
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
 
+import app.utils.cache as csx_cache
+import app.utils.analysis as csx_analysis
+
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
 
@@ -199,6 +202,7 @@ def isNumber(testStr):
 @router.get("/")
 def search(
     query: str,
+    user_id: str,
     visible_dimensions="",
     schema="",
     index="",
@@ -209,6 +213,8 @@ def search(
     anchor_properties="[]",
 ) -> dict:
     """Run search using given query."""
+
+    current_graph = csx_cache.load_current_network(user_id)
 
     directory_path = os.getcwd()
     print("My current directory is : " + directory_path)
@@ -273,6 +279,19 @@ def search(
 
     anchor_properties = json.loads(anchor_properties)
 
+    comparison_res = csx_cache.same_network(
+        current_graph,
+        {
+            "index": index,
+            "query": query,
+            "schema": schema,
+            "dimensions": links + [anchor]
+            if graph_type == "overview"
+            else visible_dimensions,
+            "anchor_properties": anchor_properties if graph_type == "overview" else [],
+        },
+    )
+
     if graph_type == "overview":
         graph_data = get_overview_graph(elastic_list, links, anchor, anchor_properties)
 
@@ -286,6 +305,12 @@ def search(
             ),
         }
 
+        csx_cache.save_current_network(
+            user_id,
+            graph_data,
+            {"index": index, "schema": schema, "anchor_properties": anchor_properties},
+        )
+
         return graph_data
 
     graph_data = get_graph(elastic_list, all_dimensions, visible_dimensions, schema)
@@ -297,6 +322,12 @@ def search(
         "table_data": convert_table_data(graph_data["nodes"], elastic_list),
         "visible_entries": json.loads(visible_entries),
     }
+
+    csx_cache.save_current_network(
+        user_id,
+        graph_data,
+        {"index": index, "schema": schema, "anchor_properties": []},
+    )
 
     return graph_data
 
