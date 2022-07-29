@@ -15,7 +15,11 @@ import pytextrank
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
-from app.controllers.graph.converter import get_graph, get_overview_graph
+from app.controllers.graph.converter import (
+    get_graph,
+    get_overview_graph,
+    get_props_for_cached_nodes,
+)
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
 
@@ -279,7 +283,7 @@ def search(
 
     anchor_properties = json.loads(anchor_properties)
 
-    comparison_res = csx_cache.same_network(
+    comparison_results = csx_cache.same_network(
         current_graph,
         {
             "index": index,
@@ -288,27 +292,43 @@ def search(
             "dimensions": links + [anchor]
             if graph_type == "overview"
             else visible_dimensions,
-            "anchor_properties": anchor_properties if graph_type == "overview" else [],
+            "anchor_properties": get_anchor_property_values(
+                elastic_list, anchor_properties
+            )
+            if graph_type == "overview"
+            else None,
         },
     )
 
     if graph_type == "overview":
-        graph_data = get_overview_graph(elastic_list, links, anchor, anchor_properties)
 
-        graph_data["meta"] = {
-            "new_dimensions": new_dimensions,
-            "graph": query,
-            "dimensions": links + [anchor],
-            "table_data": convert_table_data(graph_data["nodes"], elastic_list),
-            "anchor_properties": get_anchor_property_values(
+        if comparison_results["difference"] == "anchor_properties":
+            graph_data = get_props_for_cached_nodes(
+                comparison_results, anchor_properties
+            )
+
+            graph_data["meta"]["anchor_properties"] = get_anchor_property_values(
                 elastic_list, anchor_properties
-            ),
-        }
+            )
+        else:
+            graph_data = get_overview_graph(
+                elastic_list, links, anchor, anchor_properties
+            )
+
+            graph_data["meta"] = {
+                "new_dimensions": new_dimensions,
+                "graph": query,
+                "dimensions": links + [anchor],
+                "table_data": convert_table_data(graph_data["nodes"], elastic_list),
+                "anchor_properties": get_anchor_property_values(
+                    elastic_list, anchor_properties
+                ),
+            }
 
         csx_cache.save_current_network(
             user_id,
             graph_data,
-            {"index": index, "schema": schema, "anchor_properties": anchor_properties},
+            {"index": index, "schema": schema},
         )
 
         return graph_data
@@ -326,7 +346,7 @@ def search(
     csx_cache.save_current_network(
         user_id,
         graph_data,
-        {"index": index, "schema": schema, "anchor_properties": []},
+        {"index": index, "schema": schema},
     )
 
     return graph_data

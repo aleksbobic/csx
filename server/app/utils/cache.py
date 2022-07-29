@@ -36,4 +36,4 @@ def same_network(graph_data, params):
         return {"same": False, "difference": "dimensions", "data": graph_data}
     if graph_data["meta"]["anchor_properties"] != params["anchor_properties"]:
         return {"same": False, "difference": "anchor_properties", "data": graph_data}
-    return {"same": True, "data": graph_data}
+    return {"same": True, "difference": None, "data": graph_data}

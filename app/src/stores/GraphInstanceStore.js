@@ -536,7 +536,8 @@ export class GraphInstanceStore {
     };
 
     generateSchemeColorsFromArray = (values, feature) => {
-        const skipfactor = values.length > 10 ? 1 / values.length : null;
+        const skipfactor =
+            values && values.length > 10 ? 1 / values.length : null;
 
         this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
 

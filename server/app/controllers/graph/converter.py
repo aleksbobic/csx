@@ -29,7 +29,7 @@ def get_graph(
     search_results,
     features: List[str],
     visible_features: List[str],
-    schema: List[SchemaElement]
+    schema: List[SchemaElement],
 ):
     """Convert results retrieved from elastic into a graph representation."""
 
@@ -66,8 +66,40 @@ def get_graph(
 
 
 @use_timing
+def get_props_for_cached_nodes(comparison_results, anchor_properties):
+    current_properties_set = set(
+        comparison_results["data"]["nodes"][0]["properties"].keys()
+    )
+    new_properties_set = set(anchor_properties)
+
+    properties_to_remove = list(current_properties_set - new_properties_set)
+    properties_to_add = list(new_properties_set - current_properties_set)
+
+    for node in comparison_results["data"]["nodes"]:
+        node["properties"] = {
+            prop: node["properties"][prop]
+            for prop in node["properties"]
+            if prop not in properties_to_remove
+        }
+
+    # add properties
+    for node in comparison_results["data"]["nodes"]:
+        for prop in properties_to_add:
+            node["properties"][prop] = next(
+                entry
+                for entry in comparison_results["data"]["meta"]["table_data"]
+                if entry["entry"] == node["entries"][0]
+            )[prop]
+
+    return comparison_results["data"]
+
+
+@use_timing
 def get_overview_graph(
-    search_results, links: List[str], anchor: str, anchor_properties: List[str]
+    search_results,
+    links: List[str],
+    anchor: str,
+    anchor_properties: List[str],
 ):
     search_results_df = pd.DataFrame(search_results)
 
