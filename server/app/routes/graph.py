@@ -15,53 +15,53 @@ from pydantic import BaseModel
 class Data(BaseModel):
     nodes: List
     user_id: str
+    graph_type: str
 
 
 @router.post("/trim")
 def trim_network(
-    # nodes: List,
-    # user_id: str,
     data: Data,
 ):
     node_ids = data.nodes
-    network_data = csx_cache.load_current_network(data.user_id)
-    network_data["nodes"] = [
-        node for node in network_data["nodes"] if node["id"] in node_ids
+    cache_data = csx_cache.load_current_graph(data.user_id)
+    cache_data[data.graph_type]["nodes"] = [
+        node for node in cache_data[data.graph_type]["nodes"] if node["id"] in node_ids
     ]
 
-    network_data["edges"] = [
+    cache_data[data.graph_type]["edges"] = [
         edge
-        for edge in network_data["edges"]
+        for edge in cache_data[data.graph_type]["edges"]
         if edge["source"] in node_ids and edge["target"] in node_ids
     ]
 
-    network_data["components"] = [
+    cache_data[data.graph_type]["components"] = [
         component
-        for component in network_data["components"]
+        for component in cache_data[data.graph_type]["components"]
         if len(list(set(component["nodes"]).intersection(set(node_ids)))) > 0
     ]
 
-    list_of_entries = [node["entries"] for node in network_data["nodes"]]
+    list_of_entries = [node["entries"] for node in cache_data[data.graph_type]["nodes"]]
     entries = list(set([entry for entries in list_of_entries for entry in entries]))
 
-    network_data["meta"]["table_data"] = [
-        data for data in network_data["meta"]["table_data"] if data["entry"] in entries
+    cache_data["global"]["table_data"] = [
+        data for data in cache_data["global"]["table_data"] if data["entry"] in entries
     ]
 
-    data_df = pd.read_json(network_data["meta"]["results_df"])
+    data_df = pd.read_json(cache_data["global"]["results_df"])
 
-    network_data["meta"]["results_df"] = data_df[
+    cache_data["global"]["results_df"] = data_df[
         data_df["entry"].isin(entries)
     ].to_json()
 
-    network_data["meta"]["nx_graph"] = nx.to_dict_of_dicts(
-        csx_analysis.graph_from_graph_data(network_data)
+    cache_data[data.graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
+        csx_analysis.graph_from_graph_data(cache_data[data.graph_type])
     )
 
-    csx_cache.save_current_network(
+    csx_cache.save_current_graph(
         data.user_id,
-        network_data,
+        cache_data,
+        data.graph_type,
         {},
     )
 
-    return network_data
+    return cache_data[data.graph_type]

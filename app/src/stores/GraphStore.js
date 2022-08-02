@@ -820,7 +820,8 @@ export class GraphStore {
         try {
             const response = await axios.post('graph/trim', {
                 nodes: graph_data_copy.nodes,
-                user_id: this.store.core.userUuid
+                user_id: this.store.core.userUuid,
+                graph_type: this.store.core.currentGraph
             });
 
             this.handleRetrievedGraph(

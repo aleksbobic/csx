@@ -219,7 +219,7 @@ def search(
 ) -> dict:
     """Run search using given query."""
 
-    current_graph = csx_cache.load_current_network(user_id)
+    cache_data = csx_cache.load_current_graph(user_id)
 
     directory_path = os.getcwd()
     print("My current directory is : " + directory_path)
@@ -284,8 +284,8 @@ def search(
 
     anchor_properties = json.loads(anchor_properties)
 
-    comparison_results = csx_cache.same_network(
-        current_graph,
+    comparison_results = csx_cache.is_same_graph(
+        cache_data,
         {
             "index": index,
             "query": query,
@@ -299,6 +299,7 @@ def search(
             if graph_type == "overview"
             else None,
         },
+        graph_type,
     )
 
     if graph_type == "overview":
@@ -316,6 +317,7 @@ def search(
                 elastic_list, links, anchor, anchor_properties
             )
 
+            # Graph data: nodes edges components
             graph_data["meta"] = {
                 "new_dimensions": new_dimensions,
                 "query": query,
@@ -326,15 +328,30 @@ def search(
                 ),
             }
 
-        csx_cache.save_current_network(
+        cache_data = {
+            "overview": graph_data,
+            "detail": cache_data["detail"] if cache_data else {},
+            "global": {
+                "index": index,
+                "new_dimensions": new_dimensions,
+                "query": query,
+                "table_data": convert_table_data(graph_data["nodes"], elastic_list),
+                "results_df": results.to_json(),
+            },
+        }
+
+        csx_cache.save_current_graph(
             user_id,
-            graph_data,
-            {"index": index, "schema": schema, "results_df": results.to_json()},
+            cache_data,
+            "overview",
+            {"schema": schema},
         )
 
         return graph_data
 
     graph_data = get_graph(elastic_list, all_dimensions, visible_dimensions, schema)
+
+    # Graph data: nodes edges components
 
     graph_data["meta"] = {
         "new_dimensions": new_dimensions,
@@ -344,10 +361,23 @@ def search(
         "visible_entries": json.loads(visible_entries),
     }
 
-    csx_cache.save_current_network(
+    cache_data = {
+        "overview": cache_data["overview"] if cache_data else {},
+        "detail": graph_data,
+        "global": {
+            "index": index,
+            "new_dimensions": new_dimensions,
+            "query": query,
+            "table_data": convert_table_data(graph_data["nodes"], elastic_list),
+            "results_df": results.to_json(),
+        },
+    }
+
+    csx_cache.save_current_graph(
         user_id,
-        graph_data,
-        {"index": index, "schema": schema, "results_df": results.to_json()},
+        cache_data,
+        "detail",
+        {"schema": schema},
     )
 
     return graph_data
