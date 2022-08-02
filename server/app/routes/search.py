@@ -208,6 +208,7 @@ def isNumber(testStr):
 def search(
     query: str,
     user_id: str,
+    search_uuid="",
     visible_dimensions="",
     schema="",
     index="",
@@ -218,7 +219,6 @@ def search(
     anchor_properties="[]",
 ) -> dict:
     """Run search using given query."""
-
     cache_data = csx_cache.load_current_graph(user_id)
 
     directory_path = os.getcwd()
@@ -284,10 +284,13 @@ def search(
 
     anchor_properties = json.loads(anchor_properties)
 
+    # print('elastic results ', elastic_list)
+
     comparison_results = csx_cache.is_same_graph(
         cache_data,
         {
             "index": index,
+            "search_uuid": search_uuid,
             "query": query,
             "schema": schema,
             "dimensions": links + [anchor]
@@ -304,9 +307,16 @@ def search(
 
     if graph_type == "overview":
 
+        if comparison_results["difference"] == None:
+            return_graph_data = comparison_results["data"][graph_type]
+            return_graph_data["meta"]["table_data"] = comparison_results["data"][
+                "global"
+            ]["table_data"]
+            return return_graph_data
+
         if comparison_results["difference"] == "anchor_properties":
             graph_data = get_props_for_cached_nodes(
-                comparison_results, anchor_properties
+                comparison_results, anchor_properties, graph_type
             )
 
             graph_data["meta"]["anchor_properties"] = get_anchor_property_values(
@@ -332,6 +342,7 @@ def search(
             "overview": graph_data,
             "detail": cache_data["detail"] if cache_data else {},
             "global": {
+                "search_uuid": search_uuid,
                 "index": index,
                 "new_dimensions": new_dimensions,
                 "query": query,
@@ -349,6 +360,13 @@ def search(
 
         return graph_data
 
+    if comparison_results["difference"] == None:
+        return_graph_data = comparison_results["data"][graph_type]
+        return_graph_data["meta"]["table_data"] = comparison_results["data"]["global"][
+            "table_data"
+        ]
+        return return_graph_data
+
     graph_data = get_graph(elastic_list, all_dimensions, visible_dimensions, schema)
 
     # Graph data: nodes edges components
@@ -365,6 +383,7 @@ def search(
         "overview": cache_data["overview"] if cache_data else {},
         "detail": graph_data,
         "global": {
+            "search_uuid": search_uuid,
             "index": index,
             "new_dimensions": new_dimensions,
             "query": query,

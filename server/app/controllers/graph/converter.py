@@ -66,31 +66,31 @@ def get_graph(
 
 
 @use_timing
-def get_props_for_cached_nodes(comparison_results, anchor_properties):
+def get_props_for_cached_nodes(comparison_results, anchor_properties, graph_type):
     current_properties_set = set(
-        comparison_results["data"]["nodes"][0]["properties"].keys()
+        comparison_results["data"][graph_type]["nodes"][0]["properties"].keys()
     )
     new_properties_set = set(anchor_properties)
 
     properties_to_remove = list(current_properties_set - new_properties_set)
     properties_to_add = list(new_properties_set - current_properties_set)
 
-    for node in comparison_results["data"]["nodes"]:
+    for node in comparison_results["data"][graph_type]["nodes"]:
         node["properties"] = {
             prop: node["properties"][prop]
             for prop in node["properties"]
             if prop not in properties_to_remove
         }
     # add properties
-    for node in comparison_results["data"]["nodes"]:
+    for node in comparison_results["data"][graph_type]["nodes"]:
         for prop in properties_to_add:
             node["properties"][prop] = next(
                 entry
-                for entry in comparison_results["data"]["meta"]["table_data"]
+                for entry in comparison_results["data"]["global"]["table_data"]
                 if entry["entry"] == node["entries"][0]
             )[prop]
 
-    return comparison_results["data"]
+    return comparison_results["data"][graph_type]
 
 
 @use_timing

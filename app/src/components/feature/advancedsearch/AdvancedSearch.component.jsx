@@ -30,6 +30,7 @@ import ResultsNode from './resultsNode/ResultsNode.component';
 import SearchEdge from './searchedge/SearchEdge.component';
 import SearchNode from './searchnode/SearchNode.component';
 import DatasetNode from './datasetNode/Dataset.component';
+import { v4 as uuidv4 } from 'uuid';
 
 function AdvancedSearch(props) {
     const reactFlowWrapper = useRef(null);
@@ -43,7 +44,7 @@ function AdvancedSearch(props) {
             history.push(
                 `/graph?query=${JSON.stringify(
                     store.search.advancedSearchQuery
-                )}&dataset=${store.search.currentDataset}`
+                )}&dataset=${store.search.currentDataset}&suuid=${uuidv4()}`
             );
         }
     }, [

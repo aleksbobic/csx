@@ -40,6 +40,8 @@ function GraphPage() {
 
         const query = queryString.parse(location.search).query;
         const dataset = queryString.parse(location.search).dataset;
+        const suuid = queryString.parse(location.search).suuid;
+
         store.graphInstance.toggleVisibleComponents(-1);
 
         if (query) {
@@ -88,7 +90,7 @@ function GraphPage() {
                     store.graph.detailGraphData.isEmpty ||
                     !same_components // Check for component entries and if they are the same as in the detail graph
                 ) {
-                    store.graph.getSearchGraph(query, 'detail');
+                    store.graph.getSearchGraph(query, 'detail', suuid);
                 }
             } else {
                 if (
@@ -96,7 +98,7 @@ function GraphPage() {
                     store.graph.currentGraphData.meta.dataset !== dataset ||
                     store.graph.currentGraphData.isEmpty
                 ) {
-                    store.graph.getSearchGraph(query, 'overview');
+                    store.graph.getSearchGraph(query, 'overview', suuid);
                 }
             }
         } else {

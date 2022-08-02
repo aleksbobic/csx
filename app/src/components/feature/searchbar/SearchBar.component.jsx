@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { v4 as uuidv4 } from 'uuid';
 
 function SearchBar(props) {
     const history = useHistory();
@@ -47,7 +48,9 @@ function SearchBar(props) {
                     store.workflow.resetWorkflow();
                     store.schema.resetOverviewNodeProperties();
                     history.push(
-                        `/graph?query=${values.search}&dataset=${store.search.datasets[selectedDataset]}`
+                        `/graph?query=${values.search}&dataset=${
+                            store.search.datasets[selectedDataset]
+                        }&suuid=${uuidv4()}`
                     );
                 }}
             >

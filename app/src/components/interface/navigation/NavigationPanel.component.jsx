@@ -105,10 +105,14 @@ function NavigationPanelComponent() {
                             location.pathname.startsWith('/graph/detail')
                                 ? `/graph?query=${getQueryString(
                                       'query'
-                                  )}&dataset=${getQueryString('dataset')}`
+                                  )}&dataset=${getQueryString(
+                                      'dataset'
+                                  )}&suuid=${getQueryString('suuid')}`
                                 : `/graph/detail?query=${getQueryString(
                                       'query'
-                                  )}&dataset=${getQueryString('dataset')}`
+                                  )}&dataset=${getQueryString(
+                                      'dataset'
+                                  )}&suuid=${getQueryString('suuid')}`
                         }
                         id="switchgraphviewbutton"
                         size="sm"

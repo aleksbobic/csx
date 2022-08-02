@@ -23,8 +23,6 @@ def get_edge_tuples(
 
     shortest_paths = get_shortest_schema_paths(features, visible_features, schema)
 
-    print("\n\n\n shortest paths", shortest_paths)
-
     edge_tuples = []
 
     for path in shortest_paths:

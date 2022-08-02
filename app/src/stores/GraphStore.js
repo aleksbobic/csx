@@ -429,7 +429,7 @@ export class GraphStore {
         );
     };
 
-    getSearchGraph = (query, graphType) => {
+    getSearchGraph = (query, graphType, suuid) => {
         let visibleDimensions = this.store.core.visibleDimensions[graphType];
 
         let schema = this.store.schema.getServerSchema();
@@ -443,7 +443,7 @@ export class GraphStore {
         this.graphData.meta.query = query;
 
         return this.store.search
-            .search(query, visibleDimensions, schema, graphType)
+            .search(query, visibleDimensions, schema, graphType, suuid)
             .then(
                 action(response =>
                     this.handleRetrievedGraph(response, graphType, query)
@@ -458,7 +458,7 @@ export class GraphStore {
         } else {
             this.store.core.toggleSpinner(true);
             this.store.search.newNodeTypes = response.meta.new_dimensions;
-
+            console.log(response);
             if (graphType === 'overview') {
                 // Handle overview graph data
                 this.graphData.meta.query = query;

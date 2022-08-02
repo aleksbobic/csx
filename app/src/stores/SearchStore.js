@@ -103,9 +103,11 @@ export class SearchStore {
             .catch(error => this.store.core.handleError(error));
     };
 
-    search = async (query, nodeTypes, schema, graphType) => {
+    search = async (query, nodeTypes, schema, graphType, search_uuid) => {
         // Set search parameters
+
         const params = {
+            search_uuid: search_uuid,
             query: query,
             anchor: this.anchor,
             graph_type: graphType,
