@@ -825,7 +825,7 @@ export class GraphStore {
 
             this.handleRetrievedGraph(
                 response.data,
-                'overview',
+                this.store.core.currentGraph,
                 response.data['meta']['graph']
             );
         } catch (error) {

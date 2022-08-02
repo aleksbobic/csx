@@ -32,8 +32,14 @@ def same_network(graph_data, params):
         return {"same": False, "difference": "query", "data": graph_data}
     if graph_data["meta"]["schema"] != params["schema"]:
         return {"same": False, "difference": "schema", "data": graph_data}
-    if graph_data["meta"]["dimensions"] != params["dimensions"]:
+    if (
+        "dimensions" not in graph_data["meta"]
+        or graph_data["meta"]["dimensions"] != params["dimensions"]
+    ):
         return {"same": False, "difference": "dimensions", "data": graph_data}
-    if graph_data["meta"]["anchor_properties"] != params["anchor_properties"]:
+    if (
+        "anchor_properties" not in graph_data["meta"]
+        or graph_data["meta"]["anchor_properties"] != params["anchor_properties"]
+    ):
         return {"same": False, "difference": "anchor_properties", "data": graph_data}
     return {"same": True, "difference": None, "data": graph_data}
