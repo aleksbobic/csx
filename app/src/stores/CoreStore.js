@@ -1,5 +1,6 @@
 import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
 export class CoreStore {
     availableDatasets = [];
@@ -28,6 +29,12 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    generateUUID = () => {
+        return axios.get('util/uuid').then(response => {
+            localStorage.setItem('useruuid', response.data);
+        });
+    };
 
     setToastMessage = message => (this.toastInfo.message = message);
     setToastType = toastType => (this.toastInfo.type = toastType);
