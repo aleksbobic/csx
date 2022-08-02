@@ -81,7 +81,6 @@ def get_props_for_cached_nodes(comparison_results, anchor_properties):
             for prop in node["properties"]
             if prop not in properties_to_remove
         }
-
     # add properties
     for node in comparison_results["data"]["nodes"]:
         for prop in properties_to_add:

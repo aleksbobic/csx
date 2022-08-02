@@ -28,7 +28,7 @@ def load_current_network(uuid):
 def same_network(graph_data, params):
     if not graph_data or graph_data["meta"]["index"] != params["index"]:
         return {"same": False, "difference": "index", "data": graph_data}
-    if graph_data["meta"]["graph"] != params["query"]:
+    if graph_data["meta"]["query"] != params["query"]:
         return {"same": False, "difference": "query", "data": graph_data}
     if graph_data["meta"]["schema"] != params["schema"]:
         return {"same": False, "difference": "schema", "data": graph_data}

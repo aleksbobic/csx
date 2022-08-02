@@ -17,6 +17,10 @@ import {
     TagLabel,
     useColorModeValue,
     Wrap,
+    RangeSlider,
+    RangeSliderTrack,
+    RangeSliderFilledTrack,
+    RangeSliderThumb,
     IconButton
 } from '@chakra-ui/react';
 import {
@@ -36,6 +40,7 @@ import { useLocation } from 'react-router-dom';
 function Settings() {
     const location = useLocation();
     const store = useContext(RootStoreContext);
+
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
         'whiteAlpha.300'
@@ -176,7 +181,7 @@ function Settings() {
                             <Box position="relative" right={10} />
                             <SliderFilledTrack bg="blue.300" />
                         </SliderTrack>
-                        <SliderThumb boxSize={5} />
+                        <SliderThumb boxSize={3} />
                     </Slider>
                 </Box>
             </>
@@ -295,6 +300,16 @@ function Settings() {
                     />
                     Orphan nodes
                 </FormLabel>
+                <FormLabel paddingBottom="10px" paddingTop="10px">
+                    Cores:
+                </FormLabel>
+                <RangeSlider defaultValue={[0, 20]} min={0} max={20} step={1}>
+                    <RangeSliderTrack bg="blue.400">
+                        <RangeSliderFilledTrack bg="blue.100" />
+                    </RangeSliderTrack>
+                    <RangeSliderThumb boxSize={3} index={0} />
+                    <RangeSliderThumb boxSize={3} index={1} />
+                </RangeSlider>
             </>
         );
     };

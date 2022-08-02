@@ -56,21 +56,9 @@ function NavigationPanelComponent() {
         'blackAlpha.700'
     );
 
-    const isJSON = str => {
-        try {
-            JSON.parse(str);
-        } catch (e) {
-            return false;
-        }
-        return true;
-    };
-
     const regenerateGraph = () => {
-        const query = queryString.parse(location.search).query;
-
         store.graph.getSearchGraph(
             store.graph.currentGraphData.meta.query,
-            isJSON(query),
             location.pathname.startsWith('/graph/detail')
                 ? 'detail'
                 : 'overview'

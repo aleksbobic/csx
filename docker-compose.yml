@@ -23,7 +23,7 @@ services:
       - ./app:/home/node/csx
     depends_on:
       - server
-      - analytics
+      # - analytics
     command: bash -c "npm install && npm start"
   # mysql:
   #   image: "mysql:5.7"

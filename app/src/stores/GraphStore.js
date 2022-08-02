@@ -1,6 +1,7 @@
 import { makeAutoObservable, action } from 'mobx';
 import * as THREE from 'three';
 import SpriteText from 'three-spritetext';
+import axios from 'axios';
 
 export class GraphStore {
     perspectives = [];
@@ -428,16 +429,10 @@ export class GraphStore {
         );
     };
 
-    getSearchGraph = (query, complex, graphType) => {
-        let connector;
-
+    getSearchGraph = (query, graphType) => {
         let visibleDimensions = this.store.core.visibleDimensions[graphType];
 
         let schema = this.store.schema.getServerSchema();
-
-        if (complex) {
-            connector = this.store.search.connector;
-        }
 
         if (graphType === 'detail') {
             this.resetDetailGraphData();
@@ -448,240 +443,215 @@ export class GraphStore {
         this.graphData.meta.query = query;
 
         return this.store.search
-            .search(query, visibleDimensions, schema, connector, graphType)
+            .search(query, visibleDimensions, schema, graphType)
             .then(
-                action(response => {
-                    if (!response['nodes'].length) {
-                        this.graphData['isEmpty'] = true;
-                        this.store.search.setSearchIsEmpty(true);
-                    } else {
-                        this.store.core.toggleSpinner(true);
-                        this.store.search.newNodeTypes =
-                            response.meta.new_dimensions;
-
-                        if (graphType === 'overview') {
-                            // Handle overview graph data
-                            this.graphData.meta.connector = connector
-                                ? connector
-                                : null;
-
-                            this.graphData.meta.query = query;
-                            this.graphData.meta.dataset =
-                                this.store.search.currentDataset;
-                            this.store.controlPanel.resetNavigationValues();
-
-                            this.setSelectedNodes([], 'overview');
-                            this.resetGraphData();
-
-                            this.graphData.tableData = response.meta.table_data;
-                            this.graphData.activeTableData =
-                                response.meta.table_data;
-
-                            this.store.graphInstance.generateSchemeColorsFromArray(
-                                response.components.map(c => c.id),
-                                'component'
-                            );
-
-                            response.meta.anchor_properties.map(entry =>
-                                this.store.graphInstance.generateSchemeColorsFromArray(
-                                    entry.values,
-                                    entry.property
-                                )
-                            );
-
-                            const neighbours = this.generateNeighbours(
-                                response.edges
-                            );
-
-                            const nodes = this.generateNodeObjects(
-                                response.nodes,
-                                neighbours,
-                                'overview'
-                            );
-
-                            this.graphData = {
-                                ...this.graphData,
-                                links: response.edges.map(edge => {
-                                    edge.color =
-                                        this.store.graphInstance.nodeColorSchemeColors[
-                                            this.store.core.currentGraph
-                                        ][
-                                            this.store.graphInstance.nodeColorScheme.overview
-                                        ][edge.component];
-                                    return edge;
-                                }),
-                                nodes,
-                                isEmpty: false
-                            };
-
-                            this.graphData.components = response.components
-                                .map(component => {
-                                    return {
-                                        id: component.id,
-                                        node_count: component.node_count,
-                                        largest_nodes: component.largest_nodes,
-                                        largest_connections:
-                                            component.largest_connections,
-                                        entries: component.entries,
-                                        nodes: component.nodes,
-                                        selectedNodesCount: 0,
-                                        isSelected: false
-                                    };
-                                })
-                                .sort((first, second) =>
-                                    first.node_count > second.node_count
-                                        ? -1
-                                        : first.node_count < second.node_count
-                                        ? 1
-                                        : 0
-                                );
-
-                            this.graphData.meta = {
-                                ...this.graphData.meta,
-                                nodeCount: nodes.length,
-                                linkCount: response.edges.length,
-                                anchorProperties:
-                                    response.meta.anchor_properties
-                            };
-
-                            this.graphData.perspectivesInGraph =
-                                response.meta.dimensions;
-
-                            this.store.core.setVisibleDimensions(
-                                response.meta.dimensions
-                            );
-
-                            this.tableColumns =
-                                this.graphData.perspectivesInGraph.map(
-                                    perspective => {
-                                        return {
-                                            Header: perspective.toUpperCase(),
-                                            accessor: perspective
-                                        };
-                                    }
-                                );
-
-                            this.store.graphInstance.resetSelfCentric();
-
-                            this.graphData.nodeObjects =
-                                this.generateNodeKeyValueStore(
-                                    this.graphData.nodes
-                                );
-
-                            this.addNeighbourObjectsToNodes();
-
-                            this.store.schema.populateStoreData();
-                        } else {
-                            // Handle detail graph data
-                            this.detailGraphData.meta.connector = connector
-                                ? connector
-                                : null;
-
-                            this.detailGraphData.meta.query = query;
-                            this.detailGraphData.meta.dataset =
-                                this.store.search.currentDataset;
-                            this.store.controlPanel.resetNavigationValues();
-
-                            this.setSelectedNodes([], 'detail');
-                            this.resetDetailGraphData();
-
-                            this.detailGraphData.meta.visible_entries =
-                                response.meta.visible_entries;
-                            this.detailGraphData.tableData =
-                                response.meta.table_data;
-                            this.detailGraphData.activeTableData =
-                                response.meta.table_data;
-
-                            this.store.graphInstance.generateSchemeColorsFromArray(
-                                [
-                                    ...Object.keys(this.store.search.nodeTypes),
-                                    ...Object.keys(
-                                        this.store.search.newNodeTypes
-                                    )
-                                ],
-                                'type'
-                            );
-
-                            this.store.graphInstance.generateSchemeColorsFromArray(
-                                response.components.map(c => c.id),
-                                'component'
-                            );
-
-                            const neighbours = this.generateNeighbours(
-                                response.edges
-                            );
-
-                            const nodes = this.generateNodeObjects(
-                                response.nodes,
-                                neighbours,
-                                'detail'
-                            );
-
-                            this.detailGraphData = {
-                                ...this.detailGraphData,
-                                links: response.edges.map(edge => {
-                                    edge.color =
-                                        this.store.graphInstance.nodeColorSchemeColors[
-                                            this.store.core.currentGraph
-                                        ][
-                                            this.store.graphInstance.nodeColorScheme.detail
-                                        ][edge.component];
-                                    return edge;
-                                }),
-                                nodes,
-                                isEmpty: false
-                            };
-
-                            this.detailGraphData.components =
-                                response.components.map(component => {
-                                    return {
-                                        id: component.id,
-                                        node_count: component.node_count,
-                                        largest_nodes: component.largest_nodes,
-                                        entries: component.entries,
-                                        nodes: component.nodes,
-                                        selectedNodesCount: 0,
-                                        isSelected: false
-                                    };
-                                });
-
-                            this.detailGraphData.meta = {
-                                ...this.detailGraphData.meta,
-                                nodeCount: nodes.length,
-                                linkCount: response.edges.length
-                            };
-
-                            this.detailGraphData.perspectivesInGraph =
-                                response.meta.dimensions;
-
-                            this.store.core.setVisibleDimensions(
-                                response.meta.dimensions
-                            );
-
-                            this.tableColumns =
-                                this.detailGraphData.perspectivesInGraph.map(
-                                    perspective => {
-                                        return {
-                                            Header: perspective.toUpperCase(),
-                                            accessor: perspective
-                                        };
-                                    }
-                                );
-
-                            this.store.graphInstance.resetSelfCentric();
-
-                            this.detailGraphData.nodeObjects =
-                                this.generateNodeKeyValueStore(
-                                    this.detailGraphData.nodes
-                                );
-
-                            this.addNeighbourObjectsToNodes();
-                        }
-                        // Switch data displayed in graph based on what you are viewing
-                        this.store.core.toggleSpinner(false);
-                    }
-                })
+                action(response =>
+                    this.handleRetrievedGraph(response, graphType, query)
+                )
             );
+    };
+
+    handleRetrievedGraph = (response, graphType, query) => {
+        if (!response['nodes'].length) {
+            this.graphData['isEmpty'] = true;
+            this.store.search.setSearchIsEmpty(true);
+        } else {
+            this.store.core.toggleSpinner(true);
+            this.store.search.newNodeTypes = response.meta.new_dimensions;
+
+            if (graphType === 'overview') {
+                // Handle overview graph data
+                this.graphData.meta.query = query;
+                this.graphData.meta.dataset = this.store.search.currentDataset;
+                this.store.controlPanel.resetNavigationValues();
+
+                this.setSelectedNodes([], 'overview');
+                this.resetGraphData();
+
+                this.graphData.tableData = response.meta.table_data;
+                this.graphData.activeTableData = response.meta.table_data;
+
+                this.store.graphInstance.generateSchemeColorsFromArray(
+                    response.components.map(c => c.id),
+                    'component'
+                );
+
+                response.meta.anchor_properties.map(entry =>
+                    this.store.graphInstance.generateSchemeColorsFromArray(
+                        entry.values,
+                        entry.property
+                    )
+                );
+
+                const neighbours = this.generateNeighbours(response.edges);
+
+                const nodes = this.generateNodeObjects(
+                    response.nodes,
+                    neighbours,
+                    'overview'
+                );
+
+                this.graphData = {
+                    ...this.graphData,
+                    links: response.edges.map(edge => {
+                        edge.color =
+                            this.store.graphInstance.nodeColorSchemeColors[
+                                this.store.core.currentGraph
+                            ][
+                                this.store.graphInstance.nodeColorScheme.overview
+                            ][edge.component];
+                        return edge;
+                    }),
+                    nodes,
+                    isEmpty: false
+                };
+
+                this.graphData.components = response.components
+                    .map(component => {
+                        return {
+                            id: component.id,
+                            node_count: component.node_count,
+                            largest_nodes: component.largest_nodes,
+                            largest_connections: component.largest_connections,
+                            entries: component.entries,
+                            nodes: component.nodes,
+                            selectedNodesCount: 0,
+                            isSelected: false
+                        };
+                    })
+                    .sort((first, second) =>
+                        first.node_count > second.node_count
+                            ? -1
+                            : first.node_count < second.node_count
+                            ? 1
+                            : 0
+                    );
+
+                this.graphData.meta = {
+                    ...this.graphData.meta,
+                    nodeCount: nodes.length,
+                    linkCount: response.edges.length,
+                    anchorProperties: response.meta.anchor_properties
+                };
+
+                this.graphData.perspectivesInGraph = response.meta.dimensions;
+
+                this.store.core.setVisibleDimensions(response.meta.dimensions);
+
+                this.tableColumns = this.graphData.perspectivesInGraph.map(
+                    perspective => {
+                        return {
+                            Header: perspective.toUpperCase(),
+                            accessor: perspective
+                        };
+                    }
+                );
+
+                this.store.graphInstance.resetSelfCentric();
+
+                this.graphData.nodeObjects = this.generateNodeKeyValueStore(
+                    this.graphData.nodes
+                );
+
+                this.addNeighbourObjectsToNodes();
+
+                this.store.schema.populateStoreData();
+            } else {
+                // Handle detail graph data
+                this.detailGraphData.meta.query = query;
+                this.detailGraphData.meta.dataset =
+                    this.store.search.currentDataset;
+                this.store.controlPanel.resetNavigationValues();
+
+                this.setSelectedNodes([], 'detail');
+                this.resetDetailGraphData();
+
+                this.detailGraphData.meta.visible_entries =
+                    response.meta.visible_entries;
+                this.detailGraphData.tableData = response.meta.table_data;
+                this.detailGraphData.activeTableData = response.meta.table_data;
+
+                this.store.graphInstance.generateSchemeColorsFromArray(
+                    [
+                        ...Object.keys(this.store.search.nodeTypes),
+                        ...Object.keys(this.store.search.newNodeTypes)
+                    ],
+                    'type'
+                );
+
+                this.store.graphInstance.generateSchemeColorsFromArray(
+                    response.components.map(c => c.id),
+                    'component'
+                );
+
+                const neighbours = this.generateNeighbours(response.edges);
+
+                const nodes = this.generateNodeObjects(
+                    response.nodes,
+                    neighbours,
+                    'detail'
+                );
+
+                this.detailGraphData = {
+                    ...this.detailGraphData,
+                    links: response.edges.map(edge => {
+                        edge.color =
+                            this.store.graphInstance.nodeColorSchemeColors[
+                                this.store.core.currentGraph
+                            ][this.store.graphInstance.nodeColorScheme.detail][
+                                edge.component
+                            ];
+                        return edge;
+                    }),
+                    nodes,
+                    isEmpty: false
+                };
+
+                this.detailGraphData.components = response.components.map(
+                    component => {
+                        return {
+                            id: component.id,
+                            node_count: component.node_count,
+                            largest_nodes: component.largest_nodes,
+                            entries: component.entries,
+                            nodes: component.nodes,
+                            selectedNodesCount: 0,
+                            isSelected: false
+                        };
+                    }
+                );
+
+                this.detailGraphData.meta = {
+                    ...this.detailGraphData.meta,
+                    nodeCount: nodes.length,
+                    linkCount: response.edges.length
+                };
+
+                this.detailGraphData.perspectivesInGraph =
+                    response.meta.dimensions;
+
+                this.store.core.setVisibleDimensions(response.meta.dimensions);
+
+                this.tableColumns =
+                    this.detailGraphData.perspectivesInGraph.map(
+                        perspective => {
+                            return {
+                                Header: perspective.toUpperCase(),
+                                accessor: perspective
+                            };
+                        }
+                    );
+
+                this.store.graphInstance.resetSelfCentric();
+
+                this.detailGraphData.nodeObjects =
+                    this.generateNodeKeyValueStore(this.detailGraphData.nodes);
+
+                this.addNeighbourObjectsToNodes();
+            }
+            // Switch data displayed in graph based on what you are viewing
+            this.store.core.toggleSpinner(false);
+        }
     };
 
     setSelectedNodes = (selectedNodes, graphType) => {
@@ -839,6 +809,28 @@ export class GraphStore {
 
         data.nodes.push({});
         data.nodes.pop();
+    };
+
+    trimNetwork = async () => {
+        const graph_data_copy = { ...this.currentGraphData };
+        graph_data_copy.nodes = graph_data_copy.nodes
+            .filter(node => node.visible)
+            .map(node => node.id);
+
+        try {
+            const response = await axios.post('graph/trim', {
+                nodes: graph_data_copy.nodes,
+                user_id: this.store.core.userUuid
+            });
+
+            this.handleRetrievedGraph(
+                response.data,
+                'overview',
+                response.data['meta']['graph']
+            );
+        } catch (error) {
+            return this.store.core.handleError(error);
+        }
     };
 
     get graphObjectCount() {

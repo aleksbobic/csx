@@ -11,6 +11,7 @@ import os
 import pandas as pd
 import spacy
 import pytextrank
+import pickle
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -317,7 +318,7 @@ def search(
 
             graph_data["meta"] = {
                 "new_dimensions": new_dimensions,
-                "graph": query,
+                "query": query,
                 "dimensions": links + [anchor],
                 "table_data": convert_table_data(graph_data["nodes"], elastic_list),
                 "anchor_properties": get_anchor_property_values(
@@ -328,7 +329,7 @@ def search(
         csx_cache.save_current_network(
             user_id,
             graph_data,
-            {"index": index, "schema": schema},
+            {"index": index, "schema": schema, "results_df": results.to_json()},
         )
 
         return graph_data
@@ -337,7 +338,7 @@ def search(
 
     graph_data["meta"] = {
         "new_dimensions": new_dimensions,
-        "graph": query,
+        "query": query,
         "dimensions": visible_dimensions,
         "table_data": convert_table_data(graph_data["nodes"], elastic_list),
         "visible_entries": json.loads(visible_entries),
@@ -346,7 +347,7 @@ def search(
     csx_cache.save_current_network(
         user_id,
         graph_data,
-        {"index": index, "schema": schema},
+        {"index": index, "schema": schema, "results_df": results.to_json()},
     )
 
     return graph_data

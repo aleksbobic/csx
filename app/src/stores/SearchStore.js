@@ -11,7 +11,6 @@ export class SearchStore {
     datasets = [];
     currentDataset = null;
     currentDatasetIndex = 0;
-    connector = '';
     searchIsEmpty = false;
     advancedSearchQuery = '';
     datasetEdit = false;
@@ -104,11 +103,10 @@ export class SearchStore {
             .catch(error => this.store.core.handleError(error));
     };
 
-    search = async (query, nodeTypes, schema, connector, graphType) => {
+    search = async (query, nodeTypes, schema, graphType) => {
         // Set search parameters
         const params = {
             query: query,
-            connector: connector ? connector : null,
             anchor: this.anchor,
             graph_type: graphType,
             visible_entries: [],

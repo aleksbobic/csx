@@ -29,16 +29,6 @@ function GraphPage() {
     const toastRef = useRef();
     const history = useHistory();
 
-    const isJSON = val => {
-        try {
-            JSON.parse(val);
-        } catch (e) {
-            return false;
-        }
-
-        return isNaN(Number(val));
-    };
-
     useEffect(() => {
         store.track.trackPageChange();
 
@@ -98,11 +88,7 @@ function GraphPage() {
                     store.graph.detailGraphData.isEmpty ||
                     !same_components // Check for component entries and if they are the same as in the detail graph
                 ) {
-                    store.graph.getSearchGraph(
-                        query,
-                        isJSON(String(query)),
-                        'detail'
-                    );
+                    store.graph.getSearchGraph(query, 'detail');
                 }
             } else {
                 if (
@@ -110,11 +96,7 @@ function GraphPage() {
                     store.graph.currentGraphData.meta.dataset !== dataset ||
                     store.graph.currentGraphData.isEmpty
                 ) {
-                    store.graph.getSearchGraph(
-                        query,
-                        isJSON(query),
-                        'overview'
-                    );
+                    store.graph.getSearchGraph(query, 'overview');
                 }
             }
         } else {
