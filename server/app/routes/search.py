@@ -1,31 +1,30 @@
-from elasticsearch_dsl.query import Query
-from fastapi import APIRouter
-
-from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Q, Index
-from typing import List, Dict, Any
-from app.types import Node, Keyphrase
-
 import json
 import os
-import pandas as pd
-import spacy
-import pytextrank
 import pickle
+from sre_constants import AT_END_STRING
+from typing import Any, Dict, List
+
+import pandas as pd
+import pytextrank
+import spacy
+from app.types import Keyphrase, Node
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Index, Q, Search
+from elasticsearch_dsl.query import Query
+from fastapi import APIRouter
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
+import app.utils.analysis as csx_analysis
+import app.utils.cache as csx_cache
 from app.controllers.graph.converter import (
     get_graph,
-    get_overview_graph,
+    generate_graph_metadata,
     get_props_for_cached_nodes,
 )
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
-
-import app.utils.cache as csx_cache
-import app.utils.analysis as csx_analysis
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -251,7 +250,7 @@ def search(
     search = search[0:10000]
 
     id_list = json.loads(visible_entries)
-    new_dimensions = []
+    query_generated_dimensions = []
 
     if len(id_list):
         results = convert_filter_res_to_df(
@@ -266,7 +265,7 @@ def search(
         )
         results = convert_query_to_df(es_query, search)
     else:
-        new_dimensions = {
+        query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
@@ -275,131 +274,180 @@ def search(
     if len(results.index) == 0:
         return {"nodes": []}
 
-    elastic_list = json.loads(results.to_json(orient="records"))
+    elastic_json = json.loads(results.to_json(orient="records"))
 
-    all_dimensions = [
-        property
-        for property in es.indices.get(index=index)[index]["mappings"]["properties"]
-    ]
+    dimensions = {
+        "links": links,
+        "anchor": {"dimension": anchor, "props": json.loads(anchor_properties)},
+        "visible": visible_dimensions,
+        "query_generated": query_generated_dimensions,
+        "all": [
+            property
+            for property in es.indices.get(index=index)[index]["mappings"]["properties"]
+        ],
+    }
 
-    anchor_properties = json.loads(anchor_properties)
+    current_dimensions = visible_dimensions
 
-    # print('elastic results ', elastic_list)
+    if graph_type == "overview":
+        current_dimensions = links + [anchor]
 
-    comparison_results = csx_cache.is_same_graph(
+    comparison_res = csx_cache.compare_instances(
         cache_data,
         {
             "index": index,
             "search_uuid": search_uuid,
             "query": query,
             "schema": schema,
-            "dimensions": links + [anchor]
-            if graph_type == "overview"
-            else visible_dimensions,
-            "anchor_properties": get_anchor_property_values(
-                elastic_list, anchor_properties
-            )
-            if graph_type == "overview"
-            else None,
+            "dimensions": current_dimensions,
+            "anchor_properties": anchor_properties,
         },
         graph_type,
     )
 
-    if graph_type == "overview":
-
-        if comparison_results["difference"] == None:
-            return_graph_data = comparison_results["data"][graph_type]
-            return_graph_data["meta"]["table_data"] = comparison_results["data"][
-                "global"
-            ]["table_data"]
-            return return_graph_data
-
-        if comparison_results["difference"] == "anchor_properties":
-            graph_data = get_props_for_cached_nodes(
-                comparison_results, anchor_properties, graph_type
-            )
-
-            graph_data["meta"]["anchor_properties"] = get_anchor_property_values(
-                elastic_list, anchor_properties
-            )
-        else:
-            graph_data = get_overview_graph(
-                elastic_list, links, anchor, anchor_properties
-            )
-
-            # Graph data: nodes edges components
-            graph_data["meta"] = {
-                "new_dimensions": new_dimensions,
-                "query": query,
-                "dimensions": links + [anchor],
-                "table_data": convert_table_data(graph_data["nodes"], elastic_list),
-                "anchor_properties": get_anchor_property_values(
-                    elastic_list, anchor_properties
-                ),
-            }
-
-        cache_data = {
-            "overview": graph_data,
-            "detail": cache_data["detail"] if cache_data else {},
-            "global": {
-                "search_uuid": search_uuid,
-                "index": index,
-                "new_dimensions": new_dimensions,
-                "query": query,
-                "table_data": convert_table_data(graph_data["nodes"], elastic_list),
-                "results_df": results.to_json(),
-            },
-        }
-
-        csx_cache.save_current_graph(
-            user_id,
+    comparison_switch = {
+        "from_scratch": lambda: get_graph_from_scratch(
+            graph_type,
+            dimensions,
+            elastic_json,
+            visible_entries,
+            query,
+            index,
             cache_data,
-            "overview",
-            {"schema": schema},
-        )
-
-        return graph_data
-
-    if comparison_results["difference"] == None:
-        return_graph_data = comparison_results["data"][graph_type]
-        return_graph_data["meta"]["table_data"] = comparison_results["data"]["global"][
-            "table_data"
-        ]
-        return return_graph_data
-
-    graph_data = get_graph(elastic_list, all_dimensions, visible_dimensions, schema)
-
-    # Graph data: nodes edges components
-
-    graph_data["meta"] = {
-        "new_dimensions": new_dimensions,
-        "query": query,
-        "dimensions": visible_dimensions,
-        "table_data": convert_table_data(graph_data["nodes"], elastic_list),
-        "visible_entries": json.loads(visible_entries),
+            search_uuid,
+            results,
+            user_id,
+            schema,
+            anchor_properties,
+            comparison_res,
+        ),
+        "from_anchor_properties": lambda: get_graph_with_new_anchor_props(
+            comparison_res, graph_type, dimensions, elastic_json
+        ),
+        "from_existing_data": lambda: get_graph_from_existing_data(
+            graph_type,
+            dimensions,
+            elastic_json,
+            visible_entries,
+            query,
+            cache_data,
+            user_id,
+            schema,
+            anchor_properties,
+            comparison_res,
+        ),
+        "from_cache": lambda: get_graph_from_cache(comparison_res, graph_type),
     }
 
-    cache_data = {
-        "overview": cache_data["overview"] if cache_data else {},
-        "detail": graph_data,
-        "global": {
-            "search_uuid": search_uuid,
-            "index": index,
-            "new_dimensions": new_dimensions,
-            "query": query,
-            "table_data": convert_table_data(graph_data["nodes"], elastic_list),
-            "results_df": results.to_json(),
-        },
-    }
+    return comparison_switch[comparison_res["action"]]()
 
-    csx_cache.save_current_graph(
-        user_id,
+
+def get_graph_from_scratch(
+    graph_type,
+    dimensions,
+    elastic_json,
+    visible_entries,
+    query,
+    index,
+    cache_data,
+    search_uuid,
+    results,
+    user_id,
+    schema,
+    anchor_properties,
+    comparison_res,
+):
+    graph_data = get_graph(graph_type, elastic_json, dimensions, schema)
+    table_data = convert_table_data(graph_data["nodes"], elastic_json)
+    anchor_property_values = get_anchor_property_values(
+        elastic_json, dimensions["anchor"]["props"]
+    )
+
+    graph_data["meta"] = generate_graph_metadata(
+        graph_type,
+        dimensions,
+        table_data,
+        schema,
+        query,
+        visible_entries,
+        anchor_properties,
+        anchor_property_values,
+    )
+
+    cache_data = csx_cache.generate_cache_data(
+        graph_type,
         cache_data,
-        "detail",
-        {"schema": schema},
+        graph_data,
+        search_uuid,
+        index,
+        query,
+        dimensions,
+        table_data,
+        results,
+        comparison_res,
+        elastic_json,
+    )
+
+    csx_cache.save_current_graph(user_id, cache_data, graph_type)
+
+    return graph_data
+
+
+def get_graph_with_new_anchor_props(
+    comparison_res, graph_type, dimensions, elastic_json
+):
+    graph_data = get_props_for_cached_nodes(
+        comparison_res, dimensions["anchor"]["props"], graph_type
+    )
+
+    graph_data["meta"]["anchor_property_values"] = get_anchor_property_values(
+        elastic_json, dimensions["anchor"]["props"]
     )
 
     return graph_data
+
+
+def get_graph_from_existing_data(
+    graph_type,
+    dimensions,
+    elastic_json,
+    visible_entries,
+    query,
+    cache_data,
+    user_id,
+    schema,
+    anchor_properties,
+    comparison_res,
+):
+    # Take global table data and generate grpah
+    elastic_json = comparison_res["data"]["global"]["elastic_json"]
+    graph_data = get_graph(graph_type, elastic_json, dimensions, schema)
+    table_data = convert_table_data(graph_data["nodes"], elastic_json)
+
+    anchor_property_values = get_anchor_property_values(
+        elastic_json, dimensions["anchor"]["props"]
+    )
+
+    graph_data["meta"] = generate_graph_metadata(
+        graph_type,
+        dimensions,
+        table_data,
+        schema,
+        query,
+        visible_entries,
+        anchor_properties,
+        anchor_property_values,
+    )
+
+    cache_data[graph_type] = graph_data
+
+    csx_cache.save_new_instance_of_cache_data(user_id, cache_data)
+
+    return graph_data
+
+
+def get_graph_from_cache(comparison_res, graph_type):
+    return comparison_res["data"][graph_type]
 
 
 @router.get("/datasets")

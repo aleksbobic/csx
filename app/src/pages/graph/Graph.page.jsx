@@ -84,22 +84,9 @@ function GraphPage() {
                     }
                 }
 
-                if (
-                    store.graph.detailGraphData.meta.query !== query ||
-                    store.graph.detailGraphData.meta.dataset !== dataset ||
-                    store.graph.detailGraphData.isEmpty ||
-                    !same_components // Check for component entries and if they are the same as in the detail graph
-                ) {
-                    store.graph.getSearchGraph(query, 'detail', suuid);
-                }
+                store.graph.getSearchGraph(query, 'detail', suuid);
             } else {
-                if (
-                    store.graph.currentGraphData.meta.query !== query ||
-                    store.graph.currentGraphData.meta.dataset !== dataset ||
-                    store.graph.currentGraphData.isEmpty
-                ) {
-                    store.graph.getSearchGraph(query, 'overview', suuid);
-                }
+                store.graph.getSearchGraph(query, 'overview', suuid);
             }
         } else {
             history.push('/');
@@ -188,16 +175,18 @@ function GraphPage() {
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
-            <GraphComponent
-                graphData={
-                    store.core.isDetail
-                        ? store.graph.detailGraphData
-                        : store.graph.graphData
-                }
-            />
+            {/* {!store.core.showSpinner && ( */}
+            {true && (
+                <GraphComponent
+                    graphData={
+                        store.core.isDetail
+                            ? store.graph.detailGraphData
+                            : store.graph.graphData
+                    }
+                />
+            )}
 
-            {(!store.graph.currentGraphData.nodes.length ||
-                store.graph.showSpinner) && (
+            {false && (
                 <Center
                     width="100%"
                     height="100%"

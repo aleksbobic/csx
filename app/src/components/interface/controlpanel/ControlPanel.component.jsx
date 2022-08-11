@@ -123,7 +123,7 @@ function ControlPanel() {
             <Flex
                 id="colorscheme"
                 position="absolute"
-                bottom="20px"
+                bottom="70px"
                 left="320px"
                 maxWidth="200px"
                 zIndex={20}

@@ -61,7 +61,8 @@ function NavigationPanelComponent() {
             store.graph.currentGraphData.meta.query,
             location.pathname.startsWith('/graph/detail')
                 ? 'detail'
-                : 'overview'
+                : 'overview',
+            queryString.parse(location.search).suuid
         );
     };
 

@@ -144,6 +144,10 @@ function Graph(props) {
         }
     };
 
+    useEffect(() => {
+        console.log('from the graph component', store.core.showSpinner);
+    }, [store.core.showSpinner]);
+
     return (
         <ForceGraph3D
             ref={containerRef}

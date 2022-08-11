@@ -65,10 +65,8 @@ def enrich_nodes_with_props(
 
 
 @use_timing
-def get_feature_nodes(
-    df: pd.DataFrame, feature: str, size_factor: int = 2
-):
-# -> List[Node]:
+def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
+    # -> List[Node]:
     """Generate list of node objects for all values of a given feature."""
 
     isFeatureList = isinstance(df[feature].iloc[0], list)
@@ -79,14 +77,14 @@ def get_feature_nodes(
 
     def expand_entities(node_label, node_labels):
         node = {
-                "entries": get_label_entries(df, feature, node_label, isFeatureList),
-                "id": uuid.uuid4().hex,
-                "label": node_label,
-                "feature": feature,
-                "community": 0,
-                "component": 0,
-                "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
-            }
+            "entries": get_label_entries(df, feature, node_label, isFeatureList),
+            "id": uuid.uuid4().hex,
+            "label": node_label,
+            "feature": feature,
+            "community": 0,
+            "component": 0,
+            "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
+        }
 
         for entry in node["entries"]:
             if entry in entry_list:
@@ -115,7 +113,7 @@ def get_feature_nodes(
     nodes = [
         cast(
             Node,
-            expand_entities(node_label,node_labels),
+            expand_entities(node_label, node_labels),
         )
         for node_label in node_labels
     ]

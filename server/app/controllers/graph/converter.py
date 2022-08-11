@@ -22,10 +22,57 @@ from app.services.graph.node import (
 )
 from app.utils.timer import use_timing
 from app.types import SchemaElement
+import json
+
+
+def get_graph(graph_type, elastic_json, dimensions, schema):
+    if graph_type == "overview":
+        return get_overview_graph(
+            elastic_json,
+            dimensions["links"],
+            dimensions["anchor"]["dimension"],
+            dimensions["anchor"]["props"],
+        )
+
+    return get_detail_graph(
+        elastic_json, dimensions["all"], dimensions["visible"], schema
+    )
+
+
+def generate_graph_metadata(
+    graph_type,
+    dimensions,
+    table_data,
+    schema,
+    query,
+    visible_entries,
+    anchor_properties,
+    anchor_property_values,
+):
+
+    if graph_type == "overview":
+        return {
+            "new_dimensions": dimensions["query_generated"],
+            "query": query,
+            "table_data": table_data,
+            "schema": schema,
+            "dimensions": dimensions["links"] + [dimensions["anchor"]["dimension"]],
+            "anchor_properties": anchor_properties,
+            "anchor_property_values": anchor_property_values,
+        }
+
+    return {
+        "new_dimensions": dimensions["query_generated"],
+        "query": query,
+        "table_data": table_data,
+        "schema": schema,
+        "dimensions": dimensions["visible"],
+        "visible_entries": json.loads(visible_entries),
+    }
 
 
 @use_timing
-def get_graph(
+def get_detail_graph(
     search_results,
     features: List[str],
     visible_features: List[str],

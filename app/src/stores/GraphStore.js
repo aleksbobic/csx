@@ -476,7 +476,7 @@ export class GraphStore {
                     'component'
                 );
 
-                response.meta.anchor_properties.map(entry =>
+                response.meta.anchor_property_values.map(entry =>
                     this.store.graphInstance.generateSchemeColorsFromArray(
                         entry.values,
                         entry.property
@@ -531,7 +531,7 @@ export class GraphStore {
                     ...this.graphData.meta,
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
-                    anchorProperties: response.meta.anchor_properties
+                    anchorProperties: response.meta.anchor_property_values
                 };
 
                 this.graphData.perspectivesInGraph = response.meta.dimensions;
