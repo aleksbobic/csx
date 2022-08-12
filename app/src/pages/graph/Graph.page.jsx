@@ -175,18 +175,15 @@ function GraphPage() {
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
-            {/* {!store.core.showSpinner && ( */}
-            {true && (
-                <GraphComponent
-                    graphData={
-                        store.core.isDetail
-                            ? store.graph.detailGraphData
-                            : store.graph.graphData
-                    }
-                />
-            )}
+            <GraphComponent
+                graphData={
+                    store.core.isDetail
+                        ? store.graph.detailGraphData
+                        : store.graph.graphData
+                }
+            />
 
-            {false && (
+            {!store.graph.currentGraphData.nodes.length && (
                 <Center
                     width="100%"
                     height="100%"

@@ -12,7 +12,7 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
-function BasicExample() {
+function CSX() {
     const { colorMode } = useColorMode();
 
     return (
@@ -45,4 +45,4 @@ function BasicExample() {
     );
 }
 
-export default observer(BasicExample);
+export default observer(CSX);

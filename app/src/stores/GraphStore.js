@@ -456,7 +456,6 @@ export class GraphStore {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);
         } else {
-            this.store.core.toggleSpinner(true);
             this.store.search.newNodeTypes = response.meta.new_dimensions;
             console.log(response);
             if (graphType === 'overview') {
@@ -649,8 +648,6 @@ export class GraphStore {
 
                 this.addNeighbourObjectsToNodes();
             }
-            // Switch data displayed in graph based on what you are viewing
-            this.store.core.toggleSpinner(false);
         }
     };
 
@@ -816,6 +813,12 @@ export class GraphStore {
         graph_data_copy.nodes = graph_data_copy.nodes
             .filter(node => node.visible)
             .map(node => node.id);
+
+        if (this.store.core.currentGraph === 'detail') {
+            this.resetDetailGraphData();
+        } else {
+            this.resetGraphData();
+        }
 
         try {
             const response = await axios.post('graph/trim', {

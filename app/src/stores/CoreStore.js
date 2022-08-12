@@ -11,8 +11,6 @@ export class CoreStore {
     currentGraph = '';
     userUuid = null;
 
-    showSpinner = false;
-
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
         message: '',
@@ -65,12 +63,6 @@ export class CoreStore {
 
     setDemoNavigationData = data => {
         this.demoNavigationData = data;
-    };
-
-    toggleSpinner = val => {
-        console.log(`triggered with value ${val}!`);
-        this.showSpinner = val;
-        console.log(`triggered with value ${this.showSpinner}!`);
     };
 
     toggleVisibleDimension = dimension => {
