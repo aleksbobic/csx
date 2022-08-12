@@ -317,10 +317,12 @@ function Settings() {
                     />
                     Orphan nodes
                 </FormLabel>
+
                 <FormLabel paddingBottom="10px" paddingTop="10px">
                     Filter by connection:
                 </FormLabel>
                 <RangeSlider
+                    isDisabled={sliderMaxValue === 0}
                     value={[sliderMinTooltipValue, sliderMaxTooltipValue]}
                     min={0}
                     max={sliderMaxValue}
@@ -330,7 +332,7 @@ function Settings() {
                         setSliderMaxTooltipValue(val[1]);
                     }}
                     onChangeEnd={val =>
-                        console.log('this is the final value ', val)
+                        store.graphInstance.filterNodesByDegree(val[0], val[1])
                     }
                 >
                     <RangeSliderTrack bg="blue.100">

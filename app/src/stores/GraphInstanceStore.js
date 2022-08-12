@@ -11,7 +11,8 @@ const SELF_CENTRIC_TYPES = {
     ONLY_SELECTED: 'only_selected_nodes',
     SAME_ENTRY: 'same_entry',
     SELECTED_COMPONENT: 'selected_component',
-    CHART_FILTER: 'chart_filter'
+    CHART_FILTER: 'chart_filter',
+    DEGREE_FILTER: 'degree_filter'
 };
 
 export class GraphInstanceStore {
@@ -113,6 +114,55 @@ export class GraphInstanceStore {
         this.isSelfCentric = true;
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
+    };
+
+    filterNodesByDegree = (min, max) => {
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        for (let i = 0; i < nodeCount; i++) {
+            if (
+                this.store.graph.currentGraphData.nodes[i].neighbours.size ===
+                    0 &&
+                !this.store.graphInstance.orphanNodeVisibility
+            ) {
+                this.store.graph.currentGraphData.nodes[i].visible = false;
+            } else {
+                this.store.graph.currentGraphData.nodes[i].visible =
+                    this.store.graph.currentGraphData.nodes[i].neighbours
+                        .size >= min &&
+                    this.store.graph.currentGraphData.nodes[i].neighbours
+                        .size <= max;
+            }
+        }
+
+        const visibleNodeIds = [];
+
+        for (let i = 0; i < nodeCount; i++) {
+            if (this.store.graph.currentGraphData.nodes[i].visible) {
+                visibleNodeIds.push(
+                    this.store.graph.currentGraphData.nodes[i].id
+                );
+            }
+        }
+
+        // Find links that are connecting selected nodes
+        for (let i = 0; i < linkCount; i++) {
+            let linkSource =
+                this.store.graph.currentGraphData.links[i].source.id;
+            let linkTarget =
+                this.store.graph.currentGraphData.links[i].target.id;
+
+            this.store.graph.currentGraphData.links[i].visible =
+                visibleNodeIds.includes(linkSource) &&
+                visibleNodeIds.includes(linkTarget);
+        }
+
+        this.filterTabularData();
+
+        this.isSelfCentric = true;
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
     };
 
     filterTabularData = () => {
@@ -227,11 +277,10 @@ export class GraphInstanceStore {
         if (this.isSelfCentric) {
             for (let i = 0; i < nodeCount; i++) {
                 this.store.graph.currentGraphData.nodes[i].visible = true;
-
                 this.store.graph.currentGraphData.nodes[i].visible =
                     !this.store.graph.currentGraphData.nodes[i].neighbours ||
                     this.store.graph.currentGraphData.nodes[i].neighbours
-                        .length === 0
+                        .size === 0
                         ? this.orphanNodeVisibility
                         : true;
             }
@@ -592,7 +641,7 @@ export class GraphInstanceStore {
             if (node.component === componentId || componentId === -1) {
                 node.visible = true;
                 node.visible =
-                    !node.neighbours || node.neighbours.length === 0
+                    !node.neighbours || node.neighbours.size === 0
                         ? this.orphanNodeVisibility
                         : true;
                 visibleNodeIds.push(node.id);

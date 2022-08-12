@@ -194,7 +194,7 @@ export class GraphStore {
             nodes[i].selected = false;
 
             nodes[i].visible =
-                !nodes[i].neighbours || nodes[i].neighbours.length === 0
+                !nodes[i].neighbours || nodes[i].neighbours.size === 0
                     ? this.store.graphInstance.orphanNodeVisibility
                     : true;
             nodes[i].material = this.generateNodeMaterial(
@@ -271,7 +271,7 @@ export class GraphStore {
             : this.detailGraphData;
 
         for (let i = 0; i < data.meta.nodeCount; i++) {
-            if (!data.nodes[i].neighbours) {
+            if (data.nodes[i].neighbours.size === 0) {
                 data.nodes[i].visible = visible;
             }
         }
