@@ -10,8 +10,8 @@ def graph_from_graph_data(graph_data) -> nx.Graph:
     return graph
 
 
-def graph_from_cache(cahce_data) -> nx.Graph:
-    graph = nx.from_dict_of_dicts(cahce_data["meta"]["nx_graph"])
+def graph_from_cache(graph_data) -> nx.Graph:
+    graph = nx.from_dict_of_dicts(graph_data["meta"]["nx_graph"])
     return graph
 
 

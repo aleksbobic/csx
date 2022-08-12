@@ -33,13 +33,30 @@ import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
 import { Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { useLocation } from 'react-router-dom';
 
 function Settings() {
     const location = useLocation();
     const store = useContext(RootStoreContext);
+
+    const [sliderMinTooltipValue, setSliderMinTooltipValue] = useState(0);
+    const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
+        store.graph.currentGraphData.meta.maxDegree
+    );
+
+    const [showMinTooltip, setShowMinTooltip] = useState(false);
+    const [showMaxTooltip, setShowMaxTooltip] = useState(false);
+
+    const [sliderMaxValue, setSliderMaxValue] = useState(
+        store.graph.currentGraphData.meta.maxDegree
+    );
+
+    useEffect(() => {
+        setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
+        setSliderMaxTooltipValue(store.graph.currentGraphData.meta.maxDegree);
+    }, [store.graph.currentGraphData.meta.maxDegree]);
 
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
@@ -301,14 +318,54 @@ function Settings() {
                     Orphan nodes
                 </FormLabel>
                 <FormLabel paddingBottom="10px" paddingTop="10px">
-                    Cores:
+                    Filter by connection:
                 </FormLabel>
-                <RangeSlider defaultValue={[0, 20]} min={0} max={20} step={1}>
-                    <RangeSliderTrack bg="blue.400">
-                        <RangeSliderFilledTrack bg="blue.100" />
+                <RangeSlider
+                    value={[sliderMinTooltipValue, sliderMaxTooltipValue]}
+                    min={0}
+                    max={sliderMaxValue}
+                    step={1}
+                    onChange={val => {
+                        setSliderMinTooltipValue(val[0]);
+                        setSliderMaxTooltipValue(val[1]);
+                    }}
+                    onChangeEnd={val =>
+                        console.log('this is the final value ', val)
+                    }
+                >
+                    <RangeSliderTrack bg="blue.100">
+                        <RangeSliderFilledTrack bg="blue.500" />
                     </RangeSliderTrack>
-                    <RangeSliderThumb boxSize={3} index={0} />
-                    <RangeSliderThumb boxSize={3} index={1} />
+                    <Tooltip
+                        hasArrow
+                        bg="blue.500"
+                        color="white"
+                        placement="top"
+                        isOpen={showMaxTooltip}
+                        label={`${sliderMinTooltipValue}`}
+                    >
+                        <RangeSliderThumb
+                            boxSize={3}
+                            index={0}
+                            onMouseEnter={() => setShowMaxTooltip(true)}
+                            onMouseLeave={() => setShowMaxTooltip(false)}
+                        />
+                    </Tooltip>
+                    <Tooltip
+                        hasArrow
+                        bg="blue.500"
+                        color="white"
+                        placement="top"
+                        isOpen={showMinTooltip}
+                        label={`${sliderMaxTooltipValue}`}
+                    >
+                        <RangeSliderThumb
+                            boxSize={3}
+                            index={1}
+                            onMouseEnter={() => setShowMinTooltip(true)}
+                            onMouseLeave={() => setShowMinTooltip(false)}
+                        />
+                    </Tooltip>
                 </RangeSlider>
             </>
         );

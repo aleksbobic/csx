@@ -372,6 +372,7 @@ def get_graph_from_scratch(
         visible_entries,
         anchor_properties,
         anchor_property_values,
+        graph_data,
     )
 
     cache_data = csx_cache.generate_cache_data(
@@ -389,6 +390,7 @@ def get_graph_from_scratch(
     )
 
     csx_cache.save_current_graph(user_id, cache_data, graph_type)
+    csx_analysis.graph_from_graph_data(cache_data[graph_type])
 
     return graph_data
 
@@ -437,6 +439,7 @@ def get_graph_from_existing_data(
         visible_entries,
         anchor_properties,
         anchor_property_values,
+        graph_data,
     )
 
     cache_data[graph_type] = graph_data

@@ -20,6 +20,7 @@ from app.services.graph.node import (
     get_visible_nodes,
     get_node_ids_with_labels,
 )
+import app.utils.analysis as csx_analysis
 from app.utils.timer import use_timing
 from app.types import SchemaElement
 import json
@@ -48,6 +49,7 @@ def generate_graph_metadata(
     visible_entries,
     anchor_properties,
     anchor_property_values,
+    graph_data,
 ):
 
     if graph_type == "overview":
@@ -59,6 +61,9 @@ def generate_graph_metadata(
             "dimensions": dimensions["links"] + [dimensions["anchor"]["dimension"]],
             "anchor_properties": anchor_properties,
             "anchor_property_values": anchor_property_values,
+            "max_degree": csx_analysis.get_max_degree(
+                csx_analysis.graph_from_graph_data(graph_data)
+            ),
         }
 
     return {
@@ -68,6 +73,9 @@ def generate_graph_metadata(
         "schema": schema,
         "dimensions": dimensions["visible"],
         "visible_entries": json.loads(visible_entries),
+        "max_degree": csx_analysis.get_max_degree(
+            csx_analysis.graph_from_graph_data(graph_data)
+        ),
     }
 
 

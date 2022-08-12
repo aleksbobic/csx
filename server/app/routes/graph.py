@@ -29,7 +29,6 @@ def trim_network(
     cache_data = csx_cache.load_current_graph(user_id)
 
     # Get entries of visible_nodes
-    print(cache_data["detail"].keys())
     entry_list = [
         node["entries"]
         for node in cache_data[graph_type]["nodes"]
@@ -113,6 +112,10 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
 
     # Generate new NetworkX graph
     cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
+        csx_analysis.graph_from_graph_data(cache_data[graph_type])
+    )
+
+    cache_data[graph_type]["meta"]["max_degree"] = csx_analysis.get_max_degree(
         csx_analysis.graph_from_graph_data(cache_data[graph_type])
     )
 

@@ -13,7 +13,8 @@ export class GraphStore {
         meta: {
             graphID: null,
             query: '',
-            anchorProperties: []
+            anchorProperties: [],
+            maxDegree: 0
         },
         nodes: [],
         links: [],
@@ -35,7 +36,8 @@ export class GraphStore {
         meta: {
             graphID: null,
             query: '',
-            visible_entries: []
+            visible_entries: [],
+            maxDegree: 0
         },
         nodes: [],
         links: [],
@@ -70,7 +72,8 @@ export class GraphStore {
                 references: [],
                 nodeCount: 0,
                 linkCount: 0,
-                anchorProperties: []
+                anchorProperties: [],
+                maxDegree: 0
             },
             nodes: [],
             links: [],
@@ -96,7 +99,8 @@ export class GraphStore {
                 ...this.detailGraphData.meta,
                 references: [],
                 nodeCount: 0,
-                linkCount: 0
+                linkCount: 0,
+                maxDegree: 0
             },
             nodes: [],
             links: [],
@@ -181,7 +185,12 @@ export class GraphStore {
                 nodes[i].size
             );
 
-            nodes[i].neighbours = neighbours[nodes[i].id];
+            if (neighbours[nodes[i].id]) {
+                nodes[i].neighbours = neighbours[nodes[i].id];
+            } else {
+                nodes[i].neighbours = new Set();
+            }
+
             nodes[i].selected = false;
 
             nodes[i].visible =
@@ -530,7 +539,8 @@ export class GraphStore {
                     ...this.graphData.meta,
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
-                    anchorProperties: response.meta.anchor_property_values
+                    anchorProperties: response.meta.anchor_property_values,
+                    maxDegree: response.meta.max_degree
                 };
 
                 this.graphData.perspectivesInGraph = response.meta.dimensions;
@@ -623,7 +633,8 @@ export class GraphStore {
                 this.detailGraphData.meta = {
                     ...this.detailGraphData.meta,
                     nodeCount: nodes.length,
-                    linkCount: response.edges.length
+                    linkCount: response.edges.length,
+                    maxDegree: response.meta.max_degree
                 };
 
                 this.detailGraphData.perspectivesInGraph =
