@@ -1,4 +1,3 @@
-import { Skeleton } from '@chakra-ui/skeleton';
 import { Button } from '@chakra-ui/button';
 import { Checkbox } from '@chakra-ui/checkbox';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
@@ -13,16 +12,22 @@ import {
 } from '@chakra-ui/layout';
 import { Radio, RadioGroup } from '@chakra-ui/radio';
 import {
+    IconButton,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    RangeSlider,
+    RangeSliderFilledTrack,
+    RangeSliderThumb,
+    RangeSliderTrack,
     Tag,
     TagLabel,
     useColorModeValue,
-    Wrap,
-    RangeSlider,
-    RangeSliderTrack,
-    RangeSliderFilledTrack,
-    RangeSliderThumb,
-    IconButton
+    Wrap
 } from '@chakra-ui/react';
+import { Skeleton } from '@chakra-ui/skeleton';
 import {
     Slider,
     SliderFilledTrack,
@@ -34,8 +39,8 @@ import { Tooltip } from '@chakra-ui/tooltip';
 import { Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
 import { useLocation } from 'react-router-dom';
+import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
     const location = useLocation();
@@ -45,9 +50,6 @@ function Settings() {
     const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
         store.graph.currentGraphData.meta.maxDegree
     );
-
-    const [showMinTooltip, setShowMinTooltip] = useState(false);
-    const [showMaxTooltip, setShowMaxTooltip] = useState(false);
 
     const [sliderMaxValue, setSliderMaxValue] = useState(
         store.graph.currentGraphData.meta.maxDegree
@@ -321,6 +323,57 @@ function Settings() {
                 <FormLabel paddingBottom="10px" paddingTop="10px">
                     Filter by connection:
                 </FormLabel>
+                <HStack
+                    style={{ justifyContent: 'space-between', width: '100%' }}
+                >
+                    <Text size="xs" fontWeight="bold">
+                        min
+                    </Text>
+                    <Text size="xs" fontWeight="bold">
+                        max
+                    </Text>
+                </HStack>
+                <HStack spacing={10} style={{ marginBottom: '10px' }}>
+                    <NumberInput
+                        size="xs"
+                        value={sliderMinTooltipValue}
+                        onChange={val => {
+                            setSliderMinTooltipValue(val);
+                            store.graphInstance.filterNodesByDegree(
+                                val,
+                                sliderMaxTooltipValue
+                            );
+                        }}
+                        min={0}
+                        max={sliderMaxTooltipValue}
+                    >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+
+                    <NumberInput
+                        size="xs"
+                        value={sliderMaxTooltipValue}
+                        onChange={val => {
+                            setSliderMaxTooltipValue(val);
+                            store.graphInstance.filterNodesByDegree(
+                                sliderMinTooltipValue,
+                                val
+                            );
+                        }}
+                        min={sliderMinTooltipValue}
+                        max={sliderMaxValue}
+                    >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </HStack>
                 <RangeSlider
                     isDisabled={sliderMaxValue === 0}
                     value={[sliderMinTooltipValue, sliderMaxTooltipValue]}
@@ -338,36 +391,10 @@ function Settings() {
                     <RangeSliderTrack bg="blue.100">
                         <RangeSliderFilledTrack bg="blue.500" />
                     </RangeSliderTrack>
-                    <Tooltip
-                        hasArrow
-                        bg="blue.500"
-                        color="white"
-                        placement="top"
-                        isOpen={showMaxTooltip}
-                        label={`${sliderMinTooltipValue}`}
-                    >
-                        <RangeSliderThumb
-                            boxSize={3}
-                            index={0}
-                            onMouseEnter={() => setShowMaxTooltip(true)}
-                            onMouseLeave={() => setShowMaxTooltip(false)}
-                        />
-                    </Tooltip>
-                    <Tooltip
-                        hasArrow
-                        bg="blue.500"
-                        color="white"
-                        placement="top"
-                        isOpen={showMinTooltip}
-                        label={`${sliderMaxTooltipValue}`}
-                    >
-                        <RangeSliderThumb
-                            boxSize={3}
-                            index={1}
-                            onMouseEnter={() => setShowMinTooltip(true)}
-                            onMouseLeave={() => setShowMinTooltip(false)}
-                        />
-                    </Tooltip>
+
+                    <RangeSliderThumb boxSize={3} index={0} />
+
+                    <RangeSliderThumb boxSize={3} index={1} />
                 </RangeSlider>
             </>
         );
