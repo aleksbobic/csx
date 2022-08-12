@@ -830,7 +830,7 @@ export class GraphStore {
             this.handleRetrievedGraph(
                 response.data,
                 this.store.core.currentGraph,
-                response.data['meta']['graph']
+                response.data['meta']['query']
             );
         } catch (error) {
             return this.store.core.handleError(error);
