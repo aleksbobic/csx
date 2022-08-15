@@ -65,3 +65,14 @@ services:
       - 6379:6379
     volumes:
       - ./redis:/data
+    container_name: csx_redis
+  mongo:
+    image: mongo:4
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/data/db
+    # environment:
+    #   - MONGO_INITDB_ROOT_USERNAME=admin
+    #   - MONGO_INITDB_ROOT_PASSWORD=admin
+    container_name: csx_mongo

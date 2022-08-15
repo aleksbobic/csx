@@ -19,6 +19,7 @@ npm-debug.log*
 analytics
 mysql
 redis
+mongo
 elasticsearch
 datasets
 metals.*
