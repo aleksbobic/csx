@@ -32,9 +32,15 @@ def bulk_populate(data):
     bulk(es, data, refresh="wait_for")
 
 
-def convert_query_to_df(query, index):
+def convert_query_to_df(query, index, use_limit=True):
     search = Search(using=es, index=index)
-    search = search[0:10000]
+    # TODO: Make interval dynamic so that we can make it infinite when retrieveing data for the mongo population
+    if use_limit:
+        search = search[0:10000]
+    else:
+        search_length = search.count()
+        search = search[0:search_length]
+
     results = search.query(query).execute()
 
     elastic_list = []

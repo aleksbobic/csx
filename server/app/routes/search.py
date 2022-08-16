@@ -23,7 +23,6 @@ from app.controllers.graph.converter import (
 )
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
-import app.utils.data as csx_data
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -52,10 +51,7 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
         )
 
     if query["action"] == "get dataset":
-        return csx_es.convert_query_to_df(
-            Q("match_all"),
-            index,
-        )
+        return csx_es.convert_query_to_df(Q("match_all"), index, False)
 
     if query["action"] == "extract keywords":
         source_feature = query["feature"]

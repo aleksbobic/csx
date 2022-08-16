@@ -2,12 +2,14 @@ import pandas as pd
 import json
 import os
 import ast
+import itertools
 
 from fastapi import APIRouter, UploadFile
 from elasticsearch_dsl import Q
 
 from app.services.graph.node import get_nodes
 import app.utils.elastic as csx_es
+import app.utils.data as csx_data
 
 router = APIRouter()
 
@@ -195,23 +197,46 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     csx_es.create_index(name, mapping)
 
     try:
+        print("***** Populating elastic")
         csx_es.bulk_populate(
             generate_entries_from_dataframe(
                 data, columns, name, config["dimension_types"]
             )
         )
-
-        elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name)
-        print("\n\n\n list: ", elastic_list_df)
-        nodes, entries_with_nodes = get_nodes(elastic_list_df)
-        print("\n\n\n nodes: ", nodes)
-        print("\n\n\n entries with nodes: ", entries_with_nodes)
     except Exception as exception:
+        os.remove(f"./app/data/files/{original_name}.csv")
+        delete_dataset(name)
+        print("\n\n\n\n", exception)
         return exception
+
+    print("***** Retrieving elastic")
+    elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name, False)
+    print("***** Generating nodes")
+    nodes, entries_with_nodes = get_nodes(elastic_list_df)
+
+    print("***** Generating mongo nodes")
+    mongo_nodes = [
+        convert_entry_with_nodes_to_mongo(entries_with_nodes[key], key)
+        for key in entries_with_nodes.keys()
+    ]
+    print("***** Populating mongo")
+    csx_data.insert_documents(name, mongo_nodes)
 
     os.remove(f"./app/data/files/{original_name}.csv")
 
     return {"status": "success"}
+
+
+def convert_entry_with_nodes_to_mongo(entry, key):
+    new_entry = {"_id": key}
+
+    for prop in entry:
+        if prop["feature"] in new_entry:
+            new_entry[prop["feature"]].append(prop)
+        else:
+            new_entry[prop["feature"]] = [prop]
+
+    return new_entry
 
 
 @router.get("/cancel")
@@ -223,6 +248,7 @@ def cancel_dataset_upload(name: str):
 @router.get("/delete")
 def delete_dataset(name: str):
     csx_es.delete_index(name)
+    csx_data.delete_collection(name)
     os.remove(f"./app/data/config/{name}.json")
     return {"status": "success"}
 
