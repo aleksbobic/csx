@@ -71,8 +71,9 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./mongo:/data/db
-    # environment:
-    #   - MONGO_INITDB_ROOT_USERNAME=admin
-    #   - MONGO_INITDB_ROOT_PASSWORD=admin
+      - mongo-volume:/data/db
     container_name: csx_mongo
+
+volumes:
+  mongo-volume:
+    external: false

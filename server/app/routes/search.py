@@ -1,16 +1,13 @@
 import json
 import os
-import pickle
-from sre_constants import AT_END_STRING
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import pandas as pd
 import pytextrank
 import spacy
-from app.types import Keyphrase, Node
+from app.types import Node
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Index, Q, Search
-from elasticsearch_dsl.query import Query
+from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 
 nlp = spacy.load("en_core_web_sm")
@@ -18,6 +15,7 @@ nlp.add_pipe("textrank")
 
 import app.utils.analysis as csx_analysis
 import app.utils.cache as csx_cache
+import app.utils.elastic as csx_es
 from app.controllers.graph.converter import (
     get_graph,
     generate_graph_metadata,
@@ -25,21 +23,10 @@ from app.controllers.graph.converter import (
 )
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
+import app.utils.data as csx_data
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
-
-
-def convert_query_to_df(query, search):
-    results = search.query(query).execute()
-
-    elastic_list = []
-    for entry in results["hits"]["hits"]:
-        entry_dict = entry["_source"].to_dict()
-        entry_dict["entry"] = entry["_id"]
-        elastic_list.append(entry_dict)
-
-    return pd.DataFrame(elastic_list)
 
 
 def convert_filter_res_to_df(results):
@@ -52,28 +39,28 @@ def convert_filter_res_to_df(results):
     return pd.DataFrame(elastic_list)
 
 
-def generate_advanced_query(query, search) -> pd.DataFrame:
+def generate_advanced_query(query, index) -> pd.DataFrame:
     """Assemble query from multiple query phrases. Each call should return a dataframe."""
 
     if "min" in query and "max" in query:
-        return convert_query_to_df(
+        return csx_es.convert_query_to_df(
             Q(
                 "range",
                 **{query["feature"]: {"gte": query["min"], "lte": query["max"]}},
             ),
-            search,
+            index,
         )
 
     if query["action"] == "get dataset":
-        return convert_query_to_df(
+        return csx_es.convert_query_to_df(
             Q("match_all"),
-            search,
+            index,
         )
 
     if query["action"] == "extract keywords":
         source_feature = query["feature"]
         newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], search)
+        results = generate_advanced_query(query["query"], index)
         keywords = []
 
         for doc in nlp.pipe(results[source_feature].values):
@@ -89,27 +76,27 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
     if query["action"] == "count array":
         source_feature = query["feature"]
         newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], search)
+        results = generate_advanced_query(query["query"], index)
 
         results[newFeatureName] = results[source_feature].apply(lambda x: str(len(x)))
         return results
 
     if "query" not in query and "queries" not in query:
-        return convert_query_to_df(
+        return csx_es.convert_query_to_df(
             Q(
                 "query_string",
                 query=f"{query['keyphrase']}",
                 type="phrase",
                 fields=[query["feature"]],
             ),
-            search,
+            index,
         )
 
     if query["action"] == "connect":
         if query["connector"] == "or":
 
             query_dfs = [
-                generate_advanced_query(entry, search) for entry in query["queries"]
+                generate_advanced_query(entry, index) for entry in query["queries"]
             ]
 
             merged_df = (
@@ -123,7 +110,7 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
         elif query["connector"] == "and":
 
             query_dfs = [
-                generate_advanced_query(entry, search) for entry in query["queries"]
+                generate_advanced_query(entry, index) for entry in query["queries"]
             ]
 
             merged_df = pd.concat(query_dfs, ignore_index=True)
@@ -132,7 +119,7 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
                 drop=True
             )
         else:
-            return convert_query_to_df(
+            return csx_es.convert_query_to_df(
                 Q(
                     "bool",
                     must_not=[
@@ -144,10 +131,10 @@ def generate_advanced_query(query, search) -> pd.DataFrame:
                         )
                     ],
                 ),
-                search,
+                index,
             )
 
-    return generate_advanced_query(query["query"], search)
+    return generate_advanced_query(query["query"], index)
 
 
 def get_new_features(query):
@@ -217,6 +204,7 @@ def search(
     visible_entries="[]",
     anchor_properties="[]",
 ) -> dict:
+
     """Run search using given query."""
     cache_data = csx_cache.load_current_graph(user_id)
 
@@ -263,13 +251,13 @@ def search(
             type="phrase",
             fields=default_search_fields,
         )
-        results = convert_query_to_df(es_query, search)
+        results = csx_es.convert_query_to_df(es_query, index)
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
-        results = generate_advanced_query(json.loads(query), search)
+        results = generate_advanced_query(json.loads(query), index)
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -283,7 +271,7 @@ def search(
         "query_generated": query_generated_dimensions,
         "all": [
             property
-            for property in es.indices.get(index=index)[index]["mappings"]["properties"]
+            for property in csx_es.get_index(index)[index]["mappings"]["properties"]
         ],
     }
 
@@ -459,10 +447,8 @@ def get_datasets() -> dict:
 
     datasets = {}
 
-    for index in es.indices.get(index="*"):
-        index_instance = Index(index, using=es)
-
-        if "properties" not in index_instance.get()[index]["mappings"]:
+    for index in csx_es.get_all_indices():
+        if "properties" not in csx_es.get_index(index)[index]["mappings"]:
             continue
 
         with open(f"./app/data/config/{index}.json") as f:

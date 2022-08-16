@@ -1,16 +1,15 @@
-from re import M
 import pandas as pd
 import json
 import os
 import ast
 
 from fastapi import APIRouter, UploadFile
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
+from elasticsearch_dsl import Q
+
+from app.services.graph.node import get_nodes
+import app.utils.elastic as csx_es
 
 router = APIRouter()
-
-es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
 
 
 @router.post("/upload")
@@ -193,16 +192,20 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         },
     }
 
-    if not es.indices.exists(index=name):
-        es.indices.create(index=name, body=mapping)
+    csx_es.create_index(name, mapping)
 
     try:
-        bulk(
-            es,
+        csx_es.bulk_populate(
             generate_entries_from_dataframe(
                 data, columns, name, config["dimension_types"]
-            ),
+            )
         )
+
+        elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name)
+        print("\n\n\n list: ", elastic_list_df)
+        nodes, entries_with_nodes = get_nodes(elastic_list_df)
+        print("\n\n\n nodes: ", nodes)
+        print("\n\n\n entries with nodes: ", entries_with_nodes)
     except Exception as exception:
         return exception
 
@@ -219,7 +222,7 @@ def cancel_dataset_upload(name: str):
 
 @router.get("/delete")
 def delete_dataset(name: str):
-    es.indices.delete(index=name)
+    csx_es.delete_index(name)
     os.remove(f"./app/data/config/{name}.json")
     return {"status": "success"}
 

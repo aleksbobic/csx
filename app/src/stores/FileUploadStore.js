@@ -148,7 +148,7 @@ export class FileUploadStore {
 
         this.setIsPopulating(true);
 
-        const params = {
+        let params = {
             original_name: this.fileUploadData.originalName,
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
