@@ -319,6 +319,7 @@ def search(
             schema,
             anchor_properties,
             comparison_res,
+            index,
         ),
         "from_cache": lambda: get_graph_from_cache(comparison_res, graph_type),
     }
@@ -341,7 +342,7 @@ def get_graph_from_scratch(
     anchor_properties,
     comparison_res,
 ):
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema)
+    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
     anchor_property_values = get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
@@ -404,10 +405,11 @@ def get_graph_from_existing_data(
     schema,
     anchor_properties,
     comparison_res,
+    index,
 ):
     # Take global table data and generate grpah
     elastic_json = comparison_res["data"]["global"]["elastic_json"]
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema)
+    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
 
     anchor_property_values = get_anchor_property_values(

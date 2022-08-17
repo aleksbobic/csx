@@ -127,10 +127,11 @@ def get_nodes(
     links: List[str] = [],
     anchor: str = "",
     anchor_properties: List[str] = [],
+    is_anchor_list=False,
 ):
     """Get node objects for each feature or each passed feature in dataframe."""
 
-    features = links + [anchor] if anchor != "" else links
+    features = links + [anchor] if anchor != "" and not is_anchor_list else links
     nodes = []
     entries = {}
 

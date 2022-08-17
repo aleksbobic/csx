@@ -209,34 +209,39 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         print("\n\n\n\n", exception)
         return exception
 
-    print("***** Retrieving elastic")
-    elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name, False)
-    print("***** Generating nodes")
-    nodes, entries_with_nodes = get_nodes(elastic_list_df)
-
-    print("***** Generating mongo nodes")
-    mongo_nodes = [
-        convert_entry_with_nodes_to_mongo(entries_with_nodes[key], key)
-        for key in entries_with_nodes.keys()
+    list_properties = [
+        key for key, value in config["dimension_types"].items() if value == "list"
     ]
-    print("***** Populating mongo")
-    csx_data.insert_documents(name, mongo_nodes)
+
+    if len(list_properties) > 0:
+        print("***** Retrieving elastic")
+        elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name, False)
+        print("***** Generating nodes")
+        nodes, entries_with_nodes = get_nodes(elastic_list_df)
+
+        print("***** Generating mongo nodes")
+
+        mongo_nodes = [node for node in nodes if node["feature"] in list_properties]
+
+        print("***** Populating mongo")
+        csx_data.insert_documents(name, mongo_nodes)
+    else:
+        print("***** Skipped populating mongo")
 
     os.remove(f"./app/data/files/{original_name}.csv")
 
     return {"status": "success"}
 
 
-def convert_entry_with_nodes_to_mongo(entry, key):
-    new_entry = {"_id": key}
+def convert_entry_with_nodes_to_mongo(entry, key, list_props):
+    new_entries = []
 
     for prop in entry:
-        if prop["feature"] in new_entry:
-            new_entry[prop["feature"]].append(prop)
-        else:
-            new_entry[prop["feature"]] = [prop]
+        if prop["feature"] in list_props:
+            prop["esid"] = key
+            new_entries.append(prop)
 
-    return new_entry
+    return new_entries
 
 
 @router.get("/cancel")
