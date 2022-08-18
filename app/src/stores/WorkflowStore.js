@@ -142,6 +142,48 @@ export class WorkflowStore {
         ];
     };
 
+    updateFilterNodeValues = (nodeID, feature) => {
+        this.actions = this.actions.map(node => {
+            if (node.id === nodeID) {
+                node = {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        min: this.store.search.getSearchHintsByFeature(feature)[
+                            'min'
+                        ],
+                        max: this.store.search.getSearchHintsByFeature(feature)[
+                            'max'
+                        ],
+                        min_value:
+                            this.store.search.getSearchHintsByFeature(feature)[
+                                'min'
+                            ],
+                        max_value:
+                            this.store.search.getSearchHintsByFeature(feature)[
+                                'max'
+                            ]
+                    }
+                };
+            }
+
+            return node;
+        });
+    };
+
+    updateFilterNodeData = (nodeID, dataKey, dataValue) => {
+        this.actions = this.actions.map(node => {
+            if (node.id === nodeID) {
+                node.data = {
+                    ...node.data
+                };
+                node.data[dataKey] = dataValue;
+            }
+
+            return node;
+        });
+    };
+
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
 
@@ -158,8 +200,20 @@ export class WorkflowStore {
         if (nodeType === 'filterNode') {
             data.features = this.getNodeTypesOfType(['integer', 'float']);
             data.feature = this.getNodeTypesOfType(['integer', 'float'])[0];
-            data.min = 0;
-            data.max = 0;
+            data.updateFilterNodeValues = this.updateFilterNodeValues;
+            data.updateFilterNodeData = this.updateFilterNodeData;
+            data.min = this.store.search.getSearchHintsByFeature(data.feature)[
+                'min'
+            ];
+            data.max = this.store.search.getSearchHintsByFeature(data.feature)[
+                'max'
+            ];
+            data.min_value = this.store.search.getSearchHintsByFeature(
+                data.feature
+            )['min'];
+            data.max_value = this.store.search.getSearchHintsByFeature(
+                data.feature
+            )['max'];
         }
 
         if (nodeType === 'countsNode') {

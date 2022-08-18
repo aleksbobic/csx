@@ -2,13 +2,15 @@ import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
 export class SearchStore {
-    nodeTypes = [];
-    newNodeTypes = [];
+    nodeTypes = {};
+    newNodeTypes = {};
     anchor = '';
     links = [];
     schema = [];
     schemas = [];
     datasets = [];
+    searchHints = {};
+
     currentDataset = null;
     currentDatasetIndex = 0;
     searchIsEmpty = false;
@@ -24,6 +26,10 @@ export class SearchStore {
     setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
+
+    getNodeTypeByFeature = feature => this.nodeTypes[feature];
+
+    getSearchHintsByFeature = feature => this.searchHints[feature];
 
     useDataset = index => {
         if (!this.datasets.length) {
@@ -43,6 +49,7 @@ export class SearchStore {
 
         this.schema = dataset_config.schemas[0]['relations'];
         this.schemas = dataset_config.schemas;
+        this.searchHints = dataset_config.search_hints;
 
         this.nodeTypes = dataset_config.types;
         this.anchor = dataset_config.anchor;

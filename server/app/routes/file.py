@@ -24,6 +24,8 @@ def uploadfile(file: UploadFile):
         if columns[column] == object:
             if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
                 columns[column] = "list"
+            elif len(data.index) > 20 and len(list(data[column].unique())) < 10:
+                columns[column] = "category"
             else:
                 columns[column] = "string"
         elif isinstance(columns[column], float):
@@ -130,6 +132,13 @@ def get_elastic_type(dim_type):
     return "text"
 
 
+def transform_to_list(raw_entry):
+    return [
+        entry.lstrip("'").rstrip("'")
+        for entry in raw_entry.lstrip("[").rstrip("]").split("', '")
+    ]
+
+
 @router.get("/settings")
 def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     defaults = json.loads(defaults)
@@ -167,9 +176,6 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     if not os.path.exists("./app/data/config"):
         os.makedirs("./app/data/config")
 
-    with open(f"./app/data/config/{name}.json", "w") as f:
-        json.dump(config, f)
-
     data = pd.read_csv(f"./app/data/files/{original_name}.csv", lineterminator="\n")
 
     rename_mapping = get_renamed_dimensions(defaults)
@@ -193,6 +199,37 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
             }
         },
     }
+
+    dimension_search_hints = {}
+
+    for key in config["dimension_types"]:
+        if config["dimension_types"][key] == "integer":
+            dimension_search_hints[key] = {
+                "min": int(data[key].min()),
+                "max": int(data[key].max()),
+            }
+        elif config["dimension_types"][key] == "float":
+            dimension_search_hints[key] = {
+                "min": float(data[key].min()),
+                "max": float(data[key].max()),
+            }
+        elif config["dimension_types"][key] == "category":
+            dimension_search_hints[key] = {"values": list(data[key].unique())}
+        elif config["dimension_types"][key] == "list":
+            dimension_search_hints[key] = {
+                "values": list(
+                    set(
+                        itertools.chain.from_iterable(
+                            data[key].apply(transform_to_list).tolist()
+                        )
+                    )
+                )
+            }
+
+    config["search_hints"] = dimension_search_hints
+
+    with open(f"./app/data/config/{name}.json", "w") as f:
+        json.dump(config, f)
 
     csx_es.create_index(name, mapping)
 

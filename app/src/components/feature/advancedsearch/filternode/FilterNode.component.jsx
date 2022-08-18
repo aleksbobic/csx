@@ -3,26 +3,26 @@ import {
     Heading,
     HStack,
     IconButton,
-    Input,
+    NumberInput,
+    NumberInputField,
     Select,
     Tooltip,
     VStack
 } from '@chakra-ui/react';
 import { Close } from 'css.gg';
-import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
 const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
-        data.min = value.target.value;
+        data.updateFilterNodeData(id, 'min', value);
     };
 
     const modifyMax = value => {
-        data.max = value.target.value;
+        data.updateFilterNodeData(id, 'max', value);
     };
 
     const modifyFeature = value => {
-        data.feature = value.target.value;
+        data.updateFilterNodeValues(id, value.target.value);
     };
 
     return (
@@ -49,7 +49,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             variant="filled"
                             size="sm"
                             borderRadius="5px"
-                            defaultValue={data.feature}
+                            value={data.feature}
                             background="whiteAlpha.200"
                             opacity="0.8"
                             _hover={{
@@ -73,40 +73,44 @@ const filterNode = ({ id, data, isConnectable }) => {
                         </Select>
                     </Tooltip>
                     <Tooltip label="From">
-                        <Input
-                            size="sm"
-                            variant="filled"
-                            type="Number"
-                            placeholder="Min"
-                            margin="0px"
-                            defaultValue={data.min}
+                        <NumberInput
                             borderRadius="5px"
-                            onChange={modifyMin}
                             opacity="0.8"
                             background="whiteAlpha.200"
                             _hover={{
                                 opacity: 1
                             }}
                             _focus={{ opacity: 1 }}
-                        ></Input>
+                            margin="0px"
+                            variant="filled"
+                            onChange={modifyMin}
+                            value={data.min}
+                            size="sm"
+                            min={data.min_value}
+                            max={data.max}
+                        >
+                            <NumberInputField />
+                        </NumberInput>
                     </Tooltip>
                     <Tooltip label="To">
-                        <Input
-                            size="sm"
-                            variant="filled"
-                            type="Number"
-                            placeholder="Max"
-                            margin="0px"
-                            defaultValue={data.max}
+                        <NumberInput
                             borderRadius="5px"
-                            onChange={modifyMax}
                             opacity="0.8"
                             background="whiteAlpha.200"
                             _hover={{
                                 opacity: 1
                             }}
                             _focus={{ opacity: 1 }}
-                        ></Input>
+                            margin="0px"
+                            variant="filled"
+                            onChange={modifyMax}
+                            value={data.max}
+                            size="sm"
+                            min={data.min}
+                            max={data.max_value}
+                        >
+                            <NumberInputField />
+                        </NumberInput>
                     </Tooltip>
                 </VStack>
                 <Handle

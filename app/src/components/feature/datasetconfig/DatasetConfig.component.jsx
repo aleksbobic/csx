@@ -47,6 +47,7 @@ function DatasetConfig(props) {
                 <option value="float">float</option>
                 <option value="integer">integer</option>
                 <option value="list">list</option>
+                <option value="category">category</option>
             </Select>
         );
     };

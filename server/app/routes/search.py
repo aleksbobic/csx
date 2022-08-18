@@ -459,9 +459,11 @@ def get_datasets() -> dict:
                 datasets[index]["schemas"] = loaded_config["schemas"]
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
+                datasets[index]["search_hints"] = loaded_config["search_hints"]
         except:
             datasets[index]["schemas"] = []
             datasets[index]["anchor"] = []
             datasets[index]["links"] = []
+            datasets[index]["search_hints"] = []
 
     return datasets
