@@ -217,10 +217,12 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
             dimension_search_hints[key] = {"values": list(data[key].unique())}
         elif config["dimension_types"][key] == "list":
             dimension_search_hints[key] = {
-                "values": list(
-                    set(
-                        itertools.chain.from_iterable(
-                            data[key].apply(transform_to_list).tolist()
+                "values": sorted(
+                    list(
+                        set(
+                            itertools.chain.from_iterable(
+                                data[key].apply(transform_to_list).tolist()
+                            )
                         )
                     )
                 )

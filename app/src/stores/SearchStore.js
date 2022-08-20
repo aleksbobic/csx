@@ -47,6 +47,7 @@ export class SearchStore {
 
         this.links = dataset_config.links;
 
+        console.log(dataset_config);
         this.schema = dataset_config.schemas[0]['relations'];
         this.schemas = dataset_config.schemas;
         this.searchHints = dataset_config.search_hints;
@@ -167,6 +168,7 @@ export class SearchStore {
 
         try {
             const response = await axios.get('search', { params });
+
             return response.data;
         } catch (error) {
             return this.store.core.handleError(error);

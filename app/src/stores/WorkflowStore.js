@@ -184,12 +184,17 @@ export class WorkflowStore {
         });
     };
 
+    updateActions = () => (this.actions = [...this.actions]);
+
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
 
         if (nodeType === 'searchNode') {
             data.features = Object.keys(this.store.search.nodeTypes);
             data.feature = Object.keys(this.store.search.nodeTypes)[0];
+            data.featureHints = this.store.search.searchHints;
+            data.featureTypes = this.store.search.nodeTypes;
+            data.updateActions = this.updateActions;
             data.keyphrase = '';
         }
 

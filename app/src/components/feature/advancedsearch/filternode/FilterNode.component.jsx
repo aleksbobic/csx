@@ -22,6 +22,7 @@ const filterNode = ({ id, data, isConnectable }) => {
     };
 
     const modifyFeature = value => {
+        data.feature = value.target.value;
         data.updateFilterNodeValues(id, value.target.value);
     };
 

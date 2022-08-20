@@ -38,16 +38,12 @@ def convert_filter_res_to_df(results):
     return pd.DataFrame(elastic_list)
 
 
-def generate_advanced_query(query, index) -> pd.DataFrame:
+def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
     """Assemble query from multiple query phrases. Each call should return a dataframe."""
 
     if "min" in query and "max" in query:
-        return csx_es.convert_query_to_df(
-            Q(
-                "range",
-                **{query["feature"]: {"gte": query["min"], "lte": query["max"]}},
-            ),
-            index,
+        return csx_es.convert_range_filter_to_df(
+            query["feature"], query["min"], query["max"], index
         )
 
     if query["action"] == "get dataset":
@@ -56,7 +52,7 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
     if query["action"] == "extract keywords":
         source_feature = query["feature"]
         newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], index)
+        results = generate_advanced_query(query["query"], index, dimension_types)
         keywords = []
 
         for doc in nlp.pipe(results[source_feature].values):
@@ -72,12 +68,22 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
     if query["action"] == "count array":
         source_feature = query["feature"]
         newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], index)
+        results = generate_advanced_query(query["query"], index, dimension_types)
 
         results[newFeatureName] = results[source_feature].apply(lambda x: str(len(x)))
         return results
 
+    # TODO: CHeck if feature is list
     if "query" not in query and "queries" not in query:
+        if dimension_types[query["feature"]] == "list":
+
+            results = csx_es.convert_query_to_df(
+                Q("match_phrase", **{query["feature"]: query["keyphrase"]}),
+                index,
+            )
+
+            return results
+
         return csx_es.convert_query_to_df(
             Q(
                 "query_string",
@@ -92,7 +98,8 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
         if query["connector"] == "or":
 
             query_dfs = [
-                generate_advanced_query(entry, index) for entry in query["queries"]
+                generate_advanced_query(entry, index, dimension_types)
+                for entry in query["queries"]
             ]
 
             merged_df = (
@@ -106,14 +113,23 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
         elif query["connector"] == "and":
 
             query_dfs = [
-                generate_advanced_query(entry, index) for entry in query["queries"]
+                generate_advanced_query(entry, index, dimension_types)
+                for entry in query["queries"]
             ]
 
-            merged_df = pd.concat(query_dfs, ignore_index=True)
+            merged_df = query_dfs[0]
+            query_dfs = query_dfs[1:]
 
-            return merged_df[merged_df.duplicated(subset=["entry"])].reset_index(
-                drop=True
-            )
+            for entry_df in query_dfs:
+
+                merged_df = pd.concat([merged_df, entry_df], ignore_index=True)
+                merged_df = (
+                    merged_df[merged_df.duplicated(subset=["entry"])]
+                    .drop_duplicates(subset=["entry"])
+                    .reset_index(drop=True)
+                )
+
+            return merged_df
         else:
             return csx_es.convert_query_to_df(
                 Q(
@@ -130,7 +146,7 @@ def generate_advanced_query(query, index) -> pd.DataFrame:
                 index,
             )
 
-    return generate_advanced_query(query["query"], index)
+    return generate_advanced_query(query["query"], index, dimension_types)
 
 
 def get_new_features(query):
@@ -210,6 +226,8 @@ def search(
     with open(f"./app/data/config/{index}.json") as config:
         config = json.load(config)
 
+        dimension_types = config["dimension_types"]
+
         if schema == "":
             schema = config["schemas"][0]["relations"]
         else:
@@ -253,7 +271,7 @@ def search(
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
-        results = generate_advanced_query(json.loads(query), index)
+        results = generate_advanced_query(json.loads(query), index, dimension_types)
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -459,8 +477,15 @@ def get_datasets() -> dict:
                 datasets[index]["schemas"] = loaded_config["schemas"]
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
-                datasets[index]["search_hints"] = loaded_config["search_hints"]
-        except:
+
+                datasets[index]["search_hints"] = {
+                    feature: loaded_config["search_hints"][feature]
+                    for feature in loaded_config["search_hints"]
+                    if data["dimension_types"][feature]
+                    in ["integer", "float", "category", "list"]
+                }
+        except Exception as e:
+            print("There was an exception", e)
             datasets[index]["schemas"] = []
             datasets[index]["anchor"] = []
             datasets[index]["links"] = []

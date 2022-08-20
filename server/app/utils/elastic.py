@@ -32,6 +32,26 @@ def bulk_populate(data):
     bulk(es, data, refresh="wait_for")
 
 
+def convert_range_filter_to_df(feature, min, max, index, use_limit=True):
+    search = Search(using=es, index=index)
+
+    if use_limit:
+        search = search[0:10000]
+    else:
+        search_length = search.count()
+        search = search[0:search_length]
+
+    results = search.filter("range", **{feature: {"gte": min, "lte": max}}).execute()
+
+    elastic_list = []
+    for entry in results["hits"]["hits"]:
+        entry_dict = entry["_source"].to_dict()
+        entry_dict["entry"] = entry["_id"]
+        elastic_list.append(entry_dict)
+
+    return pd.DataFrame(elastic_list)
+
+
 def convert_query_to_df(query, index, use_limit=True):
     search = Search(using=es, index=index)
     # TODO: Make interval dynamic so that we can make it infinite when retrieveing data for the mongo population
