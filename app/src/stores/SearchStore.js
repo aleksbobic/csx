@@ -47,7 +47,6 @@ export class SearchStore {
 
         this.links = dataset_config.links;
 
-        console.log(dataset_config);
         this.schema = dataset_config.schemas[0]['relations'];
         this.schemas = dataset_config.schemas;
         this.searchHints = dataset_config.search_hints;
@@ -124,9 +123,10 @@ export class SearchStore {
         };
 
         if (graphType === 'overview') {
-            params.anchor_properties = JSON.stringify(
-                this.store.schema.overviewDataNodeProperties
-            );
+            params.anchor_properties =
+                this.store.schema.overviewDataNodeProperties;
+        } else {
+            params.anchor_properties = [];
         }
 
         if (
@@ -144,30 +144,34 @@ export class SearchStore {
                     []
                 );
 
-            params.visible_entries = JSON.stringify([...new Set(entryArray)]);
+            params.visible_entries = [...new Set(entryArray)];
+        } else {
+            params.visible_entries = [];
         }
 
-        params['links'] = JSON.stringify(this.links);
+        params['links'] = this.links;
 
         // Set schema by using the provided schema or reading from store
         if (schema && schema.length) {
-            params['schema'] = JSON.stringify(schema);
+            params['graph_schema'] = schema;
         } else if (localStorage.getItem('schema')) {
-            params['schema'] = JSON.stringify(
-                this.store.schema.getServerSchema()
-            );
+            params['graph_schema'] = this.store.schema.getServerSchema();
+        } else {
+            params['graph_schema'] = [];
         }
 
         // Set the node types the user wants to view
         if (nodeTypes && Object.keys(nodeTypes).length) {
-            params['visible_dimensions'] = JSON.stringify(nodeTypes);
+            params['visible_dimensions'] = nodeTypes;
+        } else {
+            params['visible_dimensions'] = [];
         }
 
         // Set selected index
         params['index'] = localStorage.getItem('currentDataset');
 
         try {
-            const response = await axios.get('search', { params });
+            const response = await axios.post('search', params);
 
             return response.data;
         } catch (error) {
@@ -206,6 +210,19 @@ export class SearchStore {
                 dataset,
                 results.data.config
             );
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    suggest = async (feature, input) => {
+        try {
+            const suggestions = await axios.post('search/suggest', {
+                index: this.currentDataset,
+                feature,
+                input
+            });
+            console.log(suggestions);
         } catch (error) {
             this.store.core.handleError(error);
         }

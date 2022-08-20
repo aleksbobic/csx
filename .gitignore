@@ -25,4 +25,5 @@ datasets
 metals.*
 
 server/app/data/config/*
+server/app/data/autocomplete/*
 !server/app/data/config/jucssm.json

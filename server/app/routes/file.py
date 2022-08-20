@@ -10,6 +10,7 @@ from elasticsearch_dsl import Q
 from app.services.graph.node import get_nodes
 import app.utils.elastic as csx_es
 import app.utils.data as csx_data
+import app.utils.autocomplete as csx_auto
 
 router = APIRouter()
 
@@ -266,6 +267,13 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         csx_data.insert_documents(name, mongo_nodes)
     else:
         print("***** Skipped populating mongo")
+
+    string_properties = [
+        key for key, value in config["dimension_types"].items() if value == "string"
+    ]
+
+    for prop in string_properties:
+        csx_auto.generate_auto_index(name, prop, data[prop].astype(str).to_list())
 
     os.remove(f"./app/data/files/{original_name}.csv")
 

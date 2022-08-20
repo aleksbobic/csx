@@ -36,8 +36,6 @@ const searchNode = ({ id, data, isConnectable }) => {
         } else {
             data.keyphrase = value;
         }
-
-        console.log('new keyphrase ', data.keyphrase);
     };
 
     const modifyFeature = value => {
@@ -59,7 +57,10 @@ const searchNode = ({ id, data, isConnectable }) => {
                 defaultValue={data.keyphrase}
                 margin="0px"
                 borderRadius="5px"
-                onChange={modifyKeyphrase}
+                onChange={value => {
+                    data.getSuggestions(data.feature, value.target.value);
+                    modifyKeyphrase(value);
+                }}
                 opacity="0.8"
                 background="whiteAlpha.200"
                 _hover={{

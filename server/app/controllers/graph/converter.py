@@ -74,7 +74,7 @@ def generate_graph_metadata(
         "table_data": table_data,
         "schema": schema,
         "dimensions": dimensions["visible"],
-        "visible_entries": json.loads(visible_entries),
+        "visible_entries": visible_entries,
         "max_degree": csx_analysis.get_max_degree(
             csx_analysis.graph_from_graph_data(graph_data)
         ),

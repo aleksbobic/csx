@@ -195,6 +195,7 @@ export class WorkflowStore {
             data.featureHints = this.store.search.searchHints;
             data.featureTypes = this.store.search.nodeTypes;
             data.updateActions = this.updateActions;
+            data.getSuggestions = this.store.search.suggest;
             data.keyphrase = '';
         }
 

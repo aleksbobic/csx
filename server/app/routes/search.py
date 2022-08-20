@@ -9,6 +9,7 @@ from app.types import Node
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -23,6 +24,7 @@ from app.controllers.graph.converter import (
 )
 from app.services.graph.node import get_anchor_property_values
 from app.utils.timer import use_timing
+import app.utils.autocomplete as csx_auto
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -150,6 +152,7 @@ def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
 
 
 def get_new_features(query):
+
     if query["action"] == "connect":
         return [get_new_features(entry) for entry in query["queries"]]
 
@@ -202,20 +205,34 @@ def isNumber(testStr):
         return False
 
 
-@router.get("/")
-def search(
-    query: str,
-    user_id: str,
-    search_uuid="",
-    visible_dimensions="",
-    schema="",
-    index="",
-    anchor="",
-    links="",
-    graph_type="overview",
-    visible_entries="[]",
-    anchor_properties="[]",
-) -> dict:
+class Data(BaseModel):
+    query: str
+    user_id: str
+    search_uuid: str
+    visible_dimensions: List
+    graph_schema: List
+    index: str
+    anchor: str
+    links: List
+    graph_type: str
+    visible_entries: List
+    anchor_properties: List
+
+
+@router.post("/")
+def search(data: Data) -> dict:
+
+    query = data.query
+    user_id = data.user_id
+    search_uuid = data.search_uuid
+    visible_dimensions = data.visible_dimensions
+    schema = data.graph_schema
+    index = data.index
+    anchor = data.anchor
+    links = data.links
+    graph_type = data.graph_type
+    visible_entries = data.visible_entries
+    anchor_properties = data.anchor_properties
 
     """Run search using given query."""
     cache_data = csx_cache.load_current_graph(user_id)
@@ -228,22 +245,16 @@ def search(
 
         dimension_types = config["dimension_types"]
 
-        if schema == "":
+        if len(schema) == 0:
             schema = config["schemas"][0]["relations"]
-        else:
-            schema = json.loads(schema)
 
-        if visible_dimensions == "":
+        if len(visible_dimensions) == 0:
             visible_dimensions = config["default_visible_dimensions"]
-        else:
-            visible_dimensions = json.loads(visible_dimensions)
 
         default_search_fields = config["default_search_fields"]
 
         if anchor == "":
             anchor = config["anchor"]
-
-        links = json.loads(links)
 
         if not links:
             links = config["links"]
@@ -251,8 +262,8 @@ def search(
     search = Search(using=es, index=index)
     search = search[0:10000]
 
-    id_list = json.loads(visible_entries)
-    query_generated_dimensions = []
+    id_list = visible_entries
+    query_generated_dimensions = {}
 
     if len(id_list):
         results = convert_filter_res_to_df(
@@ -280,7 +291,7 @@ def search(
 
     dimensions = {
         "links": links,
-        "anchor": {"dimension": anchor, "props": json.loads(anchor_properties)},
+        "anchor": {"dimension": anchor, "props": anchor_properties},
         "visible": visible_dimensions,
         "query_generated": query_generated_dimensions,
         "all": [
@@ -492,3 +503,14 @@ def get_datasets() -> dict:
             datasets[index]["search_hints"] = []
 
     return datasets
+
+
+class SuggestionData(BaseModel):
+    index: str
+    feature: str
+    input: str
+
+
+@router.post("/suggest")
+def get_suggestion(data: SuggestionData):
+    return csx_auto.get_suggestions(data.index, data.feature, data.input)

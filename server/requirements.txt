@@ -14,3 +14,4 @@ pytextrank
 python-multipart
 redis
 pymongo
+marisa-trie
