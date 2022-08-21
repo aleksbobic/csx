@@ -3,7 +3,6 @@ import {
     Heading,
     HStack,
     IconButton,
-    Input,
     NumberDecrementStepper,
     NumberIncrementStepper,
     NumberInput,
@@ -13,8 +12,8 @@ import {
     Tooltip,
     VStack
 } from '@chakra-ui/react';
+import AutoCompleteInputComponent from 'components/feature/autocompleteinput/AutoCompleteInput.component';
 import { Close } from 'css.gg';
-import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
 const searchNode = ({ id, data, isConnectable }) => {
@@ -32,7 +31,11 @@ const searchNode = ({ id, data, isConnectable }) => {
 
     const modifyKeyphrase = value => {
         if (typeof value === 'object') {
-            data.keyphrase = value.target.value;
+            if (Object.keys(value).includes('target')) {
+                data.keyphrase = value.target.value;
+            } else {
+                data.keyphrase = value.label;
+            }
         } else {
             data.keyphrase = value;
         }
@@ -43,31 +46,19 @@ const searchNode = ({ id, data, isConnectable }) => {
         data.updateActions();
     };
 
-    const renderTextInput = () => {
+    const renderNewNewTextInput = () => {
         if (!isFeatureValue(data.keyphrase)) {
             modifyKeyphrase('');
         }
 
         return (
-            <Input
-                size="sm"
-                variant="filled"
-                type="text"
-                placeholder="Keyphrase"
-                defaultValue={data.keyphrase}
-                margin="0px"
-                borderRadius="5px"
-                onChange={value => {
-                    data.getSuggestions(data.feature, value.target.value);
-                    modifyKeyphrase(value);
-                }}
-                opacity="0.8"
-                background="whiteAlpha.200"
-                _hover={{
-                    opacity: 1
-                }}
-                _focus={{ opacity: 1 }}
-            ></Input>
+            <AutoCompleteInputComponent
+                placeholder={`Search for a keyword in ${data.feature}`}
+                getSuggestions={value =>
+                    data.getSuggestions(data.feature, value)
+                }
+                getValue={value => modifyKeyphrase(value)}
+            />
         );
     };
 
@@ -133,7 +124,8 @@ const searchNode = ({ id, data, isConnectable }) => {
     const renderInputBasedOnFeatureType = feature => {
         switch (data.featureTypes[feature]) {
             case 'string':
-                return renderTextInput();
+                // return renderTextInput()
+                return renderNewNewTextInput();
             case 'list':
             case 'category':
                 return renderSelectInput();

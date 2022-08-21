@@ -222,9 +222,10 @@ export class SearchStore {
                 feature,
                 input
             });
-            console.log(suggestions);
+            return suggestions;
         } catch (error) {
             this.store.core.handleError(error);
+            return [];
         }
     };
 }
