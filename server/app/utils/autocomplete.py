@@ -22,6 +22,7 @@ def generate_auto_index(index, feature, strings):
         completion_phrases += [process_phrase(phrase) for phrase in doc._.phrases]
 
     completion_phrases = list(set(completion_phrases))
+    completion_phrases = [phrase.lower() for phrase in completion_phrases]
     completion_trie = marisa_trie.Trie(completion_phrases)
 
     if not os.path.exists("./app/data/autocomplete"):
@@ -50,6 +51,8 @@ def generate_main_auto_index(index, other_search_fields, string_search_fields, d
 
     completion_phrases = list(set(completion_phrases))
 
+    completion_phrases = [phrase.lower() for phrase in completion_phrases]
+
     completion_trie = marisa_trie.Trie(completion_phrases)
     if not os.path.exists("./app/data/autocomplete"):
         os.makedirs("./app/data/autocomplete")
@@ -64,4 +67,4 @@ def get_suggestions(index, input, feature=""):
         completion_trie.load(f"./app/data/autocomplete/auto_{index}_{feature}")
     else:
         completion_trie.load(f"./app/data/autocomplete/auto_{index}")
-    return completion_trie.keys(input)[:20]
+    return completion_trie.keys(input.lower())[:20]

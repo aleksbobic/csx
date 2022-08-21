@@ -266,7 +266,8 @@ function DatasetConfig(props) {
                                     isDisabled={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].dataType ===
-                                        'list'
+                                            'list' ||
+                                        props.formType === 'modify'
                                     }
                                     defaultChecked={
                                         store.fileUpload.fileUploadData
