@@ -513,4 +513,4 @@ class SuggestionData(BaseModel):
 
 @router.post("/suggest")
 def get_suggestion(data: SuggestionData):
-    return csx_auto.get_suggestions(data.index, data.feature, data.input)
+    return csx_auto.get_suggestions(data.index, data.input, data.feature)

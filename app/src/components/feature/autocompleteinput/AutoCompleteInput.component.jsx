@@ -22,6 +22,10 @@ function AutoCompleteInput(props) {
             setSuggestionsVisible(false);
             setActiveSuggestion(0);
         }
+
+        if (props.externalChangeHandler) {
+            props.externalChangeHandler(e);
+        }
     };
 
     const clickSuggestion = clickedVal => {
@@ -35,6 +39,7 @@ function AutoCompleteInput(props) {
     const handleKeyDown = e => {
         if (e.keyCode === 13) {
             if (suggestionsVisible && suggestions.length > 0) {
+                e.preventDefault();
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
                 setSuggestionsVisible(false);
@@ -111,7 +116,9 @@ function AutoCompleteInput(props) {
                     }}
                     padding="5px 10px"
                 >
-                    <Text marginTop="0px">{entry}</Text>
+                    <Text marginTop="0px" width="100%" textAlign="left">
+                        {entry}
+                    </Text>
                 </Box>
             ))}
         </VStack>
@@ -124,7 +131,6 @@ function AutoCompleteInput(props) {
                     placeholder={props.placeholder}
                     size={props.size}
                     variant="filled"
-                    borderRadius="5px"
                     overflow="hidden"
                     onBlur={handleBlur}
                     onFocus={handleFocus}
@@ -133,18 +139,17 @@ function AutoCompleteInput(props) {
                     textOverflow="ellipsis"
                     onChange={handleValueChange}
                     value={input}
+                    style={{ ...props.style }}
                 ></Input>
             </Tooltip>
             {suggestionsVisible && suggestions.length > 0 && (
                 <Box
-                    backgroundColor="black"
-                    position="fixed"
-                    top="110px"
                     width="auto"
                     maxHeight="200px"
                     overflowX="scroll"
                     borderRadius="5px"
                     className="suggestionContainer"
+                    style={{ ...props.suggestionStyle }}
                 >
                     {getSuggestionList()}
                 </Box>
@@ -158,12 +163,17 @@ AutoCompleteInput.propTypes = {
     size: PropTypes.string,
     variant: PropTypes.string,
     getSuggestions: PropTypes.func,
-    getValue: PropTypes.func
+    getValue: PropTypes.func,
+    style: PropTypes.object,
+    suggestionStyle: PropTypes.object,
+    externalChangeHandler: PropTypes.func
 };
 
 AutoCompleteInput.defaultProps = {
     placeholder: '',
-    size: 'sm'
+    size: 'sm',
+    style: {},
+    suggestionStyle: {}
 };
 
 export default observer(AutoCompleteInput);

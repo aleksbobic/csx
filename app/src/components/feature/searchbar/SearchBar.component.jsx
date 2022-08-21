@@ -1,7 +1,6 @@
 import {
     Center,
     IconButton,
-    Input,
     InputGroup,
     InputRightElement,
     Select,
@@ -15,6 +14,7 @@ import { useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
+import AutoCompleteInputComponent from '../autocompleteinput/AutoCompleteInput.component';
 
 function SearchBar(props) {
     const history = useHistory();
@@ -54,7 +54,7 @@ function SearchBar(props) {
                     );
                 }}
             >
-                {({ values, handleSubmit, handleChange }) => (
+                {({ values, handleSubmit, setFieldValue }) => (
                     <Form onSubmit={handleSubmit} style={{ flexGrow: 1 }}>
                         <InputGroup alignItems="center">
                             {!props.datasetSelectorDisabled && (
@@ -89,16 +89,28 @@ function SearchBar(props) {
                                     {renderDatasetSelectionOptions()}
                                 </Select>
                             )}
-                            <Input
-                                variant="filled"
-                                name="search"
+                            <AutoCompleteInputComponent
                                 placeholder={props.placeholder}
-                                paddingRight="50px"
-                                onChange={handleChange}
-                                value={values.search}
-                                autoComplete="off"
-                                borderStartRadius={
-                                    props.datasetSelectorDisabled ? '4px' : '0'
+                                getSuggestions={value =>
+                                    store.search.suggest('', value)
+                                }
+                                style={{
+                                    height: '40px',
+                                    borderRadius: '0px',
+                                    borderStartRadius:
+                                        props.datasetSelectorDisabled
+                                            ? '4px'
+                                            : '0'
+                                }}
+                                suggestionStyle={{
+                                    position: 'absolute',
+                                    backgroundColor: 'black',
+                                    top: '40px',
+                                    left: '145px',
+                                    zIndex: '10'
+                                }}
+                                getValue={value =>
+                                    setFieldValue('search', value)
                                 }
                             />
                             <InputRightElement

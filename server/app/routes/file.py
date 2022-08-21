@@ -1,6 +1,7 @@
 import pandas as pd
 import json
-import os
+import os, glob
+from os.path import exists
 import ast
 import itertools
 
@@ -275,6 +276,19 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     for prop in string_properties:
         csx_auto.generate_auto_index(name, prop, data[prop].astype(str).to_list())
 
+    string_search_fields = []
+    other_search_fields = []
+
+    for search_field in config["default_search_fields"]:
+        if config["dimension_types"][search_field] == "string":
+            string_search_fields.append(search_field)
+        else:
+            other_search_fields.append(search_field)
+
+    csx_auto.generate_main_auto_index(
+        name, other_search_fields, string_search_fields, data
+    )
+
     os.remove(f"./app/data/files/{original_name}.csv")
 
     return {"status": "success"}
@@ -301,7 +315,19 @@ def cancel_dataset_upload(name: str):
 def delete_dataset(name: str):
     csx_es.delete_index(name)
     csx_data.delete_collection(name)
+
+    if exists(f"./app/data/autocomplete/auto_{name}"):
+        os.remove(f"./app/data/autocomplete/auto_{name}")
+
+    with open(f"./app/data/config/{name}.json") as config:
+        config = json.load(config)
+        dimension_types = config["dimension_types"]
+        for dim in dimension_types:
+            if exists(f"./app/data/autocomplete/auto_{name}_{dim}"):
+                os.remove(f"./app/data/autocomplete/auto_{name}_{dim}")
+
     os.remove(f"./app/data/config/{name}.json")
+
     return {"status": "success"}
 
 

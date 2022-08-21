@@ -58,6 +58,12 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.getSuggestions(data.feature, value)
                 }
                 getValue={value => modifyKeyphrase(value)}
+                style={{ borderRadius: '5px' }}
+                suggestionStyle={{
+                    backgroundColor: 'black',
+                    top: '110px',
+                    position: 'fixed'
+                }}
             />
         );
     };
