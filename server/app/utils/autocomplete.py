@@ -31,6 +31,16 @@ def generate_auto_index(index, feature, strings):
     completion_trie.save(f"./app/data/autocomplete/auto_{index}_{feature}")
 
 
+def generate_list_auto_index(index, feature, completion_phrases):
+    completion_phrases = [phrase.lower() for phrase in completion_phrases]
+    completion_trie = marisa_trie.Trie(completion_phrases)
+
+    if not os.path.exists("./app/data/autocomplete"):
+        os.makedirs("./app/data/autocomplete")
+
+    completion_trie.save(f"./app/data/autocomplete/auto_{index}_{feature}")
+
+
 def generate_main_auto_index(index, other_search_fields, string_search_fields, data):
 
     string_values = []

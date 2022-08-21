@@ -5,18 +5,21 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 
 function AutoCompleteInput(props) {
-    const [input, setInput] = useState('');
+    const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [activeSuggestion, setActiveSuggestion] = useState(0);
 
     const handleValueChange = e => {
         setInput(e.target.value);
+
         props.getValue(e.target.value);
         if (e.target.value.trim() !== '') {
-            props
-                .getSuggestions(e.target.value)
-                .then(returnedData => setSuggestions(returnedData.data));
+            const resolved = Promise.resolve(
+                props.getSuggestions(e.target.value)
+            );
+
+            resolved.then(returnedData => setSuggestions(returnedData));
             setSuggestionsVisible(true);
         } else {
             setSuggestionsVisible(false);
@@ -42,6 +45,7 @@ function AutoCompleteInput(props) {
                 e.preventDefault();
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
+
                 setSuggestionsVisible(false);
                 setSuggestions([]);
                 setActiveSuggestion(0);
@@ -78,7 +82,7 @@ function AutoCompleteInput(props) {
         }
     };
 
-    const handleBlur = e => {
+    const handleBlur = () => {
         setActiveSuggestion(0);
         setSuggestionsVisible(false);
         setSuggestions([]);
@@ -86,9 +90,9 @@ function AutoCompleteInput(props) {
 
     const handleFocus = () => {
         if (input !== '') {
-            props
-                .getSuggestions(input)
-                .then(returnedData => setSuggestions(returnedData.data));
+            const resolved = Promise.resolve(props.getSuggestions(input));
+
+            resolved.then(returnedData => setSuggestions(returnedData));
             setSuggestionsVisible(true);
         }
     };
@@ -166,14 +170,16 @@ AutoCompleteInput.propTypes = {
     getValue: PropTypes.func,
     style: PropTypes.object,
     suggestionStyle: PropTypes.object,
-    externalChangeHandler: PropTypes.func
+    externalChangeHandler: PropTypes.func,
+    initialValue: PropTypes.string
 };
 
 AutoCompleteInput.defaultProps = {
     placeholder: '',
     size: 'sm',
     style: {},
-    suggestionStyle: {}
+    suggestionStyle: {},
+    initialValue: ''
 };
 
 export default observer(AutoCompleteInput);

@@ -101,6 +101,14 @@ export class WorkflowStore {
         );
 
         this.actions = [...otherNodes, ...resultsNodes];
+
+        this.actions = this.actions.map(node => {
+            if (node.type === 'searchNode') {
+                node.data.updateActions = this.updateActions;
+                node.data.getSuggestions = this.store.search.suggest;
+            }
+            return node;
+        });
     };
 
     setShouldRunWorkflow = val => {

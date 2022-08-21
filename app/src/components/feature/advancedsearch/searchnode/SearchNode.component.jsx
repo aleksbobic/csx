@@ -20,8 +20,8 @@ const searchNode = ({ id, data, isConnectable }) => {
     const isFeatureValue = value => {
         switch (data.featureTypes[data.feature]) {
             case 'string':
-                return typeof value === 'string';
             case 'list':
+                return typeof value === 'string';
             case 'category':
                 return data.featureHints[data.feature].values.includes(value);
             default:
@@ -46,7 +46,7 @@ const searchNode = ({ id, data, isConnectable }) => {
         data.updateActions();
     };
 
-    const renderNewNewTextInput = () => {
+    const renderTextInput = () => {
         if (!isFeatureValue(data.keyphrase)) {
             modifyKeyphrase('');
         }
@@ -57,13 +57,16 @@ const searchNode = ({ id, data, isConnectable }) => {
                 getSuggestions={value =>
                     data.getSuggestions(data.feature, value)
                 }
-                getValue={value => modifyKeyphrase(value)}
+                getValue={value => {
+                    modifyKeyphrase(value);
+                }}
                 style={{ borderRadius: '5px' }}
                 suggestionStyle={{
                     backgroundColor: 'black',
                     top: '110px',
                     position: 'fixed'
                 }}
+                initialValue={data.keyphrase}
             />
         );
     };
@@ -130,9 +133,9 @@ const searchNode = ({ id, data, isConnectable }) => {
     const renderInputBasedOnFeatureType = feature => {
         switch (data.featureTypes[feature]) {
             case 'string':
-                // return renderTextInput()
-                return renderNewNewTextInput();
+                return renderTextInput();
             case 'list':
+                return renderTextInput();
             case 'category':
                 return renderSelectInput();
             default:

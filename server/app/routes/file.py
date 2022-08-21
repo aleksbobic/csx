@@ -4,6 +4,7 @@ import os, glob
 from os.path import exists
 import ast
 import itertools
+from collections import Counter
 
 from fastapi import APIRouter, UploadFile
 from elasticsearch_dsl import Q
@@ -275,6 +276,20 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     for prop in string_properties:
         csx_auto.generate_auto_index(name, prop, data[prop].astype(str).to_list())
+
+    for prop in list_properties:
+        unique_entries = list(
+            set(
+                itertools.chain.from_iterable(
+                    [
+                        entry.lstrip("[").rstrip("]").replace("'", "").split(", ")
+                        for entry in data[prop].astype(str).to_list()
+                    ]
+                )
+            )
+        )
+
+        csx_auto.generate_list_auto_index(name, prop, unique_entries)
 
     string_search_fields = []
     other_search_fields = []

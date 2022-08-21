@@ -20,7 +20,7 @@ function SearchBar(props) {
     const history = useHistory();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
-    const [selectedDataset, setSelectedDataset] = useState(0);
+    const [selectedDataset, setSelectedDataset] = useState(1);
 
     const selectedDatasetChange = e => {
         setSelectedDataset(e.target.value);

@@ -217,12 +217,13 @@ export class SearchStore {
 
     suggest = async (feature, input) => {
         try {
-            const suggestions = await axios.post('search/suggest', {
-                index: this.currentDataset,
-                feature,
-                input
-            });
-            return suggestions;
+            return await axios
+                .post('search/suggest', {
+                    index: this.currentDataset,
+                    feature,
+                    input
+                })
+                .then(response => response.data);
         } catch (error) {
             this.store.core.handleError(error);
             return [];
