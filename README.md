@@ -32,14 +32,16 @@ If you happen to mention or use this project as part of one of your scientific w
 To start developing this project, please complete the following steps:
 
 1. Install docker on your local machine
-2. Install python 3.7 or higher on your local machine
-3. Clone the CSX project to your machine
-4. Start docker
-5. In a terminal, navigate to the project directory and run `docker-compose up`, which will start the app in development mode.
-6. Once the project is running, it will be accessible on [http://localhost:8882](http://localhost:8882)
-7. Before you can start exploring the example dataset, open another terminal and navigate to the `datasets_example` folder in the project folder
-8. Run the following command in python `python populate_elastic.py jucssm jucs_sm.ndjson` to populate the CSX storage with the sample dataset
-9. Refresh your browser page and start exploring
+2. Clone the CSX project to your machine
+3. Start docker
+4. In a terminal, navigate to the project directory and run `docker-compose up`, which will start the app in development mode.
+5. Once the project is running, it will be accessible on [http://localhost:8882](http://localhost:8882)
+6. Before you can start exploring the example dataset, open `datasets_example` folder and drag and drop the example file `just_sm.csv` into the csx drop zone.
+7. Rename the dataset name to jucssm
+8. Set `Title` as the anchor and default search column (click on the radio button in the first column and the checkbox in the third column)
+9. Set `Authors` as the link (click on the radio button in the second column)
+10. Click set defaults
+11. After a short period the dataset should be ready for exploration
 
 ## Usage 🤔
 Here is an example video showing how to use CSX once the example data has been loaded. It can be roughly divided into the following sections:
@@ -62,50 +64,24 @@ Once you are happy with your implementation, open a pull request to the develop 
 ## Developing 🧑‍💻
 ### Starting the project and populating elastic with the sample dataset
 
-Run `docker-compose up`, which will start the app in development mode.
+Run `docker-compose up`, which will start the app in development mode on [http://localhost:8882](http://localhost:8882)
 
-Navigate to the `dataset_examples` in your terminal and run the following command to populate the running elastic instance with sample data collected from the [Journal of Universal Computer Science](https://lib.jucs.org/): `python populate_elastic.py jucssm jucs_sm.ndjson`. The first argument is the index name, and the second argument is the file name.
-
-You can drop your custom dataset in the same folder and run the command by changing the parameters for the index name and the file name. The custom dataset should have the following format:
-
-```JSON
-{"index": {"_id": 0}}
-{"Column 1": "Value 1.1", "Column 2": "Value 2.1", "Column 3": ["Value 3.1.1", "Value 3.1.2"]}
-{"index": {"_id": 1}}
-{"Column 1": "Value 1.2", "Column 2": "Value 2.2", "Column 3": ["Value 3.2.1", "Value 3.2.2", "Value 3.2.3"]}
-```
-
-A file containing the config for this dataset can be found in the `server/app/data/config` folder. This file can be used to modify your default config for the uploaded dataset. If you add more datasets, please make sure to name the config file of each new dataset the same as the index. **Dataset config files are necessary for each dataset!**
-
-The config file has the following parameters:
-```JavaScript
-{
-    "default_visible_dimensions": ["feature 1", "feature 2"], // Default visible features in detail network
-    "anchor": "featur 2", // Default anchor node for both networks
-    "links": ["feature 1"], // Default link features for both networks
-    "default_search_fields": ["feature 2"], // Features used for searching through the start page searchbar
-    "schemas": [ // Default schemas (can be left empty)
-        {
-            "name": "schema name",
-            "relations": [
-                {
-                    "dest": "feature 1",
-                    "src": "feature 2",
-                    "relationship" "oneToOne" // Can be oneToOne, oneToMany, ManyToOne and manyToMany
-                },
-                {
-                    "dest": "feature 2",
-                    "src": "feature 3",
-                    "relationship" "oneToMany"
-                }
-            ]
-        }
-    ]
-}
-```
+Navigate to the `dataset_examples` folder and drag and drop the example file `just_sm.csv` into the csx drop zone to populate the running elastic instance with sample data collected from the [Journal of Universal Computer Science](https://lib.jucs.org/).
 
 
-Open [http://localhost:8882](http://localhost:8882) to view CSX in the browser and explore the newly added dataset.
+To add a custom dataset simply prepare a CSV file with the following format (make sure there are no single quotation marks in the text since that might interfere with the automatic processing of list values):
+
+| String feature name   | Category feature name                   | Number feature name | List feature name       |
+| --------------------- | --------------------------------------- | ------------------- | ----------------------- |
+| Some string value.    | Categorical val 1                       | 1                   | ["val1","val2","val3"]  |
+| Another string value  | Categorical val 2 (same as a string)    | 4.35                | ["val6","val4","val1"]  |
+
+
+When the dataset is uploaded a config file is created in the `server/app/data/config` folder. This file defines the default configuration for a dataset.
+
+> 🚨 **Config files should never be manually modified. If you want to modify the config of a dataset either click on the change default settings for dataset button next to each of the datasets on the homepage or delete the dataset and upload it again with different settings.**:
+
+
 
 ### Starting the project in production mode 🚀
 
