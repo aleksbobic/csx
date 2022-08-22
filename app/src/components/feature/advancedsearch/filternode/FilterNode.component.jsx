@@ -1,18 +1,29 @@
-import { Box, Heading, Input, Select, Tooltip, VStack } from '@chakra-ui/react';
-import React from 'react';
+import {
+    Box,
+    Heading,
+    HStack,
+    IconButton,
+    NumberInput,
+    NumberInputField,
+    Select,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close } from 'css.gg';
 import { Handle } from 'react-flow-renderer';
 
-const filterNode = ({ data, isConnectable }) => {
+const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
-        data.min = value.target.value;
+        data.updateFilterNodeData(id, 'min', value);
     };
 
     const modifyMax = value => {
-        data.max = value.target.value;
+        data.updateFilterNodeData(id, 'max', value);
     };
 
     const modifyFeature = value => {
         data.feature = value.target.value;
+        data.updateFilterNodeValues(id, value.target.value);
     };
 
     return (
@@ -23,20 +34,34 @@ const filterNode = ({ data, isConnectable }) => {
                 padding="8px"
             >
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Between</Heading>
-                    <Tooltip label="Dataset property">
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Filter</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
+                    <Tooltip label="Filter this property">
                         <Select
                             margin="0px"
                             variant="filled"
                             size="sm"
                             borderRadius="5px"
-                            defaultValue={data.feature}
-                            background="blackAlpha.500"
-                            onChange={modifyFeature}
+                            value={data.feature}
+                            background="whiteAlpha.200"
+                            opacity="0.8"
                             _hover={{
-                                background: 'blackAlpha.600',
+                                opacity: 1,
                                 cursor: 'pointer'
                             }}
+                            _focus={{
+                                opacity: 1,
+                                cursor: 'pointer'
+                            }}
+                            onChange={modifyFeature}
                         >
                             {data.features.map((feature, index) => (
                                 <option
@@ -48,33 +73,46 @@ const filterNode = ({ data, isConnectable }) => {
                             ))}
                         </Select>
                     </Tooltip>
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="Number"
-                        placeholder="Min"
-                        margin="0px"
-                        defaultValue={data.min}
-                        borderRadius="5px"
-                        onChange={modifyMin}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
-                    ></Input>
-
-                    <Input
-                        size="sm"
-                        variant="filled"
-                        type="Number"
-                        placeholder="Max"
-                        margin="0px"
-                        defaultValue={data.max}
-                        borderRadius="5px"
-                        onChange={modifyMax}
-                        background="blackAlpha.500"
-                        _hover={{ background: 'blackAlpha.600' }}
-                        _focus={{ background: 'blackAlpha.600' }}
-                    ></Input>
+                    <Tooltip label="From">
+                        <NumberInput
+                            borderRadius="5px"
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                            margin="0px"
+                            variant="filled"
+                            onChange={modifyMin}
+                            value={data.min}
+                            size="sm"
+                            min={data.min_value}
+                            max={data.max}
+                        >
+                            <NumberInputField />
+                        </NumberInput>
+                    </Tooltip>
+                    <Tooltip label="To">
+                        <NumberInput
+                            borderRadius="5px"
+                            opacity="0.8"
+                            background="whiteAlpha.200"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            _focus={{ opacity: 1 }}
+                            margin="0px"
+                            variant="filled"
+                            onChange={modifyMax}
+                            value={data.max}
+                            size="sm"
+                            min={data.min}
+                            max={data.max_value}
+                        >
+                            <NumberInputField />
+                        </NumberInput>
+                    </Tooltip>
                 </VStack>
                 <Handle
                     type="source"

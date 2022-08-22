@@ -1,7 +1,6 @@
 import {
     Center,
     IconButton,
-    Input,
     InputGroup,
     InputRightElement,
     Select,
@@ -10,28 +9,30 @@ import {
 import { Database, Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
+import { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { v4 as uuidv4 } from 'uuid';
+import AutoCompleteInputComponent from '../autocompleteinput/AutoCompleteInput.component';
 
 function SearchBar(props) {
     const history = useHistory();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
-    const [selectedDataset, setSelectedDataset] = useState(
-        localStorage.getItem('currentDatasetIndex') || 0
-    );
+    const [selectedDataset, setSelectedDataset] = useState(0);
 
     const selectedDatasetChange = e => {
+        setSelectedDataset(e.target.value);
         store.search.useDataset(e.target.value);
         store.workflow.resetWorkflow();
         store.schema.resetOverviewNodeProperties();
     };
 
     useEffect(() => {
-        setSelectedDataset(store.search.selectedDatasetIndex);
-    }, [store.search.selectedDatasetIndex]);
+        setSelectedDataset(store.search.currentDatasetIndex);
+    }, [store.search.currentDataset, store.search.currentDatasetIndex]);
 
     const renderDatasetSelectionOptions = () => {
         return store.search.datasets.map((dataset, index) => (
@@ -47,13 +48,19 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.core.setCurrentGraph('overview');
+                    store.graphInstance.setNodeColorScheme('component');
+                    store.search.useDataset(selectedDataset);
                     store.core.resetVisibleDimensions();
+                    store.workflow.resetWorkflow();
+                    store.schema.resetOverviewNodeProperties();
                     history.push(
-                        `/graph?query=${values.search}&dataset=${store.search.currentDataset}`
+                        `/graph?query=${values.search}&dataset=${
+                            store.search.datasets[selectedDataset]
+                        }&suuid=${uuidv4()}`
                     );
                 }}
             >
-                {({ values, handleSubmit, handleChange }) => (
+                {({ values, handleSubmit, setFieldValue }) => (
                     <Form onSubmit={handleSubmit} style={{ flexGrow: 1 }}>
                         <InputGroup alignItems="center">
                             {!props.datasetSelectorDisabled && (
@@ -77,29 +84,40 @@ function SearchBar(props) {
                                     variant="filled"
                                     width="200px"
                                     borderEndRadius="0"
-                                    defaultValue={localStorage.getItem(
-                                        'currentDataset'
-                                    )}
+                                    value={selectedDataset}
                                     style={{
                                         paddingLeft: '40px',
                                         textTransform: 'uppercase',
                                         fontSize: '14px',
                                         fontWeight: 'bold'
                                     }}
-                                    value={selectedDataset}
                                 >
                                     {renderDatasetSelectionOptions()}
                                 </Select>
                             )}
-                            <Input
-                                variant="filled"
-                                name="search"
+                            <AutoCompleteInputComponent
                                 placeholder={props.placeholder}
-                                paddingRight="50px"
-                                onChange={handleChange}
-                                value={values.search}
-                                borderStartRadius={
-                                    props.datasetSelectorDisabled ? '4px' : '0'
+                                getSuggestions={value =>
+                                    store.search.suggest('', value)
+                                }
+                                style={{
+                                    height: '40px',
+                                    borderRadius: '0px',
+                                    borderStartRadius:
+                                        props.datasetSelectorDisabled
+                                            ? '4px'
+                                            : '0'
+                                }}
+                                suggestionStyle={{
+                                    position: 'absolute',
+                                    backgroundColor: '#141824',
+                                    top: '44px',
+                                    left: '145px',
+                                    zIndex: '10',
+                                    minWidth: '60%'
+                                }}
+                                getValue={value =>
+                                    setFieldValue('search', value)
                                 }
                             />
                             <InputRightElement

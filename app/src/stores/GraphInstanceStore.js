@@ -10,7 +10,9 @@ const SELF_CENTRIC_TYPES = {
     ORIGIN_INTERSECTION: 'origin_union',
     ONLY_SELECTED: 'only_selected_nodes',
     SAME_ENTRY: 'same_entry',
-    SELECTED_COMPONENT: 'selected_component'
+    SELECTED_COMPONENT: 'selected_component',
+    CHART_FILTER: 'chart_filter',
+    DEGREE_FILTER: 'degree_filter'
 };
 
 export class GraphInstanceStore {
@@ -107,9 +109,78 @@ export class GraphInstanceStore {
                 selectedNodeIds.includes(linkTarget);
         }
 
+        this.filterTabularData();
+
         this.isSelfCentric = true;
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
+    };
+
+    filterNodesByDegree = (min, max) => {
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        for (let i = 0; i < nodeCount; i++) {
+            if (
+                this.store.graph.currentGraphData.nodes[i].neighbours.size ===
+                    0 &&
+                !this.store.graphInstance.orphanNodeVisibility
+            ) {
+                this.store.graph.currentGraphData.nodes[i].visible = false;
+            } else {
+                this.store.graph.currentGraphData.nodes[i].visible =
+                    this.store.graph.currentGraphData.nodes[i].neighbours
+                        .size >= min &&
+                    this.store.graph.currentGraphData.nodes[i].neighbours
+                        .size <= max;
+            }
+        }
+
+        const visibleNodeIds = [];
+
+        for (let i = 0; i < nodeCount; i++) {
+            if (this.store.graph.currentGraphData.nodes[i].visible) {
+                visibleNodeIds.push(
+                    this.store.graph.currentGraphData.nodes[i].id
+                );
+            }
+        }
+
+        // Find links that are connecting selected nodes
+        for (let i = 0; i < linkCount; i++) {
+            let linkSource =
+                this.store.graph.currentGraphData.links[i].source.id;
+            let linkTarget =
+                this.store.graph.currentGraphData.links[i].target.id;
+
+            this.store.graph.currentGraphData.links[i].visible =
+                visibleNodeIds.includes(linkSource) &&
+                visibleNodeIds.includes(linkTarget);
+        }
+
+        this.filterTabularData();
+
+        this.isSelfCentric = true;
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
+    };
+
+    filterTabularData = () => {
+        const data = this.store.graph.currentGraphData;
+
+        this.store.graph.activeTableData = [];
+        const visibleNodeEntries = [
+            ...new Set(
+                this.store.graph.currentGraphData.nodes
+                    .filter(node => node.visible)
+                    .map(node => node.entries)
+                    .flat()
+            )
+        ];
+
+        data.activeTableData = data.tableData.filter(row =>
+            visibleNodeEntries.includes(row.entry)
+        );
     };
 
     ignoreSelected = event => {
@@ -206,11 +277,10 @@ export class GraphInstanceStore {
         if (this.isSelfCentric) {
             for (let i = 0; i < nodeCount; i++) {
                 this.store.graph.currentGraphData.nodes[i].visible = true;
-
                 this.store.graph.currentGraphData.nodes[i].visible =
                     !this.store.graph.currentGraphData.nodes[i].neighbours ||
                     this.store.graph.currentGraphData.nodes[i].neighbours
-                        .length === 0
+                        .size === 0
                         ? this.orphanNodeVisibility
                         : true;
             }
@@ -221,6 +291,9 @@ export class GraphInstanceStore {
 
             this.isSelfCentric = false;
         }
+
+        this.selfCentricType = null;
+        this.filterTabularData();
     };
 
     triggerSelfCentric = () => {
@@ -254,6 +327,8 @@ export class GraphInstanceStore {
                 data.links[i].source.id === originNode.id ||
                 data.links[i].target.id === originNode.id;
         }
+
+        this.filterTabularData();
 
         this.isSelfCentric = true;
         this.selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
@@ -315,10 +390,7 @@ export class GraphInstanceStore {
     };
 
     getMutualNeighbours = selectedNodeIds => {
-        console.log(this.store.graph.currentGraphData.selectedNodes);
         return this.store.graph.currentGraphData.selectedNodes.map(node => {
-            console.log('\n\n\n');
-            console.log('node', node);
             return [...node.neighbours].filter((neighbourId, i, self) => {
                 return (
                     self.includes(neighbourId) &&
@@ -346,8 +418,6 @@ export class GraphInstanceStore {
             neighbours = mutualWithOrigin
                 ? this.getMutualNeighboursWithOrigin(selectedNodeIds)
                 : this.getMutualNeighbours(selectedNodeIds);
-
-            console.log(neighbours);
         } else {
             // Only nodes which are connected to at least one of the selected nodes
             neighbours = this.store.graph.currentGraphData.selectedNodes.map(
@@ -414,6 +484,8 @@ export class GraphInstanceStore {
                     );
             }
         }
+
+        this.filterTabularData();
 
         this.isSelfCentric = true;
         this.selfCentricType = null;
@@ -497,6 +569,8 @@ export class GraphInstanceStore {
                 );
         }
 
+        this.filterTabularData();
+
         this.isSelfCentric = true;
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.SAME_ENTRY;
@@ -511,7 +585,8 @@ export class GraphInstanceStore {
     };
 
     generateSchemeColorsFromArray = (values, feature) => {
-        const skipfactor = values.length > 10 ? 1 / values.length : null;
+        const skipfactor =
+            values && values.length > 10 ? 1 / values.length : null;
 
         this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
 
@@ -566,7 +641,7 @@ export class GraphInstanceStore {
             if (node.component === componentId || componentId === -1) {
                 node.visible = true;
                 node.visible =
-                    !node.neighbours || node.neighbours.length === 0
+                    !node.neighbours || node.neighbours.size === 0
                         ? this.orphanNodeVisibility
                         : true;
                 visibleNodeIds.push(node.id);
@@ -590,4 +665,109 @@ export class GraphInstanceStore {
     get selectedColorSchema() {
         return this.nodeColorScheme[this.store.core.currentGraph];
     }
+
+    filterNodesWithValue = (property, value) => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        const getNodeProp =
+            property.type === 'basic'
+                ? this.store.stats.getNodeBasicProp
+                : this.store.stats.getNodeAdvancedProp;
+
+        const visibleIds = [];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible =
+                getNodeProp(
+                    this.store.graph.currentGraphData.nodes[i],
+                    property.prop
+                ) === value;
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+
+            if (isVisible) {
+                visibleIds.push(this.store.graph.currentGraphData.nodes[i].id);
+            }
+        }
+
+        for (let i = 0; i < linkCount; i++) {
+            this.store.graph.currentGraphData.links[i].visible =
+                visibleIds.includes(
+                    this.store.graph.currentGraphData.links[i].source.id
+                ) &&
+                visibleIds.includes(
+                    this.store.graph.currentGraphData.links[i].target.id
+                );
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
+    };
+
+    filterEdgesWithValue = (property, value) => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        let visibleIds = [];
+
+        if (property.type === 'basic') {
+            for (let i = 0; i < linkCount; i++) {
+                let isVisible =
+                    this.store.graph.currentGraphData.links[i][
+                        property.prop
+                    ] === value;
+                this.store.graph.currentGraphData.links[i].visible = isVisible;
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].source.id
+                    );
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].target.id
+                    );
+                }
+            }
+        } else {
+            for (let i = 0; i < linkCount; i++) {
+                let isVisible = this.store.graph.currentGraphData.links[
+                    i
+                ].connections.find(
+                    connection => connection[property.prop] === value
+                );
+
+                this.store.graph.currentGraphData.links[i].visible = isVisible;
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].source.id
+                    );
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.links[i].target.id
+                    );
+                }
+            }
+        }
+
+        visibleIds = [...new Set(visibleIds)];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible = visibleIds.includes(
+                this.store.graph.currentGraphData.nodes[i].id
+            );
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
+    };
 }

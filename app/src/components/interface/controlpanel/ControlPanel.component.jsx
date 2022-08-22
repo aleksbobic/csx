@@ -22,6 +22,7 @@ import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
     DisplayFullwidth,
+    EditStraight,
     Eye,
     FormatSeparator,
     LayoutPin,
@@ -122,7 +123,7 @@ function ControlPanel() {
             <Flex
                 id="colorscheme"
                 position="absolute"
-                bottom="20px"
+                bottom="70px"
                 left="320px"
                 maxWidth="200px"
                 zIndex={20}
@@ -156,6 +157,38 @@ function ControlPanel() {
     useEffect(() => {
         onOpen();
     }, [onOpen]);
+
+    const renderNetworkModificationMenu = () => (
+        <HStack
+            id="networkmodificationmenu"
+            position="absolute"
+            bottom="20px"
+            left="320px"
+            zIndex={20}
+            spacing="2"
+            backgroundColor={selfCentricMenuBackground}
+            padding="5px 6px"
+            borderRadius="8px"
+            style={{ backdropFilter: 'blur(2px)' }}
+        >
+            <HStack spacing="1">
+                <Tooltip label="Trim network">
+                    <IconButton
+                        borderRadius="6px"
+                        id="trimnetworkbutton"
+                        size="sm"
+                        style={{
+                            backdropFilter: 'blur(2px)'
+                        }}
+                        icon={<EditStraight style={{ '--ggs': '0.6' }} />}
+                        onClick={() => {
+                            store.graph.trimNetwork();
+                        }}
+                    />
+                </Tooltip>
+            </HStack>
+        </HStack>
+    );
 
     const renderDirectConnectionsMenu = () => (
         <HStack
@@ -474,6 +507,7 @@ function ControlPanel() {
                     </TabPanels>
 
                     {renderDirectConnectionsMenu()}
+                    {renderNetworkModificationMenu()}
 
                     {store.core.currentGraph &&
                         !['none', 'component'].includes(

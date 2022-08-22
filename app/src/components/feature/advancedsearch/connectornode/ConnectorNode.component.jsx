@@ -1,8 +1,17 @@
-import { Box, Heading, Select, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Heading,
+    HStack,
+    IconButton,
+    Select,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
-const connectorNode = ({ data, isConnectable }) => {
+const connectorNode = ({ id, data, isConnectable }) => {
     const modifyConnector = value => {
         data.connector = value.target.value;
     };
@@ -27,7 +36,16 @@ const connectorNode = ({ data, isConnectable }) => {
                     isConnectable={isConnectable}
                 />
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Connector</Heading>
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Connector</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
                     <Select
                         margin="0px"
                         variant="filled"
@@ -35,6 +53,16 @@ const connectorNode = ({ data, isConnectable }) => {
                         defaultValue={data.connector}
                         borderRadius="5px"
                         onChange={modifyConnector}
+                        background="whiteAlpha.200"
+                        opacity="0.8"
+                        _hover={{
+                            opacity: 1,
+                            cursor: 'pointer'
+                        }}
+                        _focus={{
+                            opacity: 1,
+                            cursor: 'pointer'
+                        }}
                     >
                         <option value="and">and</option>
                         <option value="or">or</option>

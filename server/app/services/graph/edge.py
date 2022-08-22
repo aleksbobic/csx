@@ -16,43 +16,19 @@ def get_edge_tuples(
     features: List[str],
     visible_features: List[str],
     schema: List[SchemaElement],
-    anchor: str,
     entries_with_nodes,
     node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
     """Get node tuples that represent the graphs edges."""
 
-    anchor_features = []
-
-    # If anchor is not visible new edges have to be created between all features connected through the anchor feature
-    if anchor not in visible_features:
-        anchor_features = get_anchor_features(schema, anchor)
-
-    # Features connected through anchor will have an m to n conenction
-    shortest_paths = get_shortest_schema_paths(
-        features, visible_features, schema, anchor_features, anchor
-    )
-
-    print("\n\n\n\n shortest paths: ", shortest_paths)
+    shortest_paths = get_shortest_schema_paths(features, visible_features, schema)
 
     edge_tuples = []
 
-    # If shortest paths between various graph features have been identified use them to get actual graph edges
-    if shortest_paths:
-        for path in shortest_paths:
-            edge_tuples.extend(
-                get_edges_based_on_path(
-                    df, path, anchor_features, entries_with_nodes, node_ids_with_labels
-                )
-            )
-
-        return edge_tuples
-
-    for feature in visible_features:
-        if feature in anchor_features:
-            # generate edges for the selected dimension based on the newly connected edges
-            edge_tuples = get_single_column_edges(df, feature, entries_with_nodes)
-            break
+    for path in shortest_paths:
+        edge_tuples.extend(
+            get_edges_based_on_path(df, path, entries_with_nodes, node_ids_with_labels)
+        )
 
     return edge_tuples
 
@@ -72,9 +48,7 @@ def get_overview_edge_tuples(
 
     for path in overview_schema_paths:
         candidate_edges.extend(
-            get_edges_based_on_path(
-                df, path, [], entries_with_nodes, node_ids_with_labels
-            )
+            get_edges_based_on_path(df, path, entries_with_nodes, node_ids_with_labels)
         )
 
     graph = nx.MultiGraph()
@@ -95,17 +69,6 @@ def get_overview_edge_tuples(
                 node_instance for node_instance in nodes if node_instance["id"] == node
             ][0]
 
-            # edge_tuples.extend(
-            #     [
-            #         {
-            #             "label": node_instance["label"],
-            #             "feature": node_instance["feature"],
-            #             "edge": edge,
-            #         }
-            #         for edge in temp_new_edge_tuples
-            #     ]
-            # )
-
             for edge in temp_new_edge_tuples:
                 if edge in edge_tuple_lookup:
                     edge_tuple_lookup[edge].append(
@@ -123,7 +86,6 @@ def get_overview_edge_tuples(
                     ]
 
     return edge_tuple_lookup
-    # return edge_tuples, edge_tuple_lookup
 
 
 @use_timing
@@ -131,11 +93,6 @@ def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
     """Generate a position for each node in graph."""
 
     edge_tuples_counts = Counter(nx_edges)
-
-    if edge_tuples_counts.values():
-        norm_divisor = max(edge_tuples_counts.values())
-    else:
-        norm_divisor = 1
 
     return [
         cast(
@@ -145,7 +102,7 @@ def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
                 "source": edge[0],
                 "target": edge[1],
                 "visible": True,
-                "weight": round(edge_tuples_counts[edge] / norm_divisor, 2),
+                "weight": len(edge_tuple_lookup[edge]),
                 "connections": edge_tuple_lookup[edge],
             },
         )
@@ -239,7 +196,9 @@ def get_shortest_schema_paths_from_src_leafs(
     shortest_schema_paths = []
 
     # We always have directed edges leading from the leaf to the anchor or from the anchor to the leaf
+
     for node in src_leaf_nodes:
+        temp_shortest_path_length = 0
         temp_shortest_path = []
 
         for path in shortest_schema_path_candidates:
@@ -251,11 +210,16 @@ def get_shortest_schema_paths_from_src_leafs(
                 shortest_schema_paths.append(path)
                 continue
             elif path[0]["src"] == node:
-                if not temp_shortest_path or len(temp_shortest_path) > len(path):
-                    temp_shortest_path = path
+                if not temp_shortest_path or temp_shortest_path_length > len(path):
+                    temp_shortest_path_length = len(path)
+                    temp_shortest_path = []
+                    temp_shortest_path.append(path)
+                elif temp_shortest_path_length == len(path):
+                    temp_shortest_path.append(path)
 
-        if temp_shortest_path:
-            shortest_schema_paths.append(temp_shortest_path)
+        if len(temp_shortest_path) > 0:
+            for entry in temp_shortest_path:
+                shortest_schema_paths.append(entry)
     return shortest_schema_paths
 
 
@@ -283,85 +247,97 @@ def get_shortest_schema_paths_from_dest_leafs(
 
 
 def get_shortest_schema_paths(
-    features: List[str],
-    visible_features: List[str],
-    schema: List[SchemaElement],
-    anchor_features: List[str],
-    anchor: str,  # Represents main data row node
+    features: List[str], visible_features: List[str], schema: List[SchemaElement]
 ) -> List[List[SchemaElement]]:
     """Get shortest paths from schema nodes to the anchor schema node and from the anchor schema node to scehma nodes."""
 
-    anchor_visible = anchor in visible_features
-
-    if not anchor_visible:
-        schema = connect_disconnected_features(anchor, schema, anchor_features)
-
-    schema_graph = nx.DiGraph()
-    schema_graph.add_nodes_from(features)
-    # we assume we know what is the reference i.e. central node ... we will actually send this from the frontend
-
+    graph = nx.DiGraph()
+    graph.add_nodes_from(features)
     for edge_data in schema:
         if edge_data["dest"] != "":
-            schema_graph.add_edge(
+            graph.add_edge(
                 edge_data["src"],
                 edge_data["dest"],
                 relationship=edge_data["relationship"],
             )
 
-    # Generate permutations of all visible feature pairs in order to find shortest paths between features
-    visible_feature_permutations = permutations(visible_features, 2)
+    shortest_path_candidates = []
+    source_leaf_nodes = set()
+    target_leaf_nodes = set()
 
-    shortest_schema_path_candidates = []
-    src_leaf_nodes = set()  # Shortest schema path starting points
-    dest_leaf_nodes = set()  # Shortest schema path ending points
-
-    # Get shortest path candidates from one feature to another
-    for permutation in visible_feature_permutations:
+    for pair in permutations(visible_features, 2):
+        if pair[0] == pair[1]:
+            continue
         try:
-            # Get shortest path from one feature to another
-            path = shortest_path(schema_graph, permutation[0], permutation[1])
-            shortest_path_with_details = []
-            for i, node in enumerate(path):
-                if i == len(path) - 1:
+
+            new_shortest_path = nx.shortest_path(graph, source=pair[0], target=pair[1])
+            new_shortest_path_details = []
+
+            for i, node in enumerate(new_shortest_path):
+                if i == len(new_shortest_path) - 1:
                     break
-                edge_data = cast(
-                    Dict[str, str], schema_graph.get_edge_data(node, path[i + 1])
+
+                temp_edge_data = cast(
+                    Dict[str, str],
+                    graph.get_edge_data(node, new_shortest_path[i + 1]),
                 )
 
-                shortest_path_with_details.append(
+                new_shortest_path_details.append(
                     {
                         "src": node,
-                        "dest": path[i + 1],
-                        "relationship": edge_data["relationship"],
+                        "dest": new_shortest_path[i + 1],
+                        "relationship": temp_edge_data["relationship"],
                     }
                 )
 
-                src_leaf_nodes.add(permutation[0])
-                dest_leaf_nodes.add(permutation[1])
-
-            shortest_schema_path_candidates.append(shortest_path_with_details)
+                source_leaf_nodes.add(node)
+                target_leaf_nodes.add(new_shortest_path[i + 1])
+            shortest_path_candidates.append(new_shortest_path_details)
         except:
-            pass
+            continue
 
-    shortest_schema_paths = get_shortest_schema_paths_from_src_leafs(
-        src_leaf_nodes, shortest_schema_path_candidates, anchor_visible, anchor_features
+    shortest_schema_paths = []
+
+    shortest_schema_paths = add_shortest_path_from_leafs(
+        source_leaf_nodes, shortest_schema_paths, shortest_path_candidates, "src", graph
+    )
+    shortest_schema_paths = add_shortest_path_from_leafs(
+        source_leaf_nodes,
+        shortest_schema_paths,
+        shortest_path_candidates,
+        "dest",
+        graph,
     )
 
-    for node in dest_leaf_nodes:
-        temp_shortest_path = []
+    return shortest_schema_paths
 
-        for path in shortest_schema_paths:
-            if path[-1]["dest"] == node:
-                if not temp_shortest_path or len(temp_shortest_path) > len(path):
-                    temp_shortest_path = path
 
-        if not shortest_path_exists(
-            shortest_schema_paths,
-            temp_shortest_path[0]["src"],
-            temp_shortest_path[-1]["dest"],
-        ):
-            shortest_schema_paths.append(temp_shortest_path)
+def add_shortest_path_from_leafs(
+    leaf_nodes, shortest_schema_paths, shortest_path_candidates, position, graph
+):
+    for node in leaf_nodes:
+        new_temp_shortest_path_from_src = []
+        shortest_length = 0
 
+        for path in shortest_path_candidates:
+            if (position == "src" and path[0]["src"] == node) or (
+                position == "dest" and path[-1]["dest"] == node
+            ):
+                if not new_temp_shortest_path_from_src or shortest_length >= len(path):
+                    if shortest_length == len(path):
+                        new_temp_shortest_path_from_src.append(path)
+                    else:
+                        new_temp_shortest_path_from_src = [path]
+                        shortest_length = len(path)
+
+        for entry in new_temp_shortest_path_from_src:
+            if position == "src":
+                shortest_schema_paths.append(entry)
+            else:
+                if not shortest_path_with_dest_exists(
+                    shortest_schema_paths, entry[0]["src"], entry[-1]["dest"], graph
+                ):
+                    shortest_schema_paths.append(entry)
     return shortest_schema_paths
 
 
@@ -421,7 +397,6 @@ def get_single_column_edges(
 def get_edges_based_on_path(
     df: pd.DataFrame,
     path: List[SchemaElement],
-    newly_conencted_nodes: List[str],
     entries_with_nodes,
     node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
@@ -435,7 +410,6 @@ def get_edges_based_on_path(
             lambda row: get_row_edge_based_on_path(
                 row,
                 path,
-                newly_conencted_nodes,
                 entries_with_nodes,
                 node_ids_with_labels,
             ),
@@ -454,8 +428,23 @@ def shortest_path_exists(
     shortest_paths: List[List[SchemaElement]], src: str, dest: str
 ) -> bool:
     """Check if there exists a shortest schema path with given source or destination."""
+
     for path in shortest_paths:
         if path[0]["src"] == src or path[-1]["dest"] == dest:
+            return True
+    return False
+
+
+def shortest_path_with_dest_exists(
+    shortest_paths: List[List[SchemaElement]], src: str, dest: str, graph
+) -> bool:
+    for path in shortest_paths:
+        if path[0]["src"] == src and path[-1]["dest"] == dest:
+            return True
+        if path[-1]["dest"] == dest and (
+            nx.has_path(graph, path[0]["src"], src)
+            or nx.has_path(graph, src, path[0]["src"])
+        ):
             return True
     return False
 
@@ -463,7 +452,6 @@ def shortest_path_exists(
 def get_row_edge_based_on_path(
     row: pd.Series,
     path: List[SchemaElement],
-    newly_conencted_nodes: List[str],
     entries_with_nodes,
     node_ids_with_labels,
 ) -> List[Tuple[str, str]]:
@@ -484,25 +472,32 @@ def get_row_edge_based_on_path(
 
         entry_nodes = entries_with_nodes[row.entry]
 
-        # src_val = row[src_type]
-        # dest_val = row[dest_type]
-
-        src_val = [
-            node["id"]
+        src_val_temp = {
+            node["label"]: node["id"]
             for node in list(
                 filter(lambda node: node["feature"] == src_type, entry_nodes)
             )
-        ]
+        }
+
+        if isinstance(row[src_type], list):
+            src_val = [src_val_temp[label] for label in row[src_type]]
+        else:
+            src_val = [src_val_temp[row[src_type]]]
 
         if len(src_val) == 1:
             src_val = src_val[0]
 
-        dest_val = [
-            node["id"]
+        dest_val_temp = {
+            node["label"]: node["id"]
             for node in list(
                 filter(lambda node: node["feature"] == dest_type, entry_nodes)
             )
-        ]
+        }
+
+        if isinstance(row[dest_type], list):
+            dest_val = [dest_val_temp[label] for label in row[dest_type]]
+        else:
+            dest_val = [dest_val_temp[row[dest_type]]]
 
         if len(dest_val) == 1:
             dest_val = dest_val[0]
@@ -516,13 +511,8 @@ def get_row_edge_based_on_path(
                     continue
 
                 src = edge[0]
-                # src = str(edge[0]) + str(
-                # src_type
-                # )
+
                 dest = edge[1]
-                # dest = str(edge[1]) + str(
-                #     dest_type
-                # )
 
                 if not edge_is_in_list(generated_edges, src, dest):
                     generated_edges.append((src, dest))
@@ -546,20 +536,6 @@ def get_row_edge_based_on_path(
 
             generated_edges = chained_edges
             chained_edges = []
-
-    if path[0]["src"] in newly_conencted_nodes:
-
-        for new_edge in list(combinations(row[path[0]["src"]], 2)):
-            if isinstance(new_edge, list):
-                src = str(new_edge[0]) + str(path[0]["src"])
-                dest = str(new_edge[1]) + str(path[0]["src"])
-                generated_edges.append((src, dest))
-
-        for new_edge in list(combinations(row[path[-1]["dest"]], 2)):
-            if isinstance(new_edge, list):
-                src = str(new_edge[0]) + str(path[-1]["dest"])
-                dest = str(new_edge[1]) + str(path[-1]["dest"])
-                generated_edges.append((src, dest))
 
     return generated_edges
 

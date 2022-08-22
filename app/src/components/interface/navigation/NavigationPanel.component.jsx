@@ -56,24 +56,13 @@ function NavigationPanelComponent() {
         'blackAlpha.700'
     );
 
-    const isJSON = str => {
-        try {
-            JSON.parse(str);
-        } catch (e) {
-            return false;
-        }
-        return true;
-    };
-
     const regenerateGraph = () => {
-        const query = queryString.parse(location.search).query;
-
         store.graph.getSearchGraph(
             store.graph.currentGraphData.meta.query,
-            isJSON(query),
             location.pathname.startsWith('/graph/detail')
                 ? 'detail'
-                : 'overview'
+                : 'overview',
+            queryString.parse(location.search).suuid
         );
     };
 
@@ -117,10 +106,14 @@ function NavigationPanelComponent() {
                             location.pathname.startsWith('/graph/detail')
                                 ? `/graph?query=${getQueryString(
                                       'query'
-                                  )}&dataset=${getQueryString('dataset')}`
+                                  )}&dataset=${getQueryString(
+                                      'dataset'
+                                  )}&suuid=${getQueryString('suuid')}`
                                 : `/graph/detail?query=${getQueryString(
                                       'query'
-                                  )}&dataset=${getQueryString('dataset')}`
+                                  )}&dataset=${getQueryString(
+                                      'dataset'
+                                  )}&suuid=${getQueryString('suuid')}`
                         }
                         id="switchgraphviewbutton"
                         size="sm"
@@ -285,6 +278,12 @@ function NavigationPanelComponent() {
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }
+                    style={{
+                        pointerEvents: !store.graph.currentGraphData.nodes
+                            .length
+                            ? 'none'
+                            : 'auto'
+                    }}
                 >
                     Graph
                 </Button>

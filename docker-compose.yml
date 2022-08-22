@@ -23,32 +23,32 @@ services:
       - ./app:/home/node/csx
     depends_on:
       - server
-      - analytics
+      # - analytics
     command: bash -c "npm install && npm start"
-  mysql:
-    image: "mysql:5.7"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: analytics
-    command: --max_allowed_packet=128000000 #Bytes
-    ports:
-      - "3316:3306"
-    volumes:
-      - ./mysql:/var/lib/mysql
-    container_name: csx_analytics_db
-  analytics:
-    image: matomo:latest
-    container_name: csx_analytics
-    volumes:
-      - ./analytics:/var/www/html
-    environment:
-      MATOMO_DATABASE_HOST: csx_analytics_db
-      MATOMO_DATABASE_USERNAME: root
-      MATOMO_DATABASE_PASSWORD: root
-      MATOMO_DATABASE_DBNAME: analytics
-    ports:
-      - 8883:80
-    links: [mysql]
+  # mysql:
+  #   image: "mysql:5.7"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: analytics
+  #   command: --max_allowed_packet=128000000 #Bytes
+  #   ports:
+  #     - "3316:3306"
+  #   volumes:
+  #     - ./mysql:/var/lib/mysql
+  #   container_name: csx_analytics_db
+  # analytics:
+  #   image: matomo:latest
+  #   container_name: csx_analytics
+  #   volumes:
+  #     - ./analytics:/var/www/html
+  #   environment:
+  #     MATOMO_DATABASE_HOST: csx_analytics_db
+  #     MATOMO_DATABASE_USERNAME: root
+  #     MATOMO_DATABASE_PASSWORD: root
+  #     MATOMO_DATABASE_DBNAME: analytics
+  #   ports:
+  #     - 8883:80
+  #   links: [mysql]
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
     environment:
@@ -59,3 +59,21 @@ services:
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data
     container_name: csx_elastic
+  redis:
+    image: redis:7.0.4
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis:/data
+    container_name: csx_redis
+  mongo:
+    image: mongo:4
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-volume:/data/db
+    container_name: csx_mongo
+
+volumes:
+  mongo-volume:
+    external: false

@@ -1,5 +1,13 @@
-import { Box, Button, Heading, Tooltip, VStack } from '@chakra-ui/react';
-import { PlayButton } from 'css.gg';
+import {
+    Box,
+    Button,
+    Heading,
+    HStack,
+    IconButton,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close, PlayButton } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
@@ -24,7 +32,16 @@ const resultsNode = ({ id, data, isConnectable }) => {
                     isConnectable={isConnectable}
                 />
                 <VStack alignItems="start" fontSize="14px">
-                    <Heading size="xs">Results node</Heading>
+                    <HStack width="100%" justifyContent="space-between">
+                        <Heading size="xs">Results node</Heading>
+                        <Tooltip label="Remove node">
+                            <IconButton
+                                size="xs"
+                                icon={<Close />}
+                                onClick={() => data.deleteNode(id)}
+                            />
+                        </Tooltip>
+                    </HStack>
                     <Tooltip label="Data flowing into this node is visualised in the graph.">
                         <Button
                             variant="solid"

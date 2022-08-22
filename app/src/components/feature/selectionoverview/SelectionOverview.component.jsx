@@ -1,34 +1,71 @@
 import {
     Box,
+    Center,
+    Grid,
+    GridItem,
     Heading,
     HStack,
     IconButton,
+    SkeletonCircle,
     Stat,
     Tag,
     TagLabel,
     Text,
+    Tooltip,
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { Remove } from 'css.gg';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    Tooltip as ChartJSTooltip
+} from 'chart.js';
+import {
+    ArrowsH,
+    ArrowsMergeAltH,
+    Close,
+    MathPlus,
+    Remove,
+    Ruler,
+    ToolbarTop
+} from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
+import { Chart, getElementAtEvent } from 'react-chartjs-2';
 import { RootStoreContext } from 'stores/RootStore';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip } from 'chart.js';
-import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
-
 function SelectionOverview(props) {
     const store = useContext(RootStoreContext);
+    const chartRef = useRef([]);
 
     const bgColor = useColorModeValue('gray.50', 'gray.800');
+
+    useEffect(() => {
+        ChartJS.register(
+            ArcElement,
+            ChartJSTooltip,
+            CategoryScale,
+            LinearScale,
+            BarElement,
+            Title,
+            Legend,
+            PointElement,
+            LineElement
+        );
+    });
 
     const renderSelectedNodes = () => {
         const selectedNodeList = store.graph.currentGraphData.selectedNodes;
 
         return selectedNodeList.length ? (
-            <VStack overflowY="scroll" maxHeight="200px" width="100%">
+            <VStack overflowY="scroll" maxHeight="140px" width="100%">
                 {selectedNodeList.map(node => {
                     return (
                         <Stat
@@ -113,6 +150,448 @@ function SelectionOverview(props) {
         );
     };
 
+    const renderChart = (
+        data,
+        title,
+        chart,
+        chartType,
+        chartIndex,
+        options
+    ) => {
+        if (!data.labels.length) {
+            return (
+                <Center width="100%" height="100%">
+                    <SkeletonCircle size="20px" />
+                </Center>
+            );
+        }
+
+        const pluginOptins = {};
+
+        if (chart.hoverLabel) {
+            pluginOptins.tooltip = {
+                callbacks: {
+                    label: tooltipItem => {
+                        if (chart.groupHoverLabel) {
+                            return `${chart.groupHoverLabel}: ${tooltipItem.dataset.label}`;
+                        }
+
+                        return `${chart.hoverLabel}: ${tooltipItem.label}`;
+                    },
+                    afterLabel: tooltipItem => {
+                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                    }
+                }
+            };
+        } else {
+            pluginOptins.tooltip = {
+                callbacks: {
+                    label: tooltipItem => tooltipItem.label,
+                    afterLabel: tooltipItem => {
+                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                    }
+                }
+            };
+        }
+
+        if (chart.groupHoverLabel) {
+            pluginOptins.tooltip.callbacks.title = tooltipItems => {
+                return `${chart.hoverLabel}: ${tooltipItems[0].label}`;
+            };
+        }
+
+        return (
+            <Chart
+                ref={element => (chartRef.current[chartIndex] = element)}
+                type={chartType}
+                height="250px"
+                redraw={true}
+                data={data}
+                onClick={event => {
+                    const { index } = getElementAtEvent(
+                        chartRef.current[chartIndex],
+                        event
+                    )[0];
+
+                    if ('nodeProperty' in data) {
+                        store.graphInstance.filterNodesWithValue(
+                            data.nodeProperty,
+                            data.labels[index]
+                        );
+                    } else {
+                        store.graphInstance.filterEdgesWithValue(
+                            data.edgeProperty,
+                            data.labels[index]
+                        );
+                    }
+                }}
+                options={{
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    indexAxis: options && options.indexAxis,
+                    onHover: (event, elements) => {
+                        if (elements.length) {
+                            event.native.target.style.cursor = 'pointer';
+                        } else {
+                            event.native.target.style.cursor = 'default';
+                        }
+                    },
+                    scales: {
+                        y: {
+                            display: chart.labels.y.display,
+                            ticks: {
+                                diplay: chart.labels.y.display
+                            }
+                        },
+                        x: {
+                            display: chart.labels.x.display,
+                            ticks: {
+                                diplay: chart.labels.x.display
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title
+                        },
+                        legend: {
+                            display: chart.legend
+                        },
+                        ...pluginOptins
+                    }
+                }}
+            />
+        );
+    };
+
+    const getChartObject = (chart, data, title, index) => {
+        switch (chart.type.toLowerCase()) {
+            case 'bar':
+                return renderChart(data, title, chart, 'bar', index, {
+                    indexAxis: 'y'
+                });
+            case 'vertical bar':
+            case 'grouped bar':
+                return renderChart(data, title, chart, 'bar', index);
+            case 'line':
+                return renderChart(data, title, chart, 'line', index);
+            default:
+                return renderChart(data, title, chart, 'doughnut', index);
+        }
+    };
+
+    const getEdgeChartData = (chart, index) => {
+        let title;
+        let edgeProperty;
+        let groupBy;
+
+        if (chart.type.toLowerCase() === 'grouped bar') {
+            groupBy = getEdgeGroupByParam(chart.group_by);
+        }
+
+        switch (chart.element_values) {
+            case 'values':
+                edgeProperty = { type: 'advanced', prop: 'label' };
+                title = chart.title ? chart.title : 'edge values';
+                break;
+            case 'types':
+                edgeProperty = { type: 'advanced', prop: 'feature' };
+                title = chart.title ? chart.title : 'edge types';
+                break;
+            default:
+                edgeProperty = { type: 'basic', prop: 'weight' };
+                title = chart.title ? chart.title : 'edge weights';
+                break;
+        }
+
+        const data = store.stats.getEdgeCounts(
+            edgeProperty,
+            chart.type,
+            chart.display_limit,
+            groupBy,
+            chart.onlyVisible
+        );
+
+        return getChartObject(chart, data, title, index);
+    };
+
+    const getNodeGroupByParam = groupBy => {
+        switch (groupBy) {
+            case 'values':
+                return { type: 'basic', prop: 'label' };
+            case 'types':
+                return { type: 'basic', prop: 'feature' };
+            default:
+                return { type: 'advanced', prop: groupBy };
+        }
+    };
+
+    const getEdgeGroupByParam = groupBy => {
+        switch (groupBy) {
+            case 'values':
+                return { type: 'advanced', prop: 'label' };
+            case 'types':
+                return { type: 'advanced', prop: 'feature' };
+            default:
+                return { type: 'basic', prop: groupBy };
+        }
+    };
+
+    const getNodeChartData = (chart, index) => {
+        let title;
+        let nodeProperty;
+        let groupBy;
+
+        if (chart.type.toLowerCase() === 'grouped bar') {
+            groupBy = getNodeGroupByParam(chart.group_by);
+        }
+
+        switch (chart.element_values) {
+            case 'values':
+                nodeProperty = { type: 'basic', prop: 'label' };
+                title = chart.title ? chart.title : 'node values';
+                break;
+            case 'types':
+                nodeProperty = { type: 'basic', prop: 'feature' };
+                title = chart.title ? chart.title : 'node types';
+                break;
+            default:
+                nodeProperty = { type: 'advanced', prop: chart.element_values };
+                title = chart.title
+                    ? chart.title
+                    : `property ${chart.element_values} values`;
+                break;
+        }
+
+        const data = store.stats.getNodeCounts(
+            nodeProperty,
+            chart.type,
+            chart.display_limit,
+            chart.network_data,
+            groupBy,
+            chart.onlyVisible,
+            chart.show_only
+        );
+
+        return getChartObject(chart, data, title, index);
+    };
+
+    const renderCharts = () => {
+        const chartList = store.stats.getChartListForDataset();
+
+        const gridCharts = chartList
+            .filter(
+                chart =>
+                    props.types.includes(chart.network_data) &&
+                    chart.network === store.core.currentGraph
+            )
+            .map((chart, index) => {
+                let chartObject;
+
+                if (chart.elements === 'nodes') {
+                    chartObject = getNodeChartData(chart, index);
+                } else {
+                    chartObject = getEdgeChartData(chart, index);
+                }
+
+                return (
+                    <GridItem
+                        key={`Selection chart ${index}`}
+                        height={chart.height}
+                        padding="10px"
+                        paddingBottom={chart.colSpan === 2 ? '50px' : '10px'}
+                        colSpan={chart.colSpan}
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius={8}
+                        position="relative"
+                    >
+                        {chartObject}
+                        <HStack position="absolute" top="6px" right="6px">
+                            {chart.colSpan === 1 ? (
+                                <Tooltip label="Expand">
+                                    <IconButton
+                                        icon={<ArrowsH />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.expandChart(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+                            ) : (
+                                <Tooltip label="Shrink">
+                                    <IconButton
+                                        icon={<ArrowsMergeAltH />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.shrinkChart(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+                            )}
+
+                            <Tooltip label="Remove chart">
+                                <IconButton
+                                    icon={<Close />}
+                                    size="sm"
+                                    variant="ghost"
+                                    opacity={0.5}
+                                    _hover={{
+                                        opacity: 1
+                                    }}
+                                    onClick={() =>
+                                        store.stats.removeChart(chart.id)
+                                    }
+                                />
+                            </Tooltip>
+                        </HStack>
+
+                        {chart.colSpan === 2 && (
+                            <HStack
+                                position="absolute"
+                                bottom="6px"
+                                right="6px"
+                            >
+                                <Tooltip label="Toggle legend">
+                                    <IconButton
+                                        icon={<ToolbarTop />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.toggleLegend(chart.id)
+                                        }
+                                    />
+                                </Tooltip>
+
+                                <Tooltip label="Toggle axis labels">
+                                    <IconButton
+                                        icon={<Ruler />}
+                                        size="sm"
+                                        variant="ghost"
+                                        opacity={0.5}
+                                        _hover={{
+                                            opacity: 1
+                                        }}
+                                        onClick={() =>
+                                            store.stats.toggleAxisLabels(
+                                                chart.id
+                                            )
+                                        }
+                                    />
+                                </Tooltip>
+                            </HStack>
+                        )}
+                    </GridItem>
+                );
+            });
+
+        return (
+            <Grid
+                maxHeight="100%"
+                width="100%"
+                templateColumns={'repeat(2, 1fr)'}
+                gap={5}
+                margin="0"
+                marginBottom="70px"
+                padding="0"
+            >
+                {props.types.includes('selection') &&
+                    store.graph.currentGraphData.selectedNodes.length > 0 && (
+                        <GridItem
+                            key={'Selection chart selected nodes'}
+                            height="200px"
+                            padding="10px"
+                            colSpan={1}
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius={8}
+                            position="relative"
+                        >
+                            <Heading
+                                size="sm"
+                                textAlign="left"
+                                width="100%"
+                                marginBottom="10px"
+                            >
+                                Selected nodes
+                            </Heading>
+                            {renderSelectedNodes()}
+                        </GridItem>
+                    )}
+                {props.types.includes('selection') &&
+                    store.graph.currentGraphData.selectedComponents.length >
+                        0 && (
+                        <GridItem
+                            key={'Selection chart selected components'}
+                            height="200px"
+                            padding="10px"
+                            colSpan={1}
+                            backgroundColor="whiteAlpha.200"
+                            borderRadius={8}
+                            position="relative"
+                        >
+                            <Heading
+                                size="sm"
+                                textAlign="left"
+                                width="100%"
+                                marginBottom="10px"
+                            >
+                                Selected components
+                            </Heading>
+                            {renderSelectedComponents()}
+                        </GridItem>
+                    )}
+                {gridCharts}
+                <GridItem
+                    key={'Chart grid add button'}
+                    height="200px"
+                    padding="10px"
+                    colSpan={1}
+                    backgroundColor="transparent"
+                    borderRadius={8}
+                    position="relative"
+                >
+                    <Box width="100%" height="100%" padding="20px">
+                        <Tooltip label="Add new statistic">
+                            <IconButton
+                                width="100%"
+                                height="100%"
+                                borderRadius="xl"
+                                onClick={() =>
+                                    store.stats.toggleStatsModalVisiblity(
+                                        true,
+                                        props.types
+                                    )
+                                }
+                                icon={
+                                    <MathPlus
+                                        style={{
+                                            opacity: 0.5,
+                                            '--ggs': '2'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                    </Box>
+                </GridItem>
+            </Grid>
+        );
+    };
+
     const renderSelectedComponents = () => {
         const selectedComponentIds =
             store.graph.currentGraphData.selectedComponents;
@@ -123,7 +602,7 @@ function SelectionOverview(props) {
         );
 
         return selectedComponents.length ? (
-            <VStack overflowY="scroll" maxHeight="200px" width="100%">
+            <VStack maxHeight="140px" width="100%" overflowY="scroll">
                 {selectedComponents.map(component => {
                     return (
                         <Stat
@@ -178,184 +657,19 @@ function SelectionOverview(props) {
         );
     };
 
-    const renderEdgeFeatureStats = () => {
-        const selectedComponentIds =
-            store.graph.currentGraphData.selectedComponents;
-        const componentEdges = store.graph.currentGraphData.links
-            .filter(l => selectedComponentIds.includes(l.component))
-            .map(l => l.connections)
-            .flat();
-
-        const edgeCounts = componentEdges
-            .map(edge => edge.feature)
-            .reduce(
-                (counter, feature) => {
-                    counter.find(
-                        entry => entry['feature'] === feature
-                    ).count += 1;
-
-                    return counter;
-                },
-                [...new Set(componentEdges.map(edge => edge.feature))].map(
-                    feature => {
-                        return { feature: feature, count: 0 };
-                    }
-                )
-            );
-
-        const labels = edgeCounts.map(entry => entry.feature);
-        const data = edgeCounts.map(entry => entry.count);
-        const colors = getGraphColors(labels);
-
-        const chartData = {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'feature connections',
-                    data: data,
-                    backgroundColor: colors,
-                    borderColor: ['rgba(0,0,0,0)']
-                }
-            ]
-        };
-
-        ChartJS.register(ArcElement, Tooltip);
-        return labels.length ? (
-            <Box height="100%" width="100%" padding="50px" marginTop="0px">
-                <Pie data={chartData} />
-            </Box>
-        ) : (
-            <Text
-                fontSize="xs"
-                marginTop="50px"
-                width="100%"
-                textAlign="left"
-                color="gray.400"
-                fontWeight="bold"
-            >
-                Select a component to see it&#39;s details here.
-            </Text>
-        );
-    };
-
-    const getGraphColors = labels => {
-        const skipfactor = labels.length > 10 ? 1 / labels.length : null;
-
-        const graphColors = [];
-
-        for (let i = 0; i < labels.length; i++) {
-            graphColors.push(
-                skipfactor
-                    ? interpolateRainbow(i * skipfactor)
-                    : schemeTableau10[i]
-            );
-        }
-
-        return graphColors;
-    };
-
-    const renderEdgeValueStats = () => {
-        const selectedComponentIds =
-            store.graph.currentGraphData.selectedComponents;
-        const componentEdges = store.graph.currentGraphData.links
-            .filter(l => selectedComponentIds.includes(l.component))
-            .map(l => l.connections)
-            .flat();
-
-        const edgeCounts = componentEdges
-            .map(edge => edge.label)
-            .reduce(
-                (counter, label) => {
-                    counter.find(entry => entry['label'] === label).count += 1;
-
-                    return counter;
-                },
-                [...new Set(componentEdges.map(edge => edge.label))].map(
-                    label => {
-                        return { label: label, count: 0 };
-                    }
-                )
-            );
-
-        const labels = edgeCounts.map(entry => entry.label);
-        const data = edgeCounts.map(entry => entry.count);
-        const colors = getGraphColors(labels);
-
-        const chartData = {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'feature connections',
-                    data: data,
-                    backgroundColor: colors,
-                    borderColor: ['rgba(0,0,0,0)']
-                }
-            ]
-        };
-
-        ChartJS.register(ArcElement, Tooltip);
-        return labels.length ? (
-            <Box height="100%" width="100%" padding="50px" marginTop="0px">
-                <Pie data={chartData} />
-            </Box>
-        ) : (
-            <Text
-                fontSize="xs"
-                marginTop="50px"
-                width="100%"
-                textAlign="left"
-                color="gray.400"
-                fontWeight="bold"
-            >
-                Select a component to see it&#39;s details here.
-            </Text>
-        );
-    };
-
     return (
         <VStack spacing="10px" marginTop="50px">
-            <HStack maxHeight="200px" width="100%" marginTop="20px">
-                <VStack width="48%" height="200px">
-                    <Heading size="sm" textAlign="left" width="100%">
-                        Selected nodes
-                    </Heading>
-                    {renderSelectedNodes()}
-                </VStack>
-                <VStack width="48%" height="200px">
-                    <Heading size="sm" textAlign="left" width="100%">
-                        Selected components
-                    </Heading>
-                    {renderSelectedComponents()}
-                </VStack>
-            </HStack>
-            {store.core.isOverview &&
-                store.graph.currentGraphData.selectedComponents.length && (
-                    <HStack
-                        maxHeight="200px"
-                        width="100%"
-                        style={{ marginTop: '50px' }}
-                    >
-                        <VStack width="48%" height="200px">
-                            <Heading size="sm" textAlign="left" width="100%">
-                                Edge Features
-                            </Heading>
-                            {renderEdgeFeatureStats()}
-                        </VStack>
-                        <VStack width="48%" height="200px">
-                            <Heading size="sm" textAlign="left" width="100%">
-                                Edge Values
-                            </Heading>
-                            {renderEdgeValueStats()}
-                        </VStack>
-                    </HStack>
-                )}
+            {renderCharts()}
         </VStack>
     );
 }
 
 SelectionOverview.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number
+    types: PropTypes.array
+};
+
+SelectionOverview.defaultProps = {
+    types: ['selection', 'visible']
 };
 
 export default observer(SelectionOverview);

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
 export class CoreStore {
@@ -7,15 +8,33 @@ export class CoreStore {
     activeDemoIndex = 1;
     errorMessage = null;
     errorDetails = null;
-    showSpinner = false;
     currentGraph = '';
+    userUuid = null;
 
     visibleDimensions = { overview: [], detail: [] };
+    toastInfo = {
+        message: '',
+        type: 'info'
+    };
 
     constructor(store) {
         this.store = store;
+        this.userUuid = localStorage.getItem('useruuid');
+
+        if (!this.userUuid) {
+            localStorage.setItem('useruuid', this.generateUUID());
+        }
+
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    generateUUID = async () => {
+        const response = await axios.get('util/uuid');
+        return response.data;
+    };
+
+    setToastMessage = message => (this.toastInfo.message = message);
+    setToastType = toastType => (this.toastInfo.type = toastType);
 
     setCurrentGraph = graphType => {
         this.currentGraph = graphType;
@@ -44,10 +63,6 @@ export class CoreStore {
 
     setDemoNavigationData = data => {
         this.demoNavigationData = data;
-    };
-
-    toggleSpinner = showSpinner => {
-        this.showSpinner = showSpinner;
     };
 
     toggleVisibleDimension = dimension => {

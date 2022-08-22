@@ -3,8 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class WorkflowStore {
     shouldRunWorkflow = false;
+    newWorkflowName = '';
+    workflows = {};
 
     actionNodeTypes = [
+        {
+            nodeType: 'datasetNode',
+            label: 'Dataset',
+            tooltip: 'Retrieve an entire dataset'
+        },
         {
             nodeType: 'searchNode',
             label: 'Search',
@@ -43,14 +50,66 @@ export class WorkflowStore {
 
     actionNodeColors = {
         searchNode: '#3182ce',
-        filterNode: '#31cebf',
-        countsNode: '#31cebf',
+        datasetNode: '#3182ce',
+        filterNode: '#ce8631',
+        countsNode: '#ce8631',
         connectorNode: '#323232',
-        resultsNode: '#4da344',
-        keywordExtractionNode: '#31cebf'
+        resultsNode: '#3cd824',
+        keywordExtractionNode: '#ce8631',
+        background: '#161616'
     };
 
     actions = [];
+
+    setNewWorkflowName = val => (this.newWorkflowName = val);
+
+    saveNewWorkflow = () => {
+        console.log(
+            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.actions.length} actions`
+        );
+
+        if (!this.workflows[this.store.search.currentDataset]) {
+            this.workflows[this.store.search.currentDataset] = {};
+        }
+
+        this.workflows[this.store.search.currentDataset][this.newWorkflowName] =
+            this.actions;
+
+        localStorage.setItem('workflows', JSON.stringify(this.workflows));
+        this.newWorkflowName = '';
+    };
+
+    removeWorkflow = name => {
+        delete this.workflows[this.store.search.currentDataset][name];
+
+        localStorage.setItem('workflows', JSON.stringify(this.workflows));
+    };
+
+    loadWorkflow = name => {
+        const loadedActions =
+            this.workflows[this.store.search.currentDataset][name];
+
+        const resultsNodes = loadedActions
+            .filter(node => node.type === 'resultsNode')
+            .map(node => {
+                node.data.runWorkflow = this.runWorkFlow;
+                return node;
+            });
+
+        const otherNodes = loadedActions.filter(
+            node => node.type !== 'resultsNode'
+        );
+
+        this.actions = [...otherNodes, ...resultsNodes];
+
+        this.actions = this.actions.map(node => {
+            if (node.type === 'searchNode') {
+                node.data.updateActions = this.updateActions;
+                node.data.getSuggestions = this.store.search.suggest;
+            }
+            return node;
+        });
+    };
 
     setShouldRunWorkflow = val => {
         this.shouldRunWorkflow = val;
@@ -58,6 +117,12 @@ export class WorkflowStore {
 
     constructor(store) {
         this.store = store;
+
+        const workflowString = localStorage.getItem('workflows');
+        if (workflowString) {
+            this.workflows = JSON.parse(workflowString);
+        }
+
         makeAutoObservable(this);
     }
 
@@ -65,25 +130,115 @@ export class WorkflowStore {
         this.actions = [];
     };
 
+    getNodeTypesOfType = nodeTypes => {
+        return Object.entries(this.store.search.nodeTypes)
+            .filter(entry =>
+                nodeTypes.includes(this.store.search.nodeTypes[entry[0]])
+            )
+            .map(entry => entry[0]);
+    };
+
+    deleteNode = nodeID => {
+        this.actions = [
+            ...this.actions.filter(
+                node =>
+                    (node.type !== 'searchEdge' && node.id !== nodeID) ||
+                    (node.type === 'searchEdge' &&
+                        node.source !== nodeID &&
+                        node.target !== nodeID)
+            )
+        ];
+    };
+
+    updateFilterNodeValues = (nodeID, feature) => {
+        this.actions = this.actions.map(node => {
+            if (node.id === nodeID) {
+                node = {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        min: this.store.search.getSearchHintsByFeature(feature)[
+                            'min'
+                        ],
+                        max: this.store.search.getSearchHintsByFeature(feature)[
+                            'max'
+                        ],
+                        min_value:
+                            this.store.search.getSearchHintsByFeature(feature)[
+                                'min'
+                            ],
+                        max_value:
+                            this.store.search.getSearchHintsByFeature(feature)[
+                                'max'
+                            ]
+                    }
+                };
+            }
+
+            return node;
+        });
+    };
+
+    updateFilterNodeData = (nodeID, dataKey, dataValue) => {
+        this.actions = this.actions.map(node => {
+            if (node.id === nodeID) {
+                node.data = {
+                    ...node.data
+                };
+                node.data[dataKey] = dataValue;
+            }
+
+            return node;
+        });
+    };
+
+    updateActions = () => (this.actions = [...this.actions]);
+
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
 
         if (nodeType === 'searchNode') {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
+            data.features = Object.keys(this.store.search.nodeTypes);
+            data.feature = Object.keys(this.store.search.nodeTypes)[0];
+            data.featureHints = this.store.search.searchHints;
+            data.featureTypes = this.store.search.nodeTypes;
+            data.updateActions = this.updateActions;
+            data.getSuggestions = this.store.search.suggest;
             data.keyphrase = '';
         }
 
-        if (nodeType === 'filterNode') {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
-            data.min = 0;
-            data.max = 0;
+        if (nodeType === 'datasetNode') {
+            data.dataset = this.store.search.currentDataset;
         }
 
-        if (['countsNode', 'keywordExtractionNode'].includes(nodeType)) {
-            data.features = this.store.search.nodeTypes;
-            data.feature = this.store.search.nodeTypes[0];
+        if (nodeType === 'filterNode') {
+            data.features = this.getNodeTypesOfType(['integer', 'float']);
+            data.feature = this.getNodeTypesOfType(['integer', 'float'])[0];
+            data.updateFilterNodeValues = this.updateFilterNodeValues;
+            data.updateFilterNodeData = this.updateFilterNodeData;
+            data.min = this.store.search.getSearchHintsByFeature(data.feature)[
+                'min'
+            ];
+            data.max = this.store.search.getSearchHintsByFeature(data.feature)[
+                'max'
+            ];
+            data.min_value = this.store.search.getSearchHintsByFeature(
+                data.feature
+            )['min'];
+            data.max_value = this.store.search.getSearchHintsByFeature(
+                data.feature
+            )['max'];
+        }
+
+        if (nodeType === 'countsNode') {
+            data.features = this.getNodeTypesOfType(['list']);
+            data.feature = this.getNodeTypesOfType(['list'])[0];
+            data.newFeatureName = '';
+        }
+
+        if (nodeType === 'keywordExtractionNode') {
+            data.features = this.getNodeTypesOfType(['string']);
+            data.feature = this.getNodeTypesOfType(['string'])[0];
             data.newFeatureName = '';
         }
 
@@ -95,13 +250,16 @@ export class WorkflowStore {
             data.runWorkflow = this.runWorkFlow;
         }
 
+        data.deleteNode = this.deleteNode;
+
         const newNode = {
             id: uuidv4(),
             type: nodeType,
             position,
             data,
             style: {
-                backgroundColor: this.actionNodeColors[nodeType],
+                border: `1px solid ${this.actionNodeColors[nodeType]}`,
+                backgroundColor: this.actionNodeColors['background'],
                 borderRadius: '10px',
                 padding: '3px'
             }
@@ -169,19 +327,25 @@ export class WorkflowStore {
         const node = actions.find(element => element.id === id);
 
         if (node.data.parents.length === 0) {
-            if (node.type === 'searchNode') {
-                return {
-                    action: 'search',
-                    feature: node.data.feature,
-                    keyphrase: node.data.keyphrase
-                };
-            } else {
-                return {
-                    action: 'filter',
-                    feature: node.data.feature,
-                    min: node.data.min,
-                    max: node.data.max
-                };
+            switch (node.type) {
+                case 'searchNode':
+                    return {
+                        action: 'search',
+                        feature: node.data.feature,
+                        keyphrase: node.data.keyphrase
+                    };
+                case 'datasetNode':
+                    return {
+                        action: 'get dataset',
+                        dataset: node.data.dataset
+                    };
+                default:
+                    return {
+                        action: 'filter',
+                        feature: node.data.feature,
+                        min: node.data.min,
+                        max: node.data.max
+                    };
             }
         }
 

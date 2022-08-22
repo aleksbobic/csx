@@ -1,4 +1,3 @@
-import { Skeleton } from '@chakra-ui/skeleton';
 import { Button } from '@chakra-ui/button';
 import { Checkbox } from '@chakra-ui/checkbox';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
@@ -13,12 +12,22 @@ import {
 } from '@chakra-ui/layout';
 import { Radio, RadioGroup } from '@chakra-ui/radio';
 import {
+    IconButton,
+    NumberDecrementStepper,
+    NumberIncrementStepper,
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    RangeSlider,
+    RangeSliderFilledTrack,
+    RangeSliderThumb,
+    RangeSliderTrack,
     Tag,
     TagLabel,
     useColorModeValue,
-    Wrap,
-    IconButton
+    Wrap
 } from '@chakra-ui/react';
+import { Skeleton } from '@chakra-ui/skeleton';
 import {
     Slider,
     SliderFilledTrack,
@@ -29,13 +38,28 @@ import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
 import { Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
     const location = useLocation();
     const store = useContext(RootStoreContext);
+
+    const [sliderMinTooltipValue, setSliderMinTooltipValue] = useState(0);
+    const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
+        store.graph.currentGraphData.meta.maxDegree
+    );
+
+    const [sliderMaxValue, setSliderMaxValue] = useState(
+        store.graph.currentGraphData.meta.maxDegree
+    );
+
+    useEffect(() => {
+        setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
+        setSliderMaxTooltipValue(store.graph.currentGraphData.meta.maxDegree);
+    }, [store.graph.currentGraphData.meta.maxDegree]);
+
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
         'whiteAlpha.300'
@@ -176,7 +200,7 @@ function Settings() {
                             <Box position="relative" right={10} />
                             <SliderFilledTrack bg="blue.300" />
                         </SliderTrack>
-                        <SliderThumb boxSize={5} />
+                        <SliderThumb boxSize={3} />
                     </Slider>
                 </Box>
             </>
@@ -295,14 +319,91 @@ function Settings() {
                     />
                     Orphan nodes
                 </FormLabel>
+
+                <FormLabel paddingBottom="10px" paddingTop="10px">
+                    Filter by connection:
+                </FormLabel>
+                <HStack
+                    style={{ justifyContent: 'space-between', width: '100%' }}
+                >
+                    <Text size="xs" fontWeight="bold">
+                        min
+                    </Text>
+                    <Text size="xs" fontWeight="bold">
+                        max
+                    </Text>
+                </HStack>
+                <HStack spacing={10} style={{ marginBottom: '10px' }}>
+                    <NumberInput
+                        size="xs"
+                        value={sliderMinTooltipValue}
+                        onChange={val => {
+                            setSliderMinTooltipValue(val);
+                            store.graphInstance.filterNodesByDegree(
+                                val,
+                                sliderMaxTooltipValue
+                            );
+                        }}
+                        min={0}
+                        max={sliderMaxTooltipValue}
+                    >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+
+                    <NumberInput
+                        size="xs"
+                        value={sliderMaxTooltipValue}
+                        onChange={val => {
+                            setSliderMaxTooltipValue(val);
+                            store.graphInstance.filterNodesByDegree(
+                                sliderMinTooltipValue,
+                                val
+                            );
+                        }}
+                        min={sliderMinTooltipValue}
+                        max={sliderMaxValue}
+                    >
+                        <NumberInputField />
+                        <NumberInputStepper>
+                            <NumberIncrementStepper />
+                            <NumberDecrementStepper />
+                        </NumberInputStepper>
+                    </NumberInput>
+                </HStack>
+                <RangeSlider
+                    isDisabled={sliderMaxValue === 0}
+                    value={[sliderMinTooltipValue, sliderMaxTooltipValue]}
+                    min={0}
+                    max={sliderMaxValue}
+                    step={1}
+                    onChange={val => {
+                        setSliderMinTooltipValue(val[0]);
+                        setSliderMaxTooltipValue(val[1]);
+                    }}
+                    onChangeEnd={val =>
+                        store.graphInstance.filterNodesByDegree(val[0], val[1])
+                    }
+                >
+                    <RangeSliderTrack bg="blue.100">
+                        <RangeSliderFilledTrack bg="blue.500" />
+                    </RangeSliderTrack>
+
+                    <RangeSliderThumb boxSize={3} index={0} />
+
+                    <RangeSliderThumb boxSize={3} index={1} />
+                </RangeSlider>
             </>
         );
     };
 
     const renderDimensionsToggle = () => {
         const tags = [
-            ...store.search.nodeTypes,
-            ...store.search.newNodeTypes
+            ...Object.keys(store.search.nodeTypes),
+            ...Object.keys(store.search.newNodeTypes)
         ].map((property, index) => (
             <Tag
                 key={index}

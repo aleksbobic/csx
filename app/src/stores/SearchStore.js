@@ -2,18 +2,20 @@ import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 
 export class SearchStore {
-    nodeTypes = [];
-    newNodeTypes = [];
+    nodeTypes = {};
+    newNodeTypes = {};
     anchor = '';
     links = [];
     schema = [];
     schemas = [];
     datasets = [];
+    searchHints = {};
+
     currentDataset = null;
     currentDatasetIndex = 0;
-    connector = '';
     searchIsEmpty = false;
     advancedSearchQuery = '';
+    datasetEdit = false;
 
     constructor(store) {
         this.store = store;
@@ -25,7 +27,14 @@ export class SearchStore {
 
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
 
+    getNodeTypeByFeature = feature => this.nodeTypes[feature];
+
+    getSearchHintsByFeature = feature => this.searchHints[feature];
+
     useDataset = index => {
+        if (!this.datasets.length) {
+            return;
+        }
         this.currentDataset = this.datasets[index];
         this.currentDatasetIndex = index;
 
@@ -40,6 +49,7 @@ export class SearchStore {
 
         this.schema = dataset_config.schemas[0]['relations'];
         this.schemas = dataset_config.schemas;
+        this.searchHints = dataset_config.search_hints;
 
         this.nodeTypes = dataset_config.types;
         this.anchor = dataset_config.anchor;
@@ -61,16 +71,14 @@ export class SearchStore {
         localStorage.setItem(`index_${dataset_name}`, JSON.stringify(dataset));
 
     initDatasets = datasets => {
-        for (let dataset_name in datasets) {
-            // If dataset doesn't exist add it to the local storage
-            if (!this.getLocalStorageDataset(dataset_name)) {
-                this.setLocalStorageDataset(
-                    dataset_name,
-                    datasets[dataset_name]
-                );
-            }
+        this.datasets = [];
 
-            this.datasets = [...this.datasets, dataset_name];
+        for (let dataset_name in datasets) {
+            this.setLocalStorageDataset(dataset_name, datasets[dataset_name]);
+
+            if (!this.datasets.includes(dataset_name)) {
+                this.datasets.push(dataset_name);
+            }
         }
     };
 
@@ -102,20 +110,23 @@ export class SearchStore {
             .catch(error => this.store.core.handleError(error));
     };
 
-    search = async (query, nodeTypes, schema, connector, graphType) => {
+    search = async (query, nodeTypes, schema, graphType, search_uuid) => {
         // Set search parameters
+
         const params = {
+            search_uuid: search_uuid,
             query: query,
-            connector: connector ? connector : null,
             anchor: this.anchor,
             graph_type: graphType,
-            visible_entries: []
+            visible_entries: [],
+            user_id: this.store.core.userUuid
         };
 
         if (graphType === 'overview') {
-            params.anchor_properties = JSON.stringify(
-                this.store.schema.overviewDataNodeProperties
-            );
+            params.anchor_properties =
+                this.store.schema.overviewDataNodeProperties;
+        } else {
+            params.anchor_properties = [];
         }
 
         if (
@@ -133,33 +144,89 @@ export class SearchStore {
                     []
                 );
 
-            params.visible_entries = JSON.stringify([...new Set(entryArray)]);
+            params.visible_entries = [...new Set(entryArray)];
+        } else {
+            params.visible_entries = [];
         }
 
-        params['links'] = JSON.stringify(this.links);
+        params['links'] = this.links;
 
         // Set schema by using the provided schema or reading from store
         if (schema && schema.length) {
-            params['schema'] = JSON.stringify(schema);
+            params['graph_schema'] = schema;
         } else if (localStorage.getItem('schema')) {
-            params['schema'] = JSON.stringify(
-                this.store.schema.getServerSchema()
-            );
+            params['graph_schema'] = this.store.schema.getServerSchema();
+        } else {
+            params['graph_schema'] = [];
         }
 
         // Set the node types the user wants to view
         if (nodeTypes && Object.keys(nodeTypes).length) {
-            params['visible_dimensions'] = JSON.stringify(nodeTypes);
+            params['visible_dimensions'] = nodeTypes;
+        } else {
+            params['visible_dimensions'] = [];
         }
 
         // Set selected index
         params['index'] = localStorage.getItem('currentDataset');
 
         try {
-            const response = await axios.get('search', { params });
+            const response = await axios.post('search', params);
+
             return response.data;
         } catch (error) {
             return this.store.core.handleError(error);
+        }
+    };
+
+    deleteDataset = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            await axios.get('file/delete', { params });
+            this.store.core.setToastType('info');
+            this.store.core.setToastMessage(
+                `${dataset.charAt(0).toUpperCase()}${dataset.slice(
+                    1
+                )} dataset deleted 🙂`
+            );
+            localStorage.removeItem(`index_${dataset}`);
+            this.getDatasets();
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    getConifg = async dataset => {
+        const params = {
+            name: dataset
+        };
+
+        try {
+            const results = await axios.get('file/config', { params });
+            this.store.fileUpload.populateDataFromConfig(
+                dataset,
+                results.data.config
+            );
+        } catch (error) {
+            this.store.core.handleError(error);
+        }
+    };
+
+    suggest = async (feature, input) => {
+        try {
+            return await axios
+                .post('search/suggest', {
+                    index: this.currentDataset,
+                    feature,
+                    input
+                })
+                .then(response => response.data);
+        } catch (error) {
+            this.store.core.handleError(error);
+            return [];
         }
     };
 }

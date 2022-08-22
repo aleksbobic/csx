@@ -23,6 +23,7 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
+import DatasetNode from 'components/feature/advancedsearch/datasetNode/Dataset.component';
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
@@ -91,6 +92,7 @@ function DataPanel() {
                 onConnect={connectNodes}
                 onEdgeUpdate={updateEdge}
                 nodeTypes={{
+                    datasetNode: DatasetNode,
                     schemaNode: SchemaNode,
                     overviewSchemaNode: OverviewSchemaNode,
                     searchNode: SearchNode,
@@ -123,6 +125,7 @@ function DataPanel() {
             >
                 <TabPanel padding="10px" paddingTop="60px" height="100%">
                     <GraphDetailsComponent />
+                    <SelectionOverview types={['all']} />
                 </TabPanel>
                 <TabPanel paddingLeft="0" paddingRight="0" paddingTop="15px">
                     <SelectionOverview />
@@ -231,7 +234,6 @@ function DataPanel() {
                 variant="soft-rounded"
                 colorScheme="blue"
                 height="100%"
-                isLazy
             >
                 {renderTabButtons()}
                 {renderTablePanels()}

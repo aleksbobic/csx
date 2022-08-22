@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
+import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
 import { Close, Spinner } from 'css.gg';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
@@ -28,16 +29,6 @@ function GraphPage() {
     const toastRef = useRef();
     const history = useHistory();
 
-    const isJSON = val => {
-        try {
-            JSON.parse(val);
-        } catch (e) {
-            return false;
-        }
-
-        return isNaN(Number(val));
-    };
-
     useEffect(() => {
         store.track.trackPageChange();
 
@@ -49,6 +40,8 @@ function GraphPage() {
 
         const query = queryString.parse(location.search).query;
         const dataset = queryString.parse(location.search).dataset;
+        const suuid = queryString.parse(location.search).suuid;
+
         store.graphInstance.toggleVisibleComponents(-1);
 
         if (query) {
@@ -91,30 +84,9 @@ function GraphPage() {
                     }
                 }
 
-                if (
-                    store.graph.detailGraphData.meta.query !== query ||
-                    store.graph.detailGraphData.meta.dataset !== dataset ||
-                    store.graph.detailGraphData.isEmpty ||
-                    !same_components // Check for component entries and if they are the same as in the detail graph
-                ) {
-                    store.graph.getSearchGraph(
-                        query,
-                        isJSON(String(query)),
-                        'detail'
-                    );
-                }
+                store.graph.getSearchGraph(query, 'detail', suuid);
             } else {
-                if (
-                    store.graph.currentGraphData.meta.query !== query ||
-                    store.graph.currentGraphData.meta.dataset !== dataset ||
-                    store.graph.currentGraphData.isEmpty
-                ) {
-                    store.graph.getSearchGraph(
-                        query,
-                        isJSON(query),
-                        'overview'
-                    );
-                }
+                store.graph.getSearchGraph(query, 'overview', suuid);
             }
         } else {
             history.push('/');
@@ -201,6 +173,7 @@ function GraphPage() {
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
+            <StatsModalComponent />
             <ContextMenuComponent />
             <GraphComponent
                 graphData={
@@ -210,8 +183,7 @@ function GraphPage() {
                 }
             />
 
-            {(!store.graph.currentGraphData.nodes.length ||
-                store.graph.showSpinner) && (
+            {!store.graph.currentGraphData.nodes.length && (
                 <Center
                     width="100%"
                     height="100%"
