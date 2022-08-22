@@ -48,6 +48,7 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.core.setCurrentGraph('overview');
+                    store.graphInstance.setNodeColorScheme('component');
                     store.search.useDataset(selectedDataset);
                     store.core.resetVisibleDimensions();
                     store.workflow.resetWorkflow();

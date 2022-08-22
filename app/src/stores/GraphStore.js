@@ -126,11 +126,18 @@ export class GraphStore {
     generateNodeMaterial = (meshBasicMaterialTemplate, node) => {
         const material = meshBasicMaterialTemplate.clone();
 
-        switch (
-            this.store.graphInstance.nodeColorScheme[
+        const currentGraphColorSchemas = Object.keys(
+            this.store.graphInstance.nodeColorSchemeColors[
                 this.store.core.currentGraph
             ]
-        ) {
+        );
+
+        const selectedColorSchemaAttribute =
+            this.store.graphInstance.nodeColorScheme[
+                this.store.core.currentGraph
+            ];
+
+        switch (selectedColorSchemaAttribute) {
             case 'type':
                 material.color.set(
                     this.store.graphInstance.nodeColorSchemeColors[
@@ -149,7 +156,21 @@ export class GraphStore {
                 material.color.set(node.color);
                 break;
             default:
-                material.color.set('white');
+                if (
+                    currentGraphColorSchemas.includes(
+                        selectedColorSchemaAttribute
+                    )
+                ) {
+                    material.color.set(
+                        this.store.graphInstance.nodeColorSchemeColors[
+                            this.store.core.currentGraph
+                        ][selectedColorSchemaAttribute][
+                            node.properties[selectedColorSchemaAttribute]
+                        ]
+                    );
+                } else {
+                    material.color.set('white');
+                }
                 break;
         }
 
@@ -466,7 +487,7 @@ export class GraphStore {
             this.store.search.setSearchIsEmpty(true);
         } else {
             this.store.search.newNodeTypes = response.meta.new_dimensions;
-            console.log(response);
+            // console.log(response);
             if (graphType === 'overview') {
                 // Handle overview graph data
                 this.graphData.meta.query = query;
