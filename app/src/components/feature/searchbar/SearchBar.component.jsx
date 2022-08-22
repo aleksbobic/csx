@@ -104,10 +104,11 @@ function SearchBar(props) {
                                 }}
                                 suggestionStyle={{
                                     position: 'absolute',
-                                    backgroundColor: 'black',
-                                    top: '40px',
+                                    backgroundColor: '#141824',
+                                    top: '44px',
                                     left: '145px',
-                                    zIndex: '10'
+                                    zIndex: '10',
+                                    minWidth: '60%'
                                 }}
                                 getValue={value =>
                                     setFieldValue('search', value)

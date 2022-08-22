@@ -1,3 +1,4 @@
+from email.policy import default
 import json
 import os
 from typing import Dict, List
@@ -270,11 +271,21 @@ def search(data: Data) -> dict:
             search.filter("terms", _id=id_list).execute()
         )
     elif not isJson(query) or isNumber(query):
+
+        filtered_fields = default_search_fields
+
+        if not isNumber(query):
+            filtered_fields = [
+                field
+                for field in filtered_fields
+                if dimension_types[field] not in ["integer", "float"]
+            ]
+
         es_query = Q(
             "query_string",
             query=f"{query}",
             type="phrase",
-            fields=default_search_fields,
+            fields=filtered_fields,
         )
         results = csx_es.convert_query_to_df(es_query, index)
     else:
