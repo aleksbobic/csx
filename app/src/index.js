@@ -4,12 +4,12 @@ import './index.scss';
 import App from './app/App';
 import * as serviceWorker from './serviceWorker';
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
-import theme from './theme';
 
 ReactDOM.render(
     <React.StrictMode>
+        {localStorage.setItem('chakra-ui-color-mode', 'dark')}
         <ChakraProvider>
-            <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+            <ColorModeScript />
             <App />
         </ChakraProvider>
     </React.StrictMode>,
