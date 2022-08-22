@@ -10,6 +10,7 @@ import { Database, Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import { useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -20,7 +21,7 @@ function SearchBar(props) {
     const history = useHistory();
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
-    const [selectedDataset, setSelectedDataset] = useState(1);
+    const [selectedDataset, setSelectedDataset] = useState(0);
 
     const selectedDatasetChange = e => {
         setSelectedDataset(e.target.value);
@@ -28,6 +29,10 @@ function SearchBar(props) {
         store.workflow.resetWorkflow();
         store.schema.resetOverviewNodeProperties();
     };
+
+    useEffect(() => {
+        setSelectedDataset(store.search.currentDatasetIndex);
+    }, [store.search.currentDataset, store.search.currentDatasetIndex]);
 
     const renderDatasetSelectionOptions = () => {
         return store.search.datasets.map((dataset, index) => (
@@ -78,7 +83,7 @@ function SearchBar(props) {
                                     variant="filled"
                                     width="200px"
                                     borderEndRadius="0"
-                                    defaultValue={selectedDataset}
+                                    value={selectedDataset}
                                     style={{
                                         paddingLeft: '40px',
                                         textTransform: 'uppercase',
