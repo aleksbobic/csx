@@ -23,7 +23,7 @@ Contributors from the following institutions were involved in the development of
 ## CITATION ✍️
 If you happen to mention or use this project as part of one of your scientific works, please cite the following paper: Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021.
 
-## Latest publications 📚
+## Selected publications 📚
 * Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Towards supporting complex retrieval tasks through graph-based information retrieval and visual analytics. In CEUR Workshop Proceedings (Vol. 2950, pp. 30-37). RWTH Aachen. [Presentation Video](https://youtu.be/Xf-JHparbRA)
 * Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021. [Presentation Video](https://zenodo.org/record/5877309)
 
