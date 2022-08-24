@@ -75,6 +75,20 @@ def enrich_nodes_with_components(
 
 
 @use_timing
+def enrich_nodes_with_neighbors(
+    nodes: List[Node], edges: List[Tuple[str, str]]
+) -> List[Node]:
+    graph = nx.MultiGraph()
+    graph.add_nodes_from([node["id"] for node in nodes])
+    graph.add_edges_from(edges)
+
+    for node in nodes:
+        node["neighbours"] = set(graph.neighbors(node["id"]))
+
+    return nodes
+
+
+@use_timing
 def enrich_edges_with_components(
     edges: List[Edge], components: List[Component]
 ) -> List[Edge]:

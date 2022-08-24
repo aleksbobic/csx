@@ -186,7 +186,7 @@ export class GraphStore {
         return [mesh, mesh.clone()];
     };
 
-    generateNodeObjects = (nodes, neighbours, graphType) => {
+    generateNodeObjects = (nodes, graphType) => {
         const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
             color: new THREE.Color('white'),
             side: THREE.DoubleSide
@@ -206,11 +206,7 @@ export class GraphStore {
                 nodes[i].size
             );
 
-            if (neighbours[nodes[i].id]) {
-                nodes[i].neighbours = neighbours[nodes[i].id];
-            } else {
-                nodes[i].neighbours = new Set();
-            }
+            nodes[i].neighbours = new Set(nodes[i].neighbours);
 
             nodes[i].selected = false;
 
@@ -376,26 +372,6 @@ export class GraphStore {
         data.links.pop();
     };
 
-    generateNeighbours = edges => {
-        const neighbours = {};
-
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].source in neighbours) {
-                neighbours[edges[i].source].add(edges[i].target);
-            } else {
-                neighbours[edges[i].source] = new Set([edges[i].target]);
-            }
-
-            if (edges[i].target in neighbours) {
-                neighbours[edges[i].target].add(edges[i].source);
-            } else {
-                neighbours[edges[i].target] = new Set([edges[i].source]);
-            }
-        }
-
-        return neighbours;
-    };
-
     updatePerspectives = perspectives => {
         this.perspectives = perspectives.map(entry => entry[1]);
     };
@@ -512,11 +488,8 @@ export class GraphStore {
                     )
                 );
 
-                const neighbours = this.generateNeighbours(response.edges);
-
                 const nodes = this.generateNodeObjects(
                     response.nodes,
-                    neighbours,
                     'overview'
                 );
 
@@ -614,11 +587,8 @@ export class GraphStore {
                     'component'
                 );
 
-                const neighbours = this.generateNeighbours(response.edges);
-
                 const nodes = this.generateNodeObjects(
                     response.nodes,
-                    neighbours,
                     'detail'
                 );
 

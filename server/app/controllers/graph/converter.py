@@ -3,6 +3,7 @@ import pandas as pd
 from app.services.graph.component import (
     get_components,
     enrich_nodes_with_components,
+    enrich_nodes_with_neighbors,
     enrich_edges_with_components,
     enrich_components_with_top_connections,
 )
@@ -144,6 +145,7 @@ def get_detail_graph(
 
     components = get_components(nodes, nx_edges)
     nodes = enrich_nodes_with_components(nodes, components)
+    nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
     edges = enrich_edges_with_components(edges, components)
 
     return {
@@ -239,6 +241,7 @@ def get_overview_graph(
 
     components = get_components(nodes, nx_edges)
     nodes = enrich_nodes_with_components(nodes, components)
+    nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
     edges = enrich_edges_with_components(edges, components)
     components = enrich_components_with_top_connections(components, edges)
 
