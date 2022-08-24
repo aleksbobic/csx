@@ -48,6 +48,8 @@ def get_components(nodes: List[Node], edges: List[Tuple[str, str]]) -> List[Comp
 
         new_component["entries"] = list(set(component_entries))
         new_component["nodes"] = component
+        new_component["selectedNodesCount"] = 0
+        new_component["isSelected"] = False
 
         if new_component["node_count"] > 0:
             if new_component["largest_nodes"]:

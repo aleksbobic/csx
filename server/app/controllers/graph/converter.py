@@ -144,9 +144,12 @@ def get_detail_graph(
     nodes = get_positions(nodes, nx_edges)
 
     components = get_components(nodes, nx_edges)
+
     nodes = enrich_nodes_with_components(nodes, components)
     nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
     edges = enrich_edges_with_components(edges, components)
+
+    components = sorted(components, key=lambda component: -component["node_count"])
 
     return {
         "nodes": nodes,
@@ -240,10 +243,12 @@ def get_overview_graph(
     nodes = get_positions(nodes, nx_edges)
 
     components = get_components(nodes, nx_edges)
+
     nodes = enrich_nodes_with_components(nodes, components)
     nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
     edges = enrich_edges_with_components(edges, components)
     components = enrich_components_with_top_connections(components, edges)
+    components = sorted(components, key=lambda component: -component["node_count"])
 
     return {
         "nodes": nodes,

@@ -505,29 +505,9 @@ export class GraphStore {
                         return edge;
                     }),
                     nodes,
+                    components: response.components,
                     isEmpty: false
                 };
-
-                this.graphData.components = response.components
-                    .map(component => {
-                        return {
-                            id: component.id,
-                            node_count: component.node_count,
-                            largest_nodes: component.largest_nodes,
-                            largest_connections: component.largest_connections,
-                            entries: component.entries,
-                            nodes: component.nodes,
-                            selectedNodesCount: 0,
-                            isSelected: false
-                        };
-                    })
-                    .sort((first, second) =>
-                        first.node_count > second.node_count
-                            ? -1
-                            : first.node_count < second.node_count
-                            ? 1
-                            : 0
-                    );
 
                 this.graphData.meta = {
                     ...this.graphData.meta,
@@ -604,22 +584,9 @@ export class GraphStore {
                         return edge;
                     }),
                     nodes,
+                    components: response.components,
                     isEmpty: false
                 };
-
-                this.detailGraphData.components = response.components.map(
-                    component => {
-                        return {
-                            id: component.id,
-                            node_count: component.node_count,
-                            largest_nodes: component.largest_nodes,
-                            entries: component.entries,
-                            nodes: component.nodes,
-                            selectedNodesCount: 0,
-                            isSelected: false
-                        };
-                    }
-                );
 
                 this.detailGraphData.meta = {
                     ...this.detailGraphData.meta,
