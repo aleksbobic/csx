@@ -11,6 +11,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 from pydantic import BaseModel
+import itertools
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -155,22 +156,28 @@ def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
 def get_new_features(query):
 
     if query["action"] == "connect":
-        return [get_new_features(entry) for entry in query["queries"]]
+        return list(
+            itertools.chain.from_iterable(
+                [get_new_features(entry) for entry in query["queries"]]
+            )
+        )
 
     if "newFeatureName" in query.keys():
         if query["action"] == "count array":
-            return [
-                {"feature": query["newFeatureName"], "type": "integer"}
-            ] + get_new_features(query["query"])
+            return [{"feature": query["newFeatureName"], "type": "integer"}] + list(
+                itertools.chain.from_iterable(get_new_features(query["query"]))
+            )
         elif query["action"] == "extract keywords":
-            return [
-                {"feature": query["newFeatureName"], "type": "list"}
-            ] + get_new_features(query["query"])
+            return [{"feature": query["newFeatureName"], "type": "list"}] + list(
+                itertools.chain.from_iterable(get_new_features(query["query"]))
+            )
 
     if "query" not in query and "queries" not in query:
         return []
 
-    return list(filter(None, get_new_features(query["query"])))
+    return list(
+        itertools.chain.from_iterable(filter(None, get_new_features(query["query"])))
+    )
 
 
 @use_timing

@@ -93,14 +93,28 @@ export class WorkflowStore {
             .filter(node => node.type === 'resultsNode')
             .map(node => {
                 node.data.runWorkflow = this.runWorkFlow;
+                node.data.deleteNode = this.deleteNode;
                 return node;
             });
 
-        const otherNodes = loadedActions.filter(
-            node => node.type !== 'resultsNode'
-        );
+        const edges = loadedActions
+            .filter(entry => entry.type === 'searchEdge')
+            .map(edge => {
+                edge.data.removeEdge = this.removeEdge;
+                return edge;
+            });
 
-        this.actions = [...otherNodes, ...resultsNodes];
+        const otherNodes = loadedActions
+            .filter(
+                node =>
+                    node.type !== 'resultsNode' && node.type !== 'searchEdge'
+            )
+            .map(node => {
+                node.data.deleteNode = this.deleteNode;
+                return node;
+            });
+
+        this.actions = [...otherNodes, ...resultsNodes, ...edges];
 
         this.actions = this.actions.map(node => {
             if (node.type === 'searchNode') {
@@ -192,7 +206,9 @@ export class WorkflowStore {
         });
     };
 
-    updateActions = () => (this.actions = [...this.actions]);
+    updateActions = () => {
+        this.actions = [...this.actions];
+    };
 
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };

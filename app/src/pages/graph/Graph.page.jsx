@@ -39,51 +39,12 @@ function GraphPage() {
         );
 
         const query = queryString.parse(location.search).query;
-        const dataset = queryString.parse(location.search).dataset;
         const suuid = queryString.parse(location.search).suuid;
 
         store.graphInstance.toggleVisibleComponents(-1);
 
         if (query) {
             if (location.pathname.startsWith('/graph/detail')) {
-                let visible_entries = [];
-
-                if (store.graph.currentGraphData.selectedComponents.length) {
-                    const entryArray = store.graph.currentGraphData.components
-                        .filter(component =>
-                            store.graph.currentGraphData.selectedComponents.includes(
-                                component.id
-                            )
-                        )
-                        .reduce(
-                            (entries, component) =>
-                                entries.concat(component.entries),
-                            []
-                        );
-
-                    visible_entries = JSON.stringify([...new Set(entryArray)]);
-                }
-
-                let same_components =
-                    visible_entries.length ===
-                    store.graph.detailGraphData.meta.visible_entries.length;
-
-                if (
-                    visible_entries.length ===
-                    store.graph.detailGraphData.meta.visible_entries.length
-                ) {
-                    for (let entry in visible_entries) {
-                        if (
-                            store.graph.detailGraphData.meta.visible_entries.includes(
-                                entry
-                            )
-                        ) {
-                            same_components = false;
-                            break;
-                        }
-                    }
-                }
-
                 store.graph.getSearchGraph(query, 'detail', suuid);
             } else {
                 store.graph.getSearchGraph(query, 'overview', suuid);
