@@ -81,6 +81,8 @@ When the dataset is uploaded a config file is created in the `server/app/data/co
 
 > 🚨 **Config files should never be manually modified. If you want to modify the config of a dataset either click on the change default settings for dataset button next to each of the datasets on the homepage or delete the dataset and upload it again with different settings.**:
 
+### Disabling upload form
+To disable the upload form please go to the `docker-compose.yml` file set the `REACT_APP_DISABLE_UPLOAD` under `app` and `environment` to true.
 
 
 ### Starting the project in production mode 🚀

@@ -312,7 +312,8 @@ function HomePage() {
                         {renderDatasetGrid()}
                     </>
                 )}
-                {renderFileUpload()}
+                {process.env.REACT_APP_DISABLE_UPLOAD !== 'true' &&
+                    renderFileUpload()}
             </Container>
             {renderFooter()}
         </Box>

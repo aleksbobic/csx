@@ -24,6 +24,8 @@ services:
     depends_on:
       - server
       # - analytics
+    environment:
+      REACT_APP_DISABLE_UPLOAD: 'false'
     command: bash -c "npm install && npm start"
   # mysql:
   #   image: "mysql:5.7"
