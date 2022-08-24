@@ -258,7 +258,9 @@ function NavigationPanelComponent() {
                     as={NavLink}
                     to={`/search?query=${getQueryString(
                         'query'
-                    )}&dataset=${getQueryString('dataset')}`}
+                    )}&dataset=${getQueryString(
+                        'dataset'
+                    )}&suuid=${getQueryString('suuid')}`}
                     border="1px solid transparent"
                     opacity={location.pathname === '/search' ? '1' : '0.5'}
                 >
@@ -274,7 +276,9 @@ function NavigationPanelComponent() {
                     as={NavLink}
                     to={`/graph?query=${getQueryString(
                         'query'
-                    )}&dataset=${getQueryString('dataset')}`}
+                    )}&dataset=${getQueryString(
+                        'dataset'
+                    )}&suuid=${getQueryString('suuid')}`}
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }

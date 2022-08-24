@@ -29,8 +29,9 @@ export class CoreStore {
     }
 
     generateUUID = async () => {
-        const response = await axios.get('util/uuid');
-        return response.data;
+        await axios.get('util/uuid').then(response => {
+            localStorage.setItem('useruuid', response.data);
+        });
     };
 
     setToastMessage = message => (this.toastInfo.message = message);
