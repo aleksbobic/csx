@@ -25,7 +25,11 @@ const searchNode = ({ id, data, isConnectable }) => {
             case 'category':
                 return data.featureHints[data.feature].values.includes(value);
             default:
-                return typeof value === 'number';
+                return (
+                    typeof value === 'number' &&
+                    data.featureHints[data.feature].min <= value &&
+                    data.featureHints[data.feature].max >= value
+                );
         }
     };
 
@@ -43,6 +47,7 @@ const searchNode = ({ id, data, isConnectable }) => {
 
     const modifyFeature = value => {
         data.feature = value.target.value;
+        data.keyphrase = data.getDefaultValue(value.target.value);
         data.updateActions();
     };
 
@@ -58,7 +63,7 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.getSuggestions(data.feature, value)
                 }
                 getValue={value => {
-                    modifyKeyphrase(value);
+                    data.updateSearchNodeData(id, value);
                 }}
                 style={{ borderRadius: '5px' }}
                 suggestionStyle={{
@@ -72,19 +77,18 @@ const searchNode = ({ id, data, isConnectable }) => {
     };
 
     const renderSelectInput = () => {
-        if (!isFeatureValue(data.keyphrase)) {
-            modifyKeyphrase(data.featureHints[data.feature].values[0]);
-        }
-
         return (
             <Select
                 size="sm"
                 variant="filled"
                 margin="0px"
                 borderRadius="5px"
-                onChange={modifyKeyphrase}
+                onChange={event => {
+                    data.updateSearchNodeData(id, event.target.value);
+                }}
                 opacity="0.8"
                 background="whiteAlpha.200"
+                value={data.keyphrase}
                 _hover={{
                     opacity: 1
                 }}
@@ -100,10 +104,6 @@ const searchNode = ({ id, data, isConnectable }) => {
     };
 
     const renderNumberInput = () => {
-        if (!isFeatureValue(data.keyphrase)) {
-            modifyKeyphrase(data.featureHints[data.feature].min);
-        }
-
         return (
             <NumberInput
                 width="100%"
@@ -111,14 +111,16 @@ const searchNode = ({ id, data, isConnectable }) => {
                 variant="filled"
                 margin="0px"
                 borderRadius="5px"
-                onChange={modifyKeyphrase}
+                onChange={value => {
+                    data.updateSearchNodeData(id, value);
+                }}
                 opacity="0.8"
                 background="whiteAlpha.200"
                 _hover={{
                     opacity: 1
                 }}
                 _focus={{ opacity: 1 }}
-                defaultValue={data.featureHints[data.feature].min}
+                value={data.keyphrase}
                 min={data.featureHints[data.feature].min}
                 max={data.featureHints[data.feature].max}
             >

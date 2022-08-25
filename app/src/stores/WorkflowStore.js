@@ -104,17 +104,32 @@ export class WorkflowStore {
                 return edge;
             });
 
+        const searchNodes = loadedActions
+            .filter(node => node.type === 'searchNode')
+            .map(node => {
+                node.data.deleteNode = this.deleteNode;
+                node.data.updateSearchNodeData = this.updateSearchNodeData;
+                return node;
+            });
+
         const otherNodes = loadedActions
             .filter(
                 node =>
-                    node.type !== 'resultsNode' && node.type !== 'searchEdge'
+                    !['resultsNode', 'searchNode', 'searchEdge'].includes(
+                        node.type
+                    )
             )
             .map(node => {
                 node.data.deleteNode = this.deleteNode;
                 return node;
             });
 
-        this.actions = [...otherNodes, ...resultsNodes, ...edges];
+        this.actions = [
+            ...otherNodes,
+            ...resultsNodes,
+            ...searchNodes,
+            ...edges
+        ];
 
         this.actions = this.actions.map(node => {
             if (node.type === 'searchNode') {
@@ -206,8 +221,32 @@ export class WorkflowStore {
         });
     };
 
+    updateSearchNodeData = (nodeID, dataValue) => {
+        this.actions = this.actions.map(node => {
+            if (node.id === nodeID) {
+                node.data = {
+                    ...node.data
+                };
+                node.data['keyphrase'] = dataValue;
+            }
+            return node;
+        });
+    };
+
     updateActions = () => {
         this.actions = [...this.actions];
+    };
+
+    getDefaultValue = feature => {
+        switch (this.store.search.nodeTypes[feature]) {
+            case 'string':
+            case 'list':
+                return '';
+            case 'category':
+                return this.store.search.searchHints[feature].values[0];
+            default:
+                return this.store.search.searchHints[feature].min;
+        }
     };
 
     addNewAction = (nodeType, position) => {
@@ -220,7 +259,9 @@ export class WorkflowStore {
             data.featureTypes = this.store.search.nodeTypes;
             data.updateActions = this.updateActions;
             data.getSuggestions = this.store.search.suggest;
-            data.keyphrase = '';
+            data.updateSearchNodeData = this.updateSearchNodeData;
+            data.keyphrase = this.getDefaultValue(data.feature);
+            data.getDefaultValue = this.getDefaultValue;
         }
 
         if (nodeType === 'datasetNode') {
