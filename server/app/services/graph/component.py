@@ -6,12 +6,15 @@ from collections import Counter
 
 
 @use_timing
-def get_components(nodes: List[Node], edges: List[Tuple[str, str]]) -> List[Component]:
+def get_components(
+    nodes: List[Node], edges: List[Tuple[str, str]], graph=None
+) -> List[Component]:
     """Extract components from given nodes and edges."""
 
-    graph = nx.MultiGraph()
-    graph.add_nodes_from([range(0, len(nodes))])
-    graph.add_edges_from(edges)
+    if not graph:
+        graph = nx.MultiGraph()
+        graph.add_nodes_from([range(0, len(nodes))])
+        graph.add_edges_from(edges)
 
     # Extract the actual component nodes and edges
     components = []
@@ -78,11 +81,12 @@ def enrich_nodes_with_components(
 
 @use_timing
 def enrich_nodes_with_neighbors(
-    nodes: List[Node], edges: List[Tuple[str, str]]
+    nodes: List[Node], edges: List[Tuple[str, str]], graph=None
 ) -> List[Node]:
-    graph = nx.MultiGraph()
-    graph.add_nodes_from([node["id"] for node in nodes])
-    graph.add_edges_from(edges)
+    if not graph:
+        graph = nx.MultiGraph()
+        graph.add_nodes_from([node["id"] for node in nodes])
+        graph.add_edges_from(edges)
 
     for node in nodes:
         node["neighbours"] = set(graph.neighbors(node["id"]))

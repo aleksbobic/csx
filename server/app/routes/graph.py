@@ -5,6 +5,13 @@ import app.utils.cache as csx_cache
 import pandas as pd
 import networkx as nx
 import app.utils.analysis as csx_analysis
+from app.services.graph.component import (
+    get_components,
+    enrich_nodes_with_components,
+    enrich_nodes_with_neighbors,
+    enrich_edges_with_components,
+    enrich_components_with_top_connections,
+)
 
 
 router = APIRouter()
@@ -78,16 +85,18 @@ def calculate_global_cache_properties(cache_data, entries):
 
 def calculate_trimmed_graph(cache_data, entries, graph_type):
     # Filter graph nodes
-    cache_data[graph_type]["nodes"] = [
+    new_nodes = [
         node
         for node in cache_data[graph_type]["nodes"]
         if len(set(node["entries"]).intersection(set(entries))) > 0
     ]
 
+    cache_data[graph_type]["nodes"] = new_nodes
+
     # Get visible nodes
     visible_nodes = [
         node["id"]
-        for node in cache_data[graph_type]["nodes"]
+        for node in new_nodes
         if len(set(node["entries"]).intersection(set(entries))) > 0
     ]
 
@@ -114,6 +123,31 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
     cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
         csx_analysis.graph_from_graph_data(cache_data[graph_type])
     )
+
+    components = get_components(
+        cache_data[graph_type]["nodes"],
+        [],
+        csx_analysis.graph_from_graph_data(cache_data[graph_type]),
+    )
+
+    nodes = enrich_nodes_with_components(new_nodes, components)
+    nodes = enrich_nodes_with_neighbors(
+        nodes, [], csx_analysis.graph_from_graph_data(cache_data[graph_type])
+    )
+
+    cache_data[graph_type]["edges"] = enrich_edges_with_components(
+        cache_data[graph_type]["edges"], components
+    )
+
+    cache_data[graph_type]["nodes"] = nodes
+
+    if graph_type == "overview":
+        components = enrich_components_with_top_connections(
+            components, cache_data[graph_type]["edges"]
+        )
+    components = sorted(components, key=lambda component: -component["node_count"])
+
+    cache_data[graph_type]["components"] = components
 
     cache_data[graph_type]["meta"]["max_degree"] = csx_analysis.get_max_degree(
         csx_analysis.graph_from_graph_data(cache_data[graph_type])
