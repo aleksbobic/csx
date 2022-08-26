@@ -140,6 +140,7 @@ function NavigationPanelComponent() {
                         id="regenerategraphbutton"
                         size="sm"
                         border="none"
+                        disabled={store.search.links.length === 0}
                         aria-label="Regenerate graph"
                         style={{
                             backdropFilter: 'blur(2px)'
