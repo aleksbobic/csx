@@ -165,18 +165,31 @@ export class GraphInstanceStore {
         this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
     };
 
-    filterTabularData = () => {
+    filterTabularData = (only_selected = false) => {
         const data = this.store.graph.currentGraphData;
 
         this.store.graph.activeTableData = [];
-        const visibleNodeEntries = [
-            ...new Set(
-                this.store.graph.currentGraphData.nodes
-                    .filter(node => node.visible)
-                    .map(node => node.entries)
-                    .flat()
-            )
-        ];
+        let visibleNodeEntries;
+
+        if (only_selected) {
+            visibleNodeEntries = [
+                ...new Set(
+                    this.store.graph.currentGraphData.selectedNodes
+                        .filter(node => node.visible)
+                        .map(node => node.entries)
+                        .flat()
+                )
+            ];
+        } else {
+            visibleNodeEntries = [
+                ...new Set(
+                    this.store.graph.currentGraphData.nodes
+                        .filter(node => node.visible)
+                        .map(node => node.entries)
+                        .flat()
+                )
+            ];
+        }
 
         data.activeTableData = data.tableData.filter(row =>
             visibleNodeEntries.includes(row.entry)
@@ -328,7 +341,7 @@ export class GraphInstanceStore {
                 data.links[i].target.id === originNode.id;
         }
 
-        this.filterTabularData();
+        this.filterTabularData(true);
 
         this.isSelfCentric = true;
         this.selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
@@ -485,7 +498,7 @@ export class GraphInstanceStore {
             }
         }
 
-        this.filterTabularData();
+        this.filterTabularData(true);
 
         this.isSelfCentric = true;
         this.selfCentricType = null;
@@ -569,7 +582,7 @@ export class GraphInstanceStore {
                 );
         }
 
-        this.filterTabularData();
+        this.filterTabularData(true);
 
         this.isSelfCentric = true;
         this.selfCentricType = null;
@@ -582,6 +595,7 @@ export class GraphInstanceStore {
 
     setNodeColorScheme = val => {
         this.nodeColorScheme[this.store.core.currentGraph] = val;
+        this.nodeColorScheme = { ...this.nodeColorScheme };
     };
 
     generateSchemeColorsFromArray = (values, feature) => {
