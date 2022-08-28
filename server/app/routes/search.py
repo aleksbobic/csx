@@ -452,9 +452,11 @@ def get_graph_from_existing_data(
 ):
     # Take global table data and generate grpah
     elastic_json = comparison_res["data"]["global"]["elastic_json"]
+
     graph_data = csx_graph.get_graph(
         graph_type, elastic_json, dimensions, schema, index
     )
+
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
 
     anchor_property_values = csx_nodes.get_anchor_property_values(

@@ -10,12 +10,12 @@ from app.utils.timer import use_timing
 def get_components(
     nodes: List[Node],
     edges: List[Tuple[str, str]],
-    graph: Union[nx.MultiGraph, None] = None,
+    graph: Union[nx.Graph, None] = None,
 ) -> List[Component]:
     """Extract components from given nodes and edges."""
 
     if not graph:
-        graph = nx.MultiGraph()
+        graph = nx.Graph()
         graph.add_nodes_from([range(0, len(nodes))])
         graph.add_edges_from(edges)
 

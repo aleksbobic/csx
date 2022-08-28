@@ -12,8 +12,9 @@ from app.types import Component, Node
 
 
 @use_timing
-def get_labels(df: pd.DataFrame, feature: str, isFeatureList: bool) -> Counter:
+def get_labels(df: pd.DataFrame, feature: str) -> Counter:
     """Extract unique values and their counts of a given feature."""
+    isFeatureList = isinstance(df[feature].iloc[0], list)
 
     if isFeatureList:
         return Counter(itertools.chain.from_iterable(df[feature]))
@@ -21,10 +22,9 @@ def get_labels(df: pd.DataFrame, feature: str, isFeatureList: bool) -> Counter:
     return Counter(df[feature].tolist())
 
 
-def get_label_entries(
-    df: pd.DataFrame, feature: str, label: str, isFeatureList: bool
-) -> List[str]:
+def get_label_entries(df: pd.DataFrame, feature: str, label: str) -> List[str]:
     """Extract entry ids for a given feature, label tuple."""
+    isFeatureList = isFeatureList = isinstance(df[feature].iloc[0], list)
 
     if isFeatureList:
         return df[df[feature].apply(lambda x: label in x)]["entry"].tolist()
@@ -81,7 +81,7 @@ def enrich_node_with_props(
 
 
 @use_timing
-def enrich_nodes_with_props(
+def enrich_with_props(
     df: pd.DataFrame, nodes: List[Node], anchor: str, anchor_properties: List[str]
 ) -> List[Node]:
     return [
@@ -92,20 +92,36 @@ def enrich_nodes_with_props(
     ]
 
 
+def adjust_node_size(
+    nodes: List[Node], df: pd.DataFrame, features: List[str]
+) -> List[Node]:
+    """Adjust size of nodes based on frequency of labesl in given dataframe"""
+
+    node_label_frequencies = {}
+
+    for feature in features:
+        node_label_frequencies[feature] = get_labels(df, feature)
+
+    for node in nodes:
+        node["size"] = math.ceil(
+            np.log2(node_label_frequencies[node["feature"]][node["label"]]) + 5
+        )
+
+    return nodes
+
+
 @use_timing
 def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
     # -> List[Node]:
     """Generate list of node objects for all values of a given feature."""
 
-    isFeatureList = isinstance(df[feature].iloc[0], list)
-
-    node_labels = get_labels(df, feature, isFeatureList)
+    node_labels = get_labels(df, feature)
 
     entry_list = {}
 
     def expand_entities(node_label, node_labels):
         node = {
-            "entries": get_label_entries(df, feature, node_label, isFeatureList),
+            "entries": get_label_entries(df, feature, node_label),
             "id": uuid.uuid4().hex,
             "label": node_label,
             "feature": feature,
@@ -177,7 +193,7 @@ def get_nodes(
                     entries[entry] = entries[entry] + new_entries[entry]
                 else:
                     entries[entry] = new_entries[entry]
-        nodes = enrich_nodes_with_props(df, nodes, anchor, anchor_properties)
+        nodes = enrich_with_props(df, nodes, anchor, anchor_properties)
 
     return nodes, entries
 

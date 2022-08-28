@@ -112,6 +112,9 @@ def get_detail_graph(
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
             entries_with_nodes, mongo_nodes
         )
+        mongo_nodes = csx_nodes.adjust_node_size(
+            mongo_nodes, search_results_df, list_features
+        )
         nodes = nodes + mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
@@ -212,6 +215,11 @@ def get_overview_graph(
         )
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
             entries_with_nodes, mongo_nodes
+        )
+        mongo_nodes = csx_nodes.adjust_node_size(
+            mongo_nodes,
+            search_results_df,
+            list_links + [anchor] if is_anchor_list else list_links,
         )
         nodes = nodes + mongo_nodes
 
