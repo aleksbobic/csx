@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import List, Tuple, cast
+from typing import List, Tuple, cast, Union
 
 import networkx as nx
 from app.types import Component, ConnectionCount, Edge, Node
@@ -8,7 +8,9 @@ from app.utils.timer import use_timing
 
 @use_timing
 def get_components(
-    nodes: List[Node], edges: List[Tuple[str, str]], graph: nx.MultiGraph
+    nodes: List[Node],
+    edges: List[Tuple[str, str]],
+    graph: Union[nx.MultiGraph, None] = None,
 ) -> List[Component]:
     """Extract components from given nodes and edges."""
 

@@ -256,7 +256,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     if len(list_properties) > 0:
         print("***** Retrieving elastic")
-        elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name, False)
+        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), name, False)
         print("***** Generating nodes")
         nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
 

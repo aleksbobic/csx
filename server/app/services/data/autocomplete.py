@@ -1,25 +1,30 @@
-import spacy
-import pytextrank
-import marisa_trie
-import os
 import itertools
+import os
+from typing import List
+
+import marisa_trie
+import pandas as pd
+import pytextrank
+import spacy
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 stopwords = nlp.Defaults.stop_words
 
 
-def process_phrase(phrase):
+def remove_stopwords(phrase) -> str:
+    """remove stopwords from spacy phrase"""
     return " ".join(
         [entry for entry in phrase.text.lower().split(" ") if entry not in stopwords]
     )
 
 
-def generate_auto_index(index, feature, strings):
+def generate_auto_index(index: str, feature: str, strings: List[str]) -> None:
+    """Generate autocomplete index of one feature"""
     completion_phrases = []
 
     for doc in nlp.pipe(strings):
-        completion_phrases += [process_phrase(phrase) for phrase in doc._.phrases]
+        completion_phrases += [remove_stopwords(phrase) for phrase in doc._.phrases]
 
     completion_phrases = list(set(completion_phrases))
     completion_phrases = [phrase.lower() for phrase in completion_phrases]
@@ -41,7 +46,13 @@ def generate_list_auto_index(index, feature, completion_phrases):
     completion_trie.save(f"./app/data/autocomplete/auto_{index}_{feature}")
 
 
-def generate_main_auto_index(index, other_search_fields, string_search_fields, data):
+def generate_main_auto_index(
+    index: str,
+    other_search_fields: List[str],
+    string_search_fields: List[str],
+    data: pd.DataFrame,
+) -> None:
+    """Generate index consisting of multiple features"""
 
     string_values = []
 
@@ -51,7 +62,7 @@ def generate_main_auto_index(index, other_search_fields, string_search_fields, d
     completion_phrases = []
 
     for doc in nlp.pipe(string_values):
-        completion_phrases += [process_phrase(phrase) for phrase in doc._.phrases]
+        completion_phrases += [remove_stopwords(phrase) for phrase in doc._.phrases]
 
     completion_phrases += list(
         itertools.chain.from_iterable(
@@ -70,11 +81,13 @@ def generate_main_auto_index(index, other_search_fields, string_search_fields, d
     completion_trie.save(f"./app/data/autocomplete/auto_{index}")
 
 
-def get_suggestions(index, input, feature=""):
+def get_suggestions(index: str, input: str, feature: str = ""):
+    """Retrieve top 20 suggestions based on given input and index"""
     completion_trie = marisa_trie.Trie()
 
     if feature != "":
         completion_trie.load(f"./app/data/autocomplete/auto_{index}_{feature}")
     else:
         completion_trie.load(f"./app/data/autocomplete/auto_{index}")
+
     return completion_trie.keys(input.lower())[:20]

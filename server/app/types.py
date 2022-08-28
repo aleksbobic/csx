@@ -1,5 +1,5 @@
 from itertools import count
-from typing import TypedDict, List, Optional, Literal, Tuple
+from typing import TypedDict, List, Optional, Literal, Tuple, Dict, Union
 
 
 class Node(TypedDict):
@@ -14,6 +14,28 @@ class Node(TypedDict):
     y: Optional[int]
     properties: Optional[dict]
     neighbours: Optional[set]
+
+
+CacheDifference = Literal[
+    "data",
+    "search_uuid",
+    "query",
+    "graph_type",
+    "schema",
+    "dimensions",
+    "anchor_properties",
+]
+
+CacheDifferenceAction = Literal[
+    "from_cache", "from_scratch", "from_existing_data", "from_anchor_properties"
+]
+
+
+class ComparisonResults(TypedDict):
+    same: bool
+    difference: Union[CacheDifference, None]
+    action: CacheDifferenceAction
+    data: Optional[Dict]
 
 
 SchemaRelationship = Literal["oneToOne", "manyToOne", "oneToMany", "manyToMany"]

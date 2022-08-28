@@ -99,13 +99,13 @@ def get_detail_graph(
         entries_with_nodes = {}
 
     if len(list_features) > 0:
-        nodes, entries_with_nodes = csx_data.retrieve_nodes_from_mongo(
-            index,
-            nodes,
-            entries_with_nodes,
-            search_results_df.entry.tolist(),
-            list_features,
+        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
+            index, search_results_df.entry.tolist(), list_features
         )
+        entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
+            entries_with_nodes, mongo_nodes
+        )
+        nodes = nodes + mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 
@@ -196,13 +196,15 @@ def get_overview_graph(
         entries_with_nodes = {}
 
     if len(list_links) > 0 or is_anchor_list:
-        nodes, entries_with_nodes = csx_data.retrieve_nodes_from_mongo(
+        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
             index,
-            nodes,
-            entries_with_nodes,
             search_results_df.entry.tolist(),
             list_links + [anchor] if is_anchor_list else list_links,
         )
+        entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
+            entries_with_nodes, mongo_nodes
+        )
+        nodes = nodes + mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 

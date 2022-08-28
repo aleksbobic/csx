@@ -1,7 +1,7 @@
 import itertools
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Literal
 
 import pandas as pd
 import pytextrank
@@ -40,12 +40,12 @@ def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
     """Assemble query from multiple query phrases. Each call should return a dataframe."""
 
     if "min" in query and "max" in query:
-        return csx_es.convert_range_filter_to_df(
+        return csx_es.range_filter_to_dataframe(
             query["feature"], query["min"], query["max"], index
         )
 
     if query["action"] == "get dataset":
-        return csx_es.convert_query_to_df(Q("match_all"), index, False)
+        return csx_es.query_to_dataframe(Q("match_all"), index, False)
 
     if query["action"] == "extract keywords":
         source_feature = query["feature"]
@@ -75,14 +75,14 @@ def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
     if "query" not in query and "queries" not in query:
         if dimension_types[query["feature"]] == "list":
 
-            results = csx_es.convert_query_to_df(
+            results = csx_es.query_to_dataframe(
                 Q("match_phrase", **{query["feature"]: query["keyphrase"]}),
                 index,
             )
 
             return results
 
-        return csx_es.convert_query_to_df(
+        return csx_es.query_to_dataframe(
             Q(
                 "query_string",
                 query=f"{query['keyphrase']}",
@@ -129,7 +129,7 @@ def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
 
             return merged_df
         else:
-            return csx_es.convert_query_to_df(
+            return csx_es.query_to_dataframe(
                 Q(
                     "bool",
                     must_not=[
@@ -216,7 +216,7 @@ class Data(BaseModel):
     index: str
     anchor: str
     links: List
-    graph_type: str
+    graph_type: Literal["overview", "detail"]
     visible_entries: List
     anchor_properties: List
 
@@ -288,7 +288,7 @@ def search(data: Data) -> dict:
             type="phrase",
             fields=filtered_fields,
         )
-        results = csx_es.convert_query_to_df(es_query, index)
+        results = csx_es.query_to_dataframe(es_query, index)
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]

@@ -133,6 +133,18 @@ def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
     return nodes, entry_list
 
 
+def enrich_entries_with_nodes(entries_with_nodes: Dict, nodes: List[Node]) -> Dict:
+    """Enrich existing entries with nodes with additional nodes"""
+    for node in nodes:
+        for entry in node["entries"]:
+            if entry in entries_with_nodes:
+                entries_with_nodes[entry].append(node)
+            else:
+                entries_with_nodes[entry] = [node]
+
+    return entries_with_nodes
+
+
 @use_timing
 def get_nodes(
     df: pd.DataFrame,
