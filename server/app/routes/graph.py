@@ -114,10 +114,11 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
         if len(list(set(component["nodes"]).intersection(set(visible_nodes)))) > 0
     ]
 
-    # FIXME: Table data should be only in global and should be at all times the same between detail and overview
-
     # Modify table data of graph
-    cache_data[graph_type]["meta"]["table_data"] = cache_data["global"]["table_data"]
+    # Due to the particular structure of table_data in the cxs client both overview and detail graph have to have their own instance of table data
+    cache_data[graph_type]["meta"]["table_data"] = csx_graph.convert_table_data(
+        cache_data[graph_type]["nodes"], cache_data["global"]["elastic_json"]
+    )
 
     # Generate new NetworkX graph
     cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(

@@ -7,7 +7,7 @@ import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
 import networkx as nx
 import pandas as pd
-from app.types import SchemaElement
+from app.types import SchemaElement, Node
 from app.utils.timer import use_timing
 
 
@@ -273,3 +273,20 @@ def from_cache(graph_data) -> nx.Graph:
 
 def get_max_degree(graph: nx.Graph):
     return max([d for n, d in graph.degree()])
+
+
+@use_timing
+def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[Dict]:
+    """Extract table data from elastic results and node list and generate particular entries needed for client side."""
+
+    dataEntries = {}
+
+    for node in nodes:
+        for entryId in node["entries"]:
+            dataEntries[entryId] = {}
+
+    for node in nodes:
+        for entryId in node["entries"]:
+            dataEntries[entryId][f"{node['feature']}_{node['label']}_id"] = node["id"]
+
+    return [{**dataEntries[row["entry"]], **row} for row in elastic_results]

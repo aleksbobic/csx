@@ -1,16 +1,16 @@
 import itertools
 import json
 import os
-from typing import Dict, List, Literal
+from typing import List, Literal
 
 import pandas as pd
 import pytextrank
 import spacy
-from app.types import Node
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 from pydantic import BaseModel
+import app.services.graph.graph as csx_graph
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -172,23 +172,6 @@ def get_new_features(query):
     return list(
         itertools.chain.from_iterable(filter(None, get_new_features(query["query"])))
     )
-
-
-@use_timing
-def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[Dict]:
-    """Extract table data from elastic results and node list."""
-
-    dataEntries = {}
-
-    for node in nodes:
-        for entryId in node["entries"]:
-            dataEntries[entryId] = {}
-
-    for node in nodes:
-        for entryId in node["entries"]:
-            dataEntries[entryId][f"{node['feature']}_{node['label']}_id"] = node["id"]
-
-    return [{**dataEntries[row["entry"]], **row} for row in elastic_results]
 
 
 def isJson(testStr):
@@ -386,7 +369,7 @@ def get_graph_from_scratch(
     graph_data = csx_graph.get_graph(
         graph_type, elastic_json, dimensions, schema, index
     )
-    table_data = convert_table_data(graph_data["nodes"], elastic_json)
+    table_data = csx_graph.convert_table_data(graph_data["nodes"], elastic_json)
     anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
@@ -457,7 +440,7 @@ def get_graph_from_existing_data(
         graph_type, elastic_json, dimensions, schema, index
     )
 
-    table_data = convert_table_data(graph_data["nodes"], elastic_json)
+    table_data = csx_graph.convert_table_data(graph_data["nodes"], elastic_json)
 
     anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]

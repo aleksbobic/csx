@@ -463,7 +463,7 @@ export class GraphStore {
             this.store.search.setSearchIsEmpty(true);
         } else {
             this.store.search.newNodeTypes = response.meta.new_dimensions;
-            console.log(response);
+            // console.log(response);
             if (graphType === 'overview') {
                 // Handle overview graph data
                 this.graphData.meta.query = query;
@@ -785,6 +785,7 @@ export class GraphStore {
 
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
+            this.resetGraphData();
         } else {
             this.resetGraphData();
         }

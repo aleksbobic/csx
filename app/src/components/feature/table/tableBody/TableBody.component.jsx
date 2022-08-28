@@ -33,8 +33,8 @@ function TableBody(props) {
             );
         } else if (typeof index === 'number') {
             // Based on the type of content in the cell the id can be located in different areas
-            full_selector = `${selector}_${cell.value[index]}_id`;
 
+            full_selector = `${selector}_${cell.value[index]}_id`;
             key = Object.keys(hidden_cols).find(
                 entry => entry.toLowerCase() === full_selector.toLowerCase()
             );

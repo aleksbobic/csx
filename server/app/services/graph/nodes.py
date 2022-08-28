@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple, cast
 
 import networkx as nx
 import numpy as np
+from numpy import inf
 import pandas as pd
 from app.utils.timer import use_timing
 from app.types import Component, Node
@@ -103,9 +104,14 @@ def adjust_node_size(
         node_label_frequencies[feature] = get_labels(df, feature)
 
     for node in nodes:
-        node["size"] = math.ceil(
-            np.log2(node_label_frequencies[node["feature"]][node["label"]]) + 5
+        calculated_size = np.log2(
+            node_label_frequencies[node["feature"]][node["label"]]
         )
+
+        if calculated_size == -inf:
+            calculated_size = 0
+
+        node["size"] = math.ceil(calculated_size + 5)
 
     return nodes
 
