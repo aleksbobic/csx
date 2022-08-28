@@ -1,9 +1,7 @@
+import pandas as pd
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
-from elasticsearch_dsl import Index, Q, Search
-from elasticsearch_dsl.query import Query
-import pandas as pd
-
+from elasticsearch_dsl import Search
 
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
 

@@ -1,31 +1,14 @@
-from typing import List
-import pandas as pd
-from app.services.graph.component import (
-    get_components,
-    enrich_nodes_with_components,
-    enrich_nodes_with_neighbors,
-    enrich_edges_with_components,
-    enrich_components_with_top_connections,
-)
-from app.services.graph.edge import (
-    get_edges,
-    get_nx_edges,
-    get_edge_tuples,
-    get_overview_edge_tuples,
-    get_overview_edges,
-    get_overview_nx_edges,
-)
-from app.services.graph.node import (
-    get_nodes,
-    get_positions,
-    get_visible_nodes,
-    get_node_ids_with_labels,
-)
-import app.utils.analysis as csx_analysis
-import app.utils.data as csx_data
-from app.utils.timer import use_timing
-from app.types import SchemaElement
 import json
+from typing import List
+
+import app.services.data.mongo as csx_data
+import app.services.graph.components as csx_components
+import app.services.graph.edges as csx_edges
+import app.services.graph.nodes as csx_nodes
+import networkx as nx
+import pandas as pd
+from app.types import SchemaElement
+from app.utils.timer import use_timing
 
 
 def get_graph(graph_type, elastic_json, dimensions, schema, index):
@@ -64,9 +47,7 @@ def generate_graph_metadata(
             "dimensions": dimensions["links"] + [dimensions["anchor"]["dimension"]],
             "anchor_properties": anchor_properties,
             "anchor_property_values": anchor_property_values,
-            "max_degree": csx_analysis.get_max_degree(
-                csx_analysis.graph_from_graph_data(graph_data)
-            ),
+            "max_degree": get_max_degree(from_graph_data(graph_data)),
         }
 
     return {
@@ -76,9 +57,7 @@ def generate_graph_metadata(
         "schema": schema,
         "dimensions": dimensions["visible"],
         "visible_entries": visible_entries,
-        "max_degree": csx_analysis.get_max_degree(
-            csx_analysis.graph_from_graph_data(graph_data)
-        ),
+        "max_degree": get_max_degree(from_graph_data(graph_data)),
     }
 
 
@@ -112,7 +91,9 @@ def get_detail_graph(
         ]
 
     if len(non_list_features) > 0:
-        nodes, entries_with_nodes = get_nodes(search_results_df, non_list_features)
+        nodes, entries_with_nodes = csx_nodes.get_nodes(
+            search_results_df, non_list_features
+        )
     else:
         nodes = []
         entries_with_nodes = {}
@@ -126,9 +107,9 @@ def get_detail_graph(
             list_features,
         )
 
-    node_ids_with_labels = get_node_ids_with_labels(nodes)
+    node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 
-    edge_tuples = get_edge_tuples(
+    edge_tuples = csx_edges.get_edge_tuples(
         search_results_df,
         features,
         visible_features,
@@ -137,17 +118,17 @@ def get_detail_graph(
         node_ids_with_labels,
     )
 
-    nx_edges = get_nx_edges(edge_tuples)
-    edges = get_edges(edge_tuples)
+    nx_edges = csx_edges.get_nx_edges(edge_tuples)
+    edges = csx_edges.get_edges(edge_tuples)
 
-    nodes = get_visible_nodes(nodes, visible_features)
-    nodes = get_positions(nodes, nx_edges)
+    nodes = csx_nodes.get_visible_nodes(nodes, visible_features)
+    nodes = csx_nodes.get_positions(nodes, nx_edges)
 
-    components = get_components(nodes, nx_edges)
+    components = csx_components.get_components(nodes, nx_edges)
 
-    nodes = enrich_nodes_with_components(nodes, components)
-    nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
-    edges = enrich_edges_with_components(edges, components)
+    nodes = csx_nodes.enrich_with_components(nodes, components)
+    nodes = csx_nodes.enrich_with_neighbors(nodes, nx_edges)
+    edges = csx_edges.enrich_with_components(edges, components)
 
     components = sorted(components, key=lambda component: -component["node_count"])
 
@@ -207,7 +188,7 @@ def get_overview_graph(
         ]
 
     if len(non_list_links) > 0 or not is_anchor_list:
-        nodes, entries_with_nodes = get_nodes(
+        nodes, entries_with_nodes = csx_nodes.get_nodes(
             search_results_df, non_list_links, anchor, anchor_properties, is_anchor_list
         )
     else:
@@ -223,9 +204,9 @@ def get_overview_graph(
             list_links + [anchor] if is_anchor_list else list_links,
         )
 
-    node_ids_with_labels = get_node_ids_with_labels(nodes)
+    node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 
-    edge_tuple_lookup = get_overview_edge_tuples(
+    edge_tuple_lookup = csx_edges.get_overview_edge_tuples(
         search_results_df,
         anchor,
         links,
@@ -238,16 +219,16 @@ def get_overview_graph(
 
     nx_edges = list(edge_tuple_lookup.keys())
 
-    edges = get_overview_edges(edge_tuple_lookup, nx_edges)
+    edges = csx_edges.get_overview_edges(edge_tuple_lookup, nx_edges)
 
-    nodes = get_positions(nodes, nx_edges)
+    nodes = csx_nodes.get_positions(nodes, nx_edges)
 
-    components = get_components(nodes, nx_edges)
+    components = csx_components.get_components(nodes, nx_edges)
 
-    nodes = enrich_nodes_with_components(nodes, components)
-    nodes = enrich_nodes_with_neighbors(nodes, nx_edges)
-    edges = enrich_edges_with_components(edges, components)
-    components = enrich_components_with_top_connections(components, edges)
+    nodes = csx_nodes.enrich_with_components(nodes, components)
+    nodes = csx_nodes.enrich_with_neighbors(nodes, nx_edges)
+    edges = csx_edges.enrich_with_components(edges, components)
+    components = csx_components.enrich_with_top_connections(components, edges)
     components = sorted(components, key=lambda component: -component["node_count"])
 
     return {
@@ -255,3 +236,21 @@ def get_overview_graph(
         "edges": edges,
         "components": components,
     }
+
+
+def from_graph_data(graph_data) -> nx.Graph:
+    graph = nx.Graph()
+    graph.add_nodes_from([node["id"] for node in graph_data["nodes"]])
+    graph.add_edges_from(
+        [(edge["source"], edge["target"]) for edge in graph_data["edges"]]
+    )
+    return graph
+
+
+def from_cache(graph_data) -> nx.Graph:
+    graph = nx.from_dict_of_dicts(graph_data["meta"]["nx_graph"])
+    return graph
+
+
+def get_max_degree(graph: nx.Graph):
+    return max([d for n, d in graph.degree()])

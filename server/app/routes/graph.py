@@ -1,18 +1,15 @@
 from typing import List
-from fastapi import APIRouter
-import json
-import app.utils.cache as csx_cache
-import pandas as pd
-import networkx as nx
-import app.utils.analysis as csx_analysis
-from app.services.graph.component import (
-    get_components,
-    enrich_nodes_with_components,
-    enrich_nodes_with_neighbors,
-    enrich_edges_with_components,
-    enrich_components_with_top_connections,
-)
 
+import app.services.data.redis as csx_redis
+
+import app.services.graph.components as csx_components
+import app.services.graph.edges as csx_edges
+import app.services.graph.graph as csx_graph
+import app.services.graph.nodes as csx_nodes
+
+import networkx as nx
+import pandas as pd
+from fastapi import APIRouter
 
 router = APIRouter()
 
@@ -33,7 +30,7 @@ def trim_network(
     user_id = data.user_id
     graph_type = data.graph_type
 
-    cache_data = csx_cache.load_current_graph(user_id)
+    cache_data = csx_redis.load_current_graph(user_id)
 
     # Get entries of visible_nodes
     entry_list = [
@@ -56,7 +53,7 @@ def trim_network(
         if cache_data["overview"] != {}:
             cache_data = calculate_trimmed_graph(cache_data, entries, "overview")
 
-    csx_cache.save_new_instance_of_cache_data(user_id, cache_data)
+    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
 
     return cache_data[graph_type]
 
@@ -121,36 +118,36 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
 
     # Generate new NetworkX graph
     cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
-        csx_analysis.graph_from_graph_data(cache_data[graph_type])
+        csx_graph.from_graph_data(cache_data[graph_type])
     )
 
-    components = get_components(
+    components = csx_components.get_components(
         cache_data[graph_type]["nodes"],
         [],
-        csx_analysis.graph_from_graph_data(cache_data[graph_type]),
+        csx_graph.from_graph_data(cache_data[graph_type]),
     )
 
-    nodes = enrich_nodes_with_components(new_nodes, components)
-    nodes = enrich_nodes_with_neighbors(
-        nodes, [], csx_analysis.graph_from_graph_data(cache_data[graph_type])
+    nodes = csx_nodes.enrich_with_components(new_nodes, components)
+    nodes = csx_nodes.enrich_with_neighbors(
+        nodes, [], csx_graph.from_graph_data(cache_data[graph_type])
     )
 
-    cache_data[graph_type]["edges"] = enrich_edges_with_components(
+    cache_data[graph_type]["edges"] = csx_edges.enrich_with_components(
         cache_data[graph_type]["edges"], components
     )
 
     cache_data[graph_type]["nodes"] = nodes
 
     if graph_type == "overview":
-        components = enrich_components_with_top_connections(
+        components = csx_components.enrich_with_top_connections(
             components, cache_data[graph_type]["edges"]
         )
     components = sorted(components, key=lambda component: -component["node_count"])
 
     cache_data[graph_type]["components"] = components
 
-    cache_data[graph_type]["meta"]["max_degree"] = csx_analysis.get_max_degree(
-        csx_analysis.graph_from_graph_data(cache_data[graph_type])
+    cache_data[graph_type]["meta"]["max_degree"] = csx_graph.get_max_degree(
+        csx_graph.from_graph_data(cache_data[graph_type])
     )
 
     return cache_data

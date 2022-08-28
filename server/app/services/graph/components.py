@@ -1,13 +1,14 @@
-import networkx as nx
-from app.utils.timer import use_timing
-from typing import List, Tuple, cast
-from app.types import Node, Component, Edge, ConnectionCount
 from collections import Counter
+from typing import List, Tuple, cast
+
+import networkx as nx
+from app.types import Component, ConnectionCount, Edge, Node
+from app.utils.timer import use_timing
 
 
 @use_timing
 def get_components(
-    nodes: List[Node], edges: List[Tuple[str, str]], graph=None
+    nodes: List[Node], edges: List[Tuple[str, str]], graph: nx.MultiGraph
 ) -> List[Component]:
     """Extract components from given nodes and edges."""
 
@@ -69,47 +70,7 @@ def get_components(
 
 
 @use_timing
-def enrich_nodes_with_components(
-    nodes: List[Node], components: List[Component]
-) -> List[Node]:
-    for node in nodes:
-        for component in components:
-            if node["id"] in component["nodes"]:
-                node["component"] = component["id"]
-    return nodes
-
-
-@use_timing
-def enrich_nodes_with_neighbors(
-    nodes: List[Node], edges: List[Tuple[str, str]], graph=None
-) -> List[Node]:
-    if not graph:
-        graph = nx.MultiGraph()
-        graph.add_nodes_from([node["id"] for node in nodes])
-        graph.add_edges_from(edges)
-
-    for node in nodes:
-        node["neighbours"] = set(graph.neighbors(node["id"]))
-
-    return nodes
-
-
-@use_timing
-def enrich_edges_with_components(
-    edges: List[Edge], components: List[Component]
-) -> List[Edge]:
-    for edge in edges:
-        for component in components:
-            if (
-                edge["source"] in component["nodes"]
-                and edge["target"] in component["nodes"]
-            ):
-                edge["component"] = component["id"]
-    return edges
-
-
-@use_timing
-def enrich_components_with_top_connections(
+def enrich_with_top_connections(
     components: List[Component], edges: List[Edge]
 ) -> List[Component]:
     for component in components:

@@ -1,7 +1,6 @@
-from app.utils.timer import use_timing
 import pymongo
+from app.utils.timer import use_timing
 from pymongo import MongoClient
-import itertools
 
 client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx

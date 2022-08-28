@@ -40,12 +40,6 @@ class Edge(TypedDict):
     connections: Optional[List[EdgeConnection]]
 
 
-class EnrichedEdgeTuple(TypedDict):
-    label: str
-    feature: str
-    edge: Tuple[str, str]
-
-
 class Keyphrase(TypedDict):
     label: str
     type: str

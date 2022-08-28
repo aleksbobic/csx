@@ -1,8 +1,9 @@
-import redis
 import pickle
+
+import app.services.graph.graph as csx_graph
 import networkx as nx
 
-import app.utils.analysis as csx_analysis
+import redis
 
 r = redis.Redis(host="redis", port=6379, db=0)
 
@@ -11,7 +12,7 @@ def save_current_graph(uuid, cache_data, graph_type):
     cache_data[graph_type]["meta"] = {
         **cache_data[graph_type]["meta"],
         "nx_graph": nx.to_dict_of_dicts(
-            csx_analysis.graph_from_graph_data(cache_data[graph_type])
+            csx_graph.from_graph_data(cache_data[graph_type])
         ),
     }
 

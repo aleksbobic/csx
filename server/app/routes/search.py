@@ -1,4 +1,4 @@
-from email.policy import default
+import itertools
 import json
 import os
 from typing import Dict, List
@@ -11,22 +11,16 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 from pydantic import BaseModel
-import itertools
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
-import app.utils.analysis as csx_analysis
-import app.utils.cache as csx_cache
-import app.utils.elastic as csx_es
-from app.controllers.graph.converter import (
-    get_graph,
-    generate_graph_metadata,
-    get_props_for_cached_nodes,
-)
-from app.services.graph.node import get_anchor_property_values
+import app.services.data.elastic as csx_es
+import app.services.data.redis as csx_redis
+import app.services.graph.graph as csx_graph
+import app.services.graph.nodes as csx_nodes
+import app.services.data.autocomplete as csx_auto
 from app.utils.timer import use_timing
-import app.utils.autocomplete as csx_auto
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -243,7 +237,7 @@ def search(data: Data) -> dict:
     anchor_properties = data.anchor_properties
 
     """Run search using given query."""
-    cache_data = csx_cache.load_current_graph(user_id)
+    cache_data = csx_redis.load_current_graph(user_id)
 
     directory_path = os.getcwd()
     print("My current directory is : " + directory_path)
@@ -323,7 +317,7 @@ def search(data: Data) -> dict:
     if graph_type == "overview":
         current_dimensions = links + [anchor]
 
-    comparison_res = csx_cache.compare_instances(
+    comparison_res = csx_redis.compare_instances(
         cache_data,
         {
             "index": index,
@@ -389,13 +383,15 @@ def get_graph_from_scratch(
     anchor_properties,
     comparison_res,
 ):
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
+    graph_data = csx_graph.get_graph(
+        graph_type, elastic_json, dimensions, schema, index
+    )
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
-    anchor_property_values = get_anchor_property_values(
+    anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
 
-    graph_data["meta"] = generate_graph_metadata(
+    graph_data["meta"] = csx_graph.generate_graph_metadata(
         graph_type,
         dimensions,
         table_data,
@@ -407,7 +403,7 @@ def get_graph_from_scratch(
         graph_data,
     )
 
-    cache_data = csx_cache.generate_cache_data(
+    cache_data = csx_redis.generate_cache_data(
         graph_type,
         cache_data,
         graph_data,
@@ -421,8 +417,8 @@ def get_graph_from_scratch(
         elastic_json,
     )
 
-    csx_cache.save_current_graph(user_id, cache_data, graph_type)
-    csx_analysis.graph_from_graph_data(cache_data[graph_type])
+    csx_redis.save_current_graph(user_id, cache_data, graph_type)
+    csx_graph.from_graph_data(cache_data[graph_type])
 
     return graph_data
 
@@ -430,11 +426,11 @@ def get_graph_from_scratch(
 def get_graph_with_new_anchor_props(
     comparison_res, graph_type, dimensions, elastic_json
 ):
-    graph_data = get_props_for_cached_nodes(
+    graph_data = csx_graph.get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
     )
 
-    graph_data["meta"]["anchor_property_values"] = get_anchor_property_values(
+    graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
 
@@ -456,14 +452,16 @@ def get_graph_from_existing_data(
 ):
     # Take global table data and generate grpah
     elastic_json = comparison_res["data"]["global"]["elastic_json"]
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
+    graph_data = csx_graph.get_graph(
+        graph_type, elastic_json, dimensions, schema, index
+    )
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
 
-    anchor_property_values = get_anchor_property_values(
+    anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
 
-    graph_data["meta"] = generate_graph_metadata(
+    graph_data["meta"] = csx_graph.generate_graph_metadata(
         graph_type,
         dimensions,
         table_data,
@@ -477,7 +475,7 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    csx_cache.save_new_instance_of_cache_data(user_id, cache_data)
+    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
 
     return graph_data
 

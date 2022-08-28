@@ -1,8 +1,11 @@
 from palettable.matplotlib import Plasma_10
 from palettable.tableau import Tableau_20, Tableau_10
+from typing import List, Tuple, cast, Any, Union
 
 
-def generate_rainbow_scale(values):
+def generate_rainbow_scale(values: List[Union[str, int, float]]) -> dict:
+    """Generate dictionary of value color pairs from given values"""
+
     color_list_20 = Tableau_20.hex_colors
     color_list_10 = Tableau_10.hex_colors
 
@@ -12,7 +15,10 @@ def generate_rainbow_scale(values):
     return {val: color_list_20[i % 20] for i, val in enumerate(values)}
 
 
-def generate_cold_hot_scale(min, max):
+def generate_cold_hot_scale(
+    min: Union[int, float], max: Union[int, float]
+) -> list[dict]:
+    """Generate a list steps where each step contains the minimum and maximum value and the color assigned to the min and max value"""
 
     color_list_10 = Plasma_10.hex_colors
     step_size = (max - min) / 10
