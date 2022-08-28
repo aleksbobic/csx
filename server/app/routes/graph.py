@@ -100,6 +100,9 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
         if len(set(node["entries"]).intersection(set(entries))) > 0
     ]
 
+    for node in cache_data[graph_type]["nodes"]:
+        node["entries"] = list(set(node["entries"]).intersection(set(entries)))
+
     # Filter graph edges
     cache_data[graph_type]["edges"] = [
         edge
