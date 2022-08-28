@@ -1,17 +1,23 @@
-import networkx as nx
-from app.utils.timer import use_timing
-from typing import List, Tuple, cast
-from app.types import Node, Component, Edge, ConnectionCount
 from collections import Counter
+from typing import List, Tuple, cast, Union
+
+import networkx as nx
+from app.types import Component, ConnectionCount, Edge, Node
+from app.utils.timer import use_timing
 
 
 @use_timing
-def get_components(nodes: List[Node], edges: List[Tuple[str, str]]) -> List[Component]:
+def get_components(
+    nodes: List[Node],
+    edges: List[Tuple[str, str]],
+    graph: Union[nx.Graph, None] = None,
+) -> List[Component]:
     """Extract components from given nodes and edges."""
 
-    graph = nx.MultiGraph()
-    graph.add_nodes_from([range(0, len(nodes))])
-    graph.add_edges_from(edges)
+    if not graph:
+        graph = nx.Graph()
+        graph.add_nodes_from([node["id"] for node in nodes])
+        graph.add_edges_from(edges)
 
     # Extract the actual component nodes and edges
     components = []
@@ -48,8 +54,10 @@ def get_components(nodes: List[Node], edges: List[Tuple[str, str]]) -> List[Comp
 
         new_component["entries"] = list(set(component_entries))
         new_component["nodes"] = component
+        new_component["selectedNodesCount"] = 0
+        new_component["isSelected"] = False
 
-        if new_component["node_count"] > 0:
+        if new_component["node_count"] > 1:
             if new_component["largest_nodes"]:
                 components_with_large_nodes.append(new_component)
             else:
@@ -64,34 +72,10 @@ def get_components(nodes: List[Node], edges: List[Tuple[str, str]]) -> List[Comp
 
 
 @use_timing
-def enrich_nodes_with_components(
-    nodes: List[Node], components: List[Component]
-) -> List[Node]:
-    for node in nodes:
-        for component in components:
-            if node["id"] in component["nodes"]:
-                node["component"] = component["id"]
-    return nodes
-
-
-@use_timing
-def enrich_edges_with_components(
-    edges: List[Edge], components: List[Component]
-) -> List[Edge]:
-    for edge in edges:
-        for component in components:
-            if (
-                edge["source"] in component["nodes"]
-                and edge["target"] in component["nodes"]
-            ):
-                edge["component"] = component["id"]
-    return edges
-
-
-@use_timing
-def enrich_components_with_top_connections(
+def enrich_with_top_connections(
     components: List[Component], edges: List[Edge]
 ) -> List[Component]:
+    """Enrich components with top components"""
     for component in components:
         component_connections = [
             edge["connections"]

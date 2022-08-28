@@ -186,7 +186,7 @@ export class GraphStore {
         return [mesh, mesh.clone()];
     };
 
-    generateNodeObjects = (nodes, neighbours, graphType) => {
+    generateNodeObjects = (nodes, graphType) => {
         const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
             color: new THREE.Color('white'),
             side: THREE.DoubleSide
@@ -206,11 +206,7 @@ export class GraphStore {
                 nodes[i].size
             );
 
-            if (neighbours[nodes[i].id]) {
-                nodes[i].neighbours = neighbours[nodes[i].id];
-            } else {
-                nodes[i].neighbours = new Set();
-            }
+            nodes[i].neighbours = new Set(nodes[i].neighbours);
 
             nodes[i].selected = false;
 
@@ -376,26 +372,6 @@ export class GraphStore {
         data.links.pop();
     };
 
-    generateNeighbours = edges => {
-        const neighbours = {};
-
-        for (let i = 0; i < edges.length; i++) {
-            if (edges[i].source in neighbours) {
-                neighbours[edges[i].source].add(edges[i].target);
-            } else {
-                neighbours[edges[i].source] = new Set([edges[i].target]);
-            }
-
-            if (edges[i].target in neighbours) {
-                neighbours[edges[i].target].add(edges[i].source);
-            } else {
-                neighbours[edges[i].target] = new Set([edges[i].source]);
-            }
-        }
-
-        return neighbours;
-    };
-
     updatePerspectives = perspectives => {
         this.perspectives = perspectives.map(entry => entry[1]);
     };
@@ -512,11 +488,8 @@ export class GraphStore {
                     )
                 );
 
-                const neighbours = this.generateNeighbours(response.edges);
-
                 const nodes = this.generateNodeObjects(
                     response.nodes,
-                    neighbours,
                     'overview'
                 );
 
@@ -532,29 +505,9 @@ export class GraphStore {
                         return edge;
                     }),
                     nodes,
+                    components: response.components,
                     isEmpty: false
                 };
-
-                this.graphData.components = response.components
-                    .map(component => {
-                        return {
-                            id: component.id,
-                            node_count: component.node_count,
-                            largest_nodes: component.largest_nodes,
-                            largest_connections: component.largest_connections,
-                            entries: component.entries,
-                            nodes: component.nodes,
-                            selectedNodesCount: 0,
-                            isSelected: false
-                        };
-                    })
-                    .sort((first, second) =>
-                        first.node_count > second.node_count
-                            ? -1
-                            : first.node_count < second.node_count
-                            ? 1
-                            : 0
-                    );
 
                 this.graphData.meta = {
                     ...this.graphData.meta,
@@ -614,11 +567,8 @@ export class GraphStore {
                     'component'
                 );
 
-                const neighbours = this.generateNeighbours(response.edges);
-
                 const nodes = this.generateNodeObjects(
                     response.nodes,
-                    neighbours,
                     'detail'
                 );
 
@@ -634,22 +584,9 @@ export class GraphStore {
                         return edge;
                     }),
                     nodes,
+                    components: response.components,
                     isEmpty: false
                 };
-
-                this.detailGraphData.components = response.components.map(
-                    component => {
-                        return {
-                            id: component.id,
-                            node_count: component.node_count,
-                            largest_nodes: component.largest_nodes,
-                            entries: component.entries,
-                            nodes: component.nodes,
-                            selectedNodesCount: 0,
-                            isSelected: false
-                        };
-                    }
-                );
 
                 this.detailGraphData.meta = {
                     ...this.detailGraphData.meta,
@@ -848,6 +785,7 @@ export class GraphStore {
 
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
+            this.resetGraphData();
         } else {
             this.resetGraphData();
         }

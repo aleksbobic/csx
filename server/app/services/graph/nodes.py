@@ -1,19 +1,21 @@
+import itertools
 import math
 import uuid
-from typing import Dict, List, cast
+from collections import Counter
+from typing import Dict, List, Tuple, cast
 
 import networkx as nx
 import numpy as np
+from numpy import inf
 import pandas as pd
-from app.types import Node
 from app.utils.timer import use_timing
-from collections import Counter
-import itertools
+from app.types import Component, Node
 
 
 @use_timing
-def get_labels(df: pd.DataFrame, feature: str, isFeatureList: bool) -> Counter:
+def get_labels(df: pd.DataFrame, feature: str) -> Counter:
     """Extract unique values and their counts of a given feature."""
+    isFeatureList = isinstance(df[feature].iloc[0], list)
 
     if isFeatureList:
         return Counter(itertools.chain.from_iterable(df[feature]))
@@ -21,10 +23,10 @@ def get_labels(df: pd.DataFrame, feature: str, isFeatureList: bool) -> Counter:
     return Counter(df[feature].tolist())
 
 
-def get_label_entries(
-    df: pd.DataFrame, feature: str, label: str, isFeatureList: bool
-) -> List[str]:
+def get_label_entries(df: pd.DataFrame, feature: str, label: str) -> List[str]:
     """Extract entry ids for a given feature, label tuple."""
+    isFeatureList = isFeatureList = isinstance(df[feature].iloc[0], list)
+
     if isFeatureList:
         return df[df[feature].apply(lambda x: label in x)]["entry"].tolist()
 
@@ -40,6 +42,33 @@ def get_anchor_property_values(search_results, anchor_properties: List[str]) -> 
     ]
 
 
+@use_timing
+def enrich_with_components(
+    nodes: List[Node], components: List[Component]
+) -> List[Node]:
+    for node in nodes:
+        for component in components:
+            if node["id"] in component["nodes"]:
+                node["component"] = component["id"]
+                break
+    return nodes
+
+
+@use_timing
+def enrich_with_neighbors(
+    nodes: List[Node], edges: List[Tuple[str, str]], graph=None
+) -> List[Node]:
+    if not graph:
+        graph = nx.MultiGraph()
+        graph.add_nodes_from([node["id"] for node in nodes])
+        graph.add_edges_from(edges)
+
+    for node in nodes:
+        node["neighbours"] = set(graph.neighbors(node["id"]))
+
+    return nodes
+
+
 def enrich_node_with_props(
     node: Node, df: pd.DataFrame, anchor_properties: List[str]
 ) -> Node:
@@ -53,7 +82,7 @@ def enrich_node_with_props(
 
 
 @use_timing
-def enrich_nodes_with_props(
+def enrich_with_props(
     df: pd.DataFrame, nodes: List[Node], anchor: str, anchor_properties: List[str]
 ) -> List[Node]:
     return [
@@ -64,20 +93,41 @@ def enrich_nodes_with_props(
     ]
 
 
+def adjust_node_size(
+    nodes: List[Node], df: pd.DataFrame, features: List[str]
+) -> List[Node]:
+    """Adjust size of nodes based on frequency of labesl in given dataframe"""
+
+    node_label_frequencies = {}
+
+    for feature in features:
+        node_label_frequencies[feature] = get_labels(df, feature)
+
+    for node in nodes:
+        calculated_size = np.log2(
+            node_label_frequencies[node["feature"]][node["label"]]
+        )
+
+        if calculated_size == -inf:
+            calculated_size = 0
+
+        node["size"] = math.ceil(calculated_size + 5)
+
+    return nodes
+
+
 @use_timing
 def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
     # -> List[Node]:
     """Generate list of node objects for all values of a given feature."""
 
-    isFeatureList = isinstance(df[feature].iloc[0], list)
-
-    node_labels = get_labels(df, feature, isFeatureList)
+    node_labels = get_labels(df, feature)
 
     entry_list = {}
 
     def expand_entities(node_label, node_labels):
         node = {
-            "entries": get_label_entries(df, feature, node_label, isFeatureList),
+            "entries": get_label_entries(df, feature, node_label),
             "id": uuid.uuid4().hex,
             "label": node_label,
             "feature": feature,
@@ -94,22 +144,6 @@ def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
 
         return node
 
-    # return [
-    #     cast(
-    #         Node,
-    #         {
-    #             "entries": get_label_entries(df, feature, node_label, isFeatureList),
-    #             "id": uuid.uuid4().hex,
-    #             "label": node_label,
-    #             "feature": feature,
-    #             "community": 0,
-    #             "component": 0,
-    #             "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
-    #         },
-    #     )
-    #     for node_label in node_labels
-    # ]
-
     nodes = [
         cast(
             Node,
@@ -119,6 +153,18 @@ def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
     ]
 
     return nodes, entry_list
+
+
+def enrich_entries_with_nodes(entries_with_nodes: Dict, nodes: List[Node]) -> Dict:
+    """Enrich existing entries with nodes with additional nodes"""
+    for node in nodes:
+        for entry in node["entries"]:
+            if entry in entries_with_nodes:
+                entries_with_nodes[entry].append(node)
+            else:
+                entries_with_nodes[entry] = [node]
+
+    return entries_with_nodes
 
 
 @use_timing
@@ -153,7 +199,7 @@ def get_nodes(
                     entries[entry] = entries[entry] + new_entries[entry]
                 else:
                     entries[entry] = new_entries[entry]
-        nodes = enrich_nodes_with_props(df, nodes, anchor, anchor_properties)
+        nodes = enrich_with_props(df, nodes, anchor, anchor_properties)
 
     return nodes, entries
 
@@ -189,7 +235,7 @@ def get_positions(nodes: List[Node], edges) -> List[Node]:
 
 @use_timing
 def get_visible_nodes(nodes: List[Node], visible_features: List[str]) -> List[Node]:
-    """Extract visible nodes from list of all nodes"""
+    """Extract visible nodes from list of all nodes based on the provided visible features"""
 
     return [
         node

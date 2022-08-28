@@ -7,6 +7,7 @@ export class SchemaStore {
     data = [];
     overviewData = [];
     overviewDataNodeProperties = [];
+    overviewHasLink = true;
 
     colors = {
         link: '#4da344',

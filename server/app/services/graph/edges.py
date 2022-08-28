@@ -1,13 +1,12 @@
-from networkx.algorithms.shortest_paths.generic import shortest_path
-from itertools import combinations, product, permutations
-import networkx as nx
-from app.utils.timer import use_timing
 import uuid
-import pandas as pd
-from typing import Dict, List, Set, Tuple, cast, Union
 from collections import Counter
+from itertools import combinations, permutations, product
+from typing import Dict, List, Literal, Set, Tuple, Union, cast
 
-from app.types import SchemaElement, Edge, Node, EnrichedEdgeTuple
+import networkx as nx
+import pandas as pd
+from app.types import Component, Edge, Node, SchemaElement
+from app.utils.timer import use_timing
 
 
 @use_timing
@@ -16,8 +15,8 @@ def get_edge_tuples(
     features: List[str],
     visible_features: List[str],
     schema: List[SchemaElement],
-    entries_with_nodes,
-    node_ids_with_labels,
+    entries_with_nodes: Dict,
+    node_ids_with_labels: Dict,
 ) -> List[Tuple[str, str]]:
     """Get node tuples that represent the graphs edges."""
 
@@ -39,9 +38,10 @@ def get_overview_edge_tuples(
     anchor: str,
     links: List[str],
     nodes: List[Node],
-    entries_with_nodes,
-    node_ids_with_labels,
-):
+    entries_with_nodes: Dict,
+    node_ids_with_labels: Dict,
+) -> Dict:
+    """Generate dictionary with edges as keys and their properties as values"""
     overview_schema_paths = get_overview_graph_schema(anchor, links)
 
     candidate_edges = []
@@ -55,7 +55,6 @@ def get_overview_edge_tuples(
     graph.add_nodes_from([node["id"] for node in nodes])
     graph.add_edges_from(candidate_edges)
 
-    edge_tuples = []
     edge_tuple_lookup = {}
 
     link_nodes = [node["id"] for node in nodes if node["feature"] in links]
@@ -89,7 +88,7 @@ def get_overview_edge_tuples(
 
 
 @use_timing
-def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
+def get_overview_edges(edge_tuple_lookup: Dict, nx_edges: List[str]) -> List[Edge]:
     """Generate a position for each node in graph."""
 
     edge_tuples_counts = Counter(nx_edges)
@@ -108,17 +107,6 @@ def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
         )
         for edge in edge_tuples_counts
     ]
-
-
-@use_timing
-def get_overview_nx_edges(
-    enriched_edge_tuples: List[EnrichedEdgeTuple],
-) -> List[Tuple[str, str]]:
-    """Get edges which can be used directly in a networkx graph."""
-
-    edge_tuples = [edge_tuple["edge"] for edge_tuple in enriched_edge_tuples]
-
-    return list(set(edge_tuples))
 
 
 @use_timing
@@ -313,8 +301,13 @@ def get_shortest_schema_paths(
 
 
 def add_shortest_path_from_leafs(
-    leaf_nodes, shortest_schema_paths, shortest_path_candidates, position, graph
-):
+    leaf_nodes: Set,
+    shortest_schema_paths: List,
+    shortest_path_candidates: List,
+    position: Literal["src", "dest"],
+    graph: nx.DiGraph,
+) -> List:
+    """Expand shortest schema paths with shortest schema paths from leaf nodes"""
     for node in leaf_nodes:
         new_temp_shortest_path_from_src = []
         shortest_length = 0
@@ -591,3 +584,17 @@ def edge_is_in_list(edges: List[Tuple[str, str]], dest: str, src: str) -> bool:
         if edge[0] == dest and edge[1] == src:
             return True
     return False
+
+
+@use_timing
+def enrich_with_components(
+    edges: List[Edge], components: List[Component]
+) -> List[Edge]:
+    for edge in edges:
+        for component in components:
+            if (
+                edge["source"] in component["nodes"]
+                and edge["target"] in component["nodes"]
+            ):
+                edge["component"] = component["id"]
+    return edges

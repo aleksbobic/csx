@@ -1,35 +1,44 @@
-import redis
 import pickle
-import networkx as nx
 
-import app.utils.analysis as csx_analysis
+import app.services.graph.graph as csx_graph
+import networkx as nx
+import pandas as pd
+
+from typing import Dict, Any, List, Union, Tuple, Literal
+from app.types import Component, ConnectionCount, Edge, Node, ComparisonResults
+import redis
 
 r = redis.Redis(host="redis", port=6379, db=0)
 
 
-def save_current_graph(uuid, cache_data, graph_type):
+def save_current_graph(
+    uuid: str, cache_data: Dict, graph_type: Literal["overview", "detail"]
+) -> None:
     cache_data[graph_type]["meta"] = {
         **cache_data[graph_type]["meta"],
         "nx_graph": nx.to_dict_of_dicts(
-            csx_analysis.graph_from_graph_data(cache_data[graph_type])
+            csx_graph.from_graph_data(cache_data[graph_type])
         ),
     }
 
     r.set(uuid, pickle.dumps(cache_data))
 
 
-def save_new_instance_of_cache_data(uuid, cache_data):
+def save_new_instance_of_cache_data(uuid: str, cache_data: Dict) -> None:
     r.set(uuid, pickle.dumps(cache_data))
 
 
-def load_current_graph(uuid):
+def load_current_graph(uuid: str) -> Dict:
     graph = r.get(uuid)
     if graph:
         return pickle.loads(graph)
     return {}
 
 
-def compare_instances(cache_data, params, graph_type):
+def compare_instances(
+    cache_data: Dict, params: Dict, graph_type: Literal["overview", "detail"]
+) -> ComparisonResults:
+    """Compare existing cache graph with set of given parameters"""
     difference = None
     action = "from_cache"
 
@@ -59,10 +68,8 @@ def compare_instances(cache_data, params, graph_type):
         difference = "anchor_properties"
         action = "from_anchor_properties"
 
-    # TODO: Check for table data
-
     return {
-        "same": difference == None,
+        "same": difference == "",
         "difference": difference,
         "action": action,
         "data": cache_data,
@@ -70,18 +77,20 @@ def compare_instances(cache_data, params, graph_type):
 
 
 def generate_cache_data(
-    graph_type,
-    cache_data,
-    graph_data,
-    search_uuid,
-    index,
-    query,
-    dimensions,
-    table_data,
-    results,
-    comparison_res,
-    elastic_json,
-):
+    graph_type: Literal["overview", "detail"],
+    cache_data: Dict,
+    graph_data: Dict,
+    search_uuid: str,
+    index: str,
+    query: str,
+    dimensions: Dict,
+    table_data: List[Dict],
+    results: pd.DataFrame,
+    comparison_res: ComparisonResults,
+    elastic_json: Dict,
+) -> Dict:
+    """Generate cache data"""
+
     if graph_type == "overview":
         overview = graph_data
         if comparison_res["difference"] == "search_uuid":

@@ -1,18 +1,17 @@
-import pandas as pd
-import json
-import os, glob
-from os.path import exists
 import ast
 import itertools
-from collections import Counter
+import json
+import os
+from os.path import exists
 
-from fastapi import APIRouter, UploadFile
+import app.services.data.elastic as csx_es
+import app.services.data.mongo as csx_data
+import app.services.graph.nodes as csx_nodes
+import app.services.data.autocomplete as csx_auto
+
+import pandas as pd
 from elasticsearch_dsl import Q
-
-from app.services.graph.node import get_nodes
-import app.utils.elastic as csx_es
-import app.utils.data as csx_data
-import app.utils.autocomplete as csx_auto
+from fastapi import APIRouter, UploadFile
 
 router = APIRouter()
 
@@ -257,9 +256,9 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     if len(list_properties) > 0:
         print("***** Retrieving elastic")
-        elastic_list_df = csx_es.convert_query_to_df(Q("match_all"), name, False)
+        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), name, False)
         print("***** Generating nodes")
-        nodes, entries_with_nodes = get_nodes(elastic_list_df)
+        nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
 
         print("***** Generating mongo nodes")
 
