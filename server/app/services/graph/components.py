@@ -16,7 +16,7 @@ def get_components(
 
     if not graph:
         graph = nx.Graph()
-        graph.add_nodes_from([range(0, len(nodes))])
+        graph.add_nodes_from([node["id"] for node in nodes])
         graph.add_edges_from(edges)
 
     # Extract the actual component nodes and edges
@@ -57,7 +57,7 @@ def get_components(
         new_component["selectedNodesCount"] = 0
         new_component["isSelected"] = False
 
-        if new_component["node_count"] > 0:
+        if new_component["node_count"] > 1:
             if new_component["largest_nodes"]:
                 components_with_large_nodes.append(new_component)
             else:

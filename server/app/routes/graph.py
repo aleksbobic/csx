@@ -9,8 +9,6 @@ import app.services.graph.nodes as csx_nodes
 
 import networkx as nx
 import pandas as pd
-import numpy as np
-import math
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -83,6 +81,9 @@ def calculate_global_cache_properties(cache_data, entries):
 
 
 def calculate_trimmed_graph(cache_data, entries, graph_type):
+
+    df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
+
     # Filter graph nodes
     new_nodes = [
         node
@@ -133,8 +134,6 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
     nodes = csx_nodes.enrich_with_neighbors(
         nodes, [], csx_graph.from_graph_data(cache_data[graph_type])
     )
-
-    df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
 
     nodes = csx_nodes.adjust_node_size(
         nodes, df, cache_data[graph_type]["meta"]["dimensions"]
