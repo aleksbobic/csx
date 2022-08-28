@@ -75,6 +75,7 @@ def get_components(
 def enrich_with_top_connections(
     components: List[Component], edges: List[Edge]
 ) -> List[Component]:
+    """Enrich components with top components"""
     for component in components:
         component_connections = [
             edge["connections"]

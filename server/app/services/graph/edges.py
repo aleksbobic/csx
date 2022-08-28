@@ -1,7 +1,7 @@
 import uuid
 from collections import Counter
 from itertools import combinations, permutations, product
-from typing import Dict, List, Set, Tuple, Union, cast
+from typing import Dict, List, Literal, Set, Tuple, Union, cast
 
 import networkx as nx
 import pandas as pd
@@ -15,8 +15,8 @@ def get_edge_tuples(
     features: List[str],
     visible_features: List[str],
     schema: List[SchemaElement],
-    entries_with_nodes,
-    node_ids_with_labels,
+    entries_with_nodes: Dict,
+    node_ids_with_labels: Dict,
 ) -> List[Tuple[str, str]]:
     """Get node tuples that represent the graphs edges."""
 
@@ -38,9 +38,10 @@ def get_overview_edge_tuples(
     anchor: str,
     links: List[str],
     nodes: List[Node],
-    entries_with_nodes,
-    node_ids_with_labels,
-):
+    entries_with_nodes: Dict,
+    node_ids_with_labels: Dict,
+) -> Dict:
+    """Generate dictionary with edges as keys and their properties as values"""
     overview_schema_paths = get_overview_graph_schema(anchor, links)
 
     candidate_edges = []
@@ -54,7 +55,6 @@ def get_overview_edge_tuples(
     graph.add_nodes_from([node["id"] for node in nodes])
     graph.add_edges_from(candidate_edges)
 
-    edge_tuples = []
     edge_tuple_lookup = {}
 
     link_nodes = [node["id"] for node in nodes if node["feature"] in links]
@@ -88,7 +88,7 @@ def get_overview_edge_tuples(
 
 
 @use_timing
-def get_overview_edges(edge_tuple_lookup, nx_edges) -> List[Edge]:
+def get_overview_edges(edge_tuple_lookup: Dict, nx_edges: List[str]) -> List[Edge]:
     """Generate a position for each node in graph."""
 
     edge_tuples_counts = Counter(nx_edges)
@@ -301,8 +301,13 @@ def get_shortest_schema_paths(
 
 
 def add_shortest_path_from_leafs(
-    leaf_nodes, shortest_schema_paths, shortest_path_candidates, position, graph
-):
+    leaf_nodes: Set,
+    shortest_schema_paths: List,
+    shortest_path_candidates: List,
+    position: Literal["src", "dest"],
+    graph: nx.DiGraph,
+) -> List:
+    """Expand shortest schema paths with shortest schema paths from leaf nodes"""
     for node in leaf_nodes:
         new_temp_shortest_path_from_src = []
         shortest_length = 0

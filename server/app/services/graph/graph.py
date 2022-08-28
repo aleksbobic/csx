@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Literal, Dict
 
 import app.services.data.mongo as csx_data
 import app.services.graph.components as csx_components
@@ -11,7 +11,14 @@ from app.types import SchemaElement
 from app.utils.timer import use_timing
 
 
-def get_graph(graph_type, elastic_json, dimensions, schema, index):
+def get_graph(
+    graph_type: Literal["overview", "detail"],
+    elastic_json: Dict,
+    dimensions: Dict,
+    schema: List[SchemaElement],
+    index: str,
+) -> Dict:
+    """Generate graph"""
     if graph_type == "overview":
         return get_overview_graph(
             elastic_json,
@@ -27,8 +34,8 @@ def get_graph(graph_type, elastic_json, dimensions, schema, index):
 
 
 def generate_graph_metadata(
-    graph_type,
-    dimensions,
+    graph_type: Literal["overview", "detail"],
+    dimensions: Dict,
     table_data,
     schema,
     query,
@@ -36,7 +43,7 @@ def generate_graph_metadata(
     anchor_properties,
     anchor_property_values,
     graph_data,
-):
+) -> Dict:
 
     if graph_type == "overview":
         return {
@@ -140,7 +147,9 @@ def get_detail_graph(
 
 
 @use_timing
-def get_props_for_cached_nodes(comparison_results, anchor_properties, graph_type):
+def get_props_for_cached_nodes(
+    comparison_results, anchor_properties, graph_type: Literal["overview", "detail"]
+):
     current_properties_set = set(
         comparison_results["data"][graph_type]["nodes"][0]["properties"].keys()
     )
