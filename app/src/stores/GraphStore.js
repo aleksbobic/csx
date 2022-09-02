@@ -403,19 +403,21 @@ export class GraphStore {
     };
 
     selectComponent = componentId => {
-        if (this.graphData.nodes) {
-            if (!this.graphData.selectedComponents.includes(componentId)) {
-                const nodesToSelect = this.graphData.nodes.filter(
+        if (this.currentGraphData.nodes) {
+            if (
+                !this.currentGraphData.selectedComponents.includes(componentId)
+            ) {
+                const nodesToSelect = this.currentGraphData.nodes.filter(
                     node => node.component === componentId
                 );
                 this.selectNode(nodesToSelect);
             } else {
-                const nodesToDeselect = this.graphData.nodes.filter(
+                const nodesToDeselect = this.currentGraphData.nodes.filter(
                     node => node.component === componentId && node.selected
                 );
 
                 nodesToDeselect.forEach(node => {
-                    const index = this.graphData.selectedNodes.findIndex(
+                    const index = this.currentGraphData.selectedNodes.findIndex(
                         n => n.id === node.id
                     );
                     this.deselectNode(node, index);
@@ -670,26 +672,24 @@ export class GraphStore {
             this.store.graphInstance.resetSelfCentric();
         }
 
-        if (this.store.core.isOverview) {
-            const nodeComponent = this.currentGraphData.components.find(
-                c => c.id === node.component
-            );
+        const nodeComponent = this.currentGraphData.components.find(
+            c => c.id === node.component
+        );
 
-            if (nodeComponent) {
-                nodeComponent.selectedNodesCount -= 1;
+        if (nodeComponent) {
+            nodeComponent.selectedNodesCount -= 1;
 
-                if (
-                    nodeComponent.selectedNodesCount === 0 &&
-                    nodeComponent.isSelected
-                ) {
-                    nodeComponent.isSelected = false;
+            if (
+                nodeComponent.selectedNodesCount === 0 &&
+                nodeComponent.isSelected
+            ) {
+                nodeComponent.isSelected = false;
 
-                    const index =
-                        this.currentGraphData.selectedComponents.findIndex(
-                            cid => cid === nodeComponent.id
-                        );
-                    this.currentGraphData.selectedComponents.splice(index, 1);
-                }
+                const index =
+                    this.currentGraphData.selectedComponents.findIndex(
+                        cid => cid === nodeComponent.id
+                    );
+                this.currentGraphData.selectedComponents.splice(index, 1);
             }
         }
     };
@@ -708,42 +708,31 @@ export class GraphStore {
             ]);
         }
 
-        if (this.store.core.isOverview) {
-            for (const node of nodes) {
-                if (this.store.graphInstance.forceShouldIgnoreSelected) {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                }
-
-                node.selected = true;
-
-                const nodeComponent = this.graphData.components.find(
-                    c => c.id === node.component
-                );
-
-                if (nodeComponent) {
-                    nodeComponent.selectedNodesCount += 1;
-
-                    if (
-                        nodeComponent.selectedNodesCount ===
-                            nodeComponent.nodes.length &&
-                        !nodeComponent.isSelected
-                    ) {
-                        nodeComponent.isSelected = true;
-                        this.graphData.selectedComponents.push(
-                            nodeComponent.id
-                        );
-                    }
-                }
+        for (const node of nodes) {
+            if (this.store.graphInstance.forceShouldIgnoreSelected) {
+                node.fx = node.x;
+                node.fy = node.y;
             }
-        } else {
-            for (const node of nodes) {
-                if (this.store.graphInstance.forceShouldIgnoreSelected) {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                }
 
-                node.selected = true;
+            node.selected = true;
+
+            const nodeComponent = this.currentGraphData.components.find(
+                c => c.id === node.component
+            );
+
+            if (nodeComponent) {
+                nodeComponent.selectedNodesCount += 1;
+
+                if (
+                    nodeComponent.selectedNodesCount ===
+                        nodeComponent.nodes.length &&
+                    !nodeComponent.isSelected
+                ) {
+                    nodeComponent.isSelected = true;
+                    this.currentGraphData.selectedComponents.push(
+                        nodeComponent.id
+                    );
+                }
             }
         }
     };
@@ -816,8 +805,26 @@ export class GraphStore {
         }
 
         return {
-            nodes: { count: this.currentGraphData.meta.nodeCount },
-            edges: { count: this.currentGraphData.meta.linkCount }
+            nodes: {
+                count: this.currentGraphData.meta.nodeCount,
+                label: 'nodes'
+            },
+            edges: {
+                count: this.currentGraphData.meta.linkCount,
+                label: 'edges'
+            },
+            components: {
+                count: this.currentGraphData.components.length,
+                label: 'components'
+            },
+            entries: {
+                count: this.currentGraphData.tableData.length,
+                label: 'entries'
+            },
+            maxDegree: {
+                count: this.currentGraphData.meta.maxDegree,
+                label: 'max degree'
+            }
         };
     }
 

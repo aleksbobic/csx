@@ -37,10 +37,14 @@ import {
     Title,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
+import ChartComponent from 'components/feature/stats/chart/Chart.component';
+import ComponentStatsComponent from 'components/feature/stats/component/ComponentStats.component';
+import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
+import GraphStatsComponent from 'components/feature/stats/graph/GraphStats.component';
+import NodeStatsComponent from 'components/feature/stats/node/NodeStats.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect } from 'react';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { RootStoreContext } from 'stores/RootStore';
 
 function FileUploadModal() {
@@ -70,25 +74,24 @@ function FileUploadModal() {
         );
     });
 
-    const renderDoughnutPanel = () => {
-        const chartData = {
-            labels: ['First value', 'Second value', 'Third value'],
-            datasets: [
-                {
-                    label: 'node values',
-                    data: [5, 12, 3],
-                    backgroundColor: ['#3182ce', '#ce317b', '#ce7c31'],
-                    borderColor: 'rgb(0,0,0,)'
-                }
-            ]
-        };
+    const renderChart = (chartType, title) => {
+        let chartData;
+        let chartOptions;
 
-        return (
-            <Doughnut
-                height="250px"
-                redraw={true}
-                data={chartData}
-                options={{
+        switch (chartType) {
+            case 'doughnut':
+                chartData = {
+                    labels: ['First value', 'Second value', 'Third value'],
+                    datasets: [
+                        {
+                            label: 'node values',
+                            data: [5, 12, 3],
+                            backgroundColor: ['#3182ce', '#ce317b', '#ce7c31'],
+                            borderColor: 'rgb(0,0,0,)'
+                        }
+                    ]
+                };
+                chartOptions = {
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     responsive: true,
@@ -98,31 +101,21 @@ function FileUploadModal() {
                             text: 'Example Doughnut Chart'
                         }
                     }
-                }}
-            />
-        );
-    };
-
-    const renderBarPanel = () => {
-        const chartData = {
-            labels: ['First value', 'Second value', 'Third value'],
-            datasets: [
-                {
-                    label: 'node values',
-                    data: [5, 12, 3],
-                    backgroundColor: '#3182ce',
-                    borderColor: 'rgb(0,0,0)'
-                }
-            ]
-        };
-
-        return (
-            <Bar
-                data={chartData}
-                width="100%"
-                height="250px"
-                redraw={true}
-                options={{
+                };
+                break;
+            case 'bar':
+                chartData = {
+                    labels: ['First value', 'Second value', 'Third value'],
+                    datasets: [
+                        {
+                            label: 'node values',
+                            data: [5, 12, 3],
+                            backgroundColor: '#3182ce',
+                            borderColor: 'rgb(0,0,0)'
+                        }
+                    ]
+                };
+                chartOptions = {
                     maintainAspectRatio: false,
                     indexAxis: 'y',
                     responsive: true,
@@ -132,82 +125,79 @@ function FileUploadModal() {
                             text: 'Example Bar Chart'
                         }
                     }
-                }}
-            />
-        );
-    };
-
-    const renderVerticalBarPanel = () => {
-        const chartData = {
-            labels: ['First value', 'Second value', 'Third value'],
-            datasets: [
-                {
-                    label: 'node values',
-                    data: [5, 12, 3],
-                    backgroundColor: '#3182ce',
-                    borderColor: 'rgb(0,0,0)'
-                }
-            ]
-        };
-
-        return (
-            <Bar
-                data={chartData}
-                width="100%"
-                height="250px"
-                redraw={true}
-                options={{
+                };
+                break;
+            case 'vertical bar':
+                chartData = {
+                    labels: ['First value', 'Second value', 'Third value'],
+                    datasets: [
+                        {
+                            label: 'node values',
+                            data: [5, 12, 3],
+                            backgroundColor: '#3182ce',
+                            borderColor: 'rgb(0,0,0)'
+                        }
+                    ]
+                };
+                chartOptions = {
                     maintainAspectRatio: false,
-
                     responsive: true,
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Example Bar Chart'
+                            text: 'Example Vertical Bar Chart'
                         }
                     }
-                }}
-            />
-        );
-    };
-
-    const renderGroupedBarPanel = () => {
-        const chartData = {
-            labels: ['First value', 'Second value', 'Third value'],
-            datasets: [
-                {
-                    label: 'First group',
-                    data: [5, 12, 3],
-                    backgroundColor: '#3182ce',
-                    borderColor: 'rgb(0,0,0)',
-                    stack: 'stack 1'
-                },
-                {
-                    label: 'Second group',
-                    data: [2, 5, 9],
-                    backgroundColor: '#ce317b',
-                    borderColor: 'rgb(0,0,0)',
-                    stack: 'stack 2'
-                },
-                {
-                    label: 'Third group',
-                    data: [10, 3, 8],
-                    backgroundColor: '#ce7c31',
-                    borderColor: 'rgb(0,0,0)',
-                    stack: 'stack 3'
-                }
-            ]
-        };
-
-        return (
-            <Bar
-                data={chartData}
-                width="100%"
-                height="250px"
-                redraw={true}
-                options={{
+                };
+                break;
+            case 'grouped bar':
+                chartData = {
+                    labels: ['First value', 'Second value', 'Third value'],
+                    datasets: [
+                        {
+                            label: 'First group',
+                            data: [5, 12, 3],
+                            backgroundColor: '#3182ce',
+                            borderColor: 'rgb(0,0,0)',
+                            stack: 'stack 1'
+                        },
+                        {
+                            label: 'Second group',
+                            data: [2, 5, 9],
+                            backgroundColor: '#ce317b',
+                            borderColor: 'rgb(0,0,0)',
+                            stack: 'stack 2'
+                        },
+                        {
+                            label: 'Third group',
+                            data: [10, 3, 8],
+                            backgroundColor: '#ce7c31',
+                            borderColor: 'rgb(0,0,0)',
+                            stack: 'stack 3'
+                        }
+                    ]
+                };
+                break;
+            default:
+                chartData = {
+                    labels: [
+                        'First value',
+                        'Second value',
+                        'Third value',
+                        'Fourth value',
+                        'Fifth value'
+                    ],
+                    datasets: [
+                        {
+                            label: 'node values',
+                            data: [5, 12, 3, 7, 4],
+                            backgroundColor: '#3182ce',
+                            borderColor: '#3182ce'
+                        }
+                    ]
+                };
+                chartOptions = {
                     maintainAspectRatio: false,
-
                     responsive: true,
                     plugins: {
                         title: {
@@ -223,48 +213,152 @@ function FileUploadModal() {
                             stacked: true
                         }
                     }
+                };
+                break;
+        }
+
+        return (
+            <ChartComponent
+                data={chartData}
+                title={title}
+                chart={{
+                    type: chartType,
+                    labels: { y: { display: false }, x: { display: false } }
                 }}
+                chartIndex={1}
+                isExample={true}
+                options={chartOptions}
             />
         );
     };
 
-    const renderLinePanel = () => {
-        const chartData = {
-            labels: [
-                'First value',
-                'Second value',
-                'Third value',
-                'Fourth value',
-                'Fifth value'
-            ],
-            datasets: [
-                {
-                    label: 'node values',
-                    data: [5, 12, 3, 7, 4],
-                    backgroundColor: '#3182ce',
-                    borderColor: '#3182ce'
-                }
-            ]
-        };
+    const renderExampleStats = statType => {
+        switch (statType) {
+            case 'nodes':
+                return (
+                    <NodeStatsComponent
+                        isExpanded={true}
+                        demoData={[
+                            {
+                                id: 1,
+                                label: 'label1',
+                                feature: 'feature1',
+                                neighbours: new Set([1, 2, 3])
+                            },
+                            {
+                                id: 2,
+                                label: 'label2',
+                                feature: 'feature2',
+                                neighbours: new Set([1, 2])
+                            },
+                            {
+                                id: 3,
+                                label: 'label3',
+                                feature: 'feature3',
+                                neighbours: new Set([1])
+                            },
+                            {
+                                id: 4,
+                                label: 'label4',
+                                feature: 'feature4',
+                                neighbours: new Set([])
+                            }
+                        ]}
+                    />
+                );
 
-        return (
-            <Line
-                data={chartData}
-                width="100%"
-                height="250px"
-                redraw={true}
-                options={{
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Example Line Chart'
-                        }
-                    }
-                }}
-            />
-        );
+            case 'components':
+                return (
+                    <ComponentStatsComponent
+                        isExpanded={true}
+                        demoData={[
+                            {
+                                id: 1,
+                                node_count: 53
+                            },
+                            {
+                                id: 2,
+                                node_count: 34
+                            },
+                            {
+                                id: 3,
+                                node_count: 14
+                            },
+                            {
+                                id: 4,
+                                node_count: 4
+                            }
+                        ]}
+                    />
+                );
+            case 'graph':
+                return (
+                    <GraphStatsComponent
+                        isExpanded={true}
+                        demoData={{
+                            graphData: {
+                                components: {
+                                    count: 41,
+                                    label: 'components'
+                                },
+                                edges: {
+                                    count: 261,
+                                    label: 'edges'
+                                },
+                                entries: {
+                                    count: 52,
+                                    label: 'entries'
+                                },
+                                maxDegree: {
+                                    count: 10,
+                                    label: 'max degree'
+                                },
+                                nodes: {
+                                    count: 301,
+                                    label: 'nodes'
+                                }
+                            },
+                            nodeData: {
+                                'feature 1': { count: 421 },
+                                'feature 2': { count: 43 }
+                            }
+                        }}
+                    />
+                );
+            default:
+                return (
+                    <ConnectionStatsComponent
+                        isExpanded={true}
+                        demoData={[
+                            {
+                                id: 1,
+                                label: 'label1',
+                                feature: 'feature1',
+                                neighbourObjects: [
+                                    {
+                                        id: 2,
+                                        label: 'label2',
+                                        feature: 'feature2',
+                                        neighbours: new Set([1, 2])
+                                    },
+                                    {
+                                        id: 3,
+                                        label: 'label3',
+                                        feature: 'feature3',
+                                        neighbours: new Set([1])
+                                    },
+                                    {
+                                        id: 4,
+                                        label: 'label4',
+                                        feature: 'feature4',
+                                        neighbours: new Set([])
+                                    }
+                                ]
+                            }
+                        ]}
+                    />
+                );
+        }
     };
 
     const renderSelectionElements = selectionElementsType => {
@@ -614,47 +708,81 @@ function FileUploadModal() {
                             </Tab>
                         ))}
                     </TabList>
-                    <TabPanels>
-                        <TabPanel>
-                            <VStack width="100%" height="100%">
-                                <Box height="250px" width="100%">
-                                    {renderDoughnutPanel()}
-                                </Box>
-                                {renderSelectionElements()}
-                            </VStack>
-                        </TabPanel>
-                        <TabPanel>
-                            <VStack width="100%" height="100%">
-                                <Box height="250px" width="100%">
-                                    {renderBarPanel()}
-                                </Box>
-                                {renderSelectionElements()}
-                            </VStack>
-                        </TabPanel>
-                        <TabPanel>
-                            <VStack width="100%" height="100%">
-                                <Box height="250px" width="100%">
-                                    {renderLinePanel()}
-                                </Box>
-                                {renderSelectionElements()}
-                            </VStack>
-                        </TabPanel>
-                        <TabPanel>
-                            <VStack width="100%" height="100%">
-                                <Box height="250px" width="100%">
-                                    {renderVerticalBarPanel()}
-                                </Box>
-                                {renderSelectionElements()}
-                            </VStack>
-                        </TabPanel>
-                        <TabPanel>
-                            <VStack width="100%" height="100%">
-                                <Box height="250px" width="100%">
-                                    {renderGroupedBarPanel()}
-                                </Box>
-                                {renderSelectionElements('grouped')}
-                            </VStack>
-                        </TabPanel>
+                    <TabPanels paddingTop="0px">
+                        {[
+                            {
+                                chartType: 'doughnut',
+                                title: 'Example doughnut chart',
+                                type: 'chart'
+                            },
+                            {
+                                chartType: 'bar',
+                                title: 'Example bar chart',
+                                type: 'chart'
+                            },
+                            {
+                                chartType: 'line',
+                                title: 'Example line chart',
+                                type: 'chart'
+                            },
+                            {
+                                chartType: 'vertical bar',
+                                title: 'Example vertical bar chart',
+                                type: 'chart'
+                            },
+                            {
+                                chartType: 'grouped bar',
+                                title: 'Example grouped bar chart',
+                                type: 'chart'
+                            },
+                            {
+                                statType: 'nodes',
+                                type: 'stat'
+                            },
+                            {
+                                statType: 'components',
+                                type: 'stat'
+                            },
+                            {
+                                statType: 'graph',
+                                type: 'stat'
+                            },
+                            {
+                                statType: 'connections',
+                                type: 'stat'
+                            }
+                        ].map((entry, index) => (
+                            <TabPanel
+                                paddingTop="0px"
+                                paddingBottom="0px"
+                                height="100%"
+                                key={`Example_chart_${index}`}
+                            >
+                                <VStack
+                                    width="100%"
+                                    height="100%"
+                                    justifyContent="space-between"
+                                >
+                                    <Box
+                                        height="250px"
+                                        width="100%"
+                                        backgroundColor="whiteAlpha.200"
+                                        padding="10px"
+                                        borderRadius="6px"
+                                    >
+                                        {entry['type'] === 'chart'
+                                            ? renderChart(
+                                                  entry['chartType'],
+                                                  entry['title']
+                                              )
+                                            : renderExampleStats(
+                                                  entry['statType']
+                                              )}
+                                    </Box>
+                                    {renderSelectionElements()}
+                                </VStack>
+                            </TabPanel>
+                        ))}
                     </TabPanels>
                 </Tabs>
             </ModalBody>

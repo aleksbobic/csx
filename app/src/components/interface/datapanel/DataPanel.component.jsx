@@ -11,7 +11,7 @@ import {
     Select
 } from '@chakra-ui/react';
 import GraphDetailsComponent from 'components/feature/graphDetails/graphDetails.component';
-import SelectionOverview from 'components/feature/selectionoverview/SelectionOverview.component';
+import Overview from 'components/feature/overview/Overview.component';
 import TableComponent from 'components/feature/table/Table.component';
 import { observer } from 'mobx-react';
 import { useContext, useState, useEffect } from 'react';
@@ -125,10 +125,7 @@ function DataPanel() {
             >
                 <TabPanel padding="10px" paddingTop="60px" height="100%">
                     <GraphDetailsComponent />
-                    <SelectionOverview types={['all']} />
-                </TabPanel>
-                <TabPanel paddingLeft="0" paddingRight="0" paddingTop="15px">
-                    <SelectionOverview />
+                    <Overview />
                 </TabPanel>
                 <TabPanel
                     paddingLeft="0"
@@ -160,11 +157,6 @@ function DataPanel() {
                 trackingCode: 'details tab',
                 id: 'detailstab',
                 text: 'Details'
-            },
-            {
-                trackingCode: 'selection tab',
-                id: 'selectiontab',
-                text: 'Selection'
             },
             {
                 trackingCode: 'results tab',

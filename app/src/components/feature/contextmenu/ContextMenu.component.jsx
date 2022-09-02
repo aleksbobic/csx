@@ -93,19 +93,15 @@ function ContextMenu() {
                             ? 'Deselect node'
                             : 'Select node'}
                     </Button>
-                    {!store.graphInstance.isSelfCentric &&
-                        store.core.isOverview && (
-                            <Button
-                                justifyContent="left"
-                                onClick={selectComponent}
-                            >
-                                {store.graph.currentGraphData.selectedComponents.includes(
-                                    store.contextMenu.originNode?.component
-                                )
-                                    ? 'Deselect component'
-                                    : 'Select component'}
-                            </Button>
-                        )}
+                    {!store.graphInstance.isSelfCentric && (
+                        <Button justifyContent="left" onClick={selectComponent}>
+                            {store.graph.currentGraphData.selectedComponents.includes(
+                                store.contextMenu.originNode?.component
+                            )
+                                ? 'Deselect component'
+                                : 'Select component'}
+                        </Button>
+                    )}
                     {!store.graphInstance.isSelfCentric &&
                         renderAdvcancedButtons()}
                 </VStack>

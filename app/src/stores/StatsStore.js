@@ -4,7 +4,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class StatsStore {
     isStatsModalVisible = false;
-    chartTypes = ['Doughnut', 'Bar', 'Line', 'Vertical Bar', 'Grouped Bar'];
+    chartTypes = [
+        'Doughnut',
+        'Bar',
+        'Line',
+        'Vertical Bar',
+        'Grouped Bar',
+        'Nodes',
+        'Components',
+        'Graph stats',
+        'Connections'
+    ];
     availableTypes = ['all'];
     newChartProps = {
         title: '',

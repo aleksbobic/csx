@@ -490,8 +490,10 @@ def get_datasets() -> dict:
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
 
+
+
                 datasets[index]["search_hints"] = {
-                    feature: loaded_config["search_hints"][feature]
+                    feature: json.dumps(loaded_config["search_hints"][feature])
                     for feature in loaded_config["search_hints"]
                     if data["dimension_types"][feature]
                     in ["integer", "float", "category", "list"]
