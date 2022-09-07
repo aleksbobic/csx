@@ -6,30 +6,43 @@ import {
     Stat,
     Tag,
     TagLabel,
+    Text,
     VStack
 } from '@chakra-ui/react';
 import { Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useEffect } from 'react';
+import { useContext, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
+    const [data, setData] = useState([]);
 
-    const selectedComponentIds =
-        store.graph.currentGraphData.selectedComponents;
-    const components = store.graph.currentGraphData.components;
+    useEffect(() => {
+        const components = store.graph.currentGraphData.components;
 
-    const getData = () => {
         if (props.demoData.length) {
-            return props.demoData;
+            setData(props.demoData);
+        } else if (props.networkData === 'all') {
+            setData(components);
+        } else {
+            setData(
+                components.filter(c =>
+                    store.graph.currentGraphData.selectedComponents.includes(
+                        c.id
+                    )
+                )
+            );
         }
-
-        return props.networkData === 'all'
-            ? components
-            : components.filter(c => selectedComponentIds.includes(c.id));
-    };
+    }, [
+        props.demoData,
+        props.networkData,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.graph.currentGraphData.selectedNodes
+    ]);
 
     const renderComponentDetails = component => (
         <HStack>
@@ -47,9 +60,38 @@ function SelectedComponentList(props) {
         </HStack>
     );
 
+    if (data.length === 0) {
+        return (
+            <VStack
+                height="100%"
+                width="100%"
+                overflowY="scroll"
+                spacing={1}
+                backgroundColor="blackAlpha.800"
+                borderRadius="6px"
+                justifyContent="center"
+                padding="20%"
+            >
+                <Heading size="md" opacity="0.5">
+                    NO DATA
+                </Heading>
+                {props.networkData !== 'all' && props.isExpanded && (
+                    <Text
+                        textAlign="center"
+                        fontSize="sm"
+                        fontWeight="bold"
+                        opacity="0.5"
+                    >
+                        Select some components to see details here! 😉
+                    </Text>
+                )}
+            </VStack>
+        );
+    }
+
     return (
         <VStack height="100%" width="100%" overflowY="scroll" spacing={1}>
-            {getData()
+            {data
                 .slice()
                 .sort((component1, component2) => {
                     if (component1.node_count > component2.node_count) {
@@ -81,22 +123,28 @@ function SelectedComponentList(props) {
                             >
                                 Component {component.id}
                             </Heading>
-                            {props.networkData!=='all' && <Box position="absolute" top="4px" right="8px">
-                                <IconButton
-                                    size="xs"
-                                    border="none"
-                                    variant="ghost"
-                                    aria-label="Remove from list"
-                                    icon={<Remove style={{ '--ggs': '0.8' }} />}
-                                    onClick={() => {
-                                        if (props.demoData.length) {
-                                            store.graph.selectComponent(
-                                                component.id
-                                            );
+                            {props.networkData !== 'all' && (
+                                <Box position="absolute" top="4px" right="8px">
+                                    <IconButton
+                                        size="xs"
+                                        border="none"
+                                        variant="ghost"
+                                        aria-label="Remove from list"
+                                        icon={
+                                            <Remove
+                                                style={{ '--ggs': '0.8' }}
+                                            />
                                         }
-                                    }}
-                                />
-                            </Box>}
+                                        onClick={() => {
+                                            if (props.demoData.length) {
+                                                store.graph.selectComponent(
+                                                    component.id
+                                                );
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            )}
                             {props.isExpanded &&
                                 renderComponentDetails(component)}
                         </Stat>

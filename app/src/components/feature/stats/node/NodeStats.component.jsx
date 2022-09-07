@@ -6,26 +6,55 @@ import {
     Stat,
     Tag,
     TagLabel,
+    Text,
     VStack
 } from '@chakra-ui/react';
 import { Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
+    const [data, setData] = useState([]);
 
-    const getData = () => {
+    useEffect(() => {
         if (props.demoData.length) {
-            return props.demoData;
-        }
+            setData(props.demoData);
+        } else {
+            let data =
+                props.networkData === 'all'
+                    ? store.graph.currentGraphData.nodes
+                    : store.graph.currentGraphData.selectedNodes;
 
-        return props.networkData === 'all'
-            ? store.graph.currentGraphData.nodes
-            : store.graph.currentGraphData.selectedNodes;
-    };
+            data = data.slice().sort((node1, node2) => {
+                if (node1.neighbours.size > node2.neighbours.size) {
+                    return -1;
+                }
+
+                if (node1.neighbours.size < node2.neighbours.size) {
+                    return 1;
+                }
+
+                return 0;
+            });
+
+            if (props.networkData !== 'all') {
+                setData(data);
+            } else if (props.elementDisplayLimit > 0) {
+                setData(data.slice(0, props.elementDisplayLimit));
+            } else {
+                setData(data.slice(props.elementDisplayLimit, data.length));
+            }
+        }
+    }, [
+        props.demoData,
+        props.elementDisplayLimit,
+        props.networkData,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes
+    ]);
 
     const renderNodeDetails = node => {
         return (
@@ -59,52 +88,71 @@ function SelectedNodeList(props) {
         );
     };
 
+    if (data.length === 0) {
+        return (
+            <VStack
+                overflowY="scroll"
+                height="100%"
+                width="100%"
+                spacing={1}
+                backgroundColor="blackAlpha.800"
+                borderRadius="6px"
+                justifyContent="center"
+                padding="20%"
+            >
+                <Heading size="md" opacity="0.5">
+                    NO DATA
+                </Heading>
+                {props.networkData !== 'all' && props.isExpanded && (
+                    <Text
+                        textAlign="center"
+                        fontSize="sm"
+                        fontWeight="bold"
+                        opacity="0.5"
+                    >
+                        Select some nodes to see details here! 😉
+                    </Text>
+                )}
+            </VStack>
+        );
+    }
+
     return (
         <VStack overflowY="scroll" height="100%" width="100%" spacing={1}>
-            {getData()
-                .slice()
-                .sort((node1, node2) => {
-                    if (node1.neighbours.size > node2.neighbours.size) {
-                        return -1;
-                    } else if (node1.neighbours.size < node2.neighbours.size) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                })
-                .map(node => {
-                    return (
-                        <Stat
-                            key={node.id}
-                            borderRadius="10px"
-                            backgroundColor="blackAlpha.800"
-                            padding="10px"
+            {data.map(node => {
+                return (
+                    <Stat
+                        key={node.id}
+                        borderRadius="10px"
+                        backgroundColor="blackAlpha.800"
+                        padding="10px"
+                        width="100%"
+                        flex="0 1 0%"
+                    >
+                        <Heading
+                            size="xs"
+                            marginBottom={props.isExpanded ? '8px' : '0'}
+                            whiteSpace="nowrap"
+                            overflow="hidden"
+                            textOverflow="ellipsis"
                             width="100%"
-                            flex="0 1 0%"
+                            paddingRight="30px"
+                            _hover={{ cursor: 'pointer' }}
+                            onClick={() => {
+                                if (!props.demoData.length) {
+                                    store.graphInstance.zoomToFitByNodeId(
+                                        node.id
+                                    );
+                                }
+                            }}
                         >
-                            <Heading
-                                size="xs"
-                                marginBottom={props.isExpanded ? '8px' : '0'}
-                                whiteSpace="nowrap"
-                                overflow="hidden"
-                                textOverflow="ellipsis"
-                                width="100%"
-                                paddingRight="30px"
-                                _hover={{ cursor: 'pointer' }}
-                                onClick={() => {
-                                    if (!props.demoData.length) {
-                                        store.graphInstance.zoomToFitByNodeId(
-                                            node.id
-                                        );
-                                    }
-                                }}
-                            >
-                                {node.label}
-                            </Heading>
+                            {node.label}
+                        </Heading>
 
-                            {props.isExpanded && renderNodeDetails(node)}
+                        {props.isExpanded && renderNodeDetails(node)}
 
-                            {props.networkData!=='all' && <Box position="absolute" top="4px" right="8px">
+                        {props.networkData !== 'all' && (
+                            <Box position="absolute" top="4px" right="8px">
                                 <IconButton
                                     size="xs"
                                     border="none"
@@ -131,23 +179,26 @@ function SelectedNodeList(props) {
                                         }
                                     }}
                                 />
-                            </Box>}
-                        </Stat>
-                    );
-                })}
+                            </Box>
+                        )}
+                    </Stat>
+                );
+            })}
         </VStack>
     );
 }
 SelectedNodeList.propTypes = {
     isExpanded: PropTypes.bool,
     networkData: PropTypes.string,
-    demoData: PropTypes.array
+    demoData: PropTypes.array,
+    elementDisplayLimit: PropTypes.number
 };
 
 SelectedNodeList.defaultProps = {
     isExpanded: false,
     networkData: 'all',
-    demoData: []
+    demoData: [],
+    elementDisplayLimit: 10
 };
 
 export default observer(SelectedNodeList);

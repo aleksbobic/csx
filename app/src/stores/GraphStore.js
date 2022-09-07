@@ -465,7 +465,7 @@ export class GraphStore {
             this.store.search.setSearchIsEmpty(true);
         } else {
             this.store.search.newNodeTypes = response.meta.new_dimensions;
-            // console.log(response);
+
             if (graphType === 'overview') {
                 // Handle overview graph data
                 this.graphData.meta.query = query;
@@ -824,6 +824,39 @@ export class GraphStore {
             maxDegree: {
                 count: this.currentGraphData.meta.maxDegree,
                 label: 'max degree'
+            }
+        };
+    }
+
+    get graphSelectedObjectCount() {
+        return {
+            nodes: {
+                count: this.currentGraphData.selectedNodes.length,
+                label: 'selected nodes'
+            },
+            components: {
+                count: this.currentGraphData.selectedComponents.length,
+                label: 'selected components'
+            },
+            entries: {
+                count: new Set(
+                    this.currentGraphData.selectedNodes
+                        .map(node => node.entries)
+                        .flat()
+                ).size,
+                label: 'selected entries'
+            },
+            maxDegree: {
+                count: this.currentGraphData.selectedNodes.reduce(
+                    (maxDegree, node) => {
+                        if (node.neighbours.size > maxDegree) {
+                            return node.neighbours.size;
+                        }
+                        return maxDegree;
+                    },
+                    0
+                ),
+                label: 'max degree of selected nodes'
             }
         };
     }

@@ -17,6 +17,7 @@ function StatContainer(props) {
     const store = useContext(RootStoreContext);
     const [isExpanded, setIsExpanded] = useState(props.chart.colSpan === 2);
     const [networkData, setNetworkData] = useState(props.chart.network_data);
+    const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
 
     const renderChartContainerTopControls = () => (
         <HStack
@@ -27,34 +28,75 @@ function StatContainer(props) {
             right="0px"
             justifyContent="end"
         >
-            <Heading
-                size="xs"
-                whiteSpace="nowrap"
-                overflow="hidden"
-                textOverflow="ellipsis"
-                flexGrow="1"
-            >
-                {props.title}
-            </Heading>
-            <Tooltip label="Change displayed elements">
-                <Select
+            <Tooltip label={props.title}>
+                <Heading
                     size="xs"
-                    variant="filled"
-                    borderRadius="5px"
-                    opacity="0.5"
-                    width="70px"
-                    textAlign="right"
-                    backgroundColor="transparent"
-                    _hover={{ opacity: '1', backgroundColor: 'whiteAlpha.200' }}
-                    icon={<></>}
-                    style={{ paddingRight: '8px' }}
-                    defaultValue={props.chart.show_only}
-                    onChange={e => setNetworkData(e.target.value)}
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    flexGrow="1"
                 >
-                    <option value="selected">selected</option>
-                    <option value="all">all</option>
-                </Select>
+                    {props.title}
+                </Heading>
             </Tooltip>
+            {['nodes'].includes(props.chart.type.toLowerCase()) &&
+                networkData === 'all' &&
+                isExpanded && (
+                    <Tooltip label="Limit element display by neighbour frequency.">
+                        <Select
+                            size="xs"
+                            variant="filled"
+                            borderRadius="5px"
+                            opacity="0.5"
+                            width="70px"
+                            minWidth="70px"
+                            textAlign="right"
+                            backgroundColor="transparent"
+                            _hover={{
+                                opacity: '1',
+                                backgroundColor: 'whiteAlpha.200'
+                            }}
+                            icon={<></>}
+                            style={{ paddingRight: '8px' }}
+                            defaultValue={elementDisplayLimit}
+                            onChange={e =>
+                                setElementDisplayLimit(parseInt(e.target.value))
+                            }
+                        >
+                            <option value={10}>First 10</option>
+                            <option value={50}>First 50</option>
+                            <option value={100}>First 100</option>
+                            <option value={-10}>Last 10</option>
+                            <option value={-50}>Last 50</option>
+                            <option value={-100}>Last 100</option>
+                        </Select>
+                    </Tooltip>
+                )}
+            {!['connections'].includes(props.chart.type.toLowerCase()) && (
+                <Tooltip label="Change displayed elements">
+                    <Select
+                        size="xs"
+                        variant="filled"
+                        borderRadius="5px"
+                        opacity="0.5"
+                        minWidth="70px"
+                        width="70px"
+                        textAlign="right"
+                        backgroundColor="transparent"
+                        _hover={{
+                            opacity: '1',
+                            backgroundColor: 'whiteAlpha.200'
+                        }}
+                        icon={<></>}
+                        style={{ paddingRight: '8px' }}
+                        defaultValue={props.chart.show_only}
+                        onChange={e => setNetworkData(e.target.value)}
+                    >
+                        <option value="selected">selected</option>
+                        <option value="all">all</option>
+                    </Select>
+                </Tooltip>
+            )}
             {props.chart.colSpan === 1 ? (
                 <Tooltip label="Expand">
                     <IconButton
@@ -137,7 +179,11 @@ function StatContainer(props) {
 
     const childrenWithProps = Children.map(props.children, child => {
         if (isValidElement(child)) {
-            return cloneElement(child, { isExpanded, networkData });
+            return cloneElement(child, {
+                isExpanded,
+                networkData,
+                elementDisplayLimit
+            });
         }
         return child;
     });
@@ -148,7 +194,14 @@ function StatContainer(props) {
             height={props.chart.height}
             padding="10px"
             paddingTop="42px"
-            paddingBottom={props.chart.colSpan === 2 ? '50px' : '10px'}
+            paddingBottom={
+                props.chart.colSpan === 2 &&
+                !['graph stats', 'connections', 'components', 'nodes'].includes(
+                    props.chart.type.toLowerCase()
+                )
+                    ? '50px'
+                    : '10px'
+            }
             colSpan={props.chart.colSpan}
             backgroundColor="whiteAlpha.200"
             borderRadius={8}
@@ -156,7 +209,11 @@ function StatContainer(props) {
         >
             {renderChartContainerTopControls(props.chart)}
             {childrenWithProps}
+
             {props.chart.colSpan === 2 &&
+                !['graph stats', 'connections', 'components', 'nodes'].includes(
+                    props.chart.type.toLowerCase()
+                ) &&
                 renderChartContainerBottomControls(props.chart)}
         </GridItem>
     );

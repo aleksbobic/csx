@@ -393,7 +393,6 @@ function Settings() {
                     </RangeSliderTrack>
 
                     <RangeSliderThumb boxSize={3} index={0} />
-
                     <RangeSliderThumb boxSize={3} index={1} />
                 </RangeSlider>
             </>

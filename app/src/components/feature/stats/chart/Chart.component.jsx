@@ -164,9 +164,14 @@ Chart.propTypes = {
     chartIndex: PropTypes.number,
     options: PropTypes.object,
     isExpanded: PropTypes.bool,
-    isExample: PropTypes.bool
+    isExample: PropTypes.bool,
+    networkData: PropTypes.string
 };
 
-Chart.defaultProps = { isExpanded: false, isExample: false };
+Chart.defaultProps = {
+    isExpanded: false,
+    isExample: false,
+    networkData: 'all'
+};
 
 export default observer(Chart);

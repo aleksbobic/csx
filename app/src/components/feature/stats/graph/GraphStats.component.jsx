@@ -10,11 +10,74 @@ import {
 } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function GraphStats(props) {
     const store = useContext(RootStoreContext);
+    const [graphData, setGraphData] = useState([]);
+    const [nodeData, setNodeData] = useState([]);
+
+    useEffect(() => {
+        if (props.demoData) {
+            setGraphData(Object.entries(props.demoData.graphData));
+        } else if (props.networkData === 'all') {
+            setGraphData(Object.entries(store.graph.graphObjectCount));
+        } else {
+            setGraphData(Object.entries(store.graph.graphSelectedObjectCount));
+        }
+    }, [
+        props.demoData,
+        props.networkData,
+        store.graph.graphObjectCount,
+        store.graph.graphSelectedObjectCount
+    ]);
+
+    useEffect(() => {
+        if (props.demoData) {
+            setNodeData(
+                Object.entries(props.demoData.nodeData).map(entry => [
+                    entry[0],
+                    { count: entry[1].count, label: entry[0] }
+                ])
+            );
+        } else if (props.networkData === 'all') {
+            setNodeData(
+                Object.entries(store.graph.currentGraphData.types).map(
+                    entry => [
+                        entry[0],
+                        { count: entry[1].count, label: entry[0] }
+                    ]
+                )
+            );
+        } else {
+            const node_counts =
+                store.graph.currentGraphData.selectedNodes.reduce(
+                    (counts, node) => {
+                        if (Object.keys(counts).includes(node.feature)) {
+                            counts[node.feature] += 1;
+                        } else {
+                            counts[node.feature] = 1;
+                        }
+
+                        return counts;
+                    },
+                    {}
+                );
+
+            setNodeData(
+                Object.entries(node_counts).map(entry => [
+                    entry[0],
+                    { count: entry[1], label: entry[0] }
+                ])
+            );
+        }
+    }, [
+        props.demoData,
+        props.networkData,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.types
+    ]);
 
     const renderGraphStats = (title, data) =>
         data.map((entry, index) => (
@@ -96,40 +159,48 @@ function GraphStats(props) {
         </VStack>
     );
 
-    const getGraphData = () => {
-        if (props.demoData) {
-            return Object.entries(props.demoData.graphData);
-        }
-
-        return Object.entries(store.graph.graphObjectCount);
-    };
-
-    const getNodeData = () => {
-        if (props.demoData) {
-            return Object.entries(props.demoData.nodeData).map(entry => [
-                entry[0],
-                { count: entry[1].count, label: entry[0] }
-            ]);
-        }
-
-        return Object.entries(store.graph.currentGraphData.types).map(entry => [
-            entry[0],
-            { count: entry[1].count, label: entry[0] }
-        ]);
-    };
+    if (nodeData.length === 0 && props.networkData !== 'all') {
+        return (
+            <VStack
+                overflowY="scroll"
+                height="100%"
+                width="100%"
+                spacing={1}
+                backgroundColor="blackAlpha.800"
+                borderRadius="6px"
+                justifyContent="center"
+                padding="20%"
+            >
+                <Heading size="md" opacity="0.5">
+                    NO DATA
+                </Heading>
+                {props.isExpanded && (
+                    <Text
+                        textAlign="center"
+                        fontSize="sm"
+                        fontWeight="bold"
+                        opacity="0.5"
+                    >
+                        Select some nodes to see details here! 😉
+                    </Text>
+                )}
+            </VStack>
+        );
+    }
 
     return (
         <VStack overflowY="scroll" maxHeight="100%" width="100%">
-            {renderStatsGroup(getGraphData(), 'Graph Stats')}
-            {renderStatsGroup(getNodeData(), 'Node Stats')}
+            {renderStatsGroup(graphData, 'Graph Stats')}
+            {renderStatsGroup(nodeData, 'Node Stats')}
         </VStack>
     );
 }
 GraphStats.propTypes = {
     isExpanded: PropTypes.bool,
-    demoData: PropTypes.object
+    demoData: PropTypes.object,
+    networkData: PropTypes.string
 };
 
-GraphStats.defaultProps = {};
+GraphStats.defaultProps = { networkData: 'all' };
 
 export default observer(GraphStats);
