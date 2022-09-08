@@ -54,7 +54,8 @@ function SelectedNodeList(props) {
         props.elementDisplayLimit,
         props.networkData,
         store.graph.currentGraphData.nodes,
-        store.graph.currentGraphData.selectedNodes
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length
     ]);
 
     const renderNodeDetails = node => {

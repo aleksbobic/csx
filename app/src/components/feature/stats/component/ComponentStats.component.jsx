@@ -42,7 +42,7 @@ function SelectedComponentList(props) {
         props.networkData,
         store.graph.currentGraphData.components,
         store.graph.currentGraphData.selectedComponents,
-        store.graph.currentGraphData.selectedNodes
+        store.graph.currentGraphData.selectedNodes.length
     ]);
 
     const renderComponentDetails = component => (
@@ -138,7 +138,7 @@ function SelectedComponentList(props) {
                                                 />
                                             }
                                             onClick={() => {
-                                                if (props.demoData.length) {
+                                                if (!props.demoData.length) {
                                                     store.graph.selectComponent(
                                                         component.id
                                                     );

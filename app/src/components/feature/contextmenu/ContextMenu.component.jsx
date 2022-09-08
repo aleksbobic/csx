@@ -33,6 +33,7 @@ function ContextMenu() {
                 store.contextMenu.originNode.label
             }, id: ${store.contextMenu.originNode.id}}`
         );
+
         store.graph.toggleNodeSelection(
             store.contextMenu.originNode.id,
             nodeIndex

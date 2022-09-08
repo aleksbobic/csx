@@ -76,6 +76,7 @@ function GraphStats(props) {
         props.demoData,
         props.networkData,
         store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
         store.graph.currentGraphData.types
     ]);
 
