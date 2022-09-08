@@ -7,6 +7,7 @@ import {
     Tag,
     TagLabel,
     Text,
+    Tooltip,
     VStack
 } from '@chakra-ui/react';
 import { Remove } from 'css.gg';
@@ -125,24 +126,26 @@ function SelectedComponentList(props) {
                             </Heading>
                             {props.networkData !== 'all' && (
                                 <Box position="absolute" top="4px" right="8px">
-                                    <IconButton
-                                        size="xs"
-                                        border="none"
-                                        variant="ghost"
-                                        aria-label="Remove from list"
-                                        icon={
-                                            <Remove
-                                                style={{ '--ggs': '0.8' }}
-                                            />
-                                        }
-                                        onClick={() => {
-                                            if (props.demoData.length) {
-                                                store.graph.selectComponent(
-                                                    component.id
-                                                );
+                                    <Tooltip label="Deselect component">
+                                        <IconButton
+                                            size="xs"
+                                            border="none"
+                                            variant="ghost"
+                                            aria-label="Remove from list"
+                                            icon={
+                                                <Remove
+                                                    style={{ '--ggs': '0.8' }}
+                                                />
                                             }
-                                        }}
-                                    />
+                                            onClick={() => {
+                                                if (props.demoData.length) {
+                                                    store.graph.selectComponent(
+                                                        component.id
+                                                    );
+                                                }
+                                            }}
+                                        />
+                                    </Tooltip>
                                 </Box>
                             )}
                             {props.isExpanded &&

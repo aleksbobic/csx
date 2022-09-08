@@ -7,6 +7,7 @@ import {
     Tag,
     TagLabel,
     Text,
+    Tooltip,
     VStack
 } from '@chakra-ui/react';
 import { Remove } from 'css.gg';
@@ -153,32 +154,38 @@ function SelectedNodeList(props) {
 
                         {props.networkData !== 'all' && (
                             <Box position="absolute" top="4px" right="8px">
-                                <IconButton
-                                    size="xs"
-                                    border="none"
-                                    variant="ghost"
-                                    aria-label="Remove from list"
-                                    icon={<Remove style={{ '--ggs': '0.8' }} />}
-                                    onClick={() => {
-                                        if (!props.demoData.length) {
-                                            store.track.trackEvent(
-                                                'data panel selection tab',
-                                                'button click',
-                                                `deselect node {id: ${node.id}, label: ${node.label}}`
-                                            );
-
-                                            const nodeIndex =
-                                                store.graph.currentGraphData.selectedNodes.findIndex(
-                                                    n => n.id === node.id
+                                <Tooltip label="Deselect node">
+                                    <IconButton
+                                        size="xs"
+                                        border="none"
+                                        variant="ghost"
+                                        aria-label="Remove from list"
+                                        icon={
+                                            <Remove
+                                                style={{ '--ggs': '0.8' }}
+                                            />
+                                        }
+                                        onClick={() => {
+                                            if (!props.demoData.length) {
+                                                store.track.trackEvent(
+                                                    'data panel selection tab',
+                                                    'button click',
+                                                    `deselect node {id: ${node.id}, label: ${node.label}}`
                                                 );
 
-                                            store.graph.toggleNodeSelection(
-                                                node.id,
-                                                nodeIndex
-                                            );
-                                        }
-                                    }}
-                                />
+                                                const nodeIndex =
+                                                    store.graph.currentGraphData.selectedNodes.findIndex(
+                                                        n => n.id === node.id
+                                                    );
+
+                                                store.graph.toggleNodeSelection(
+                                                    node.id,
+                                                    nodeIndex
+                                                );
+                                            }
+                                        }}
+                                    />
+                                </Tooltip>
                             </Box>
                         )}
                     </Stat>
