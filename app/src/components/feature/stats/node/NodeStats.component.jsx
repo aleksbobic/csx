@@ -24,10 +24,21 @@ function SelectedNodeList(props) {
         if (props.demoData.length) {
             setData(props.demoData);
         } else {
-            let data =
-                props.networkData === 'all'
-                    ? store.graph.currentGraphData.nodes
-                    : store.graph.currentGraphData.selectedNodes;
+            let data;
+
+            switch (props.networkData) {
+                case 'selected':
+                    data = store.graph.currentGraphData.selectedNodes;
+                    break;
+                case 'visible':
+                    data = store.graph.currentGraphData.nodes.filter(
+                        node => node.visible
+                    );
+                    break;
+                default:
+                    data = store.graph.currentGraphData.nodes;
+                    break;
+            }
 
             data = data.slice().sort((node1, node2) => {
                 if (node1.neighbours.size > node2.neighbours.size) {
@@ -41,7 +52,10 @@ function SelectedNodeList(props) {
                 return 0;
             });
 
-            if (props.networkData !== 'all') {
+            if (
+                props.networkData === 'selected' ||
+                props.elementDisplayLimit === 0
+            ) {
                 setData(data);
             } else if (props.elementDisplayLimit > 0) {
                 setData(data.slice(0, props.elementDisplayLimit));
@@ -55,7 +69,9 @@ function SelectedNodeList(props) {
         props.networkData,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
-        store.graph.currentGraphData.selectedNodes.length
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponent
     ]);
 
     const renderNodeDetails = node => {
@@ -121,7 +137,7 @@ function SelectedNodeList(props) {
 
     return (
         <VStack overflowY="scroll" height="100%" width="100%" spacing={1}>
-            {data.map(node => {
+            {data.map((node, index) => {
                 return (
                     <Stat
                         key={node.id}
@@ -138,7 +154,9 @@ function SelectedNodeList(props) {
                             overflow="hidden"
                             textOverflow="ellipsis"
                             width="100%"
-                            paddingRight="30px"
+                            paddingRight={
+                                props.networkData === 'selected' ? '30px' : '0'
+                            }
                             _hover={{ cursor: 'pointer' }}
                             onClick={() => {
                                 if (!props.demoData.length) {
@@ -148,12 +166,21 @@ function SelectedNodeList(props) {
                                 }
                             }}
                         >
+                            <Text
+                                fontSize="xs"
+                                fontWeight="black"
+                                opacity="0.2"
+                                display="inline"
+                                marginRight="5px"
+                            >
+                                {index} -
+                            </Text>
                             {node.label}
                         </Heading>
 
                         {props.isExpanded && renderNodeDetails(node)}
 
-                        {props.networkData !== 'all' && (
+                        {props.networkData === 'selected' && (
                             <Box position="absolute" top="4px" right="8px">
                                 <Tooltip label="Deselect node">
                                     <IconButton

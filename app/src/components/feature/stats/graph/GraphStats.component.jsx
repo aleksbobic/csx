@@ -21,16 +21,29 @@ function GraphStats(props) {
     useEffect(() => {
         if (props.demoData) {
             setGraphData(Object.entries(props.demoData.graphData));
-        } else if (props.networkData === 'all') {
-            setGraphData(Object.entries(store.graph.graphObjectCount));
         } else {
-            setGraphData(Object.entries(store.graph.graphSelectedObjectCount));
+            switch (props.networkData) {
+                case 'visible':
+                    setGraphData(
+                        Object.entries(store.graph.graphVisibleObjectCount)
+                    );
+                    break;
+                case 'selected':
+                    setGraphData(
+                        Object.entries(store.graph.graphSelectedObjectCount)
+                    );
+                    break;
+                default:
+                    setGraphData(Object.entries(store.graph.graphObjectCount));
+                    break;
+            }
         }
     }, [
         props.demoData,
         props.networkData,
         store.graph.graphObjectCount,
-        store.graph.graphSelectedObjectCount
+        store.graph.graphSelectedObjectCount,
+        store.graph.graphVisibleObjectCount
     ]);
 
     useEffect(() => {
@@ -41,43 +54,75 @@ function GraphStats(props) {
                     { count: entry[1].count, label: entry[0] }
                 ])
             );
-        } else if (props.networkData === 'all') {
-            setNodeData(
-                Object.entries(store.graph.currentGraphData.types).map(
-                    entry => [
-                        entry[0],
-                        { count: entry[1].count, label: entry[0] }
-                    ]
-                )
-            );
         } else {
-            const node_counts =
-                store.graph.currentGraphData.selectedNodes.reduce(
-                    (counts, node) => {
-                        if (Object.keys(counts).includes(node.feature)) {
-                            counts[node.feature] += 1;
-                        } else {
-                            counts[node.feature] = 1;
-                        }
+            let node_counts;
 
-                        return counts;
-                    },
-                    {}
-                );
+            switch (props.networkData) {
+                case 'visible':
+                    node_counts = store.graph.currentGraphData.nodes
+                        .filter(node => node.visible)
+                        .reduce((counts, node) => {
+                            if (Object.keys(counts).includes(node.feature)) {
+                                counts[node.feature] += 1;
+                            } else {
+                                counts[node.feature] = 1;
+                            }
 
-            setNodeData(
-                Object.entries(node_counts).map(entry => [
-                    entry[0],
-                    { count: entry[1], label: entry[0] }
-                ])
-            );
+                            return counts;
+                        }, {});
+
+                    setNodeData(
+                        Object.entries(node_counts).map(entry => [
+                            entry[0],
+                            { count: entry[1], label: entry[0] }
+                        ])
+                    );
+                    break;
+                case 'selected':
+                    node_counts =
+                        store.graph.currentGraphData.selectedNodes.reduce(
+                            (counts, node) => {
+                                if (
+                                    Object.keys(counts).includes(node.feature)
+                                ) {
+                                    counts[node.feature] += 1;
+                                } else {
+                                    counts[node.feature] = 1;
+                                }
+
+                                return counts;
+                            },
+                            {}
+                        );
+
+                    setNodeData(
+                        Object.entries(node_counts).map(entry => [
+                            entry[0],
+                            { count: entry[1], label: entry[0] }
+                        ])
+                    );
+                    break;
+                default:
+                    setNodeData(
+                        Object.entries(store.graph.currentGraphData.types).map(
+                            entry => [
+                                entry[0],
+                                { count: entry[1].count, label: entry[0] }
+                            ]
+                        )
+                    );
+                    break;
+            }
         }
     }, [
         props.demoData,
         props.networkData,
+        store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
-        store.graph.currentGraphData.types
+        store.graph.currentGraphData.types,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponent
     ]);
 
     const renderGraphStats = (title, data) =>

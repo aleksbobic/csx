@@ -8,13 +8,13 @@ import {
     TagLabel,
     Text,
     Tooltip,
-    VStack
+    VStack,
+    Wrap
 } from '@chakra-ui/react';
-import { Remove } from 'css.gg';
+import { Eye, Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function SelectedComponentList(props) {
@@ -45,10 +45,116 @@ function SelectedComponentList(props) {
         store.graph.currentGraphData.selectedNodes.length
     ]);
 
-    const renderComponentDetails = component => (
-        <HStack>
+    const getLargestNodes = nodes => {
+        if (nodes && nodes.length === 0) {
+            return;
+        }
+
+        return nodes.map(node => (
             <Tag
-                size="md"
+                size="sm"
+                borderRadius="4px"
+                variant="solid"
+                key={`largest_component_node_${node.label}_${node.feature}`}
+                background={
+                    store.graphInstance.nodeColorSchemeColors[
+                        [store.core.currentGraph]
+                    ]['type'][node.feature]
+                }
+            >
+                <Tooltip
+                    padding="7px"
+                    borderRadius="6px"
+                    label={
+                        <Text fontWeight="normal">
+                            Node{' '}
+                            <Tag
+                                fontWeight="bold"
+                                colorScheme="blackAlpha"
+                                variant="solid"
+                                size="sm"
+                            >
+                                {node.label}
+                            </Tag>{' '}
+                            appearing{' '}
+                            <Tag
+                                fontWeight="bold"
+                                colorScheme="blackAlpha"
+                                variant="solid"
+                                size="sm"
+                            >
+                                {node.entries.length}{' '}
+                                {node.entries.length > 1 ? 'times' : 'time'}
+                            </Tag>
+                        </Text>
+                    }
+                >
+                    <TagLabel>{node.label}</TagLabel>
+                </Tooltip>
+            </Tag>
+        ));
+    };
+
+    const getLargestConnections = (connections, component_id) => {
+        if (!connections || (connections && connections.length === 0)) {
+            return;
+        }
+
+        return connections.map((connection, id) => (
+            <Tag
+                size="sm"
+                borderRadius="4px"
+                variant="solid"
+                key={`${component_id}_largest_connection_${id}`}
+                backgroundColor={`${
+                    store.graphInstance.nodeColorSchemeColors[
+                        [store.core.currentGraph]
+                    ]['component'][component_id]
+                }AA`}
+            >
+                <Tooltip
+                    label={
+                        <Text fontWeight="normal">
+                            Connection{' '}
+                            <Tag
+                                fontWeight="bold"
+                                colorScheme="blackAlpha"
+                                variant="solid"
+                                size="sm"
+                            >
+                                {connection.label}
+                            </Tag>{' '}
+                            appearing{' '}
+                            <Tag
+                                fontWeight="bold"
+                                colorScheme="blackAlpha"
+                                variant="solid"
+                                size="sm"
+                            >
+                                {connection.count}{' '}
+                                {connection.count > 1 ? 'times' : 'time'}
+                            </Tag>
+                            .
+                        </Text>
+                    }
+                >
+                    <TagLabel
+                        width="100%"
+                        overflow="hidden"
+                        whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                    >
+                        {connection.label}: {connection.count}
+                    </TagLabel>
+                </Tooltip>
+            </Tag>
+        ));
+    };
+
+    const renderComponentDetails = component => (
+        <Wrap spacing="1" width="100%">
+            <Tag
+                size="sm"
                 borderRadius="4px"
                 variant="solid"
                 backgroundColor="whiteAlpha.200"
@@ -58,7 +164,13 @@ function SelectedComponentList(props) {
                     {component.node_count === 1 ? 'node' : 'nodes'}
                 </TagLabel>
             </Tag>
-        </HStack>
+            {store.core.isOverview
+                ? getLargestConnections(
+                      component.largest_connections,
+                      component.id
+                  )
+                : getLargestNodes(component.largest_nodes)}
+        </Wrap>
     );
 
     if (data.length === 0) {
@@ -113,17 +225,47 @@ function SelectedComponentList(props) {
                             width="100%"
                             flex="0 1 0%"
                         >
-                            <Heading
-                                size="xs"
-                                marginBottom={props.isExpanded ? '8px' : '0'}
-                                whiteSpace="nowrap"
-                                overflow="hidden"
-                                textOverflow="ellipsis"
-                                maxWidth="300px"
-                                paddingRight="30px"
+                            <HStack
+                                width="100%"
+                                justifyContent="space-between"
+                                paddingBottom="5px"
                             >
-                                Component {component.id}
-                            </Heading>
+                                <Heading
+                                    size="xs"
+                                    marginBottom={
+                                        props.isExpanded ? '8px' : '0'
+                                    }
+                                    whiteSpace="nowrap"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    maxWidth="300px"
+                                    paddingRight="30px"
+                                >
+                                    Component {component.id}
+                                </Heading>
+                                <Tooltip label="Toggle component visibility">
+                                    <IconButton
+                                        variant="ghost"
+                                        size="xs"
+                                        opacity={
+                                            store.graphInstance
+                                                .visibleComponent ===
+                                            component.id
+                                                ? '1'
+                                                : '0.3'
+                                        }
+                                        _hover={{ opacity: 1 }}
+                                        onClick={() =>
+                                            store.graphInstance.toggleVisibleComponents(
+                                                component.id
+                                            )
+                                        }
+                                        icon={
+                                            <Eye style={{ '--ggs': '0.7' }} />
+                                        }
+                                    />
+                                </Tooltip>
+                            </HStack>
                             {props.networkData !== 'all' && (
                                 <Box position="absolute" top="4px" right="8px">
                                     <Tooltip label="Deselect component">

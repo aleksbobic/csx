@@ -37,13 +37,14 @@ function ConnectionStats(props) {
 
     const getNeighbours = (node_list, visited_node_ids) => {
         const neighbours = [];
-
         node_list.forEach(node =>
-            node.neighbourObjects.forEach(neighbour => {
-                if (!visited_node_ids.includes(neighbour.id)) {
-                    neighbours.push(neighbour);
-                }
-            })
+            node.neighbourObjects
+                ? node.neighbourObjects.forEach(neighbour => {
+                      if (!visited_node_ids.includes(neighbour.id)) {
+                          neighbours.push(neighbour);
+                      }
+                  })
+                : []
         );
 
         return neighbours;

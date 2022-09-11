@@ -1,4 +1,5 @@
 import {
+    Button,
     GridItem,
     Heading,
     HStack,
@@ -6,11 +7,16 @@ import {
     Select,
     Tooltip
 } from '@chakra-ui/react';
-import { ArrowsH, ArrowsMergeAltH, Close, Ruler, ToolbarTop } from 'css.gg';
+import { ArrowsH, ArrowsMergeAltH, Close, ToolbarTop } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { cloneElement } from 'react';
-import { Children, isValidElement, useContext, useState } from 'react';
+import {
+    Children,
+    cloneElement,
+    isValidElement,
+    useContext,
+    useState
+} from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function StatContainer(props) {
@@ -39,8 +45,15 @@ function StatContainer(props) {
                     {props.title}
                 </Heading>
             </Tooltip>
-            {['nodes'].includes(props.chart.type.toLowerCase()) &&
-                networkData === 'all' &&
+            {[
+                'nodes',
+                'bar',
+                'vertical bar',
+                'doughnut',
+                'line',
+                'grouped bar'
+            ].includes(props.chart.type.toLowerCase()) &&
+                networkData !== 'selected' &&
                 isExpanded && (
                     <Tooltip label="Limit element display by neighbour frequency.">
                         <Select
@@ -69,6 +82,7 @@ function StatContainer(props) {
                             <option value={-10}>Last 10</option>
                             <option value={-50}>Last 50</option>
                             <option value={-100}>Last 100</option>
+                            <option value={0}>All</option>
                         </Select>
                     </Tooltip>
                 )}
@@ -92,7 +106,12 @@ function StatContainer(props) {
                         defaultValue={props.chart.show_only}
                         onChange={e => setNetworkData(e.target.value)}
                     >
-                        <option value="selected">selected</option>
+                        {props.chart.elements !== 'edges' && (
+                            <option value="selected">selected</option>
+                        )}
+                        {props.chart.type.toLowerCase() !== 'components' && (
+                            <option value="visible">visible</option>
+                        )}
                         <option value="all">all</option>
                     </Select>
                 </Tooltip>
@@ -161,19 +180,40 @@ function StatContainer(props) {
                     onClick={() => store.stats.toggleLegend(props.chart.id)}
                 />
             </Tooltip>
-
-            <Tooltip label="Toggle axis labels">
-                <IconButton
-                    icon={<Ruler />}
-                    size="sm"
-                    variant="ghost"
-                    opacity={0.5}
-                    _hover={{
-                        opacity: 1
-                    }}
-                    onClick={() => store.stats.toggleAxisLabels(props.chart.id)}
-                />
-            </Tooltip>
+            {!['doughnut'].includes(props.chart.type.toLowerCase()) && (
+                <Tooltip label="Toggle x axis label">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        opacity={0.5}
+                        _hover={{
+                            opacity: 1
+                        }}
+                        onClick={() =>
+                            store.stats.toggleAxisLabels(props.chart.id, 'x')
+                        }
+                    >
+                        X
+                    </Button>
+                </Tooltip>
+            )}
+            {!['doughnut'].includes(props.chart.type.toLowerCase()) && (
+                <Tooltip label="Toggle y axis label">
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        opacity={0.5}
+                        _hover={{
+                            opacity: 1
+                        }}
+                        onClick={() =>
+                            store.stats.toggleAxisLabels(props.chart.id, 'y')
+                        }
+                    >
+                        Y
+                    </Button>
+                </Tooltip>
+            )}
         </HStack>
     );
 

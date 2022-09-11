@@ -23,11 +23,9 @@ import {
     RangeSliderThumb,
     RangeSliderTrack,
     Tag,
-    TagLabel,
     useColorModeValue,
     Wrap
 } from '@chakra-ui/react';
-import { Skeleton } from '@chakra-ui/skeleton';
 import {
     Slider,
     SliderFilledTrack,
@@ -444,199 +442,6 @@ function Settings() {
         );
     };
 
-    const getLargestNodes = nodes => {
-        if (nodes && nodes.length === 0) {
-            return;
-        }
-
-        return (
-            <Wrap width="100%" spacing="1">
-                {nodes.map(node => (
-                    <Tag
-                        size="sm"
-                        variant="solid"
-                        borderRadius="full"
-                        margin="2px"
-                        background={
-                            store.graphInstance.nodeColorSchemeColors[
-                                [store.core.currentGraph]
-                            ][node.feature]
-                        }
-                        key={node.id}
-                    >
-                        <Tooltip label={node.label}>
-                            <TagLabel
-                                width="100%"
-                                overflow="hidden"
-                                whiteSpace="nowrap"
-                                textOverflow="ellipsis"
-                            >
-                                {node.label}
-                            </TagLabel>
-                        </Tooltip>
-                    </Tag>
-                ))}
-            </Wrap>
-        );
-    };
-
-    const getLargestConnections = (connections, component_id) => {
-        if (!connections || (connections && connections.length === 0)) {
-            return;
-        }
-
-        return (
-            <Wrap width="100%" spacing="1">
-                {connections.map((connection, id) => (
-                    <Tag
-                        size="sm"
-                        variant="solid"
-                        borderRadius="full"
-                        margin="2px"
-                        background="blue.500"
-                        key={`${component_id}_largest_connection_${id}`}
-                    >
-                        <Tooltip
-                            label={
-                                <Text fontWeight="normal">
-                                    Common connection{' '}
-                                    <Tag
-                                        fontWeight="bold"
-                                        colorScheme="blackAlpha"
-                                        variant="solid"
-                                        size="sm"
-                                    >
-                                        {connection.label}
-                                    </Tag>{' '}
-                                    appearing{' '}
-                                    <Tag
-                                        fontWeight="bold"
-                                        colorScheme="blackAlpha"
-                                        variant="solid"
-                                        size="sm"
-                                    >
-                                        {connection.count}{' '}
-                                        {connection.count > 1
-                                            ? 'times'
-                                            : 'time'}
-                                    </Tag>
-                                    .
-                                </Text>
-                            }
-                        >
-                            <TagLabel
-                                width="100%"
-                                overflow="hidden"
-                                whiteSpace="nowrap"
-                                textOverflow="ellipsis"
-                            >
-                                {connection.label}: {connection.count}
-                            </TagLabel>
-                        </Tooltip>
-                    </Tag>
-                ))}
-            </Wrap>
-        );
-    };
-
-    const renderComponentToggle = componentData => {
-        const components = [
-            {
-                id: -1,
-                node_count: 'All',
-                largest_nodes: [],
-                largest_connections: []
-            },
-            ...componentData
-        ].map(component => (
-            <Tag
-                key={component.id}
-                size="sm"
-                borderRadius="10px"
-                variant="solid"
-                padding="10px"
-                width={
-                    (store.core.isOverview &&
-                        component.largest_connections &&
-                        component.largest_connections.length > 0) ||
-                    (store.core.isDetail &&
-                        component.largest_nodes &&
-                        component.largest_nodes.length > 0) ||
-                    component.id === -1
-                        ? '100%'
-                        : '46%'
-                }
-                backgroundColor={graphDimensionBackground}
-                transition="all 0.1s ease-in-out"
-                _hover={{
-                    opacity: 0.8,
-                    cursor: 'pointer'
-                }}
-                onClick={() =>
-                    store.graphInstance.toggleVisibleComponents(component.id)
-                }
-            >
-                <VStack width="100%">
-                    <HStack width="100%" justify="space-between">
-                        <Text
-                            size="sm"
-                            whiteSpace="nowrap"
-                            letterSpacing="0.5px"
-                            fontWeight="semibold"
-                        >
-                            {component.node_count} nodes{' '}
-                        </Text>
-                        <Box
-                            height="10px"
-                            width="10px"
-                            backgroundColor={
-                                store.graphInstance.visibleComponent ===
-                                component.id
-                                    ? 'blue.600'
-                                    : graphDimensionBackground
-                            }
-                            borderRadius="full"
-                        ></Box>
-                    </HStack>
-                    {store.core.isOverview
-                        ? getLargestConnections(
-                              component.largest_connections,
-                              component.id
-                          )
-                        : getLargestNodes(component.largest_nodes)}
-                </VStack>
-            </Tag>
-        ));
-
-        return (
-            <Stack width="100%">
-                <Heading size="sm" marginTop="10px" marginBottom="5px">
-                    Graph components:
-                </Heading>
-                <Wrap maxHeight="300px" overflowY="scroll">
-                    {componentData && componentData.length ? (
-                        components
-                    ) : (
-                        <Stack width="100%">
-                            <Skeleton
-                                height="30px"
-                                borderRadius="10px"
-                            ></Skeleton>
-                            <Skeleton
-                                height="30px"
-                                borderRadius="10px"
-                            ></Skeleton>
-                            <Skeleton
-                                height="30px"
-                                borderRadius="10px"
-                            ></Skeleton>
-                        </Stack>
-                    )}
-                </Wrap>
-            </Stack>
-        );
-    };
-
     return (
         <Stack
             align="center"
@@ -659,15 +464,11 @@ function Settings() {
                     {renderLabelOptions()}
                     <Divider />
                     {renderLayoutOptions()}
-                    <Divider />
-                    {location.pathname.startsWith('/graph/detail') &&
-                        renderDimensionsToggle()}
                     {location.pathname.startsWith('/graph/detail') && (
                         <Divider />
                     )}
-                    {renderComponentToggle(
-                        store.graph.currentGraphData.components
-                    )}
+                    {location.pathname.startsWith('/graph/detail') &&
+                        renderDimensionsToggle()}
                 </VStack>
             </FormControl>
         </Stack>

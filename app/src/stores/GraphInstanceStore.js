@@ -242,13 +242,63 @@ export class GraphInstanceStore {
         }
     }
 
-    zoomToFitByNodeId = id => {
+    zoomToFitByNodeIds = ids => {
+        const coordinates = this.store.graph.currentGraphData.nodes
+            .filter(node => ids.includes(node.id))
+            .map(node => [node.x, node.y]);
+
+        let maxX = coordinates[0][0];
+        let minX = coordinates[0][0];
+        let maxY = coordinates[0][1];
+        let minY = coordinates[0][1];
+
+        coordinates.forEach(coordinate => {
+            if (coordinate[0] > maxX) {
+                maxX = coordinate[0];
+            } else if (coordinate[0] < minX) {
+                minX = coordinate[0];
+            }
+
+            if (coordinate[1] > maxY) {
+                maxY = coordinate[1];
+            } else if (coordinate[1] < minY) {
+                minY = coordinate[1];
+            }
+        });
+
+        const cameraX = Math.round((minX + maxX) / 2, 2);
+        const cameraY = Math.round((minY + maxY) / 2, 2);
+        console.log(maxX, maxY);
+        console.log(minX, minY);
+        console.log(cameraX, cameraY);
+
+        const xDistance = Math.abs(maxX) + Math.abs(minX);
+        const yDistance = Math.abs(maxY) + Math.abs(minY);
+
+        const largestDinstance = xDistance > yDistance ? xDistance : yDistance;
+
+        this.graphInstance.cameraPosition(
+            {
+                x: cameraX,
+                y: cameraY,
+                z: largestDinstance + largestDinstance * 0.3
+            },
+            new THREE.Vector3(cameraX, cameraY, -1),
+            0
+        );
+    };
+
+    zoomToFitByNodeId = (id, cameraDistance = 100) => {
         const node = this.store.graph.currentGraphData.nodes.find(
             node => node.id === id
         );
 
         this.graphInstance.cameraPosition(
-            { x: node.x, y: node.y, z: 100 },
+            {
+                x: node.x,
+                y: node.y,
+                z: cameraDistance
+            },
             new THREE.Vector3(node.x, node.y, -1),
             0
         );
@@ -673,6 +723,12 @@ export class GraphInstanceStore {
                 visibleNodeIds.includes(data.links[i].target.id);
         }
 
+        if (visibleNodeIds.length > 1) {
+            this.zoomToFitByNodeIds(visibleNodeIds);
+        } else if (visibleNodeIds.length === 1) {
+            this.zoomToFitByNodeId(visibleNodeIds[0]);
+        }
+
         this.visibleComponent = componentId;
     };
 
@@ -722,6 +778,8 @@ export class GraphInstanceStore {
         this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
 
         this.filterTabularData();
+
+        return visibleIds;
     };
 
     filterEdgesWithValue = (property, value) => {
@@ -783,5 +841,6 @@ export class GraphInstanceStore {
         this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
 
         this.filterTabularData();
+        return visibleIds;
     };
 }

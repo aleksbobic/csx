@@ -279,24 +279,34 @@ export class StatsStore {
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
-    toggleAxisLabels = id => {
+    toggleAxisLabels = (id, axis) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
                 return chart;
             }
 
-            return {
-                ...chart,
-                labels: {
-                    x: {
-                        display: !chart.labels.x.display
-                    },
-                    y: {
-                        display: !chart.labels.y.display
+            if (axis === 'x') {
+                return {
+                    ...chart,
+                    labels: {
+                        ...chart.labels,
+                        x: {
+                            display: !chart.labels.x.display
+                        }
                     }
-                }
-            };
+                };
+            } else {
+                return {
+                    ...chart,
+                    labels: {
+                        ...chart.labels,
+                        y: {
+                            display: !chart.labels.y.display
+                        }
+                    }
+                };
+            }
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
@@ -450,13 +460,13 @@ export class StatsStore {
         chartType,
         display_limit,
         groupBy,
-        onlyVisible
+        network_data
     ) => {
         let values = [];
         let counts = [];
         let data = this.store.graph.currentGraphData.links;
 
-        if (onlyVisible) {
+        if (network_data === 'visible') {
             data = data.filter(link => link.visible);
         }
 
@@ -567,20 +577,20 @@ export class StatsStore {
         };
     };
 
-    getNodeDataBasedOnNetworkSelection = (
-        network_data,
-        onlyVisible,
-        showOnly
-    ) => {
+    getNodeDataBasedOnNetworkSelection = (network_data, showOnly) => {
         let nodes;
-        if (network_data === 'selection') {
-            nodes = this.store.graph.currentGraphData.selectedNodes;
-        } else {
-            nodes = this.store.graph.currentGraphData.nodes;
-        }
-
-        if (onlyVisible) {
-            nodes = nodes.filter(node => node.visible);
+        switch (network_data) {
+            case 'selected':
+                nodes = this.store.graph.currentGraphData.selectedNodes;
+                break;
+            case 'visible':
+                nodes = this.store.graph.currentGraphData.nodes.filter(
+                    node => node.visible
+                );
+                break;
+            default:
+                nodes = this.store.graph.currentGraphData.nodes;
+                break;
         }
 
         if (showOnly !== 'all') {
@@ -668,12 +678,10 @@ export class StatsStore {
         display_limit,
         network_data,
         groupBy,
-        onlyVisible,
         show_only
     ) => {
         let data = this.getNodeDataBasedOnNetworkSelection(
             network_data,
-            onlyVisible,
             show_only
         );
         let getNodeProp =
