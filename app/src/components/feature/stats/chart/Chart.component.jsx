@@ -151,7 +151,7 @@ function Chart(props) {
                         return `${props.chart.hoverLabel}: ${tooltipItem.label}`;
                     },
                     afterLabel: tooltipItem => {
-                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                        return `Frequency: ${tooltipItem.formattedValue}`;
                     }
                 }
             };
@@ -160,7 +160,7 @@ function Chart(props) {
                 callbacks: {
                     label: tooltipItem => tooltipItem.label,
                     afterLabel: tooltipItem => {
-                        return `Frequnecy: ${tooltipItem.formattedValue}`;
+                        return `Frequency: ${tooltipItem.formattedValue}`;
                     }
                 }
             };

@@ -1,5 +1,6 @@
 import {
     Box,
+    Button,
     Divider,
     Flex,
     HStack,
@@ -205,7 +206,7 @@ function ControlPanel() {
         >
             <HStack spacing="1">
                 <Tooltip label="Show all nodes">
-                    <IconButton
+                    <Button
                         borderRadius="6px"
                         id="closedirectconnections"
                         size="sm"
@@ -222,7 +223,9 @@ function ControlPanel() {
                             store.graphInstance.toggleVisibleComponents(-1);
                             store.graphInstance.resetSelfCentric();
                         }}
-                    />
+                    >
+                        Show all
+                    </Button>
                 </Tooltip>
                 <Tooltip label="Show selected nodes">
                     <IconButton
@@ -246,7 +249,8 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
-                <Tooltip label="Show connections with same entries as origin node">
+
+                <Tooltip label="Show nodes with same entries as origin node">
                     <IconButton
                         borderRadius="6px"
                         id="mutualentriesoriginbutton"
@@ -267,7 +271,7 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
-                <Tooltip label="Show connections with same entries as selected nodes">
+                <Tooltip label="Show nodes with same entries as all selected nodes">
                     <IconButton
                         borderRadius="6px"
                         id="mutualentriesoriginbutton"
@@ -297,7 +301,7 @@ function ControlPanel() {
                         id="alldirectconnections"
                         isDisabled={
                             store.graph.currentGraphData.selectedNodes.length <
-                            2
+                            1
                         }
                         size="sm"
                         style={{

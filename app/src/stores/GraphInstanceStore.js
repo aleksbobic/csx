@@ -268,9 +268,6 @@ export class GraphInstanceStore {
 
         const cameraX = Math.round((minX + maxX) / 2, 2);
         const cameraY = Math.round((minY + maxY) / 2, 2);
-        console.log(maxX, maxY);
-        console.log(minX, minY);
-        console.log(cameraX, cameraY);
 
         const xDistance = Math.abs(maxX) + Math.abs(minX);
         const yDistance = Math.abs(maxY) + Math.abs(minY);

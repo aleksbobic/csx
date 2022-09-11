@@ -273,19 +273,49 @@ function FileUploadModal() {
                         demoData={[
                             {
                                 id: 1,
-                                node_count: 53
+                                node_count: 53,
+                                largest_connections: [
+                                    { label: 'edge 1', count: 5 },
+                                    { label: 'edge 2', count: 5 },
+                                    { label: 'edge 3', count: 5 }
+                                ],
+                                largest_nodes: [
+                                    {
+                                        label: 'node 1',
+                                        entries: [4, 5, 2, 4, 3, 5]
+                                    },
+                                    {
+                                        label: 'node 2',
+                                        entries: [4, 5, 2, 3, 5]
+                                    },
+                                    { label: 'node 3', entries: [4, 5, 2, 3] }
+                                ]
                             },
                             {
                                 id: 2,
-                                node_count: 34
+                                node_count: 34,
+                                largest_connections: [
+                                    { label: 'edge 5', count: 3 }
+                                ],
+                                largest_nodes: [
+                                    { label: 'node 5', entries: [2, 4, 5] }
+                                ]
                             },
                             {
                                 id: 3,
-                                node_count: 14
+                                node_count: 14,
+                                largest_connections: [
+                                    { label: 'edge 4', count: 2 }
+                                ],
+                                largest_nodes: [
+                                    { label: 'node 4', entries: [4, 5] }
+                                ]
                             },
                             {
                                 id: 4,
-                                node_count: 4
+                                node_count: 4,
+                                largest_connections: [],
+                                largest_nodes: []
                             }
                         ]}
                     />
@@ -594,7 +624,8 @@ function FileUploadModal() {
                             </FormControl>
                         )}
 
-                    {store.core.currentGraph === 'detail' &&
+                    {statTypes.type === 'chart' &&
+                        store.core.currentGraph === 'detail' &&
                         store.stats.newChartProps.elements === 'nodes' &&
                         store.stats.newChartProps.element_values !==
                             'types' && (
