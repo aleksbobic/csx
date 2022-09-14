@@ -80,7 +80,7 @@ function Graph(props) {
         store.graphInstance.linkVisibility,
         store.graphInstance.labels.visibilityDistance,
         store.graphInstance.forceEngine,
-        store.graphInstance.visibleComponent,
+        store.graphInstance.visibleComponents,
         store.graph.currentGraphData.selectedNodes,
         store.graphInstance.isSelfCentric,
         store.graphInstance.selfCentricType,

@@ -248,9 +248,9 @@ function SelectedComponentList(props) {
                                         variant="ghost"
                                         size="xs"
                                         opacity={
-                                            store.graphInstance
-                                                .visibleComponent ===
-                                            component.id
+                                            store.graphInstance.visibleComponents.includes(
+                                                component.id
+                                            )
                                                 ? '1'
                                                 : '0.3'
                                         }

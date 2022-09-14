@@ -24,6 +24,8 @@ function StatContainer(props) {
     const [isExpanded, setIsExpanded] = useState(props.chart.colSpan === 2);
     const [networkData, setNetworkData] = useState(props.chart.network_data);
     const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
+    const [connectionFeature, setConnectionFeature] = useState('all');
+    const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
 
     const renderChartContainerTopControls = () => (
         <HStack
@@ -45,6 +47,71 @@ function StatContainer(props) {
                     {props.title}
                 </Heading>
             </Tooltip>
+            {['connections'].includes(props.chart.type.toLowerCase()) &&
+                isExpanded && (
+                    <Tooltip label="Change max degree.">
+                        <Select
+                            size="xs"
+                            variant="filled"
+                            borderRadius="5px"
+                            opacity="0.5"
+                            minWidth="40px"
+                            width="40px"
+                            textAlign="right"
+                            backgroundColor="transparent"
+                            _hover={{
+                                opacity: '1',
+                                backgroundColor: 'whiteAlpha.200'
+                            }}
+                            icon={<></>}
+                            style={{ paddingRight: '8px' }}
+                            defaultValue={maxConnectionDegree}
+                            onChange={e =>
+                                setMaxConnectionDegree(parseInt(e.target.value))
+                            }
+                        >
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </Select>
+                    </Tooltip>
+                )}
+            {['connections'].includes(props.chart.type.toLowerCase()) && (
+                <Tooltip label="Show only features of selected type.">
+                    <Select
+                        size="xs"
+                        variant="filled"
+                        borderRadius="5px"
+                        opacity="0.5"
+                        minWidth="70px"
+                        width="70px"
+                        textAlign="right"
+                        backgroundColor="transparent"
+                        _hover={{
+                            opacity: '1',
+                            backgroundColor: 'whiteAlpha.200'
+                        }}
+                        icon={<></>}
+                        style={{ paddingRight: '8px' }}
+                        defaultValue={connectionFeature}
+                        onChange={e => setConnectionFeature(e.target.value)}
+                    >
+                        <option value="all">all</option>
+                        {store.graph.currentGraphData.perspectivesInGraph.map(
+                            feature => (
+                                <option
+                                    key={`connection_feature_${feature}`}
+                                    value={feature}
+                                >
+                                    {feature}
+                                </option>
+                            )
+                        )}
+                    </Select>
+                </Tooltip>
+            )}
             {[
                 'nodes',
                 'bar',
@@ -222,7 +289,9 @@ function StatContainer(props) {
             return cloneElement(child, {
                 isExpanded,
                 networkData,
-                elementDisplayLimit
+                elementDisplayLimit,
+                connectionFeature,
+                maxConnectionDegree
             });
         }
         return child;

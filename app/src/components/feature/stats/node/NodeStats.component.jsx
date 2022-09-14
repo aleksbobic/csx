@@ -71,7 +71,7 @@ function SelectedNodeList(props) {
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
         store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponent
+        store.graphInstance.visibleComponents
     ]);
 
     const renderNodeDetails = node => {

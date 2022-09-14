@@ -21,6 +21,10 @@ function Overview(props) {
     const store = useContext(RootStoreContext);
 
     const getChartTitle = chart => {
+        if (chart.title) {
+            return chart.title;
+        }
+
         if (chart.type.toLowerCase() === 'nodes') {
             return 'Graph nodes';
         }
@@ -35,10 +39,6 @@ function Overview(props) {
 
         if (chart.type.toLowerCase() === 'connections') {
             return 'Node connections';
-        }
-
-        if (chart.title) {
-            return chart.title;
         }
 
         switch (chart.element_values) {

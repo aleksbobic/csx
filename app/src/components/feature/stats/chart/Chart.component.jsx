@@ -131,7 +131,7 @@ function Chart(props) {
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
         store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponent,
+        store.graphInstance.visibleComponents,
         props.elementDisplayLimit,
         props.networkData,
         props.chart.group_by

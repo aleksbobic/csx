@@ -122,7 +122,7 @@ function GraphStats(props) {
         store.graph.currentGraphData.selectedNodes.length,
         store.graph.currentGraphData.types,
         store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponent
+        store.graphInstance.visibleComponents
     ]);
 
     const renderGraphStats = (title, data) =>

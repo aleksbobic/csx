@@ -12,7 +12,8 @@ const SELF_CENTRIC_TYPES = {
     SAME_ENTRY: 'same_entry',
     SELECTED_COMPONENT: 'selected_component',
     CHART_FILTER: 'chart_filter',
-    DEGREE_FILTER: 'degree_filter'
+    DEGREE_FILTER: 'degree_filter',
+    NEIGHBOURS: 'node_neighbours'
 };
 
 export class GraphInstanceStore {
@@ -29,7 +30,7 @@ export class GraphInstanceStore {
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
-    visibleComponent = -1;
+    visibleComponents = [];
     hoverData = [];
 
     labels = {
@@ -163,6 +164,45 @@ export class GraphInstanceStore {
         this.isSelfCentric = true;
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
+    };
+
+    filterNodesById = (origin, neighbourData, level, feature = 'all') => {
+        const visibleNodes = [
+            origin,
+            ...neighbourData
+                .slice(0, level + 1)
+                .map(data => data.neighbours)
+                .flat()
+                .filter(node => feature === 'all' || node.feature === feature)
+        ];
+
+        const visibleNodeIds = visibleNodes.map(node => node.id);
+
+        const data = this.store.graph.currentGraphData;
+
+        data.nodes.forEach(node => {
+            node.visible = visibleNodeIds.includes(node.id);
+        });
+
+        const linkCount = data.links.length;
+
+        for (let i = 0; i < linkCount; i++) {
+            data.links[i].visible =
+                visibleNodeIds.includes(data.links[i].source.id) &&
+                visibleNodeIds.includes(data.links[i].target.id);
+        }
+
+        if (visibleNodeIds.length > 1) {
+            this.zoomToFitByNodeIds(visibleNodeIds);
+        } else if (visibleNodeIds.length === 1) {
+            this.zoomToFitByNodeId(visibleNodeIds[0]);
+        }
+
+        this.filterTabularData();
+
+        this.isSelfCentric = true;
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.NEIGHBOURS;
     };
 
     filterTabularData = (only_selected = false) => {
@@ -681,6 +721,26 @@ export class GraphInstanceStore {
     };
 
     toggleVisibleComponents = componentId => {
+        let allVisibleComponents;
+
+        this.store.graph.currentGraphData.selectedNodes.forEach(
+            (node, index) => {
+                this.store.graph.deselectNode(node, index);
+            }
+        );
+
+        if (componentId === -1) {
+            allVisibleComponents = [];
+        } else {
+            if (this.visibleComponents.includes(componentId)) {
+                allVisibleComponents = this.visibleComponents.filter(
+                    cId => cId !== componentId
+                );
+            } else {
+                allVisibleComponents = [...this.visibleComponents, componentId];
+            }
+        }
+
         const visibleNodeIds = [];
 
         const data = this.store.graph.currentGraphData;
@@ -689,22 +749,29 @@ export class GraphInstanceStore {
             data.activeTableData = data.tableData;
         } else {
             this.store.graph.activeTableData = [];
-            const selectedComponent = data.components.find(
-                component => component['id'] === componentId
+            const selectedComponents = data.components.filter(component =>
+                allVisibleComponents.includes(component['id'])
             );
 
+            const componentEntries = [
+                ...new Set(
+                    selectedComponents
+                        .map(component => component['entries'])
+                        .flat()
+                )
+            ];
+
             data.activeTableData = data.tableData.filter(row =>
-                selectedComponent['entries'].includes(row.entry)
+                componentEntries.includes(row.entry)
             );
         }
 
         data.nodes.forEach(node => {
-            if (node.component === componentId || componentId === -1) {
+            if (
+                allVisibleComponents.includes(node.component) ||
+                allVisibleComponents.length === 0
+            ) {
                 node.visible = true;
-                node.visible =
-                    !node.neighbours || node.neighbours.size === 0
-                        ? this.orphanNodeVisibility
-                        : true;
                 visibleNodeIds.push(node.id);
             } else {
                 node.visible = false;
@@ -726,8 +793,10 @@ export class GraphInstanceStore {
             this.zoomToFitByNodeId(visibleNodeIds[0]);
         }
 
-        this.visibleComponent = componentId;
+        this.setVisibleComponents(allVisibleComponents);
     };
+
+    setVisibleComponents = value => (this.visibleComponents = value);
 
     get selectedColorSchema() {
         return this.nodeColorScheme[this.store.core.currentGraph];
