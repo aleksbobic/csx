@@ -39,8 +39,12 @@ def retrieve_raw_nodes_from_mongo(
     collection_name: str, id_list: List, features: List
 ) -> List[Node]:
     """Retrieve nodes stored in mongo by id list and feature"""
-    return list(
+    nodes = list(
         database[collection_name].find(
             {"entries": {"$in": id_list}, "feature": {"$in": features}}, {"_id": 0}
         )
     )
+    for node in nodes:
+        node["entries"] = [entry for entry in node["entries"] if entry in id_list]
+
+    return nodes
