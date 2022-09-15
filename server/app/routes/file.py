@@ -355,6 +355,13 @@ def get_dataset_config(name: str):
 @router.get("/settingsupdate")
 def update_settings(name="", anchor="", defaults="{}"):
     defaults = json.loads(defaults)
+    schemas = []
+    search_hints = {}
+
+    with open(f"./app/data/config/{name}.json") as f:
+        data = json.load(f)
+        schemas = data["schemas"]
+        search_hints = data["search_hints"]
 
     # Generate default config
     config = {
@@ -363,7 +370,8 @@ def update_settings(name="", anchor="", defaults="{}"):
         "links": get_default_link_dimensions(defaults),
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
-        "schemas": [{"name": "default", "relations": []}],
+        "schemas": schemas,
+        "search_hints": search_hints,
     }
 
     with open(f"./app/data/config/{name}.json", "w") as f:

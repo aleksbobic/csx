@@ -29,7 +29,7 @@ def create_index(index: str, mapping: Dict) -> None:
         es.indices.create(index=index, body=mapping)
 
 
-def bulk_populate(data: List[Any]) -> None:
+def bulk_populate(data) -> None:
     """Populate elasticsearch with given data. The index is defined in the data."""
     # We need to specify that elastic should wait
     # for the changes made using bulk to be available
