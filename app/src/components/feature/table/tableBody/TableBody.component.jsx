@@ -25,7 +25,7 @@ function TableBody(props) {
             );
 
             full_selector = Array.isArray(cell_with_values.value)
-                ? `${selector}_${cell_with_values.value[0]}_id`
+                ? `${selector}_${cell_with_values.value[index ? index : 0]}_id`
                 : `${selector}_${cell_with_values.value}_id`;
 
             key = Object.keys(hidden_cols).find(
@@ -72,11 +72,38 @@ function TableBody(props) {
                             `focus on node: ${cell.value}}`
                         );
 
-                        store.graphInstance.zoomToFitByNodeId(
-                            Array.isArray(cell.value)
+                        if (
+                            store.core.isDetail ||
+                            store.search.nodeTypes[store.search.anchor] !==
+                                'list' ||
+                            cell.column.Header.toLowerCase() ===
+                                store.search.anchor.toLowerCase()
+                        ) {
+                            store.graphInstance.zoomToFitByNodeId(
+                                Array.isArray(cell.value)
+                                    ? findID(cell, 0)
+                                    : findID(cell)
+                            );
+                        } else {
+                            const id = Array.isArray(cell.value)
                                 ? findID(cell, 0)
-                                : findID(cell)
-                        );
+                                : findID(cell);
+
+                            const entries =
+                                store.graph.currentGraphData.nodes.find(
+                                    node => node.id === id
+                                ).entries;
+
+                            const ids = store.graph.currentGraphData.nodes
+                                .filter(node =>
+                                    node.entries.some(entry =>
+                                        entries.includes(entry)
+                                    )
+                                )
+                                .map(node => node.id);
+
+                            store.graphInstance.zoomToFitByNodeIds(ids);
+                        }
                     }}
                     _hover={{
                         cursor: 'pointer',
@@ -118,11 +145,38 @@ function TableBody(props) {
                                 `focus on node: ${cell.value}}`
                             );
 
-                            store.graphInstance.zoomToFitByNodeId(
-                                Array.isArray(cell.value)
+                            if (
+                                store.core.isDetail ||
+                                store.search.nodeTypes[store.search.anchor] !==
+                                    'list' ||
+                                cell.column.Header.toLowerCase() ===
+                                    store.search.anchor.toLowerCase()
+                            ) {
+                                store.graphInstance.zoomToFitByNodeId(
+                                    Array.isArray(cell.value)
+                                        ? findID(cell, index)
+                                        : findID(cell)
+                                );
+                            } else {
+                                const id = Array.isArray(cell.value)
                                     ? findID(cell, index)
-                                    : findID(cell)
-                            );
+                                    : findID(cell);
+
+                                const entries =
+                                    store.graph.currentGraphData.nodes.find(
+                                        node => node.id === id
+                                    ).entries;
+
+                                const ids = store.graph.currentGraphData.nodes
+                                    .filter(node =>
+                                        node.entries.some(entry =>
+                                            entries.includes(entry)
+                                        )
+                                    )
+                                    .map(node => node.id);
+
+                                store.graphInstance.zoomToFitByNodeIds(ids);
+                            }
                         }}
                     >
                         {value}
