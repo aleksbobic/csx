@@ -796,10 +796,7 @@ export class GraphStore {
         }
     };
 
-    expandNetwork = async (node, suuid) => {
-        const feature = node.feature;
-        const value = node.label;
-
+    expandNetwork = async (nodes, suuid, connector = null) => {
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
             this.resetGraphData();
@@ -845,8 +842,12 @@ export class GraphStore {
 
         try {
             const response = await axios.post('graph/expand', {
-                feature: feature,
-                value: value,
+                values: {
+                    connector: connector,
+                    nodes: nodes.map(node => {
+                        return { value: node.label, feature: node.feature };
+                    })
+                },
                 user_id: this.store.core.userUuid,
                 graph_type: this.store.core.currentGraph,
                 anchor: this.store.search.anchor,

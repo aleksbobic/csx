@@ -61,8 +61,7 @@ def trim_network(
 
 
 class ExpandData(BaseModel):
-    feature: str
-    value: str
+    values: dict
     user_id: str
     graph_type: str
     anchor: str
@@ -78,8 +77,7 @@ class ExpandData(BaseModel):
 def expand_network(
     data: ExpandData,
 ):
-    feature = data.feature
-    value = data.value
+    values = data.values
     user_id = data.user_id
     graph_type = data.graph_type
     anchor_properties = data.anchor_properties
@@ -91,13 +89,33 @@ def expand_network(
 
     cache_data = csx_redis.load_current_graph(user_id)
 
-    # Generate: {'action': 'visualise', 'query': {'action': 'search', 'feature': 'author keywords', 'keyphrase': 'text classification'}}
-    # Call generate_advanced_query(json.loads(query), index, dimension_types)
+    if len(values["nodes"]) == 1:
+        query = {
+            "action": "visualise",
+            "query": {
+                "action": "search",
+                "feature": values["nodes"][0]["feature"],
+                "keyphrase": values["nodes"][0]["value"],
+            },
+        }
+    else:
+        atomic_queries = [
+            {
+                "action": "search",
+                "feature": entry["feature"],
+                "keyphrase": entry["value"],
+            }
+            for entry in values["nodes"]
+        ]
 
-    query = {
-        "action": "visualise",
-        "query": {"action": "search", "feature": feature, "keyphrase": value},
-    }
+        query = {
+            "action": "visualise",
+            "query": {
+                "action": "connect",
+                "connector": values["connector"],
+                "queries": atomic_queries,
+            },
+        }
 
     dimension_types = {}
 

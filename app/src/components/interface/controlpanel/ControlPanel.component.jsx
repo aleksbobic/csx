@@ -40,7 +40,9 @@ import {
 } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import queryString from 'query-string';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -51,6 +53,7 @@ function ControlPanel() {
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [originNodeExists, setOriginNodeExists] = useState(false);
+    const location = useLocation();
 
     const selfCentricMenuBackground = useColorModeValue(
         'whiteAlpha.800',
@@ -132,7 +135,7 @@ function ControlPanel() {
                 bottom="70px"
                 left="320px"
                 maxWidth="200px"
-                zIndex={20}
+                zIndex={2}
                 backgroundColor={legendBackgroundColor}
                 padding="10px"
                 borderRadius="10px"
@@ -164,6 +167,17 @@ function ControlPanel() {
         onOpen();
     }, [onOpen]);
 
+    const getQueryString = param => queryString.parse(location.search)[param];
+
+    const expandGraph = connector => {
+        store.graph.expandNetwork(
+            store.graph.currentGraphData.selectedNodes,
+            getQueryString('suuid'),
+            connector
+        );
+        store.contextMenu.hideContextMenu();
+    };
+
     const renderNetworkModificationMenu = () => (
         <HStack
             id="networkmodificationmenu"
@@ -192,7 +206,7 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
-                <Menu>
+                <Menu style={{ zIndex: 40 }}>
                     <Tooltip label="Expand network">
                         <MenuButton
                             disabled={
@@ -218,6 +232,7 @@ function ControlPanel() {
                             fontSize="xs"
                             fontWeight="bold"
                             borderRadius="6px"
+                            onClick={() => expandGraph('or')}
                         >
                             Wide Expand
                         </MenuItem>
@@ -225,6 +240,7 @@ function ControlPanel() {
                             fontSize="xs"
                             fontWeight="bold"
                             borderRadius="6px"
+                            onClick={() => expandGraph('and')}
                         >
                             Narrow Expand
                         </MenuItem>

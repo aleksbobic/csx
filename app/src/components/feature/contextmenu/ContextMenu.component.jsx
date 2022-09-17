@@ -51,7 +51,7 @@ function ContextMenu() {
             node => node.id === store.contextMenu.originNode.id
         )[0];
 
-        store.graph.expandNetwork(node, getQueryString('suuid'));
+        store.graph.expandNetwork([node], getQueryString('suuid'));
         store.contextMenu.hideContextMenu();
     };
 
