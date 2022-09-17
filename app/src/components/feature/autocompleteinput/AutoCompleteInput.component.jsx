@@ -8,7 +8,7 @@ function AutoCompleteInput(props) {
     const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-    const [activeSuggestion, setActiveSuggestion] = useState(0);
+    const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
     const handleValueChange = e => {
         setInput(e.target.value);
@@ -36,12 +36,16 @@ function AutoCompleteInput(props) {
         props.getValue(clickedVal);
         setSuggestionsVisible(false);
         setSuggestions([]);
-        setActiveSuggestion(0);
+        setActiveSuggestion(-1);
     };
 
     const handleKeyDown = e => {
         if (e.keyCode === 13) {
-            if (suggestionsVisible && suggestions.length > 0) {
+            if (
+                suggestionsVisible &&
+                suggestions.length > 0 &&
+                activeSuggestion > -1
+            ) {
                 e.preventDefault();
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
@@ -56,11 +60,14 @@ function AutoCompleteInput(props) {
 
                 const element =
                     document.getElementsByClassName('activeSuggestion')[0];
-                element.scrollIntoView({
-                    behavior: 'auto',
-                    block: 'center',
-                    inline: 'start'
-                });
+
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center',
+                        inline: 'start'
+                    });
+                }
             }
         }
         // User pressed the down arrow, increment the index
@@ -73,17 +80,24 @@ function AutoCompleteInput(props) {
 
                 const element =
                     document.getElementsByClassName('activeSuggestion')[0];
-                element.scrollIntoView({
-                    behavior: 'auto',
-                    block: 'center',
-                    inline: 'start'
-                });
+
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center',
+                        inline: 'start'
+                    });
+                }
             }
+        } else if (e.keyCode === 27) {
+            setActiveSuggestion(-1);
+            setSuggestionsVisible(false);
+            setSuggestions([]);
         }
     };
 
     const handleBlur = () => {
-        setActiveSuggestion(0);
+        setActiveSuggestion(-1);
         setSuggestionsVisible(false);
         setSuggestions([]);
     };
