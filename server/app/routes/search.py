@@ -31,7 +31,6 @@ def convert_filter_res_to_df(results):
 
 
 def get_new_features(query):
-
     if query["action"] == "connect":
         return list(
             itertools.chain.from_iterable(
@@ -133,6 +132,8 @@ def search(data: Data) -> dict:
     id_list = visible_entries
     query_generated_dimensions = {}
 
+    print("\n\n\n\n\n\nquery:", query, type(query), "\n\n\n\n\n\n")
+
     if len(id_list):
         results = convert_filter_res_to_df(
             search.filter("terms", _id=id_list).execute()
@@ -156,6 +157,7 @@ def search(data: Data) -> dict:
         )
         results = csx_es.query_to_dataframe(es_query, index)
     else:
+
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
