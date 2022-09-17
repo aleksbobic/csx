@@ -4,23 +4,17 @@ import os
 from typing import List, Literal
 
 import pandas as pd
-import pytextrank
-import spacy
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 from pydantic import BaseModel
+
 import app.services.graph.graph as csx_graph
-
-nlp = spacy.load("en_core_web_sm")
-nlp.add_pipe("textrank")
-
 import app.services.data.elastic as csx_es
 import app.services.data.redis as csx_redis
 import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
 import app.services.data.autocomplete as csx_auto
-from app.utils.timer import use_timing
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -34,117 +28,6 @@ def convert_filter_res_to_df(results):
         elastic_list.append(entry_dict)
 
     return pd.DataFrame(elastic_list)
-
-
-def generate_advanced_query(query, index, dimension_types) -> pd.DataFrame:
-    """Assemble query from multiple query phrases. Each call should return a dataframe."""
-
-    if "min" in query and "max" in query:
-        return csx_es.range_filter_to_dataframe(
-            query["feature"], query["min"], query["max"], index
-        )
-
-    if query["action"] == "get dataset":
-        return csx_es.query_to_dataframe(Q("match_all"), index, False)
-
-    if query["action"] == "extract keywords":
-        source_feature = query["feature"]
-        newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], index, dimension_types)
-        keywords = []
-
-        for doc in nlp.pipe(results[source_feature].values):
-            if doc.has_annotation("DEP"):
-                keywords.append([phrase.text for phrase in doc._.phrases[:10]])
-            else:
-                keywords.append([])
-
-        results[newFeatureName] = keywords
-
-        return results
-
-    if query["action"] == "count array":
-        source_feature = query["feature"]
-        newFeatureName = query["newFeatureName"]
-        results = generate_advanced_query(query["query"], index, dimension_types)
-
-        results[newFeatureName] = results[source_feature].apply(lambda x: str(len(x)))
-        return results
-
-    # TODO: CHeck if feature is list
-    if "query" not in query and "queries" not in query:
-        if dimension_types[query["feature"]] == "list":
-
-            results = csx_es.query_to_dataframe(
-                Q("match_phrase", **{query["feature"]: query["keyphrase"]}),
-                index,
-            )
-
-            return results
-
-        return csx_es.query_to_dataframe(
-            Q(
-                "query_string",
-                query=f"{query['keyphrase']}",
-                type="phrase",
-                fields=[query["feature"]],
-            ),
-            index,
-        )
-
-    if query["action"] == "connect":
-        if query["connector"] == "or":
-
-            query_dfs = [
-                generate_advanced_query(entry, index, dimension_types)
-                for entry in query["queries"]
-            ]
-
-            merged_df = (
-                pd.concat(query_dfs, ignore_index=True)
-                .drop_duplicates(subset=["entry"])
-                .reset_index(drop=True)
-            )
-
-            return merged_df
-
-        elif query["connector"] == "and":
-
-            query_dfs = [
-                generate_advanced_query(entry, index, dimension_types)
-                for entry in query["queries"]
-            ]
-
-            merged_df = query_dfs[0]
-            query_dfs = query_dfs[1:]
-
-            for entry_df in query_dfs:
-
-                merged_df = pd.concat([merged_df, entry_df], ignore_index=True)
-                merged_df = (
-                    merged_df[merged_df.duplicated(subset=["entry"])]
-                    .drop_duplicates(subset=["entry"])
-                    .reset_index(drop=True)
-                )
-
-            return merged_df
-        else:
-            return csx_es.query_to_dataframe(
-                Q(
-                    "bool",
-                    must_not=[
-                        Q(
-                            "query_string",
-                            query=f"{query['queries'][0]['keyphrase']}",
-                            type="phrase",
-                            fields=[query["queries"][0]["feature"]],
-                        )
-                    ],
-                ),
-                index,
-            )
-
-    return generate_advanced_query(query["query"], index, dimension_types)
 
 
 def get_new_features(query):
@@ -277,7 +160,8 @@ def search(data: Data) -> dict:
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
-        results = generate_advanced_query(json.loads(query), index, dimension_types)
+
+        results = csx_es.run_advanced_query(json.loads(query), index, dimension_types)
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -314,7 +198,7 @@ def search(data: Data) -> dict:
     )
 
     comparison_switch = {
-        "from_scratch": lambda: get_graph_from_scratch(
+        "from_scratch": lambda: csx_graph.get_graph_from_scratch(
             graph_type,
             dimensions,
             elastic_json,
@@ -329,10 +213,10 @@ def search(data: Data) -> dict:
             anchor_properties,
             comparison_res,
         ),
-        "from_anchor_properties": lambda: get_graph_with_new_anchor_props(
+        "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
             comparison_res, graph_type, dimensions, elastic_json
         ),
-        "from_existing_data": lambda: get_graph_from_existing_data(
+        "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
             dimensions,
             elastic_json,
@@ -342,131 +226,14 @@ def search(data: Data) -> dict:
             user_id,
             schema,
             anchor_properties,
-            comparison_res,
             index,
         ),
-        "from_cache": lambda: get_graph_from_cache(comparison_res, graph_type),
+        "from_cache": lambda: csx_graph.get_graph_from_cache(
+            comparison_res, graph_type
+        ),
     }
 
     return comparison_switch[comparison_res["action"]]()
-
-
-def get_graph_from_scratch(
-    graph_type,
-    dimensions,
-    elastic_json,
-    visible_entries,
-    query,
-    index,
-    cache_data,
-    search_uuid,
-    results,
-    user_id,
-    schema,
-    anchor_properties,
-    comparison_res,
-):
-    graph_data = csx_graph.get_graph(
-        graph_type, elastic_json, dimensions, schema, index
-    )
-    table_data = csx_graph.convert_table_data(graph_data["nodes"], elastic_json)
-    anchor_property_values = csx_nodes.get_anchor_property_values(
-        elastic_json, dimensions["anchor"]["props"]
-    )
-
-    graph_data["meta"] = csx_graph.generate_graph_metadata(
-        graph_type,
-        dimensions,
-        table_data,
-        schema,
-        query,
-        visible_entries,
-        anchor_properties,
-        anchor_property_values,
-        graph_data,
-    )
-
-    cache_data = csx_redis.generate_cache_data(
-        graph_type,
-        cache_data,
-        graph_data,
-        search_uuid,
-        index,
-        query,
-        dimensions,
-        table_data,
-        results,
-        comparison_res,
-        elastic_json,
-    )
-
-    csx_redis.save_current_graph(user_id, cache_data, graph_type)
-    csx_graph.from_graph_data(cache_data[graph_type])
-
-    return graph_data
-
-
-def get_graph_with_new_anchor_props(
-    comparison_res, graph_type, dimensions, elastic_json
-):
-    graph_data = csx_graph.get_props_for_cached_nodes(
-        comparison_res, dimensions["anchor"]["props"], graph_type
-    )
-
-    graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
-        elastic_json, dimensions["anchor"]["props"]
-    )
-
-    return graph_data
-
-
-def get_graph_from_existing_data(
-    graph_type,
-    dimensions,
-    elastic_json,
-    visible_entries,
-    query,
-    cache_data,
-    user_id,
-    schema,
-    anchor_properties,
-    comparison_res,
-    index,
-):
-    # Take global table data and generate grpah
-    elastic_json = comparison_res["data"]["global"]["elastic_json"]
-
-    graph_data = csx_graph.get_graph(
-        graph_type, elastic_json, dimensions, schema, index
-    )
-
-    table_data = csx_graph.convert_table_data(graph_data["nodes"], elastic_json)
-
-    anchor_property_values = csx_nodes.get_anchor_property_values(
-        elastic_json, dimensions["anchor"]["props"]
-    )
-
-    graph_data["meta"] = csx_graph.generate_graph_metadata(
-        graph_type,
-        dimensions,
-        table_data,
-        schema,
-        query,
-        visible_entries,
-        anchor_properties,
-        anchor_property_values,
-        graph_data,
-    )
-
-    cache_data[graph_type] = graph_data
-
-    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
-
-    return graph_data
-
-
-def get_graph_from_cache(comparison_res, graph_type):
-    return comparison_res["data"][graph_type]
 
 
 @router.get("/datasets")
@@ -489,8 +256,6 @@ def get_datasets() -> dict:
                 datasets[index]["schemas"] = loaded_config["schemas"]
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
-
-
 
                 datasets[index]["search_hints"] = {
                     feature: json.dumps(loaded_config["search_hints"][feature])

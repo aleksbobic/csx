@@ -5,6 +5,10 @@ import {
     Flex,
     HStack,
     IconButton,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
     Slide,
     Tab,
     TabList,
@@ -22,6 +26,7 @@ import SettingsComponent from 'components/feature/settings/Settings.component';
 import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
+    Controller,
     DisplayFullwidth,
     EditStraight,
     Eye,
@@ -187,6 +192,44 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
+                <Menu>
+                    <Tooltip label="Expand network">
+                        <MenuButton
+                            disabled={
+                                !store.graph.currentGraphData.selectedNodes
+                                    .length
+                            }
+                            as={IconButton}
+                            borderRadius="6px"
+                            id="trimnetworkbutton"
+                            size="sm"
+                            style={{
+                                backdropFilter: 'blur(2px)'
+                            }}
+                            icon={<Controller style={{ '--ggs': '0.6' }} />}
+                        />
+                    </Tooltip>
+                    <MenuList
+                        backgroundColor="black"
+                        padding="5px"
+                        borderRadius="10px"
+                    >
+                        <MenuItem
+                            fontSize="xs"
+                            fontWeight="bold"
+                            borderRadius="6px"
+                        >
+                            Wide Expand
+                        </MenuItem>
+                        <MenuItem
+                            fontSize="xs"
+                            fontWeight="bold"
+                            borderRadius="6px"
+                        >
+                            Narrow Expand
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
             </HStack>
         </HStack>
     );

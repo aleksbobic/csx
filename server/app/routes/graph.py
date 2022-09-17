@@ -6,17 +6,19 @@ import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
+import app.services.data.elastic as csx_es
 
 import networkx as nx
 import pandas as pd
 from fastapi import APIRouter
+import json
 
 router = APIRouter()
 
 from pydantic import BaseModel
 
 
-class Data(BaseModel):
+class TrimData(BaseModel):
     nodes: List
     user_id: str
     graph_type: str
@@ -24,7 +26,7 @@ class Data(BaseModel):
 
 @router.post("/trim")
 def trim_network(
-    data: Data,
+    data: TrimData,
 ):
     provided_nodes = data.nodes
     user_id = data.user_id
@@ -58,6 +60,122 @@ def trim_network(
     return cache_data[graph_type]
 
 
+class ExpandData(BaseModel):
+    feature: str
+    value: str
+    user_id: str
+    graph_type: str
+    anchor: str
+    visible_entries: List
+    anchor_properties: List
+    graph_schema: List
+    visible_dimensions: List
+    links: List
+    search_uuid: str
+
+
+@router.post("/expand")
+def expand_network(
+    data: ExpandData,
+):
+    feature = data.feature
+    value = data.value
+    user_id = data.user_id
+    graph_type = data.graph_type
+    anchor_properties = data.anchor_properties
+    schema = data.graph_schema
+    visible_dimensions = data.visible_dimensions
+    anchor = data.anchor
+    links = data.links
+    search_uuid = data.search_uuid
+
+    cache_data = csx_redis.load_current_graph(user_id)
+
+    # Generate: {'action': 'visualise', 'query': {'action': 'search', 'feature': 'author keywords', 'keyphrase': 'text classification'}}
+    # Call generate_advanced_query(json.loads(query), index, dimension_types)
+
+    query = {
+        "action": "visualise",
+        "query": {"action": "search", "feature": feature, "keyphrase": value},
+    }
+
+    dimension_types = {}
+
+    with open(f"./app/data/config/{cache_data['global']['index']}.json") as config:
+        config = json.load(config)
+
+        dimension_types = config["dimension_types"]
+
+    index = cache_data["global"]["index"]
+
+    with open(f"./app/data/config/{index}.json") as config:
+        config = json.load(config)
+
+        dimension_types = config["dimension_types"]
+
+        if len(schema) == 0:
+            schema = config["schemas"][0]["relations"]
+
+        if len(visible_dimensions) == 0:
+            visible_dimensions = config["default_visible_dimensions"]
+
+        if anchor == "":
+            anchor = config["anchor"]
+
+        if not links:
+            links = config["links"]
+
+    results = csx_es.run_advanced_query(
+        query, cache_data["global"]["index"], dimension_types
+    )
+
+    elastic_json = cache_data["global"]["elastic_json"]
+    new_elastic_json = json.loads(results.to_json(orient="records"))
+
+    entries = list(set([row["entry"] for row in elastic_json]))
+
+    elastic_json = elastic_json + [
+        row for row in new_elastic_json if row["entry"] not in entries
+    ]
+
+    results = pd.concat(
+        [
+            pd.read_json(cache_data["global"]["results_df"]),
+            results[~results["entry"].isin(entries)],
+        ]
+    ).reset_index(drop=True)
+
+    print(results.shape)
+    # results["entry"].tolist()
+
+    dimensions = {
+        "links": links,
+        "anchor": {"dimension": anchor, "props": anchor_properties},
+        "visible": visible_dimensions,
+        "query_generated": {},
+        "all": [
+            property
+            for property in csx_es.get_index(index)[index]["mappings"]["properties"]
+        ],
+    }
+
+    return csx_graph.get_graph_from_scratch(
+        graph_type,
+        dimensions,
+        elastic_json,
+        [],
+        cache_data["global"]["query"],
+        index,
+        cache_data,
+        search_uuid,
+        results,
+        user_id,
+        schema,
+        anchor_properties,
+        {"difference": "search_uuid"},
+    )
+
+
 def calculate_global_cache_properties(cache_data, entries):
     # Filter table data to include only entries necessary
     cache_data["global"]["table_data"] = [
@@ -84,6 +202,8 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
 
     df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
 
+    print("the graph type: ", graph_type)
+    print("the graph type: ", cache_data[graph_type].keys())
     # Filter graph nodes
     new_nodes = [
         node

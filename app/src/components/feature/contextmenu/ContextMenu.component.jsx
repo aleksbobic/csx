@@ -4,10 +4,13 @@ import { useOutsideClick } from '@chakra-ui/hooks';
 import { Box, VStack } from '@chakra-ui/layout';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import queryString from 'query-string';
 
 function ContextMenu() {
     const contextMenuRef = useRef();
+    const location = useLocation();
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
@@ -20,6 +23,8 @@ function ContextMenu() {
             }
         }
     });
+
+    const getQueryString = param => queryString.parse(location.search)[param];
 
     const selectNode = () => {
         const nodeIndex = store.graph.currentGraphData.selectedNodes.findIndex(
@@ -38,6 +43,15 @@ function ContextMenu() {
             store.contextMenu.originNode.id,
             nodeIndex
         );
+        store.contextMenu.hideContextMenu();
+    };
+
+    const expandGraph = () => {
+        const node = store.graph.currentGraphData.nodes.filter(
+            node => node.id === store.contextMenu.originNode.id
+        )[0];
+
+        store.graph.expandNetwork(node, getQueryString('suuid'));
         store.contextMenu.hideContextMenu();
     };
 
@@ -105,6 +119,9 @@ function ContextMenu() {
                     )}
                     {!store.graphInstance.isSelfCentric &&
                         renderAdvcancedButtons()}
+                    <Button justifyContent="left" onClick={expandGraph}>
+                        Expand graph through node
+                    </Button>
                 </VStack>
             </ButtonGroup>
         </Box>

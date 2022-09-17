@@ -789,7 +789,79 @@ export class GraphStore {
             this.handleRetrievedGraph(
                 response.data,
                 this.store.core.currentGraph,
-                response.data['meta']['query']
+                JSON.stringify(response.data['meta']['query'])
+            );
+        } catch (error) {
+            return this.store.core.handleError(error);
+        }
+    };
+
+    expandNetwork = async (node, suuid) => {
+        const feature = node.feature;
+        const value = node.label;
+
+        if (this.store.core.currentGraph === 'detail') {
+            this.resetDetailGraphData();
+            this.resetGraphData();
+        } else {
+            this.resetGraphData();
+        }
+
+        const anchor_properties =
+            this.store.core.currentGraph === 'overview'
+                ? this.store.schema.overviewDataNodeProperties
+                : [];
+        let visible_entries;
+
+        if (
+            this.store.core.currentGraph === 'detail' &&
+            this.store.graph.graphData.selectedComponents.length
+        ) {
+            const entryArray = this.store.graph.graphData.components
+                .filter(component =>
+                    this.store.graph.graphData.selectedComponents.includes(
+                        component.id
+                    )
+                )
+                .reduce(
+                    (entries, component) => entries.concat(component.entries),
+                    []
+                );
+
+            visible_entries = [...new Set(entryArray)];
+        } else {
+            visible_entries = [];
+        }
+
+        const graph_schema = localStorage.getItem('schema')
+            ? this.store.schema.getServerSchema()
+            : [];
+
+        const visible_dimensions = this.store.core.visibleDimensions[
+            this.store.core.currentGraph
+        ].length
+            ? this.store.core.visibleDimensions[this.store.core.currentGraph]
+            : [];
+
+        try {
+            const response = await axios.post('graph/expand', {
+                feature: feature,
+                value: value,
+                user_id: this.store.core.userUuid,
+                graph_type: this.store.core.currentGraph,
+                anchor: this.store.search.anchor,
+                links: this.store.search.links,
+                visible_entries: visible_entries,
+                anchor_properties: anchor_properties,
+                graph_schema: graph_schema,
+                visible_dimensions: visible_dimensions,
+                search_uuid: suuid
+            });
+
+            this.handleRetrievedGraph(
+                response.data,
+                this.store.core.currentGraph,
+                JSON.stringify(response.data['meta']['query'])
             );
         } catch (error) {
             return this.store.core.handleError(error);

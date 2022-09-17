@@ -5,6 +5,7 @@ import app.services.data.mongo as csx_data
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
+import app.services.data.redis as csx_redis
 import networkx as nx
 import pandas as pd
 from app.types import SchemaElement, Node
@@ -290,3 +291,119 @@ def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[D
             dataEntries[entryId][f"{node['feature']}_{node['label']}_id"] = node["id"]
 
     return [{**dataEntries[row["entry"]], **row} for row in elastic_results]
+
+
+def get_graph_from_scratch(
+    graph_type,
+    dimensions,
+    elastic_json,
+    visible_entries,
+    query,
+    index,
+    cache_data,
+    search_uuid,
+    results,
+    user_id,
+    schema,
+    anchor_properties,
+    comparison_res,
+):
+    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
+    table_data = convert_table_data(graph_data["nodes"], elastic_json)
+    anchor_property_values = csx_nodes.get_anchor_property_values(
+        elastic_json, dimensions["anchor"]["props"]
+    )
+
+    graph_data["meta"] = generate_graph_metadata(
+        graph_type,
+        dimensions,
+        table_data,
+        schema,
+        query,
+        visible_entries,
+        anchor_properties,
+        anchor_property_values,
+        graph_data,
+    )
+
+    cache_data = csx_redis.generate_cache_data(
+        graph_type,
+        cache_data,
+        graph_data,
+        search_uuid,
+        index,
+        query,
+        dimensions,
+        table_data,
+        results,
+        comparison_res,
+        elastic_json,
+    )
+
+    csx_redis.save_current_graph(user_id, cache_data, graph_type)
+    from_graph_data(cache_data[graph_type])
+
+    return graph_data
+
+
+def get_graph_with_new_anchor_props(
+    comparison_res, graph_type, dimensions, elastic_json
+):
+    graph_data = get_props_for_cached_nodes(
+        comparison_res, dimensions["anchor"]["props"], graph_type
+    )
+
+    graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
+        elastic_json, dimensions["anchor"]["props"]
+    )
+
+    return graph_data
+
+
+def get_graph_from_existing_data(
+    graph_type,
+    dimensions,
+    elastic_json,
+    visible_entries,
+    query,
+    cache_data,
+    user_id,
+    schema,
+    anchor_properties,
+    index,
+):
+    # Take global table data and generate grpah
+
+    graph_data = get_graph(
+        graph_type, cache_data["global"]["elastic_json"], dimensions, schema, index
+    )
+
+    table_data = convert_table_data(
+        graph_data["nodes"], cache_data["global"]["elastic_json"]
+    )
+
+    anchor_property_values = csx_nodes.get_anchor_property_values(
+        cache_data["global"]["elastic_json"], dimensions["anchor"]["props"]
+    )
+
+    graph_data["meta"] = generate_graph_metadata(
+        graph_type,
+        dimensions,
+        table_data,
+        schema,
+        query,
+        visible_entries,
+        anchor_properties,
+        anchor_property_values,
+        graph_data,
+    )
+
+    cache_data[graph_type] = graph_data
+
+    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
+
+    return graph_data
+
+
+def get_graph_from_cache(comparison_res, graph_type):
+    return comparison_res["data"][graph_type]
