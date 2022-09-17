@@ -830,9 +830,7 @@ export class GraphStore {
             visible_entries = [];
         }
 
-        const graph_schema = localStorage.getItem('schema')
-            ? this.store.schema.getServerSchema()
-            : [];
+        const graph_schema = this.store.schema.getServerSchema();
 
         const visible_dimensions = this.store.core.visibleDimensions[
             this.store.core.currentGraph

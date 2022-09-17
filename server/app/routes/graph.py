@@ -163,9 +163,6 @@ def expand_network(
         ]
     ).reset_index(drop=True)
 
-    print(results.shape)
-    # results["entry"].tolist()
-
     dimensions = {
         "links": links,
         "anchor": {"dimension": anchor, "props": anchor_properties},
@@ -220,8 +217,6 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
 
     df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
 
-    print("the graph type: ", graph_type)
-    print("the graph type: ", cache_data[graph_type].keys())
     # Filter graph nodes
     new_nodes = [
         node

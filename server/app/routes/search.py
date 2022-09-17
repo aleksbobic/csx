@@ -132,8 +132,6 @@ def search(data: Data) -> dict:
     id_list = visible_entries
     query_generated_dimensions = {}
 
-    print("\n\n\n\n\n\nquery:", query, type(query), "\n\n\n\n\n\n")
-
     if len(id_list):
         results = convert_filter_res_to_df(
             search.filter("terms", _id=id_list).execute()
