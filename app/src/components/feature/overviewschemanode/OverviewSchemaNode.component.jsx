@@ -166,66 +166,71 @@ const overviewSchemaNode = ({ id, data }) => {
                     </Flex>
                 ))}
 
-                {data.position === 'left' && (
-                    <HStack
-                        height="36px"
-                        padding="3px 0px"
-                        width="100%"
-                        spacing="5"
-                        style={{ marginTop: '0px' }}
-                    >
-                        <Select
-                            id={`${id}_property_selector`}
-                            size="xs"
-                            variant="filled"
-                            width="150px"
-                            marginTop="-2px"
-                            marginRight="10px"
-                            defaultValue={data.properties[0]}
-                            borderRadius="6px"
-                            background="blackAlpha.400"
-                            _hover={{ background: '#143e66' }}
+                {data.position === 'left' &&
+                    data.properties.filter(
+                        property => !data.addedProperties.includes(property)
+                    ).length > 0 && (
+                        <HStack
+                            height="36px"
+                            padding="3px 0px"
+                            width="100%"
+                            spacing="5"
+                            style={{ marginTop: '0px' }}
                         >
-                            {data.properties
-                                .filter(
-                                    property =>
-                                        !data.addedProperties.includes(property)
-                                )
-                                .map((feature, id) => (
-                                    <option value={feature} key={id}>
-                                        {feature}
-                                    </option>
-                                ))}
-                        </Select>
-                        <Tooltip label="Add selected feature as anchor property">
-                            <IconButton
+                            <Select
+                                id={`${id}_property_selector`}
                                 size="xs"
-                                borderRadius="full"
-                                backgroundColor="blackAlpha.300"
-                                onClick={() =>
-                                    data.addProperty(
-                                        document.getElementById(
-                                            `${id}_property_selector`
-                                        ).value
+                                variant="filled"
+                                width="150px"
+                                marginTop="-2px"
+                                marginRight="10px"
+                                defaultValue={data.properties[0]}
+                                borderRadius="6px"
+                                background="blackAlpha.400"
+                                _hover={{ background: '#143e66' }}
+                            >
+                                {data.properties
+                                    .filter(
+                                        property =>
+                                            !data.addedProperties.includes(
+                                                property
+                                            )
                                     )
-                                }
-                                _hover={{
-                                    backgroundColor: 'blue.600'
-                                }}
-                                style={{ marginLeft: '0px' }}
-                                rightIcon={
-                                    <MathPlus
-                                        style={{
-                                            marginLeft: '-8px',
-                                            marginTop: '0px',
-                                            '--ggs': '0.7'
-                                        }}
-                                    />
-                                }
-                            ></IconButton>
-                        </Tooltip>
-                    </HStack>
-                )}
+                                    .map((feature, id) => (
+                                        <option value={feature} key={id}>
+                                            {feature}
+                                        </option>
+                                    ))}
+                            </Select>
+                            <Tooltip label="Add selected feature as anchor property">
+                                <IconButton
+                                    size="xs"
+                                    borderRadius="full"
+                                    backgroundColor="blackAlpha.300"
+                                    onClick={() =>
+                                        data.addProperty(
+                                            document.getElementById(
+                                                `${id}_property_selector`
+                                            ).value
+                                        )
+                                    }
+                                    _hover={{
+                                        backgroundColor: 'blue.600'
+                                    }}
+                                    style={{ marginLeft: '0px' }}
+                                    rightIcon={
+                                        <MathPlus
+                                            style={{
+                                                marginLeft: '-8px',
+                                                marginTop: '0px',
+                                                '--ggs': '0.7'
+                                            }}
+                                        />
+                                    }
+                                ></IconButton>
+                            </Tooltip>
+                        </HStack>
+                    )}
             </VStack>
         );
     };
