@@ -1,41 +1,46 @@
 import {
     Box,
     Flex,
+    HStack,
+    Select,
+    Switch,
     Tab,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
+    Text,
     useColorModeValue,
-    VStack,
-    Select
+    VStack
 } from '@chakra-ui/react';
 import GraphDetailsComponent from 'components/feature/graphDetails/graphDetails.component';
 import Overview from 'components/feature/overview/Overview.component';
-import TableComponent from 'components/feature/table/Table.component';
 import { observer } from 'mobx-react';
-import { useContext, useState, useEffect } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useContext, useEffect, useState } from 'react';
 import ReactFlow, { Background } from 'react-flow-renderer';
+import { RootStoreContext } from 'stores/RootStore';
 
-import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
-import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
-import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
-import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
-import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
-import DatasetNode from 'components/feature/advancedsearch/datasetNode/Dataset.component';
-import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
+import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
+import DatasetNode from 'components/feature/advancedsearch/datasetNode/Dataset.component';
 import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
 import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
-import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
+import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
+import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
+import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
+import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
+import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
+import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
+import SerpComponent from 'components/feature/serp/Serp.component';
+import TableComponent from 'components/feature/table/Table.component';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
     const tabHeaderBgColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
+    const [useList, setUseList] = useState(false);
 
     const [schemaData, setSchemaData] = useState(
         store.core.isOverview ? store.schema.overviewData : store.schema.data
@@ -133,12 +138,42 @@ function DataPanel() {
                     paddingTop="50px"
                     height="100%"
                 >
-                    {store.graph.currentGraphData.activeTableData && (
-                        <TableComponent
-                            data={store.graph.currentGraphData.activeTableData}
-                            columns={store.graph.tableColumns}
+                    <HStack
+                        display="flex"
+                        alignItems="center"
+                        width="100%"
+                        justifyContent="center"
+                        marginTop="10px"
+                    >
+                        <Text
+                            fontSize="sm"
+                            marginRight="10px"
+                            marginBottom="0px"
+                        >
+                            Use List View
+                        </Text>
+                        <Switch
+                            size="sm"
+                            isChecked={useList}
+                            onChange={e => setUseList(e.target.checked)}
                         />
-                    )}
+                    </HStack>
+                    {store.graph.currentGraphData.activeTableData &&
+                        (useList ? (
+                            <SerpComponent
+                                data={
+                                    store.graph.currentGraphData.activeTableData
+                                }
+                                columns={store.graph.tableColumns}
+                            />
+                        ) : (
+                            <TableComponent
+                                data={
+                                    store.graph.currentGraphData.activeTableData
+                                }
+                                columns={store.graph.tableColumns}
+                            />
+                        ))}
                 </TabPanel>
                 <TabPanel padding="10px" paddingTop="60px" height="100%">
                     <VStack width="100%" height="100%">
