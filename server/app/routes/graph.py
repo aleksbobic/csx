@@ -286,6 +286,13 @@ def calculate_trimmed_graph(cache_data, entries, graph_type):
         components = csx_components.enrich_with_top_connections(
             components, cache_data[graph_type]["edges"]
         )
+
+        for property_value in cache_data[graph_type]["meta"]["anchor_property_values"]:
+            property_value["values"] = [
+                node["properties"][property_value["property"]]
+                for node in cache_data[graph_type]["nodes"]
+            ]
+
     components = sorted(components, key=lambda component: -component["node_count"])
 
     cache_data[graph_type]["components"] = components
