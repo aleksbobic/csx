@@ -43,6 +43,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import queryString from 'query-string';
+import { schemeYlOrRd } from 'd3-scale-chromatic';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -92,6 +93,55 @@ function ControlPanel() {
                 selectedColorScheme
             ]
         );
+
+        if (
+            ['integer', 'float'].includes(
+                store.search.nodeTypes[
+                    store.graphInstance.nodeColorScheme[store.core.currentGraph]
+                ]
+            )
+        ) {
+            return (
+                <Flex
+                    id="colorscheme"
+                    position="absolute"
+                    bottom="70px"
+                    left="320px"
+                    maxWidth="300px"
+                    zIndex={2}
+                    backgroundColor={legendBackgroundColor}
+                    style={{ backdropFilter: 'blur(2px)' }}
+                    padding="10px"
+                    borderRadius="4px"
+                    maxHeight="300px"
+                    overflowY="scroll"
+                >
+                    <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        position="absolute"
+                        left="15px"
+                        color="blackAlpha.700"
+                    >
+                        {legendItems[0]}
+                    </Text>
+                    <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        position="absolute"
+                        right="15px"
+                    >
+                        {legendItems[legendItems.length - 1]}
+                    </Text>
+                    <Box
+                        width="300px"
+                        height="20px"
+                        borderRadius="2px"
+                        bgGradient={`linear(to-r, ${String(schemeYlOrRd[9])})`}
+                    />
+                </Flex>
+            );
+        }
 
         if (selectedColorScheme === 'type') {
             legendItems = legendItems.filter(key =>

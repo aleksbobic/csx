@@ -1,7 +1,11 @@
 import { makeAutoObservable } from 'mobx';
 import * as THREE from 'three';
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
-import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
+import {
+    interpolateRainbow,
+    schemeTableau10,
+    interpolateYlOrRd
+} from 'd3-scale-chromatic';
 
 const SELF_CENTRIC_TYPES = {
     DIRECT: 'direct',
@@ -697,6 +701,21 @@ export class GraphInstanceStore {
             ] = skipfactor
                 ? interpolateRainbow(i * skipfactor)
                 : schemeTableau10[i];
+        }
+    };
+
+    generateNumericColorSchema = (values, feature) => {
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+
+        const norm_values = values.map(value => (value - min) / (max - min));
+
+        this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
+
+        for (let i = 0; i < values.length; i++) {
+            this.nodeColorSchemeColors[this.store.core.currentGraph][feature][
+                values[i]
+            ] = interpolateYlOrRd(norm_values[i]);
         }
     };
 

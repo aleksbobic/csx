@@ -483,12 +483,22 @@ export class GraphStore {
                     'component'
                 );
 
-                response.meta.anchor_property_values.map(entry =>
-                    this.store.graphInstance.generateSchemeColorsFromArray(
-                        entry.values,
-                        entry.property
-                    )
-                );
+                response.meta.anchor_property_values.map(entry => {
+                    if (
+                        this.store.search.nodeTypes[entry.property] ===
+                        'category'
+                    ) {
+                        this.store.graphInstance.generateSchemeColorsFromArray(
+                            entry.values,
+                            entry.property
+                        );
+                    } else {
+                        this.store.graphInstance.generateNumericColorSchema(
+                            entry.values,
+                            entry.property
+                        );
+                    }
+                });
 
                 if (
                     !['none', 'component'].includes(
