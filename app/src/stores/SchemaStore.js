@@ -397,10 +397,19 @@ export class SchemaStore {
     setAnchor = anchor => {
         this.store.search.anchor = anchor;
 
+        if (this.store.search.nodeTypes[anchor] === 'list') {
+            this.resetProperties();
+        }
+
         this.overviewData = this.overviewData.map(entry => {
             if ('isAnchor' in entry.data && entry.data.isAnchor) {
                 entry.data.label = anchor;
                 entry.data.properties = this.getOverviewNodeProperties();
+
+                if (this.store.search.nodeTypes[anchor] === 'list') {
+                    entry.data.addedProperties =
+                        this.overviewDataNodeProperties;
+                }
 
                 entry.style = {
                     background:
@@ -683,6 +692,11 @@ export class SchemaStore {
         this.data = this.data.filter(entry => entry['id'] !== id);
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+    };
+
+    resetProperties = () => {
+        this.overviewDataNodeProperties = [];
+        this.overviewData = [...this.overviewData];
     };
 
     addProperty = property => {
