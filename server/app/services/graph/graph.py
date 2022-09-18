@@ -347,7 +347,7 @@ def get_graph_from_scratch(
 
 
 def get_graph_with_new_anchor_props(
-    comparison_res, graph_type, dimensions, elastic_json
+    comparison_res, graph_type, dimensions, elastic_json, user_id
 ):
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
@@ -356,6 +356,14 @@ def get_graph_with_new_anchor_props(
     graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
+
+    cache_data = csx_redis.load_current_graph(user_id)
+    cache_data[graph_type]["meta"]["anchor_property_values"] = graph_data["meta"][
+        "anchor_property_values"
+    ]
+    cache_data[graph_type]["nodes"] = graph_data["nodes"]
+
+    csx_redis.save_current_graph(user_id, cache_data, graph_type)
 
     return graph_data
 

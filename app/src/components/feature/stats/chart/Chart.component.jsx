@@ -97,25 +97,40 @@ function Chart(props) {
                             : { type: 'basic', prop: 'weight' };
                     break;
             }
+            const anchor_properties =
+                store.core.currentGraph === 'overview'
+                    ? store.schema.overviewDataNodeProperties
+                    : [];
 
-            setData(
-                props.chart.elements === 'nodes'
-                    ? store.stats.getNodeCounts(
-                          elementProperty,
-                          props.chart.type,
-                          props.elementDisplayLimit,
-                          props.networkData,
-                          groupBy,
-                          props.chart.show_only
-                      )
-                    : store.stats.getEdgeCounts(
-                          elementProperty,
-                          props.chart.type,
-                          props.elementDisplayLimit,
-                          groupBy,
-                          props.networkData
-                      )
-            );
+            if (props.chart.elements === 'nodes') {
+                if (
+                    elementProperty.type === 'advanced' &&
+                    !anchor_properties.includes(elementProperty.prop)
+                ) {
+                    setData(null);
+                } else {
+                    setData(
+                        store.stats.getNodeCounts(
+                            elementProperty,
+                            props.chart.type,
+                            props.elementDisplayLimit,
+                            props.networkData,
+                            groupBy,
+                            props.chart.show_only
+                        )
+                    );
+                }
+            } else {
+                setData(
+                    store.stats.getEdgeCounts(
+                        elementProperty,
+                        props.chart.type,
+                        props.elementDisplayLimit,
+                        groupBy,
+                        props.networkData
+                    )
+                );
+            }
         }
     }, [
         props.chart.element_values,
@@ -134,7 +149,9 @@ function Chart(props) {
         store.graphInstance.visibleComponents,
         props.elementDisplayLimit,
         props.networkData,
-        props.chart.group_by
+        props.chart.group_by,
+        store.core.currentGraph,
+        store.schema.overviewDataNodeProperties
     ]);
 
     const getPluginOptions = () => {

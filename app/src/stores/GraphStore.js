@@ -483,7 +483,7 @@ export class GraphStore {
                     'component'
                 );
 
-                response.meta.anchor_property_values.map(entry => {
+                response.meta.anchor_property_values.forEach(entry => {
                     if (
                         this.store.search.nodeTypes[entry.property] ===
                         'category'

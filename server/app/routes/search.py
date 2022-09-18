@@ -214,7 +214,7 @@ def search(data: Data) -> dict:
             comparison_res,
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
-            comparison_res, graph_type, dimensions, elastic_json
+            comparison_res, graph_type, dimensions, elastic_json, user_id
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
