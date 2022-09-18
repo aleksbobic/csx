@@ -134,7 +134,7 @@ export class SchemaStore {
                 .filter(
                     entry =>
                         entry[0] !== this.store.search.anchor &&
-                        data[entry[0]] !== 'list'
+                        !['list', 'string'].includes(data[entry[0]])
                 )
                 .map(entry => entry[0]);
         }
