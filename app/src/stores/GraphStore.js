@@ -490,6 +490,23 @@ export class GraphStore {
                     )
                 );
 
+                if (
+                    !['none', 'component'].includes(
+                        this.store.graphInstance.nodeColorScheme[
+                            this.store.core.currentGraph
+                        ]
+                    ) &&
+                    !response.meta.anchor_property_values.find(
+                        entry =>
+                            entry.property ===
+                            this.store.graphInstance.nodeColorScheme[
+                                this.store.core.currentGraph
+                            ]
+                    )
+                ) {
+                    this.store.graphInstance.setNodeColorScheme('component');
+                }
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'overview'
@@ -499,11 +516,17 @@ export class GraphStore {
                     ...this.graphData,
                     links: response.edges.map(edge => {
                         edge.color =
-                            this.store.graphInstance.nodeColorSchemeColors[
+                            this.store.graphInstance.nodeColorScheme[
                                 this.store.core.currentGraph
-                            ][
-                                this.store.graphInstance.nodeColorScheme.overview
-                            ][edge.component];
+                            ] !== 'component'
+                                ? '#ffffff'
+                                : this.store.graphInstance
+                                      .nodeColorSchemeColors[
+                                      this.store.core.currentGraph
+                                  ][
+                                      this.store.graphInstance.nodeColorScheme
+                                          .overview
+                                  ][edge.component];
                         return edge;
                     }),
                     nodes,
