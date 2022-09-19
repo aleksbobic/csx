@@ -2,19 +2,28 @@ import { Box, Text, VStack } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { RootStoreContext } from 'stores/RootStore';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
 
-    const parentRef = useRef(null);
+    const [listData, setListData] = useState([]);
+
+    const scrollTableContainerRefrence = useRef(null);
     const rowVirtualizer = useVirtualizer({
-        count: props.data.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 125
+        count: listData.length,
+        getScrollElement: () => scrollTableContainerRefrence.current,
+        estimateSize: () => 125,
+        enableSmoothScroll: false
     });
+
+    useEffect(() => {
+        setListData(props.data);
+
+        rowVirtualizer.measure();
+    }, [props.data, rowVirtualizer, props.visibleProperties]);
 
     const getDataComponent = (feature, value, index, feature_index) => {
         if (store.search.nodeTypes[feature] === 'string') {
@@ -108,7 +117,7 @@ function Serp(props) {
             (feature, feature_index) =>
                 getDataComponent(
                     feature,
-                    props.data[index][feature],
+                    listData[index][feature],
                     index,
                     feature_index
                 )
@@ -140,7 +149,7 @@ function Serp(props) {
                 <AutoSizer height="100%" width="100%">
                     {({ height, width }) => (
                         <Box
-                            ref={parentRef}
+                            ref={scrollTableContainerRefrence}
                             style={{
                                 height: height,
                                 width: width,
