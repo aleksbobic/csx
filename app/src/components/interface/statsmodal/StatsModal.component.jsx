@@ -819,7 +819,7 @@ function FileUploadModal() {
                         padding="0"
                         marginTop="10px"
                     >
-                        Chart Selection
+                        Stat Selection
                     </Heading>
                     <IconButton
                         position="absolute"
