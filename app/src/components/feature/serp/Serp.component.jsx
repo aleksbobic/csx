@@ -104,20 +104,15 @@ function Serp(props) {
         );
     };
     const renderResult = (index, key) => {
-        const propertyObjects = Object.keys(props.data[index])
-            .filter(
-                feature =>
-                    !!store.search.nodeTypes[feature] &&
-                    props.visibleProperties.includes(feature)
-            )
-            .map((feature, feature_index) =>
+        const propertyObjects = props.visibleProperties.map(
+            (feature, feature_index) =>
                 getDataComponent(
                     feature,
                     props.data[index][feature],
                     index,
                     feature_index
                 )
-            );
+        );
 
         return (
             <Box width="100%" paddingBottom="10px">
@@ -135,7 +130,12 @@ function Serp(props) {
     };
 
     return (
-        <VStack height="100%" width="100%" marginTop="20px">
+        <VStack
+            height="100%"
+            width="100%"
+            marginTop="20px"
+            paddingBottom="10px"
+        >
             <Box height="100%" width="100%">
                 <AutoSizer height="100%" width="100%">
                     {({ height, width }) => (

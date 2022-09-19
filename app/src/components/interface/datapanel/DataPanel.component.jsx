@@ -40,7 +40,13 @@ import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
 import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
-import { MenuBoxed, MoreVerticalAlt, ViewComfortable } from 'css.gg';
+import {
+    MenuBoxed,
+    MoreVerticalAlt,
+    SoftwareDownload,
+    ViewComfortable
+} from 'css.gg';
+import { CSVLink } from 'react-csv';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -50,7 +56,8 @@ function DataPanel() {
     const [useList, setUseList] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const [visibleProperties, setVisibleProperties] = useState([]);
-
+    const [csvData, setCsvData] = useState([]);
+    const [csvHeaders, setCsvHeaders] = useState([]);
     const [schemaData, setSchemaData] = useState(
         store.core.isOverview ? store.schema.overviewData : store.schema.data
     );
@@ -86,6 +93,44 @@ function DataPanel() {
                 {entry.name.toUpperCase()}
             </option>
         ));
+
+    const getCsvHeaders = data => {
+        if (!data || !data.length) {
+            return [];
+        }
+
+        return Object.keys(data[0])
+            .filter(key => !key.endsWith('_id') && key !== 'entry')
+            .map(key => {
+                return { label: key, key: key };
+            });
+    };
+
+    const getCsvData = data => {
+        if (!data || !data.length) {
+            return [];
+        }
+
+        return data.map(row =>
+            Object.keys(row)
+                .filter(key => !key.endsWith('_id') && key !== 'entry')
+                .reduce((newRow, key) => {
+                    newRow[key] = row[key];
+                    return newRow;
+                }, {})
+        );
+    };
+
+    useEffect(() => {
+        if (store.graph.currentGraphData.activeTableData) {
+            setCsvData(
+                getCsvData(store.graph.currentGraphData.activeTableData)
+            );
+            setCsvHeaders(
+                getCsvHeaders(store.graph.currentGraphData.activeTableData)
+            );
+        }
+    }, [store.graph.currentGraphData.activeTableData]);
 
     const renderSchema = () => (
         <Box height="100%" minHeight="500px" width="100%">
@@ -238,6 +283,29 @@ function DataPanel() {
 
                 {activeTab === 1 && (
                     <HStack>
+                        <Tooltip label="Download visible data as CSV">
+                            <Box>
+                                <IconButton
+                                    size="sm"
+                                    as={CSVLink}
+                                    data={csvData}
+                                    headers={csvHeaders}
+                                    filename="csx.csv"
+                                    target="_blank"
+                                    variant="solid"
+                                    opacity="0.5"
+                                    transition="all 0.2 ease-in-out"
+                                    _hover={{ opacity: 1 }}
+                                    icon={
+                                        <SoftwareDownload
+                                            style={{
+                                                '--ggs': '0.8'
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Box>
+                        </Tooltip>
                         <Menu closeOnSelect={false} zIndex="3">
                             <Tooltip label="List options">
                                 <MenuButton
@@ -261,6 +329,9 @@ function DataPanel() {
                                     feature => (
                                         <MenuItem
                                             key={`serp_list_checkbox_${feature}`}
+                                            fontSize="xs"
+                                            fontWeight="bold"
+                                            borderRadius="6px"
                                         >
                                             <Checkbox
                                                 isChecked={visibleProperties.includes(
