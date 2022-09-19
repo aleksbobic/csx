@@ -75,7 +75,7 @@ function TableHead(props) {
                     padding: '5px 10px',
                     position: 'sticky',
                     top: '0px',
-                    zIndex: 10,
+                    zIndex: 1,
                     background: colorMode === 'light' ? '#f3f3f3' : '#161616',
                     borderTopLeftRadius: index === 0 && '5px',
                     borderBottomLeftRadius: index === 0 && '5px',

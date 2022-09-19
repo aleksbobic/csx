@@ -1,12 +1,10 @@
-import { Box, Checkbox, Text, VStack, Wrap } from '@chakra-ui/react';
+import { Box, Text, VStack } from '@chakra-ui/react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
-import { useContext } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useContext, useRef } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef } from 'react';
+import { RootStoreContext } from 'stores/RootStore';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
@@ -17,10 +15,6 @@ function Serp(props) {
         getScrollElement: () => parentRef.current,
         estimateSize: () => 125
     });
-
-    const [visibleProperties, setVisibleProperties] = useState(
-        Object.keys(store.search.nodeTypes).slice(0, 3)
-    );
 
     const getDataComponent = (feature, value, index, feature_index) => {
         if (store.search.nodeTypes[feature] === 'string') {
@@ -33,7 +27,7 @@ function Serp(props) {
                 >
                     <Text
                         fontSize="xs"
-                        backgroundColor="blue.700"
+                        backgroundColor="blue.600"
                         marginRight="5px"
                         display="inline"
                         padding="3px 6px"
@@ -42,7 +36,12 @@ function Serp(props) {
                     >
                         {feature.toUpperCase()}
                     </Text>
-                    <Text fontSize="xs" width="100%" paddingTop="10px">
+                    <Text
+                        fontSize="xs"
+                        width="100%"
+                        paddingTop="10px"
+                        display="inline"
+                    >
                         {value.charAt(0).toUpperCase() + value.slice(1)}
                     </Text>
                 </Box>
@@ -59,7 +58,7 @@ function Serp(props) {
                 >
                     <Text
                         fontSize="xs"
-                        backgroundColor="blue.700"
+                        backgroundColor="blue.600"
                         marginRight="5px"
                         display="inline"
                         padding="3px 6px"
@@ -88,7 +87,7 @@ function Serp(props) {
             >
                 <Text
                     fontSize="xs"
-                    backgroundColor="blue.700"
+                    backgroundColor="blue.600"
                     marginRight="5px"
                     display="inline"
                     padding="3px 6px"
@@ -109,7 +108,7 @@ function Serp(props) {
             .filter(
                 feature =>
                     !!store.search.nodeTypes[feature] &&
-                    visibleProperties.includes(feature)
+                    props.visibleProperties.includes(feature)
             )
             .map((feature, feature_index) =>
                 getDataComponent(
@@ -137,31 +136,6 @@ function Serp(props) {
 
     return (
         <VStack height="100%" width="100%" marginTop="20px">
-            <Wrap paddingBottom="10px">
-                {Object.keys(store.search.nodeTypes).map(feature => (
-                    <Checkbox
-                        isChecked={visibleProperties.includes(feature)}
-                        key={`serp_list_checkbox_${feature}`}
-                        size="sm"
-                        onChange={e => {
-                            if (e.target.checked) {
-                                setVisibleProperties([
-                                    ...visibleProperties,
-                                    feature
-                                ]);
-                            } else {
-                                setVisibleProperties([
-                                    ...visibleProperties.filter(
-                                        value => value !== feature
-                                    )
-                                ]);
-                            }
-                        }}
-                    >
-                        {feature}
-                    </Checkbox>
-                ))}
-            </Wrap>
             <Box height="100%" width="100%">
                 <AutoSizer height="100%" width="100%">
                     {({ height, width }) => (
@@ -212,7 +186,8 @@ function Serp(props) {
 Serp.propTypes = {
     data: PropTypes.array,
     columns: PropTypes.array,
-    hiddenColumns: PropTypes.array
+    hiddenColumns: PropTypes.array,
+    visibleProperties: PropTypes.array
 };
 
 Serp.defaultProps = {

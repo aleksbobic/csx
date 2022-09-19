@@ -1,9 +1,14 @@
 import {
     Box,
     ButtonGroup,
+    Checkbox,
     Flex,
     HStack,
     IconButton,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
     Select,
     Tab,
     TabList,
@@ -35,7 +40,7 @@ import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
 import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
-import { List, Menu, MenuBoxed, ViewComfortable, ViewList } from 'css.gg';
+import { MenuBoxed, MoreVerticalAlt, ViewComfortable } from 'css.gg';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -44,6 +49,7 @@ function DataPanel() {
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [useList, setUseList] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
+    const [visibleProperties, setVisibleProperties] = useState([]);
 
     const [schemaData, setSchemaData] = useState(
         store.core.isOverview ? store.schema.overviewData : store.schema.data
@@ -148,6 +154,7 @@ function DataPanel() {
                                     store.graph.currentGraphData.activeTableData
                                 }
                                 columns={store.graph.tableColumns}
+                                visibleProperties={visibleProperties}
                             />
                         ) : (
                             <TableComponent
@@ -230,34 +237,106 @@ function DataPanel() {
                 </HStack>
 
                 {activeTab === 1 && (
-                    <ButtonGroup spacing="0" paddingRight="10px">
-                        <Tooltip label="Use table view">
-                            <IconButton
-                                opacity={!useList ? 1 : 0.5}
-                                icon={
-                                    <ViewComfortable
-                                        style={{ '--ggs': '0.7' }}
-                                    />
-                                }
-                                size="sm"
-                                borderEndRadius="0"
-                                transition="all 0.2 ease-in-out"
-                                _hover={{ opacity: 1 }}
-                                onClick={() => setUseList(false)}
-                            />
-                        </Tooltip>
-                        <Tooltip label="Use list view">
-                            <IconButton
-                                opacity={useList ? 1 : 0.5}
-                                icon={<MenuBoxed style={{ '--ggs': '0.7' }} />}
-                                size="sm"
-                                borderStartRadius="0"
-                                transition="all 0.2 ease-in-out"
-                                _hover={{ opacity: 1 }}
-                                onClick={() => setUseList(true)}
-                            />
-                        </Tooltip>
-                    </ButtonGroup>
+                    <HStack>
+                        <Menu closeOnSelect={false} zIndex="3">
+                            <Tooltip label="List options">
+                                <MenuButton
+                                    disabled={!useList}
+                                    size="sm"
+                                    as={IconButton}
+                                    icon={
+                                        <MoreVerticalAlt
+                                            style={{ '--ggs': 0.8 }}
+                                        />
+                                    }
+                                    zIndex="3"
+                                />
+                            </Tooltip>
+                            <MenuList
+                                backgroundColor="black"
+                                padding="5px"
+                                borderRadius="10px"
+                            >
+                                {Object.keys(store.search.nodeTypes).map(
+                                    feature => (
+                                        <MenuItem
+                                            key={`serp_list_checkbox_${feature}`}
+                                        >
+                                            <Checkbox
+                                                isChecked={visibleProperties.includes(
+                                                    feature
+                                                )}
+                                                size="sm"
+                                                onChange={e => {
+                                                    if (e.target.checked) {
+                                                        setVisibleProperties([
+                                                            ...visibleProperties,
+                                                            feature
+                                                        ]);
+                                                    } else if (
+                                                        visibleProperties.length >
+                                                        1
+                                                    ) {
+                                                        setVisibleProperties([
+                                                            ...visibleProperties.filter(
+                                                                value =>
+                                                                    value !==
+                                                                    feature
+                                                            )
+                                                        ]);
+                                                    }
+                                                }}
+                                            >
+                                                {feature}
+                                            </Checkbox>
+                                        </MenuItem>
+                                    )
+                                )}
+                            </MenuList>
+                        </Menu>
+                        <ButtonGroup spacing="0" paddingRight="10px">
+                            <Tooltip label="Use table view">
+                                <IconButton
+                                    opacity={!useList ? 1 : 0.5}
+                                    icon={
+                                        <ViewComfortable
+                                            style={{ '--ggs': '0.7' }}
+                                        />
+                                    }
+                                    size="sm"
+                                    borderEndRadius="0"
+                                    transition="all 0.2 ease-in-out"
+                                    _hover={{ opacity: 1 }}
+                                    onClick={() => {
+                                        setUseList(false);
+                                    }}
+                                />
+                            </Tooltip>
+                            <Tooltip label="Use list view">
+                                <IconButton
+                                    opacity={useList ? 1 : 0.5}
+                                    icon={
+                                        <MenuBoxed style={{ '--ggs': '0.7' }} />
+                                    }
+                                    size="sm"
+                                    borderStartRadius="0"
+                                    transition="all 0.2 ease-in-out"
+                                    _hover={{ opacity: 1 }}
+                                    onClick={() => {
+                                        if (visibleProperties.length === 0) {
+                                            setVisibleProperties(
+                                                Object.keys(
+                                                    store.search.nodeTypes
+                                                ).slice(0, 3)
+                                            );
+                                        }
+
+                                        setUseList(true);
+                                    }}
+                                />
+                            </Tooltip>
+                        </ButtonGroup>
+                    </HStack>
                 )}
             </TabList>
         );
