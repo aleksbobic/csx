@@ -3,6 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowRight } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
+
 import { useContext, useEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { RootStoreContext } from 'stores/RootStore';
@@ -11,20 +12,53 @@ function Serp(props) {
     const store = useContext(RootStoreContext);
 
     const [listData, setListData] = useState([]);
+    const [timer, setTimer] = useState(null);
 
     const scrollTableContainerRefrence = useRef(null);
+    const listElement = useRef(null);
+
     const rowVirtualizer = useVirtualizer({
         count: listData.length,
         getScrollElement: () => scrollTableContainerRefrence.current,
-        estimateSize: () => 125,
-        enableSmoothScroll: false
+        estimateSize: () => 125
     });
+
+    const recalculateSizes = () => {
+        rowVirtualizer.measure();
+        rowVirtualizer
+            .getVirtualItems()
+            .map((item, index) =>
+                item.measureElement(
+                    listElement.current.children[index].children[0]
+                )
+            );
+    };
 
     useEffect(() => {
         setListData(props.data);
-
-        rowVirtualizer.measure();
+        setTimeout(() => {
+            rowVirtualizer.measure();
+            rowVirtualizer
+                .getVirtualItems()
+                .map((item, index) =>
+                    item.measureElement(
+                        listElement.current.children[index].children[0]
+                    )
+                );
+        }, 100);
     }, [props.data, rowVirtualizer, props.visibleProperties]);
+
+    useEffect(() => {
+        const resizeSERP = () => {
+            clearTimeout(timer);
+            setTimer(setTimeout(recalculateSizes, 100));
+        };
+        window.addEventListener('resize', resizeSERP);
+
+        return () => {
+            window.removeEventListener('resize', resizeSERP);
+        };
+    });
 
     const getDataComponent = (feature, value, index, feature_index) => {
         if (store.search.nodeTypes[feature] === 'string') {
@@ -186,6 +220,7 @@ function Serp(props) {
                             }}
                         >
                             <div
+                                ref={listElement}
                                 style={{
                                     height: rowVirtualizer.getTotalSize(),
                                     width: '100%',
@@ -194,24 +229,26 @@ function Serp(props) {
                             >
                                 {rowVirtualizer
                                     .getVirtualItems()
-                                    .map(virtualRow => (
-                                        <div
-                                            key={virtualRow.index}
-                                            ref={virtualRow.measureElement}
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                transform: `translateY(${virtualRow.start}px)`
-                                            }}
-                                        >
-                                            {renderResult(
-                                                virtualRow.index,
-                                                virtualRow.index
-                                            )}
-                                        </div>
-                                    ))}
+                                    .map(virtualRow => {
+                                        return (
+                                            <div
+                                                key={virtualRow.index}
+                                                ref={virtualRow.measureElement}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    transform: `translateY(${virtualRow.start}px)`
+                                                }}
+                                            >
+                                                {renderResult(
+                                                    virtualRow.index,
+                                                    virtualRow.index
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                             </div>
                         </Box>
                     )}

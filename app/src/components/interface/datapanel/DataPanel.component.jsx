@@ -10,7 +10,6 @@ import {
     MenuItem,
     MenuList,
     Select,
-    Skeleton,
     Tab,
     TabList,
     TabPanel,
@@ -59,7 +58,6 @@ function DataPanel() {
     const [visibleProperties, setVisibleProperties] = useState([]);
     const [csvData, setCsvData] = useState([]);
     const [csvHeaders, setCsvHeaders] = useState([]);
-    const [listMenuVisible, setListMenuVisible] = useState(false);
     const [schemaData, setSchemaData] = useState(
         store.core.isOverview ? store.schema.overviewData : store.schema.data
     );
@@ -196,23 +194,13 @@ function DataPanel() {
                 >
                     {store.graph.currentGraphData.activeTableData &&
                         (useList ? (
-                            !listMenuVisible ? (
-                                <SerpComponent
-                                    data={
-                                        store.graph.currentGraphData
-                                            .activeTableData
-                                    }
-                                    columns={store.graph.tableColumns}
-                                    visibleProperties={visibleProperties}
-                                />
-                            ) : (
-                                <VStack paddingTop="10px" height="100%">
-                                    <Skeleton height="10%" width="100%" />
-                                    <Skeleton height="10%" width="100%" />
-                                    <Skeleton height="10%" width="100%" />
-                                    <Skeleton height="10%" width="100%" />
-                                </VStack>
-                            )
+                            <SerpComponent
+                                data={
+                                    store.graph.currentGraphData.activeTableData
+                                }
+                                columns={store.graph.tableColumns}
+                                visibleProperties={visibleProperties}
+                            />
                         ) : (
                             <TableComponent
                                 data={
@@ -318,12 +306,7 @@ function DataPanel() {
                                 />
                             </Box>
                         </Tooltip>
-                        <Menu
-                            closeOnSelect={false}
-                            zIndex="3"
-                            onOpen={() => setListMenuVisible(true)}
-                            onClose={() => setListMenuVisible(false)}
-                        >
+                        <Menu closeOnSelect={false} zIndex="3">
                             <Tooltip label="List options">
                                 <MenuButton
                                     disabled={!useList}
