@@ -131,6 +131,7 @@ function Serp(props) {
                     backgroundColor="whiteAlpha.100"
                     width="100%"
                     padding="20px"
+                    paddingBottom="30px"
                     borderRadius="6px"
                 >
                     {propertyObjects}
@@ -141,6 +142,7 @@ function Serp(props) {
                         right="10px"
                         bottom="20px"
                         size="xs"
+                        variant="ghost"
                         icon={<ArrowRight style={{ '--ggs': 0.6 }} />}
                         onClick={() => {
                             const nodeIds = store.graph.currentGraphData.nodes
