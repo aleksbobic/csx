@@ -62,7 +62,7 @@ function TableHead(props) {
         );
     };
 
-    const renderHeader = header => {
+    const renderHeader = (header, index, endIndex) => {
         return (
             <th
                 {...header.getHeaderProps(header.getSortByToggleProps())}
@@ -76,7 +76,11 @@ function TableHead(props) {
                     position: 'sticky',
                     top: '0px',
                     zIndex: 10,
-                    background: colorMode === 'light' ? '#f3f3f3' : '#161616'
+                    background: colorMode === 'light' ? '#f3f3f3' : '#161616',
+                    borderTopLeftRadius: index === 0 && '5px',
+                    borderBottomLeftRadius: index === 0 && '5px',
+                    borderTopRightRadius: index === endIndex && '5px',
+                    borderBottomRightRadius: index === endIndex && '5px'
                 }}
             >
                 {header.render(renderHeaderCellContent)}
@@ -88,7 +92,13 @@ function TableHead(props) {
         <thead>
             {props.headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
-                    {headerGroup.headers.map(renderHeader)}
+                    {headerGroup.headers.map((header, index) =>
+                        renderHeader(
+                            header,
+                            index,
+                            headerGroup.headers.length - 1
+                        )
+                    )}
                 </tr>
             ))}
         </thead>

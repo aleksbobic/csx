@@ -258,7 +258,6 @@ function AdvancedSearch(props) {
                     padding="10px 10px"
                     backgroundColor="blackAlpha.500"
                     flexGrow="1"
-                    backdropFilter="blur(2px)"
                 >
                     {renderNodeList()}
                 </VStack>

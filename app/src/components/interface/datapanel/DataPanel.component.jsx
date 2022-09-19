@@ -253,7 +253,6 @@ function DataPanel() {
             bgColor={bgColor}
             borderLeft="1px solid"
             borderColor={edgeColor}
-            style={{ backdropFilter: 'blur(2px)' }}
             id="datapanel"
         >
             <Tabs

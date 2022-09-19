@@ -1,12 +1,22 @@
 import { Box, Checkbox, Text, VStack, Wrap } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useRef } from 'react';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
+
+    const parentRef = useRef(null);
+    const rowVirtualizer = useVirtualizer({
+        count: props.data.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 125
+    });
 
     const [visibleProperties, setVisibleProperties] = useState(
         Object.keys(store.search.nodeTypes).slice(0, 3)
@@ -94,27 +104,34 @@ function Serp(props) {
             </Box>
         );
     };
-    const renderResult = (data, index) => {
-        const propertyObjects = Object.keys(data)
+    const renderResult = (index, key) => {
+        const propertyObjects = Object.keys(props.data[index])
             .filter(
                 feature =>
                     !!store.search.nodeTypes[feature] &&
                     visibleProperties.includes(feature)
             )
             .map((feature, feature_index) =>
-                getDataComponent(feature, data[feature], index, feature_index)
+                getDataComponent(
+                    feature,
+                    props.data[index][feature],
+                    index,
+                    feature_index
+                )
             );
 
         return (
-            <VStack
-                key={`serp_result_${index}`}
-                backgroundColor="whiteAlpha.100"
-                width="100%"
-                padding="20px"
-                borderRadius="6px"
-            >
-                {propertyObjects}
-            </VStack>
+            <Box width="100%" paddingBottom="10px">
+                <VStack
+                    key={key}
+                    backgroundColor="whiteAlpha.100"
+                    width="100%"
+                    padding="20px"
+                    borderRadius="6px"
+                >
+                    {propertyObjects}
+                </VStack>
+            </Box>
         );
     };
 
@@ -145,18 +162,49 @@ function Serp(props) {
                     </Checkbox>
                 ))}
             </Wrap>
-            <VStack
-                height="100%"
-                display="flex"
-                flexDir="column"
-                paddingTop="10px"
-                alignItems="center"
-                overflowY="scroll"
-                spacing="10px"
-                paddingBottom="20px"
-            >
-                {props.data.map((entry, index) => renderResult(entry, index))}
-            </VStack>
+            <Box height="100%" width="100%">
+                <AutoSizer height="100%" width="100%">
+                    {({ height, width }) => (
+                        <Box
+                            ref={parentRef}
+                            style={{
+                                height: height,
+                                width: width,
+                                overflow: 'auto'
+                            }}
+                        >
+                            <div
+                                style={{
+                                    height: rowVirtualizer.getTotalSize(),
+                                    width: '100%',
+                                    position: 'relative'
+                                }}
+                            >
+                                {rowVirtualizer
+                                    .getVirtualItems()
+                                    .map(virtualRow => (
+                                        <div
+                                            key={virtualRow.index}
+                                            ref={virtualRow.measureElement}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                transform: `translateY(${virtualRow.start}px)`
+                                            }}
+                                        >
+                                            {renderResult(
+                                                virtualRow.index,
+                                                virtualRow.index
+                                            )}
+                                        </div>
+                                    ))}
+                            </div>
+                        </Box>
+                    )}
+                </AutoSizer>
+            </Box>
         </VStack>
     );
 }

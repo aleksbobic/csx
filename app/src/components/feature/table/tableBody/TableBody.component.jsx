@@ -192,14 +192,6 @@ function TableBody(props) {
             textAlign: 'left'
         };
 
-        if (
-            cell.column.Header !==
-            cell.row.cells[cell.row.cells.length - 1].column.Header
-        ) {
-            styles.borderRight = '1px solid';
-            styles.borderRightColor = 'rgba(255,255,255,0.25)';
-        }
-
         return (
             <td key="1" {...cell.getCellProps()} style={styles}>
                 <Wrap padding="20px 10px">
@@ -223,7 +215,7 @@ function TableBody(props) {
                         }
                         style={{
                             borderBottom: '1px solid',
-                            borderBottomColor: 'rgba(255,255,255,0.25)'
+                            borderBottomColor: 'rgba(255,255,255,0.10)'
                         }}
                     >
                         {row.cells.map(renderCell)}

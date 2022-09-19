@@ -110,7 +110,6 @@ function ControlPanel() {
                     maxWidth="300px"
                     zIndex={2}
                     backgroundColor={legendBackgroundColor}
-                    style={{ backdropFilter: 'blur(2px)' }}
                     padding="10px"
                     borderRadius="4px"
                     maxHeight="300px"
@@ -189,7 +188,6 @@ function ControlPanel() {
                 backgroundColor={legendBackgroundColor}
                 padding="10px"
                 borderRadius="10px"
-                style={{ backdropFilter: 'blur(2px)' }}
                 border="1px solid"
                 borderColor={legendBorderColor}
                 maxHeight="300px"
@@ -239,7 +237,6 @@ function ControlPanel() {
             backgroundColor={selfCentricMenuBackground}
             padding="5px 6px"
             borderRadius="8px"
-            style={{ backdropFilter: 'blur(2px)' }}
         >
             <HStack spacing="1">
                 <Tooltip label="Trim network">
@@ -247,9 +244,6 @@ function ControlPanel() {
                         borderRadius="6px"
                         id="trimnetworkbutton"
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<EditStraight style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.graph.trimNetwork();
@@ -267,9 +261,6 @@ function ControlPanel() {
                             borderRadius="6px"
                             id="trimnetworkbutton"
                             size="sm"
-                            style={{
-                                backdropFilter: 'blur(2px)'
-                            }}
                             icon={<Controller style={{ '--ggs': '0.6' }} />}
                         />
                     </Tooltip>
@@ -311,7 +302,6 @@ function ControlPanel() {
             backgroundColor={selfCentricMenuBackground}
             padding="5px 6px"
             borderRadius="8px"
-            style={{ backdropFilter: 'blur(2px)' }}
         >
             <HStack spacing="1">
                 <Tooltip label="Show all nodes">
@@ -319,9 +309,6 @@ function ControlPanel() {
                         borderRadius="6px"
                         id="closedirectconnections"
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<MediaLive style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -344,9 +331,6 @@ function ControlPanel() {
                             !store.graph.currentGraphData.selectedNodes.length
                         }
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<RadioChecked style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -366,7 +350,6 @@ function ControlPanel() {
                         isDisabled={!store.graphInstance.selfCentricOriginNode}
                         size="sm"
                         style={{
-                            backdropFilter: 'blur(2px)',
                             paddingTop: '5px'
                         }}
                         icon={<FormatSeparator style={{ '--ggs': '0.7' }} />}
@@ -390,7 +373,6 @@ function ControlPanel() {
                         }
                         size="sm"
                         style={{
-                            backdropFilter: 'blur(2px)',
                             paddingTop: '1px'
                         }}
                         icon={<DisplayFullwidth style={{ '--ggs': '0.7' }} />}
@@ -413,9 +395,6 @@ function ControlPanel() {
                             1
                         }
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<PathDivide style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -436,9 +415,6 @@ function ControlPanel() {
                             2
                         }
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<PathIntersect style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -465,9 +441,6 @@ function ControlPanel() {
                         id="directconnections"
                         isDisabled={originNodeExists}
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<LivePhoto style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -485,9 +458,6 @@ function ControlPanel() {
                         id="mutualconnectionsoriginbutton"
                         isDisabled={originNodeExists}
                         size="sm"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<LayoutPin style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -533,7 +503,6 @@ function ControlPanel() {
                     height="100%"
                     zIndex="2"
                     bgColor={tabListbgColor}
-                    style={{ backdropFilter: 'blur(2px)' }}
                 >
                     <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
                         <IconButton
@@ -608,7 +577,6 @@ function ControlPanel() {
                         borderRight="1px solid"
                         borderColor={edgeColor}
                         position="relative"
-                        style={{ backdropFilter: 'blur(2px)' }}
                     >
                         <TabPanel
                             width="250px"

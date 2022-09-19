@@ -91,7 +91,6 @@ function NavigationPanelComponent() {
                 backgroundColor={graphUtilsMenuBackground}
                 padding="5px 6px"
                 borderRadius="8px"
-                style={{ backdropFilter: 'blur(2px)' }}
             >
                 <Tooltip
                     label={
@@ -119,9 +118,6 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Switch graph view"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={
                             location.pathname.startsWith('/graph/detail') ? (
                                 <RadioCheck
@@ -142,9 +138,6 @@ function NavigationPanelComponent() {
                         border="none"
                         disabled={store.search.links.length === 0}
                         aria-label="Regenerate graph"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<Sync style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
@@ -347,7 +340,6 @@ function NavigationPanelComponent() {
                 justifyContent="space-between"
                 borderBottom="1px solid"
                 borderColor={edgeColor}
-                style={{ backdropFilter: 'blur(2px)' }}
             >
                 <HStack spacing="10px">
                     <Link
