@@ -1,15 +1,16 @@
 import {
     Box,
+    ButtonGroup,
     Flex,
     HStack,
+    IconButton,
     Select,
-    Switch,
     Tab,
     TabList,
     TabPanel,
     TabPanels,
     Tabs,
-    Text,
+    Tooltip,
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
@@ -34,6 +35,7 @@ import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
 import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
+import { List, Menu, MenuBoxed, ViewComfortable, ViewList } from 'css.gg';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -41,6 +43,7 @@ function DataPanel() {
     const tabHeaderBgColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [useList, setUseList] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
 
     const [schemaData, setSchemaData] = useState(
         store.core.isOverview ? store.schema.overviewData : store.schema.data
@@ -138,26 +141,6 @@ function DataPanel() {
                     paddingTop="50px"
                     height="100%"
                 >
-                    <HStack
-                        display="flex"
-                        alignItems="center"
-                        width="100%"
-                        justifyContent="center"
-                        marginTop="10px"
-                    >
-                        <Text
-                            fontSize="sm"
-                            marginRight="10px"
-                            marginBottom="0px"
-                        >
-                            Use List View
-                        </Text>
-                        <Switch
-                            size="sm"
-                            isChecked={useList}
-                            onChange={e => setUseList(e.target.checked)}
-                        />
-                    </HStack>
                     {store.graph.currentGraphData.activeTableData &&
                         (useList ? (
                             <SerpComponent
@@ -214,34 +197,68 @@ function DataPanel() {
                 zIndex="2"
                 backgroundColor={tabHeaderBgColor}
                 padding="15px 10px"
+                justifyContent="space-between"
             >
-                {tabs.map(tab => (
-                    <Tab
-                        key={tab.id}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'data panel',
-                                'tab click',
-                                tab.trackingCode
-                            );
-                        }}
-                        _selected={{
-                            color: 'white',
-                            backgroundColor: 'blue.500'
-                        }}
-                    >
-                        <Box
-                            id={tab.id}
-                            width="100%"
-                            height="100%"
-                            display="flex"
-                            justifyContent="center"
-                            alignItems="center"
+                <HStack>
+                    {tabs.map(tab => (
+                        <Tab
+                            key={tab.id}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'data panel',
+                                    'tab click',
+                                    tab.trackingCode
+                                );
+                            }}
+                            _selected={{
+                                color: 'white',
+                                backgroundColor: 'blue.500'
+                            }}
                         >
-                            {tab.text}
-                        </Box>
-                    </Tab>
-                ))}
+                            <Box
+                                id={tab.id}
+                                width="100%"
+                                height="100%"
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                {tab.text}
+                            </Box>
+                        </Tab>
+                    ))}
+                </HStack>
+
+                {activeTab === 1 && (
+                    <ButtonGroup spacing="0" paddingRight="10px">
+                        <Tooltip label="Use table view">
+                            <IconButton
+                                opacity={!useList ? 1 : 0.5}
+                                icon={
+                                    <ViewComfortable
+                                        style={{ '--ggs': '0.7' }}
+                                    />
+                                }
+                                size="sm"
+                                borderEndRadius="0"
+                                transition="all 0.2 ease-in-out"
+                                _hover={{ opacity: 1 }}
+                                onClick={() => setUseList(false)}
+                            />
+                        </Tooltip>
+                        <Tooltip label="Use list view">
+                            <IconButton
+                                opacity={useList ? 1 : 0.5}
+                                icon={<MenuBoxed style={{ '--ggs': '0.7' }} />}
+                                size="sm"
+                                borderStartRadius="0"
+                                transition="all 0.2 ease-in-out"
+                                _hover={{ opacity: 1 }}
+                                onClick={() => setUseList(true)}
+                            />
+                        </Tooltip>
+                    </ButtonGroup>
+                )}
             </TabList>
         );
     };
@@ -260,6 +277,7 @@ function DataPanel() {
                 variant="soft-rounded"
                 colorScheme="blue"
                 height="100%"
+                onChange={index => setActiveTab(index)}
             >
                 {renderTabButtons()}
                 {renderTablePanels()}
