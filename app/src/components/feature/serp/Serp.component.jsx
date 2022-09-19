@@ -1,5 +1,6 @@
-import { Box, Text, VStack } from '@chakra-ui/react';
+import { Box, IconButton, Text, Tooltip, VStack } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { ArrowRight } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -134,6 +135,32 @@ function Serp(props) {
                 >
                     {propertyObjects}
                 </VStack>
+                <Tooltip label="Show in graph">
+                    <IconButton
+                        position="absolute"
+                        right="10px"
+                        bottom="20px"
+                        size="xs"
+                        icon={<ArrowRight style={{ '--ggs': 0.6 }} />}
+                        onClick={() => {
+                            const nodeIds = store.graph.currentGraphData.nodes
+                                .filter(node =>
+                                    node.entries.includes(
+                                        listData[index]['entry']
+                                    )
+                                )
+                                .map(node => node.id);
+
+                            if (nodeIds.length > 1) {
+                                store.graphInstance.zoomToFitByNodeIds(nodeIds);
+                            } else if (nodeIds.length === 1) {
+                                store.graphInstance.zoomToFitByNodeId(
+                                    nodeIds[0]
+                                );
+                            }
+                        }}
+                    />
+                </Tooltip>
             </Box>
         );
     };
