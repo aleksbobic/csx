@@ -14,10 +14,35 @@ function Graph(props) {
     const containerRef = useRef();
     const bwColor = useColorModeValue('#303030', 'white');
     const backgroundColor = useColorModeValue('#efefef', '#1A202C');
+    const [timer, setTimer] = useState(null);
+
+    const [windowSize, setWindowSize] = useState({
+        width: undefined,
+        height: undefined
+    });
 
     const [graphContainerElement, setGraphContainerElement] = useState(null);
 
     useLocalObservable(() => ({}));
+
+    useEffect(() => {
+        const getNewSizes = () =>
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+
+        const handleResize = () => {
+            clearTimeout(timer);
+            setTimer(setTimeout(getNewSizes, 100));
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    });
 
     const onNodeClick = (node, event) => {
         store.track.trackEvent(
@@ -150,8 +175,8 @@ function Graph(props) {
             backgroundColor={backgroundColor}
             graphData={props.graphData}
             numDimensions={2}
-            width={props.size.width}
-            height={props.size.height}
+            width={windowSize.width ? windowSize.width : props.size.width}
+            height={windowSize.height ? windowSize.height : props.size.height}
             linkColor={link => link.color}
             enableNodeDrag={true}
             nodeThreeObject={generateNode}
