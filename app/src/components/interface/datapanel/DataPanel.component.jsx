@@ -47,6 +47,7 @@ import {
     ViewComfortable
 } from 'css.gg';
 import { CSVLink } from 'react-csv';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -143,32 +144,44 @@ function DataPanel() {
                     {getPredefinedSchemas()}
                 </Select>
             )}
-            <ReactFlow
-                elements={schemaData}
-                nodesDraggable={true}
-                nodesConnectable={true}
-                snapToGrid={true}
-                onConnect={connectNodes}
-                onEdgeUpdate={updateEdge}
-                nodeTypes={{
-                    datasetNode: DatasetNode,
-                    schemaNode: SchemaNode,
-                    overviewSchemaNode: OverviewSchemaNode,
-                    searchNode: SearchNode,
-                    connectorNode: ConnectorNode,
-                    filterNode: FilterNode,
-                    keywordExtractionNode: KeywordExtractionNode,
-                    countsNode: CountsNode,
-                    resultsNode: ResultsNode
-                }}
-                edgeTypes={{
-                    schemaEdge: SchemaEdge,
-                    overviewCustomEdge: OverviewCustomEdge,
-                    searchEdge: SearchEdge
-                }}
-            >
-                <Background gap={12} size={1} style={{ opacity: 0.5 }} />
-            </ReactFlow>
+            <AutoSizer>
+                {({ height, width }) => (
+                    <ReactFlow
+                        style={{
+                            height: `${height}px`,
+                            width: `${width}px`
+                        }}
+                        elements={schemaData}
+                        nodesDraggable={true}
+                        nodesConnectable={true}
+                        snapToGrid={true}
+                        onConnect={connectNodes}
+                        onEdgeUpdate={updateEdge}
+                        nodeTypes={{
+                            datasetNode: DatasetNode,
+                            schemaNode: SchemaNode,
+                            overviewSchemaNode: OverviewSchemaNode,
+                            searchNode: SearchNode,
+                            connectorNode: ConnectorNode,
+                            filterNode: FilterNode,
+                            keywordExtractionNode: KeywordExtractionNode,
+                            countsNode: CountsNode,
+                            resultsNode: ResultsNode
+                        }}
+                        edgeTypes={{
+                            schemaEdge: SchemaEdge,
+                            overviewCustomEdge: OverviewCustomEdge,
+                            searchEdge: SearchEdge
+                        }}
+                    >
+                        <Background
+                            gap={12}
+                            size={1}
+                            style={{ opacity: 0.5 }}
+                        />
+                    </ReactFlow>
+                )}
+            </AutoSizer>
         </Box>
     );
 
