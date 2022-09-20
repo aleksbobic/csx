@@ -149,7 +149,7 @@ def search(data: Data) -> dict:
 
         es_query = Q(
             "query_string",
-            query=f"{query}",
+            query=csx_es.convert_to_elastic_safe_query(f"{query}"),
             type="phrase",
             fields=filtered_fields,
         )

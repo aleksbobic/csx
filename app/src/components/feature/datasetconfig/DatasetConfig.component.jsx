@@ -206,8 +206,9 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
+                                        process.env.REACT_APP_DISABLE_UPLOAD ||
                                         store.fileUpload.fileUploadData.link ===
-                                        column
+                                            column
                                     }
                                     isChecked={
                                         store.fileUpload.fileUploadData
@@ -235,6 +236,7 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
+                                        process.env.REACT_APP_DISABLE_UPLOAD ||
                                         store.fileUpload.fileUploadData
                                             .anchor === column
                                     }

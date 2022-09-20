@@ -6,6 +6,8 @@ from elasticsearch.helpers import bulk
 from elasticsearch_dsl import Search, Q
 import pytextrank
 import spacy
+import re
+
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -139,7 +141,7 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
         return query_to_dataframe(
             Q(
                 "query_string",
-                query=f"{query['keyphrase']}",
+                query=convert_to_elastic_safe_query(f"{query['keyphrase']}"),
                 type="phrase",
                 fields=[query["feature"]],
             ),
@@ -189,7 +191,9 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
                     must_not=[
                         Q(
                             "query_string",
-                            query=f"{query['queries'][0]['keyphrase']}",
+                            query=convert_to_elastic_safe_query(
+                                f"{query['queries'][0]['keyphrase']}"
+                            ),
                             type="phrase",
                             fields=[query["queries"][0]["feature"]],
                         )
@@ -199,3 +203,11 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
             )
 
     return run_advanced_query(query["query"], index, dimension_types)
+
+
+def convert_to_elastic_safe_query(query):
+    return re.sub(
+        '(\+|\-|\=|&&|\|\||\>|\<|\!|\(|\)|\{|\}|\[|\]|\^|"|~|\*|\?|\:|\\\|\/)',
+        "\\\\\\1",
+        query,
+    )
