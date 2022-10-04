@@ -13,6 +13,9 @@ import {
     LineElement,
     PointElement,
     Title,
+    DoughnutController,
+    LineController,
+    BarController,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 
@@ -35,7 +38,10 @@ function Chart(props) {
             Title,
             Legend,
             PointElement,
-            LineElement
+            LineElement,
+            DoughnutController,
+            LineController,
+            BarController
         );
     });
 

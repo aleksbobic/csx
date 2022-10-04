@@ -175,7 +175,7 @@ export class SearchStore {
         params['index'] = localStorage.getItem('currentDataset');
 
         try {
-            const response = await axios.post('search', params);
+            const response = await axios.post('search/', params);
 
             return response.data;
         } catch (error) {

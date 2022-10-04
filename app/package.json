@@ -83,6 +83,7 @@
       ]
     }
   },
+  "proxy": "http://localhost:3000",
   "prettier": {
     "tabWidth": 4,
     "singleQuote": true,

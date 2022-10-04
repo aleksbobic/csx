@@ -34,6 +34,9 @@ import {
     LineElement,
     PointElement,
     Title,
+    DoughnutController,
+    LineController,
+    BarController,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import ChartComponent from 'components/feature/stats/chart/Chart.component';
@@ -69,7 +72,10 @@ function FileUploadModal() {
             Title,
             Legend,
             PointElement,
-            LineElement
+            LineElement,
+            DoughnutController,
+            LineController,
+            BarController
         );
     });
 
