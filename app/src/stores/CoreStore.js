@@ -22,7 +22,7 @@ export class CoreStore {
         this.userUuid = localStorage.getItem('useruuid');
 
         if (!this.userUuid) {
-            localStorage.setItem('useruuid', this.generateUUID());
+            this.generateUUID();
         }
 
         makeAutoObservable(this, {}, { deep: true });
@@ -31,6 +31,7 @@ export class CoreStore {
     generateUUID = async () => {
         await axios.get('util/uuid').then(response => {
             localStorage.setItem('useruuid', response.data);
+            this.userUuid = response.data;
         });
     };
 

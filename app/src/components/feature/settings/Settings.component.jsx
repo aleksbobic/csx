@@ -421,14 +421,19 @@ function Settings() {
                 }}
                 onClick={() => store.core.toggleVisibleDimension(property)}
             >
-                <Text
-                    size="sm"
-                    whiteSpace="nowrap"
-                    letterSpacing="0.5px"
-                    fontWeight="semibold"
-                >
-                    {property}
-                </Text>
+                <Tooltip label={property}>
+                    <Text
+                        size="sm"
+                        whiteSpace="nowrap"
+                        letterSpacing="0.5px"
+                        fontWeight="semibold"
+                        maxWidth="140px"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                    >
+                        {property}
+                    </Text>
+                </Tooltip>
             </Tag>
         ));
 
