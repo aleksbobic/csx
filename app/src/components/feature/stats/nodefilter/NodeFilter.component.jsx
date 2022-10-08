@@ -2,7 +2,6 @@ import {
     Box,
     Flex,
     FormLabel,
-    Heading,
     HStack,
     NumberInput,
     NumberInputField,
@@ -10,8 +9,7 @@ import {
     RangeSliderFilledTrack,
     RangeSliderThumb,
     RangeSliderTrack,
-    Text,
-    VStack
+    Text
 } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -20,7 +18,16 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function NodeFilter(props) {
     const store = useContext(RootStoreContext);
-    const [data, setData] = useState([]);
+
+    const [isDemo, setIsDemo] = useState(false);
+
+    useEffect(() => {
+        if (props.demoData.length > 0) {
+            setIsDemo(true);
+            setSliderMaxTooltipValue(props.demoData[0].max);
+            setSliderMaxValue(props.demoData[0].max);
+        }
+    }, [props.demoData, props.demoData.length]);
 
     const [sliderMinTooltipValue, setSliderMinTooltipValue] = useState(0);
     const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
@@ -32,92 +39,13 @@ function NodeFilter(props) {
     );
 
     useEffect(() => {
-        setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
-        setSliderMaxTooltipValue(store.graph.currentGraphData.meta.maxDegree);
-    }, [store.graph.currentGraphData.meta.maxDegree]);
-
-    useEffect(() => {
-        if (props.demoData.length) {
-            setData(props.demoData);
-        } else {
-            let data;
-
-            switch (props.networkData) {
-                case 'selected':
-                    data = store.graph.currentGraphData.selectedNodes;
-                    break;
-                case 'visible':
-                    data = store.graph.currentGraphData.nodes.filter(
-                        node => node.visible
-                    );
-                    break;
-                default:
-                    data = store.graph.currentGraphData.nodes;
-                    break;
-            }
-
-            data = data.slice().sort((node1, node2) => {
-                if (node1.neighbours.size > node2.neighbours.size) {
-                    return -1;
-                }
-
-                if (node1.neighbours.size < node2.neighbours.size) {
-                    return 1;
-                }
-
-                return 0;
-            });
-
-            if (
-                props.networkData === 'selected' ||
-                props.elementDisplayLimit === 0
-            ) {
-                setData(data);
-            } else if (props.elementDisplayLimit > 0) {
-                setData(data.slice(0, props.elementDisplayLimit));
-            } else {
-                setData(data.slice(props.elementDisplayLimit, data.length));
-            }
+        if (props.demoData.length === 0) {
+            setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
+            setSliderMaxTooltipValue(
+                store.graph.currentGraphData.meta.maxDegree
+            );
         }
-    }, [
-        props.demoData,
-        props.elementDisplayLimit,
-        props.networkData,
-        store.graph.currentGraphData.nodes,
-        store.graph.currentGraphData.selectedNodes,
-        store.graph.currentGraphData.selectedNodes.length,
-        store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponents
-    ]);
-
-    if (data.length === 0) {
-        return (
-            <VStack
-                overflowY="scroll"
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor="blackAlpha.800"
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData !== 'all' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
-        );
-    }
+    }, [props.demoData.length, store.graph.currentGraphData.meta.maxDegree]);
 
     return (
         <Box
@@ -150,10 +78,12 @@ function NodeFilter(props) {
                         value={sliderMinTooltipValue}
                         onChange={val => {
                             setSliderMinTooltipValue(val);
-                            store.graphInstance.filterNodesByDegree(
-                                val,
-                                sliderMaxTooltipValue
-                            );
+                            if (!isDemo) {
+                                store.graphInstance.filterNodesByDegree(
+                                    val,
+                                    sliderMaxTooltipValue
+                                );
+                            }
                         }}
                         min={0}
                         max={sliderMaxTooltipValue}
@@ -184,9 +114,12 @@ function NodeFilter(props) {
                         />
                     </NumberInput>
 
-                    {props.isExpanded && (
+                    {(props.isExpanded || isDemo) && (
                         <FormLabel paddingBottom="10px" paddingTop="10px">
-                            Filtering by <span>connection</span>
+                            Filtering by{' '}
+                            <span>
+                                {isDemo ? props.demoData[0].prop : 'connection'}
+                            </span>
                         </FormLabel>
                     )}
 
@@ -197,10 +130,12 @@ function NodeFilter(props) {
                         width="84px"
                         onChange={val => {
                             setSliderMaxTooltipValue(val);
-                            store.graphInstance.filterNodesByDegree(
-                                sliderMinTooltipValue,
-                                val
-                            );
+                            if (!isDemo) {
+                                store.graphInstance.filterNodesByDegree(
+                                    sliderMinTooltipValue,
+                                    val
+                                );
+                            }
                         }}
                         min={sliderMinTooltipValue}
                         max={sliderMaxValue}
@@ -241,9 +176,14 @@ function NodeFilter(props) {
                         setSliderMinTooltipValue(val[0]);
                         setSliderMaxTooltipValue(val[1]);
                     }}
-                    onChangeEnd={val =>
-                        store.graphInstance.filterNodesByDegree(val[0], val[1])
-                    }
+                    onChangeEnd={val => {
+                        if (!isDemo) {
+                            store.graphInstance.filterNodesByDegree(
+                                val[0],
+                                val[1]
+                            );
+                        }
+                    }}
                 >
                     <RangeSliderTrack bg="blue.100">
                         <RangeSliderFilledTrack bg="blue.500" />
