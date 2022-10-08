@@ -1,8 +1,6 @@
 import { Button } from '@chakra-ui/button';
-import { Checkbox } from '@chakra-ui/checkbox';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
 import {
-    Box,
     Divider,
     Heading,
     HStack,
@@ -13,50 +11,22 @@ import {
 import { Radio, RadioGroup } from '@chakra-ui/radio';
 import {
     IconButton,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    RangeSlider,
-    RangeSliderFilledTrack,
-    RangeSliderThumb,
-    RangeSliderTrack,
+    Select,
     Tag,
     useColorModeValue,
     Wrap
 } from '@chakra-ui/react';
-import {
-    Slider,
-    SliderFilledTrack,
-    SliderThumb,
-    SliderTrack
-} from '@chakra-ui/slider';
 import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
-import { Bolt, Undo } from 'css.gg';
+import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
     const location = useLocation();
     const store = useContext(RootStoreContext);
-
-    const [sliderMinTooltipValue, setSliderMinTooltipValue] = useState(0);
-    const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
-        store.graph.currentGraphData.meta.maxDegree
-    );
-
-    const [sliderMaxValue, setSliderMaxValue] = useState(
-        store.graph.currentGraphData.meta.maxDegree
-    );
-
-    useEffect(() => {
-        setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
-        setSliderMaxTooltipValue(store.graph.currentGraphData.meta.maxDegree);
-    }, [store.graph.currentGraphData.meta.maxDegree]);
 
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
@@ -169,39 +139,23 @@ function Settings() {
 
     const renderLabelOptions = () => {
         return (
-            <>
-                <Text>
-                    Label size:{' '}
-                    <Text
-                        as="span"
-                        fontSize="xs"
-                        fontWeight="bold"
-                        textTransform="uppercase"
-                        display="inline"
-                    >
-                        {
-                            store.graphInstance.labels.labelDistances[
-                                store.graphInstance.labels.visibilityDistance
-                            ]
-                        }
-                    </Text>
-                </Text>
-                <Box width="100%" paddingLeft="10px" paddingRight="10px">
-                    <Slider
-                        value={store.graphInstance.labels.visibilityDistance}
-                        min={600}
-                        max={4200}
-                        step={900}
-                        onChange={updateLabelDistance}
-                    >
-                        <SliderTrack bg="blue.500">
-                            <Box position="relative" right={10} />
-                            <SliderFilledTrack bg="blue.300" />
-                        </SliderTrack>
-                        <SliderThumb boxSize={3} />
-                    </Slider>
-                </Box>
-            </>
+            <HStack justifyContent="space-between" width="100%">
+                <Text>Label size: </Text>
+                <Select
+                    size="sm"
+                    value={store.graphInstance.labels.visibilityDistance}
+                    onChange={e => updateLabelDistance(e.target.value)}
+                    variant="filled"
+                    borderRadius="6px"
+                    width="115px"
+                >
+                    <option value={600}>small</option>
+                    <option value={1500}>medium</option>
+                    <option value={2400}>large</option>
+                    <option value={3300}>extra large</option>
+                    <option value={4200}>2x large</option>
+                </Select>
+            </HStack>
         );
     };
 
@@ -209,7 +163,7 @@ function Settings() {
         return (
             <VStack width="100%">
                 <HStack width="100%">
-                    <Tooltip label="Apply force to graph">
+                    <Tooltip label="Simulate graph layout (will make nodes move around and make it easier to see patterns)">
                         <Button
                             id="applyforcebutton"
                             size="sm"
@@ -228,6 +182,35 @@ function Settings() {
                             Apply force
                         </Button>
                     </Tooltip>
+                    <Tooltip
+                        label={
+                            store.graphInstance.forceShouldIgnoreSelected
+                                ? 'Turn off layout position simulation for currently selected nodes.'
+                                : 'Turn on layout position simulation for currently selected nodes.'
+                        }
+                    >
+                        <IconButton
+                            id="resetLayoutButton"
+                            size="sm"
+                            icon={<Anchor style={{ '--ggs': '0.6' }} />}
+                            onClick={() => {
+                                store.graphInstance.ignoreSelected(
+                                    !store.graphInstance
+                                        .forceShouldIgnoreSelected
+                                );
+                            }}
+                            _hover={{
+                                backgroundColor: 'blue.500',
+                                opacity: 0.76
+                            }}
+                            backgroundColor={
+                                store.graphInstance.forceShouldIgnoreSelected
+                                    ? 'blue.500'
+                                    : 'auto'
+                            }
+                            disabled={store.graphInstance.forceEngine}
+                        />
+                    </Tooltip>
                     <Tooltip label="Reset node positions">
                         <IconButton
                             id="resetLayoutButton"
@@ -245,13 +228,6 @@ function Settings() {
                         />
                     </Tooltip>
                 </HStack>
-                <Checkbox
-                    size="sm"
-                    colorScheme="blue"
-                    onChange={store.graphInstance.ignoreSelected}
-                >
-                    Ignore selected
-                </Checkbox>
             </VStack>
         );
     };
@@ -317,82 +293,6 @@ function Settings() {
                     />
                     Orphan nodes
                 </FormLabel>
-
-                <FormLabel paddingBottom="10px" paddingTop="10px">
-                    Filter by connection:
-                </FormLabel>
-                <HStack
-                    style={{ justifyContent: 'space-between', width: '100%' }}
-                >
-                    <Text size="xs" fontWeight="bold">
-                        min
-                    </Text>
-                    <Text size="xs" fontWeight="bold">
-                        max
-                    </Text>
-                </HStack>
-                <HStack spacing={10} style={{ marginBottom: '10px' }}>
-                    <NumberInput
-                        size="xs"
-                        value={sliderMinTooltipValue}
-                        onChange={val => {
-                            setSliderMinTooltipValue(val);
-                            store.graphInstance.filterNodesByDegree(
-                                val,
-                                sliderMaxTooltipValue
-                            );
-                        }}
-                        min={0}
-                        max={sliderMaxTooltipValue}
-                    >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                        </NumberInputStepper>
-                    </NumberInput>
-
-                    <NumberInput
-                        size="xs"
-                        value={sliderMaxTooltipValue}
-                        onChange={val => {
-                            setSliderMaxTooltipValue(val);
-                            store.graphInstance.filterNodesByDegree(
-                                sliderMinTooltipValue,
-                                val
-                            );
-                        }}
-                        min={sliderMinTooltipValue}
-                        max={sliderMaxValue}
-                    >
-                        <NumberInputField />
-                        <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                        </NumberInputStepper>
-                    </NumberInput>
-                </HStack>
-                <RangeSlider
-                    isDisabled={sliderMaxValue === 0}
-                    value={[sliderMinTooltipValue, sliderMaxTooltipValue]}
-                    min={0}
-                    max={sliderMaxValue}
-                    step={1}
-                    onChange={val => {
-                        setSliderMinTooltipValue(val[0]);
-                        setSliderMaxTooltipValue(val[1]);
-                    }}
-                    onChangeEnd={val =>
-                        store.graphInstance.filterNodesByDegree(val[0], val[1])
-                    }
-                >
-                    <RangeSliderTrack bg="blue.100">
-                        <RangeSliderFilledTrack bg="blue.500" />
-                    </RangeSliderTrack>
-
-                    <RangeSliderThumb boxSize={3} index={0} />
-                    <RangeSliderThumb boxSize={3} index={1} />
-                </RangeSlider>
             </>
         );
     };

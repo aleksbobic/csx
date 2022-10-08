@@ -240,8 +240,8 @@ export class GraphInstanceStore {
         );
     };
 
-    ignoreSelected = event => {
-        this.forceShouldIgnoreSelected = event.target.checked;
+    ignoreSelected = value => {
+        this.forceShouldIgnoreSelected = value;
 
         this.store.graph.currentGraphData.selectedNodes.forEach(node => {
             if (node.selected) {

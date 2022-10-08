@@ -44,6 +44,7 @@ import ComponentStatsComponent from 'components/feature/stats/component/Componen
 import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
 import GraphStatsComponent from 'components/feature/stats/graph/GraphStats.component';
 import NodeStatsComponent from 'components/feature/stats/node/NodeStats.component';
+import NodeFilterComponent from 'components/feature/stats/nodefilter/NodeFilter.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect } from 'react';
@@ -358,6 +359,12 @@ function FileUploadModal() {
                                 'feature 2': { count: 43 }
                             }
                         }}
+                    />
+                );
+            case 'node filter':
+                return (
+                    <NodeFilterComponent
+                        demoData={[{ max: 55, prop: 'connection' }]}
                     />
                 );
             default:
@@ -756,6 +763,10 @@ function FileUploadModal() {
                             },
                             {
                                 statType: 'connections',
+                                type: 'stat'
+                            },
+                            {
+                                statType: 'node filter',
                                 type: 'stat'
                             }
                         ].map((entry, index) => {
