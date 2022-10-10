@@ -13,7 +13,8 @@ export class StatsStore {
         'Nodes',
         'Components',
         'Graph stats',
-        'Connections'
+        'Connections',
+        'Node Filter'
     ];
     availableTypes = ['all'];
     newChartProps = {

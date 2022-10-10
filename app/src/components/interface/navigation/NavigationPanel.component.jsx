@@ -311,14 +311,14 @@ function NavigationPanelComponent() {
                     />
                 </Tooltip>
             )}
-            <Tooltip label="Toggle color mode">
+            {/* <Tooltip label="Toggle color mode">
                 <IconButton
                     border="none"
                     aria-label="Color mode"
                     icon={colorMode === 'light' ? <Moon /> : <Sun />}
                     onClick={toggleColor}
                 />
-            </Tooltip>
+            </Tooltip> */}
         </ButtonGroup>
     );
 

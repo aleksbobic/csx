@@ -222,6 +222,9 @@ function HomePage() {
                             paddingLeft="10px"
                             opacity="0.7"
                             _groupHover={{ opacity: '1' }}
+                            whiteSpace="nowrap"
+                            overflow="hidden"
+                            textOverflow="ellipsis"
                         >
                             {dataset}
                         </Heading>

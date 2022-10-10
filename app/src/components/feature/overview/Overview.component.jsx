@@ -17,6 +17,7 @@ import SelectedComponentListComponent from '../stats/component/ComponentStats.co
 import SelectedNodeListComponent from '../stats/node/NodeStats.component';
 import GraphStatsComponent from '../stats/graph/GraphStats.component';
 import ConnectionStatsComponent from '../stats/connections/ConnectionStats.component';
+import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
 function Overview(props) {
     const store = useContext(RootStoreContext);
 
@@ -35,6 +36,10 @@ function Overview(props) {
 
         if (chart.type.toLowerCase() === 'graph stats') {
             return 'Graph properties';
+        }
+
+        if (chart.type.toLowerCase() === 'node filter') {
+            return 'Node property filters';
         }
 
         if (chart.type.toLowerCase() === 'connections') {
@@ -75,6 +80,8 @@ function Overview(props) {
                 return <SelectedComponentListComponent />;
             case 'graph stats':
                 return <GraphStatsComponent />;
+            case 'node filter':
+                return <NodeFilterComponent />;
             default:
                 return <ConnectionStatsComponent />;
         }
@@ -141,7 +148,7 @@ function Overview(props) {
             <Grid
                 maxHeight="100%"
                 width="100%"
-                templateColumns={'repeat(2, minmax(0, 1fr))'}
+                templateColumns="repeat(auto-fit, minmax(240px, 1fr))"
                 gap={5}
                 margin="0"
                 marginBottom="70px"

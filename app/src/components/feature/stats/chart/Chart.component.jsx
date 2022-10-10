@@ -202,6 +202,7 @@ function Chart(props) {
         switch (props.chart.type.toLowerCase()) {
             case 'vertical bar':
             case 'grouped bar':
+            case 'histogram':
                 return 'bar';
             default:
                 return props.chart.type.toLowerCase();
