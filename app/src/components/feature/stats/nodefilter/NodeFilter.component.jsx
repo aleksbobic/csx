@@ -26,8 +26,32 @@ function NodeFilter(props) {
             setIsDemo(true);
             setSliderMaxTooltipValue(props.demoData[0].max);
             setSliderMaxValue(props.demoData[0].max);
+        } else if (props.filterProperty === 'degree') {
+            setIsDemo(false);
+            setSliderMinTooltipValue(0);
+            setSliderMaxTooltipValue(
+                store.graph.currentGraphData.meta.maxDegree
+            );
+            setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
+        } else {
+            setIsDemo(false);
+            setSliderMinTooltipValue(
+                store.search.searchHints[props.filterProperty].min
+            );
+            setSliderMaxTooltipValue(
+                store.search.searchHints[props.filterProperty].max
+            );
+            setSliderMaxValue(
+                store.search.searchHints[props.filterProperty].max
+            );
         }
-    }, [props.demoData, props.demoData.length]);
+    }, [
+        props.demoData,
+        props.demoData.length,
+        props.filterProperty,
+        store.graph.currentGraphData.meta.maxDegree,
+        store.search.searchHints
+    ]);
 
     const [sliderMinTooltipValue, setSliderMinTooltipValue] = useState(0);
     const [sliderMaxTooltipValue, setSliderMaxTooltipValue] = useState(
@@ -46,6 +70,14 @@ function NodeFilter(props) {
             );
         }
     }, [props.demoData.length, store.graph.currentGraphData.meta.maxDegree]);
+
+    const filterNodes = (min, max) => {
+        store.graphInstance.filterNodesByNumericProp(
+            min,
+            max,
+            props.filterProperty
+        );
+    };
 
     return (
         <Box
@@ -79,10 +111,7 @@ function NodeFilter(props) {
                         onChange={val => {
                             setSliderMinTooltipValue(val);
                             if (!isDemo) {
-                                store.graphInstance.filterNodesByDegree(
-                                    val,
-                                    sliderMaxTooltipValue
-                                );
+                                filterNodes(val, sliderMaxTooltipValue);
                             }
                         }}
                         min={0}
@@ -118,7 +147,9 @@ function NodeFilter(props) {
                         <FormLabel paddingBottom="10px" paddingTop="10px">
                             Filtering by{' '}
                             <span>
-                                {isDemo ? props.demoData[0].prop : 'connection'}
+                                {isDemo
+                                    ? props.demoData[0].prop
+                                    : props.filterProperty}
                             </span>
                         </FormLabel>
                     )}
@@ -131,10 +162,7 @@ function NodeFilter(props) {
                         onChange={val => {
                             setSliderMaxTooltipValue(val);
                             if (!isDemo) {
-                                store.graphInstance.filterNodesByDegree(
-                                    sliderMinTooltipValue,
-                                    val
-                                );
+                                filterNodes(sliderMinTooltipValue, val);
                             }
                         }}
                         min={sliderMinTooltipValue}
@@ -178,10 +206,7 @@ function NodeFilter(props) {
                     }}
                     onChangeEnd={val => {
                         if (!isDemo) {
-                            store.graphInstance.filterNodesByDegree(
-                                val[0],
-                                val[1]
-                            );
+                            filterNodes(val[0], val[1]);
                         }
                     }}
                 >
@@ -198,16 +223,14 @@ function NodeFilter(props) {
 }
 NodeFilter.propTypes = {
     isExpanded: PropTypes.bool,
-    networkData: PropTypes.string,
     demoData: PropTypes.array,
-    elementDisplayLimit: PropTypes.number
+    filterProperty: PropTypes.string
 };
 
 NodeFilter.defaultProps = {
     isExpanded: false,
-    networkData: 'all',
     demoData: [],
-    elementDisplayLimit: 10
+    filterProperty: 'degree'
 };
 
 export default observer(NodeFilter);

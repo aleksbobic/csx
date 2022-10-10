@@ -26,6 +26,7 @@ function StatContainer(props) {
     const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
     const [connectionFeature, setConnectionFeature] = useState('all');
     const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
+    const [filterProperty, setFilterProperty] = useState('degree');
 
     const renderChartContainerTopControls = () => (
         <HStack
@@ -78,6 +79,55 @@ function StatContainer(props) {
                         </Select>
                     </Tooltip>
                 )}
+            {['node filter'].includes(props.chart.type.toLowerCase()) && (
+                <Tooltip label="Change filter property.">
+                    <Select
+                        size="xs"
+                        variant="filled"
+                        borderRadius="5px"
+                        opacity="0.5"
+                        minWidth="70px"
+                        width="70px"
+                        textAlign="right"
+                        backgroundColor="transparent"
+                        _hover={{
+                            opacity: '1',
+                            backgroundColor: 'whiteAlpha.200'
+                        }}
+                        icon={<></>}
+                        style={{ paddingRight: '8px' }}
+                        defaultValue={filterProperty}
+                        onChange={e => setFilterProperty(e.target.value)}
+                    >
+                        <option value="degree">degree</option>
+                        {Object.keys(store.search.nodeTypes)
+                            .map(feature => {
+                                return {
+                                    feature: feature,
+                                    type: store.search.nodeTypes[feature]
+                                };
+                            })
+                            .filter(
+                                entry =>
+                                    ['integer', 'float'].includes(
+                                        entry['type']
+                                    ) &&
+                                    store.core.isOverview &&
+                                    store.graph.currentGraphData.meta.anchorProperties
+                                        .map(entry => entry['property'])
+                                        .includes(entry['feature'])
+                            )
+                            .map(entry => (
+                                <option
+                                    key={`filter_prop_${entry['feature']}`}
+                                    value={entry['feature']}
+                                >
+                                    {entry['feature']}
+                                </option>
+                            ))}
+                    </Select>
+                </Tooltip>
+            )}
             {['connections'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Show only features of selected type.">
                     <Select
@@ -153,7 +203,9 @@ function StatContainer(props) {
                         </Select>
                     </Tooltip>
                 )}
-            {!['connections'].includes(props.chart.type.toLowerCase()) && (
+            {!['connections', 'node filter'].includes(
+                props.chart.type.toLowerCase()
+            ) && (
                 <Tooltip label="Change displayed elements">
                     <Select
                         size="xs"
@@ -291,7 +343,8 @@ function StatContainer(props) {
                 networkData,
                 elementDisplayLimit,
                 connectionFeature,
-                maxConnectionDegree
+                maxConnectionDegree,
+                filterProperty
             });
         }
         return child;
@@ -320,9 +373,13 @@ function StatContainer(props) {
             {childrenWithProps}
 
             {props.chart.colSpan === 2 &&
-                !['graph stats', 'connections', 'components', 'nodes'].includes(
-                    props.chart.type.toLowerCase()
-                ) &&
+                ![
+                    'graph stats',
+                    'connections',
+                    'components',
+                    'nodes',
+                    'node filter'
+                ].includes(props.chart.type.toLowerCase()) &&
                 renderChartContainerBottomControls(props.chart)}
         </GridItem>
     );

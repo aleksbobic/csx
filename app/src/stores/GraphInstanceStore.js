@@ -121,23 +121,45 @@ export class GraphInstanceStore {
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
     };
 
-    filterNodesByDegree = (min, max) => {
+    filterNodesByNumericProp = (min, max, prop) => {
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;
 
-        for (let i = 0; i < nodeCount; i++) {
-            if (
-                this.store.graph.currentGraphData.nodes[i].neighbours.size ===
-                    0 &&
-                !this.store.graphInstance.orphanNodeVisibility
-            ) {
-                this.store.graph.currentGraphData.nodes[i].visible = false;
-            } else {
-                this.store.graph.currentGraphData.nodes[i].visible =
+        if (prop === 'degree') {
+            for (let i = 0; i < nodeCount; i++) {
+                if (
                     this.store.graph.currentGraphData.nodes[i].neighbours
-                        .size >= min &&
+                        .size === 0 &&
+                    !this.store.graphInstance.orphanNodeVisibility
+                ) {
+                    this.store.graph.currentGraphData.nodes[i].visible = false;
+                } else {
+                    this.store.graph.currentGraphData.nodes[i].visible =
+                        this.store.graph.currentGraphData.nodes[i].neighbours
+                            .size >= min &&
+                        this.store.graph.currentGraphData.nodes[i].neighbours
+                            .size <= max;
+                }
+            }
+        } else {
+            for (let i = 0; i < nodeCount; i++) {
+                if (
                     this.store.graph.currentGraphData.nodes[i].neighbours
-                        .size <= max;
+                        .size === 0 &&
+                    !this.store.graphInstance.orphanNodeVisibility
+                ) {
+                    this.store.graph.currentGraphData.nodes[i].visible = false;
+                } else {
+                    this.store.graph.currentGraphData.nodes[i].visible =
+                        parseFloat(
+                            this.store.graph.currentGraphData.nodes[i]
+                                .properties[prop]
+                        ) >= min &&
+                        parseFloat(
+                            this.store.graph.currentGraphData.nodes[i]
+                                .properties[prop]
+                        ) <= max;
+                }
             }
         }
 
