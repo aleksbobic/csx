@@ -1,5 +1,7 @@
 import {
+    AspectRatio,
     Box,
+    Button,
     Center,
     Container,
     Flex,
@@ -12,12 +14,13 @@ import {
     Text,
     Tooltip,
     useColorMode,
-    useToast
+    useToast,
+    VStack
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
 import DatasetConfigModalComponent from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
 import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
-import { ArrowRight, FileAdd, Toolbox, TrashEmpty } from 'css.gg';
+import { ArrowRight, Close, FileAdd, Toolbox, TrashEmpty } from 'css.gg';
 import logo from 'images/logo.png';
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -83,7 +86,7 @@ function HomePage() {
                 border: '1px dashed rgba(100,100,100,0.5)',
                 borderRadius: '7px',
                 height: '150px',
-                marginTop: '40px',
+                marginTop: '0',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -189,96 +192,229 @@ function HomePage() {
 
     const renderDatasetGrid = () => {
         return (
-            <SimpleGrid
-                columns={2}
-                spacing="10px"
-                marginTop="40px"
-                backgroundColor="blackAlpha.300"
-                padding="10px"
-                borderRadius="12px"
-                maxHeight="170px"
-                overflowY="scroll"
-            >
-                {store.search.datasets.map((dataset, index) => (
-                    <Flex
-                        backgroundColor="whiteAlpha.50"
-                        borderRadius="8px"
-                        height="40px"
-                        justifyContent="center"
-                        alignItems="center"
-                        gap="5px"
-                        paddingLeft="5px"
-                        paddingRight="5px"
-                        key={`dataset_list_${dataset}`}
-                        opacity="0.7"
-                        transition="all 0.1s ease-in-out"
-                        _hover={{ opacity: '1' }}
-                        role="group"
-                    >
-                        <Heading
-                            flexGrow="1"
-                            size="xs"
-                            textAlign="left"
-                            paddingLeft="10px"
+            <VStack marginTop="40px">
+                <Box
+                    backgroundColor="blackAlpha.300"
+                    width="100%"
+                    height="50px"
+                    margin="0"
+                    borderTopRadius="12px"
+                    display="flex"
+                    alignItems="center"
+                >
+                    <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
+                        Datasets
+                    </Heading>
+                </Box>
+                <SimpleGrid
+                    width="100%"
+                    columns={[1, 1, 2]}
+                    spacing="10px"
+                    backgroundColor="blackAlpha.300"
+                    padding="0 20px"
+                    maxHeight="156px"
+                    overflowY="scroll"
+                    marginBottom="0"
+                    style={{ marginTop: 0 }}
+                >
+                    {store.search.datasets.map((dataset, index) => (
+                        <Flex
+                            backgroundColor="whiteAlpha.50"
+                            borderRadius="8px"
+                            height="40px"
+                            justifyContent="center"
+                            alignItems="center"
+                            gap="5px"
+                            paddingLeft="5px"
+                            paddingRight="5px"
+                            key={`dataset_list_${dataset}`}
                             opacity="0.7"
-                            _groupHover={{ opacity: '1' }}
-                            whiteSpace="nowrap"
-                            overflow="hidden"
-                            textOverflow="ellipsis"
+                            transition="all 0.1s ease-in-out"
+                            _hover={{ opacity: '1' }}
+                            role="group"
                         >
-                            {dataset}
-                        </Heading>
-                        <Tooltip label={`Delete ${dataset}`}>
-                            <IconButton
-                                flexGrow="0"
-                                size="sm"
-                                variant="ghost"
-                                opacity="0"
+                            <Heading
+                                flexGrow="1"
+                                size="xs"
+                                textAlign="left"
+                                paddingLeft="10px"
+                                opacity="0.7"
                                 _groupHover={{ opacity: '1' }}
-                                onClick={() =>
-                                    store.search.deleteDataset(dataset)
-                                }
-                                icon={
-                                    <TrashEmpty
-                                        style={{
-                                            '--ggs': '0.7',
-                                            marginTop: '1px'
-                                        }}
-                                    />
-                                }
-                            />
-                        </Tooltip>
-                        <Tooltip
-                            label={`Change default settings for  ${dataset}`}
-                        >
-                            <IconButton
-                                flexGrow="0"
-                                size="sm"
-                                variant="ghost"
-                                opacity="0"
-                                _groupHover={{ opacity: '1' }}
-                                onClick={() => store.search.getConifg(dataset)}
-                                icon={<Toolbox style={{ '--ggs': '0.7' }} />}
-                            />
-                        </Tooltip>
-                        <Tooltip label={`Explore entire ${dataset}`}>
-                            <IconButton
-                                flexGrow="0"
-                                size="sm"
-                                variant="solid"
-                                opacity="0.5"
-                                _groupHover={{ opacity: '1' }}
-                                onClick={() =>
-                                    navigateToAdvancedSearch(dataset)
-                                }
-                                icon={<ArrowRight style={{ '--ggs': '0.7' }} />}
-                            />
-                        </Tooltip>
-                    </Flex>
-                ))}
-            </SimpleGrid>
+                                whiteSpace="nowrap"
+                                overflow="hidden"
+                                textOverflow="ellipsis"
+                            >
+                                {dataset}
+                            </Heading>
+                            <Tooltip label={`Delete ${dataset}`}>
+                                <IconButton
+                                    flexGrow="0"
+                                    size="sm"
+                                    variant="ghost"
+                                    opacity="0"
+                                    _groupHover={{ opacity: '1' }}
+                                    onClick={() =>
+                                        store.search.deleteDataset(dataset)
+                                    }
+                                    icon={
+                                        <TrashEmpty
+                                            style={{
+                                                '--ggs': '0.7',
+                                                marginTop: '1px'
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Tooltip>
+                            <Tooltip
+                                label={`Change default settings for  ${dataset}`}
+                            >
+                                <IconButton
+                                    flexGrow="0"
+                                    size="sm"
+                                    variant="ghost"
+                                    opacity="0"
+                                    _groupHover={{ opacity: '1' }}
+                                    onClick={() =>
+                                        store.search.getConifg(dataset)
+                                    }
+                                    icon={
+                                        <Toolbox style={{ '--ggs': '0.7' }} />
+                                    }
+                                />
+                            </Tooltip>
+                            <Tooltip label={`Explore entire ${dataset}`}>
+                                <IconButton
+                                    flexGrow="0"
+                                    size="sm"
+                                    variant="solid"
+                                    opacity="0.5"
+                                    _groupHover={{ opacity: '1' }}
+                                    onClick={() =>
+                                        navigateToAdvancedSearch(dataset)
+                                    }
+                                    icon={
+                                        <ArrowRight
+                                            style={{ '--ggs': '0.7' }}
+                                        />
+                                    }
+                                />
+                            </Tooltip>
+                        </Flex>
+                    ))}
+                </SimpleGrid>
+                {process.env.REACT_APP_DISABLE_UPLOAD !== 'true' && (
+                    <Box
+                        backgroundColor="blackAlpha.300"
+                        padding="20px"
+                        style={{ marginTop: '0px' }}
+                        borderBottomRadius="12px"
+                    >
+                        {renderFileUpload()}
+                    </Box>
+                )}
+            </VStack>
         );
     };
+
+    const renderStudyGrid = () => (
+        <VStack marginTop="40px">
+            <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
+                Studies
+            </Heading>
+
+            <SimpleGrid
+                width="100%"
+                columns={[1, 2, 3]}
+                spacing="10px"
+                marginTop="40px"
+                padding="10px 0"
+                borderRadius="12px"
+                maxHeight="250px"
+                overflowY="scroll"
+            >
+                {[].map((study, index) => (
+                    <AspectRatio ratio={1} key={`study_${index}`}>
+                        <Box padding="3px" role="group">
+                            <Box
+                                width="100%"
+                                height="100%"
+                                background="linear-gradient(129deg, rgba(102,74,182,1) 0%, rgba(153,115,188,1) 55%, rgba(172,109,182,1) 100%)"
+                                position="absolute"
+                                borderRadius="10px"
+                                zIndex="0"
+                                opacity="0"
+                                transition="all ease-in-out 0.3s"
+                                _groupHover={{ opacity: 1 }}
+                            ></Box>
+                            <Box
+                                backgroundColor="#13161d"
+                                borderRadius="8px"
+                                padding="10px"
+                                zIndex="2"
+                                height="100%"
+                                width="100%"
+                                outline="3px solid"
+                                outlineColor="whiteAlpha.100"
+                                transition="all ease-in-out 0.3s"
+                                _groupHover={{ outlineColor: 'transparent' }}
+                            >
+                                <IconButton
+                                    size="xs"
+                                    position="absolute"
+                                    top="10px"
+                                    right="10px"
+                                    variant="ghost"
+                                    zIndex="3"
+                                    icon={<Close style={{ '--ggs': '0.7' }} />}
+                                />
+                                <VStack
+                                    height="100%"
+                                    justifyContent="space-between"
+                                    position="relative"
+                                >
+                                    <Text
+                                        textAlign="left"
+                                        fontWeight="bold"
+                                        fontSize="sm"
+                                        width="100%"
+                                        paddingLeft="10px"
+                                        paddingRight="20px"
+                                        textTransform="uppercase"
+                                        overflow="hidden"
+                                        whiteSpace="nowrap"
+                                        textOverflow="ellipsis"
+                                        flexShrink="0"
+                                    >
+                                        {study.title}
+                                    </Text>
+                                    <Text
+                                        width="100%"
+                                        heigh="100%"
+                                        textAlign="left"
+                                        fontSize="sm"
+                                        paddingLeft="10px"
+                                        paddingRight="10px"
+                                        overflowY="scroll"
+                                    >
+                                        {study.description}
+                                    </Text>
+
+                                    <Button
+                                        width="100%"
+                                        size="xs"
+                                        flexShrink="0"
+                                    >
+                                        Open
+                                    </Button>
+                                </VStack>
+                            </Box>
+                        </Box>
+                    </AspectRatio>
+                ))}
+            </SimpleGrid>
+        </VStack>
+    );
 
     return (
         <Box
@@ -315,8 +451,8 @@ function HomePage() {
                         {renderDatasetGrid()}
                     </>
                 )}
-                {process.env.REACT_APP_DISABLE_UPLOAD !== 'true' &&
-                    renderFileUpload()}
+
+                {false && renderStudyGrid()}
             </Container>
             {renderFooter()}
         </Box>
