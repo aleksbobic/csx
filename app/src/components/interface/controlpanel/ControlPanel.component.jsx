@@ -3,7 +3,6 @@ import {
     Button,
     Divider,
     Flex,
-    Heading,
     HStack,
     IconButton,
     Menu,
@@ -24,6 +23,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import SettingsComponent from 'components/feature/settings/Settings.component';
+import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
@@ -40,13 +40,12 @@ import {
     PathIntersect,
     RadioChecked
 } from 'css.gg';
+import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
+import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import queryString from 'query-string';
-import { schemeYlOrRd } from 'd3-scale-chromatic';
-import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);

@@ -7,7 +7,7 @@ import {
     Tag,
     Tooltip
 } from '@chakra-ui/react';
-import { Box, Heart } from 'css.gg';
+import { Heart } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
