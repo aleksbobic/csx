@@ -52,8 +52,19 @@ def generate_study(user_uuid: str, study_name: str) -> str:
 
 @router.get("/update")
 def update_study(
-    study_uuid: str, user_uuid: str, study_name: str, study_description=""
+    study_uuid: str, user_uuid: str, study_name: str, study_description: str
 ):
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_uuid, "user_uuid": user_uuid},
+        {
+            "$set": {
+                "study_name": study_name,
+                "study_description": study_description,
+                "saved": True,
+            }
+        },
+    )
     return
 
 

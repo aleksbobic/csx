@@ -31,7 +31,7 @@ function StudyInfo() {
             <Tooltip label={store.core.studyName}>
                 <Editable
                     defaultValue={store.core.studyName}
-                    onSubmit={val => (store.core.studyName = val)}
+                    onSubmit={val => store.core.updateStudyName(val)}
                     width="100%"
                 >
                     <EditablePreview
@@ -67,7 +67,7 @@ function StudyInfo() {
             >
                 <Editable
                     defaultValue={store.core.studyDescription}
-                    onSubmit={val => (store.core.studyDescription = val)}
+                    onSubmit={val => store.core.updateStudyDescription(val)}
                     width="100%"
                     placeholder="Click here to add a study description. 👀"
                 >

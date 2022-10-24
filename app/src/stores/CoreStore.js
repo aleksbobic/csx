@@ -37,6 +37,42 @@ export class CoreStore {
 
     updateIsStudySaved = val => (this.studyIsSaved = val);
 
+    updateStudies = val => (this.studies = val);
+
+    updateStudyName = async name => {
+        this.studyName = name;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription
+        };
+
+        await axios.get('study/update', { params }).then(() => {
+            this.updateIsStudySaved(true);
+            this.getSavedStudies();
+        });
+    };
+
+    updateStudyDescription = async description => {
+        this.studyDescription = description;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription
+        };
+
+        console.log(params);
+
+        await axios.get('study/update', { params }).then(() => {
+            this.updateIsStudySaved(true);
+            this.getSavedStudies();
+        });
+    };
+
     generateUUID = async () => {
         await axios.get('util/uuid').then(response => {
             localStorage.setItem('useruuid', response.data);
@@ -51,6 +87,8 @@ export class CoreStore {
             length: 2,
             seed: this.studyUuid
         });
+
+        this.studyDescription = '';
 
         const params = { user_uuid: this.userUuid, study_name: this.studyName };
 
@@ -91,7 +129,7 @@ export class CoreStore {
         const params = { user_uuid: this.userUuid };
 
         await axios.get('study/saved', { params }).then(response => {
-            this.studies = response.data;
+            this.updateStudies(response.data);
         });
     };
 
