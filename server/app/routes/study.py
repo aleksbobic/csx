@@ -1,4 +1,5 @@
 import uuid
+import json
 
 import app.services.data.mongo as csx_data
 
@@ -10,6 +11,24 @@ router = APIRouter()
 @router.get("/")
 def get_study(study_uuid: str, user_uuid: str):
     return
+
+
+@router.get("/saved")
+def get_studies(user_uuid: str):
+    saved_studies = list(
+        csx_data.get_all_documents_by_conditions(
+            "studies", {"$and": [{"user_uuid": user_uuid}, {"saved": True}]}, {"_id": 0}
+        )
+    )
+
+    return [
+        {
+            "study_uuid": study["study_uuid"],
+            "study_description": study["study_description"],
+            "study_name": study["study_name"],
+        }
+        for study in saved_studies
+    ]
 
 
 @router.get("/generate")
@@ -40,6 +59,11 @@ def update_study(
 
 @router.get("/save")
 def save_study(study_uuid: str, user_uuid: str):
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_uuid, "user_uuid": user_uuid},
+        {"$set": {"saved": True}},
+    )
     return
 
 

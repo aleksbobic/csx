@@ -24,6 +24,11 @@ def insert_document(collection_name: str, value: Any) -> None:
     database[collection_name].insert_one(value)
 
 
+def update_document(collection_name: str, conditions: object, new_values) -> None:
+    """Update a single value in a collection"""
+    database[collection_name].update_one(conditions, new_values)
+
+
 def delete_document(collection_name: str, conditions: object) -> None:
     """Delete a single value from a collection"""
     database[collection_name].delete_one(conditions)
@@ -37,6 +42,13 @@ def insert_documents(collection_name: str, values: List[Any]) -> None:
 def get_all_documents(collection_name: str):
     """Retireve all collection documents"""
     return database[collection_name].find({})
+
+
+def get_all_documents_by_conditions(
+    collection_name: str, conditions: object, visiblity_filter={}
+):
+    """Retireve all collection documents based on conditions"""
+    return database[collection_name].find(conditions, visiblity_filter)
 
 
 @use_timing

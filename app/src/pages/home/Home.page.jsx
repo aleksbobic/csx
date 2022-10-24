@@ -27,6 +27,7 @@ import logolight from 'images/logolight.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
+import { useBeforeunload } from 'react-beforeunload';
 import { useDropzone } from 'react-dropzone';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -38,12 +39,18 @@ function HomePage() {
     const store = useContext(RootStoreContext);
     const history = useHistory();
 
+    useBeforeunload(() => {
+        store.core.deleteStudy();
+    });
+
     useEffect(() => {
         store.track.trackPageChange();
         store.search.setSearchIsEmpty(false);
         store.graph.resetDetailGraphData();
         store.graph.resetGraphData();
-    });
+        store.core.updateIsStudySaved(false);
+        store.core.getSavedStudies();
+    }, []);
 
     const onDrop = async files => {
         store.fileUpload.changeFileUploadModalVisiblity(true);
@@ -338,13 +345,8 @@ function HomePage() {
                 maxHeight="250px"
                 overflowY="scroll"
             >
-                {[
-                    { title: 'something', description: 'some descriptions' },
-                    { title: 'something', description: 'some descriptions' },
-                    { title: 'something', description: 'some descriptions' },
-                    { title: 'something', description: 'some descriptions' }
-                ].map((study, index) => (
-                    <AspectRatio ratio={1} key={`study_${index}`}>
+                {store.core.studies.map(study => (
+                    <AspectRatio ratio={1} key={`study_${study.study_uuid}`}>
                         <Box padding="3px" role="group">
                             <Box
                                 width="100%"
@@ -371,35 +373,46 @@ function HomePage() {
                                     outlineColor: 'transparent'
                                 }}
                             >
-                                <IconButton
-                                    size="xs"
-                                    position="absolute"
-                                    top="10px"
-                                    right="10px"
-                                    variant="ghost"
-                                    zIndex="3"
-                                    icon={<Close style={{ '--ggs': '0.7' }} />}
-                                />
+                                <Tooltip label="Delete study">
+                                    <IconButton
+                                        size="xs"
+                                        position="absolute"
+                                        top="10px"
+                                        right="10px"
+                                        variant="ghost"
+                                        zIndex="3"
+                                        icon={
+                                            <Close style={{ '--ggs': '0.7' }} />
+                                        }
+                                        onClick={() =>
+                                            store.core.deleteStudy(
+                                                study.study_uuid
+                                            )
+                                        }
+                                    />
+                                </Tooltip>
                                 <VStack
                                     height="100%"
                                     justifyContent="space-between"
                                     position="relative"
                                 >
-                                    <Text
-                                        textAlign="left"
-                                        fontWeight="bold"
-                                        fontSize="sm"
-                                        width="100%"
-                                        paddingLeft="10px"
-                                        paddingRight="20px"
-                                        textTransform="uppercase"
-                                        overflow="hidden"
-                                        whiteSpace="nowrap"
-                                        textOverflow="ellipsis"
-                                        flexShrink="0"
-                                    >
-                                        {study.title}
-                                    </Text>
+                                    <Tooltip label={study.study_name}>
+                                        <Text
+                                            textAlign="left"
+                                            fontWeight="bold"
+                                            fontSize="sm"
+                                            width="100%"
+                                            paddingLeft="10px"
+                                            paddingRight="20px"
+                                            textTransform="uppercase"
+                                            overflow="hidden"
+                                            whiteSpace="nowrap"
+                                            textOverflow="ellipsis"
+                                            flexShrink="0"
+                                        >
+                                            {study.study_name}
+                                        </Text>
+                                    </Tooltip>
                                     <Text
                                         width="100%"
                                         heigh="100%"
@@ -409,7 +422,9 @@ function HomePage() {
                                         paddingRight="10px"
                                         overflowY="scroll"
                                     >
-                                        {study.description}
+                                        {study.study_description
+                                            ? study.study_description
+                                            : 'No description yet ...'}
                                     </Text>
 
                                     <Button
@@ -464,7 +479,7 @@ function HomePage() {
                     </>
                 )}
 
-                {true && renderStudyGrid()}
+                {store.core.studies.length > 0 && renderStudyGrid()}
             </Container>
             {renderFooter()}
         </Box>

@@ -358,13 +358,14 @@ function NavigationPanelComponent() {
                         borderRight="1px solid"
                         borderColor={edgeColor}
                         id="homelink"
-                        onClick={() =>
+                        onClick={() => {
+                            store.core.deleteStudy();
                             store.track.trackEvent(
                                 'navbar',
                                 'button click',
                                 'logo'
-                            )
-                        }
+                            );
+                        }}
                     >
                         <Image
                             src={logo}

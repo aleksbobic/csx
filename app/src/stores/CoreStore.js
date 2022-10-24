@@ -1,10 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
-import {
-    uniqueNamesGenerator,
-    adjectives,
-    animals
-} from 'unique-names-generator';
+import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
 
 export class CoreStore {
     availableDatasets = [];
@@ -18,6 +14,8 @@ export class CoreStore {
     studyUuid = null;
     studyName = null;
     studyDescription = '';
+    studyIsSaved = false;
+    studies = [];
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -32,9 +30,12 @@ export class CoreStore {
         if (!this.userUuid) {
             this.generateUUID();
         }
+        this.getSavedStudies();
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    updateIsStudySaved = val => (this.studyIsSaved = val);
 
     generateUUID = async () => {
         await axios.get('util/uuid').then(response => {
@@ -45,7 +46,7 @@ export class CoreStore {
 
     generateStudyUUID = async () => {
         this.studyName = uniqueNamesGenerator({
-            dictionaries: [adjectives, animals],
+            dictionaries: [colors, animals],
             separator: ' ',
             length: 2,
             seed: this.studyUuid
@@ -60,9 +61,38 @@ export class CoreStore {
         });
     };
 
-    deleteStudy = () => {
-        const params = { study_uuid: this.studyUuid, user_uuid: this.userUuid };
-        axios.get('study/delete', { params });
+    deleteStudy = studyUuid => {
+        if (!this.studyIsSaved || studyUuid) {
+            const params = {
+                study_uuid: studyUuid ? studyUuid : this.studyUuid,
+                user_uuid: this.userUuid
+            };
+
+            if (studyUuid) {
+                axios.get('study/delete', { params }).then(() => {
+                    this.getSavedStudies();
+                });
+            } else {
+                axios.get('study/delete', { params });
+            }
+        }
+    };
+
+    saveStudy = () => {
+        const params = {
+            study_uuid: this.studyUuid,
+            user_uuid: this.userUuid
+        };
+        axios.get('study/save', { params });
+        this.updateIsStudySaved(true);
+    };
+
+    getSavedStudies = async () => {
+        const params = { user_uuid: this.userUuid };
+
+        await axios.get('study/saved', { params }).then(response => {
+            this.studies = response.data;
+        });
     };
 
     setToastMessage = message => (this.toastInfo.message = message);

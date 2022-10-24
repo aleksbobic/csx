@@ -5,9 +5,10 @@ import {
     EditableInput,
     EditablePreview,
     Tag,
-    Tooltip
+    Tooltip,
+    Text
 } from '@chakra-ui/react';
-import { Heart } from 'css.gg';
+import { Check, Heart } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -75,8 +76,14 @@ function StudyInfo() {
                 </Editable>
             </Tooltip>
 
-            <Button width="100%" size="sm">
-                Save <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
+            <Button
+                width="100%"
+                size="sm"
+                disabled={store.core.studyIsSaved}
+                onClick={() => store.core.saveStudy()}
+            >
+                {store.core.studyIsSaved ? 'Saved' : 'Save'}
+                <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
             </Button>
         </Stack>
     );

@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import OverviewGraphPage from 'pages/graph/Graph.page';
 import HomePage from 'pages/home/Home.page';
 import SearchPage from 'pages/search/Search.page';
+
 import {
     BrowserRouter as Router,
     Route,
