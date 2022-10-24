@@ -44,11 +44,14 @@ function AdvancedSearch(props) {
             history.push(
                 `/graph?query=${JSON.stringify(
                     store.search.advancedSearchQuery
-                )}&dataset=${store.search.currentDataset}&suuid=${uuidv4()}`
+                )}&dataset=${
+                    store.search.currentDataset
+                }&suuid=${uuidv4()}&studyuid=${store.core.studyUuid}`
             );
         }
     }, [
         history,
+        store.core.studyUuid,
         store.search.advancedSearchQuery,
         store.search.currentDataset,
         store.workflow.shouldRunWorkflow

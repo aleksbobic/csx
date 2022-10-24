@@ -24,6 +24,11 @@ def insert_document(collection_name: str, value: Any) -> None:
     database[collection_name].insert_one(value)
 
 
+def delete_document(collection_name: str, conditions: object) -> None:
+    """Delete a single value from a collection"""
+    database[collection_name].delete_one(conditions)
+
+
 def insert_documents(collection_name: str, values: List[Any]) -> None:
     """Insert multiple values in a collection"""
     database[collection_name].insert_many(values)

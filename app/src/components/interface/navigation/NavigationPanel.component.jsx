@@ -6,6 +6,7 @@ import {
     Button,
     ButtonGroup,
     Divider,
+    Heading,
     HStack,
     IconButton,
     Image,
@@ -107,12 +108,16 @@ function NavigationPanelComponent() {
                                       'query'
                                   )}&dataset=${getQueryString(
                                       'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
+                                  )}&suuid=${getQueryString(
+                                      'suuid'
+                                  )}&studyuid=${store.core.studyUuid}`
                                 : `/graph/detail?query=${getQueryString(
                                       'query'
                                   )}&dataset=${getQueryString(
                                       'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
+                                  )}&suuid=${getQueryString(
+                                      'suuid'
+                                  )}&studyuid=${store.core.studyUuid}`
                         }
                         id="switchgraphviewbutton"
                         size="sm"
@@ -254,7 +259,9 @@ function NavigationPanelComponent() {
                         'query'
                     )}&dataset=${getQueryString(
                         'dataset'
-                    )}&suuid=${getQueryString('suuid')}`}
+                    )}&suuid=${getQueryString('suuid')}&studyuid=${
+                        store.core.studyUuid
+                    }`}
                     border="1px solid transparent"
                     opacity={location.pathname === '/search' ? '1' : '0.5'}
                 >
@@ -272,7 +279,9 @@ function NavigationPanelComponent() {
                         'query'
                     )}&dataset=${getQueryString(
                         'dataset'
-                    )}&suuid=${getQueryString('suuid')}`}
+                    )}&suuid=${getQueryString('suuid')}&studyuid=${
+                        store.core.studyUuid
+                    }`}
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }
@@ -368,13 +377,15 @@ function NavigationPanelComponent() {
 
                     {location.pathname !== '/' && renderWorkspaceSwitch()}
                     {location.pathname !== '/' && (
-                        <Box style={{ marginLeft: '125px' }}>
+                        <HStack
+                            height="40px"
+                            style={{ marginLeft: '125px' }}
+                            spacing="20px"
+                        >
                             <Divider
                                 opacity="0.4"
                                 orientation="vertical"
-                                height="80%"
-                                top="6px"
-                                position="absolute"
+                                height="100%"
                                 backgroundColor="gray.900"
                             />
                             <Breadcrumb
@@ -401,7 +412,9 @@ function NavigationPanelComponent() {
                                             'query'
                                         )}&dataset=${getQueryString(
                                             'dataset'
-                                        )}`}
+                                        )}&suuid=${getQueryString(
+                                            'suuid'
+                                        )}&studyuid=${store.core.studyUuid}`}
                                         fontSize="xs"
                                         fontWeight="regular"
                                     >
@@ -428,7 +441,7 @@ function NavigationPanelComponent() {
                                     </BreadcrumbItem>
                                 )}
                             </Breadcrumb>
-                        </Box>
+                        </HStack>
                     )}
                 </HStack>
                 {renderToggles()}

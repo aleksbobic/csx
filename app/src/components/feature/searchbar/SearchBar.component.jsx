@@ -31,6 +31,10 @@ function SearchBar(props) {
     };
 
     useEffect(() => {
+        store.core.generateStudyUUID();
+    });
+
+    useEffect(() => {
         setSelectedDataset(store.search.currentDatasetIndex);
     }, [store.search.currentDataset, store.search.currentDatasetIndex]);
 
@@ -56,7 +60,7 @@ function SearchBar(props) {
                     history.push(
                         `/graph?query=${values.search}&dataset=${
                             store.search.datasets[selectedDataset]
-                        }&suuid=${uuidv4()}`
+                        }&suuid=${uuidv4()}&studyuid=${store.core.studyUuid}`
                     );
                 }}
             >

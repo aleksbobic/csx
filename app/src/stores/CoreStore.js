@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import {
+    uniqueNamesGenerator,
+    adjectives,
+    animals
+} from 'unique-names-generator';
 
 export class CoreStore {
     availableDatasets = [];
@@ -10,6 +15,9 @@ export class CoreStore {
     errorDetails = null;
     currentGraph = '';
     userUuid = null;
+    studyUuid = null;
+    studyName = null;
+    studyDescription = '';
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -33,6 +41,28 @@ export class CoreStore {
             localStorage.setItem('useruuid', response.data);
             this.userUuid = response.data;
         });
+    };
+
+    generateStudyUUID = async () => {
+        this.studyName = uniqueNamesGenerator({
+            dictionaries: [adjectives, animals],
+            separator: ' ',
+            length: 2,
+            seed: this.studyUuid
+        });
+
+        const params = { user_uuid: this.userUuid, study_name: this.studyName };
+
+        await axios.get('study/generate', { params }).then(response => {
+            localStorage.setItem('studyuuid', response.data);
+            console.log(`study id changed to ${response.data}`);
+            this.studyUuid = response.data;
+        });
+    };
+
+    deleteStudy = () => {
+        const params = { study_uuid: this.studyUuid, user_uuid: this.userUuid };
+        axios.get('study/delete', { params });
     };
 
     setToastMessage = message => (this.toastInfo.message = message);

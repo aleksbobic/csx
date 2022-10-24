@@ -318,7 +318,12 @@ function HomePage() {
     };
 
     const renderStudyGrid = () => (
-        <VStack marginTop="40px">
+        <VStack
+            marginTop="40px"
+            padding="20px"
+            backgroundColor="blackAlpha.300"
+            borderRadius="12px"
+        >
             <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
                 Studies
             </Heading>
@@ -333,7 +338,12 @@ function HomePage() {
                 maxHeight="250px"
                 overflowY="scroll"
             >
-                {[].map((study, index) => (
+                {[
+                    { title: 'something', description: 'some descriptions' },
+                    { title: 'something', description: 'some descriptions' },
+                    { title: 'something', description: 'some descriptions' },
+                    { title: 'something', description: 'some descriptions' }
+                ].map((study, index) => (
                     <AspectRatio ratio={1} key={`study_${index}`}>
                         <Box padding="3px" role="group">
                             <Box
@@ -357,7 +367,9 @@ function HomePage() {
                                 outline="3px solid"
                                 outlineColor="whiteAlpha.100"
                                 transition="all ease-in-out 0.3s"
-                                _groupHover={{ outlineColor: 'transparent' }}
+                                _groupHover={{
+                                    outlineColor: 'transparent'
+                                }}
                             >
                                 <IconButton
                                     size="xs"
@@ -452,7 +464,7 @@ function HomePage() {
                     </>
                 )}
 
-                {false && renderStudyGrid()}
+                {true && renderStudyGrid()}
             </Container>
             {renderFooter()}
         </Box>

@@ -17,6 +17,7 @@ import { Close, Spinner } from 'css.gg';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -28,6 +29,10 @@ function GraphPage() {
     const { colorMode } = useColorMode();
     const toastRef = useRef();
     const history = useHistory();
+
+    useBeforeunload(() => {
+        store.core.deleteStudy();
+    });
 
     useEffect(() => {
         store.track.trackPageChange();

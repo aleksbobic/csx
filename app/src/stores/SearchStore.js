@@ -117,13 +117,19 @@ export class SearchStore {
     search = async (query, nodeTypes, schema, graphType, search_uuid) => {
         // Set search parameters
 
+        console.log(
+            'running new search with study id: ',
+            this.store.core.studyUuid
+        );
+
         const params = {
             search_uuid: search_uuid,
             query: query,
             anchor: this.anchor,
             graph_type: graphType,
             visible_entries: [],
-            user_id: this.store.core.userUuid
+            user_id: this.store.core.userUuid,
+            study_id: this.store.core.studyUuid
         };
 
         if (graphType === 'overview') {

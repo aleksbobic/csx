@@ -3,6 +3,7 @@ import {
     Button,
     Divider,
     Flex,
+    Heading,
     HStack,
     IconButton,
     Menu,
@@ -31,6 +32,7 @@ import {
     EditStraight,
     Eye,
     FormatSeparator,
+    Info,
     LayoutPin,
     LivePhoto,
     MediaLive,
@@ -44,6 +46,7 @@ import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import queryString from 'query-string';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
+import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -529,6 +532,40 @@ function ControlPanel() {
                             store.track.trackEvent(
                                 'controls panel',
                                 'button click',
+                                'show study info'
+                            );
+                        }}
+                        padding="8px"
+                        style={
+                            isOpen
+                                ? {}
+                                : {
+                                      color: tabInactiveColors,
+                                      borderColor: 'transparent'
+                                  }
+                        }
+                    >
+                        <Tooltip label="Study info">
+                            <Box
+                                id="viewsettingstab"
+                                width="100%"
+                                height="100%"
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Info />
+                            </Box>
+                        </Tooltip>
+                    </Tab>
+                    <Tab
+                        width="50px"
+                        height="50px"
+                        onClick={() => {
+                            openSliderIfClosed();
+                            store.track.trackEvent(
+                                'controls panel',
+                                'button click',
                                 'show view controls'
                             );
                         }}
@@ -578,6 +615,13 @@ function ControlPanel() {
                         borderColor={edgeColor}
                         position="relative"
                     >
+                        <TabPanel
+                            width="250px"
+                            overflowY="scroll"
+                            height="100%"
+                        >
+                            <StudyInfoComponent />
+                        </TabPanel>
                         <TabPanel
                             width="250px"
                             overflowY="scroll"

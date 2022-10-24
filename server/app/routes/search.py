@@ -75,6 +75,7 @@ def isNumber(testStr):
 class Data(BaseModel):
     query: str
     user_id: str
+    study_id: str
     search_uuid: str
     visible_dimensions: List
     graph_schema: List
