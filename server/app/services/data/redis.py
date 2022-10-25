@@ -1,6 +1,7 @@
 import pickle
 
 import app.services.graph.graph as csx_graph
+import app.services.data.mongo as csx_data
 import networkx as nx
 import pandas as pd
 
@@ -13,7 +14,7 @@ r = redis.Redis(host="redis", port=6379, db=0)
 
 def save_current_graph(
     uuid: str, cache_data: Dict, graph_type: Literal["overview", "detail"]
-) -> None:
+):
     cache_data[graph_type]["meta"] = {
         **cache_data[graph_type]["meta"],
         "nx_graph": nx.to_dict_of_dicts(
@@ -22,10 +23,12 @@ def save_current_graph(
     }
 
     r.set(uuid, pickle.dumps(cache_data))
+    return cache_data
 
 
-def save_new_instance_of_cache_data(uuid: str, cache_data: Dict) -> None:
+def save_new_instance_of_cache_data(uuid: str, cache_data: Dict):
     r.set(uuid, pickle.dumps(cache_data))
+    return cache_data
 
 
 def load_current_graph(uuid: str) -> Dict:
@@ -88,6 +91,7 @@ def generate_cache_data(
     results: pd.DataFrame,
     comparison_res: ComparisonResults,
     elastic_json: Dict,
+    study_id: str,
 ) -> Dict:
     """Generate cache data"""
 
@@ -109,6 +113,7 @@ def generate_cache_data(
         "detail": detail,
         "global": {
             "search_uuid": search_uuid,
+            "study_id": study_id,
             "index": index,
             "new_dimensions": dimensions["query_generated"],
             "query": query,

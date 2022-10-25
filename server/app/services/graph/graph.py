@@ -8,6 +8,7 @@ import app.services.graph.nodes as csx_nodes
 import app.services.data.redis as csx_redis
 import networkx as nx
 import pandas as pd
+import pickle
 from app.types import SchemaElement, Node
 from app.utils.timer import use_timing
 
@@ -307,6 +308,8 @@ def get_graph_from_scratch(
     schema,
     anchor_properties,
     comparison_res,
+    study_id,
+    action,
 ):
     graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
@@ -338,16 +341,36 @@ def get_graph_from_scratch(
         results,
         comparison_res,
         elastic_json,
+        study_id,
     )
 
-    csx_redis.save_current_graph(user_id, cache_data, graph_type)
+    cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
     from_graph_data(cache_data[graph_type])
+
+    history_entry = csx_data.insert_document(
+        "history", {"data": pickle.dumps(cache_snapshot)}
+    )
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_id, "user_uuid": user_id},
+        {
+            "$push": {
+                "history": {
+                    "item_id": history_entry.inserted_id,
+                    "action": action,
+                    "comment": "",
+                    "parent": "",
+                }
+            }
+        },
+    )
 
     return graph_data
 
 
 def get_graph_with_new_anchor_props(
-    comparison_res, graph_type, dimensions, elastic_json, user_id
+    comparison_res, graph_type, dimensions, elastic_json, user_id, study_id, action
 ):
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
@@ -363,7 +386,26 @@ def get_graph_with_new_anchor_props(
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
 
-    csx_redis.save_current_graph(user_id, cache_data, graph_type)
+    cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
+
+    history_entry = csx_data.insert_document(
+        "history", {"data": pickle.dumps(cache_snapshot)}
+    )
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_id, "user_uuid": user_id},
+        {
+            "$push": {
+                "history": {
+                    "item_id": history_entry.inserted_id,
+                    "action": action,
+                    "comment": "",
+                    "parent": "",
+                }
+            }
+        },
+    )
 
     return graph_data
 
@@ -379,6 +421,8 @@ def get_graph_from_existing_data(
     schema,
     anchor_properties,
     index,
+    study_id,
+    action,
 ):
     # Take global table data and generate grpah
 
@@ -408,10 +452,29 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
+    cache_snapshot = csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
+
+    history_entry = csx_data.insert_document(
+        "history", {"data": pickle.dumps(cache_snapshot)}
+    )
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_id, "user_uuid": user_id},
+        {
+            "$push": {
+                "history": {
+                    "item_id": history_entry.inserted_id,
+                    "action": action,
+                    "comment": "",
+                    "parent": "",
+                }
+            }
+        },
+    )
 
     return graph_data
 
 
-def get_graph_from_cache(comparison_res, graph_type):
+def get_graph_from_cache(comparison_res, graph_type, study_id, action):
     return comparison_res["data"][graph_type]

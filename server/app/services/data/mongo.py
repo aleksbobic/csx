@@ -21,7 +21,7 @@ def delete_collection(collection_name: str) -> None:
 
 def insert_document(collection_name: str, value: Any) -> None:
     """Insert a single value in a collection"""
-    database[collection_name].insert_one(value)
+    return database[collection_name].insert_one(value)
 
 
 def update_document(collection_name: str, conditions: object, new_values) -> None:

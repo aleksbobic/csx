@@ -11,3 +11,8 @@ def get_item(study_uuid: str, item_uuid: str, uuid: str):
 @router.get("/insert")
 def insert_item(study_uuid: str, item_uuid: str, uuid: str):
     return
+
+
+@router.get("/delete")
+def delete_item(study_uuid: str, item_uuid: str, uuid: str):
+    return

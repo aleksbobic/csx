@@ -15,6 +15,7 @@ import app.services.data.redis as csx_redis
 import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
 import app.services.data.autocomplete as csx_auto
+import app.services.data.mongo as csx_data
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -101,6 +102,7 @@ def search(data: Data) -> dict:
     graph_type = data.graph_type
     visible_entries = data.visible_entries
     anchor_properties = data.anchor_properties
+    study_id = data.study_id
 
     """Run search using given query."""
     cache_data = csx_redis.load_current_graph(user_id)
@@ -213,9 +215,17 @@ def search(data: Data) -> dict:
             schema,
             anchor_properties,
             comparison_res,
+            study_id,
+            comparison_res["action"],
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
-            comparison_res, graph_type, dimensions, elastic_json, user_id
+            comparison_res,
+            graph_type,
+            dimensions,
+            elastic_json,
+            user_id,
+            study_id,
+            comparison_res["action"],
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
@@ -228,9 +238,11 @@ def search(data: Data) -> dict:
             schema,
             anchor_properties,
             index,
+            study_id,
+            comparison_res["action"],
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
-            comparison_res, graph_type
+            comparison_res, graph_type, study_id, comparison_res["action"]
         ),
     }
 
