@@ -17,7 +17,11 @@ import { Check, ChevronRight, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
-import ReactFlow, { Background } from 'react-flow-renderer';
+import ReactFlow, {
+    Background,
+    applyEdgeChanges,
+    applyNodeChanges
+} from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
@@ -31,13 +35,54 @@ import SearchEdge from './searchedge/SearchEdge.component';
 import SearchNode from './searchnode/SearchNode.component';
 import DatasetNode from './datasetNode/Dataset.component';
 import { v4 as uuidv4 } from 'uuid';
+import { useMemo } from 'react';
+import { useCallback } from 'react';
 
 function AdvancedSearch(props) {
     const reactFlowWrapper = useRef(null);
     const store = useContext(RootStoreContext);
     const history = useHistory();
 
+    const onNodesChange = useCallback(
+        changes =>
+            store.workflow.updateNodes(
+                applyNodeChanges(changes, store.workflow.nodes)
+            ),
+        []
+    );
+    const onEdgesChange = useCallback(
+        changes =>
+            store.workflow.updateEdges(
+                applyEdgeChanges(changes, store.workflow.edges)
+            ),
+        []
+    );
+
     const [reactFlowInstance, setReactFlowInstance] = useState(null);
+
+    const nodeTypes = useMemo(
+        () => ({
+            datasetNode: DatasetNode,
+            searchNode: SearchNode,
+            filterNode: FilterNode,
+            keywordExtractionNode: KeywordExtractionNode,
+            connectorNode: ConnectorNode,
+            schemaNode: SchemaNode,
+            overviewSchemaNode: OverviewSchemaNode,
+            countsNode: CountsNode,
+            resultsNode: ResultsNode
+        }),
+        []
+    );
+
+    const edgeTypes = useMemo(
+        () => ({
+            schemaEdge: SchemaEdge,
+            overviewCustomEdge: OverviewCustomEdge,
+            searchEdge: SearchEdge
+        }),
+        []
+    );
 
     useEffect(() => {
         if (store.workflow.shouldRunWorkflow) {
@@ -200,26 +245,15 @@ function AdvancedSearch(props) {
         >
             <Box width="100%" height="100%" ref={reactFlowWrapper}>
                 <ReactFlow
-                    elements={store.workflow.actions}
-                    nodeTypes={{
-                        datasetNode: DatasetNode,
-                        searchNode: SearchNode,
-                        filterNode: FilterNode,
-                        keywordExtractionNode: KeywordExtractionNode,
-                        connectorNode: ConnectorNode,
-                        schemaNode: SchemaNode,
-                        overviewSchemaNode: OverviewSchemaNode,
-                        countsNode: CountsNode,
-                        resultsNode: ResultsNode
-                    }}
-                    edgeTypes={{
-                        schemaEdge: SchemaEdge,
-                        overviewCustomEdge: OverviewCustomEdge,
-                        searchEdge: SearchEdge
-                    }}
+                    nodes={store.workflow.nodes}
+                    edges={store.workflow.edges}
+                    nodeTypes={nodeTypes}
+                    edgeTypes={edgeTypes}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
                     onConnect={store.workflow.onConnect}
                     onDragOver={onDragOver}
-                    onLoad={onLoad}
+                    onInit={onLoad}
                     onDrop={onDrop}
                     nodesDraggable={true}
                     nodesConnectable={true}

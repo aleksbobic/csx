@@ -60,12 +60,17 @@ export class WorkflowStore {
     };
 
     actions = [];
+    nodes = [];
+    edges = [];
+
+    updateNodes = nodes => (this.nodes = nodes);
+    updateEdges = edges => (this.edges = edges);
 
     setNewWorkflowName = val => (this.newWorkflowName = val);
 
     saveNewWorkflow = () => {
         console.log(
-            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.actions.length} actions`
+            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.nodes.length} nodes and with ${this.edges.length}`
         );
 
         if (!this.workflows[this.store.search.currentDataset]) {
@@ -73,7 +78,7 @@ export class WorkflowStore {
         }
 
         this.workflows[this.store.search.currentDataset][this.newWorkflowName] =
-            this.actions;
+            { edges: this.edges, nodes: this.nodes };
 
         localStorage.setItem('workflows', JSON.stringify(this.workflows));
         this.newWorkflowName = '';
@@ -86,10 +91,13 @@ export class WorkflowStore {
     };
 
     loadWorkflow = name => {
-        const loadedActions =
-            this.workflows[this.store.search.currentDataset][name];
+        const loadedEdges =
+            this.workflows[this.store.search.currentDataset][name]['edges'];
 
-        const resultsNodes = loadedActions
+        const loadedNodes =
+            this.workflows[this.store.search.currentDataset][name]['nodes'];
+
+        const resultsNodes = loadedNodes
             .filter(node => node.type === 'resultsNode')
             .map(node => {
                 node.data.runWorkflow = this.runWorkFlow;
@@ -97,14 +105,14 @@ export class WorkflowStore {
                 return node;
             });
 
-        const edges = loadedActions
+        this.edges = loadedEdges
             .filter(entry => entry.type === 'searchEdge')
             .map(edge => {
                 edge.data.removeEdge = this.removeEdge;
                 return edge;
             });
 
-        const searchNodes = loadedActions
+        const searchNodes = loadedNodes
             .filter(node => node.type === 'searchNode')
             .map(node => {
                 node.data.deleteNode = this.deleteNode;
@@ -112,7 +120,7 @@ export class WorkflowStore {
                 return node;
             });
 
-        const otherNodes = loadedActions
+        const otherNodes = loadedNodes
             .filter(
                 node =>
                     !['resultsNode', 'searchNode', 'searchEdge'].includes(
@@ -124,14 +132,9 @@ export class WorkflowStore {
                 return node;
             });
 
-        this.actions = [
-            ...otherNodes,
-            ...resultsNodes,
-            ...searchNodes,
-            ...edges
-        ];
+        this.nodes = [...otherNodes, ...resultsNodes, ...searchNodes];
 
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.type === 'searchNode') {
                 node.data.updateActions = this.updateActions;
                 node.data.getSuggestions = this.store.search.suggest;
@@ -156,7 +159,8 @@ export class WorkflowStore {
     }
 
     resetWorkflow = () => {
-        this.actions = [];
+        this.edges = [];
+        this.nodes = [];
     };
 
     getNodeTypesOfType = nodeTypes => {
@@ -168,19 +172,20 @@ export class WorkflowStore {
     };
 
     deleteNode = nodeID => {
-        this.actions = [
-            ...this.actions.filter(
+        this.nodes = [...this.nodes.filter(node => node.id !== nodeID)];
+
+        this.edges = [
+            ...this.edges.filter(
                 node =>
-                    (node.type !== 'searchEdge' && node.id !== nodeID) ||
-                    (node.type === 'searchEdge' &&
-                        node.source !== nodeID &&
-                        node.target !== nodeID)
+                    node.type === 'searchEdge' &&
+                    node.source !== nodeID &&
+                    node.target !== nodeID
             )
         ];
     };
 
     updateFilterNodeValues = (nodeID, feature) => {
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
                 node = {
                     ...node,
@@ -209,7 +214,7 @@ export class WorkflowStore {
     };
 
     updateFilterNodeData = (nodeID, dataKey, dataValue) => {
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
                 node.data = {
                     ...node.data
@@ -222,7 +227,7 @@ export class WorkflowStore {
     };
 
     updateSearchNodeData = (nodeID, dataValue) => {
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
                 node.data = {
                     ...node.data
@@ -234,7 +239,8 @@ export class WorkflowStore {
     };
 
     updateActions = () => {
-        this.actions = [...this.actions];
+        this.nodes = [...this.nodes];
+        this.edges = [...this.edges];
     };
 
     getDefaultValue = feature => {
@@ -321,8 +327,8 @@ export class WorkflowStore {
                 padding: '3px'
             }
         };
-        this.actions.push(newNode);
-        this.actions = [...this.actions];
+        this.nodes.push(newNode);
+        this.nodes = [...this.nodes];
     };
 
     onConnect = connection => {
@@ -336,52 +342,51 @@ export class WorkflowStore {
             }
         };
 
-        this.actions
+        this.nodes
             .find(node => node.id === connection.target)
             .data.parents.push(connection.source);
 
-        this.actions
+        this.nodes
             .find(node => node.id === connection.source)
             .data.children.push(connection.target);
 
-        this.actions = [...this.actions, newConnection];
+        this.edges = [...this.edges, newConnection];
     };
 
     removeEdge = id => {
-        const connection = this.actions.find(element => element.id === id);
+        const connection = this.edges.find(element => element.id === id);
 
-        const source = this.actions.find(
+        const source = this.nodes.find(
             element => element.id === connection.source
         );
-        const target = this.actions.find(
+        const target = this.nodes.find(
             element => element.id === connection.target
         );
 
         // Remove child from source
-        this.actions.find(node => node.id === source.id).data.children =
-            this.actions
+        this.nodes.find(node => node.id === source.id).data.children =
+            this.nodes
                 .find(node => node.id === source.id)
                 .data.children.filter(id => id !== target.id);
 
         // Remove parent from target
-        this.actions.find(node => node.id === target.id).data.parents =
-            this.actions
-                .find(node => node.id === target.id)
-                .data.parents.filter(id => id !== source.id);
+        this.nodes.find(node => node.id === target.id).data.parents = this.nodes
+            .find(node => node.id === target.id)
+            .data.parents.filter(id => id !== source.id);
 
-        this.actions = this.actions.filter(element => element.id !== id);
+        this.edges = this.edges.filter(element => element.id !== id);
     };
 
     runWorkFlow = resultsNodeId => {
-        this.actions = [...this.actions];
-        const generatedQuery = this.getQuery(resultsNodeId, this.actions);
+        this.nodes = [...this.nodes];
+        const generatedQuery = this.getQuery(resultsNodeId, this.nodes);
 
         this.store.search.setAdvancedSearchQuery(generatedQuery);
         this.shouldRunWorkflow = true;
     };
 
-    getQuery = (id, actions) => {
-        const node = actions.find(element => element.id === id);
+    getQuery = (id, nodes) => {
+        const node = nodes.find(element => element.id === id);
 
         if (node.data.parents.length === 0) {
             switch (node.type) {
@@ -411,7 +416,7 @@ export class WorkflowStore {
                 action: 'connect',
                 connector: node.data.connector,
                 queries: node.data.parents.map(parent =>
-                    this.getQuery(parent, actions)
+                    this.getQuery(parent, nodes)
                 )
             };
         }
@@ -419,7 +424,7 @@ export class WorkflowStore {
         if (node.type === 'resultsNode') {
             return {
                 action: 'visualise',
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 
@@ -428,7 +433,7 @@ export class WorkflowStore {
                 action: 'count array',
                 feature: node.data.feature,
                 newFeatureName: node.data.newFeatureName,
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 
@@ -437,7 +442,7 @@ export class WorkflowStore {
                 action: 'extract keywords',
                 feature: node.data.feature,
                 newFeatureName: node.data.newFeatureName,
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 
