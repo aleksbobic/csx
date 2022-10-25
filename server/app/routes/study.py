@@ -80,6 +80,19 @@ def save_study(study_uuid: str, user_uuid: str):
 
 @router.get("/delete")
 def delete_study(study_uuid: str, user_uuid: str):
+
+    study_entry = list(
+        csx_data.get_all_documents_by_conditions(
+            "studies",
+            {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
+            {"_id": 0},
+        )
+    )
+
+    history_ids = [item["item_id"] for item in study_entry[0]["history"]]
+
+    csx_data.delete_documents("history", {"_id": {"$in": history_ids}})
+
     csx_data.delete_document(
         "studies", {"study_uuid": study_uuid, "user_uuid": user_uuid}
     )
