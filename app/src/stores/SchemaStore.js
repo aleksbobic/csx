@@ -6,6 +6,12 @@ export class SchemaStore {
     edgeRelationshipTypes = ['1:1', '1:M', 'M:N', 'M:1'];
     data = [];
     overviewData = [];
+
+    nodes = [];
+    edges = [];
+    overviewNodes = [];
+    overviewEdges = [];
+
     overviewDataNodeProperties = [];
     overviewHasLink = true;
 
@@ -24,6 +30,11 @@ export class SchemaStore {
 
     nameToId = {};
 
+    updateNodes = nodes => (this.nodes = nodes);
+    updateEdges = edges => (this.edges = edges);
+    updateOverviewNodes = nodes => (this.overviewNodes = nodes);
+    updateOverviewEdges = edges => (this.overviewEdges = edges);
+
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
@@ -32,7 +43,7 @@ export class SchemaStore {
     resetOverviewNodeProperties = () => (this.overviewDataNodeProperties = []);
 
     toggleRelationship = (id, possibleRelationships) => {
-        this.data = this.data.map(entry => {
+        this.edges = this.edges.map(entry => {
             if (entry['id'] === id) {
                 const currentRelIndex = possibleRelationships.indexOf(
                     entry['data']['relationship']
@@ -55,13 +66,13 @@ export class SchemaStore {
     getServerSchema = () => {
         const serverSchema = [];
 
-        this.data.forEach(entry => {
+        this.edges.forEach(entry => {
             if ('source' in entry && 'target' in entry) {
-                const source = this.data.find(
+                const source = this.nodes.find(
                     node => node['id'] === entry['source']
                 )['data']['label'];
 
-                const target = this.data.find(
+                const target = this.nodes.find(
                     node => node['id'] === entry['target']
                 )['data']['label'];
 
@@ -321,7 +332,21 @@ export class SchemaStore {
 
         this.data = this.generateNodePositions(schema);
 
-        this.overviewData = [...overviewSchema, ...overviewSchemaLinks];
+        const nodes = [];
+        const edges = [];
+        this.data.forEach(entry => {
+            if (Object.keys(entry).includes('source')) {
+                edges.push(entry);
+            } else {
+                nodes.push(entry);
+            }
+        });
+
+        this.edges = edges;
+        this.nodes = nodes;
+
+        this.overviewNodes = [...overviewSchema];
+        this.overviewEdges = [...overviewSchemaLinks];
     };
 
     //TODO: implement a way to update schema when new values show up
@@ -329,7 +354,7 @@ export class SchemaStore {
     addLinkNode = () => {
         const newNodeId = uuidv4();
 
-        this.overviewData.push({
+        this.overviewNodes.push({
             id: newNodeId,
             position: { x: 250, y: 200 },
             type: 'overviewSchemaNode',
@@ -363,7 +388,7 @@ export class SchemaStore {
             }
         });
 
-        this.overviewData.push({
+        this.overviewEdges.push({
             id: `${-1}${newNodeId}`,
             source: `${-1}`,
             target: `${newNodeId}`,
@@ -371,7 +396,7 @@ export class SchemaStore {
             data: {},
             type: 'overviewCustomEdge'
         });
-        this.overviewData.push({
+        this.overviewEdges.push({
             id: `${newNodeId}${-2}`,
             source: `${newNodeId}`,
             target: `${-2}`,
@@ -380,17 +405,17 @@ export class SchemaStore {
             type: 'overviewCustomEdge'
         });
 
-        // this.overviewData = this.generateNodePositions(this.overviewData);
-        this.overviewData = [...this.overviewData];
+        this.overviewNodes = [...this.overviewNodes];
+        this.overviewEdges = [...this.overviewEdges];
     };
 
     removeLinkNode = id => {
-        this.overviewData = this.overviewData.filter(entry => {
-            return (
-                entry.id !== id &&
-                entry.id !== `${-1}${id}` &&
-                entry.id !== `${id}${-2}`
-            );
+        this.overviewNodes = this.overviewNodes.filter(entry => {
+            return entry.id !== id;
+        });
+
+        this.overviewEdges = this.overviewEdges.filter(entry => {
+            return entry.id !== `${-1}${id}` && entry.id !== `${id}${-2}`;
         });
     };
 
@@ -401,7 +426,7 @@ export class SchemaStore {
             this.resetProperties();
         }
 
-        this.overviewData = this.overviewData.map(entry => {
+        this.overviewNodes = this.overviewNodes.map(entry => {
             if ('isAnchor' in entry.data && entry.data.isAnchor) {
                 entry.data.label = anchor;
                 entry.data.properties = this.getOverviewNodeProperties();
@@ -426,19 +451,19 @@ export class SchemaStore {
                 };
             }
 
-            if (entry.data.isAnchor || entry.data.isLink) {
-                entry.data.anchor = this.store.search.anchor;
-                return entry;
-            } else {
-                return {
-                    id: `${entry.id}`,
-                    source: `${entry.source}`,
-                    target: `${entry.target}`,
-                    arrowHeadType: 'none',
-                    data: {},
-                    type: 'overviewCustomEdge'
-                };
-            }
+            entry.data.anchor = this.store.search.anchor;
+            return entry;
+        });
+
+        this.overviewEdges = this.overviewEdges.map(entry => {
+            return {
+                id: `${entry.id}`,
+                source: `${entry.source}`,
+                target: `${entry.target}`,
+                arrowHeadType: 'none',
+                data: {},
+                type: 'overviewCustomEdge'
+            };
         });
     };
 
@@ -470,18 +495,12 @@ export class SchemaStore {
                 return entry;
             });
 
-            const overviewLinkNodeId = this.overviewData.find(
+            const overviewLinkNodeId = this.overviewNodes.find(
                 entry => entry.data.label === link
             ).id;
 
-            this.overviewData = this.overviewData
-                .filter(entry => {
-                    return (
-                        entry.id !== overviewLinkNodeId &&
-                        entry.id !== `${-1}${overviewLinkNodeId}` &&
-                        entry.id !== `${overviewLinkNodeId}${-2}`
-                    );
-                })
+            this.overviewNodes = this.overviewNodes
+                .filter(entry => entry.id !== overviewLinkNodeId)
                 .map(entry => {
                     if (
                         (entry.data.isLink && !entry.data.label) ||
@@ -495,18 +514,36 @@ export class SchemaStore {
                         );
                     }
 
-                    if (entry.data.isAnchor || entry.data.isLink) {
-                        return entry;
-                    } else {
-                        return {
-                            id: `${entry.id}`,
-                            source: `${entry.source}`,
-                            target: `${entry.target}`,
-                            arrowHeadType: 'none',
-                            data: {},
-                            type: 'overviewCustomEdge'
-                        };
+                    return entry;
+                });
+
+            this.overviewEdges = this.overviewEdges
+                .filter(
+                    entry =>
+                        entry.id !== `${-1}${overviewLinkNodeId}` &&
+                        entry.id !== `${overviewLinkNodeId}${-2}`
+                )
+                .map(entry => {
+                    if (
+                        (entry.data.isLink && !entry.data.label) ||
+                        entry.data.isAnchor
+                    ) {
+                        entry.data.features = Object.keys(
+                            this.store.search.nodeTypes
+                        ).filter(
+                            feature =>
+                                !this.store.search.links.includes(feature)
+                        );
                     }
+
+                    return {
+                        id: `${entry.id}`,
+                        source: `${entry.source}`,
+                        target: `${entry.target}`,
+                        arrowHeadType: 'none',
+                        data: {},
+                        type: 'overviewCustomEdge'
+                    };
                 });
         } else {
             this.store.search.links.push(link);
@@ -534,14 +571,14 @@ export class SchemaStore {
 
             if (
                 !nodeId &&
-                !this.overviewData.find(
+                !this.overviewNodes.find(
                     node => node.data.isLink && !node.data.label
                 )
             ) {
                 this.addLinkNode();
             }
 
-            this.overviewData = this.overviewData.map(entry => {
+            this.overviewNodes = this.overviewNodes.map(entry => {
                 if (nodeId) {
                     if (
                         'isLink' in entry.data &&
@@ -600,18 +637,18 @@ export class SchemaStore {
                     );
                 }
 
-                if (entry.data.isAnchor || entry.data.isLink) {
-                    return entry;
-                } else {
-                    return {
-                        id: `${entry.id}`,
-                        source: `${entry.source}`,
-                        target: `${entry.target}`,
-                        arrowHeadType: 'none',
-                        data: {},
-                        type: 'overviewCustomEdge'
-                    };
-                }
+                return entry;
+            });
+
+            this.overviewEdges = this.overviewEdges.map(entry => {
+                return {
+                    id: `${entry.id}`,
+                    source: `${entry.source}`,
+                    target: `${entry.target}`,
+                    arrowHeadType: 'none',
+                    data: {},
+                    type: 'overviewCustomEdge'
+                };
             });
         }
     };
@@ -654,8 +691,8 @@ export class SchemaStore {
             this.getNodeNameFromId(edge['target'])
         );
 
-        this.data = [
-            ...this.data,
+        this.edges = [
+            ...this.edges,
             {
                 id: `${edge['source']}${edge['target']}`,
                 source: edge['source'],
@@ -675,7 +712,7 @@ export class SchemaStore {
     };
 
     updateSchemaConnection = (oldEdge, newEdge) => {
-        this.data = this.data.map(entry => {
+        this.edges = this.edges.map(entry => {
             if (entry['id'] === oldEdge['id']) {
                 entry['id'] = `${newEdge['source']}${newEdge['target']}`;
                 entry['source'] = newEdge['source'];
@@ -689,24 +726,27 @@ export class SchemaStore {
     };
 
     removeSchemaConnection = id => {
-        this.data = this.data.filter(entry => entry['id'] !== id);
+        this.edges = this.edges.filter(entry => entry['id'] !== id);
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
     };
 
     resetProperties = () => {
         this.overviewDataNodeProperties = [];
-        this.overviewData = [...this.overviewData];
+        this.overviewNodes = [...this.overviewNodes];
+        this.overviewEdges = [...this.overviewEdges];
     };
 
     addProperty = property => {
         this.overviewDataNodeProperties.push(property);
-        this.overviewData = [...this.overviewData];
+        this.overviewNodes = [...this.overviewNodes];
+        this.overviewEdges = [...this.overviewEdges];
     };
 
     removeProperty = property => {
         const propIndex = this.overviewDataNodeProperties.indexOf(property);
         this.overviewDataNodeProperties.splice(propIndex, 1);
-        this.overviewData = [...this.overviewData];
+        this.overviewNodes = [...this.overviewNodes];
+        this.overviewEdges = [...this.overviewEdges];
     };
 }

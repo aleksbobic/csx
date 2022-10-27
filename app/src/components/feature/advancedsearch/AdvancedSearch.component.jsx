@@ -16,27 +16,32 @@ import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
 import { Check, ChevronRight, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useRef, useState } from 'react';
+import {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from 'react';
 import ReactFlow, {
-    Background,
     applyEdgeChanges,
-    applyNodeChanges
+    applyNodeChanges,
+    Background
 } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { v4 as uuidv4 } from 'uuid';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../schemanode/SchemaNode.component';
 import ConnectorNode from './connectornode/ConnectorNode.component';
 import CountsNode from './countsNode/Counts.component';
+import DatasetNode from './datasetNode/Dataset.component';
 import FilterNode from './filternode/FilterNode.component';
 import KeywordExtractionNode from './keywordextractionnode/KeywordExtractionNode.component';
 import ResultsNode from './resultsNode/ResultsNode.component';
 import SearchEdge from './searchedge/SearchEdge.component';
 import SearchNode from './searchnode/SearchNode.component';
-import DatasetNode from './datasetNode/Dataset.component';
-import { v4 as uuidv4 } from 'uuid';
-import { useMemo } from 'react';
-import { useCallback } from 'react';
 
 function AdvancedSearch(props) {
     const reactFlowWrapper = useRef(null);
@@ -48,14 +53,14 @@ function AdvancedSearch(props) {
             store.workflow.updateNodes(
                 applyNodeChanges(changes, store.workflow.nodes)
             ),
-        []
+        [store.workflow]
     );
     const onEdgesChange = useCallback(
         changes =>
             store.workflow.updateEdges(
                 applyEdgeChanges(changes, store.workflow.edges)
             ),
-        []
+        [store.workflow]
     );
 
     const [reactFlowInstance, setReactFlowInstance] = useState(null);

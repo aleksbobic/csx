@@ -23,7 +23,11 @@ import GraphDetailsComponent from 'components/feature/graphDetails/graphDetails.
 import Overview from 'components/feature/overview/Overview.component';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
-import ReactFlow, { Background } from 'react-flow-renderer';
+import ReactFlow, {
+    applyEdgeChanges,
+    applyNodeChanges,
+    Background
+} from 'react-flow-renderer';
 import { RootStoreContext } from 'stores/RootStore';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
@@ -48,6 +52,8 @@ import {
 } from 'css.gg';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useMemo } from 'react';
+import { useCallback } from 'react';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -59,21 +65,78 @@ function DataPanel() {
     const [visibleProperties, setVisibleProperties] = useState([]);
     const [csvData, setCsvData] = useState([]);
     const [csvHeaders, setCsvHeaders] = useState([]);
-    const [schemaData, setSchemaData] = useState(
-        store.core.isOverview ? store.schema.overviewData : store.schema.data
+    const [schemaNodes, setSchemaNodes] = useState(
+        store.core.isOverview ? store.schema.overviewNodes : store.schema.nodes
+    );
+    const [schemaEdges, setSchemaEdges] = useState(
+        store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
+    );
+
+    const onNodesChange = useCallback(
+        changes =>
+            store.core.isOverview
+                ? store.schema.updateOverviewNodes(
+                      applyNodeChanges(changes, store.schema.overviewNodes)
+                  )
+                : store.schema.updateNodes(
+                      applyNodeChanges(changes, store.schema.nodes)
+                  ),
+        [store.core.isOverview, store.schema]
+    );
+    const onEdgesChange = useCallback(
+        changes =>
+            store.core.isOverview
+                ? store.schema.updateOverviewEdges(
+                      applyEdgeChanges(changes, store.schema.overviewEdges)
+                  )
+                : store.schema.updateEdges(
+                      applyEdgeChanges(changes, store.schema.edges)
+                  ),
+        [store.core.isOverview, store.schema]
+    );
+
+    const nodeTypes = useMemo(
+        () => ({
+            datasetNode: DatasetNode,
+            schemaNode: SchemaNode,
+            overviewSchemaNode: OverviewSchemaNode,
+            searchNode: SearchNode,
+            connectorNode: ConnectorNode,
+            filterNode: FilterNode,
+            keywordExtractionNode: KeywordExtractionNode,
+            countsNode: CountsNode,
+            resultsNode: ResultsNode
+        }),
+        []
+    );
+
+    const edgeTypes = useMemo(
+        () => ({
+            schemaEdge: SchemaEdge,
+            overviewCustomEdge: OverviewCustomEdge,
+            searchEdge: SearchEdge
+        }),
+        []
     );
 
     useEffect(() => {
-        setSchemaData(
+        setSchemaNodes(
             store.core.isOverview
-                ? store.schema.overviewData
-                : store.schema.data
+                ? store.schema.overviewNodes
+                : store.schema.nodes
+        );
+        setSchemaEdges(
+            store.core.isOverview
+                ? store.schema.overviewEdges
+                : store.schema.edges
         );
     }, [
         store.core.currentGraph,
         store.core.isOverview,
-        store.schema.data,
-        store.schema.overviewData
+        store.schema.edges,
+        store.schema.nodes,
+        store.schema.overviewEdges,
+        store.schema.overviewNodes
     ]);
 
     const connectNodes = connection => {
@@ -151,28 +214,17 @@ function DataPanel() {
                             height: `${height}px`,
                             width: `${width}px`
                         }}
-                        elements={schemaData}
+                        nodes={schemaNodes}
+                        edges={schemaEdges}
                         nodesDraggable={true}
                         nodesConnectable={true}
                         snapToGrid={true}
                         onConnect={connectNodes}
                         onEdgeUpdate={updateEdge}
-                        nodeTypes={{
-                            datasetNode: DatasetNode,
-                            schemaNode: SchemaNode,
-                            overviewSchemaNode: OverviewSchemaNode,
-                            searchNode: SearchNode,
-                            connectorNode: ConnectorNode,
-                            filterNode: FilterNode,
-                            keywordExtractionNode: KeywordExtractionNode,
-                            countsNode: CountsNode,
-                            resultsNode: ResultsNode
-                        }}
-                        edgeTypes={{
-                            schemaEdge: SchemaEdge,
-                            overviewCustomEdge: OverviewCustomEdge,
-                            searchEdge: SearchEdge
-                        }}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
                     >
                         <Background
                             gap={12}
