@@ -19,7 +19,6 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import GraphDetailsComponent from 'components/feature/graphDetails/graphDetails.component';
 import Overview from 'components/feature/overview/Overview.component';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
@@ -50,10 +49,9 @@ import {
     SoftwareDownload,
     ViewComfortable
 } from 'css.gg';
+import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { useMemo } from 'react';
-import { useCallback } from 'react';
 
 function DataPanel() {
     const store = useContext(RootStoreContext);
@@ -248,7 +246,6 @@ function DataPanel() {
                 paddingTop="0"
             >
                 <TabPanel padding="10px" paddingTop="60px" height="100%">
-                    <GraphDetailsComponent />
                     <Overview />
                 </TabPanel>
                 <TabPanel

@@ -437,6 +437,29 @@ export class GraphStore {
         );
     };
 
+    getStudy = async studyId => {
+        const userId = this.store.core.userUuid;
+
+        const params = {
+            study_uuid: studyId,
+            user_uuid: userId
+        };
+
+        try {
+            const response = await axios.post('study', params);
+
+            this.store.core.deleteStudy();
+            this.store.core.updateIsStudySaved(true);
+            this.store.core.setStudyUuid(studyId);
+            this.store.core.setStudyName(response.data.name);
+            this.store.core.setStudyDescription(response.data.description);
+
+            this.handleRetrievedGraph(response.data.graph, 'overview', '');
+        } catch (error) {
+            return this.store.core.handleError(error);
+        }
+    };
+
     getSearchGraph = (query, graphType, suuid) => {
         let visibleDimensions = this.store.core.visibleDimensions[graphType];
 

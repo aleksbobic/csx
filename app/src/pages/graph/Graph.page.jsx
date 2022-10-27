@@ -43,12 +43,15 @@ function GraphPage() {
                 : 'overview'
         );
 
+        const studyId = queryString.parse(location.search).study;
         const query = queryString.parse(location.search).query;
         const suuid = queryString.parse(location.search).suuid;
 
         store.graphInstance.toggleVisibleComponents(-1);
 
-        if (query) {
+        if (studyId) {
+            store.graph.getStudy(studyId);
+        } else if (query) {
             if (location.pathname.startsWith('/graph/detail')) {
                 store.graph.getSearchGraph(query, 'detail', suuid);
             } else {

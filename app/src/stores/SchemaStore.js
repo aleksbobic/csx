@@ -733,20 +733,26 @@ export class SchemaStore {
 
     resetProperties = () => {
         this.overviewDataNodeProperties = [];
-        this.overviewNodes = [...this.overviewNodes];
-        this.overviewEdges = [...this.overviewEdges];
+        this.overviewNodes = this.overviewNodes.map(node => {
+            node.data = { ...node.data };
+            return node;
+        });
     };
 
     addProperty = property => {
         this.overviewDataNodeProperties.push(property);
-        this.overviewNodes = [...this.overviewNodes];
-        this.overviewEdges = [...this.overviewEdges];
+        this.overviewNodes = this.overviewNodes.map(node => {
+            node.data = { ...node.data };
+            return node;
+        });
     };
 
     removeProperty = property => {
         const propIndex = this.overviewDataNodeProperties.indexOf(property);
         this.overviewDataNodeProperties.splice(propIndex, 1);
-        this.overviewNodes = [...this.overviewNodes];
-        this.overviewEdges = [...this.overviewEdges];
+        this.overviewNodes = this.overviewNodes.map(node => {
+            node.data = { ...node.data };
+            return node;
+        });
     };
 }

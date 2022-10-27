@@ -12,7 +12,7 @@ export class CoreStore {
     currentGraph = '';
     userUuid = null;
     studyUuid = null;
-    studyName = null;
+    studyName = '';
     studyDescription = '';
     studyIsSaved = false;
     studies = [];
@@ -38,6 +38,13 @@ export class CoreStore {
     updateIsStudySaved = val => (this.studyIsSaved = val);
 
     updateStudies = val => (this.studies = val);
+
+    setStudyName = name => (this.studyName = name);
+    setStudyDescription = description => (this.studyDescription = description);
+    setStudyUuid = id => {
+        this.studyUuid = id;
+        localStorage.setItem('studyuuid', id);
+    };
 
     updateStudyName = async name => {
         this.studyName = name;
@@ -94,7 +101,6 @@ export class CoreStore {
 
         await axios.get('study/generate', { params }).then(response => {
             localStorage.setItem('studyuuid', response.data);
-            console.log(`study id changed to ${response.data}`);
             this.studyUuid = response.data;
         });
     };

@@ -86,11 +86,18 @@ function HomePage() {
         accept: '.csv'
     });
 
+    const openStudy = studyUuid => {
+        console.log(studyUuid);
+
+        history.push(`/graph?study=${studyUuid}`);
+    };
+
     const renderFileUpload = () => (
         <div
             {...getRootProps()}
             style={{
                 border: '1px dashed rgba(100,100,100,0.5)',
+                width: '100%',
                 borderRadius: '7px',
                 height: '150px',
                 marginTop: '0',
@@ -314,6 +321,7 @@ function HomePage() {
                     <Box
                         backgroundColor="blackAlpha.300"
                         padding="20px"
+                        width="100%"
                         style={{ marginTop: '0px' }}
                         borderBottomRadius="12px"
                     >
@@ -431,6 +439,10 @@ function HomePage() {
                                         width="100%"
                                         size="xs"
                                         flexShrink="0"
+                                        _hover={{ backgroundColor: '#925eb5' }}
+                                        onClick={() =>
+                                            openStudy(study.study_uuid)
+                                        }
                                     >
                                         Open
                                     </Button>

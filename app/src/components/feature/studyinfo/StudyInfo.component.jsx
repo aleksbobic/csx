@@ -6,7 +6,8 @@ import {
     EditablePreview,
     Tag,
     Tooltip,
-    Text
+    Text,
+    EditableTextarea
 } from '@chakra-ui/react';
 import { Check, Heart } from 'css.gg';
 import { observer } from 'mobx-react';
@@ -30,8 +31,9 @@ function StudyInfo() {
 
             <Tooltip label={store.core.studyName}>
                 <Editable
-                    defaultValue={store.core.studyName}
+                    value={store.core.studyName}
                     onSubmit={val => store.core.updateStudyName(val)}
+                    onChange={val => store.core.setStudyName(val)}
                     width="100%"
                 >
                     <EditablePreview
@@ -66,13 +68,18 @@ function StudyInfo() {
                 }
             >
                 <Editable
-                    defaultValue={store.core.studyDescription}
+                    value={store.core.studyDescription}
                     onSubmit={val => store.core.updateStudyDescription(val)}
+                    onChange={val => store.core.setStudyDescription(val)}
                     width="100%"
                     placeholder="Click here to add a study description. 👀"
                 >
                     <EditablePreview size="xs" width="100%" paddingLeft="8px" />
-                    <EditableInput size="xs" width="100%" paddingLeft="8px" />
+                    <EditableTextarea
+                        size="xs"
+                        width="100%"
+                        paddingLeft="8px"
+                    />
                 </Editable>
             </Tooltip>
 
