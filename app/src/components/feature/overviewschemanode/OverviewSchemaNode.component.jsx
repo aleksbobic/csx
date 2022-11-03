@@ -131,39 +131,50 @@ const overviewSchemaNode = ({ id, data }) => {
         return (
             <VStack height="auto" width="100%" spacing="5px" padding="5px">
                 {data.addedProperties.map((property, i) => (
-                    <Flex
-                        width="100%"
-                        key={`${i}_property_${property}`}
-                        height="24px"
-                        backgroundColor="blackAlpha.600"
-                        borderRadius="6px"
-                        alignItems="center"
-                        paddingLeft="10px"
-                        paddingRight={data.position === 'left' ? '0' : '10px'}
-                        justifyContent="space-between"
-                    >
-                        <Text fontSize="xs" fontWeight="bold">
-                            {property}
-                        </Text>
-                        {data.position === 'left' && (
-                            <Tooltip label="Remove anchor property">
-                                <IconButton
-                                    onClick={() =>
-                                        data.removeProperty(property)
-                                    }
-                                    size="xs"
-                                    variant="ghost"
-                                    icon={
-                                        <Close
-                                            style={{
-                                                '--ggs': '0.7'
-                                            }}
-                                        />
-                                    }
-                                />
-                            </Tooltip>
-                        )}
-                    </Flex>
+                    <Tooltip label={property}>
+                        <Flex
+                            width="100%"
+                            key={`${i}_property_${property}`}
+                            height="24px"
+                            backgroundColor="blackAlpha.600"
+                            borderRadius="6px"
+                            alignItems="center"
+                            paddingLeft="10px"
+                            paddingRight={
+                                data.position === 'left' ? '0' : '10px'
+                            }
+                            justifyContent="space-between"
+                        >
+                            <Text
+                                fontSize="xs"
+                                fontWeight="bold"
+                                width="150px"
+                                overflow="hidden"
+                                whiteSpace="nowrap"
+                                textOverflow="ellipsis"
+                            >
+                                {property}
+                            </Text>
+                            {data.position === 'left' && (
+                                <Tooltip label="Remove anchor property">
+                                    <IconButton
+                                        onClick={() =>
+                                            data.removeProperty(property)
+                                        }
+                                        size="xs"
+                                        variant="ghost"
+                                        icon={
+                                            <Close
+                                                style={{
+                                                    '--ggs': '0.7'
+                                                }}
+                                            />
+                                        }
+                                    />
+                                </Tooltip>
+                            )}
+                        </Flex>
+                    </Tooltip>
                 ))}
 
                 {data.position === 'left' &&

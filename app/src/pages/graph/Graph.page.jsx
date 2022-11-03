@@ -37,25 +37,23 @@ function GraphPage() {
     useEffect(() => {
         store.track.trackPageChange();
 
-        store.core.setCurrentGraph(
-            location.pathname.startsWith('/graph/detail')
-                ? 'detail'
-                : 'overview'
-        );
-
         const studyId = queryString.parse(location.search).study;
-        const query = queryString.parse(location.search).query;
-        const suuid = queryString.parse(location.search).suuid;
 
         store.graphInstance.toggleVisibleComponents(-1);
 
+        console.log(
+            `prev study id: studyId: ${store.core.studyUuid}`,
+            ` study id in the link: ${studyId}`
+        );
         if (studyId) {
-            store.graph.getStudy(studyId);
-        } else if (query) {
-            if (location.pathname.startsWith('/graph/detail')) {
-                store.graph.getSearchGraph(query, 'detail', suuid);
+            if (store.core.studyUuid === studyId) {
+                console.log('modifying');
+                store.graph.modifyStudy(store.core.currentGraph);
             } else {
-                store.graph.getSearchGraph(query, 'overview', suuid);
+                store.core.deleteStudy();
+                store.core.setStudyUuid(studyId);
+                console.log('loading');
+                store.graph.getStudy(studyId);
             }
         } else {
             history.push('/');
@@ -67,7 +65,8 @@ function GraphPage() {
         store.track,
         location.pathname,
         store.core,
-        store.graphInstance
+        store.graphInstance,
+        store.search.searchID
     ]);
 
     useEffect(() => {

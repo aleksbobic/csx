@@ -57,11 +57,11 @@ function SearchBar(props) {
                     store.core.resetVisibleDimensions();
                     store.workflow.resetWorkflow();
                     store.schema.resetOverviewNodeProperties();
-                    history.push(
-                        `/graph?query=${values.search}&dataset=${
-                            store.search.datasets[selectedDataset]
-                        }&suuid=${uuidv4()}&studyuid=${store.core.studyUuid}`
-                    );
+                    store.core.setStudyHistory([]);
+                    store.core.setStudyHistoryItemIndex(0);
+                    store.search.setSearchQuery(values.search);
+                    store.search.setSearchID(uuidv4());
+                    history.push(`/graph?study=${store.core.studyUuid}`);
                 }}
             >
                 {({ values, handleSubmit, setFieldValue }) => (

@@ -50,6 +50,7 @@ function HomePage() {
         store.graph.resetGraphData();
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
+        store.search.setAdvancedSearchQuery(null);
     }, []);
 
     const onDrop = async files => {
@@ -87,8 +88,6 @@ function HomePage() {
     });
 
     const openStudy = studyUuid => {
-        console.log(studyUuid);
-
         history.push(`/graph?study=${studyUuid}`);
     };
 

@@ -14,6 +14,8 @@ export class CoreStore {
     studyUuid = null;
     studyName = '';
     studyDescription = '';
+    studyHistory = [];
+    studyHistoryItemIndex = 0;
     studyIsSaved = false;
     studies = [];
 
@@ -45,6 +47,16 @@ export class CoreStore {
         this.studyUuid = id;
         localStorage.setItem('studyuuid', id);
     };
+
+    setStudyQuery = () => {
+        this.store.search.setSearchQuery(
+            this.studyHistory[this.studyHistoryItemIndex].query
+        );
+    };
+
+    setStudyHistory = history => (this.studyHistory = history);
+
+    setStudyHistoryItemIndex = index => (this.studyHistoryItemIndex = index);
 
     updateStudyName = async name => {
         this.studyName = name;
@@ -102,6 +114,8 @@ export class CoreStore {
         await axios.get('study/generate', { params }).then(response => {
             localStorage.setItem('studyuuid', response.data);
             this.studyUuid = response.data;
+            this.setStudyHistory([]);
+            this.setStudyHistoryItemIndex(0);
         });
     };
 
@@ -112,12 +126,14 @@ export class CoreStore {
                 user_uuid: this.userUuid
             };
 
-            if (studyUuid) {
-                axios.get('study/delete', { params }).then(() => {
-                    this.getSavedStudies();
-                });
-            } else {
-                axios.get('study/delete', { params });
+            if (params.study_uuid) {
+                if (studyUuid) {
+                    axios.get('study/delete', { params }).then(() => {
+                        this.getSavedStudies();
+                    });
+                } else {
+                    axios.get('study/delete', { params });
+                }
             }
         }
     };
@@ -190,14 +206,15 @@ export class CoreStore {
     }
 
     handleError = error => {
-        console.log(error);
-        this.errorMessage = error;
+        console.log(error.toString());
 
         if (error.response) {
             this.errorDetails = `${error.response.data} ${error.response.status} ${error.response.headers}`;
             console.log('data ', error.response.data);
             console.log('status ', error.response.status);
             console.log('headers ', error.response.headers);
+        } else {
+            this.errorDetails = error.toString();
         }
     };
 }

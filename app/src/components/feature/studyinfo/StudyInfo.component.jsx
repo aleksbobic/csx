@@ -82,6 +82,10 @@ function StudyInfo() {
                     />
                 </Editable>
             </Tooltip>
+            <Tag size="sm">Selected index:</Tag>
+            <Text fontSize="sm" paddingLeft="8px">
+                {store.search.currentDataset}
+            </Text>
 
             <Button
                 width="100%"

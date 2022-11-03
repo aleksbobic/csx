@@ -44,25 +44,32 @@ def compare_instances(
     """Compare existing cache graph with set of given parameters"""
     difference = None
     action = "from_cache"
+    history_action = "initial search"
 
     if not cache_data:
         difference = "data"
         action = "from_scratch"
+        history_action = "initial search"
     elif cache_data["global"]["search_uuid"] != params["search_uuid"]:
         difference = "search_uuid"
         action = "from_scratch"
+        history_action = "modified search"
     elif cache_data["global"]["query"] != params["query"]:
         difference = "query"
         action = "from_scratch"
+        history_action = "modified search"
     elif not cache_data[graph_type]:
         difference = "graph_type"
         action = "from_existing_data"
+        history_action = "change graph type"
     elif cache_data[graph_type]["meta"]["schema"] != params["schema"]:
         difference = "schema"
         action = "from_existing_data"
+        history_action = "change schema"
     elif cache_data[graph_type]["meta"]["dimensions"] != params["dimensions"]:
         difference = "dimensions"
         action = "from_existing_data"
+        history_action = "change visible nodes"
     elif (
         "anchor_properties" in cache_data[graph_type]["meta"]
         and cache_data[graph_type]["meta"]["anchor_properties"]
@@ -70,12 +77,14 @@ def compare_instances(
     ):
         difference = "anchor_properties"
         action = "from_anchor_properties"
+        history_action = "change anchor properties"
 
     return {
         "same": difference == "",
         "difference": difference,
         "action": action,
         "data": cache_data,
+        "history_action": history_action,
     }
 
 

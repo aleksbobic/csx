@@ -369,10 +369,9 @@ function Settings() {
                     {renderLabelOptions()}
                     <Divider />
                     {renderLayoutOptions()}
-                    {location.pathname.startsWith('/graph/detail') && (
-                        <Divider />
-                    )}
-                    {location.pathname.startsWith('/graph/detail') &&
+
+                    {store.core.currentGraph === 'detail' && <Divider />}
+                    {store.core.currentGraph === 'detail' &&
                         renderDimensionsToggle()}
                 </VStack>
             </FormControl>

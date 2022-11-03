@@ -144,7 +144,7 @@ function Overview(props) {
             });
 
     return (
-        <VStack spacing="10px" marginTop="50px">
+        <VStack spacing="10px">
             <Grid
                 maxHeight="100%"
                 width="100%"

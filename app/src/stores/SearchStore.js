@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { format } from 'date-fns';
 
 export class SearchStore {
     nodeTypes = {};
@@ -10,11 +11,13 @@ export class SearchStore {
     schemas = [];
     datasets = [];
     searchHints = {};
+    query = '';
+    advancedSearchQuery = '';
+    searchID = '';
 
     currentDataset = null;
     currentDatasetIndex = 0;
     searchIsEmpty = false;
-    advancedSearchQuery = '';
     datasetEdit = false;
 
     constructor(store) {
@@ -22,6 +25,10 @@ export class SearchStore {
         makeAutoObservable(this);
         this.getDatasets();
     }
+
+    setSearchID = val => (this.searchID = val);
+
+    setSearchQuery = val => (this.query = val);
 
     setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
@@ -124,7 +131,8 @@ export class SearchStore {
             graph_type: graphType,
             visible_entries: [],
             user_id: this.store.core.userUuid,
-            study_id: this.store.core.studyUuid
+            study_id: this.store.core.studyUuid,
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
         };
 
         if (graphType === 'overview') {

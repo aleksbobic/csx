@@ -16,6 +16,8 @@ import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
 import app.services.data.autocomplete as csx_auto
 import app.services.data.mongo as csx_data
+import app.services.study.study as csx_study
+from app.utils.typecheck import isJson, isNumber
 
 router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
@@ -57,22 +59,6 @@ def get_new_features(query):
     )
 
 
-def isJson(testStr):
-    try:
-        json.loads(testStr)
-        return True
-    except:
-        return False
-
-
-def isNumber(testStr):
-    try:
-        float(testStr)
-        return True
-    except:
-        return False
-
-
 class Data(BaseModel):
     query: str
     user_id: str
@@ -86,6 +72,7 @@ class Data(BaseModel):
     graph_type: Literal["overview", "detail"]
     visible_entries: List
     anchor_properties: List
+    action_time: str
 
 
 @router.post("/")
@@ -103,12 +90,19 @@ def search(data: Data) -> dict:
     visible_entries = data.visible_entries
     anchor_properties = data.anchor_properties
     study_id = data.study_id
+    action_time = data.action_time
+
+    print("\n\n\n\n\n time of search: ", action_time)
 
     """Run search using given query."""
     cache_data = csx_redis.load_current_graph(user_id)
 
     directory_path = os.getcwd()
     print("My current directory is : " + directory_path)
+
+    # Update study with index
+
+    csx_study.add_index(study_id, user_id, index)
 
     with open(f"./app/data/config/{index}.json") as config:
         config = json.load(config)
@@ -206,7 +200,6 @@ def search(data: Data) -> dict:
             dimensions,
             elastic_json,
             visible_entries,
-            query,
             index,
             cache_data,
             search_uuid,
@@ -217,6 +210,9 @@ def search(data: Data) -> dict:
             comparison_res,
             study_id,
             comparison_res["action"],
+            query,
+            action_time,
+            comparison_res["history_action"],
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
             comparison_res,
@@ -226,13 +222,16 @@ def search(data: Data) -> dict:
             user_id,
             study_id,
             comparison_res["action"],
+            query,
+            index,
+            action_time,
+            comparison_res["history_action"],
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
             dimensions,
             elastic_json,
             visible_entries,
-            query,
             cache_data,
             user_id,
             schema,
@@ -240,9 +239,20 @@ def search(data: Data) -> dict:
             index,
             study_id,
             comparison_res["action"],
+            query,
+            action_time,
+            comparison_res["history_action"],
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
-            comparison_res, graph_type, study_id, comparison_res["action"]
+            comparison_res,
+            graph_type,
+            study_id,
+            comparison_res["action"],
+            query,
+            user_id,
+            index,
+            action_time,
+            comparison_res["history_action"],
         ),
     }
 

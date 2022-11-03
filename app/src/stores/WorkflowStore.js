@@ -255,6 +255,248 @@ export class WorkflowStore {
         }
     };
 
+    addNodesFromQuery = query => {
+        const searchNode = {
+            id: uuidv4(),
+            type: 'searchNode',
+            position: { x: 200, y: 200 },
+            data: {
+                children: [],
+                parents: [],
+                features: Object.keys(this.store.search.nodeTypes),
+                feature: Object.keys(this.store.search.nodeTypes)[0],
+                featureHints: this.store.search.searchHints,
+                featureTypes: this.store.search.nodeTypes,
+                updateActions: this.updateActions,
+                getSuggestions: this.store.search.suggest,
+                updateSearchNodeData: this.updateSearchNodeData,
+                keyphrase: query,
+                getDefaultValue: this.getDefaultValue,
+                deleteNode: this.deleteNode
+            },
+            style: {
+                border: `1px solid ${this.actionNodeColors['searchNode']}`,
+                backgroundColor: this.actionNodeColors['background'],
+                borderRadius: '10px',
+                padding: '3px'
+            }
+        };
+
+        const resultsNode = {
+            id: uuidv4(),
+            type: 'resultsNode',
+            position: { x: 200, y: 400 },
+            data: {
+                children: [],
+                parents: [],
+                frunWorkflow: this.runWorkFlow
+            },
+            style: {
+                border: `1px solid ${this.actionNodeColors['resultsNode']}`,
+                backgroundColor: this.actionNodeColors['background'],
+                borderRadius: '10px',
+                padding: '3px'
+            }
+        };
+
+        searchNode.data.children.push(resultsNode.id);
+        resultsNode.data.children.push(searchNode.id);
+
+        const newConnection = {
+            id: `e${searchNode.id}-${resultsNode.id}`,
+            source: searchNode.id,
+            target: resultsNode.id,
+            type: 'searchEdge',
+            data: {
+                removeEdge: this.removeEdge
+            }
+        };
+
+        this.nodes.push(searchNode);
+        this.nodes.push(resultsNode);
+        this.nodes = [...this.nodes];
+        this.edges = [...this.edges, newConnection];
+    };
+
+    addNodesFromJSONQuery = query => {
+        // search: {feature, keyphrase}
+        // get dataset: {dataset}
+        // filter: {feature, min, max}
+        // connect: {connector, queries}
+        // visualise
+
+        switch (query.action) {
+            case 'search':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'searchNode',
+                    position: { x: 200, y: 200 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        features: Object.keys(this.store.search.nodeTypes),
+                        feature: query.feature,
+                        featureHints: this.store.search.searchHints,
+                        featureTypes: this.store.search.nodeTypes,
+                        updateActions: this.updateActions,
+                        getSuggestions: this.store.search.suggest,
+                        updateSearchNodeData: this.updateSearchNodeData,
+                        keyphrase: query.keyphrase,
+                        getDefaultValue: this.getDefaultValue,
+                        deleteNode: this.deleteNode
+                    },
+                    style: {
+                        border: `1px solid ${this.actionNodeColors['searchNode']}`,
+                        backgroundColor: this.actionNodeColors['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'get dataset':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'datasetNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        dataset: this.store.search.currentDataset,
+                        deleteNode: this.deleteNode
+                    },
+                    style: {
+                        border: `1px solid ${this.actionNodeColors['datasetNode']}`,
+                        backgroundColor: this.actionNodeColors['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'filter':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'filterNode',
+                    position: { x: 200, y: 200 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        features: this.getNodeTypesOfType(['integer', 'float']),
+                        feature: query.feature,
+                        updateFilterNodeValues: this.updateFilterNodeValues,
+                        updateFilterNodeData: this.updateFilterNodeData,
+                        min: query.min,
+                        max: query.max,
+                        min_value: this.store.search.getSearchHintsByFeature(
+                            query.feature
+                        )['min'],
+                        max_value: this.store.search.getSearchHintsByFeature(
+                            query.feature
+                        )['max'],
+                        deleteNode: this.deleteNode
+                    },
+                    style: {
+                        border: `1px solid ${this.actionNodeColors['filterNode']}`,
+                        backgroundColor: this.actionNodeColors['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'connect':
+                query.queries.forEach(subQuery => {
+                    const val = this.addNodesFromJSONQuery(subQuery);
+                });
+                // add also the connector node and connect to as many children as it has
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'connectorNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        connector: query.connector,
+                        deleteNode: this.deleteNode
+                    },
+                    style: {
+                        border: `1px solid ${this.actionNodeColors['connectorNode']}`,
+                        backgroundColor: this.actionNodeColors['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+
+                for (let i = 0; i < query.queries.length; i++) {
+                    const newConnection = {
+                        id: `e${this.nodes[this.nodes.length - (i + 2)].id}-${
+                            this.nodes[this.nodes.length - 1].id
+                        }`,
+                        source: this.nodes[this.nodes.length - (i + 2)].id,
+                        target: this.nodes[this.nodes.length - 1].id,
+                        type: 'searchEdge',
+                        data: {
+                            removeEdge: this.removeEdge
+                        }
+                    };
+
+                    this.nodes[this.nodes.length - (i + 2)].data.children.push(
+                        this.nodes[this.nodes.length - 1].id
+                    );
+
+                    this.nodes[this.nodes.length - 1].data.parents.push(
+                        this.nodes[this.nodes.length - (i + 2)].id
+                    );
+
+                    this.edges = [...this.edges, newConnection];
+                }
+
+                return true;
+            default:
+                // visualise
+                this.addNodesFromJSONQuery(query.query);
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'resultsNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        runWorkflow: this.runWorkFlow
+                    },
+                    style: {
+                        border: `1px solid ${this.actionNodeColors['resultsNode']}`,
+                        backgroundColor: this.actionNodeColors['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                // add result node and conenct to last node
+
+                const newConnection = {
+                    id: `e${this.nodes[this.nodes.length - 2].id}-${
+                        this.nodes[this.nodes.length - 1].id
+                    }`,
+                    source: this.nodes[this.nodes.length - 2].id,
+                    target: this.nodes[this.nodes.length - 1].id,
+                    type: 'searchEdge',
+                    data: {
+                        removeEdge: this.removeEdge
+                    }
+                };
+
+                this.nodes[this.nodes.length - 2].data.children.push(
+                    this.nodes[this.nodes.length - 1].id
+                );
+
+                this.nodes[this.nodes.length - 1].data.parents.push(
+                    this.nodes[this.nodes.length - 2].id
+                );
+
+                this.edges = [...this.edges, newConnection];
+
+                break;
+        }
+    };
+
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
 

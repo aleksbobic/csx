@@ -10,7 +10,6 @@ import {
     MenuItem,
     MenuList,
     Select,
-    Tab,
     TabList,
     TabPanel,
     TabPanels,
@@ -21,6 +20,7 @@ import {
 } from '@chakra-ui/react';
 import Overview from 'components/feature/overview/Overview.component';
 import { observer } from 'mobx-react';
+import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import ReactFlow, {
     applyEdgeChanges,
@@ -37,6 +37,7 @@ import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextr
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
 import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
+import historyNode from 'components/feature/historyNode/HistoryNode.component';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
 import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
@@ -53,7 +54,7 @@ import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-function DataPanel() {
+function DataPanel(props) {
     const store = useContext(RootStoreContext);
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
     const tabHeaderBgColor = useColorModeValue('white', 'black');
@@ -69,6 +70,14 @@ function DataPanel() {
     const [schemaEdges, setSchemaEdges] = useState(
         store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
     );
+
+    const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
+    const [historyEdges, setHistoryEdges] = useState(store.history.edges);
+
+    useEffect(() => {
+        setHistoryNodes(store.history.nodes);
+        setHistoryEdges(store.history.edges);
+    }, [store.history.edges, store.history.nodes]);
 
     const onNodesChange = useCallback(
         changes =>
@@ -93,11 +102,33 @@ function DataPanel() {
         [store.core.isOverview, store.schema]
     );
 
+    useEffect(() => {
+        console.log(props.panelType);
+        switch (props.panelType) {
+            case 'details':
+                setActiveTab(0);
+                break;
+            case 'results':
+                setActiveTab(1);
+                break;
+            case 'schema':
+                setActiveTab(2);
+                break;
+            case 'history':
+                setActiveTab(3);
+                break;
+            default:
+                setActiveTab(0);
+                break;
+        }
+    }, [props.panelType]);
+
     const nodeTypes = useMemo(
         () => ({
             datasetNode: DatasetNode,
             schemaNode: SchemaNode,
             overviewSchemaNode: OverviewSchemaNode,
+            historyNode: historyNode,
             searchNode: SearchNode,
             connectorNode: ConnectorNode,
             filterNode: FilterNode,
@@ -235,6 +266,41 @@ function DataPanel() {
         </Box>
     );
 
+    const renderHistory = () => (
+        <Box
+            height="100%"
+            minHeight="500px"
+            width="100%"
+            backgroundColor="whiteAlpha.200"
+            borderRadius="8px"
+        >
+            <AutoSizer>
+                {({ height, width }) => (
+                    <ReactFlow
+                        style={{
+                            height: `${height}px`,
+                            width: `${width}px`
+                        }}
+                        nodes={historyNodes}
+                        edges={historyEdges}
+                        nodesDraggable={false}
+                        nodesConnectable={false}
+                        snapToGrid={true}
+                        onConnect={connectNodes}
+                        onEdgeUpdate={updateEdge}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        minZoom={1}
+                        defaultZoom={1.25}
+                        maxZoom={1.5}
+                    ></ReactFlow>
+                )}
+            </AutoSizer>
+        </Box>
+    );
+
     const renderTablePanels = () => {
         return (
             <TabPanels
@@ -245,7 +311,7 @@ function DataPanel() {
                 paddingBottom="50px"
                 paddingTop="0"
             >
-                <TabPanel padding="10px" paddingTop="60px" height="100%">
+                <TabPanel padding="10px" paddingTop="20px" height="100%">
                     <Overview />
                 </TabPanel>
                 <TabPanel
@@ -272,10 +338,37 @@ function DataPanel() {
                             />
                         ))}
                 </TabPanel>
-                <TabPanel padding="10px" paddingTop="60px" height="100%">
+                <TabPanel
+                    padding="10px"
+                    paddingTop="20px"
+                    paddingBottom="20px"
+                    height="100%"
+                >
                     <VStack width="100%" height="100%">
-                        <Flex spacing="10px" width="100%" height="100%">
+                        <Flex
+                            spacing="10px"
+                            width="100%"
+                            height="100%"
+                            style={{ paddingBottom: '5px' }}
+                        >
                             {renderSchema()}
+                        </Flex>
+                    </VStack>
+                </TabPanel>
+                <TabPanel
+                    padding="10px"
+                    paddingTop="20px"
+                    paddingBottom="20px"
+                    height="100%"
+                >
+                    <VStack width="100%" height="100%">
+                        <Flex
+                            spacing="10px"
+                            width="100%"
+                            height="100%"
+                            style={{ paddingBottom: '5px' }}
+                        >
+                            {renderHistory()}
                         </Flex>
                     </VStack>
                 </TabPanel>
@@ -284,24 +377,6 @@ function DataPanel() {
     };
 
     const renderTabButtons = () => {
-        const tabs = [
-            {
-                trackingCode: 'details tab',
-                id: 'detailstab',
-                text: 'Details'
-            },
-            {
-                trackingCode: 'results tab',
-                id: 'resultstab',
-                text: 'Results'
-            },
-            {
-                trackingCode: 'schema tab',
-                id: 'schematab',
-                text: 'Schema'
-            }
-        ];
-
         return (
             <TabList
                 position="absolute"
@@ -314,163 +389,126 @@ function DataPanel() {
                 justifyContent="space-between"
             >
                 <HStack>
-                    {tabs.map(tab => (
-                        <Tab
-                            key={tab.id}
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'data panel',
-                                    'tab click',
-                                    tab.trackingCode
-                                );
-                            }}
-                            _selected={{
-                                color: 'white',
-                                backgroundColor: 'blue.500'
-                            }}
-                        >
-                            <Box
-                                id={tab.id}
-                                width="100%"
-                                height="100%"
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                {tab.text}
-                            </Box>
-                        </Tab>
-                    ))}
-                </HStack>
-
-                {activeTab === 1 && (
-                    <HStack>
-                        <Tooltip label="Download visible data as CSV">
-                            <Box>
-                                <IconButton
-                                    size="sm"
-                                    as={CSVLink}
-                                    data={csvData}
-                                    headers={csvHeaders}
-                                    filename="csx.csv"
-                                    target="_blank"
-                                    variant="solid"
-                                    opacity="0.5"
-                                    transition="all 0.2 ease-in-out"
-                                    _hover={{ opacity: 1 }}
-                                    icon={
-                                        <SoftwareDownload
-                                            style={{
-                                                '--ggs': '0.8'
-                                            }}
-                                        />
-                                    }
-                                />
-                            </Box>
+                    <Tooltip label="Download visible data as CSV">
+                        <Box>
+                            <IconButton
+                                size="sm"
+                                as={CSVLink}
+                                data={csvData}
+                                headers={csvHeaders}
+                                filename="csx.csv"
+                                target="_blank"
+                                variant="solid"
+                                opacity="0.5"
+                                transition="all 0.2 ease-in-out"
+                                _hover={{ opacity: 1 }}
+                                icon={
+                                    <SoftwareDownload
+                                        style={{
+                                            '--ggs': '0.8'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Box>
+                    </Tooltip>
+                    <Menu closeOnSelect={false} zIndex="3">
+                        <Tooltip label="List options">
+                            <MenuButton
+                                disabled={!useList}
+                                size="sm"
+                                as={IconButton}
+                                icon={
+                                    <MoreVerticalAlt style={{ '--ggs': 0.8 }} />
+                                }
+                                zIndex="3"
+                            />
                         </Tooltip>
-                        <Menu closeOnSelect={false} zIndex="3">
-                            <Tooltip label="List options">
-                                <MenuButton
-                                    disabled={!useList}
-                                    size="sm"
-                                    as={IconButton}
-                                    icon={
-                                        <MoreVerticalAlt
-                                            style={{ '--ggs': 0.8 }}
-                                        />
-                                    }
-                                    zIndex="3"
-                                />
-                            </Tooltip>
-                            <MenuList
-                                backgroundColor="black"
-                                padding="5px"
-                                borderRadius="10px"
-                            >
-                                {Object.keys(store.search.nodeTypes).map(
-                                    feature => (
-                                        <MenuItem
-                                            key={`serp_list_checkbox_${feature}`}
-                                            fontSize="xs"
-                                            fontWeight="bold"
-                                            borderRadius="6px"
+                        <MenuList
+                            backgroundColor="black"
+                            padding="5px"
+                            borderRadius="10px"
+                        >
+                            {Object.keys(store.search.nodeTypes).map(
+                                feature => (
+                                    <MenuItem
+                                        key={`serp_list_checkbox_${feature}`}
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        borderRadius="6px"
+                                    >
+                                        <Checkbox
+                                            isChecked={visibleProperties.includes(
+                                                feature
+                                            )}
+                                            size="sm"
+                                            onChange={e => {
+                                                if (e.target.checked) {
+                                                    setVisibleProperties([
+                                                        ...visibleProperties,
+                                                        feature
+                                                    ]);
+                                                } else if (
+                                                    visibleProperties.length > 1
+                                                ) {
+                                                    setVisibleProperties([
+                                                        ...visibleProperties.filter(
+                                                            value =>
+                                                                value !==
+                                                                feature
+                                                        )
+                                                    ]);
+                                                }
+                                            }}
                                         >
-                                            <Checkbox
-                                                isChecked={visibleProperties.includes(
-                                                    feature
-                                                )}
-                                                size="sm"
-                                                onChange={e => {
-                                                    if (e.target.checked) {
-                                                        setVisibleProperties([
-                                                            ...visibleProperties,
-                                                            feature
-                                                        ]);
-                                                    } else if (
-                                                        visibleProperties.length >
-                                                        1
-                                                    ) {
-                                                        setVisibleProperties([
-                                                            ...visibleProperties.filter(
-                                                                value =>
-                                                                    value !==
-                                                                    feature
-                                                            )
-                                                        ]);
-                                                    }
-                                                }}
-                                            >
-                                                {feature}
-                                            </Checkbox>
-                                        </MenuItem>
-                                    )
-                                )}
-                            </MenuList>
-                        </Menu>
-                        <ButtonGroup spacing="0" paddingRight="10px">
-                            <Tooltip label="Use table view">
-                                <IconButton
-                                    opacity={!useList ? 1 : 0.5}
-                                    icon={
-                                        <ViewComfortable
-                                            style={{ '--ggs': '0.7' }}
-                                        />
+                                            {feature}
+                                        </Checkbox>
+                                    </MenuItem>
+                                )
+                            )}
+                        </MenuList>
+                    </Menu>
+                    <ButtonGroup spacing="0" paddingRight="10px">
+                        <Tooltip label="Use table view">
+                            <IconButton
+                                opacity={!useList ? 1 : 0.5}
+                                icon={
+                                    <ViewComfortable
+                                        style={{ '--ggs': '0.7' }}
+                                    />
+                                }
+                                size="sm"
+                                borderEndRadius="0"
+                                transition="all 0.2 ease-in-out"
+                                _hover={{ opacity: 1 }}
+                                onClick={() => {
+                                    setUseList(false);
+                                }}
+                            />
+                        </Tooltip>
+                        <Tooltip label="Use list view">
+                            <IconButton
+                                opacity={useList ? 1 : 0.5}
+                                icon={<MenuBoxed style={{ '--ggs': '0.7' }} />}
+                                size="sm"
+                                borderStartRadius="0"
+                                transition="all 0.2 ease-in-out"
+                                _hover={{ opacity: 1 }}
+                                onClick={() => {
+                                    if (visibleProperties.length === 0) {
+                                        setVisibleProperties(
+                                            Object.keys(
+                                                store.search.nodeTypes
+                                            ).slice(0, 3)
+                                        );
                                     }
-                                    size="sm"
-                                    borderEndRadius="0"
-                                    transition="all 0.2 ease-in-out"
-                                    _hover={{ opacity: 1 }}
-                                    onClick={() => {
-                                        setUseList(false);
-                                    }}
-                                />
-                            </Tooltip>
-                            <Tooltip label="Use list view">
-                                <IconButton
-                                    opacity={useList ? 1 : 0.5}
-                                    icon={
-                                        <MenuBoxed style={{ '--ggs': '0.7' }} />
-                                    }
-                                    size="sm"
-                                    borderStartRadius="0"
-                                    transition="all 0.2 ease-in-out"
-                                    _hover={{ opacity: 1 }}
-                                    onClick={() => {
-                                        if (visibleProperties.length === 0) {
-                                            setVisibleProperties(
-                                                Object.keys(
-                                                    store.search.nodeTypes
-                                                ).slice(0, 3)
-                                            );
-                                        }
 
-                                        setUseList(true);
-                                    }}
-                                />
-                            </Tooltip>
-                        </ButtonGroup>
-                    </HStack>
-                )}
+                                    setUseList(true);
+                                }}
+                            />
+                        </Tooltip>
+                    </ButtonGroup>
+                </HStack>
             </TabList>
         );
     };
@@ -484,18 +522,30 @@ function DataPanel() {
             borderColor={edgeColor}
             id="datapanel"
         >
-            <Tabs
-                size="sm"
-                variant="soft-rounded"
-                colorScheme="blue"
+            <Box
                 height="100%"
-                onChange={index => setActiveTab(index)}
+                width="100%"
+                bgColor={bgColor}
+                borderLeft="1px solid"
+                borderColor={edgeColor}
             >
-                {renderTabButtons()}
-                {renderTablePanels()}
-            </Tabs>
+                <Tabs
+                    size="sm"
+                    variant="soft-rounded"
+                    colorScheme="blue"
+                    height="100%"
+                    index={activeTab}
+                >
+                    {activeTab === 1 && renderTabButtons()}
+                    {renderTablePanels()}
+                </Tabs>
+            </Box>
         </Box>
     );
 }
+
+DataPanel.propTypes = {
+    panelType: PropTypes.string
+};
 
 export default observer(DataPanel);

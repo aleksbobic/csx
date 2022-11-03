@@ -6,6 +6,7 @@ import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
 import app.services.data.redis as csx_redis
+import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
 import pickle
@@ -299,7 +300,6 @@ def get_graph_from_scratch(
     dimensions,
     elastic_json,
     visible_entries,
-    query,
     index,
     cache_data,
     search_uuid,
@@ -310,6 +310,9 @@ def get_graph_from_scratch(
     comparison_res,
     study_id,
     action,
+    query,
+    action_time,
+    history_action,
 ):
     graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
@@ -347,22 +350,20 @@ def get_graph_from_scratch(
     cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
     from_graph_data(cache_data[graph_type])
 
-    history_entry = csx_data.insert_document(
-        "history", {"data": pickle.dumps(cache_snapshot)}
-    )
-
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
         {
-            "$push": {
-                "history": {
-                    "item_id": history_entry.inserted_id,
-                    "action": action,
-                    "comment": "",
-                    "parent": "",
-                }
-            }
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_snapshot),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
         },
     )
 
@@ -370,7 +371,19 @@ def get_graph_from_scratch(
 
 
 def get_graph_with_new_anchor_props(
-    comparison_res, graph_type, dimensions, elastic_json, user_id, study_id, action
+    comparison_res,
+    graph_type,
+    dimensions,
+    elastic_json,
+    user_id,
+    study_id,
+    action,
+    query,
+    index,
+    action_time,
+    history_action,
+    schema,
+    anchor_properties,
 ):
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
@@ -388,22 +401,20 @@ def get_graph_with_new_anchor_props(
 
     cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
 
-    history_entry = csx_data.insert_document(
-        "history", {"data": pickle.dumps(cache_snapshot)}
-    )
-
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
         {
-            "$push": {
-                "history": {
-                    "item_id": history_entry.inserted_id,
-                    "action": action,
-                    "comment": "",
-                    "parent": "",
-                }
-            }
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_snapshot),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
         },
     )
 
@@ -415,7 +426,6 @@ def get_graph_from_existing_data(
     dimensions,
     elastic_json,
     visible_entries,
-    query,
     cache_data,
     user_id,
     schema,
@@ -423,6 +433,9 @@ def get_graph_from_existing_data(
     index,
     study_id,
     action,
+    query,
+    action_time,
+    history_action,
 ):
     # Take global table data and generate grpah
 
@@ -454,27 +467,55 @@ def get_graph_from_existing_data(
 
     cache_snapshot = csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
 
-    history_entry = csx_data.insert_document(
-        "history", {"data": pickle.dumps(cache_snapshot)}
-    )
-
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
         {
-            "$push": {
-                "history": {
-                    "item_id": history_entry.inserted_id,
-                    "action": action,
-                    "comment": "",
-                    "parent": "",
-                }
-            }
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_snapshot),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
         },
     )
 
     return graph_data
 
 
-def get_graph_from_cache(comparison_res, graph_type, study_id, action):
+def get_graph_from_cache(
+    comparison_res,
+    graph_type,
+    study_id,
+    action,
+    query,
+    user_id,
+    index,
+    action_time,
+    history_action,
+    schema,
+    anchor_properties,
+    dimensions,
+):
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(comparison_res["data"]),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
+        },
+    )
+
     return comparison_res["data"][graph_type]

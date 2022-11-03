@@ -32,6 +32,7 @@ import ReactFlow, {
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
+import historyNode from '../historyNode/HistoryNode.component';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../schemanode/SchemaNode.component';
 import ConnectorNode from './connectornode/ConnectorNode.component';
@@ -73,6 +74,7 @@ function AdvancedSearch(props) {
             keywordExtractionNode: KeywordExtractionNode,
             connectorNode: ConnectorNode,
             schemaNode: SchemaNode,
+            historyNode: historyNode,
             overviewSchemaNode: OverviewSchemaNode,
             countsNode: CountsNode,
             resultsNode: ResultsNode
@@ -91,17 +93,12 @@ function AdvancedSearch(props) {
 
     useEffect(() => {
         if (store.workflow.shouldRunWorkflow) {
-            history.push(
-                `/graph?query=${JSON.stringify(
-                    store.search.advancedSearchQuery
-                )}&dataset=${
-                    store.search.currentDataset
-                }&suuid=${uuidv4()}&studyuid=${store.core.studyUuid}`
-            );
+            history.push(`/graph?study=${store.core.studyUuid}`);
         }
     }, [
         history,
         store.core.studyUuid,
+        store.search,
         store.search.advancedSearchQuery,
         store.search.currentDataset,
         store.workflow.shouldRunWorkflow
