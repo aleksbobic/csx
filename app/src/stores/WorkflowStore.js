@@ -264,7 +264,7 @@ export class WorkflowStore {
                 children: [],
                 parents: [],
                 features: Object.keys(this.store.search.nodeTypes),
-                feature: Object.keys(this.store.search.nodeTypes)[0],
+                feature: this.store.search.default_search_features[0],
                 featureHints: this.store.search.searchHints,
                 featureTypes: this.store.search.nodeTypes,
                 updateActions: this.updateActions,
@@ -404,8 +404,11 @@ export class WorkflowStore {
                 return true;
             case 'connect':
                 query.queries.forEach(subQuery => {
-                    const val = this.addNodesFromJSONQuery(subQuery);
+                    console.log('sub query: ', subQuery);
+                    this.addNodesFromJSONQuery(subQuery);
                 });
+
+                console.log(this.nodes);
                 // add also the connector node and connect to as many children as it has
                 this.nodes.push({
                     id: uuidv4(),
@@ -426,6 +429,7 @@ export class WorkflowStore {
                 });
 
                 for (let i = 0; i < query.queries.length; i++) {
+                    console.log(this.nodes, i + 2);
                     const newConnection = {
                         id: `e${this.nodes[this.nodes.length - (i + 2)].id}-${
                             this.nodes[this.nodes.length - 1].id

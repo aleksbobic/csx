@@ -131,10 +131,9 @@ const overviewSchemaNode = ({ id, data }) => {
         return (
             <VStack height="auto" width="100%" spacing="5px" padding="5px">
                 {data.addedProperties.map((property, i) => (
-                    <Tooltip label={property}>
+                    <Tooltip label={property} key={`${i}_property_${property}`}>
                         <Flex
                             width="100%"
-                            key={`${i}_property_${property}`}
                             height="24px"
                             backgroundColor="blackAlpha.600"
                             borderRadius="6px"

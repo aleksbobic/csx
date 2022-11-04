@@ -279,6 +279,9 @@ def get_datasets() -> dict:
                 datasets[index]["schemas"] = loaded_config["schemas"]
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
+                datasets[index]["default_search_fields"] = loaded_config[
+                    "default_search_fields"
+                ]
 
                 datasets[index]["search_hints"] = {
                     feature: json.dumps(loaded_config["search_hints"][feature])
@@ -292,6 +295,7 @@ def get_datasets() -> dict:
             datasets[index]["anchor"] = []
             datasets[index]["links"] = []
             datasets[index]["search_hints"] = []
+            datasets[index]["default_search_fields"] = []
 
     return datasets
 

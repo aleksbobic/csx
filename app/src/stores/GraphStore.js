@@ -530,6 +530,17 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
 
+            this.store.workflow.nodes = [];
+            this.store.workflow.edges = [];
+
+            try {
+                this.store.workflow.addNodesFromJSONQuery(
+                    JSON.parse(this.store.search.query)
+                );
+            } catch (e) {
+                this.store.workflow.addNodesFromQuery(this.store.search.query);
+            }
+
             this.handleRetrievedGraph(
                 response.data.graph,
                 historyGraphType,
@@ -606,11 +617,15 @@ export class GraphStore {
                     this.store.core.studyHistoryItemIndex
                 ].schema;
 
+            this.store.workflow.nodes = [];
+            this.store.workflow.edges = [];
+
             try {
                 this.store.workflow.addNodesFromJSONQuery(
                     JSON.parse(this.store.search.query)
                 );
             } catch (e) {
+                console.log(e);
                 this.store.workflow.addNodesFromQuery(this.store.search.query);
             }
 

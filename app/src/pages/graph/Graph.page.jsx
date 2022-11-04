@@ -41,33 +41,23 @@ function GraphPage() {
 
         store.graphInstance.toggleVisibleComponents(-1);
 
-        console.log(
-            `prev study id: studyId: ${store.core.studyUuid}`,
-            ` study id in the link: ${studyId}`
-        );
         if (studyId) {
             if (store.core.studyUuid === studyId) {
-                console.log('modifying');
-                store.graph.modifyStudy(store.core.currentGraph);
+                if (
+                    store.graph.graphData.nodes.length === 0 ||
+                    store.workflow.shouldRunWorkflow
+                ) {
+                    store.graph.modifyStudy(store.core.currentGraph);
+                }
             } else {
                 store.core.deleteStudy();
                 store.core.setStudyUuid(studyId);
-                console.log('loading');
                 store.graph.getStudy(studyId);
             }
         } else {
             history.push('/');
         }
-    }, [
-        history,
-        location.search,
-        store.graph,
-        store.track,
-        location.pathname,
-        store.core,
-        store.graphInstance,
-        store.search.searchID
-    ]);
+    }, []);
 
     useEffect(() => {
         if (store.search.searchIsEmpty) {
