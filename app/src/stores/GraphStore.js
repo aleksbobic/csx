@@ -465,7 +465,6 @@ export class GraphStore {
         if (this.store.search.advancedSearchQuery) {
             console.log(this.store.search.advancedSearchQuery);
         }
-        console.log('the query: ', this.store.search.advancedSearchQuery);
 
         const params = {
             study_uuid: studyId,

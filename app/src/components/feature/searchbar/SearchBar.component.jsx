@@ -106,8 +106,12 @@ function SearchBar(props) {
                                 }
                                 style={{
                                     height: '40px',
-                                    borderRadius: '0px',
-                                    borderStartRadius:
+                                    borderRadius: '6px',
+                                    borderEndStartRadius:
+                                        props.datasetSelectorDisabled
+                                            ? '4px'
+                                            : '0',
+                                    borderStartStartRadius:
                                         props.datasetSelectorDisabled
                                             ? '4px'
                                             : '0'
