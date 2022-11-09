@@ -34,7 +34,7 @@ import {
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
-import queryString from 'query-string';
+
 import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -250,8 +250,6 @@ function NavigationPanelComponent() {
             </HStack>
         </Box>
     );
-
-    const getQueryString = param => queryString.parse(location.search)[param];
 
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>

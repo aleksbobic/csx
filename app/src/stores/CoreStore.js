@@ -17,6 +17,7 @@ export class CoreStore {
     studyHistory = [];
     studyHistoryItemIndex = 0;
     studyIsSaved = false;
+    showCommentModal = false;
     studies = [];
 
     visibleDimensions = { overview: [], detail: [] };
@@ -36,6 +37,8 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setShowCommentModal = val => (this.showCommentModal = val);
 
     updateIsStudySaved = val => (this.studyIsSaved = val);
 

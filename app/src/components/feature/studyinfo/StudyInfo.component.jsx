@@ -4,12 +4,12 @@ import {
     Editable,
     EditableInput,
     EditablePreview,
+    EditableTextarea,
     Tag,
-    Tooltip,
     Text,
-    EditableTextarea
+    Tooltip
 } from '@chakra-ui/react';
-import { Check, Heart } from 'css.gg';
+import { Heart } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';

@@ -25,7 +25,7 @@ export class HistoryStore {
                     parent: historyItem.parent_id,
                     action: historyItem.action,
                     graphType: historyItem.graph_type,
-                    comment: historyItem.comment,
+                    comments: historyItem.comments,
                     actionTime: historyItem.action_time,
                     isActive: this.store.core.studyHistoryItemIndex === index,
                     loadStudy: this.loadStudy
@@ -120,5 +120,9 @@ export class HistoryStore {
 
         this.nodes = [...layoutedNodes];
         this.edges = [...layoutedEdges];
+    };
+
+    addComment = comment => {
+        console.log(comment);
     };
 }

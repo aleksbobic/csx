@@ -1,11 +1,13 @@
 import {
     Box,
+    Button,
     Center,
     Code,
     Heading,
     HStack,
     IconButton,
     Text,
+    Textarea,
     useColorMode,
     useToast,
     VStack
@@ -14,8 +16,10 @@ import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.com
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
 import { Close, Spinner } from 'css.gg';
+import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
+import { useState } from 'react';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
@@ -29,6 +33,8 @@ function GraphPage() {
     const { colorMode } = useColorMode();
     const toastRef = useRef();
     const history = useHistory();
+
+    const [comment, setComment] = useState('');
 
     useBeforeunload(() => {
         store.core.deleteStudy();
@@ -81,7 +87,7 @@ function GraphPage() {
                             alignItems="flex-start"
                         >
                             <HStack justifyContent="space-between" width="100%">
-                                <Heading size="md">Server error :(</Heading>
+                                <Heading size="md">Server error 😢</Heading>
                                 <IconButton
                                     variant="ghost"
                                     size="md"
@@ -129,10 +135,100 @@ function GraphPage() {
         }
     }, [store.core.errorMessage, renderToast, store.workflow]);
 
+    const openCommentModalKey = useKeyPress('c', 'shift');
+    const closeCommentModalKey = useKeyPress('escape');
+    const submitCommentModalKey = useKeyPress('enter', 'shift');
+
+    useEffect(() => {
+        if (openCommentModalKey && !store.core.showCommentModal) {
+            store.core.setShowCommentModal(true);
+        }
+
+        if (closeCommentModalKey && store.core.showCommentModal) {
+            setComment('');
+            store.core.setShowCommentModal(false);
+        }
+    }, [
+        closeCommentModalKey,
+        openCommentModalKey,
+        store.core,
+        submitCommentModalKey
+    ]);
+
+    const closeCommentModal = useCallback(() => {
+        setComment('');
+        store.core.setShowCommentModal(false);
+    }, [store.core]);
+
+    useEffect(() => {
+        if (submitCommentModalKey && comment !== '') {
+            store.history.addComment(comment);
+            closeCommentModal();
+        }
+    }, [closeCommentModal, comment, store.history, submitCommentModalKey]);
+
+    const submitComment = () => {
+        console.log(comment);
+        setComment('');
+        closeCommentModal();
+    };
+
+    const renderCommentModal = () => (
+        <Box
+            width="500px"
+            height="120px"
+            position="fixed"
+            bottom="20px"
+            left="50%"
+            transform="translate(-50%, 0)"
+            zIndex="20"
+            backgroundColor="black"
+            borderRadius="12px"
+            border="1px solid gray.900"
+        >
+            <Textarea
+                width="100%"
+                height="100%"
+                borderRadius="12px"
+                padding="10px"
+                paddingRight="40px"
+                border="none"
+                resize="none"
+                placeholder="Enter your observations here ..."
+                fontSize="sm"
+                autoFocus={true}
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+            />
+            <Button
+                size="xs"
+                position="absolute"
+                right="16px"
+                bottom="16px"
+                zIndex="2"
+                onClick={submitComment}
+            >
+                Comment
+            </Button>
+            <IconButton
+                size="xs"
+                icon={<Close style={{ '--ggs': 0.7 }} />}
+                position="absolute"
+                right="12px"
+                top="12px"
+                variant="ghost"
+                zIndex="2"
+                onClick={closeCommentModal}
+            />
+        </Box>
+    );
+
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
+            {store.core.showCommentModal && renderCommentModal()}
+
             <GraphComponent
                 graphData={
                     store.core.isDetail

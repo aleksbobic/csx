@@ -57,7 +57,7 @@ function ControlPanel() {
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [originNodeExists, setOriginNodeExists] = useState(false);
-    const { colorMode, toggleColorMode } = useColorMode();
+    const { colorMode } = useColorMode();
 
     const location = useLocation();
 

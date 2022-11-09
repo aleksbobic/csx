@@ -27,7 +27,7 @@ def new_history_entry(study_id, user_id, data):
                     "anchor": data["anchor"],
                     "links": data["links"],
                     "visible_dimensions": data["visible_dimensions"],
-                    "comment": "",
+                    "comments": [],
                     "parent": data["history_parent_id"],
                 }
             }

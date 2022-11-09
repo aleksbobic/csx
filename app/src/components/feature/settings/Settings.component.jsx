@@ -21,11 +21,10 @@ import { Tooltip } from '@chakra-ui/tooltip';
 import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+
 import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
-    const location = useLocation();
     const store = useContext(RootStoreContext);
 
     const graphDimensionBackground = useColorModeValue(

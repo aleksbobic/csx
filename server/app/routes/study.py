@@ -111,7 +111,7 @@ def get_study(data: GetStudyData):
             {
                 "id": str(item["item_id"]),
                 "action": item["action"],
-                "comment": item["comment"],
+                "comments": item["comments"],
                 "parent": str(item["parent"]),
                 "query": item["query"],
                 "graph_type": item["graph_type"],
@@ -372,7 +372,7 @@ def modify_study_graph(data: ModifyStudyData):
             {
                 "id": str(item["item_id"]),
                 "action": item["action"],
-                "comment": item["comment"],
+                "comments": item["comments"],
                 "parent": str(item["parent"]),
                 "query": item["query"],
                 "graph_type": item["graph_type"],

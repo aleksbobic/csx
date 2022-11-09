@@ -17,6 +17,7 @@ import {
     TabPanels,
     Tabs,
     Text,
+    Textarea,
     Tooltip,
     useColorModeValue,
     VStack
@@ -49,7 +50,6 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
-    Comment,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
@@ -109,7 +109,6 @@ function DataPanel(props) {
     );
 
     useEffect(() => {
-        console.log(props.panelType);
         switch (props.panelType) {
             case 'details':
                 setActiveTab(0);
@@ -279,29 +278,51 @@ function DataPanel(props) {
         return (
             <VStack width="100%" spacing="40px" overflowY="scroll">
                 <VStack heigh="auto" width="100%">
+                    {store.core.studyHistory.length > 0 &&
+                        store.core.studyHistory[
+                            store.core.studyHistoryItemIndex
+                        ].comments.map((comment, index) => {
+                            return (
+                                <Box
+                                    backgroundColor="whiteAlpha.200"
+                                    borderRadius="8px"
+                                    padding="20px"
+                                    width="100%"
+                                    ket={`history_comment_${index}`}
+                                >
+                                    <Text fontSize="sm">{comment}</Text>
+                                </Box>
+                            );
+                        })}
+
                     <Box
-                        backgroundColor="whiteAlpha.200"
+                        backgroundColor="transparent"
                         borderRadius="8px"
-                        padding="20px"
                         width="100%"
+                        position="relative"
+                        padding="2px"
                     >
-                        <Text fontSize="sm">This is a comment</Text>
-                    </Box>
-                    <Box
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius="8px"
-                        padding="20px"
-                        width="100%"
-                    >
-                        <Text fontSize="sm">Another comment</Text>
-                    </Box>
-                    <Box
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius="8px"
-                        padding="20px"
-                        width="100%"
-                    >
-                        <Text fontSize="sm">Another one!</Text>
+                        <Textarea
+                            width="100%"
+                            height="100%"
+                            borderRadius="8px"
+                            padding="10px"
+                            border="none"
+                            resize="none"
+                            placeholder="Enter your observations here ..."
+                            fontSize="sm"
+                            backgroundColor="whiteAlpha.200"
+                        />
+                        <Button
+                            size="xs"
+                            position="absolute"
+                            right="8px"
+                            bottom="8px"
+                            zIndex="2"
+                            borderRadius="4px"
+                        >
+                            Comment
+                        </Button>
                     </Box>
                 </VStack>
                 <HStack
@@ -309,17 +330,12 @@ function DataPanel(props) {
                     padding="20px"
                     borderRadius="10px"
                 >
-                    <Tooltip label="Add comment for current scene">
-                        <Button size="sm">
-                            Add comment{' '}
-                            <Comment
-                                style={{ '--ggs': '0.7', marginLeft: '6px' }}
-                            />
-                        </Button>
-                    </Tooltip>
-                    <span>
-                        or <Kbd>shift</Kbd> + <Kbd>C</Kbd>
-                    </span>
+                    <Text fontSize="sm">
+                        Tip: press{' '}
+                        <Kbd style={{ marginLeft: '10px' }}>shift</Kbd> +{' '}
+                        <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in
+                        the app to add a comment.
+                    </Text>
                 </HStack>
             </VStack>
         );

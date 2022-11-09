@@ -31,7 +31,6 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { v4 as uuidv4 } from 'uuid';
 import historyNode from '../historyNode/HistoryNode.component';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../schemanode/SchemaNode.component';

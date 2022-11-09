@@ -43,10 +43,16 @@ const historyNode = ({ id, data, isConnectable }) => {
                                 {data.action}
                             </Text>
                         </HStack>
-                        <HStack width="100%">
+                        <HStack width="100%" style={{ marginTop: 0 }}>
                             <Text fontSize="xs">Graph type:</Text>
                             <Text fontWeight="bold" fontSize="xs">
                                 {data.graphType}
+                            </Text>
+                        </HStack>
+                        <HStack width="100%" style={{ marginTop: 0 }}>
+                            <Text fontSize="xs">Comment count:</Text>
+                            <Text fontWeight="bold" fontSize="xs">
+                                {data.comments.length}
                             </Text>
                         </HStack>
                     </VStack>
