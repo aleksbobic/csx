@@ -6,12 +6,10 @@ import {
     Button,
     ButtonGroup,
     Divider,
-    Fade,
     HStack,
     IconButton,
     Image,
     Link,
-    Slide,
     Text,
     Tooltip,
     useColorMode,
@@ -24,6 +22,7 @@ import {
     Assign,
     Attribution,
     ChevronRight,
+    Comment,
     List,
     Moon,
     RadioCheck,
@@ -104,9 +103,12 @@ function NavigationPanelComponent() {
         <Box position="absolute" marginLeft="-105px" top="20px" id="graphutils">
             <HStack
                 spacing="10px"
-                backgroundColor={graphUtilsMenuBackground}
+                backgroundColor={
+                    colorMode === 'light' ? '#ffffff' : graphUtilsMenuBackground
+                }
                 padding="5px 6px"
                 borderRadius="8px"
+                border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
             >
                 <Tooltip
                     label={
@@ -318,7 +320,11 @@ function NavigationPanelComponent() {
                             aria-label="Details panel toggle"
                             id="detailspnaletoggle"
                             color={
-                                panelType === 'details' ? 'blue.400' : 'white'
+                                panelType === 'details'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
                             }
                             onClick={() => toggleDataPanel('details')}
                             icon={
@@ -336,7 +342,11 @@ function NavigationPanelComponent() {
                             aria-label="Results panel toggle"
                             id="resultspnaletoggle"
                             color={
-                                panelType === 'results' ? 'blue.400' : 'white'
+                                panelType === 'results'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
                             }
                             onClick={() => toggleDataPanel('results')}
                             icon={
@@ -354,7 +364,11 @@ function NavigationPanelComponent() {
                             aria-label="Schema panel toggle"
                             id="schemapnaletoggle"
                             color={
-                                panelType === 'schema' ? 'blue.400' : 'white'
+                                panelType === 'schema'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
                             }
                             onClick={() => toggleDataPanel('schema')}
                             icon={
@@ -372,11 +386,37 @@ function NavigationPanelComponent() {
                             aria-label="History panel toggle"
                             id="historypnaletoggle"
                             color={
-                                panelType === 'history' ? 'blue.400' : 'white'
+                                panelType === 'history'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
                             }
                             onClick={() => toggleDataPanel('history')}
                             icon={
                                 <Stopwatch
+                                    style={{
+                                        '--ggs': '0.7'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle comment panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Commnet panel toggle"
+                            id="commnetpnaletoggle"
+                            color={
+                                panelType === 'comment'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => toggleDataPanel('comment')}
+                            icon={
+                                <Comment
                                     style={{
                                         '--ggs': '0.7'
                                     }}

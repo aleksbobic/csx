@@ -27,6 +27,7 @@ class TrimData(BaseModel):
     history_item_id: str
     graph_type: str
     action_time: str
+    history_parent_id: str
 
 
 @router.post("/trim")
@@ -39,6 +40,7 @@ def trim_network(
     history_item_id = data.history_item_id
     graph_type = data.graph_type
     action_time = data.action_time
+    history_parent_id = data.history_parent_id
 
     cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
 
@@ -83,6 +85,7 @@ def trim_network(
             "anchor": last_history_item["anchor"],
             "links": last_history_item["links"],
             "visible_dimensions": last_history_item["visible_dimensions"],
+            "history_parent_id": history_parent_id,
         },
     )
 
@@ -104,6 +107,7 @@ def trim_network(
                 "anchor": item["anchor"],
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
+                "parent_id": item["parent"],
             }
             for item in study["history"]
         ],
@@ -124,6 +128,7 @@ class ExpandData(BaseModel):
     study_id: str
     history_item_id: str
     action_time: str
+    history_parent_id: str
 
 
 @router.post("/expand")
@@ -142,6 +147,7 @@ def expand_network(
     study_id = data.study_id
     history_item_id = data.history_item_id
     action_time = data.action_time
+    history_parent_id = data.history_parent_id
 
     # cache_data = csx_redis.load_current_graph(user_id)
     cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
@@ -250,6 +256,7 @@ def expand_network(
         last_history_item["query"],
         action_time,
         "expand",
+        history_parent_id,
     )
 
     study = csx_study.get_study(user_id, study_id)
@@ -270,6 +277,7 @@ def expand_network(
                 "anchor": item["anchor"],
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
+                "parent_id": item["parent"],
             }
             for item in study["history"]
         ],

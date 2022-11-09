@@ -13,7 +13,7 @@ function Graph(props) {
     const store = useContext(RootStoreContext);
     const containerRef = useRef();
     const bwColor = useColorModeValue('#303030', 'white');
-    const backgroundColor = useColorModeValue('#efefef', '#1A202C');
+    const backgroundColor = useColorModeValue('#ffffff', '#1A202C');
     const [timer, setTimer] = useState(null);
 
     const [windowSize, setWindowSize] = useState({

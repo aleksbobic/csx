@@ -483,6 +483,13 @@ export class GraphStore {
             action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
         };
 
+        if (this.store.core.studyHistory.length > 0) {
+            params.history_parent_id =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id;
+        }
+
         if (
             graphType === 'detail' &&
             this.store.graph.graphData.selectedComponents.length
@@ -550,6 +557,87 @@ export class GraphStore {
         }
     };
 
+    getStudyFromHistory = async (studyId, historyID) => {
+        const userId = this.store.core.userUuid;
+
+        const params = {
+            study_uuid: studyId,
+            user_uuid: userId,
+            history_id: historyID
+        };
+        let response;
+
+        try {
+            response = await axios.post('study', params);
+            console.log(response);
+
+            this.store.core.setStudyHistory(response.data.history);
+
+            this.store.core.setStudyHistoryItemIndexById(historyID);
+
+            this.store.core.setStudyQuery();
+
+            this.store.workflow.resetWorkflow();
+            this.store.schema.resetOverviewNodeProperties();
+
+            const historyGraphType =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].graph_type;
+
+            this.store.core.setCurrentGraph(historyGraphType);
+
+            this.store.search.links =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].links;
+            this.store.search.anchor =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].anchor;
+            this.store.search.anchorProperties =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].anchor_properties;
+            this.store.schema.overviewDataNodeProperties =
+                this.store.search.anchorProperties;
+
+            this.store.search.schema =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].schema;
+
+            this.store.workflow.nodes = [];
+            this.store.workflow.edges = [];
+
+            try {
+                this.store.workflow.addNodesFromJSONQuery(
+                    JSON.parse(this.store.search.query)
+                );
+            } catch (e) {
+                this.store.workflow.addNodesFromQuery(this.store.search.query);
+            }
+
+            this.store.schema.populateStoreData();
+
+            this.store.history.generateHistoryNodes();
+
+            console.log(response.data.graph);
+            console.log(historyGraphType);
+            console.log(this.store.search.query);
+
+            this.handleRetrievedGraph(
+                response.data.graph,
+                historyGraphType,
+                this.store.search.query
+            );
+        } catch (error) {
+            console.log(error);
+            this.store.search.setSearchIsEmpty(true);
+            return this.store.core.handleError(error);
+        }
+    };
+
     getStudy = async studyId => {
         const userId = this.store.core.userUuid;
 
@@ -561,6 +649,7 @@ export class GraphStore {
 
         try {
             response = await axios.post('study', params);
+            console.log(response);
         } catch (error) {
             console.log(error);
             this.store.search.setSearchIsEmpty(true);
@@ -624,7 +713,6 @@ export class GraphStore {
                     JSON.parse(this.store.search.query)
                 );
             } catch (e) {
-                console.log(e);
                 this.store.workflow.addNodesFromQuery(this.store.search.query);
             }
 
@@ -1026,7 +1114,12 @@ export class GraphStore {
                 history_item_id: currentStudyHistoryItem,
                 graph_type: this.store.core.currentGraph,
                 study_id: this.store.core.studyUuid,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
+                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                history_parent_id:
+                    this.store.core.studyHistory.length > 0 &&
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].id
             });
 
             this.store.core.setStudyHistory(response.data.history);
@@ -1122,7 +1215,12 @@ export class GraphStore {
                 search_uuid: suuid,
                 study_id: this.store.core.studyUuid,
                 history_item_id: currentStudyHistoryItem,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
+                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                history_parent_id:
+                    this.store.core.studyHistory.length > 0 &&
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].id
             });
 
             this.store.core.setStudyHistory(response.data.history);

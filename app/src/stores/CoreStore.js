@@ -58,6 +58,15 @@ export class CoreStore {
 
     setStudyHistoryItemIndex = index => (this.studyHistoryItemIndex = index);
 
+    setStudyHistoryItemIndexById = id => {
+        for (let i = 0; i < this.studyHistory.length; i++) {
+            if (this.studyHistory[i].id === id) {
+                this.setStudyHistoryItemIndex(i);
+                break;
+            }
+        }
+    };
+
     updateStudyName = async name => {
         this.studyName = name;
 

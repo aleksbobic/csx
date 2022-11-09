@@ -1,10 +1,12 @@
 import {
     Box,
+    Button,
     ButtonGroup,
     Checkbox,
     Flex,
     HStack,
     IconButton,
+    Kbd,
     Menu,
     MenuButton,
     MenuItem,
@@ -14,6 +16,7 @@ import {
     TabPanel,
     TabPanels,
     Tabs,
+    Text,
     Tooltip,
     useColorModeValue,
     VStack
@@ -25,7 +28,8 @@ import { useContext, useEffect, useState } from 'react';
 import ReactFlow, {
     applyEdgeChanges,
     applyNodeChanges,
-    Background
+    Background,
+    MiniMap
 } from 'react-flow-renderer';
 import { RootStoreContext } from 'stores/RootStore';
 
@@ -45,6 +49,7 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
+    Comment,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
@@ -56,6 +61,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
+
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
     const tabHeaderBgColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
@@ -116,6 +122,9 @@ function DataPanel(props) {
                 break;
             case 'history':
                 setActiveTab(3);
+                break;
+            case 'comment':
+                setActiveTab(4);
                 break;
             default:
                 setActiveTab(0);
@@ -266,6 +275,56 @@ function DataPanel(props) {
         </Box>
     );
 
+    const renderComments = () => {
+        return (
+            <VStack width="100%" spacing="40px" overflowY="scroll">
+                <VStack heigh="auto" width="100%">
+                    <Box
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="8px"
+                        padding="20px"
+                        width="100%"
+                    >
+                        <Text fontSize="sm">This is a comment</Text>
+                    </Box>
+                    <Box
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="8px"
+                        padding="20px"
+                        width="100%"
+                    >
+                        <Text fontSize="sm">Another comment</Text>
+                    </Box>
+                    <Box
+                        backgroundColor="whiteAlpha.200"
+                        borderRadius="8px"
+                        padding="20px"
+                        width="100%"
+                    >
+                        <Text fontSize="sm">Another one!</Text>
+                    </Box>
+                </VStack>
+                <HStack
+                    border="1px dashed #ffffff33"
+                    padding="20px"
+                    borderRadius="10px"
+                >
+                    <Tooltip label="Add comment for current scene">
+                        <Button size="sm">
+                            Add comment{' '}
+                            <Comment
+                                style={{ '--ggs': '0.7', marginLeft: '6px' }}
+                            />
+                        </Button>
+                    </Tooltip>
+                    <span>
+                        or <Kbd>shift</Kbd> + <Kbd>C</Kbd>
+                    </span>
+                </HStack>
+            </VStack>
+        );
+    };
+
     const renderHistory = () => (
         <Box
             height="100%"
@@ -295,7 +354,24 @@ function DataPanel(props) {
                         minZoom={1}
                         defaultZoom={1.25}
                         maxZoom={1.5}
-                    ></ReactFlow>
+                    >
+                        <MiniMap
+                            nodeColor={node =>
+                                node.data.isActive ? '#3182ceeb' : '#323232'
+                            }
+                            nodeStrokeColor={node =>
+                                node.data.isActive ? '#3182ceeb' : '#323232'
+                            }
+                            nodeBorderRadius="15px"
+                            maskColor="#1a1a1a"
+                            style={{
+                                backgroundColor: '#000000',
+                                border: '1px solid #ffffff22',
+                                borderRadius: '8px'
+                            }}
+                            nodeStrokeWidth={3}
+                        />
+                    </ReactFlow>
                 )}
             </AutoSizer>
         </Box>
@@ -369,6 +445,23 @@ function DataPanel(props) {
                             style={{ paddingBottom: '5px' }}
                         >
                             {renderHistory()}
+                        </Flex>
+                    </VStack>
+                </TabPanel>
+                <TabPanel
+                    padding="10px"
+                    paddingTop="20px"
+                    paddingBottom="20px"
+                    height="100%"
+                >
+                    <VStack width="100%" height="100%">
+                        <Flex
+                            spacing="10px"
+                            width="100%"
+                            height="100%"
+                            style={{ paddingBottom: '5px' }}
+                        >
+                            {renderComments()}
                         </Flex>
                     </VStack>
                 </TabPanel>

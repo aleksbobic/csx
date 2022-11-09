@@ -313,6 +313,7 @@ def get_graph_from_scratch(
     query,
     action_time,
     history_action,
+    history_parent_id,
 ):
     graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
@@ -364,6 +365,7 @@ def get_graph_from_scratch(
             "anchor": dimensions["anchor"]["dimension"],
             "links": dimensions["links"],
             "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
         },
     )
 
@@ -384,6 +386,7 @@ def get_graph_with_new_anchor_props(
     history_action,
     schema,
     anchor_properties,
+    history_parent_id,
 ):
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
@@ -415,6 +418,7 @@ def get_graph_with_new_anchor_props(
             "anchor": dimensions["anchor"]["dimension"],
             "links": dimensions["links"],
             "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
         },
     )
 
@@ -436,6 +440,7 @@ def get_graph_from_existing_data(
     query,
     action_time,
     history_action,
+    history_parent_id,
 ):
     # Take global table data and generate grpah
 
@@ -481,6 +486,7 @@ def get_graph_from_existing_data(
             "anchor": dimensions["anchor"]["dimension"],
             "links": dimensions["links"],
             "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
         },
     )
 
@@ -500,6 +506,7 @@ def get_graph_from_cache(
     schema,
     anchor_properties,
     dimensions,
+    history_parent_id,
 ):
     csx_study.new_history_entry(
         study_id,
@@ -515,6 +522,7 @@ def get_graph_from_cache(
             "anchor": dimensions["anchor"]["dimension"],
             "links": dimensions["links"],
             "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
         },
     )
 

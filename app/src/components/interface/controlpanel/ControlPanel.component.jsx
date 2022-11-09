@@ -18,6 +18,7 @@ import {
     Tag,
     Text,
     Tooltip,
+    useColorMode,
     useColorModeValue,
     useDisclosure,
     VStack
@@ -56,6 +57,8 @@ function ControlPanel() {
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [originNodeExists, setOriginNodeExists] = useState(false);
+    const { colorMode, toggleColorMode } = useColorMode();
+
     const location = useLocation();
 
     const selfCentricMenuBackground = useColorModeValue(
@@ -236,9 +239,12 @@ function ControlPanel() {
             left="320px"
             zIndex={20}
             spacing="2"
-            backgroundColor={selfCentricMenuBackground}
+            backgroundColor={
+                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
+            }
             padding="5px 6px"
             borderRadius="8px"
+            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
         >
             <HStack spacing="1">
                 <Tooltip label="Trim network">
@@ -301,9 +307,12 @@ function ControlPanel() {
             left="320px"
             zIndex={20}
             spacing="2"
-            backgroundColor={selfCentricMenuBackground}
+            backgroundColor={
+                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
+            }
             padding="5px 6px"
             borderRadius="8px"
+            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
         >
             <HStack spacing="1">
                 <Tooltip label="Show all nodes">

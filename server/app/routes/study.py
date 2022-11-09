@@ -66,6 +66,7 @@ def get_new_features(query):
 class GetStudyData(BaseModel):
     study_uuid: str
     user_uuid: str
+    history_id: Union[str, None]
     query: Union[str, None]
     user_id: Union[str, None]
     study_id: Union[str, None]
@@ -84,11 +85,19 @@ class GetStudyData(BaseModel):
 def get_study(data: GetStudyData):
     study_uuid = data.study_uuid
     user_uuid = data.user_uuid
+    history_entry_id = data.history_id
 
     study = csx_study.get_study(user_uuid, study_uuid)
 
     if len(study["history"]) > 0:
-        history_id = study["history"][len(study["history"]) - 1]["item_id"]
+        if history_entry_id:
+            history_id = [
+                entry
+                for entry in study["history"]
+                if entry["item_id"] == ObjectId(history_entry_id)
+            ][0]["item_id"]
+        else:
+            history_id = study["history"][len(study["history"]) - 1]["item_id"]
 
         history_item = list(
             csx_data.get_all_documents_by_conditions(
@@ -112,14 +121,22 @@ def get_study(data: GetStudyData):
                 "anchor": item["anchor"],
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
+                "parent_id": item["parent"],
             }
             for item in study["history"]
         ]
 
+        if history_entry_id:
+            graph_type = [
+                entry
+                for entry in study["history"]
+                if entry["item_id"] == ObjectId(history_entry_id)
+            ][0]["graph_type"]
+        else:
+            graph_type = history[len(history) - 1]["graph_type"]
+
         return {
-            "graph": pickle.loads(history_item["data"])[
-                history[len(history) - 1]["graph_type"]
-            ],
+            "graph": pickle.loads(history_item["data"])[graph_type],
             "name": study["study_name"],
             "description": study["study_description"],
             "history": history,
@@ -150,6 +167,7 @@ class ModifyStudyData(BaseModel):
     links: List
     anchor_properties: List
     action_time: str
+    history_parent_id: Union[str, None]
 
 
 @router.post("/modify")
@@ -168,6 +186,7 @@ def modify_study_graph(data: ModifyStudyData):
     visible_entries = data.visible_entries
     anchor_properties = data.anchor_properties
     action_time = data.action_time
+    history_parent_id = data.history_parent_id
 
     """Run search using given query."""
     if history_item_id == "":
@@ -291,6 +310,7 @@ def modify_study_graph(data: ModifyStudyData):
             query,
             action_time,
             comparison_res["history_action"],
+            history_parent_id,
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
             comparison_res,
@@ -306,6 +326,7 @@ def modify_study_graph(data: ModifyStudyData):
             comparison_res["history_action"],
             schema,
             anchor_properties,
+            history_parent_id,
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
@@ -322,6 +343,7 @@ def modify_study_graph(data: ModifyStudyData):
             query,
             action_time,
             comparison_res["history_action"],
+            history_parent_id,
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
             comparison_res,
@@ -336,6 +358,7 @@ def modify_study_graph(data: ModifyStudyData):
             schema,
             anchor_properties,
             dimensions,
+            history_parent_id,
         ),
     }
 
@@ -359,6 +382,7 @@ def modify_study_graph(data: ModifyStudyData):
                 "anchor": item["anchor"],
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
+                "parent_id": item["parent"],
             }
             for item in study["history"]
         ],
