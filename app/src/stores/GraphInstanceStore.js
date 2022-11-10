@@ -393,7 +393,6 @@ export class GraphInstanceStore {
 
         element.click();
     };
-
     resetSelfCentric = () => {
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;

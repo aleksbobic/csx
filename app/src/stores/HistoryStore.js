@@ -1,6 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import { MarkerType } from 'react-flow-renderer';
+import { format } from 'date-fns';
 import dagre from 'dagre';
+import axios from 'axios';
 
 export class HistoryStore {
     nodes = [];
@@ -122,7 +124,22 @@ export class HistoryStore {
         this.edges = [...layoutedEdges];
     };
 
-    addComment = comment => {
-        console.log(comment);
+    addComment = async comment => {
+        const comment_time = format(new Date(), 'H:mm do MMM yyyy OOOO');
+
+        const params = {
+            study_uuid: this.store.core.studyUuid,
+            user_uuid: this.store.core.userUuid,
+            history_item_index: this.store.core.studyHistoryItemIndex,
+            comment: comment,
+            comment_time: comment_time
+        };
+
+        this.store.core.studyHistory[
+            this.store.core.studyHistoryItemIndex
+        ].comments.push({ comment: comment, time: comment_time });
+
+        const response = await axios.post('history/comment', params);
+        console.log(response);
     };
 }

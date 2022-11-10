@@ -79,6 +79,7 @@ function DataPanel(props) {
 
     const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
+    const [comment, setComment] = useState('');
 
     useEffect(() => {
         setHistoryNodes(store.history.nodes);
@@ -274,6 +275,13 @@ function DataPanel(props) {
         </Box>
     );
 
+    const submitComment = () => {
+        if (comment !== '') {
+            store.history.addComment(comment);
+            setComment('');
+        }
+    };
+
     const renderComments = () => {
         return (
             <VStack width="100%" spacing="40px" overflowY="scroll">
@@ -288,9 +296,9 @@ function DataPanel(props) {
                                     borderRadius="8px"
                                     padding="20px"
                                     width="100%"
-                                    ket={`history_comment_${index}`}
+                                    key={`history_comment_${index}`}
                                 >
-                                    <Text fontSize="sm">{comment}</Text>
+                                    <Text fontSize="sm">{comment.comment}</Text>
                                 </Box>
                             );
                         })}
@@ -312,6 +320,8 @@ function DataPanel(props) {
                             placeholder="Enter your observations here ..."
                             fontSize="sm"
                             backgroundColor="whiteAlpha.200"
+                            value={comment}
+                            onChange={e => setComment(e.target.value)}
                         />
                         <Button
                             size="xs"
@@ -320,6 +330,7 @@ function DataPanel(props) {
                             bottom="8px"
                             zIndex="2"
                             borderRadius="4px"
+                            onClick={submitComment}
                         >
                             Comment
                         </Button>

@@ -168,9 +168,11 @@ function GraphPage() {
     }, [closeCommentModal, comment, store.history, submitCommentModalKey]);
 
     const submitComment = () => {
-        console.log(comment);
-        setComment('');
-        closeCommentModal();
+        if (comment !== '') {
+            store.history.addComment(comment);
+            setComment('');
+            closeCommentModal();
+        }
     };
 
     const renderCommentModal = () => (
@@ -178,11 +180,11 @@ function GraphPage() {
             width="500px"
             height="120px"
             position="fixed"
-            bottom="20px"
+            bottom="80px"
             left="50%"
             transform="translate(-50%, 0)"
             zIndex="20"
-            backgroundColor="black"
+            backgroundColor="blackAlpha.800"
             borderRadius="12px"
             border="1px solid gray.900"
         >
@@ -190,7 +192,7 @@ function GraphPage() {
                 width="100%"
                 height="100%"
                 borderRadius="12px"
-                padding="10px"
+                padding="20px"
                 paddingRight="40px"
                 border="none"
                 resize="none"

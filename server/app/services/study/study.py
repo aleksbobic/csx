@@ -76,3 +76,25 @@ def add_index(study_uuid: str, user_uuid: str, index: str):
         {"$set": {"index": index}},
     )
     return
+
+
+def add_comment(
+    study_id: str,
+    user_id: str,
+    history_item_index: int,
+    comment: str,
+    comment_time: str,
+):
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_id, "user_uuid": user_id},
+        {
+            "$push": {
+                f"history.{history_item_index}.comments": {
+                    "comment": comment,
+                    "time": comment_time,
+                }
+            }
+        },
+    )
