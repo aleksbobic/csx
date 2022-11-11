@@ -43,6 +43,7 @@ function CommentsComponent(props) {
             padding="14px"
             backgroundColor="whiteAlpha.100"
             borderRadius="10px"
+            style={{ justifyContent: 'space-between' }}
         >
             {props.commentsVisible && (
                 <VStack
