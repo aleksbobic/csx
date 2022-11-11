@@ -1,4 +1,4 @@
-import { Tag, Text, useColorMode, Wrap } from '@chakra-ui/react';
+import { Tag, Tbody, Td, Text, Tr, useColorMode, Wrap } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -193,36 +193,37 @@ function TableBody(props) {
         };
 
         return (
-            <td key="1" {...cell.getCellProps()} style={styles}>
+            <Td key="1" {...cell.getCellProps()} style={styles}>
                 <Wrap padding="20px 10px">
                     {cell.render(({ cell }) => renderCellContent(cell))}
                 </Wrap>
-            </td>
+            </Td>
         );
     };
 
     return (
-        <tbody {...props.getTableBodyProps()} id="nodelistbody">
+        <Tbody {...props.getTableBodyProps()} id="nodelistbody">
             {props.rows.map(row => {
                 props.prepareRow(row);
                 return (
-                    <tr
+                    <Tr
                         {...row.getRowProps()}
                         className={
                             colorMode === 'light'
                                 ? 'table-row-light'
                                 : 'table-row'
                         }
-                        style={{
-                            borderBottom: '1px solid',
-                            borderBottomColor: 'rgba(255,255,255,0.10)'
+                        borderBottom="1px solid rgba(255,255,255,0.10)"
+                        _last={{
+                            borderBottom: '0px solid',
+                            borderBottomColor: 'transparent'
                         }}
                     >
                         {row.cells.map(renderCell)}
-                    </tr>
+                    </Tr>
                 );
             })}
-        </tbody>
+        </Tbody>
     );
 }
 

@@ -50,6 +50,7 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
+    Comment,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
@@ -76,6 +77,7 @@ function DataPanel(props) {
     const [schemaEdges, setSchemaEdges] = useState(
         store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
     );
+    const [commentsVisible, setCommentsVisible] = useState(true);
 
     const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
@@ -284,69 +286,98 @@ function DataPanel(props) {
 
     const renderComments = () => {
         return (
-            <VStack width="100%" spacing="40px" overflowY="scroll">
-                <VStack heigh="auto" width="100%">
-                    {store.core.studyHistory.length > 0 &&
-                        store.core.studyHistory[
-                            store.core.studyHistoryItemIndex
-                        ].comments.map((comment, index) => {
-                            return (
-                                <Box
-                                    backgroundColor="whiteAlpha.200"
-                                    borderRadius="8px"
-                                    padding="20px"
-                                    width="100%"
-                                    key={`history_comment_${index}`}
-                                >
-                                    <Text fontSize="sm">{comment.comment}</Text>
-                                </Box>
-                            );
-                        })}
-
-                    <Box
-                        backgroundColor="transparent"
-                        borderRadius="8px"
+            <VStack
+                width="100%"
+                spacing="40px"
+                padding="14px"
+                backgroundColor="whiteAlpha.100"
+                borderRadius="10px"
+            >
+                {commentsVisible && (
+                    <VStack
+                        heigh="auto"
                         width="100%"
-                        position="relative"
-                        padding="2px"
+                        overflowY="scroll"
+                        borderRadius="6px"
                     >
-                        <Textarea
-                            width="100%"
-                            height="100%"
+                        {store.core.studyHistory.length > 0 &&
+                            store.core.studyHistory[
+                                store.core.studyHistoryItemIndex
+                            ].comments.map((comment, index) => {
+                                return (
+                                    <Box
+                                        backgroundColor="whiteAlpha.200"
+                                        borderRadius="8px"
+                                        padding="20px"
+                                        width="100%"
+                                        key={`history_comment_${index}`}
+                                    >
+                                        <Text fontSize="sm">
+                                            {comment.comment}
+                                        </Text>
+                                    </Box>
+                                );
+                            })}
+
+                        <Box
+                            backgroundColor="transparent"
                             borderRadius="8px"
-                            padding="10px"
-                            border="none"
-                            resize="none"
-                            placeholder="Enter your observations here ..."
-                            fontSize="sm"
-                            backgroundColor="whiteAlpha.200"
-                            value={comment}
-                            onChange={e => setComment(e.target.value)}
-                        />
-                        <Button
-                            size="xs"
-                            position="absolute"
-                            right="8px"
-                            bottom="8px"
-                            zIndex="2"
-                            borderRadius="4px"
-                            onClick={submitComment}
+                            width="100%"
+                            position="relative"
+                            padding="2px"
                         >
-                            Comment
-                        </Button>
-                    </Box>
-                </VStack>
+                            <Textarea
+                                width="100%"
+                                height="100%"
+                                borderRadius="8px"
+                                padding="10px"
+                                border="none"
+                                resize="none"
+                                placeholder="Enter your observations here ..."
+                                fontSize="sm"
+                                backgroundColor="whiteAlpha.200"
+                                value={comment}
+                                onChange={e => setComment(e.target.value)}
+                            />
+                            <Button
+                                size="xs"
+                                position="absolute"
+                                right="8px"
+                                bottom="8px"
+                                zIndex="2"
+                                borderRadius="4px"
+                                onClick={submitComment}
+                            >
+                                Comment
+                            </Button>
+                        </Box>
+                    </VStack>
+                )}
                 <HStack
-                    border="1px dashed #ffffff33"
-                    padding="20px"
                     borderRadius="10px"
+                    width="100%"
+                    justifyContent="space-between"
+                    style={{ marginTop: commentsVisible ? 10 : 0 }}
                 >
-                    <Text fontSize="sm">
+                    <Text fontWeight="bold" fontSize="xs" opacity="0.6">
                         Tip: press{' '}
                         <Kbd style={{ marginLeft: '10px' }}>shift</Kbd> +{' '}
                         <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in
                         the app to add a comment.
                     </Text>
+                    <Tooltip
+                        label={
+                            commentsVisible ? 'Hide comments' : 'Show comments'
+                        }
+                    >
+                        <IconButton
+                            size="sm"
+                            variant="ghost"
+                            color={commentsVisible ? 'blue.400' : 'white'}
+                            onClick={() => setCommentsVisible(!commentsVisible)}
+                            icon={<Comment style={{ '--ggs': '0.7' }} />}
+                        />
+                    </Tooltip>
                 </HStack>
             </VStack>
         );
@@ -378,7 +409,7 @@ function DataPanel(props) {
                         onEdgesChange={onEdgesChange}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
-                        minZoom={1}
+                        minZoom={0.2}
                         defaultZoom={1.25}
                         maxZoom={1.5}
                     >
@@ -404,93 +435,75 @@ function DataPanel(props) {
         </Box>
     );
 
-    const renderTablePanels = () => {
+    const renderTabPanels = () => {
         return (
-            <TabPanels
-                width="100%"
-                padding="10px"
-                overflow="scroll"
-                height="100%"
-                paddingBottom="50px"
-                paddingTop="0"
-            >
-                <TabPanel padding="10px" paddingTop="20px" height="100%">
-                    <Overview />
+            <TabPanels width="100%" padding="10px" height="100%">
+                <TabPanel padding="10px" height="100%">
+                    <Box
+                        height="100%"
+                        width="100%"
+                        padding="14px"
+                        backgroundColor="whiteAlpha.100"
+                        borderRadius="10px"
+                        overflow="scroll"
+                    >
+                        <Overview />
+                    </Box>
                 </TabPanel>
-                <TabPanel
-                    paddingLeft="0"
-                    paddingRight="0"
-                    paddingTop="50px"
-                    height="100%"
-                >
-                    {store.graph.currentGraphData.activeTableData &&
-                        (useList ? (
-                            <SerpComponent
-                                data={
-                                    store.graph.currentGraphData.activeTableData
-                                }
-                                columns={store.graph.tableColumns}
-                                visibleProperties={visibleProperties}
-                            />
-                        ) : (
-                            <TableComponent
-                                data={
-                                    store.graph.currentGraphData.activeTableData
-                                }
-                                columns={store.graph.tableColumns}
-                            />
-                        ))}
+                <TabPanel padding="10px" height="100%">
+                    <Box
+                        height="100%"
+                        width="100%"
+                        padding="14px"
+                        backgroundColor="whiteAlpha.100"
+                        borderRadius="10px"
+                        overflow="scroll"
+                        paddingTop={activeTab === 1 && '30px'}
+                    >
+                        {store.graph.currentGraphData.activeTableData &&
+                            (useList ? (
+                                <SerpComponent
+                                    data={
+                                        store.graph.currentGraphData
+                                            .activeTableData
+                                    }
+                                    columns={store.graph.tableColumns}
+                                    visibleProperties={visibleProperties}
+                                />
+                            ) : (
+                                <TableComponent
+                                    data={
+                                        store.graph.currentGraphData
+                                            .activeTableData
+                                    }
+                                    columns={store.graph.tableColumns}
+                                />
+                            ))}
+                    </Box>
                 </TabPanel>
-                <TabPanel
-                    padding="10px"
-                    paddingTop="20px"
-                    paddingBottom="20px"
-                    height="100%"
-                >
-                    <VStack width="100%" height="100%">
-                        <Flex
-                            spacing="10px"
-                            width="100%"
-                            height="100%"
-                            style={{ paddingBottom: '5px' }}
-                        >
-                            {renderSchema()}
-                        </Flex>
-                    </VStack>
+                <TabPanel padding="10px" height="100%">
+                    <Box
+                        height="100%"
+                        width="100%"
+                        padding="14px"
+                        backgroundColor="whiteAlpha.100"
+                        borderRadius="10px"
+                        overflow="scroll"
+                    >
+                        {renderSchema()}
+                    </Box>
                 </TabPanel>
-                <TabPanel
-                    padding="10px"
-                    paddingTop="20px"
-                    paddingBottom="20px"
-                    height="100%"
-                >
-                    <VStack width="100%" height="100%">
-                        <Flex
-                            spacing="10px"
-                            width="100%"
-                            height="100%"
-                            style={{ paddingBottom: '5px' }}
-                        >
-                            {renderHistory()}
-                        </Flex>
-                    </VStack>
-                </TabPanel>
-                <TabPanel
-                    padding="10px"
-                    paddingTop="20px"
-                    paddingBottom="20px"
-                    height="100%"
-                >
-                    <VStack width="100%" height="100%">
-                        <Flex
-                            spacing="10px"
-                            width="100%"
-                            height="100%"
-                            style={{ paddingBottom: '5px' }}
-                        >
-                            {renderComments()}
-                        </Flex>
-                    </VStack>
+                <TabPanel padding="10px" height="100%">
+                    <Box
+                        height="100%"
+                        width="100%"
+                        padding="14px"
+                        backgroundColor="whiteAlpha.100"
+                        borderRadius="10px"
+                        overflow="scroll"
+                    >
+                        {renderHistory()}
+                    </Box>
                 </TabPanel>
             </TabPanels>
         );
@@ -499,13 +512,13 @@ function DataPanel(props) {
     const renderTabButtons = () => {
         return (
             <TabList
-                position="absolute"
-                top="0"
                 width="100%"
                 height="60px"
                 zIndex="2"
-                backgroundColor={tabHeaderBgColor}
                 padding="15px 10px"
+                position="absolute"
+                top="70px"
+                left="25px"
                 justifyContent="space-between"
             >
                 <HStack>
@@ -653,12 +666,25 @@ function DataPanel(props) {
                     size="sm"
                     variant="soft-rounded"
                     colorScheme="blue"
-                    height="100%"
+                    height={commentsVisible ? '67%' : '100%'}
+                    paddingBottom={commentsVisible ? 0 : '80px'}
                     index={activeTab}
                 >
                     {activeTab === 1 && renderTabButtons()}
-                    {renderTablePanels()}
+                    {renderTabPanels()}
                 </Tabs>
+                <Flex
+                    position={commentsVisible ? 'initial' : 'absolute'}
+                    bottom={!commentsVisible && 0}
+                    spacing="10px"
+                    width="100%"
+                    height={commentsVisible ? '33%' : '80px'}
+                    padding="20px"
+                    paddingTop="0"
+                    paddingRight={!commentsVisible && 22}
+                >
+                    {renderComments()}
+                </Flex>
             </Box>
         </Box>
     );

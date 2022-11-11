@@ -151,7 +151,6 @@ function Overview(props) {
                 templateColumns="repeat(auto-fit, minmax(240px, 1fr))"
                 gap={5}
                 margin="0"
-                marginBottom="70px"
                 padding="0"
             >
                 {renderCharts()}

@@ -33,6 +33,7 @@ function GlobalFilter(props) {
                     }
                 }}
                 placeholder={`${props.preGlobalFilteredRows.length} entries to search through...`}
+                borderRadius="6px"
             />
             <InputRightElement>
                 <IconButton

@@ -202,24 +202,20 @@ function Serp(props) {
     };
 
     return (
-        <VStack
-            height="100%"
-            width="100%"
-            marginTop="20px"
-            paddingBottom="10px"
-        >
+        <VStack height="100%" width="100%" paddingTop="30px">
             <Box height="100%" width="100%">
                 <AutoSizer height="100%" width="100%">
                     {({ height, width }) => (
                         <Box
                             ref={scrollTableContainerRefrence}
                             style={{
-                                height: height,
-                                width: width,
-                                overflow: 'auto'
+                                height: `${height}px`,
+                                width: `${width}px`,
+                                overflow: 'auto',
+                                borderRadius: '6px'
                             }}
                         >
-                            <div
+                            <Box
                                 ref={listElement}
                                 style={{
                                     height: rowVirtualizer.getTotalSize(),
@@ -231,7 +227,7 @@ function Serp(props) {
                                     .getVirtualItems()
                                     .map(virtualRow => {
                                         return (
-                                            <div
+                                            <Box
                                                 key={virtualRow.index}
                                                 ref={virtualRow.measureElement}
                                                 style={{
@@ -246,10 +242,10 @@ function Serp(props) {
                                                     virtualRow.index,
                                                     virtualRow.index
                                                 )}
-                                            </div>
+                                            </Box>
                                         );
                                     })}
-                            </div>
+                            </Box>
                         </Box>
                     )}
                 </AutoSizer>

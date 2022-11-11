@@ -22,7 +22,6 @@ import {
     Assign,
     Attribution,
     ChevronRight,
-    Comment,
     List,
     Moon,
     RadioCheck,
@@ -100,7 +99,7 @@ function NavigationPanelComponent() {
     };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-105px" top="20px" id="graphutils">
+        <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
             <HStack
                 spacing="10px"
                 backgroundColor={
@@ -207,7 +206,7 @@ function NavigationPanelComponent() {
         <Box
             position="absolute"
             marginLeft="-100px"
-            bottom="75px"
+            bottom="20px"
             id="viewutils"
         >
             {store.graphInstance.hoverData.length > 0 &&
@@ -400,28 +399,6 @@ function NavigationPanelComponent() {
                             }
                         />
                     </Tooltip>
-                    <Tooltip label="Toggle comment panel">
-                        <IconButton
-                            border="none"
-                            aria-label="Commnet panel toggle"
-                            id="commnetpnaletoggle"
-                            color={
-                                panelType === 'comment'
-                                    ? 'blue.400'
-                                    : colorMode === 'light'
-                                    ? 'black'
-                                    : 'white'
-                            }
-                            onClick={() => toggleDataPanel('comment')}
-                            icon={
-                                <Comment
-                                    style={{
-                                        '--ggs': '0.7'
-                                    }}
-                                />
-                            }
-                        />
-                    </Tooltip>
                 </ButtonGroup>
             )}
 
@@ -455,7 +432,7 @@ function NavigationPanelComponent() {
             <Box
                 id="navigation"
                 pos="fixed"
-                zIndex="5"
+                zIndex="20"
                 height="50px"
                 backgroundColor={
                     location.pathname !== '/' ? bgColor : 'transparent'
@@ -580,8 +557,9 @@ function NavigationPanelComponent() {
                         right: isOpen ? '0px' : '-35%',
                         width: '35%',
                         position: 'fixed',
-                        top: '50px',
-                        height: '100%'
+                        top: 0,
+                        height: '100%',
+                        paddingTop: '50px'
                     }}
                 >
                     {renderGraphUtils()}
