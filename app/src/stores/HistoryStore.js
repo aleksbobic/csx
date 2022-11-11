@@ -140,6 +140,20 @@ export class HistoryStore {
         ].comments.push({ comment: comment, time: comment_time });
 
         const response = await axios.post('history/comment', params);
-        console.log(response);
+    };
+
+    deleteCommnet = async index => {
+        const params = {
+            study_uuid: this.store.core.studyUuid,
+            user_uuid: this.store.core.userUuid,
+            history_item_index: this.store.core.studyHistoryItemIndex,
+            comment_index: index
+        };
+
+        this.store.core.studyHistory[
+            this.store.core.studyHistoryItemIndex
+        ].comments.splice(index, 1);
+
+        const response = await axios.post('history/deletecomment', params);
     };
 }

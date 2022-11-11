@@ -1,12 +1,10 @@
 import {
     Box,
-    Button,
     ButtonGroup,
     Checkbox,
     Flex,
     HStack,
     IconButton,
-    Kbd,
     Menu,
     MenuButton,
     MenuItem,
@@ -16,11 +14,8 @@ import {
     TabPanel,
     TabPanels,
     Tabs,
-    Text,
-    Textarea,
     Tooltip,
-    useColorModeValue,
-    VStack
+    useColorModeValue
 } from '@chakra-ui/react';
 import Overview from 'components/feature/overview/Overview.component';
 import { observer } from 'mobx-react';
@@ -42,6 +37,7 @@ import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextr
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
 import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
+import CommentsComponent from 'components/feature/comments/Comments.component';
 import historyNode from 'components/feature/historyNode/HistoryNode.component';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
@@ -50,7 +46,6 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
-    Comment,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
@@ -64,7 +59,6 @@ function DataPanel(props) {
     const store = useContext(RootStoreContext);
 
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
-    const tabHeaderBgColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [useList, setUseList] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
@@ -81,7 +75,6 @@ function DataPanel(props) {
 
     const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
-    const [comment, setComment] = useState('');
 
     useEffect(() => {
         setHistoryNodes(store.history.nodes);
@@ -276,112 +269,6 @@ function DataPanel(props) {
             </AutoSizer>
         </Box>
     );
-
-    const submitComment = () => {
-        if (comment !== '') {
-            store.history.addComment(comment);
-            setComment('');
-        }
-    };
-
-    const renderComments = () => {
-        return (
-            <VStack
-                width="100%"
-                spacing="40px"
-                padding="14px"
-                backgroundColor="whiteAlpha.100"
-                borderRadius="10px"
-            >
-                {commentsVisible && (
-                    <VStack
-                        heigh="auto"
-                        width="100%"
-                        overflowY="scroll"
-                        borderRadius="6px"
-                    >
-                        {store.core.studyHistory.length > 0 &&
-                            store.core.studyHistory[
-                                store.core.studyHistoryItemIndex
-                            ].comments.map((comment, index) => {
-                                return (
-                                    <Box
-                                        backgroundColor="whiteAlpha.200"
-                                        borderRadius="8px"
-                                        padding="20px"
-                                        width="100%"
-                                        key={`history_comment_${index}`}
-                                    >
-                                        <Text fontSize="sm">
-                                            {comment.comment}
-                                        </Text>
-                                    </Box>
-                                );
-                            })}
-
-                        <Box
-                            backgroundColor="transparent"
-                            borderRadius="8px"
-                            width="100%"
-                            position="relative"
-                            padding="2px"
-                        >
-                            <Textarea
-                                width="100%"
-                                height="100%"
-                                borderRadius="8px"
-                                padding="10px"
-                                border="none"
-                                resize="none"
-                                placeholder="Enter your observations here ..."
-                                fontSize="sm"
-                                backgroundColor="whiteAlpha.200"
-                                value={comment}
-                                onChange={e => setComment(e.target.value)}
-                            />
-                            <Button
-                                size="xs"
-                                position="absolute"
-                                right="8px"
-                                bottom="8px"
-                                zIndex="2"
-                                borderRadius="4px"
-                                onClick={submitComment}
-                            >
-                                Comment
-                            </Button>
-                        </Box>
-                    </VStack>
-                )}
-                <HStack
-                    borderRadius="10px"
-                    width="100%"
-                    justifyContent="space-between"
-                    style={{ marginTop: commentsVisible ? 10 : 0 }}
-                >
-                    <Text fontWeight="bold" fontSize="xs" opacity="0.6">
-                        Tip: press{' '}
-                        <Kbd style={{ marginLeft: '10px' }}>shift</Kbd> +{' '}
-                        <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in
-                        the app to add a comment.
-                    </Text>
-                    <Tooltip
-                        label={
-                            commentsVisible ? 'Hide comments' : 'Show comments'
-                        }
-                    >
-                        <IconButton
-                            size="sm"
-                            variant="ghost"
-                            color={commentsVisible ? 'blue.400' : 'white'}
-                            onClick={() => setCommentsVisible(!commentsVisible)}
-                            icon={<Comment style={{ '--ggs': '0.7' }} />}
-                        />
-                    </Tooltip>
-                </HStack>
-            </VStack>
-        );
-    };
 
     const renderHistory = () => (
         <Box
@@ -683,7 +570,10 @@ function DataPanel(props) {
                     paddingTop="0"
                     paddingRight={!commentsVisible && 22}
                 >
-                    {renderComments()}
+                    <CommentsComponent
+                        commentsVisible={commentsVisible}
+                        setCommentsVisible={setCommentsVisible}
+                    />
                 </Flex>
             </Box>
         </Box>

@@ -98,3 +98,14 @@ def add_comment(
             }
         },
     )
+
+
+def delete_comment(
+    study_id: str, user_id: str, history_item_index: int, comment_index: int
+):
+    csx_data.delete_from_array(
+        "studies",
+        {"study_uuid": study_id, "user_uuid": user_id},
+        f"history.{history_item_index}.comments",
+        comment_index,
+    )
