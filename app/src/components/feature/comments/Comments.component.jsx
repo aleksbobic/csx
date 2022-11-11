@@ -65,6 +65,7 @@ function CommentsComponent(props) {
                                     width="100%"
                                     key={`history_comment_${index}`}
                                     position="relative"
+                                    _last={{ marginBottom: '10px' }}
                                 >
                                     <ReactMarkdown
                                         className="comment"
@@ -99,7 +100,13 @@ function CommentsComponent(props) {
                                 </Box>
                             );
                         })}
-
+                </VStack>
+            )}
+            <VStack
+                width="100%"
+                style={{ marginTop: props.commentsVisible ? 10 : 0 }}
+            >
+                {props.commentsVisible && (
                     <Box
                         backgroundColor="transparent"
                         borderRadius="8px"
@@ -116,54 +123,60 @@ function CommentsComponent(props) {
                             resize="none"
                             placeholder="Enter your observations here ..."
                             fontSize="sm"
-                            backgroundColor="whiteAlpha.200"
+                            backgroundColor="whiteAlpha.100"
                             value={comment}
                             onChange={e => setComment(e.target.value)}
                         />
                         <Button
                             size="xs"
                             position="absolute"
-                            right="8px"
-                            bottom="8px"
+                            right="12px"
+                            bottom="12px"
+                            background="blue.400"
                             zIndex="2"
+                            opacity="0.7"
                             borderRadius="4px"
+                            transition="0.2s all ease-in-out"
+                            _hover={{ opacity: 1 }}
                             onClick={submitComment}
                         >
                             Comment
                         </Button>
                     </Box>
-                </VStack>
-            )}
-            <HStack
-                borderRadius="10px"
-                width="100%"
-                justifyContent="space-between"
-                style={{ marginTop: props.commentsVisible ? 10 : 0 }}
-            >
-                <Text fontWeight="bold" fontSize="xs" opacity="0.6">
-                    Tip: press <Kbd style={{ marginLeft: '10px' }}>shift</Kbd> +{' '}
-                    <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in the
-                    app to add a comment.
-                </Text>
-                <Tooltip
-                    label={
-                        props.commentsVisible
-                            ? 'Hide comments'
-                            : 'Show comments'
-                    }
+                )}
+
+                <HStack
+                    borderRadius="10px"
+                    width="100%"
+                    justifyContent="space-between"
+                    style={{ marginTop: props.commentsVisible ? 10 : 0 }}
                 >
-                    <IconButton
-                        opacity={props.commentsVisible ? 1 : 0.6}
-                        size="sm"
-                        variant="ghost"
-                        color={props.commentsVisible ? 'blue.400' : 'white'}
-                        onClick={() =>
-                            props.setCommentsVisible(!props.commentsVisible)
+                    <Text fontWeight="bold" fontSize="xs" opacity="0.6">
+                        Tip: press{' '}
+                        <Kbd style={{ marginLeft: '10px' }}>shift</Kbd> +{' '}
+                        <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in
+                        the app to add a comment.
+                    </Text>
+                    <Tooltip
+                        label={
+                            props.commentsVisible
+                                ? 'Hide comments'
+                                : 'Show comments'
                         }
-                        icon={<Comment style={{ '--ggs': '0.7' }} />}
-                    />
-                </Tooltip>
-            </HStack>
+                    >
+                        <IconButton
+                            opacity={props.commentsVisible ? 1 : 0.6}
+                            size="sm"
+                            variant="ghost"
+                            color={props.commentsVisible ? 'blue.400' : 'white'}
+                            onClick={() =>
+                                props.setCommentsVisible(!props.commentsVisible)
+                            }
+                            icon={<Comment style={{ '--ggs': '0.7' }} />}
+                        />
+                    </Tooltip>
+                </HStack>
+            </VStack>
         </VStack>
     );
 }
