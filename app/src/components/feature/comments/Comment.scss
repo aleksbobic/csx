@@ -1,6 +1,7 @@
 .comment {
     font-size: small;
     display: inline-block;
+    width: 100%;
 
     h1,
     h2,
@@ -33,11 +34,20 @@
     blockquote {
         padding-left: 10px;
         border-left: 2px solid #83c4f2;
+        margin-top: 6px;
+        margin-bottom: 6px;
     }
 
     a,
     a:visited {
         color: #83c4f2;
         text-decoration: underline;
+    }
+
+    code {
+        background-color: #00000077;
+        padding: 4px 6px;
+        border-radius: 4px;
+        display: inline-block;
     }
 }

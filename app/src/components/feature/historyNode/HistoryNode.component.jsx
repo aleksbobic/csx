@@ -1,19 +1,49 @@
-import { Box, Flex, HStack, Text, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Flex,
+    HStack,
+    IconButton,
+    Text,
+    Tooltip,
+    VStack
+} from '@chakra-ui/react';
+import { Close } from 'css.gg';
 
 import { Handle } from 'react-flow-renderer';
 
 const historyNode = ({ id, data, isConnectable }) => {
     return (
-        <>
+        <Box width="100%" height="100%" role="group">
+            {data.parent && (
+                <Tooltip label="Remove history item and its children">
+                    <IconButton
+                        size="xs"
+                        variant="ghost"
+                        position="absolute"
+                        top="5px"
+                        right="5px"
+                        opacity="0"
+                        transition="0.2s all ease-in-out"
+                        zIndex="2"
+                        onClick={e => {
+                            e.preventDefault();
+                            data.deleteNode(id);
+                        }}
+                        _groupHover={{ opacity: 1 }}
+                        icon={<Close style={{ '--ggs': '0.7' }} />}
+                    />
+                </Tooltip>
+            )}
             <Box
-                transition="0.1s all ease-in-out"
+                transition="0.2s all ease-in-out"
                 _hover={{
                     cursor: data.isActive ? 'default' : 'pointer',
-                    backgroundColor: data.isActive ? 'default' : '#3182ce33'
+                    backgroundColor: data.isActive ? 'default' : '#3182ce'
                 }}
                 borderRadius="6px"
                 height="100%"
                 width="100%"
+                zIndex="1"
                 onClick={() => data.loadStudy(id)}
             >
                 <Handle
@@ -39,6 +69,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                                 whiteSpace="nowrap"
                                 textOverflow="ellipsis"
                                 width="100%"
+                                paddingRight={data.parent && '20px'}
                             >
                                 {data.title}
                             </Text>
@@ -46,7 +77,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                         <HStack
                             width="100%"
                             style={{ marginTop: 0 }}
-                            opacity="0.7"
+                            opacity={data.isActive ? '1' : '0.7'}
                         >
                             <Text fontSize="xs">Graph type:</Text>
                             <Text fontWeight="bold" fontSize="xs">
@@ -56,7 +87,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                         <HStack
                             width="100%"
                             style={{ marginTop: 0 }}
-                            opacity="0.7"
+                            opacity={data.isActive ? '1' : '0.7'}
                         >
                             <Text fontSize="xs">Comment count:</Text>
                             <Text fontWeight="bold" fontSize="xs">
@@ -66,7 +97,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                     </VStack>
                     <Text
                         fontSize="8px"
-                        opacity="0.5"
+                        opacity={data.isActive ? '0.7' : '0.5'}
                         bottom="5px"
                         position="absolute"
                     >
@@ -88,7 +119,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                     isConnectable={isConnectable}
                 />
             </Box>
-        </>
+        </Box>
     );
 };
 

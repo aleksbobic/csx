@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 import app.services.study.study as csx_study
+import app.services.data.mongo as csx_data
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -15,8 +17,44 @@ def insert_item(study_uuid: str, item_uuid: str, uuid: str):
     return
 
 
-@router.get("/delete")
-def delete_item(study_uuid: str, item_uuid: str, uuid: str):
+class HistoryDeleteData(BaseModel):
+    study_uuid: str
+    user_uuid: str
+    history_item_indexes: list
+
+
+@router.post("/delete")
+def delete_item(data: HistoryDeleteData):
+    study_uuid = data.study_uuid
+    user_uuid = data.user_uuid
+    history_item_indexes = data.history_item_indexes
+
+    study_entry = list(
+        csx_data.get_all_documents_by_conditions(
+            "studies",
+            {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
+            {"_id": 0},
+        )
+    )[0]
+
+    csx_data.delete_documents(
+        "history", {"_id": {"$in": [ObjectId(item) for item in history_item_indexes]}}
+    )
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": study_uuid, "user_uuid": user_uuid},
+        {
+            "$set": {
+                "history": [
+                    entry
+                    for entry in study_entry["history"]
+                    if str(entry["item_id"]) not in history_item_indexes
+                ]
+            }
+        },
+    )
+
     return
 
 

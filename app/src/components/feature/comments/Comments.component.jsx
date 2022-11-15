@@ -21,6 +21,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { RootStoreContext } from 'stores/RootStore';
 import { PencilIcon } from '@heroicons/react/20/solid';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './Comment.scss';
 
 function CommentsComponent(props) {
@@ -125,7 +127,7 @@ function CommentsComponent(props) {
                                     }
                                     borderRadius="8px"
                                     padding="20px"
-                                    paddingRight="69px"
+                                    paddingRight="79px"
                                     width="100%"
                                     key={`history_comment_${index}`}
                                     position="relative"
@@ -139,7 +141,66 @@ function CommentsComponent(props) {
                                         children={comment.comment}
                                         remarkPlugins={[remarkGfm]}
                                         disallowedElements={['img', 'a']}
+                                        style={{ width: '100%' }}
+                                        components={{
+                                            code({
+                                                node,
+                                                inline,
+                                                className,
+                                                children,
+                                                ...props
+                                            }) {
+                                                const match =
+                                                    /language-(\w+)/.exec(
+                                                        className || ''
+                                                    );
+
+                                                return !inline && match ? (
+                                                    <SyntaxHighlighter
+                                                        children={String(
+                                                            children
+                                                        ).replace(/\n$/, '')}
+                                                        style={materialDark}
+                                                        language={match[1]}
+                                                        showLineNumbers={true}
+                                                        PreTag="div"
+                                                        useInlineStyles={true}
+                                                        customStyle={{
+                                                            background:
+                                                                'transparent',
+                                                            padding: 0,
+                                                            borderRadius: '6px',
+                                                            overflow: 'scroll'
+                                                        }}
+                                                        codeTagProps={{
+                                                            style: {
+                                                                background:
+                                                                    '#00000077',
+                                                                borderRadius:
+                                                                    '6px'
+                                                            }
+                                                        }}
+                                                        {...props}
+                                                    />
+                                                ) : (
+                                                    <code
+                                                        className={className}
+                                                        {...props}
+                                                    >
+                                                        {children}
+                                                    </code>
+                                                );
+                                            }
+                                        }}
                                     />
+
+                                    <Text
+                                        fontSize="11px"
+                                        opacity="0.5"
+                                        marginTop="6px"
+                                    >
+                                        {comment.time}
+                                    </Text>
 
                                     <Flex
                                         display={editMode ? 'none' : 'initial'}
@@ -213,7 +274,7 @@ function CommentsComponent(props) {
                             ref={commentField}
                             borderRadius="8px"
                             padding="10px"
-                            paddingRight={editMode ? '130px' : '110px'}
+                            paddingRight={editMode ? '150px' : '110px'}
                             border="none"
                             resize="none"
                             placeholder="Enter your observations here ..."

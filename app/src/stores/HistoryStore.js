@@ -55,7 +55,8 @@ export class HistoryStore {
                     comments: historyItem.comments,
                     actionTime: historyItem.action_time,
                     isActive: this.store.core.studyHistoryItemIndex === index,
-                    loadStudy: this.loadStudy
+                    loadStudy: this.loadStudy,
+                    deleteNode: this.deleteNode
                 },
                 position: {
                     x: 50,
@@ -201,5 +202,53 @@ export class HistoryStore {
         const response = await axios.post('history/editcomment', params);
 
         this.generateHistoryNodes();
+    };
+
+    getAllChildNodes = id => {
+        const currentNode = this.nodes.find(node => node.id === id);
+        const currentNodeChildren = this.nodes.filter(
+            node => node.data.parent === id
+        );
+
+        if (currentNodeChildren.length) {
+            return [
+                currentNode.id,
+                ...currentNodeChildren.map(childNode =>
+                    this.getAllChildNodes(childNode.id)
+                )
+            ].flat();
+        } else {
+            return [currentNode.id];
+        }
+    };
+
+    deleteNode = async id => {
+        const deleteNodeIDs = this.getAllChildNodes(id);
+
+        const params = {
+            study_uuid: this.store.core.studyUuid,
+            user_uuid: this.store.core.userUuid,
+            history_item_indexes: deleteNodeIDs
+        };
+
+        const response = await axios.post('history/delete', params);
+
+        const deletedNodeParent = this.nodes.find(node => node.id === id).data
+            .parent;
+
+        this.store.core.setStudyHistoryItemIndex(
+            this.store.core.studyHistory.findIndex(
+                entry => entry.id === deletedNodeParent
+            )
+        );
+
+        this.store.core.setStudyHistory(
+            this.store.core.studyHistory.filter(
+                entry => !deleteNodeIDs.includes(entry.id)
+            )
+        );
+
+        this.generateHistoryNodes();
+        this.loadStudy(deletedNodeParent);
     };
 }
