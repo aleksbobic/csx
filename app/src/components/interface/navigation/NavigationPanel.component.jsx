@@ -21,13 +21,13 @@ import {
     AlignBottom,
     Assign,
     Attribution,
+    Carousel,
     ChevronRight,
     List,
     Moon,
     RadioCheck,
     Ratio,
     Ring,
-    Stopwatch,
     Sun,
     Sync
 } from 'css.gg';
@@ -37,6 +37,7 @@ import { observer } from 'mobx-react';
 import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { CameraIcon } from '@heroicons/react/24/solid';
 import DataPanelComponent from '../datapanel/DataPanel.component';
 
 function NavigationPanelComponent() {
@@ -218,7 +219,7 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Make Screenshot"
-                        icon={<Ratio />}
+                        icon={<CameraIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
                                 'view utils',
@@ -235,7 +236,7 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Zoom to fit"
-                        icon={<Assign />}
+                        icon={<Ratio style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
                                 'view utils',
@@ -391,9 +392,11 @@ function NavigationPanelComponent() {
                             }
                             onClick={() => toggleDataPanel('history')}
                             icon={
-                                <Stopwatch
+                                <Carousel
                                     style={{
-                                        '--ggs': '0.7'
+                                        '--ggs': '0.7',
+                                        transform:
+                                            'rotate(180deg) scale(0.7, 0.8)'
                                     }}
                                 />
                             }

@@ -9,11 +9,35 @@ export class HistoryStore {
     edges = [];
     nodeHeight = 100;
     nodeWidth = 200;
+    commentTrigger = true;
 
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
     }
+
+    getNodeTitle = comments => {
+        let title;
+        const re = new RegExp('^#{1,6} .*');
+
+        if (comments.length) {
+            const filteredComments = comments.filter(entry =>
+                entry.comment.includes('#')
+            );
+
+            for (let i = 0; i < filteredComments.length; i++) {
+                const regexMatches = re.exec(filteredComments[i].comment);
+                if (regexMatches) {
+                    title = regexMatches[0].replaceAll('#', '').trim();
+                    break;
+                }
+            }
+        }
+
+        return title;
+    };
+
+    setCommentTrigger = val => (this.commentTrigger = val);
 
     generateHistoryNodes = () => {
         this.nodes = [];
@@ -25,6 +49,7 @@ export class HistoryStore {
                 type: 'historyNode',
                 data: {
                     parent: historyItem.parent_id,
+                    title: this.getNodeTitle(historyItem.comments),
                     action: historyItem.action,
                     graphType: historyItem.graph_type,
                     comments: historyItem.comments,
@@ -58,6 +83,7 @@ export class HistoryStore {
                 source: `${this.nodes[i].data.parent}`,
                 target: `${this.nodes[i].id}`,
                 data: {},
+                label: this.nodes[i].data.action,
                 markerEnd: {
                     type: MarkerType.ArrowClosed
                 }
@@ -140,6 +166,7 @@ export class HistoryStore {
         ].comments.push({ comment: comment, time: comment_time });
 
         const response = await axios.post('history/comment', params);
+        this.generateHistoryNodes();
     };
 
     deleteCommnet = async index => {
@@ -155,5 +182,24 @@ export class HistoryStore {
         ].comments.splice(index, 1);
 
         const response = await axios.post('history/deletecomment', params);
+        this.generateHistoryNodes();
+    };
+
+    editComment = async (comment, index) => {
+        const params = {
+            study_uuid: this.store.core.studyUuid,
+            user_uuid: this.store.core.userUuid,
+            history_item_index: this.store.core.studyHistoryItemIndex,
+            comment_index: index,
+            comment: comment
+        };
+
+        this.store.core.studyHistory[
+            this.store.core.studyHistoryItemIndex
+        ].comments[index].comment = comment;
+
+        const response = await axios.post('history/editcomment', params);
+
+        this.generateHistoryNodes();
     };
 }

@@ -51,12 +51,35 @@ class HistoryDeleteCommentData(BaseModel):
 
 
 @router.post("/deletecomment")
-def add_comment(data: HistoryDeleteCommentData):
+def delete_comment(data: HistoryDeleteCommentData):
     study_uuid = data.study_uuid
     user_uuid = data.user_uuid
     history_item_index = data.history_item_index
     comment_index = data.comment_index
 
     csx_study.delete_comment(study_uuid, user_uuid, history_item_index, comment_index)
+
+    return
+
+
+class HistoryEditCommentData(BaseModel):
+    study_uuid: str
+    user_uuid: str
+    history_item_index: int
+    comment_index: int
+    comment: str
+
+
+@router.post("/editcomment")
+def edit_comment(data: HistoryEditCommentData):
+    study_uuid = data.study_uuid
+    user_uuid = data.user_uuid
+    history_item_index = data.history_item_index
+    comment_index = data.comment_index
+    comment = data.comment
+
+    csx_study.edit_comment(
+        study_uuid, user_uuid, history_item_index, comment_index, comment
+    )
 
     return

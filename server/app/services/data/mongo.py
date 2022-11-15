@@ -50,6 +50,16 @@ def delete_from_array(
     database[collection_name].update_one(conditions, {"$pull": {f"{arr_name}": None}})
 
 
+def edit_array(
+    collection_name: str, conditions: object, arr_name, index, value
+) -> None:
+    """Edit a value in an array"""
+    # database[collection_name].update_many(conditions, new_values)
+    database[collection_name].update_one(
+        conditions, {"$set": {f"{arr_name}.{index}.comment": value}}
+    )
+
+
 def insert_documents(collection_name: str, values: List[Any]) -> None:
     """Insert multiple values in a collection"""
     database[collection_name].insert_many(values)

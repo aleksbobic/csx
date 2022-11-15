@@ -47,6 +47,7 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { ScissorsIcon, ArrowsPointingOutIcon } from '@heroicons/react/20/solid';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -252,7 +253,7 @@ function ControlPanel() {
                         borderRadius="6px"
                         id="trimnetworkbutton"
                         size="sm"
-                        icon={<EditStraight style={{ '--ggs': '0.6' }} />}
+                        icon={<ScissorsIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.graph.trimNetwork();
                         }}
@@ -269,7 +270,11 @@ function ControlPanel() {
                             borderRadius="6px"
                             id="trimnetworkbutton"
                             size="sm"
-                            icon={<Controller style={{ '--ggs': '0.6' }} />}
+                            icon={
+                                <ArrowsPointingOutIcon
+                                    style={{ width: '16px' }}
+                                />
+                            }
                         />
                     </Tooltip>
                     <MenuList

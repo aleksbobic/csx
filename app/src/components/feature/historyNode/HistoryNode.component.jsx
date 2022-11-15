@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react';
+import { Box, Flex, HStack, Text, Tooltip, VStack } from '@chakra-ui/react';
 
 import { Handle } from 'react-flow-renderer';
 
@@ -31,25 +31,33 @@ const historyNode = ({ id, data, isConnectable }) => {
                 />
                 <Flex alignItems="center" fontSize="14px" padding="10px">
                     <VStack width="100%" height="100%">
-                        <HStack width="100%">
-                            <Text fontSize="xs">Action:</Text>
+                        <Tooltip label={data.title}>
                             <Text
                                 fontWeight="bold"
-                                fontSize="xs"
+                                fontSize="sm"
                                 overflow="hidden"
                                 whiteSpace="nowrap"
                                 textOverflow="ellipsis"
+                                width="100%"
                             >
-                                {data.action}
+                                {data.title}
                             </Text>
-                        </HStack>
-                        <HStack width="100%" style={{ marginTop: 0 }}>
+                        </Tooltip>
+                        <HStack
+                            width="100%"
+                            style={{ marginTop: 0 }}
+                            opacity="0.7"
+                        >
                             <Text fontSize="xs">Graph type:</Text>
                             <Text fontWeight="bold" fontSize="xs">
                                 {data.graphType}
                             </Text>
                         </HStack>
-                        <HStack width="100%" style={{ marginTop: 0 }}>
+                        <HStack
+                            width="100%"
+                            style={{ marginTop: 0 }}
+                            opacity="0.7"
+                        >
                             <Text fontSize="xs">Comment count:</Text>
                             <Text fontWeight="bold" fontSize="xs">
                                 {data.comments.length}

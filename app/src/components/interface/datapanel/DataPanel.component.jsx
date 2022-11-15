@@ -46,14 +46,18 @@ import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
+    Assign,
+    Close,
     MenuBoxed,
     MoreVerticalAlt,
+    Record,
     SoftwareDownload,
     ViewComfortable
 } from 'css.gg';
 import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useRef } from 'react';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
@@ -75,6 +79,8 @@ function DataPanel(props) {
 
     const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
+
+    const [historyViewport, setHistoryViewport] = useState(null);
 
     useEffect(() => {
         setHistoryNodes(store.history.nodes);
@@ -270,6 +276,17 @@ function DataPanel(props) {
         </Box>
     );
 
+    const zoomToActiveHistoryNode = () => {
+        const selectedNodePosition =
+            store.history.nodes[store.core.studyHistoryItemIndex].position;
+
+        historyViewport.setCenter(
+            selectedNodePosition.x + 100,
+            selectedNodePosition.y,
+            { duration: 0, zoom: 1 }
+        );
+    };
+
     const renderHistory = () => (
         <Box
             height="100%"
@@ -299,6 +316,20 @@ function DataPanel(props) {
                         minZoom={0.2}
                         defaultZoom={1.25}
                         maxZoom={1.5}
+                        onInit={instance => {
+                            setHistoryViewport(instance);
+
+                            const selectedNodePosition =
+                                store.history.nodes[
+                                    store.core.studyHistoryItemIndex
+                                ].position;
+
+                            instance.setCenter(
+                                selectedNodePosition.x + 100,
+                                selectedNodePosition.y,
+                                { duration: 0, zoom: 1 }
+                            );
+                        }}
                     >
                         <MiniMap
                             nodeColor={node =>
@@ -319,6 +350,27 @@ function DataPanel(props) {
                     </ReactFlow>
                 )}
             </AutoSizer>
+
+            <Tooltip label="Navigate to current history node">
+                <IconButton
+                    size="sm"
+                    zIndex="20"
+                    position="absolute"
+                    bottom="20px"
+                    left="20px"
+                    opacity="0.6"
+                    transition="0.2s all ease-in-out"
+                    _hover={{ opacity: 1 }}
+                    icon={
+                        <Assign
+                            style={{
+                                '--ggs': '0.8'
+                            }}
+                        />
+                    }
+                    onClick={zoomToActiveHistoryNode}
+                />
+            </Tooltip>
         </Box>
     );
 

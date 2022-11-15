@@ -140,7 +140,11 @@ function GraphPage() {
     const submitCommentModalKey = useKeyPress('enter', 'shift');
 
     useEffect(() => {
-        if (openCommentModalKey && !store.core.showCommentModal) {
+        if (
+            openCommentModalKey &&
+            !store.core.showCommentModal &&
+            store.history.commentTrigger
+        ) {
             store.core.setShowCommentModal(true);
         }
 
@@ -152,6 +156,7 @@ function GraphPage() {
         closeCommentModalKey,
         openCommentModalKey,
         store.core,
+        store.history.commentTrigger,
         submitCommentModalKey
     ]);
 
@@ -161,7 +166,11 @@ function GraphPage() {
     }, [store.core]);
 
     useEffect(() => {
-        if (submitCommentModalKey && comment !== '') {
+        if (
+            submitCommentModalKey &&
+            comment !== '' &&
+            store.history.commentTrigger
+        ) {
             store.history.addComment(comment);
             closeCommentModal();
         }
