@@ -2,15 +2,27 @@ import {
     Box,
     Button,
     Flex,
+    Heading,
     HStack,
     IconButton,
     Kbd,
+    Popover,
+    PopoverArrow,
+    PopoverBody,
+    PopoverContent,
+    PopoverHeader,
+    PopoverTrigger,
+    Table,
+    Tbody,
     Text,
     Textarea,
     Tooltip,
-    VStack
+    VStack,
+    Tr,
+    Td,
+    PopoverCloseButton
 } from '@chakra-ui/react';
-import { Close, Comment } from 'css.gg';
+import { ChevronDown, ChevronUp, Close, Comment } from 'css.gg';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 
@@ -334,24 +346,238 @@ function CommentsComponent(props) {
                         <Kbd style={{ marginRight: '10px' }}>C</Kbd> anywhere in
                         the app to add a comment.
                     </Text>
-                    <Tooltip
-                        label={
-                            props.commentsVisible
-                                ? 'Hide comments'
-                                : 'Show comments'
-                        }
-                    >
-                        <IconButton
-                            opacity={props.commentsVisible ? 1 : 0.6}
-                            size="sm"
-                            variant="ghost"
-                            color={props.commentsVisible ? 'blue.400' : 'white'}
-                            onClick={() =>
-                                props.setCommentsVisible(!props.commentsVisible)
+                    <HStack spacing="1">
+                        <Popover offset={[-200, 0]} closeOnBlur={true}>
+                            <PopoverTrigger>
+                                <Button size="sm" variant="ghost" opacity="0.6">
+                                    ?
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                                backgroundColor="#0f1010"
+                                borderRadius="10px"
+                                padding="20px"
+                            >
+                                <PopoverHeader padding="14px" border="none">
+                                    <Heading size="sm">
+                                        Markdown shortcuts
+                                    </Heading>
+                                    <PopoverCloseButton
+                                        style={{ top: '14px', right: '14px' }}
+                                    />
+                                </PopoverHeader>
+                                <PopoverBody>
+                                    <Table>
+                                        <Tbody>
+                                            {[
+                                                {
+                                                    text: '# Heading XL',
+                                                    value: (
+                                                        <Text
+                                                            fontWeight="bold"
+                                                            fontSize="x-large"
+                                                        >
+                                                            Heading XL
+                                                        </Text>
+                                                    )
+                                                },
+                                                {
+                                                    text: '## Heading L',
+                                                    value: (
+                                                        <Text
+                                                            fontWeight="bold"
+                                                            fontSize="large"
+                                                        >
+                                                            Heading L
+                                                        </Text>
+                                                    )
+                                                },
+                                                {
+                                                    text: '### Heading M',
+                                                    value: (
+                                                        <Text
+                                                            fontWeight="bold"
+                                                            fontSize="medium"
+                                                        >
+                                                            Heading M
+                                                        </Text>
+                                                    )
+                                                },
+                                                {
+                                                    text: '1 ordered list',
+                                                    value: (
+                                                        <ol
+                                                            style={{
+                                                                paddingLeft:
+                                                                    '16px',
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            <li>
+                                                                ordered list
+                                                            </li>
+                                                        </ol>
+                                                    )
+                                                },
+                                                {
+                                                    text: '* unordered list',
+                                                    value: (
+                                                        <ul
+                                                            style={{
+                                                                paddingLeft:
+                                                                    '16px',
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            <li>
+                                                                unordered list
+                                                            </li>
+                                                        </ul>
+                                                    )
+                                                },
+                                                {
+                                                    text: '> quote',
+                                                    value: (
+                                                        <blockquote
+                                                            style={{
+                                                                paddingLeft:
+                                                                    '10px',
+                                                                borderLeft:
+                                                                    '2px solid #83c4f2',
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            quote
+                                                        </blockquote>
+                                                    )
+                                                },
+                                                {
+                                                    text: '`inline code`',
+                                                    value: (
+                                                        <code
+                                                            style={{
+                                                                backgroundColor:
+                                                                    '#00000077',
+                                                                padding:
+                                                                    '4px 6px',
+                                                                borderRadius:
+                                                                    '4px',
+                                                                display:
+                                                                    'inline',
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            {' '}
+                                                            inline code
+                                                        </code>
+                                                    )
+                                                },
+                                                {
+                                                    text: '**bold**',
+                                                    value: (
+                                                        <b
+                                                            style={{
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            bold
+                                                        </b>
+                                                    )
+                                                },
+                                                {
+                                                    text: '*italic*',
+                                                    value: (
+                                                        <i
+                                                            style={{
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            italic
+                                                        </i>
+                                                    )
+                                                },
+                                                {
+                                                    text: '~strikethrough~',
+                                                    value: (
+                                                        <s
+                                                            style={{
+                                                                fontSize:
+                                                                    'small'
+                                                            }}
+                                                        >
+                                                            strikethrough
+                                                        </s>
+                                                    )
+                                                }
+                                            ].map((entry, index) => (
+                                                <Tr
+                                                    key={`markdown_help_${index}`}
+                                                >
+                                                    <Td
+                                                        padding="0"
+                                                        borderBottom="none"
+                                                        style={{
+                                                            paddingBottom:
+                                                                '14px'
+                                                        }}
+                                                    >
+                                                        <Text fontSize="sm">
+                                                            {entry.text}
+                                                        </Text>
+                                                    </Td>
+                                                    <Td
+                                                        padding="0"
+                                                        paddingLeft="10px"
+                                                        borderBottom="none"
+                                                        style={{
+                                                            paddingBottom:
+                                                                '14px'
+                                                        }}
+                                                    >
+                                                        {entry.value}
+                                                    </Td>
+                                                </Tr>
+                                            ))}
+                                        </Tbody>
+                                    </Table>
+                                </PopoverBody>
+                            </PopoverContent>
+                        </Popover>
+                        <Tooltip
+                            label={
+                                props.commentsVisible
+                                    ? 'Hide comments'
+                                    : 'Show comments'
                             }
-                            icon={<Comment style={{ '--ggs': '0.7' }} />}
-                        />
-                    </Tooltip>
+                        >
+                            <IconButton
+                                opacity="0.6"
+                                size="sm"
+                                variant="ghost"
+                                color="white"
+                                onClick={() =>
+                                    props.setCommentsVisible(
+                                        !props.commentsVisible
+                                    )
+                                }
+                                icon={
+                                    props.commentsVisible ? (
+                                        <ChevronDown
+                                            style={{ '--ggs': '0.7' }}
+                                        />
+                                    ) : (
+                                        <ChevronUp style={{ '--ggs': '0.7' }} />
+                                    )
+                                }
+                            />
+                        </Tooltip>
+                    </HStack>
                 </HStack>
             </VStack>
         </VStack>
