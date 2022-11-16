@@ -69,10 +69,6 @@ export class WorkflowStore {
     setNewWorkflowName = val => (this.newWorkflowName = val);
 
     saveNewWorkflow = () => {
-        console.log(
-            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.nodes.length} nodes and with ${this.edges.length}`
-        );
-
         if (!this.workflows[this.store.search.currentDataset]) {
             this.workflows[this.store.search.currentDataset] = {};
         }
@@ -404,11 +400,9 @@ export class WorkflowStore {
                 return true;
             case 'connect':
                 query.queries.forEach(subQuery => {
-                    console.log('sub query: ', subQuery);
                     this.addNodesFromJSONQuery(subQuery);
                 });
 
-                console.log(this.nodes);
                 // add also the connector node and connect to as many children as it has
                 this.nodes.push({
                     id: uuidv4(),
@@ -429,7 +423,6 @@ export class WorkflowStore {
                 });
 
                 for (let i = 0; i < query.queries.length; i++) {
-                    console.log(this.nodes, i + 2);
                     const newConnection = {
                         id: `e${this.nodes[this.nodes.length - (i + 2)].id}-${
                             this.nodes[this.nodes.length - 1].id

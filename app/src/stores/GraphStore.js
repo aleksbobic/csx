@@ -442,10 +442,7 @@ export class GraphStore {
         this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
         const studyId = this.store.core.studyUuid;
-        console.log(
-            this.store.core.studyHistory,
-            this.store.core.studyHistoryItemIndex
-        );
+
         const currentStudyHistoryItem =
             this.store.core.studyHistory.length > 0
                 ? this.store.core.studyHistory[
@@ -461,10 +458,6 @@ export class GraphStore {
             this.resetDetailGraphData();
         } else {
             this.resetGraphData();
-        }
-
-        if (this.store.search.advancedSearchQuery) {
-            console.log(this.store.search.advancedSearchQuery);
         }
 
         const params = {
@@ -518,9 +511,11 @@ export class GraphStore {
             params.anchor_properties = [];
         }
 
+        console.log('\n\n\nstudy params: ', params);
+
         try {
             const response = await axios.post('study/modify', params);
-            console.log(response);
+
             this.store.core.setStudyHistory(response.data.history);
 
             this.store.core.setStudyHistoryItemIndex(
@@ -572,7 +567,6 @@ export class GraphStore {
 
         try {
             response = await axios.post('study', params);
-            console.log(response);
 
             this.store.core.setStudyHistory(response.data.history);
 
@@ -625,10 +619,6 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
 
-            console.log(response.data.graph);
-            console.log(historyGraphType);
-            console.log(this.store.search.query);
-
             this.handleRetrievedGraph(
                 response.data.graph,
                 historyGraphType,
@@ -654,7 +644,6 @@ export class GraphStore {
 
         try {
             response = await axios.post('study', params);
-            console.log(response);
         } catch (error) {
             this.store.core.setDataIsLoading(false);
             console.log(error);
@@ -686,10 +675,6 @@ export class GraphStore {
                 ].graph_type;
 
             this.store.core.setCurrentGraph(historyGraphType);
-            console.log(
-                response.data.history,
-                this.store.core.studyHistory.length - 1
-            );
 
             this.store.search.links =
                 this.store.core.studyHistory[

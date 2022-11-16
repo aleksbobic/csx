@@ -195,9 +195,6 @@ def modify_study_graph(data: ModifyStudyData):
     else:
         cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
 
-    directory_path = os.getcwd()
-    print("My current directory is : " + directory_path)
-
     with open(f"./app/data/config/{index}.json") as config:
         config = json.load(config)
 
@@ -229,9 +226,6 @@ def modify_study_graph(data: ModifyStudyData):
         )
     elif not isJson(query) or isNumber(query):
         filtered_fields = default_search_fields
-
-        print("\n\n\n\n filtered fields", filtered_fields)
-        print("\n\n\n\n query", query)
 
         if not isNumber(query):
             filtered_fields = [
@@ -289,8 +283,6 @@ def modify_study_graph(data: ModifyStudyData):
         graph_type,
     )
 
-    print("\n\n\n\n\n study action ", comparison_res["action"])
-
     comparison_switch = {
         "from_scratch": lambda: csx_graph.get_graph_from_scratch(
             graph_type,
@@ -327,6 +319,7 @@ def modify_study_graph(data: ModifyStudyData):
             schema,
             anchor_properties,
             history_parent_id,
+            cache_data,
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
@@ -409,8 +402,7 @@ def get_studies(user_uuid: str):
 
 @router.get("/generate")
 def generate_study(user_uuid: str, study_name: str) -> str:
-    print("study name is", study_name)
-    print("user id is", user_uuid)
+
     study_uuid = uuid.uuid4().hex
     csx_data.insert_document(
         "studies",

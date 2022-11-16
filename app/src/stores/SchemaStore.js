@@ -767,7 +767,6 @@ export class SchemaStore {
         dagre.layout(dagreGraph);
 
         nodes.forEach(node => {
-            console.log(this.overviewDataNodeProperties.length);
             const nodeWithPosition = dagreGraph.node(node.id);
             node.targetPosition = isHorizontal ? 'left' : 'top';
             node.sourcePosition = isHorizontal ? 'right' : 'bottom';

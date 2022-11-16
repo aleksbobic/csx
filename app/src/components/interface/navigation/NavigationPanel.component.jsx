@@ -61,14 +61,6 @@ function NavigationPanelComponent() {
     );
 
     const regenerateGraph = () => {
-        // store.graph.getSearchGraph(
-        //     store.graph.currentGraphData.meta.query,
-        //     location.pathname.startsWith('/graph/detail')
-        //         ? 'detail'
-        //         : 'overview',
-        //     queryString.parse(location.search).suuid
-        // );
-
         store.graph.modifyStudy(store.core.currentGraph);
     };
 

@@ -387,16 +387,18 @@ def get_graph_with_new_anchor_props(
     schema,
     anchor_properties,
     history_parent_id,
+    cache_data,
 ):
+
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
     )
 
+    graph_data["meta"]["anchor_properties"] = anchor_properties
     graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
 
-    cache_data = csx_redis.load_current_graph(user_id)
     cache_data[graph_type]["meta"]["anchor_property_values"] = graph_data["meta"][
         "anchor_property_values"
     ]
@@ -404,13 +406,18 @@ def get_graph_with_new_anchor_props(
 
     cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
 
+    print(
+        "\n\n\n after processing anchor props: ",
+        graph_data["meta"]["anchor_properties"],
+    )
+
     csx_study.new_history_entry(
         study_id,
         user_id,
         {
             "action": history_action,
             "graph_type": graph_type,
-            "graph_data": pickle.dumps(cache_snapshot),
+            "graph_data": pickle.dumps(cache_data),
             "query": query,
             "action_time": action_time,
             "schema": schema,

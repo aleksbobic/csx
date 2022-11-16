@@ -38,7 +38,6 @@ function GraphPage() {
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
 
     useEffect(() => {
-        console.log('loader should be visible: ', store.core.dataIsLoading);
         setShowLoader(store.core.dataIsLoading);
     }, [store.core.dataIsLoading]);
 
