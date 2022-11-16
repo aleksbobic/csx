@@ -17,7 +17,7 @@ export class SchemaStore {
 
     colors = {
         link: '#4da344',
-        anchor: '#3182ce',
+        anchor: '#323232',
         normal: '#323232'
     };
 
@@ -191,10 +191,10 @@ export class SchemaStore {
                             ? this.colors.anchor
                             : this.colors.normal,
                     color: 'white',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     height: 'auto',
                     borderWidth: 0,
-                    padding: '5px',
+                    padding: '10px',
                     minWidth: 50
                 }
             };
@@ -228,43 +228,11 @@ export class SchemaStore {
                     },
                     style: {
                         ...schemaNode.style,
-                        borderRadius: '10px',
-                        height: 'auto'
+                        borderRadius: '8px',
+                        height: 'auto',
+                        padding: '10px'
                     },
                     id: '-1',
-                    type: 'overviewSchemaNode'
-                });
-                overviewSchema.push({
-                    ...schemaNode,
-                    position: { x: 500, y: 200 },
-                    data: {
-                        ...schemaNode.data,
-                        position: 'right',
-                        features: [
-                            ...Object.keys(this.store.search.nodeTypes),
-                            ...Object.keys(this.store.search.newNodeTypes)
-                        ].filter(
-                            feature =>
-                                !this.store.search.links.includes(feature)
-                        ),
-                        properties: [
-                            ...Object.keys(this.store.search.nodeTypes),
-                            ...Object.keys(this.store.search.newNodeTypes)
-                        ],
-                        addedProperties: this.overviewDataNodeProperties,
-                        setAnchor: this.setAnchor,
-                        addProperty: this.addProperty,
-                        removeProperty: this.removeProperty,
-                        addLinkNode: this.addLinkNode,
-                        anchor: this.store.search.anchor
-                    },
-                    style: {
-                        ...schemaNode.style,
-                        borderRadius: '10px',
-                        height: 'auto',
-                        background: 'rgba(100,100,100,0.5)'
-                    },
-                    id: '-2',
                     type: 'overviewSchemaNode'
                 });
             } else if (this.store.search.links.includes(node)) {
@@ -292,14 +260,6 @@ export class SchemaStore {
                     id: `${-1}${node.id}`,
                     source: `${-1}`,
                     target: `${node.id}`,
-                    arrowHeadType: 'none',
-                    data: {},
-                    type: 'overviewCustomEdge'
-                });
-                overviewSchemaLinks.push({
-                    id: `${node.id}${-2}`,
-                    source: `${node.id}`,
-                    target: `${-2}`,
                     arrowHeadType: 'none',
                     data: {},
                     type: 'overviewCustomEdge'
@@ -347,6 +307,8 @@ export class SchemaStore {
 
         this.overviewNodes = [...overviewSchema];
         this.overviewEdges = [...overviewSchemaLinks];
+
+        this.generateLayout();
     };
 
     //TODO: implement a way to update schema when new values show up
@@ -380,10 +342,10 @@ export class SchemaStore {
             style: {
                 background: this.colors.normal,
                 color: 'white',
-                borderRadius: '10px',
+                borderRadius: '8px',
                 height: 'auto',
                 borderWidth: 0,
-                padding: '5px',
+                padding: '10px',
                 minWidth: 50
             }
         });
@@ -407,6 +369,8 @@ export class SchemaStore {
 
         this.overviewNodes = [...this.overviewNodes];
         this.overviewEdges = [...this.overviewEdges];
+
+        this.generateLayout();
     };
 
     removeLinkNode = id => {
@@ -417,6 +381,8 @@ export class SchemaStore {
         this.overviewEdges = this.overviewEdges.filter(entry => {
             return entry.id !== `${-1}${id}` && entry.id !== `${id}${-2}`;
         });
+
+        this.generateLayout();
     };
 
     setAnchor = anchor => {
@@ -442,10 +408,10 @@ export class SchemaStore {
                             ? this.colors.anchor
                             : 'rgba(100,100,100,0.5)',
                     color: 'white',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     height: 'auto',
                     borderWidth: 0,
-                    padding: '5px',
+                    padding: '10px',
                     minWidth: 50,
                     opacity: 1
                 };
@@ -485,10 +451,10 @@ export class SchemaStore {
                                 ? this.colors.normal
                                 : entry.style.background,
                         color: 'white',
-                        borderRadius: '10px',
+                        borderRadius: '8px',
                         height: 'auto',
                         borderWidth: 0,
-                        padding: '5px',
+                        padding: '10px',
                         minWidth: 50
                     };
                 }
@@ -557,10 +523,10 @@ export class SchemaStore {
                     entry.style = {
                         background: entry.style.background,
                         color: 'white',
-                        borderRadius: '10px',
+                        borderRadius: '8px',
                         height: 'auto',
                         borderWidth: 0,
-                        padding: '5px',
+                        padding: '10px',
                         minWidth: 50
                     };
                 }
@@ -593,10 +559,10 @@ export class SchemaStore {
                                 ? this.colors.anchor
                                 : this.colors.normal,
                             color: 'white',
-                            borderRadius: '10px',
+                            borderRadius: '8px',
                             height: 'auto',
                             borderWidth: 0,
-                            padding: '5px',
+                            padding: '10px',
                             minWidth: 50,
                             opacity: 1
                         };
@@ -616,10 +582,10 @@ export class SchemaStore {
                                 ? this.colors.anchor
                                 : this.colors.normal,
                             color: 'white',
-                            borderRadius: '10px',
+                            borderRadius: '8px',
                             height: 'auto',
                             borderWidth: 0,
-                            padding: '5px',
+                            padding: '10px',
                             minWidth: 50,
                             opacity: 1
                         };
@@ -651,6 +617,8 @@ export class SchemaStore {
                 };
             });
         }
+
+        this.generateLayout();
     };
 
     getNodeNameFromId = id => {
@@ -745,6 +713,7 @@ export class SchemaStore {
             node.data = { ...node.data };
             return node;
         });
+        this.generateLayout();
     };
 
     removeProperty = property => {
@@ -754,5 +723,95 @@ export class SchemaStore {
             node.data = { ...node.data };
             return node;
         });
+        this.generateLayout();
+    };
+
+    getLayoutedElements = (nodes, edges, direction = 'TB') => {
+        const dagreGraph = new dagre.graphlib.Graph();
+        dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+        const isHorizontal = direction === 'LR';
+        dagreGraph.setGraph({ rankdir: direction });
+
+        nodes.forEach(node => {
+            let height = node.data.isAnchor
+                ? 98 + this.overviewDataNodeProperties.length * 38
+                : 41;
+
+            if (
+                node.data.isAnchor &&
+                node.data.addedProperties.length === node.data.properties.length
+            ) {
+                height = height - 24;
+            }
+
+            let width = node.data.isAnchor ? 224 : 195;
+
+            if (
+                node.data.isAnchor &&
+                node.data.addedProperties.length === node.data.properties.length
+            ) {
+                width = width - 39;
+            }
+
+            dagreGraph.setNode(node.id, {
+                width: width,
+                height: height
+            });
+        });
+
+        edges.forEach(edge => {
+            dagreGraph.setEdge(edge.source, edge.target);
+        });
+
+        dagre.layout(dagreGraph);
+
+        nodes.forEach(node => {
+            console.log(this.overviewDataNodeProperties.length);
+            const nodeWithPosition = dagreGraph.node(node.id);
+            node.targetPosition = isHorizontal ? 'left' : 'top';
+            node.sourcePosition = isHorizontal ? 'right' : 'bottom';
+
+            let height = node.data.isAnchor
+                ? 98 + this.overviewDataNodeProperties.length * 38
+                : 41;
+
+            if (
+                node.data.isAnchor &&
+                node.data.addedProperties.length === node.data.properties.length
+            ) {
+                height = height - 24;
+            }
+
+            let width = node.data.isAnchor ? 224 : 195;
+
+            if (
+                node.data.isAnchor &&
+                node.data.addedProperties.length === node.data.properties.length
+            ) {
+                width = width - 39;
+            }
+
+            node.position = {
+                x: nodeWithPosition.x - width / 2,
+                y: nodeWithPosition.y - height / 2
+            };
+
+            return node;
+        });
+
+        return { nodes, edges };
+    };
+
+    generateLayout = () => {
+        const { nodes: layoutedNodes, edges: layoutedEdges } =
+            this.getLayoutedElements(
+                this.overviewNodes,
+                this.overviewEdges,
+                'LR' // Horizontal layout left -> right
+            );
+
+        this.overviewNodes = [...layoutedNodes];
+        this.overviewEdges = [...layoutedEdges];
     };
 }

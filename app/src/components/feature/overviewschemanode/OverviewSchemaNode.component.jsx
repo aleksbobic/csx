@@ -7,7 +7,7 @@ import {
     Tooltip,
     VStack
 } from '@chakra-ui/react';
-import { Anchor, Close, MathPlus } from 'css.gg';
+import { Close, Link, MathPlus } from 'css.gg';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
@@ -18,11 +18,11 @@ const overviewSchemaNode = ({ id, data }) => {
                 <Select
                     size="xs"
                     variant="filled"
-                    width="150px"
+                    width="100%"
+                    borderRadius="6px"
                     marginTop="-2px"
-                    marginRight="10px"
                     value={data.anchor}
-                    background="blackAlpha.600"
+                    background="blackAlpha.500"
                     _hover={{ background: 'blackAlpha.700' }}
                     onChange={e => {
                         data.setAnchor(e.target.value);
@@ -47,9 +47,10 @@ const overviewSchemaNode = ({ id, data }) => {
                     variant="filled"
                     width="150px"
                     marginTop="-2px"
+                    borderRadius="6px"
                     marginRight="10px"
                     placeholder="Select link"
-                    background="blackAlpha.600"
+                    background="blackAlpha.500"
                     _hover={{ background: 'blackAlpha.700' }}
                     onChange={e => {
                         data.setLink(e.target.value, id);
@@ -76,6 +77,8 @@ const overviewSchemaNode = ({ id, data }) => {
                 overflow="hidden"
                 whiteSpace="nowrap"
                 textOverflow="ellipsis"
+                paddingLeft="5px"
+                paddingRight="5px"
             >
                 {data.label}
             </Text>
@@ -89,34 +92,27 @@ const overviewSchemaNode = ({ id, data }) => {
             alignItems="center"
             position="absolute"
             top="0px"
-            left={position === 'right' ? '0px' : 'auto'}
-            right={position === 'right' ? 'auto' : '0px'}
+            right={'0px'}
         >
             <Tooltip label="Add new link node">
                 <IconButton
                     top="0px"
                     size="xs"
-                    marginLeft={position === 'right' ? '-34px' : 'auto'}
-                    marginRight={position === 'right' ? 'auto' : '-34px'}
-                    disabled={position === 'right'}
+                    marginLeft={'auto'}
+                    marginRight={'-15px'}
                     width="30px"
                     height="30px"
                     borderRadius="full"
-                    backgroundColor={
-                        position === 'right'
-                            ? 'rgba(100,100,100,0.5)'
-                            : 'blue.500'
-                    }
+                    backgroundColor="#323232"
+                    border="1px solid"
+                    borderColor="whiteAlpha.200"
                     onClick={() => data.addLinkNode()}
                     _hover={{
-                        backgroundColor:
-                            position === 'right'
-                                ? 'rgba(100,100,100,0.5)'
-                                : 'blue.600',
-                        cursor: position === 'right' ? 'initial' : 'pointer'
+                        backgroundColor: '#1f1f1f',
+                        cursor: 'pointer'
                     }}
                     icon={
-                        <MathPlus
+                        <Link
                             style={{
                                 '--ggs': '0.7'
                             }}
@@ -129,51 +125,50 @@ const overviewSchemaNode = ({ id, data }) => {
 
     const renderAddNewPropertyArea = () => {
         return (
-            <VStack height="auto" width="100%" spacing="5px" padding="5px">
+            <VStack height="auto" width="100%" spacing="5px" padding="0">
                 {data.addedProperties.map((property, i) => (
-                    <Tooltip label={property} key={`${i}_property_${property}`}>
-                        <Flex
-                            width="100%"
-                            height="24px"
-                            backgroundColor="blackAlpha.600"
-                            borderRadius="6px"
-                            alignItems="center"
-                            paddingLeft="10px"
-                            paddingRight={
-                                data.position === 'left' ? '0' : '10px'
-                            }
-                            justifyContent="space-between"
-                        >
+                    <Flex
+                        width="100%"
+                        height="24px"
+                        backgroundColor="blackAlpha.300"
+                        borderRadius="6px"
+                        alignItems="center"
+                        paddingLeft="10px"
+                        marginBottom="6px"
+                        justifyContent="space-between"
+                        key={`${i}_property_${property}`}
+                    >
+                        <Tooltip label={property}>
                             <Text
                                 fontSize="xs"
                                 fontWeight="bold"
-                                width="150px"
+                                width="100%"
                                 overflow="hidden"
                                 whiteSpace="nowrap"
                                 textOverflow="ellipsis"
                             >
                                 {property}
                             </Text>
-                            {data.position === 'left' && (
-                                <Tooltip label="Remove anchor property">
-                                    <IconButton
-                                        onClick={() =>
-                                            data.removeProperty(property)
-                                        }
-                                        size="xs"
-                                        variant="ghost"
-                                        icon={
-                                            <Close
-                                                style={{
-                                                    '--ggs': '0.7'
-                                                }}
-                                            />
-                                        }
-                                    />
-                                </Tooltip>
-                            )}
-                        </Flex>
-                    </Tooltip>
+                        </Tooltip>
+                        {data.position === 'left' && (
+                            <Tooltip label="Remove anchor property">
+                                <IconButton
+                                    onClick={() =>
+                                        data.removeProperty(property)
+                                    }
+                                    size="xs"
+                                    variant="ghost"
+                                    icon={
+                                        <Close
+                                            style={{
+                                                '--ggs': '0.7'
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Tooltip>
+                        )}
+                    </Flex>
                 ))}
 
                 {data.position === 'left' &&
@@ -181,10 +176,10 @@ const overviewSchemaNode = ({ id, data }) => {
                         property => !data.addedProperties.includes(property)
                     ).length > 0 && (
                         <HStack
-                            height="36px"
-                            padding="3px 0px"
+                            height="auto"
                             width="100%"
                             spacing="5"
+                            justifyContent="space-between"
                             style={{ marginTop: '0px' }}
                         >
                             <Select
@@ -193,11 +188,11 @@ const overviewSchemaNode = ({ id, data }) => {
                                 variant="filled"
                                 width="150px"
                                 marginTop="-2px"
-                                marginRight="10px"
+                                marginRight="6px"
                                 defaultValue={data.properties[0]}
                                 borderRadius="6px"
-                                background="blackAlpha.400"
-                                _hover={{ background: '#143e66' }}
+                                background="blackAlpha.500"
+                                _hover={{ background: 'blackAlpha.600' }}
                             >
                                 {data.properties
                                     .filter(
@@ -215,8 +210,8 @@ const overviewSchemaNode = ({ id, data }) => {
                             <Tooltip label="Add selected feature as anchor property">
                                 <IconButton
                                     size="xs"
-                                    borderRadius="full"
-                                    backgroundColor="blackAlpha.300"
+                                    borderRadius="6px"
+                                    backgroundColor="blackAlpha.500"
                                     onClick={() =>
                                         data.addProperty(
                                             document.getElementById(
@@ -225,7 +220,7 @@ const overviewSchemaNode = ({ id, data }) => {
                                         )
                                     }
                                     _hover={{
-                                        backgroundColor: 'blue.600'
+                                        backgroundColor: 'blackAlpha.600'
                                     }}
                                     style={{ marginLeft: '0px' }}
                                     rightIcon={
@@ -254,29 +249,20 @@ const overviewSchemaNode = ({ id, data }) => {
                 <Handle
                     type="target"
                     position="left"
-                    style={{ background: '#555' }}
+                    style={{
+                        background: 'transparent',
+                        border: 'none'
+                    }}
                     isConnectable={false}
                 />
             )}
             <Flex
                 alignItems="center"
                 fontSize="14px"
-                padding={
-                    data.isAnchor ? '5px 5px 10px 10px' : '0px 5px 0px 10px'
-                }
+                padding={data.isAnchor ? '5px 10px 10px 0' : '0'}
             >
                 {renderLabel()}
-                {data.isAnchor && data.position === 'left' && (
-                    <Tooltip label="This is an anchor">
-                        <Anchor
-                            style={{
-                                marginLeft: '10px',
-                                marginRight: '5px',
-                                '--ggs': '0.7'
-                            }}
-                        />
-                    </Tooltip>
-                )}
+
                 <Tooltip label={'Remove link node'}>
                     <IconButton
                         marginLeft="5px"
@@ -308,7 +294,7 @@ const overviewSchemaNode = ({ id, data }) => {
                 <Handle
                     type="source"
                     position="right"
-                    style={{ background: '#555' }}
+                    style={{ background: 'transparent', border: 'none' }}
                     isConnectable={false}
                 />
             )}
@@ -325,20 +311,10 @@ const overviewSchemaNode = ({ id, data }) => {
                     width="100%"
                     justifyContent="center"
                     height="auto"
-                    marginTop="0"
                     borderTop="1px solid"
-                    borderTopColor={
-                        data.position === 'left'
-                            ? 'blackAlpha.300'
-                            : 'transparent'
-                    }
-                    backgroundColor={
-                        data.position === 'left'
-                            ? 'blackAlpha.400'
-                            : 'transparent'
-                    }
-                    borderBottomLeftRadius="8px"
-                    borderBottomRightRadius="8px"
+                    paddingTop="10px"
+                    borderColor="whiteAlpha.100"
+                    paddingRight="10px"
                 >
                     {renderAddNewPropertyArea()}
                 </Flex>

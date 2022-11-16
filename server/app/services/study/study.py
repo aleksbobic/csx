@@ -117,11 +117,14 @@ def edit_comment(
     history_item_index: int,
     comment_index: int,
     comment: str,
+    comment_time: str,
 ):
     csx_data.edit_array(
         "studies",
         {"study_uuid": study_id, "user_uuid": user_id},
-        f"history.{history_item_index}.comments",
-        comment_index,
-        comment,
+        {
+            f"history.{history_item_index}.comments.{comment_index}.comment": comment,
+            f"history.{history_item_index}.comments.{comment_index}.time": comment_time,
+            f"history.{history_item_index}.comments.{comment_index}.edited": True,
+        },
     )

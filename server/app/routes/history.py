@@ -106,6 +106,7 @@ class HistoryEditCommentData(BaseModel):
     history_item_index: int
     comment_index: int
     comment: str
+    comment_time: str
 
 
 @router.post("/editcomment")
@@ -115,9 +116,10 @@ def edit_comment(data: HistoryEditCommentData):
     history_item_index = data.history_item_index
     comment_index = data.comment_index
     comment = data.comment
+    comment_time = data.comment_time
 
     csx_study.edit_comment(
-        study_uuid, user_uuid, history_item_index, comment_index, comment
+        study_uuid, user_uuid, history_item_index, comment_index, comment, comment_time
     )
 
     return

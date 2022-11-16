@@ -7,34 +7,32 @@ import {
     IconButton,
     Kbd,
     Popover,
-    PopoverArrow,
     PopoverBody,
+    PopoverCloseButton,
     PopoverContent,
     PopoverHeader,
     PopoverTrigger,
     Table,
     Tbody,
+    Td,
     Text,
     Textarea,
     Tooltip,
-    VStack,
     Tr,
-    Td,
-    PopoverCloseButton
+    VStack
 } from '@chakra-ui/react';
-import { ChevronDown, ChevronUp, Close, Comment } from 'css.gg';
+import { ChevronDown, ChevronUp, Close } from 'css.gg';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 
+import { PencilIcon } from '@heroicons/react/20/solid';
 import PropTypes from 'prop-types';
-import { useEffect, useRef } from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { RootStoreContext } from 'stores/RootStore';
-import { PencilIcon } from '@heroicons/react/20/solid';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import './Comment.scss';
 
 function CommentsComponent(props) {
@@ -172,7 +170,7 @@ function CommentsComponent(props) {
                                                         children={String(
                                                             children
                                                         ).replace(/\n$/, '')}
-                                                        style={materialDark}
+                                                        style={oneDark}
                                                         language={match[1]}
                                                         showLineNumbers={true}
                                                         PreTag="div"
@@ -189,7 +187,8 @@ function CommentsComponent(props) {
                                                                 background:
                                                                     '#00000077',
                                                                 borderRadius:
-                                                                    '6px'
+                                                                    '6px',
+                                                                display: 'block'
                                                             }
                                                         }}
                                                         {...props}
@@ -211,6 +210,7 @@ function CommentsComponent(props) {
                                         opacity="0.5"
                                         marginTop="6px"
                                     >
+                                        {comment.edited && 'Edited: '}
                                         {comment.time}
                                     </Text>
 

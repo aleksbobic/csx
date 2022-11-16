@@ -264,6 +264,9 @@ function DataPanel(props) {
                         onEdgesChange={onEdgesChange}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
+                        onInit={instance => {
+                            instance.fitView();
+                        }}
                     >
                         <Background
                             gap={12}
