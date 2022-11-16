@@ -19,6 +19,7 @@ export class CoreStore {
     studyIsSaved = false;
     showCommentModal = false;
     studies = [];
+    dataIsLoading = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -37,6 +38,8 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setDataIsLoading = val => (this.dataIsLoading = val);
 
     setShowCommentModal = val => (this.showCommentModal = val);
 

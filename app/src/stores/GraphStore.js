@@ -439,6 +439,7 @@ export class GraphStore {
     };
 
     modifyStudy = async graphType => {
+        this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
         const studyId = this.store.core.studyUuid;
         console.log(
@@ -553,11 +554,13 @@ export class GraphStore {
                 this.store.search.query
             );
         } catch (error) {
+            this.store.core.setDataIsLoading(false);
             return this.store.core.handleError(error);
         }
     };
 
     getStudyFromHistory = async (studyId, historyID) => {
+        this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
         const params = {
@@ -632,6 +635,7 @@ export class GraphStore {
                 this.store.search.query
             );
         } catch (error) {
+            this.store.core.setDataIsLoading(false);
             console.log(error);
             this.store.search.setSearchIsEmpty(true);
             return this.store.core.handleError(error);
@@ -639,6 +643,7 @@ export class GraphStore {
     };
 
     getStudy = async studyId => {
+        this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
         const params = {
@@ -651,6 +656,7 @@ export class GraphStore {
             response = await axios.post('study', params);
             console.log(response);
         } catch (error) {
+            this.store.core.setDataIsLoading(false);
             console.log(error);
             this.store.search.setSearchIsEmpty(true);
             return this.store.core.handleError(error);
@@ -943,6 +949,7 @@ export class GraphStore {
 
                 this.addNeighbourObjectsToNodes();
             }
+            this.store.core.setDataIsLoading(false);
         }
     };
 
@@ -1091,6 +1098,7 @@ export class GraphStore {
     };
 
     trimNetwork = async () => {
+        this.store.core.setDataIsLoading(true);
         const graph_data_copy = { ...this.currentGraphData };
         graph_data_copy.nodes = graph_data_copy.nodes
             .filter(node => node.visible)
@@ -1146,11 +1154,14 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
         } catch (error) {
+            this.store.core.setDataIsLoading(false);
             return this.store.core.handleError(error);
         }
     };
 
     expandNetwork = async (nodes, suuid, connector = null) => {
+        this.store.core.setDataIsLoading(true);
+
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
             this.resetGraphData();
@@ -1247,6 +1258,7 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
         } catch (error) {
+            this.store.core.setDataIsLoading(false);
             return this.store.core.handleError(error);
         }
     };

@@ -35,6 +35,12 @@ function GraphPage() {
     const history = useHistory();
 
     const [comment, setComment] = useState('');
+    const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
+
+    useEffect(() => {
+        console.log('loader should be visible: ', store.core.dataIsLoading);
+        setShowLoader(store.core.dataIsLoading);
+    }, [store.core.dataIsLoading]);
 
     useBeforeunload(() => {
         store.core.deleteStudy();
@@ -240,15 +246,7 @@ function GraphPage() {
             <ContextMenuComponent />
             {store.core.showCommentModal && renderCommentModal()}
 
-            <GraphComponent
-                graphData={
-                    store.core.isDetail
-                        ? store.graph.detailGraphData
-                        : store.graph.graphData
-                }
-            />
-
-            {!store.graph.currentGraphData.nodes.length && (
+            {showLoader && (
                 <Center
                     width="100%"
                     height="100%"
@@ -258,6 +256,7 @@ function GraphPage() {
                     position="fixed"
                     top="0"
                     left="0"
+                    zIndex="2"
                 >
                     <Spinner
                         thickness="4px"
@@ -269,6 +268,14 @@ function GraphPage() {
                     />
                 </Center>
             )}
+
+            <GraphComponent
+                graphData={
+                    store.core.isDetail
+                        ? store.graph.detailGraphData
+                        : store.graph.graphData
+                }
+            />
         </Box>
     );
 }
