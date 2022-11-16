@@ -18,7 +18,7 @@ const overviewSchemaNode = ({ id, data }) => {
                 <Select
                     size="xs"
                     variant="filled"
-                    width="100%"
+                    width="180px"
                     borderRadius="6px"
                     marginTop="-2px"
                     value={data.anchor}
@@ -71,17 +71,19 @@ const overviewSchemaNode = ({ id, data }) => {
         }
 
         return (
-            <Text
-                width="150px"
-                textAlign="left"
-                overflow="hidden"
-                whiteSpace="nowrap"
-                textOverflow="ellipsis"
-                paddingLeft="5px"
-                paddingRight="5px"
-            >
-                {data.label}
-            </Text>
+            <Tooltip label={data.label}>
+                <Text
+                    width="150px"
+                    textAlign="left"
+                    overflow="hidden"
+                    whiteSpace="nowrap"
+                    textOverflow="ellipsis"
+                    paddingLeft="5px"
+                    paddingRight="5px"
+                >
+                    {data.label}
+                </Text>
+            </Tooltip>
         );
     };
 
@@ -260,6 +262,13 @@ const overviewSchemaNode = ({ id, data }) => {
                 alignItems="center"
                 fontSize="14px"
                 padding={data.isAnchor ? '5px 10px 10px 0' : '0'}
+                paddingBottom={
+                    data.isAnchor &&
+                    data.properties.filter(
+                        property => !data.addedProperties.includes(property)
+                    ).length === 0 &&
+                    '5px'
+                }
             >
                 {renderLabel()}
 
