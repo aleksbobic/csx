@@ -266,23 +266,27 @@ function DatasetConfig(props) {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <Checkbox
+                                <Radio
                                     isDisabled={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].dataType ===
                                             'list' ||
                                         props.formType === 'modify'
                                     }
-                                    defaultChecked={
+                                    isChecked={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].isDefaultSearch
                                     }
                                     onChange={() =>
-                                        store.fileUpload.changeDefaultBoolToggle(
-                                            column,
-                                            'isDefaultSearch'
+                                        store.fileUpload.changeDefaultSearch(
+                                            column
                                         )
                                     }
+                                    _disabled={{
+                                        cursor: 'not-allowed',
+                                        backgroundColor: 'whiteAlpha.100',
+                                        border: 'none'
+                                    }}
                                 />
                             </Flex>
                         </Td>

@@ -101,14 +101,13 @@ export class FileUploadStore {
         this.fileUploadData.link = val;
     };
 
-    changeDefaultBoolToggle = (column, feature) => {
-        this.fileUploadData.defaults[column][feature] =
-            !this.fileUploadData.defaults[column][feature];
+    changeDefaultSearch = column => {
+        Object.keys(this.fileUploadData.defaults).forEach(
+            col =>
+                (this.fileUploadData.defaults[col]['isDefaultSearch'] = false)
+        );
 
-        if (feature === 'isDefaultLink') {
-            this.fileUploadData.defaults[column]['isDefaultVisible'] =
-                !this.fileUploadData.defaults[column]['isDefaultVisible'];
-        }
+        this.fileUploadData.defaults[column]['isDefaultSearch'] = true;
     };
 
     changeColumnName = (column, val) => {
