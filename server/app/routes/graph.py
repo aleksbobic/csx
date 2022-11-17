@@ -151,6 +151,8 @@ def expand_network(
 
     # cache_data = csx_redis.load_current_graph(user_id)
     cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+
+    ## TODO: load the active history item and based on that do the comparison
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
     if len(values["nodes"]) == 1:
@@ -245,7 +247,7 @@ def expand_network(
         [],
         index,
         cache_data,
-        search_uuid,
+        cache_data["global"]["search_uuid"],
         results,
         user_id,
         schema,

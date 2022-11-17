@@ -283,6 +283,8 @@ def modify_study_graph(data: ModifyStudyData):
         graph_type,
     )
 
+    print("\n\n\n\n comparison results action: ", comparison_res["action"])
+
     comparison_switch = {
         "from_scratch": lambda: csx_graph.get_graph_from_scratch(
             graph_type,
