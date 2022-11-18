@@ -516,7 +516,7 @@ export class GraphStore {
         try {
             const response = await axios.post('study/modify', params);
 
-            if (response.data.nodes.length === 0) {
+            if (response.data.graph.nodes.length === 0) {
                 this.graphData['isEmpty'] = true;
                 this.store.search.setSearchIsEmpty(true);
             } else {
