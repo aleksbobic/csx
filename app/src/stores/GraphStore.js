@@ -516,38 +516,46 @@ export class GraphStore {
         try {
             const response = await axios.post('study/modify', params);
 
-            this.store.core.setStudyHistory(response.data.history);
+            if (response.data.nodes.length === 0) {
+                this.graphData['isEmpty'] = true;
+                this.store.search.setSearchIsEmpty(true);
+            } else {
+                this.store.core.setStudyHistory(response.data.history);
 
-            this.store.core.setStudyHistoryItemIndex(
-                this.store.core.studyHistory.length - 1
-            );
-            this.store.core.setStudyQuery();
-
-            const historyGraphType =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].graph_type;
-
-            this.store.core.setCurrentGraph(historyGraphType);
-
-            this.store.history.generateHistoryNodes();
-
-            this.store.workflow.nodes = [];
-            this.store.workflow.edges = [];
-
-            try {
-                this.store.workflow.addNodesFromJSONQuery(
-                    JSON.parse(this.store.search.query)
+                this.store.core.setStudyHistoryItemIndex(
+                    this.store.core.studyHistory.length - 1
                 );
-            } catch (e) {
-                this.store.workflow.addNodesFromQuery(this.store.search.query);
-            }
 
-            this.handleRetrievedGraph(
-                response.data.graph,
-                historyGraphType,
-                this.store.search.query
-            );
+                this.store.core.setStudyQuery();
+
+                const historyGraphType =
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].graph_type;
+
+                this.store.core.setCurrentGraph(historyGraphType);
+
+                this.store.history.generateHistoryNodes();
+
+                this.store.workflow.nodes = [];
+                this.store.workflow.edges = [];
+
+                try {
+                    this.store.workflow.addNodesFromJSONQuery(
+                        JSON.parse(this.store.search.query)
+                    );
+                } catch (e) {
+                    this.store.workflow.addNodesFromQuery(
+                        this.store.search.query
+                    );
+                }
+
+                this.handleRetrievedGraph(
+                    response.data.graph,
+                    historyGraphType,
+                    this.store.search.query
+                );
+            }
         } catch (error) {
             this.store.core.setDataIsLoading(false);
             return this.store.core.handleError(error);
