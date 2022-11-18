@@ -79,6 +79,11 @@ def compare_instances(
         action = "from_anchor_properties"
         history_action = "change anchor properties"
 
+    if "is_graph_change" in params and params["is_graph_change"]:
+        difference = "graph_type"
+        action = "from_existing_data"
+        history_action = "change graph type"
+
     return {
         "same": difference == "",
         "difference": difference,

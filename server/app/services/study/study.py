@@ -39,16 +39,6 @@ def new_history_entry(study_id, user_id, data):
 
 
 def load_cache_data_from_histroy(history_item_id):
-    # last_history_item = list(
-    #     csx_data.get_all_documents_by_conditions(
-    #         "history",
-    #         {"_id": ObjectId(history_item_id)},
-    #         {"_id": 0},
-    #     )
-    # )[0]
-
-    print("loading: ", history_item_id)
-
     last_history_item = csx_data.get_large_document(ObjectId(history_item_id))
     return pickle.loads(last_history_item)
 

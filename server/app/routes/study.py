@@ -205,8 +205,15 @@ def modify_study_graph(data: ModifyStudyData):
     if history_item_id == "":
         cache_data = {}
         csx_study.add_index(study_uuid, user_uuid, index)
+        is_graph_change = False
     else:
         cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+        study = csx_study.get_study(user_uuid, study_uuid)
+        is_graph_change = [
+            entry
+            for entry in study["history"]
+            if entry["item_id"] == ObjectId(history_parent_id)
+        ][0]["graph_type"] != graph_type
 
     with open(f"./app/data/config/{index}.json") as config:
         config = json.load(config)
@@ -292,6 +299,7 @@ def modify_study_graph(data: ModifyStudyData):
             "schema": schema,
             "dimensions": current_dimensions,
             "anchor_properties": anchor_properties,
+            "is_graph_change": is_graph_change,
         },
         graph_type,
     )
