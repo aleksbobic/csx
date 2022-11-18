@@ -225,17 +225,25 @@ export class WorkflowStore {
     updateSearchNodeData = (nodeID, dataValue) => {
         this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
-                node.data = {
-                    ...node.data
-                };
                 node.data['keyphrase'] = dataValue;
             }
+
             return node;
         });
+        this.updateActions(nodeID);
     };
 
-    updateActions = () => {
-        this.nodes = [...this.nodes];
+    updateActions = id => {
+        if (id) {
+            this.nodes = this.nodes.map(node => {
+                if (node.id === id) {
+                    node.data = { ...node.data };
+                }
+                return node;
+            });
+        }
+
+        // this.nodes = [...this.nodes];
         this.edges = [...this.edges];
     };
 

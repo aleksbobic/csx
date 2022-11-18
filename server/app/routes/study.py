@@ -99,13 +99,15 @@ def get_study(data: GetStudyData):
         else:
             history_id = study["history"][len(study["history"]) - 1]["item_id"]
 
-        history_item = list(
-            csx_data.get_all_documents_by_conditions(
-                "history",
-                {"_id": history_id},
-                {"_id": 0},
-            )
-        )[0]
+        # history_item = list(
+        #     csx_data.get_all_documents_by_conditions(
+        #         "history",
+        #         {"_id": history_id},
+        #         {"_id": 0},
+        #     )
+        # )[0]
+
+        history_item = csx_data.get_large_document(history_id)
 
         history = [
             {
@@ -136,7 +138,8 @@ def get_study(data: GetStudyData):
             graph_type = history[len(history) - 1]["graph_type"]
 
         return {
-            "graph": pickle.loads(history_item["data"])[graph_type],
+            # "graph": pickle.loads(history_item["data"])[graph_type],
+            "graph": pickle.loads(history_item)[graph_type],
             "name": study["study_name"],
             "description": study["study_description"],
             "history": history,
@@ -462,8 +465,9 @@ def delete_study(study_uuid: str, user_uuid: str):
 
     if len(study_entry) > 0:
         history_ids = [item["item_id"] for item in study_entry[0]["history"]]
-
-        csx_data.delete_documents("history", {"_id": {"$in": history_ids}})
+        for item_id in history_ids:
+            # csx_data.delete_documents("history", {"_id": {"$in": history_ids}})
+            csx_data.delete_large_document(item_id)
 
     csx_data.delete_document(
         "studies", {"study_uuid": study_uuid, "user_uuid": user_uuid}

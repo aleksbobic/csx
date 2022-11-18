@@ -48,7 +48,7 @@ const searchNode = ({ id, data, isConnectable }) => {
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.keyphrase = data.getDefaultValue(value.target.value);
-        data.updateActions();
+        data.updateActions(id);
     };
 
     const renderTextInput = () => {

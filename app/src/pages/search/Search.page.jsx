@@ -36,6 +36,9 @@ function SearchPage(props) {
             height="100%"
             justifyContent="center"
             alignItems="center"
+            padding="10px"
+            paddingTop="55px"
+            backgroundColor="blackAlpha.300"
         >
             <AdvancedSearchComponent marginTop="100px" />
         </Flex>

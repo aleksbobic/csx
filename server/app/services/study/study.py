@@ -5,11 +5,13 @@ from bson import ObjectId
 
 
 def store_history_entry(entry):
-    return csx_data.insert_document("history", entry)
+    return csx_data.insert_large_document(entry)
+    # return csx_data.insert_document("history", entry)
 
 
 def new_history_entry(study_id, user_id, data):
-    insert_response = store_history_entry({"data": data["graph_data"]})
+    # insert_response = store_history_entry({"data": data["graph_data"]})
+    insert_response = store_history_entry(data["graph_data"])
 
     csx_data.update_document(
         "studies",
@@ -17,7 +19,7 @@ def new_history_entry(study_id, user_id, data):
         {
             "$push": {
                 "history": {
-                    "item_id": insert_response.inserted_id,
+                    "item_id": insert_response,
                     "action": data["action"],
                     "graph_type": data["graph_type"],
                     "query": data["query"],
@@ -36,15 +38,20 @@ def new_history_entry(study_id, user_id, data):
 
 
 def load_cache_data_from_histroy(history_item_id):
-    last_history_item = list(
-        csx_data.get_all_documents_by_conditions(
-            "history",
-            {"_id": ObjectId(history_item_id)},
-            {"_id": 0},
-        )
-    )[0]
+    # last_history_item = list(
+    #     csx_data.get_all_documents_by_conditions(
+    #         "history",
+    #         {"_id": ObjectId(history_item_id)},
+    #         {"_id": 0},
+    #     )
+    # )[0]
 
-    return pickle.loads(last_history_item["data"])
+    print("loading: ", history_item_id)
+
+    last_history_item = csx_data.get_large_document(ObjectId(history_item_id))
+    return pickle.loads(last_history_item)
+
+    # return pickle.loads(last_history_item["data"])
 
 
 def load_last_history_item(study_id, user_id):

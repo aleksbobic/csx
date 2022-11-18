@@ -4,9 +4,11 @@ import pymongo
 from app.types import Node
 from app.utils.timer import use_timing
 from pymongo import MongoClient
+import gridfs
 
 client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx
+fs = gridfs.GridFS(database)
 
 
 def list_collections() -> None:
@@ -22,6 +24,18 @@ def delete_collection(collection_name: str) -> None:
 def insert_document(collection_name: str, value: Any) -> None:
     """Insert a single value in a collection"""
     return database[collection_name].insert_one(value)
+
+
+def insert_large_document(doc) -> str:
+    return fs.put(doc)
+
+
+def get_large_document(item_id):
+    return fs.get(item_id).read()
+
+
+def delete_large_document(item_id):
+    return fs.delete(item_id)
 
 
 def update_document(collection_name: str, conditions: object, new_values) -> None:

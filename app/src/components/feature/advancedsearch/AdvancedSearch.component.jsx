@@ -242,7 +242,8 @@ function AdvancedSearch(props) {
             style={props.style}
             width="100%"
             height="100%"
-            paddingTop="50px"
+            borderRadius="10px"
+            overflow="hidden"
         >
             <Box width="100%" height="100%" ref={reactFlowWrapper}>
                 <ReactFlow

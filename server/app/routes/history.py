@@ -37,9 +37,12 @@ def delete_item(data: HistoryDeleteData):
         )
     )[0]
 
-    csx_data.delete_documents(
-        "history", {"_id": {"$in": [ObjectId(item) for item in history_item_indexes]}}
-    )
+    # csx_data.delete_documents(
+    #     "history", {"_id": {"$in": [ObjectId(item) for item in history_item_indexes]}}
+    # )
+
+    for item_id in history_item_indexes:
+        csx_data.delete_large_document(ObjectId(item_id))
 
     csx_data.update_document(
         "studies",
