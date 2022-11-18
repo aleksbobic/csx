@@ -29,8 +29,6 @@ function Overview(props) {
     );
 
     useEffect(() => {
-        console.log('change!', store.stats.charts);
-
         setVisibleCharts(
             store.stats
                 .getChartListForDataset()

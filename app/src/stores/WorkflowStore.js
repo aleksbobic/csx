@@ -29,18 +29,6 @@ export class WorkflowStore {
                 'Serves as an advanced search node which enables more elaborate filtering of values.'
         },
         {
-            nodeType: 'countsNode',
-            label: 'Counts',
-            tooltip:
-                'Serves as a node for counting the occurance of array values in a feature.'
-        },
-        {
-            nodeType: 'keywordExtractionNode',
-            label: 'Keyword Extraction',
-            tooltip:
-                'Serves as a keyword extraction node which enables extracting keywords from longer texts and adding them to a new column.'
-        },
-        {
             nodeType: 'resultsNode',
             label: 'Results',
             tooltip:

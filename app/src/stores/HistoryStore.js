@@ -44,7 +44,6 @@ export class HistoryStore {
         this.edges = [];
 
         this.store.core.studyHistory.forEach((historyItem, index) => {
-            console.log(historyItem);
             const historyNode = {
                 id: `${historyItem.id}`,
                 type: 'historyNode',
@@ -169,7 +168,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments.push({ comment: comment, time: comment_time });
 
-        const response = await axios.post('history/comment', params);
+        await axios.post('history/comment', params);
         this.generateHistoryNodes();
 
         if (!this.store.core.studyIsSaved) {
@@ -189,7 +188,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments.splice(index, 1);
 
-        const response = await axios.post('history/deletecomment', params);
+        await axios.post('history/deletecomment', params);
         this.generateHistoryNodes();
     };
 
@@ -217,7 +216,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments[index]['edited'] = true;
 
-        const response = await axios.post('history/editcomment', params);
+        await axios.post('history/editcomment', params);
 
         this.generateHistoryNodes();
     };
@@ -249,7 +248,7 @@ export class HistoryStore {
             history_item_indexes: deleteNodeIDs
         };
 
-        const response = await axios.post('history/delete', params);
+        await axios.post('history/delete', params);
 
         const deletedNodeParent = this.nodes.find(node => node.id === id).data
             .parent;

@@ -1,6 +1,5 @@
 import {
     Box,
-    Checkbox,
     Editable,
     EditableInput,
     EditablePreview,

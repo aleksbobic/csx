@@ -47,17 +47,14 @@ import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
     Assign,
-    Close,
     MenuBoxed,
     MoreVerticalAlt,
-    Record,
     SoftwareDownload,
     ViewComfortable
 } from 'css.gg';
 import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { useRef } from 'react';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);

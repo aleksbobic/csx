@@ -182,7 +182,12 @@ const overviewSchemaNode = ({ id, data }) => {
                             width="100%"
                             spacing="5"
                             justifyContent="space-between"
-                            style={{ marginTop: '0px' }}
+                            style={{
+                                marginTop:
+                                    data.addedProperties.length === 0
+                                        ? '0px'
+                                        : '10px'
+                            }}
                         >
                             <Select
                                 id={`${id}_property_selector`}

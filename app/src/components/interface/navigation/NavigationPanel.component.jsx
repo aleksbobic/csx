@@ -19,7 +19,6 @@ import {
 } from '@chakra-ui/react';
 import {
     AlignBottom,
-    Assign,
     Attribution,
     Carousel,
     ChevronRight,
@@ -34,10 +33,10 @@ import {
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 
+import { CameraIcon } from '@heroicons/react/24/solid';
 import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { CameraIcon } from '@heroicons/react/24/solid';
 import DataPanelComponent from '../datapanel/DataPanel.component';
 
 function NavigationPanelComponent() {

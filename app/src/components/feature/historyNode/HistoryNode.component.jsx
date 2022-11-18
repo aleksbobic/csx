@@ -1,8 +1,6 @@
 import {
-    AspectRatio,
     Box,
     Flex,
-    HStack,
     IconButton,
     Text,
     Tooltip,

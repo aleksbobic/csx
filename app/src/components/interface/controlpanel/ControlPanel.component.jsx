@@ -23,14 +23,13 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
+import { ArrowsPointingOutIcon, ScissorsIcon } from '@heroicons/react/20/solid';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
-    Controller,
     DisplayFullwidth,
-    EditStraight,
     Eye,
     FormatSeparator,
     Info,
@@ -47,7 +46,6 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { ScissorsIcon, ArrowsPointingOutIcon } from '@heroicons/react/20/solid';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
