@@ -20,12 +20,13 @@ import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
 import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 
 import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
     const store = useContext(RootStoreContext);
+    const [forceRunning, setForceRunning] = useState(false);
 
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
@@ -167,18 +168,29 @@ function Settings() {
                             id="applyforcebutton"
                             size="sm"
                             leftIcon={<Bolt style={{ '--ggs': '0.6' }} />}
+                            backgroundColor={forceRunning && 'blue.400'}
                             onClick={() => {
-                                store.graphInstance.applyForce();
-                                store.track.trackEvent(
-                                    'view settings',
-                                    'button click',
-                                    'apply force'
-                                );
+                                if (forceRunning) {
+                                    store.graphInstance.stopForce();
+                                    setForceRunning(false);
+                                    store.track.trackEvent(
+                                        'view settings',
+                                        'button click',
+                                        'run force'
+                                    );
+                                } else {
+                                    store.graphInstance.applyForce();
+                                    setForceRunning(true);
+                                    store.track.trackEvent(
+                                        'view settings',
+                                        'button click',
+                                        'stop force'
+                                    );
+                                }
                             }}
-                            disabled={store.graphInstance.forceEngine}
                             width="100%"
                         >
-                            Apply force
+                            {forceRunning ? 'Stop force' : 'Run Force'}
                         </Button>
                     </Tooltip>
                     <Tooltip

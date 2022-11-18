@@ -276,7 +276,7 @@ export class GraphInstanceStore {
     applyForce = () => {
         this.toggleLinkVisibility(false);
         this.forceCooldownTicks = Infinity;
-        this.forceCooldownTime = 3000;
+        this.forceCooldownTime = 15000;
         this.forceEngine = true;
     };
 
