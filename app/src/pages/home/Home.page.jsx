@@ -157,48 +157,74 @@ function HomePage() {
                     />{' '}
                     <Text fontWeight="bold">Collaboration Spotting X</Text>
                 </HStack>
-                <Text marginBottom="20px" textAlign="left">
+                <Text marginBottom="20px" textAlign="left" fontSize="xs">
                     Developed at <b>CERN</b>, Geneva, Switzerland by{' '}
                     <b>Aleksandar Bobić</b> led by <b>Dr. Jean-Marie Le Goff</b>{' '}
                     and <b>prof. Christian Gütl</b>.
                 </Text>
-                <Text textAlign="left" fontWeight="bold">
+                <Text textAlign="left" fontWeight="bold" fontSize="xs">
                     CERN &copy; 2022
                 </Text>
             </Center>
             <Center maxWidth="300px">
-                <Text
-                    fontStyle="italic"
-                    fontSize="sm"
-                    textAlign="left"
-                    marginTop="20px"
-                >
-                    This project was inspired by the{' '}
+                <VStack alignItems="start">
                     <Link
                         fontWeight="bold"
+                        fontSize="sm"
                         textDecoration="underline"
                         display="inline"
                         opacity="0.75"
                         target="_blank"
-                        href="https://collaborationspotting.web.cern.ch/"
+                        href="https://github.com/aleksbobic/csx"
                         _hover={{ opacity: 1 }}
                     >
-                        Collaboration Spotting project
+                        Github
                     </Link>
-                    . We would like to thank the{' '}
                     <Link
                         fontWeight="bold"
                         textDecoration="underline"
+                        fontSize="sm"
                         display="inline"
                         opacity="0.75"
                         target="_blank"
-                        href="https://ercim-news.ercim.eu/en111/r-i/collaboration-spotting-a-visual-analytics-platform-to-assist-knowledge-discovery"
+                        href="https://csxp.me"
                         _hover={{ opacity: 1 }}
                     >
-                        Collaboration Spotting team
-                    </Link>{' '}
-                    for their contributions.
-                </Text>
+                        Webpage
+                    </Link>
+                    <Text
+                        fontStyle="italic"
+                        fontSize="xs"
+                        textAlign="left"
+                        marginTop="20px"
+                    >
+                        This project was inspired by the{' '}
+                        <Link
+                            fontWeight="bold"
+                            textDecoration="underline"
+                            display="inline"
+                            opacity="0.75"
+                            target="_blank"
+                            href="https://collaborationspotting.web.cern.ch/"
+                            _hover={{ opacity: 1 }}
+                        >
+                            Collaboration Spotting project
+                        </Link>
+                        . We would like to thank the{' '}
+                        <Link
+                            fontWeight="bold"
+                            textDecoration="underline"
+                            display="inline"
+                            opacity="0.75"
+                            target="_blank"
+                            href="https://ercim-news.ercim.eu/en111/r-i/collaboration-spotting-a-visual-analytics-platform-to-assist-knowledge-discovery"
+                            _hover={{ opacity: 1 }}
+                        >
+                            Collaboration Spotting team
+                        </Link>{' '}
+                        for their contributions.
+                    </Text>
+                </VStack>
             </Center>
         </Container>
     );
