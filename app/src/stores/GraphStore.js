@@ -474,7 +474,8 @@ export class GraphStore {
             query: this.store.search.advancedSearchQuery
                 ? JSON.stringify(this.store.search.advancedSearchQuery)
                 : this.store.search.query,
-            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            charts: this.store.stats.charts[this.store.search.currentDataset]
         };
 
         if (this.store.core.studyHistory.length > 0) {
@@ -511,10 +512,10 @@ export class GraphStore {
             params.anchor_properties = [];
         }
 
-        console.log('\n\n\nstudy params: ', params);
-
         try {
             const response = await axios.post('study/modify', params);
+
+            console.log(response);
 
             if (response.data.graph.nodes.length === 0) {
                 this.graphData['isEmpty'] = true;
@@ -575,6 +576,8 @@ export class GraphStore {
 
         try {
             response = await axios.post('study', params);
+
+            this.store.stats.setChartListForDataset(response.data.charts);
 
             this.store.core.setStudyHistory(response.data.history);
 
@@ -1120,7 +1123,10 @@ export class GraphStore {
                     this.store.core.studyHistory.length > 0 &&
                     this.store.core.studyHistory[
                         this.store.core.studyHistoryItemIndex
-                    ].id
+                    ].id,
+                charts: this.store.stats.charts[
+                    this.store.search.currentDataset
+                ]
             });
 
             this.store.core.setStudyHistory(response.data.history);
@@ -1224,7 +1230,10 @@ export class GraphStore {
                     this.store.core.studyHistory.length > 0 &&
                     this.store.core.studyHistory[
                         this.store.core.studyHistoryItemIndex
-                    ].id
+                    ].id,
+                charts: this.store.stats.charts[
+                    this.store.search.currentDataset
+                ]
             });
 
             this.store.core.setStudyHistory(response.data.history);

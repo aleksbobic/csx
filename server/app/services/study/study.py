@@ -31,6 +31,7 @@ def new_history_entry(study_id, user_id, data):
                     "visible_dimensions": data["visible_dimensions"],
                     "comments": [],
                     "parent": data["history_parent_id"],
+                    "charts": data["charts"],
                 }
             }
         },

@@ -96,8 +96,14 @@ def get_study(data: GetStudyData):
                 for entry in study["history"]
                 if entry["item_id"] == ObjectId(history_entry_id)
             ][0]["item_id"]
+            charts = [
+                entry
+                for entry in study["history"]
+                if entry["item_id"] == ObjectId(history_entry_id)
+            ][0]["charts"]
         else:
-            history_id = study["history"][len(study["history"]) - 1]["item_id"]
+            history_id = study["history"][-1]["item_id"]
+            charts = study["history"][-1]["charts"]
 
         # history_item = list(
         #     csx_data.get_all_documents_by_conditions(
@@ -124,6 +130,7 @@ def get_study(data: GetStudyData):
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
                 "parent_id": item["parent"],
+                "charts": item["charts"],
             }
             for item in study["history"]
         ]
@@ -144,6 +151,7 @@ def get_study(data: GetStudyData):
             "description": study["study_description"],
             "history": history,
             "index": study["index"],
+            "charts": charts,
         }
 
     return {
@@ -171,6 +179,7 @@ class ModifyStudyData(BaseModel):
     anchor_properties: List
     action_time: str
     history_parent_id: Union[str, None]
+    charts: List
 
 
 @router.post("/modify")
@@ -190,6 +199,7 @@ def modify_study_graph(data: ModifyStudyData):
     anchor_properties = data.anchor_properties
     action_time = data.action_time
     history_parent_id = data.history_parent_id
+    charts = data.charts
 
     """Run search using given query."""
     if history_item_id == "":
@@ -308,6 +318,7 @@ def modify_study_graph(data: ModifyStudyData):
             action_time,
             comparison_res["history_action"],
             history_parent_id,
+            charts,
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
             comparison_res,
@@ -325,6 +336,7 @@ def modify_study_graph(data: ModifyStudyData):
             anchor_properties,
             history_parent_id,
             cache_data,
+            charts,
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
             graph_type,
@@ -342,6 +354,7 @@ def modify_study_graph(data: ModifyStudyData):
             action_time,
             comparison_res["history_action"],
             history_parent_id,
+            charts,
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
             comparison_res,
@@ -357,6 +370,7 @@ def modify_study_graph(data: ModifyStudyData):
             anchor_properties,
             dimensions,
             history_parent_id,
+            charts,
         ),
     }
 
@@ -439,6 +453,29 @@ def update_study(
             }
         },
     )
+    return
+
+
+class UpdateChartsData(BaseModel):
+    study_uuid: str
+    user_uuid: str
+    history_item_index: int
+    charts: List
+
+
+@router.post("/updatecharts")
+def update_study_charts(data: UpdateChartsData):
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
+        {
+            "$set": {
+                f"history.{data.history_item_index}.charts": data.charts,
+            }
+        },
+    )
+
     return
 
 

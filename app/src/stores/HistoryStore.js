@@ -266,4 +266,15 @@ export class HistoryStore {
         this.generateHistoryNodes();
         this.loadStudy(deletedNodeParent);
     };
+
+    updateStudyCharts = async charts => {
+        const params = {
+            study_uuid: this.store.core.studyUuid,
+            user_uuid: this.store.core.userUuid,
+            history_item_index: this.store.core.studyHistoryItemIndex,
+            charts: charts
+        };
+
+        await axios.post('study/updatecharts', params);
+    };
 }
