@@ -350,7 +350,7 @@ function Settings() {
 
         return (
             <Stack>
-                <Heading size="sm" marginTop="10px" marginBottom="5px">
+                <Heading size="xs" marginTop="10px" marginBottom="5px">
                     Graph dimensions:
                 </Heading>
                 <Wrap>{tags}</Wrap>

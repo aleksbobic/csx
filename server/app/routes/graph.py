@@ -89,6 +89,8 @@ def trim_network(
             "visible_dimensions": last_history_item["visible_dimensions"],
             "history_parent_id": history_parent_id,
             "charts": charts,
+            "edge_count": len(cache_data[graph_type]["edges"]),
+            "node_count": len(cache_data[graph_type]["nodes"]),
         },
     )
 
@@ -111,6 +113,9 @@ def trim_network(
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
                 "parent_id": item["parent"],
+                "charts": item["charts"],
+                "edge_count": item["edge_count"],
+                "node_count": item["node_count"],
             }
             for item in study["history"]
         ],
@@ -286,6 +291,9 @@ def expand_network(
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
                 "parent_id": item["parent"],
+                "charts": item["charts"],
+                "edge_count": item["edge_count"],
+                "node_count": item["node_count"],
             }
             for item in study["history"]
         ],

@@ -131,6 +131,8 @@ def get_study(data: GetStudyData):
                 "visible_dimensions": item["visible_dimensions"],
                 "parent_id": item["parent"],
                 "charts": item["charts"],
+                "edge_count": item["edge_count"],
+                "node_count": item["node_count"],
             }
             for item in study["history"]
         ]
@@ -403,6 +405,9 @@ def modify_study_graph(data: ModifyStudyData):
                 "links": item["links"],
                 "visible_dimensions": item["visible_dimensions"],
                 "parent_id": item["parent"],
+                "charts": item["charts"],
+                "edge_count": item["edge_count"],
+                "node_count": item["node_count"],
             }
             for item in study["history"]
         ],

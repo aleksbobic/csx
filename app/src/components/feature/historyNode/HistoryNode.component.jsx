@@ -1,13 +1,15 @@
 import {
+    AspectRatio,
     Box,
     Flex,
     HStack,
     IconButton,
     Text,
     Tooltip,
-    VStack
+    VStack,
+    Wrap
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
+import { Close, Comment } from 'css.gg';
 
 import { Handle } from 'react-flow-renderer';
 
@@ -64,7 +66,7 @@ const historyNode = ({ id, data, isConnectable }) => {
                         <Tooltip label={data.title}>
                             <Text
                                 fontWeight="bold"
-                                fontSize="sm"
+                                fontSize="xs"
                                 overflow="hidden"
                                 whiteSpace="nowrap"
                                 textOverflow="ellipsis"
@@ -74,26 +76,129 @@ const historyNode = ({ id, data, isConnectable }) => {
                                 {data.title}
                             </Text>
                         </Tooltip>
-                        <HStack
-                            width="100%"
-                            style={{ marginTop: 0 }}
-                            opacity={data.isActive ? '1' : '0.7'}
+
+                        <Wrap
+                            spacing="2px"
+                            style={{ margin: 0, marginTop: '3px' }}
                         >
-                            <Text fontSize="xs">Graph type:</Text>
-                            <Text fontWeight="bold" fontSize="xs">
-                                {data.graphType}
-                            </Text>
-                        </HStack>
-                        <HStack
-                            width="100%"
-                            style={{ marginTop: 0 }}
-                            opacity={data.isActive ? '1' : '0.7'}
-                        >
-                            <Text fontSize="xs">Comment count:</Text>
-                            <Text fontWeight="bold" fontSize="xs">
-                                {data.comments.length}
-                            </Text>
-                        </HStack>
+                            <Flex justifyContent="center">
+                                <Box
+                                    backgroundColor={
+                                        data.isActive
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="4px"
+                                    padding="2px 6px"
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                >
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        textAlign="center"
+                                    >
+                                        {data.graphType}
+                                    </Text>
+                                </Box>
+                            </Flex>
+                            <Flex justifyContent="center">
+                                <Box
+                                    backgroundColor={
+                                        data.isActive
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="4px"
+                                    padding="2px 6px"
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                >
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        textAlign="center"
+                                        marginRight="2px"
+                                    >
+                                        {data.comments.length}
+                                    </Text>
+                                    <Comment
+                                        style={{
+                                            '--ggs': '0.5',
+                                            marginTop: '-2px',
+                                            opacity: 0.7
+                                        }}
+                                    />
+                                </Box>
+                            </Flex>
+                            <Flex justifyContent="center">
+                                <Box
+                                    backgroundColor={
+                                        data.isActive
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="4px"
+                                    padding="2px 6px"
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                >
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        textAlign="center"
+                                        marginRight="4px"
+                                    >
+                                        {data.nodeCount}
+                                    </Text>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        opacity="0.6"
+                                    >
+                                        {data.nodeCount === 1
+                                            ? 'node'
+                                            : 'nodes'}
+                                    </Text>
+                                </Box>
+                            </Flex>
+                            <Flex justifyContent="center">
+                                <Box
+                                    backgroundColor={
+                                        data.isActive
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="4px"
+                                    padding="2px 6px"
+                                    marginRight="4px"
+                                    display="flex"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                >
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        textAlign="center"
+                                        marginRight="4px"
+                                    >
+                                        {data.edgeCount}
+                                    </Text>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="bold"
+                                        opacity="0.6"
+                                    >
+                                        {data.edgeCount === 1
+                                            ? 'edge'
+                                            : 'edges'}
+                                    </Text>
+                                </Box>
+                            </Flex>
+                        </Wrap>
                     </VStack>
                     <Text
                         fontSize="8px"

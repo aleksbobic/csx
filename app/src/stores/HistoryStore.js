@@ -44,6 +44,7 @@ export class HistoryStore {
         this.edges = [];
 
         this.store.core.studyHistory.forEach((historyItem, index) => {
+            console.log(historyItem);
             const historyNode = {
                 id: `${historyItem.id}`,
                 type: 'historyNode',
@@ -56,7 +57,9 @@ export class HistoryStore {
                     actionTime: historyItem.action_time,
                     isActive: this.store.core.studyHistoryItemIndex === index,
                     loadStudy: this.loadStudy,
-                    deleteNode: this.deleteNode
+                    deleteNode: this.deleteNode,
+                    nodeCount: historyItem.node_count,
+                    edgeCount: historyItem.edge_count
                 },
                 position: {
                     x: 50,

@@ -32,6 +32,8 @@ def new_history_entry(study_id, user_id, data):
                     "comments": [],
                     "parent": data["history_parent_id"],
                     "charts": data["charts"],
+                    "edge_count": data["edge_count"],
+                    "node_count": data["node_count"],
                 }
             }
         },

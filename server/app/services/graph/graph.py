@@ -368,6 +368,8 @@ def get_graph_from_scratch(
             "visible_dimensions": dimensions["visible"],
             "history_parent_id": history_parent_id,
             "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
         },
     )
 
@@ -430,6 +432,8 @@ def get_graph_with_new_anchor_props(
             "visible_dimensions": dimensions["visible"],
             "history_parent_id": history_parent_id,
             "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
         },
     )
 
@@ -500,6 +504,8 @@ def get_graph_from_existing_data(
             "visible_dimensions": dimensions["visible"],
             "history_parent_id": history_parent_id,
             "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
         },
     )
 
@@ -538,6 +544,8 @@ def get_graph_from_cache(
             "visible_dimensions": dimensions["visible"],
             "history_parent_id": history_parent_id,
             "charts": charts,
+            "edge_count": len(comparison_res["data"][graph_type]["edges"]),
+            "node_count": len(comparison_res["data"][graph_type]["nodes"]),
         },
     )
 
