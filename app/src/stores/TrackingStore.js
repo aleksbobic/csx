@@ -5,7 +5,7 @@ export class TrackingStore {
         this.store = store;
         makeAutoObservable(this);
 
-        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+        if (process?.env.REACT_APP_DISABLE_TRACKING !== 'true') {
             window._paq = window._paq || [];
             window._paq.push(['trackPageView']);
             window._paq.push(['enableLinkTracking']);
@@ -30,7 +30,7 @@ export class TrackingStore {
     };
 
     trackPageChange = () => {
-        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+        if (process?.env.REACT_APP_DISABLE_TRACKING !== 'true') {
             const title =
                 window.location.pathname.slice(1) === ''
                     ? 'home'
@@ -44,7 +44,7 @@ export class TrackingStore {
     };
 
     trackEvent = (event_category, event_action, event_data) => {
-        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+        if (process?.env.REACT_APP_DISABLE_TRACKING !== 'true') {
             window._paq.push([
                 'trackEvent',
                 event_category,

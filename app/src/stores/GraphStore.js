@@ -475,7 +475,8 @@ export class GraphStore {
                 ? JSON.stringify(this.store.search.advancedSearchQuery)
                 : this.store.search.query,
             action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-            charts: this.store.stats.charts[this.store.search.currentDataset]
+            charts:
+                this.store.stats.charts[this.store.search.currentDataset] || []
         };
 
         if (this.store.core.studyHistory.length > 0) {
@@ -511,6 +512,8 @@ export class GraphStore {
         } else {
             params.anchor_properties = [];
         }
+
+        console.log('request params: ', params);
 
         try {
             const response = await axios.post('study/modify', params);

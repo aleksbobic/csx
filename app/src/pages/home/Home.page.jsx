@@ -346,7 +346,7 @@ function HomePage() {
                         </Flex>
                     ))}
                 </SimpleGrid>
-                {process.env.REACT_APP_DISABLE_UPLOAD !== 'true' && (
+                {process?.env.REACT_APP_DISABLE_UPLOAD !== 'true' && (
                     <Box
                         backgroundColor="blackAlpha.300"
                         padding="20px"
@@ -516,7 +516,7 @@ function HomePage() {
                 {store.search.datasets.length > 0 && (
                     <>
                         <SearchBarComponent style={{ marginTop: '0px' }} />
-                        {process.env.REACT_APP_DISABLE_DATASET_LIST !==
+                        {process?.env.REACT_APP_DISABLE_DATASET_LIST !==
                             'true' && renderDatasetGrid()}
                     </>
                 )}

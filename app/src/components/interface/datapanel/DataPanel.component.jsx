@@ -461,7 +461,7 @@ function DataPanel(props) {
                 justifyContent="space-between"
             >
                 <HStack>
-                    {process.env.REACT_APP_DISABLE_DATASET_DOWNLOAD !==
+                    {process?.env.REACT_APP_DISABLE_DATASET_DOWNLOAD !==
                         'true' && (
                         <Tooltip label="Download visible data as CSV">
                             <Box>

@@ -47,6 +47,7 @@ const connectorNode = ({ id, data, isConnectable }) => {
                         </Tooltip>
                     </HStack>
                     <Select
+                        className="nodrag"
                         margin="0px"
                         variant="filled"
                         size="sm"

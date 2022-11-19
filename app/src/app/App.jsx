@@ -21,7 +21,7 @@ function CSX() {
         <HelmetProvider>
             <Router>
                 <Helmet>
-                    {process.env.NODE_ENV === 'production' && (
+                    {process?.env.NODE_ENV === 'production' && (
                         <meta
                             http-equiv="Content-Security-Policy"
                             content="upgrade-insecure-requests"
@@ -49,7 +49,7 @@ function CSX() {
                             <ControlPanelComponent />
                             <OverviewGraphPage />
                         </Route>
-                        {process.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                        {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
                             'true' && (
                             <Route path="/search" label="search">
                                 <SearchPage />

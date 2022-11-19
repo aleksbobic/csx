@@ -16,6 +16,7 @@ const overviewSchemaNode = ({ id, data }) => {
         if (data.features && data.isAnchor && data.position === 'left') {
             return (
                 <Select
+                    className="nodrag"
                     size="xs"
                     variant="filled"
                     width="180px"
@@ -43,6 +44,7 @@ const overviewSchemaNode = ({ id, data }) => {
         if (data.features && data.isLink && !data.label) {
             return (
                 <Select
+                    className="nodrag"
                     size="xs"
                     variant="filled"
                     width="150px"
@@ -190,6 +192,7 @@ const overviewSchemaNode = ({ id, data }) => {
                             }}
                         >
                             <Select
+                                className="nodrag"
                                 id={`${id}_property_selector`}
                                 size="xs"
                                 variant="filled"

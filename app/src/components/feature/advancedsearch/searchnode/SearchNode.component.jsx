@@ -79,6 +79,7 @@ const searchNode = ({ id, data, isConnectable }) => {
     const renderSelectInput = () => {
         return (
             <Select
+                className="nodrag"
                 size="sm"
                 variant="filled"
                 margin="0px"
@@ -165,6 +166,7 @@ const searchNode = ({ id, data, isConnectable }) => {
                     </HStack>
                     <Tooltip label="Dataset property">
                         <Select
+                            className="nodrag"
                             margin="0px"
                             variant="filled"
                             size="sm"

@@ -244,7 +244,7 @@ function NavigationPanelComponent() {
 
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>
-            {process.env.REACT_APP_DISABLE_ADVANCED_SEARCH !== 'true' && (
+            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !== 'true' && (
                 <Tooltip label="Retrieval workspace">
                     <Button
                         variant={

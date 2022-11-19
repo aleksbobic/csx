@@ -46,6 +46,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                     </HStack>
                     <Tooltip label="Filter this property">
                         <Select
+                            className="nodrag"
                             margin="0px"
                             variant="filled"
                             size="sm"
