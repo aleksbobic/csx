@@ -461,29 +461,32 @@ function DataPanel(props) {
                 justifyContent="space-between"
             >
                 <HStack>
-                    <Tooltip label="Download visible data as CSV">
-                        <Box>
-                            <IconButton
-                                size="sm"
-                                as={CSVLink}
-                                data={csvData}
-                                headers={csvHeaders}
-                                filename="csx.csv"
-                                target="_blank"
-                                variant="solid"
-                                opacity="0.5"
-                                transition="all 0.2 ease-in-out"
-                                _hover={{ opacity: 1 }}
-                                icon={
-                                    <SoftwareDownload
-                                        style={{
-                                            '--ggs': '0.8'
-                                        }}
-                                    />
-                                }
-                            />
-                        </Box>
-                    </Tooltip>
+                    {process.env.REACT_APP_DISABLE_DATASET_DOWNLOAD !==
+                        'true' && (
+                        <Tooltip label="Download visible data as CSV">
+                            <Box>
+                                <IconButton
+                                    size="sm"
+                                    as={CSVLink}
+                                    data={csvData}
+                                    headers={csvHeaders}
+                                    filename="csx.csv"
+                                    target="_blank"
+                                    variant="solid"
+                                    opacity="0.5"
+                                    transition="all 0.2 ease-in-out"
+                                    _hover={{ opacity: 1 }}
+                                    icon={
+                                        <SoftwareDownload
+                                            style={{
+                                                '--ggs': '0.8'
+                                            }}
+                                        />
+                                    }
+                                />
+                            </Box>
+                        </Tooltip>
+                    )}
                     <Menu closeOnSelect={false} zIndex="3">
                         <Tooltip label="List options">
                             <MenuButton

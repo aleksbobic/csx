@@ -25,7 +25,10 @@ services:
       - server
       # - analytics
     environment:
-      REACT_APP_DISABLE_UPLOAD: 'false'
+      REACT_APP_DISABLE_UPLOAD: 'true'
+      REACT_APP_DISABLE_DATASET_LIST: 'true'
+      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'true'
+      REACT_APP_DISABLE_ADVANCED_SEARCH: 'true'
     command: bash -c "npm install && npm start"
   # mysql:
   #   image: "mysql:5.7"

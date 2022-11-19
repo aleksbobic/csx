@@ -49,9 +49,12 @@ function CSX() {
                             <ControlPanelComponent />
                             <OverviewGraphPage />
                         </Route>
-                        <Route path="/search" label="search">
-                            <SearchPage />
-                        </Route>
+                        {process.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                            'true' && (
+                            <Route path="/search" label="search">
+                                <SearchPage />
+                            </Route>
+                        )}
                     </RRSwitch>
                 </Box>
             </Router>

@@ -244,19 +244,23 @@ function NavigationPanelComponent() {
 
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>
-            <Tooltip label="Retrieval workspace">
-                <Button
-                    variant={
-                        location.pathname === '/search' ? 'solid' : 'outline'
-                    }
-                    as={NavLink}
-                    to={`/search?study=${store.core.studyUuid}`}
-                    border="1px solid transparent"
-                    opacity={location.pathname === '/search' ? '1' : '0.5'}
-                >
-                    Search
-                </Button>
-            </Tooltip>
+            {process.env.REACT_APP_DISABLE_ADVANCED_SEARCH !== 'true' && (
+                <Tooltip label="Retrieval workspace">
+                    <Button
+                        variant={
+                            location.pathname === '/search'
+                                ? 'solid'
+                                : 'outline'
+                        }
+                        as={NavLink}
+                        to={`/search?study=${store.core.studyUuid}`}
+                        border="1px solid transparent"
+                        opacity={location.pathname === '/search' ? '1' : '0.5'}
+                    >
+                        Search
+                    </Button>
+                </Tooltip>
+            )}
             <Tooltip label="Graph analysis workspace">
                 <Button
                     variant={

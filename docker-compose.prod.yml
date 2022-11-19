@@ -26,6 +26,9 @@ services:
       # - analytics
     environment:
       REACT_APP_DISABLE_UPLOAD: 'false'
+      REACT_APP_DISABLE_DATASET_LIST: 'false'
+      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'false'
+      REACT_APP_DISABLE_ADVANCED_SEARCH: 'false'
     # command: bash -c "node server.js"
   # mysql:
   #   image: "mysql:5.7"

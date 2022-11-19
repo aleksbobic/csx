@@ -512,7 +512,8 @@ function HomePage() {
                 {store.search.datasets.length > 0 && (
                     <>
                         <SearchBarComponent style={{ marginTop: '0px' }} />
-                        {renderDatasetGrid()}
+                        {process.env.REACT_APP_DISABLE_DATASET_LIST !==
+                            'true' && renderDatasetGrid()}
                     </>
                 )}
 
