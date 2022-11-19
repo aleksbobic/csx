@@ -64,9 +64,11 @@ const connectorNode = ({ id, data, isConnectable }) => {
                             cursor: 'pointer'
                         }}
                     >
-                        <option value="and">and</option>
                         <option value="or">or</option>
-                        <option value="not">not</option>
+                        <option value="and">and</option>
+                        {data.parents.length < 2 && (
+                            <option value="not">not</option>
+                        )}
                     </Select>
                 </VStack>
                 <Handle

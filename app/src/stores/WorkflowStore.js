@@ -156,7 +156,19 @@ export class WorkflowStore {
     };
 
     deleteNode = nodeID => {
-        this.nodes = [...this.nodes.filter(node => node.id !== nodeID)];
+        this.nodes = [
+            ...this.nodes
+                .filter(node => node.id !== nodeID)
+                .map(node => {
+                    node.data.parents = node.data.parents.filter(
+                        parentID => parentID !== nodeID
+                    );
+                    node.data.children = node.data.children.filter(
+                        childID => childID !== nodeID
+                    );
+                    return node;
+                })
+        ];
 
         this.edges = [
             ...this.edges.filter(
@@ -585,6 +597,21 @@ export class WorkflowStore {
             .find(node => node.id === connection.source)
             .data.children.push(connection.target);
 
+        this.nodes = [
+            ...this.nodes.map(node => {
+                if (
+                    node.type === 'connectorNode' &&
+                    node.data.parents.length > 1 &&
+                    node.data.connector === 'not'
+                ) {
+                    node.data.connector = 'or';
+                }
+
+                node.data = { ...node.data };
+
+                return node;
+            })
+        ];
         this.edges = [...this.edges, newConnection];
     };
 
@@ -609,11 +636,14 @@ export class WorkflowStore {
             .find(node => node.id === target.id)
             .data.parents.filter(id => id !== source.id);
 
+        this.nodes = [...this.nodes];
         this.edges = this.edges.filter(element => element.id !== id);
     };
 
     runWorkFlow = resultsNodeId => {
         this.nodes = [...this.nodes];
+
+        console.log('the nodes: ', this.nodes);
         const generatedQuery = this.getQuery(resultsNodeId, this.nodes);
 
         this.store.search.setAdvancedSearchQuery(generatedQuery);
