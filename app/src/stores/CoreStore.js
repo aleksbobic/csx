@@ -20,6 +20,8 @@ export class CoreStore {
     showCommentModal = false;
     studies = [];
     dataIsLoading = false;
+    hideCookieBanner = false;
+    trackingEnabled = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -35,6 +37,8 @@ export class CoreStore {
             this.generateUUID();
         }
         this.getSavedStudies();
+        this.hideCookieBanner = this.getCookieBanner();
+        this.trackingEnabled = localStorage.getItem('trackingenabled');
 
         makeAutoObservable(this, {}, { deep: true });
     }
@@ -105,6 +109,23 @@ export class CoreStore {
             this.updateIsStudySaved(true);
             this.getSavedStudies();
         });
+    };
+
+    setTrackingEnabled = val => {
+        this.trackingEnabled = val;
+        localStorage.setItem('trackingenabled', val);
+        if (val) {
+            this.store.tracking.initTracking();
+        }
+    };
+
+    setHideCookieBanner = () => {
+        this.hideCookieBanner = true;
+        localStorage.setItem('hidecookiebanner', true);
+    };
+
+    getCookieBanner = () => {
+        return localStorage.getItem('hidecookiebanner');
     };
 
     generateUUID = async () => {
