@@ -10,6 +10,8 @@ services:
       - ./server:/cs
     ports:
       - 8881:80
+    environment:
+      DISABLE_UPLOAD: 'false'
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
   app:
     container_name: csx_app
@@ -25,10 +27,11 @@ services:
       - server
       # - analytics
     environment:
-      REACT_APP_DISABLE_UPLOAD: 'true'
-      REACT_APP_DISABLE_DATASET_LIST: 'true'
-      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'true'
-      REACT_APP_DISABLE_ADVANCED_SEARCH: 'true'
+      REACT_APP_DISABLE_UPLOAD: 'false'
+      REACT_APP_DISABLE_DATASET_LIST: 'false'
+      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'false'
+      REACT_APP_DISABLE_ADVANCED_SEARCH: 'false'
+      REACT_APP_DISABLE_TRACKING: 'true'
     command: bash -c "npm install && npm start"
   # mysql:
   #   image: "mysql:5.7"

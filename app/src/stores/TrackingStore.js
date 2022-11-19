@@ -5,11 +5,13 @@ export class TrackingStore {
         this.store = store;
         makeAutoObservable(this);
 
-        window._paq = window._paq || [];
-        window._paq.push(['trackPageView']);
-        window._paq.push(['enableLinkTracking']);
+        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+            window._paq = window._paq || [];
+            window._paq.push(['trackPageView']);
+            window._paq.push(['enableLinkTracking']);
 
-        this.initTracking();
+            this.initTracking();
+        }
     }
 
     initTracking = () => {
@@ -28,23 +30,27 @@ export class TrackingStore {
     };
 
     trackPageChange = () => {
-        const title =
-            window.location.pathname.slice(1) === ''
-                ? 'home'
-                : window.location.pathname.slice(1);
+        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+            const title =
+                window.location.pathname.slice(1) === ''
+                    ? 'home'
+                    : window.location.pathname.slice(1);
 
-        window._paq.push(['setCustomUrl', window.location.href]);
-        window._paq.push(['setDocumentTitle', title]);
-        window._paq.push(['deleteCustomVariables', 'page']);
-        window._paq.push(['trackPageView']);
+            window._paq.push(['setCustomUrl', window.location.href]);
+            window._paq.push(['setDocumentTitle', title]);
+            window._paq.push(['deleteCustomVariables', 'page']);
+            window._paq.push(['trackPageView']);
+        }
     };
 
     trackEvent = (event_category, event_action, event_data) => {
-        window._paq.push([
-            'trackEvent',
-            event_category,
-            event_action,
-            event_data
-        ]);
+        if (process.env.REACT_APP_DISABLE_TRACKING !== 'true') {
+            window._paq.push([
+                'trackEvent',
+                event_category,
+                event_action,
+                event_data
+            ]);
+        }
     };
 }

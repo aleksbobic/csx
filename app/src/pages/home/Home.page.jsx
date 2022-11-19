@@ -55,7 +55,11 @@ function HomePage() {
 
     const onDrop = async files => {
         store.fileUpload.changeFileUploadModalVisiblity(true);
-        await store.fileUpload.uploadFile(files);
+        const response = await store.fileUpload.uploadFile(files);
+
+        if (!response) {
+            store.fileUpload.changeFileUploadModalVisiblity(false);
+        }
     };
 
     const navigateToAdvancedSearch = dataset => {

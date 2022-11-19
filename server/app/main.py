@@ -8,6 +8,8 @@ from app.routes.graph import router as graph_router
 from app.routes.study import router as study_router
 from app.routes.history import router as history_router
 
+import os
+
 
 def get_application():
     app = FastAPI(title="Collaboration Spotting", version="1.0.0")
