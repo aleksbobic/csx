@@ -31,7 +31,7 @@ function Settings() {
     const { colorMode } = useColorMode();
 
     const graphDimensionBackground = useColorModeValue(
-        'blackAlpha.400',
+        'blackAlpha.200',
         'whiteAlpha.300'
     );
 
@@ -320,6 +320,7 @@ function Settings() {
                 size="sm"
                 borderRadius="full"
                 variant="solid"
+                style={{ padding: 0 }}
                 backgroundColor={
                     store.core.visibleDimensions[
                         store.core.currentGraph
@@ -330,7 +331,8 @@ function Settings() {
                 transition="all 0.1s ease-in-out"
                 _hover={{
                     backgroundColor: graphDimensionHoverBackground,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    color: 'white'
                 }}
                 onClick={() => store.core.toggleVisibleDimension(property)}
             >
@@ -343,6 +345,17 @@ function Settings() {
                         maxWidth="140px"
                         overflow="hidden"
                         textOverflow="ellipsis"
+                        padding="0 8px"
+                        _hover={{ color: 'white' }}
+                        color={
+                            store.core.visibleDimensions[
+                                store.core.currentGraph
+                            ].includes(property)
+                                ? 'white'
+                                : colorMode === 'light'
+                                ? 'black'
+                                : 'white'
+                        }
                     >
                         {property}
                     </Text>
