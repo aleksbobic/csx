@@ -46,7 +46,7 @@ import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useDropzone } from 'react-dropzone';
 import { useHistory, withRouter } from 'react-router-dom';
@@ -63,94 +63,210 @@ function HomePage() {
     const [showCookies, setShowCookies] = useState(false);
     const [cookieToastVisible, setCookieToastVisible] = useState(false);
 
-    useEffect(() => {
-        if (!store.core.hideCookieBanner && !cookieToastVisible) {
-            setCookieToastVisible(true);
-            cookieToast({
-                duration: null,
-                render: () => (
-                    <Box
-                        backgroundColor="#090b10"
-                        borderRadius="12px"
-                        padding="16px"
-                        marginBottom="20px"
-                        position="relative"
-                        filter="drop-shadow(0px 5px 8px rgba(0, 0, 0, 0.59))"
-                    >
-                        <IconButton
+    const renderDarkCookie = useCallback(
+        () => (
+            <Box
+                backgroundColor="#090b10"
+                borderRadius="12px"
+                padding="16px"
+                marginBottom="20px"
+                position="relative"
+                filter="drop-shadow(0px 5px 8px rgba(0, 0, 0, 0.59))"
+            >
+                <IconButton
+                    size="xs"
+                    backgroundColor="transparent"
+                    position="absolute"
+                    right="16px"
+                    top="16px"
+                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    transition="0.2s all ease-in-out"
+                    _hover={{ backgroundColor: 'whiteAlpha.200' }}
+                    onClick={() => {
+                        cookieToast.closeAll();
+                        store.core.setHideCookieBanner();
+                        if (
+                            process?.env.REACT_APP_DISABLE_TRACKING !== 'true'
+                        ) {
+                            store.core.setTrackingEnabled(false);
+                        }
+                    }}
+                />
+                <Heading size="xs" paddingBottom="6px">
+                    Cookies & Local Storage
+                </Heading>
+                <Text fontSize="xs" paddingRight="16px">
+                    We use local storage to provide essential functionality.{' '}
+                    {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
+                        'To read more about it click the button below or the cookies & local storage footer link.'}
+                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+                        'However, to further improve CSX and also contribute to the open source and scientific communities we would like to ask you to enable interaction tracking.'}
+                </Text>
+                <HStack paddingTop="8px">
+                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
+                        <Button
                             size="xs"
-                            backgroundColor="transparent"
-                            position="absolute"
-                            right="16px"
-                            top="16px"
-                            icon={<Close style={{ '--ggs': 0.7 }} />}
+                            variant="solid"
+                            backgroundColor="whiteAlpha.200"
                             transition="0.2s all ease-in-out"
-                            _hover={{ backgroundColor: 'whiteAlpha.200' }}
+                            _hover={{ backgroundColor: '#43a2fb' }}
+                            textTransform="uppercase"
                             onClick={() => {
                                 cookieToast.closeAll();
                                 store.core.setHideCookieBanner();
-                                if (
-                                    process?.env.REACT_APP_DISABLE_TRACKING !==
-                                    'true'
-                                ) {
-                                    store.core.setTrackingEnabled(false);
-                                }
+                                store.core.setTrackingEnabled(true);
                             }}
-                        />
-                        <Heading size="xs" paddingBottom="6px">
-                            Cookies & Local Storage
-                        </Heading>
-                        <Text fontSize="xs" paddingRight="16px">
-                            We use local storage to provide essential
-                            functionality.{' '}
-                            {process?.env.REACT_APP_DISABLE_TRACKING ===
-                                'true' &&
-                                'To read more about it click the button below or the cookies & local storage footer link.'}
-                            {process?.env.REACT_APP_DISABLE_TRACKING !==
-                                'true' &&
-                                'However, to further improve CSX and also contribute to the open source and scientific communities we would like to ask you to enable interaction tracking.'}
-                        </Text>
-                        <HStack paddingTop="8px">
-                            {process?.env.REACT_APP_DISABLE_TRACKING !==
-                                'true' && (
-                                <Button
-                                    size="xs"
-                                    variant="solid"
-                                    backgroundColor="whiteAlpha.200"
-                                    transition="0.2s all ease-in-out"
-                                    _hover={{ backgroundColor: '#43a2fb' }}
-                                    textTransform="uppercase"
-                                    onClick={() => {
-                                        cookieToast.closeAll();
-                                        store.core.setHideCookieBanner();
-                                        store.core.setTrackingEnabled(true);
-                                    }}
-                                >
-                                    Enable tracking
-                                </Button>
-                            )}
-                            <Button
-                                size="xs"
-                                variant="unstyled"
-                                opacity="0.6"
-                                transition="0.2s all ease-in-out"
-                                _hover={{ opacity: 1 }}
-                                onClick={() => {
-                                    setShowCookies(true);
-                                    store.core.setHideCookieBanner();
-                                    cookieToast.closeAll();
-                                }}
-                            >
-                                Read more
-                            </Button>
-                        </HStack>
-                    </Box>
-                )
-            });
+                        >
+                            Enable tracking
+                        </Button>
+                    )}
+                    <Button
+                        size="xs"
+                        variant="unstyled"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                        onClick={() => {
+                            setShowCookies(true);
+                            store.core.setHideCookieBanner();
+                            cookieToast.closeAll();
+                        }}
+                    >
+                        Read more
+                    </Button>
+                </HStack>
+            </Box>
+        ),
+        [cookieToast, store.core]
+    );
+
+    const renderLightCookie = useCallback(
+        () => (
+            <Box
+                backgroundColor="white"
+                borderRadius="12px"
+                padding="16px"
+                marginBottom="20px"
+                position="relative"
+                filter="drop-shadow(0px 5px 8px rgba(0, 0, 0, 0.30))"
+            >
+                <IconButton
+                    size="xs"
+                    backgroundColor="transparent"
+                    position="absolute"
+                    right="16px"
+                    top="16px"
+                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    transition="0.2s all ease-in-out"
+                    _hover={{ backgroundColor: 'blackAlpha.50' }}
+                    onClick={() => {
+                        cookieToast.closeAll();
+                        store.core.setHideCookieBanner();
+                        if (
+                            process?.env.REACT_APP_DISABLE_TRACKING !== 'true'
+                        ) {
+                            store.core.setTrackingEnabled(false);
+                        }
+                    }}
+                />
+                <Heading size="xs" paddingBottom="6px">
+                    Cookies & Local Storage
+                </Heading>
+                <Text fontSize="xs" paddingRight="16px">
+                    We use local storage to provide essential functionality.{' '}
+                    {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
+                        'To read more about it click the button below or the cookies & local storage footer link.'}
+                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+                        'However, to further improve CSX and also contribute to the open source and scientific communities we would like to ask you to enable interaction tracking.'}
+                </Text>
+                <HStack paddingTop="8px">
+                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
+                        <Button
+                            size="xs"
+                            variant="solid"
+                            backgroundColor="blackAlpha.100"
+                            transition="0.2s all ease-in-out"
+                            _hover={{
+                                backgroundColor: '#43a2fb',
+                                color: 'white'
+                            }}
+                            textTransform="uppercase"
+                            onClick={() => {
+                                cookieToast.closeAll();
+                                store.core.setHideCookieBanner();
+                                store.core.setTrackingEnabled(true);
+                            }}
+                        >
+                            Enable tracking
+                        </Button>
+                    )}
+                    <Button
+                        size="xs"
+                        variant="unstyled"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                        onClick={() => {
+                            setShowCookies(true);
+                            store.core.setHideCookieBanner();
+                            cookieToast.closeAll();
+                        }}
+                    >
+                        Read more
+                    </Button>
+                </HStack>
+            </Box>
+        ),
+        [cookieToast, store.core]
+    );
+
+    useEffect(() => {
+        if (!store.core.hideCookieBanner) {
+            if (colorMode === 'light') {
+                cookieToast.closeAll();
+                cookieToast({
+                    duration: null,
+                    render: () => renderLightCookie()
+                });
+            } else {
+                cookieToast.closeAll();
+                cookieToast({
+                    duration: null,
+                    render: () => renderDarkCookie()
+                });
+            }
         }
     }, [
+        colorMode,
+        cookieToast,
+        renderDarkCookie,
+        renderLightCookie,
+        store.core.hideCookieBanner
+    ]);
+
+    useEffect(() => {
+        if (!store.core.hideCookieBanner && !cookieToastVisible) {
+            setCookieToastVisible(true);
+            if (colorMode === 'light') {
+                cookieToast.closeAll();
+                cookieToast({
+                    duration: null,
+                    render: () => renderLightCookie()
+                });
+            } else {
+                cookieToast.closeAll();
+                cookieToast({
+                    duration: null,
+                    render: () => renderDarkCookie()
+                });
+            }
+        }
+    }, [
+        colorMode,
         cookieToast,
         cookieToastVisible,
+        renderDarkCookie,
+        renderLightCookie,
         store.core,
         store.core.hideCookieBanner
     ]);
@@ -376,7 +492,11 @@ function HomePage() {
         return (
             <VStack marginTop="40px">
                 <Box
-                    backgroundColor="blackAlpha.300"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.100'
+                            : 'blackAlpha.300'
+                    }
                     width="100%"
                     height="50px"
                     margin="0"
@@ -392,7 +512,11 @@ function HomePage() {
                     width="100%"
                     columns={[1, 1, 2]}
                     spacing="10px"
-                    backgroundColor="blackAlpha.300"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.100'
+                            : 'blackAlpha.300'
+                    }
                     padding="0 20px"
                     maxHeight="156px"
                     overflowY="scroll"
@@ -401,7 +525,11 @@ function HomePage() {
                 >
                     {store.search.datasets.map((dataset, index) => (
                         <Flex
-                            backgroundColor="whiteAlpha.50"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.100'
+                                    : 'whiteAlpha.50'
+                            }
                             borderRadius="8px"
                             height="40px"
                             justifyContent="center"
@@ -471,7 +599,9 @@ function HomePage() {
                                     size="sm"
                                     variant="solid"
                                     opacity="0.5"
-                                    _groupHover={{ opacity: '1' }}
+                                    _groupHover={{
+                                        opacity: '1'
+                                    }}
                                     onClick={() =>
                                         navigateToAdvancedSearch(dataset)
                                     }
@@ -487,7 +617,11 @@ function HomePage() {
                 </SimpleGrid>
                 {process?.env.REACT_APP_DISABLE_UPLOAD !== 'true' && (
                     <Box
-                        backgroundColor="blackAlpha.300"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.100'
+                                : 'blackAlpha.300'
+                        }
                         padding="20px"
                         width="100%"
                         style={{ marginTop: '0px' }}
@@ -504,7 +638,9 @@ function HomePage() {
         <VStack
             marginTop="40px"
             padding="20px"
-            backgroundColor="blackAlpha.300"
+            backgroundColor={
+                colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
+            }
             borderRadius="12px"
         >
             <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
@@ -536,14 +672,22 @@ function HomePage() {
                                 _groupHover={{ opacity: 1 }}
                             ></Box>
                             <Box
-                                backgroundColor="#13161d"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? '#e2e2e2'
+                                        : '#13161d'
+                                }
                                 borderRadius="8px"
                                 padding="10px"
                                 zIndex="2"
                                 height="100%"
                                 width="100%"
                                 outline="3px solid"
-                                outlineColor="whiteAlpha.100"
+                                outlineColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'whiteAlpha.100'
+                                }
                                 transition="all ease-in-out 0.3s"
                                 _groupHover={{
                                     outlineColor: 'transparent'
@@ -597,6 +741,7 @@ function HomePage() {
                                         paddingLeft="10px"
                                         paddingRight="10px"
                                         overflowY="scroll"
+                                        opacity="0.7"
                                     >
                                         {study.study_description
                                             ? study.study_description
@@ -607,7 +752,14 @@ function HomePage() {
                                         width="100%"
                                         size="xs"
                                         flexShrink="0"
-                                        _hover={{ backgroundColor: '#925eb5' }}
+                                        backgroundColor={
+                                            colorMode === 'light' && '#d4d4d4'
+                                        }
+                                        _hover={{
+                                            backgroundColor: '#925eb5',
+                                            color:
+                                                colorMode === 'light' && 'white'
+                                        }}
                                         onClick={() =>
                                             openStudy(study.study_uuid)
                                         }
@@ -666,7 +818,9 @@ function HomePage() {
             <VStack
                 marginTop="40px"
                 padding="40px"
-                backgroundColor="blackAlpha.300"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
+                }
                 borderRadius="12px"
                 position="relative"
             >
@@ -682,6 +836,12 @@ function HomePage() {
                     size="xs"
                     paddingLeft="0"
                     variant="ghost"
+                    _hover={{
+                        backgroundColor:
+                            colorMode === 'light'
+                                ? 'blackAlpha.100'
+                                : 'whiteAlpha.100'
+                    }}
                     onClick={() => setShowCookies(false)}
                 >
                     Back
@@ -913,7 +1073,10 @@ function HomePage() {
             >
                 {store.search.datasets.length > 0 && (
                     <>
-                        <SearchBarComponent style={{ marginTop: '0px' }} />
+                        <SearchBarComponent
+                            style={{ marginTop: '0px' }}
+                            onSubmit={() => cookieToast.closeAll()}
+                        />
                         <Fade in={!showCookies}>
                             {process?.env.REACT_APP_DISABLE_DATASET_LIST !==
                                 'true' &&

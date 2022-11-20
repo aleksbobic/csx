@@ -51,6 +51,7 @@ function SearchBar(props) {
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
+                    props.onSubmit();
                     store.core.setCurrentGraph('overview');
                     store.graphInstance.setNodeColorScheme('component');
                     store.search.useDataset(selectedDataset);
@@ -118,7 +119,10 @@ function SearchBar(props) {
                                 }}
                                 suggestionStyle={{
                                     position: 'absolute',
-                                    backgroundColor: '#141824',
+                                    backgroundColor:
+                                        colorMode === 'light'
+                                            ? '#d7d6d6'
+                                            : '#141824',
                                     top: '44px',
                                     left: '145px',
                                     zIndex: '10',
@@ -135,6 +139,11 @@ function SearchBar(props) {
                                         width="40px"
                                         height="40px"
                                         borderLeftRadius="0"
+                                        backgroundColor={
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.50'
+                                                : 'whiteAlpha.100'
+                                        }
                                         icon={
                                             <Search
                                                 style={{
@@ -155,12 +164,14 @@ function SearchBar(props) {
 
 SearchBar.propTypes = {
     datasetSelectorDisabled: PropTypes.bool,
-    placeholder: PropTypes.string
+    placeholder: PropTypes.string,
+    onSubmit: PropTypes.func
 };
 
 SearchBar.defaultProps = {
     datasetSelectorDisabled: false,
-    placeholder: 'Search through the dataset ...'
+    placeholder: 'Search through the dataset ...',
+    onSubmit: () => {}
 };
 
 export default observer(SearchBar);

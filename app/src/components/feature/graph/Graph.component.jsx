@@ -4,9 +4,10 @@ import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { withRouter } from 'react-router-dom';
-import { withSize } from 'react-sizeme';
 import { RootStoreContext } from 'stores/RootStore';
 import * as THREE from 'three';
+import { useResizeDetector } from 'react-resize-detector';
+
 import './Graph.scss';
 
 function Graph(props) {
@@ -15,6 +16,7 @@ function Graph(props) {
     const bwColor = useColorModeValue('#303030', 'white');
     const backgroundColor = useColorModeValue('#ffffff', '#1A202C');
     const [timer, setTimer] = useState(null);
+    const { width, height } = useResizeDetector({ containerRef });
 
     const [windowSize, setWindowSize] = useState({
         width: undefined,
@@ -175,8 +177,8 @@ function Graph(props) {
             backgroundColor={backgroundColor}
             graphData={props.graphData}
             numDimensions={2}
-            width={windowSize.width ? windowSize.width : props.size.width}
-            height={windowSize.height ? windowSize.height : props.size.height}
+            width={windowSize.width ? windowSize.width : width}
+            height={windowSize.height ? windowSize.height : height}
             linkColor={link => link.color}
             enableNodeDrag={true}
             nodeThreeObject={generateNode}
@@ -227,8 +229,4 @@ Graph.propTypes = {
     graphData: PropTypes.object
 };
 
-export default withSize({
-    monitorWidth: true,
-    monitorHeight: true,
-    noPlaceholder: true
-})(withRouter(observer(Graph)));
+export default withRouter(observer(Graph));

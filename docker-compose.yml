@@ -31,7 +31,7 @@ services:
       REACT_APP_DISABLE_DATASET_LIST: 'false'
       REACT_APP_DISABLE_DATASET_DOWNLOAD: 'false'
       REACT_APP_DISABLE_ADVANCED_SEARCH: 'false'
-      REACT_APP_DISABLE_TRACKING: 'true'
+      REACT_APP_DISABLE_TRACKING: 'false'
     command: bash -c "npm install && npm start"
   # mysql:
   #   image: "mysql:5.7"
