@@ -22,6 +22,7 @@ export class CoreStore {
     dataIsLoading = false;
     hideCookieBanner = false;
     trackingEnabled = false;
+    colorMode = null;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -39,6 +40,7 @@ export class CoreStore {
         this.getSavedStudies();
         this.hideCookieBanner = this.getCookieBanner();
         this.trackingEnabled = localStorage.getItem('trackingenabled');
+        this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
@@ -52,6 +54,9 @@ export class CoreStore {
     updateStudies = val => (this.studies = val);
 
     setStudyName = name => (this.studyName = name);
+
+    setColorMode = val => (this.colorMode = val);
+
     setStudyDescription = description => (this.studyDescription = description);
     setStudyUuid = id => {
         this.studyUuid = id;

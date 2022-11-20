@@ -13,6 +13,7 @@ import {
     IconButton,
     Select,
     Tag,
+    useColorMode,
     useColorModeValue,
     Wrap
 } from '@chakra-ui/react';
@@ -27,6 +28,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function Settings() {
     const store = useContext(RootStoreContext);
     const [forceRunning, setForceRunning] = useState(false);
+    const { colorMode } = useColorMode();
 
     const graphDimensionBackground = useColorModeValue(
         'blackAlpha.400',
@@ -41,8 +43,8 @@ function Settings() {
     const updateColorScheme = value => {
         store.graphInstance.setNodeColorScheme(value);
 
-        store.graph.updateLinkColor();
-        store.graph.updateNodeColor();
+        store.graph.updateLinkColor(colorMode);
+        store.graph.updateNodeColor(colorMode);
 
         store.track.trackEvent(
             'view settings',

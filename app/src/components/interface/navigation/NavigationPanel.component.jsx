@@ -88,6 +88,9 @@ function NavigationPanelComponent() {
             `color mode ${colorMode === 'light' ? 'dark' : 'light'}`
         );
         toggleColorMode();
+        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
     };
 
     const renderGraphUtils = () => (
@@ -163,15 +166,23 @@ function NavigationPanelComponent() {
             right="0px"
             width="200px"
             spacing="5px"
-            backgroundColor="blackAlpha.600"
+            backgroundColor={
+                colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.600'
+            }
             borderRadius="10px"
+            border="1px solid"
+            borderColor={colorMode === 'light' ? 'gray.300' : 'transparent'}
             padding="10px"
         >
             {store.graphInstance.hoverData.map((entry, index) => (
                 <Box width="100%" key={`hover_data_${index}`}>
                     <Text
                         fontSize="xs"
-                        color="gray.400"
+                        color={
+                            colorMode === 'light'
+                                ? 'blackAlpha.800'
+                                : 'gray.400'
+                        }
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"
@@ -181,7 +192,7 @@ function NavigationPanelComponent() {
                     </Text>
                     <Text
                         fontSize="sm"
-                        color="gray.200"
+                        color={colorMode === 'light' ? 'gray.700' : 'gray.200'}
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"

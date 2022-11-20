@@ -122,7 +122,11 @@ export class GraphStore {
     };
 
     generateNodeLabelSprite = (label, size) =>
-        new SpriteText(label, 6, 'white').translateY(size + 5);
+        new SpriteText(
+            label,
+            6,
+            this.store.core.colorMode === 'light' ? 'black' : 'white'
+        ).translateY(size + 5);
 
     generateNodeMaterial = (meshBasicMaterialTemplate, node) => {
         const material = meshBasicMaterialTemplate.clone();
@@ -147,11 +151,21 @@ export class GraphStore {
                 );
                 break;
             case 'component':
-                material.color.set(
+                const nodeColor =
                     this.store.graphInstance.nodeColorSchemeColors[
                         this.store.core.currentGraph
-                    ]['component'][node.component]
-                );
+                    ]['component'][node.component];
+
+                if (nodeColor) {
+                    material.color.set(nodeColor);
+                } else {
+                    material.color.set(
+                        this.store.core.colorMode === 'light'
+                            ? 'black'
+                            : 'white'
+                    );
+                }
+
                 break;
             case 'community':
                 material.color.set(node.color);
@@ -170,7 +184,11 @@ export class GraphStore {
                         ]
                     );
                 } else {
-                    material.color.set('white');
+                    material.color.set(
+                        this.store.core.colorMode === 'light'
+                            ? 'black'
+                            : 'white'
+                    );
                 }
                 break;
         }
@@ -295,7 +313,7 @@ export class GraphStore {
         }
     };
 
-    updateNodeColor = () => {
+    updateNodeColor = colorMode => {
         const data = this.store.core.isOverview
             ? this.graphData
             : this.detailGraphData;
@@ -317,16 +335,25 @@ export class GraphStore {
                 break;
             case 'component':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
-                    data.nodes[i].material.color.set(
+                    const nodeColor =
                         this.store.graphInstance.nodeColorSchemeColors[
                             this.store.core.currentGraph
-                        ]['component'][data.nodes[i].component]
-                    );
+                        ]['component'][data.nodes[i].component];
+
+                    if (nodeColor) {
+                        data.nodes[i].material.color.set(nodeColor);
+                    } else {
+                        data.nodes[i].material.color.set(
+                            colorMode === 'light' ? 'black' : 'white'
+                        );
+                    }
                 }
                 break;
             case 'none':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
-                    data.nodes[i].material.color.set('white');
+                    data.nodes[i].material.color.set(
+                        colorMode === 'light' ? 'black' : 'white'
+                    );
                 }
                 break;
             default:
@@ -343,7 +370,7 @@ export class GraphStore {
         }
     };
 
-    updateLinkColor = () => {
+    updateLinkColor = colorMode => {
         const data = this.store.core.isOverview
             ? this.graphData
             : this.detailGraphData;
@@ -363,8 +390,13 @@ export class GraphStore {
                 break;
             default:
                 for (let i = 0; i < data.meta.linkCount; i++) {
-                    data.links[i].color = 'rgb(255,255,255)';
-                    data.links[i].target.material.color.set('white');
+                    data.links[i].color =
+                        colorMode === 'light'
+                            ? 'rgb(0,0,0)'
+                            : 'rgb(255,255,255)';
+                    data.links[i].target.material.color.set(
+                        colorMode === 'light' ? 'black' : 'white'
+                    );
                 }
                 break;
         }

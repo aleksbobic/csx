@@ -184,11 +184,16 @@ function Graph(props) {
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
             cooldownTime={store.graphInstance.forceCooldownTime}
-            linkOpacity={
-                store.graphInstance.selectedColorSchema === 'component'
-                    ? 0.3
-                    : 0.1
-            }
+            linkOpacity={() => {
+                if (store.core.colorMode === 'light') {
+                    return 0.7;
+                } else {
+                    return store.graphInstance.selectedColorSchema ===
+                        'component'
+                        ? 0.3
+                        : 0.1;
+                }
+            }}
             onEngineStop={() => {
                 if (store.graphInstance.forceEngine) {
                     store.graphInstance.stopForce();
@@ -197,7 +202,7 @@ function Graph(props) {
             // linkDirectionalArrowLength={store.core.isDetail ? 10 : 0}
             // linkDirectionalArrowResolution={2}
             // linkDirectionalArrowRelPos={1}
-            // linkCurvature={0.1}
+            // linkCurvature={0.2}
             onLinkHover={store.core.isOverview ? handleLinkHover : () => {}}
             linkWidth={0}
             linkResolution={2}
