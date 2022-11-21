@@ -917,6 +917,7 @@ function HomePage() {
                                         opacity="0.5"
                                         transition="0.2s all ease-in-out"
                                         _hover={{ opacity: 1 }}
+                                        key={`cookie_${entry[0]}`}
                                     >
                                         <Td
                                             borderBottom="none"
