@@ -176,7 +176,7 @@ def compare_instances(
         action = "from_anchor_properties"
         history_action = "change anchor properties"
 
-    if "is_graph_change" in params and params["is_graph_change"]:
+    if "graph_type_changed" in params and params["graph_type_changed"]:
         difference = "graph_type"
         action = "from_existing_data"
         history_action = "change graph type"
@@ -246,3 +246,27 @@ def enrich_cache_with_ng_graph(
     }
 
     return cache_data
+
+
+def extract_history_items(study) -> List[dict]:
+    return [
+        {
+            "id": str(item["item_id"]),
+            "action": item["action"],
+            "comments": item["comments"],
+            "parent": str(item["parent"]),
+            "query": item["query"],
+            "graph_type": item["graph_type"],
+            "action_time": item["action_time"],
+            "schema": item["schema"],
+            "anchor_properties": item["anchor_properties"],
+            "anchor": item["anchor"],
+            "links": item["links"],
+            "visible_dimensions": item["visible_dimensions"],
+            "parent_id": item["parent"],
+            "charts": item["charts"],
+            "edge_count": item["edge_count"],
+            "node_count": item["node_count"],
+        }
+        for item in study["history"]
+    ]

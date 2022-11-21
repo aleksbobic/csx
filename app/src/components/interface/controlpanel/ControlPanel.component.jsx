@@ -219,12 +219,9 @@ function ControlPanel() {
         onOpen();
     }, [onOpen]);
 
-    const getQueryString = param => queryString.parse(location.search)[param];
-
     const expandGraph = connector => {
         store.graph.expandNetwork(
             store.graph.currentGraphData.selectedNodes,
-            getQueryString('suuid'),
             connector
         );
         store.contextMenu.hideContextMenu();
@@ -257,47 +254,49 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
-                <Menu style={{ zIndex: 40 }}>
-                    <Tooltip label="Expand network">
-                        <MenuButton
-                            disabled={
-                                !store.graph.currentGraphData.selectedNodes
-                                    .length
-                            }
-                            as={IconButton}
-                            borderRadius="6px"
-                            id="trimnetworkbutton"
-                            size="sm"
-                            icon={
-                                <ArrowsPointingOutIcon
-                                    style={{ width: '16px' }}
-                                />
-                            }
-                        />
-                    </Tooltip>
-                    <MenuList
-                        backgroundColor="black"
-                        padding="5px"
-                        borderRadius="10px"
-                    >
-                        <MenuItem
-                            fontSize="xs"
-                            fontWeight="bold"
-                            borderRadius="6px"
-                            onClick={() => expandGraph('or')}
+                <Box>
+                    <Menu style={{ zIndex: 40 }}>
+                        <Tooltip label="Expand network">
+                            <MenuButton
+                                disabled={
+                                    !store.graph.currentGraphData.selectedNodes
+                                        .length
+                                }
+                                as={IconButton}
+                                borderRadius="6px"
+                                id="trimnetworkbutton"
+                                size="sm"
+                                icon={
+                                    <ArrowsPointingOutIcon
+                                        style={{ width: '16px' }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                        <MenuList
+                            backgroundColor="black"
+                            padding="5px"
+                            borderRadius="10px"
                         >
-                            Wide Expand
-                        </MenuItem>
-                        <MenuItem
-                            fontSize="xs"
-                            fontWeight="bold"
-                            borderRadius="6px"
-                            onClick={() => expandGraph('and')}
-                        >
-                            Narrow Expand
-                        </MenuItem>
-                    </MenuList>
-                </Menu>
+                            <MenuItem
+                                fontSize="xs"
+                                fontWeight="bold"
+                                borderRadius="6px"
+                                onClick={() => expandGraph('or')}
+                            >
+                                Wide Expand
+                            </MenuItem>
+                            <MenuItem
+                                fontSize="xs"
+                                fontWeight="bold"
+                                borderRadius="6px"
+                                onClick={() => expandGraph('and')}
+                            >
+                                Narrow Expand
+                            </MenuItem>
+                        </MenuList>
+                    </Menu>
+                </Box>
             </HStack>
         </HStack>
     );

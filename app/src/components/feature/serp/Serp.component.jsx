@@ -221,13 +221,17 @@ function Serp(props) {
 
     return (
         <VStack height="100%" width="100%" paddingTop="30px">
-            <Box height="100%" width="100%">
+            <Box
+                height="100%"
+                width="100%"
+                overflowY="scroll"
+                borderRadius="6px"
+            >
                 <Box
                     ref={listContainerRefrence}
                     style={{
                         height: `${height}px`,
                         width: `${width}px`,
-                        overflow: 'auto',
                         borderRadius: '6px'
                     }}
                 >

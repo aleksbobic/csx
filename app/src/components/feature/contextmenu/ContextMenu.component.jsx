@@ -47,7 +47,7 @@ function ContextMenu() {
             node => node.id === store.contextMenu.originNode.id
         )[0];
 
-        store.graph.expandNetwork([node], store.core.studyUuid);
+        store.graph.expandNetwork([node]);
         store.contextMenu.hideContextMenu();
     };
 

@@ -191,7 +191,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments.splice(index, 1);
 
-        await axios.post('history/deletecomment', params);
+        await axios.post('history/comment/delete', params);
         this.generateHistoryNodes();
     };
 
@@ -219,7 +219,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments[index]['edited'] = true;
 
-        await axios.post('history/editcomment', params);
+        await axios.post('history/comment/edit', params);
 
         this.generateHistoryNodes();
     };

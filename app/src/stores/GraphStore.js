@@ -1193,7 +1193,7 @@ export class GraphStore {
         }
     };
 
-    expandNetwork = async (nodes, suuid, connector = null) => {
+    expandNetwork = async (nodes, connector = null) => {
         this.store.core.setDataIsLoading(true);
 
         if (this.store.core.currentGraph === 'detail') {
@@ -1257,7 +1257,6 @@ export class GraphStore {
                 anchor_properties: anchor_properties,
                 graph_schema: graph_schema,
                 visible_dimensions: visible_dimensions,
-                search_uuid: suuid,
                 study_id: this.store.core.studyUuid,
                 history_item_id: currentStudyHistoryItem,
                 action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),

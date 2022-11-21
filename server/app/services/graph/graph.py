@@ -308,7 +308,6 @@ def get_graph_from_scratch(
     anchor_properties,
     comparison_res,
     study_id,
-    action,
     query,
     action_time,
     history_action,

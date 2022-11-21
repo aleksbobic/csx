@@ -104,37 +104,9 @@ def get_study(data: GetStudyData):
             history_id = study["history"][-1]["item_id"]
             charts = study["history"][-1]["charts"]
 
-        # history_item = list(
-        #     csx_data.get_all_documents_by_conditions(
-        #         "history",
-        #         {"_id": history_id},
-        #         {"_id": 0},
-        #     )
-        # )[0]
-
         history_item = csx_data.get_large_document(history_id)
 
-        history = [
-            {
-                "id": str(item["item_id"]),
-                "action": item["action"],
-                "comments": item["comments"],
-                "parent": str(item["parent"]),
-                "query": item["query"],
-                "graph_type": item["graph_type"],
-                "action_time": item["action_time"],
-                "schema": item["schema"],
-                "anchor_properties": item["anchor_properties"],
-                "anchor": item["anchor"],
-                "links": item["links"],
-                "visible_dimensions": item["visible_dimensions"],
-                "parent_id": item["parent"],
-                "charts": item["charts"],
-                "edge_count": item["edge_count"],
-                "node_count": item["node_count"],
-            }
-            for item in study["history"]
-        ]
+        history = csx_study.extract_history_items(study)
 
         if history_entry_id:
             graph_type = [
@@ -146,7 +118,6 @@ def get_study(data: GetStudyData):
             graph_type = history[len(history) - 1]["graph_type"]
 
         return {
-            # "graph": pickle.loads(history_item["data"])[graph_type],
             "graph": pickle.loads(history_item)[graph_type],
             "name": study["study_name"],
             "description": study["study_description"],
@@ -206,11 +177,11 @@ def modify_study_graph(data: ModifyStudyData):
     if history_item_id == "":
         cache_data = {}
         csx_study.add_index(study_uuid, user_uuid, index)
-        is_graph_change = False
+        graph_type_changed = False
     else:
         cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
         study = csx_study.get_study(user_uuid, study_uuid)
-        is_graph_change = [
+        graph_type_changed = [
             entry
             for entry in study["history"]
             if entry["item_id"] == ObjectId(history_parent_id)
@@ -300,12 +271,10 @@ def modify_study_graph(data: ModifyStudyData):
             "schema": schema,
             "dimensions": current_dimensions,
             "anchor_properties": anchor_properties,
-            "is_graph_change": is_graph_change,
+            "graph_type_changed": graph_type_changed,
         },
         graph_type,
     )
-
-    print("\n\n\n\n comparison results action: ", comparison_res["action"])
 
     comparison_switch = {
         "from_scratch": lambda: csx_graph.get_graph_from_scratch(
@@ -322,7 +291,6 @@ def modify_study_graph(data: ModifyStudyData):
             anchor_properties,
             comparison_res,
             study_uuid,
-            comparison_res["action"],
             query,
             action_time,
             comparison_res["history_action"],
@@ -389,27 +357,7 @@ def modify_study_graph(data: ModifyStudyData):
 
     return {
         "graph": graph,
-        "history": [
-            {
-                "id": str(item["item_id"]),
-                "action": item["action"],
-                "comments": item["comments"],
-                "parent": str(item["parent"]),
-                "query": item["query"],
-                "graph_type": item["graph_type"],
-                "action_time": item["action_time"],
-                "schema": item["schema"],
-                "anchor_properties": item["anchor_properties"],
-                "anchor": item["anchor"],
-                "links": item["links"],
-                "visible_dimensions": item["visible_dimensions"],
-                "parent_id": item["parent"],
-                "charts": item["charts"],
-                "edge_count": item["edge_count"],
-                "node_count": item["node_count"],
-            }
-            for item in study["history"]
-        ],
+        "history": csx_study.extract_history_items(study),
     }
 
 
@@ -477,7 +425,6 @@ class UpdateChartsData(BaseModel):
 
 @router.post("/updatecharts")
 def update_study_charts(data: UpdateChartsData):
-
     csx_data.update_document(
         "studies",
         {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
@@ -515,11 +462,10 @@ def delete_study(study_uuid: str, user_uuid: str):
     if len(study_entry) > 0:
         history_ids = [item["item_id"] for item in study_entry[0]["history"]]
         for item_id in history_ids:
-            # csx_data.delete_documents("history", {"_id": {"$in": history_ids}})
             csx_data.delete_large_document(item_id)
 
     csx_data.delete_document(
         "studies", {"study_uuid": study_uuid, "user_uuid": user_uuid}
     )
-    # TODO: Delete also history items if there are any
+
     return

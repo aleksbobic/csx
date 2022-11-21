@@ -522,62 +522,67 @@ function DataPanel(props) {
                             </Box>
                         </Tooltip>
                     )}
-                    <Menu closeOnSelect={false} zIndex="3">
-                        <Tooltip label="List options">
-                            <MenuButton
-                                disabled={!useList}
-                                size="sm"
-                                as={IconButton}
-                                icon={
-                                    <MoreVerticalAlt style={{ '--ggs': 0.8 }} />
-                                }
-                                zIndex="3"
-                            />
-                        </Tooltip>
-                        <MenuList
-                            backgroundColor="black"
-                            padding="5px"
-                            borderRadius="10px"
-                        >
-                            {Object.keys(store.search.nodeTypes).map(
-                                feature => (
-                                    <MenuItem
-                                        key={`serp_list_checkbox_${feature}`}
-                                        fontSize="xs"
-                                        fontWeight="bold"
-                                        borderRadius="6px"
-                                    >
-                                        <Checkbox
-                                            isChecked={visibleProperties.includes(
-                                                feature
-                                            )}
-                                            size="sm"
-                                            onChange={e => {
-                                                if (e.target.checked) {
-                                                    setVisibleProperties([
-                                                        ...visibleProperties,
-                                                        feature
-                                                    ]);
-                                                } else if (
-                                                    visibleProperties.length > 1
-                                                ) {
-                                                    setVisibleProperties([
-                                                        ...visibleProperties.filter(
-                                                            value =>
-                                                                value !==
-                                                                feature
-                                                        )
-                                                    ]);
-                                                }
-                                            }}
+                    <Box>
+                        <Menu closeOnSelect={false} zIndex="3">
+                            <Tooltip label="List options">
+                                <MenuButton
+                                    disabled={!useList}
+                                    size="sm"
+                                    as={IconButton}
+                                    icon={
+                                        <MoreVerticalAlt
+                                            style={{ '--ggs': 0.8 }}
+                                        />
+                                    }
+                                    zIndex="3"
+                                />
+                            </Tooltip>
+                            <MenuList
+                                backgroundColor="black"
+                                padding="5px"
+                                borderRadius="10px"
+                            >
+                                {Object.keys(store.search.nodeTypes).map(
+                                    feature => (
+                                        <MenuItem
+                                            key={`serp_list_checkbox_${feature}`}
+                                            fontSize="xs"
+                                            fontWeight="bold"
+                                            borderRadius="6px"
                                         >
-                                            {feature}
-                                        </Checkbox>
-                                    </MenuItem>
-                                )
-                            )}
-                        </MenuList>
-                    </Menu>
+                                            <Checkbox
+                                                isChecked={visibleProperties.includes(
+                                                    feature
+                                                )}
+                                                size="sm"
+                                                onChange={e => {
+                                                    if (e.target.checked) {
+                                                        setVisibleProperties([
+                                                            ...visibleProperties,
+                                                            feature
+                                                        ]);
+                                                    } else if (
+                                                        visibleProperties.length >
+                                                        1
+                                                    ) {
+                                                        setVisibleProperties([
+                                                            ...visibleProperties.filter(
+                                                                value =>
+                                                                    value !==
+                                                                    feature
+                                                            )
+                                                        ]);
+                                                    }
+                                                }}
+                                            >
+                                                {feature}
+                                            </Checkbox>
+                                        </MenuItem>
+                                    )
+                                )}
+                            </MenuList>
+                        </Menu>
+                    </Box>
                     <ButtonGroup spacing="0" paddingRight="10px">
                         <Tooltip label="Use table view">
                             <IconButton

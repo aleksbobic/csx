@@ -95,27 +95,7 @@ def trim_network(
 
     return {
         "graph": cache_data[graph_type],
-        "history": [
-            {
-                "id": str(item["item_id"]),
-                "action": item["action"],
-                "comments": item["comments"],
-                "parent": str(item["parent"]),
-                "query": item["query"],
-                "graph_type": item["graph_type"],
-                "action_time": item["action_time"],
-                "schema": item["schema"],
-                "anchor_properties": item["anchor_properties"],
-                "anchor": item["anchor"],
-                "links": item["links"],
-                "visible_dimensions": item["visible_dimensions"],
-                "parent_id": item["parent"],
-                "charts": item["charts"],
-                "edge_count": item["edge_count"],
-                "node_count": item["node_count"],
-            }
-            for item in study["history"]
-        ],
+        "history": csx_study.extract_history_items(study),
     }
 
 
@@ -129,7 +109,6 @@ class ExpandData(BaseModel):
     graph_schema: List
     visible_dimensions: List
     links: List
-    search_uuid: str
     study_id: str
     history_item_id: str
     action_time: str
@@ -149,7 +128,6 @@ def expand_network(
     visible_dimensions = data.visible_dimensions
     anchor = data.anchor
     links = data.links
-    search_uuid = data.search_uuid
     study_id = data.study_id
     history_item_id = data.history_item_id
     action_time = data.action_time
@@ -245,6 +223,13 @@ def expand_network(
         ],
     }
 
+    history_action = "expand"
+
+    if values["connector"] == "or":
+        history_action = "wide expand"
+    elif values["connector"] == "and":
+        history_action = "narrow expand"
+
     graph = csx_graph.get_graph_from_scratch(
         graph_type,
         dimensions,
@@ -259,10 +244,9 @@ def expand_network(
         anchor_properties,
         {"difference": "search_uuid"},
         study_id,
-        "expand",
         last_history_item["query"],
         action_time,
-        "expand",
+        history_action,
         history_parent_id,
         charts,
     )
@@ -271,27 +255,7 @@ def expand_network(
 
     return {
         "graph": graph,
-        "history": [
-            {
-                "id": str(item["item_id"]),
-                "action": item["action"],
-                "comments": item["comments"],
-                "parent": str(item["parent"]),
-                "query": item["query"],
-                "graph_type": item["graph_type"],
-                "action_time": item["action_time"],
-                "schema": item["schema"],
-                "anchor_properties": item["anchor_properties"],
-                "anchor": item["anchor"],
-                "links": item["links"],
-                "visible_dimensions": item["visible_dimensions"],
-                "parent_id": item["parent"],
-                "charts": item["charts"],
-                "edge_count": item["edge_count"],
-                "node_count": item["node_count"],
-            }
-            for item in study["history"]
-        ],
+        "history": csx_study.extract_history_items(study),
     }
 
 

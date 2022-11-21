@@ -22,58 +22,6 @@ router = APIRouter()
 es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
 
 
-def convert_filter_res_to_df(results):
-    elastic_list = []
-    for entry in results["hits"]["hits"]:
-        entry_dict = entry["_source"].to_dict()
-        entry_dict["entry"] = entry["_id"]
-        elastic_list.append(entry_dict)
-
-    return pd.DataFrame(elastic_list)
-
-
-def get_new_features(query):
-    if query["action"] == "connect":
-        return list(
-            itertools.chain.from_iterable(
-                [get_new_features(entry) for entry in query["queries"]]
-            )
-        )
-
-    if "newFeatureName" in query.keys():
-        if query["action"] == "count array":
-            return [{"feature": query["newFeatureName"], "type": "integer"}] + list(
-                itertools.chain.from_iterable(get_new_features(query["query"]))
-            )
-        elif query["action"] == "extract keywords":
-            return [{"feature": query["newFeatureName"], "type": "list"}] + list(
-                itertools.chain.from_iterable(get_new_features(query["query"]))
-            )
-
-    if "query" not in query and "queries" not in query:
-        return []
-
-    return list(
-        itertools.chain.from_iterable(filter(None, get_new_features(query["query"])))
-    )
-
-
-class Data(BaseModel):
-    query: str
-    user_id: str
-    study_id: str
-    search_uuid: str
-    visible_dimensions: List
-    graph_schema: List
-    index: str
-    anchor: str
-    links: List
-    graph_type: Literal["overview", "detail"]
-    visible_entries: List
-    anchor_properties: List
-    action_time: str
-
-
 @router.get("/datasets")
 def get_datasets() -> dict:
     """Get list of all datasets and their schemas if they have one"""
@@ -105,7 +53,6 @@ def get_datasets() -> dict:
                     in ["integer", "float", "category", "list"]
                 }
         except Exception as e:
-            print("There was an exception", e)
             datasets[index]["schemas"] = []
             datasets[index]["anchor"] = []
             datasets[index]["links"] = []
