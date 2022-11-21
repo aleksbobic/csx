@@ -1,4 +1,4 @@
-import { useColorModeValue } from '@chakra-ui/react';
+import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { observer, useLocalObservable } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -25,7 +25,17 @@ function Graph(props) {
 
     const [graphContainerElement, setGraphContainerElement] = useState(null);
 
+    const { colorMode } = useColorMode();
+
     useLocalObservable(() => ({}));
+
+    useEffect(() => {
+        if (colorMode === 'light') {
+            store.graphInstance.setOutlinePassColor('red');
+        } else {
+            store.graphInstance.setOutlinePassColor('white');
+        }
+    }, [colorMode, store.graphInstance]);
 
     useEffect(() => {
         const getNewSizes = () =>

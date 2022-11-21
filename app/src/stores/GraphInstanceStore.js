@@ -83,8 +83,10 @@ export class GraphInstanceStore {
     };
 
     setOutlinePassColor(color) {
-        this.outlinePass.hiddenEdgeColor.set(color);
-        this.outlinePass.visibleEdgeColor.set(color);
+        if (this.outlinePass) {
+            this.outlinePass.hiddenEdgeColor.set(color);
+            this.outlinePass.visibleEdgeColor.set(color);
+        }
     }
 
     // make selected nodes and links between them visible
