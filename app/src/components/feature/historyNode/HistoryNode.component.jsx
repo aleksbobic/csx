@@ -29,14 +29,27 @@ const historyNode = ({ id, data, isConnectable }) => {
                             e.preventDefault();
                             data.deleteNode(id);
                         }}
-                        _groupHover={{ opacity: 1 }}
-                        icon={<Close style={{ '--ggs': '0.7' }} />}
+                        _groupHover={{
+                            opacity: 1
+                        }}
+                        _hover={{ backgroundColor: 'whiteAlpha.200' }}
+                        icon={
+                            <Close
+                                style={{
+                                    '--ggs': '0.7',
+                                    color:
+                                        (data.colorMode === 'light' ||
+                                            data.isActive) &&
+                                        'white'
+                                }}
+                            />
+                        }
                     />
                 </Tooltip>
             )}
             <Box
                 transition="0.2s all ease-in-out"
-                _hover={{
+                _groupHover={{
                     cursor: data.isActive ? 'default' : 'pointer',
                     backgroundColor: data.isActive ? 'default' : '#3182ce'
                 }}
@@ -70,6 +83,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                 textOverflow="ellipsis"
                                 width="100%"
                                 paddingRight={data.parent && '20px'}
+                                color={
+                                    data.colorMode === 'light' &&
+                                    data.isActive &&
+                                    'white'
+                                }
+                                _groupHover={{ color: 'white' }}
                             >
                                 {data.title}
                             </Text>
@@ -77,7 +96,11 @@ const historyNode = ({ id, data, isConnectable }) => {
 
                         <Wrap
                             spacing="2px"
-                            style={{ margin: 0, marginTop: '3px' }}
+                            style={{
+                                margin: 0,
+                                marginTop: '3px',
+                                paddingRight: !data.title && '20px'
+                            }}
                         >
                             <Flex justifyContent="center">
                                 <Box
@@ -96,6 +119,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         fontSize="xs"
                                         fontWeight="bold"
                                         textAlign="center"
+                                        color={
+                                            data.colorMode === 'light' &&
+                                            data.isActive &&
+                                            'white'
+                                        }
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.graphType}
                                     </Text>
@@ -113,12 +142,20 @@ const historyNode = ({ id, data, isConnectable }) => {
                                     display="flex"
                                     justifyContent="center"
                                     alignItems="center"
+                                    color={
+                                        data.colorMode === 'light' &&
+                                        data.isActive &&
+                                        'white'
+                                    }
+                                    _groupHover={{ color: 'white' }}
                                 >
                                     <Text
                                         fontSize="xs"
                                         fontWeight="bold"
                                         textAlign="center"
                                         marginRight="2px"
+                                        color="currentColor"
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.comments.length}
                                     </Text>
@@ -126,7 +163,8 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         style={{
                                             '--ggs': '0.5',
                                             marginTop: '-2px',
-                                            opacity: 0.7
+                                            opacity: 0.7,
+                                            color: 'currentColor'
                                         }}
                                     />
                                 </Box>
@@ -149,6 +187,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         fontWeight="bold"
                                         textAlign="center"
                                         marginRight="4px"
+                                        color={
+                                            data.colorMode === 'light' &&
+                                            data.isActive &&
+                                            'white'
+                                        }
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.nodeCount}
                                     </Text>
@@ -156,6 +200,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         fontSize="xs"
                                         fontWeight="bold"
                                         opacity="0.6"
+                                        color={
+                                            data.colorMode === 'light' &&
+                                            data.isActive &&
+                                            'white'
+                                        }
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.nodeCount === 1
                                             ? 'node'
@@ -182,6 +232,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         fontWeight="bold"
                                         textAlign="center"
                                         marginRight="4px"
+                                        color={
+                                            data.colorMode === 'light' &&
+                                            data.isActive &&
+                                            'white'
+                                        }
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.edgeCount}
                                     </Text>
@@ -189,6 +245,12 @@ const historyNode = ({ id, data, isConnectable }) => {
                                         fontSize="xs"
                                         fontWeight="bold"
                                         opacity="0.6"
+                                        color={
+                                            data.colorMode === 'light' &&
+                                            data.isActive &&
+                                            'white'
+                                        }
+                                        _groupHover={{ color: 'white' }}
                                     >
                                         {data.edgeCount === 1
                                             ? 'edge'

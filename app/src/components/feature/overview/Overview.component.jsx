@@ -4,6 +4,7 @@ import {
     GridItem,
     IconButton,
     Tooltip,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { MathPlus } from 'css.gg';
@@ -21,6 +22,7 @@ import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
 import { useState } from 'react';
 function Overview(props) {
     const store = useContext(RootStoreContext);
+    const { colorMode } = useColorMode();
 
     const [visibleCharts, setVisibleCharts] = useState(
         store.stats
@@ -117,6 +119,17 @@ function Overview(props) {
                     <IconButton
                         width="100%"
                         height="100%"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        _hover={{
+                            backgroundColor:
+                                colorMode === 'light'
+                                    ? 'blackAlpha.400'
+                                    : 'whiteAlpha.400'
+                        }}
                         borderRadius="xl"
                         onClick={() =>
                             store.stats.toggleStatsModalVisiblity(

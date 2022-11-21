@@ -37,14 +37,26 @@ export class WorkflowStore {
     ];
 
     actionNodeColors = {
-        searchNode: '#3182ce',
-        datasetNode: '#3182ce',
-        filterNode: '#ce8631',
-        countsNode: '#ce8631',
-        connectorNode: '#323232',
-        resultsNode: '#3cd824',
-        keywordExtractionNode: '#ce8631',
-        background: '#161616'
+        dark: {
+            searchNode: '#3182ce',
+            datasetNode: '#3182ce',
+            filterNode: '#ce8631',
+            countsNode: '#ce8631',
+            connectorNode: '#323232',
+            resultsNode: '#3cd824',
+            keywordExtractionNode: '#ce8631',
+            background: '#161616'
+        },
+        light: {
+            searchNode: '#3182ce',
+            datasetNode: '#3182ce',
+            filterNode: '#ce8631',
+            countsNode: '#ce8631',
+            connectorNode: '#323232',
+            resultsNode: '#3cd824',
+            keywordExtractionNode: '#ce8631',
+            background: '#eeeeee'
+        }
     };
 
     actions = [];
@@ -233,6 +245,23 @@ export class WorkflowStore {
         this.updateActions(nodeID);
     };
 
+    updateNodeStyles = () => {
+        this.nodes = this.nodes.map(node => {
+            node.data.colorMode = this.store.core.colorMode;
+            node.style = {
+                ...node.style,
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode][node.type]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'background'
+                    ]
+            };
+            return node;
+        });
+    };
+
     updateActions = id => {
         if (id) {
             this.nodes = this.nodes.map(node => {
@@ -241,9 +270,10 @@ export class WorkflowStore {
                 }
                 return node;
             });
+        } else {
+            this.nodes = [...this.nodes];
         }
 
-        // this.nodes = [...this.nodes];
         this.edges = [...this.edges];
     };
 
@@ -276,11 +306,19 @@ export class WorkflowStore {
                 updateSearchNodeData: this.updateSearchNodeData,
                 keyphrase: query,
                 getDefaultValue: this.getDefaultValue,
-                deleteNode: this.deleteNode
+                deleteNode: this.deleteNode,
+                colorMode: this.store.core.colorMode
             },
             style: {
-                border: `1px solid ${this.actionNodeColors['searchNode']}`,
-                backgroundColor: this.actionNodeColors['background'],
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'searchNode'
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'background'
+                    ],
                 borderRadius: '10px',
                 padding: '3px'
             }
@@ -293,11 +331,19 @@ export class WorkflowStore {
             data: {
                 children: [],
                 parents: [],
-                frunWorkflow: this.runWorkFlow
+                frunWorkflow: this.runWorkFlow,
+                colorMode: this.store.core.colorMode
             },
             style: {
-                border: `1px solid ${this.actionNodeColors['resultsNode']}`,
-                backgroundColor: this.actionNodeColors['background'],
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'resultsNode'
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'background'
+                    ],
                 borderRadius: '10px',
                 padding: '3px'
             }
@@ -347,11 +393,19 @@ export class WorkflowStore {
                         updateSearchNodeData: this.updateSearchNodeData,
                         keyphrase: query.keyphrase,
                         getDefaultValue: this.getDefaultValue,
-                        deleteNode: this.deleteNode
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode
                     },
                     style: {
-                        border: `1px solid ${this.actionNodeColors['searchNode']}`,
-                        backgroundColor: this.actionNodeColors['background'],
+                        border: `1px solid ${
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'searchNode'
+                            ]
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'background'
+                            ],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -366,11 +420,19 @@ export class WorkflowStore {
                         children: [],
                         parents: [],
                         dataset: this.store.search.currentDataset,
-                        deleteNode: this.deleteNode
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode
                     },
                     style: {
-                        border: `1px solid ${this.actionNodeColors['datasetNode']}`,
-                        backgroundColor: this.actionNodeColors['background'],
+                        border: `1px solid ${
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'datasetNode'
+                            ]
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'background'
+                            ],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -396,11 +458,19 @@ export class WorkflowStore {
                         max_value: this.store.search.getSearchHintsByFeature(
                             query.feature
                         )['max'],
-                        deleteNode: this.deleteNode
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode
                     },
                     style: {
-                        border: `1px solid ${this.actionNodeColors['filterNode']}`,
-                        backgroundColor: this.actionNodeColors['background'],
+                        border: `1px solid ${
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'filterNode'
+                            ]
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'background'
+                            ],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -420,11 +490,19 @@ export class WorkflowStore {
                         children: [],
                         parents: [],
                         connector: query.connector,
-                        deleteNode: this.deleteNode
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode
                     },
                     style: {
-                        border: `1px solid ${this.actionNodeColors['connectorNode']}`,
-                        backgroundColor: this.actionNodeColors['background'],
+                        border: `1px solid ${
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'connectorNode'
+                            ]
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'background'
+                            ],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -465,11 +543,19 @@ export class WorkflowStore {
                     data: {
                         children: [],
                         parents: [],
-                        runWorkflow: this.runWorkFlow
+                        runWorkflow: this.runWorkFlow,
+                        colorMode: this.store.core.colorMode
                     },
                     style: {
-                        border: `1px solid ${this.actionNodeColors['resultsNode']}`,
-                        backgroundColor: this.actionNodeColors['background'],
+                        border: `1px solid ${
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'resultsNode'
+                            ]
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[this.store.core.colorMode][
+                                'background'
+                            ],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -561,6 +647,7 @@ export class WorkflowStore {
         }
 
         data.deleteNode = this.deleteNode;
+        data.colorMode = this.store.core.colorMode;
 
         const newNode = {
             id: uuidv4(),
@@ -568,8 +655,13 @@ export class WorkflowStore {
             position,
             data,
             style: {
-                border: `1px solid ${this.actionNodeColors[nodeType]}`,
-                backgroundColor: this.actionNodeColors['background'],
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode][nodeType]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode][
+                        'background'
+                    ],
                 borderRadius: '10px',
                 padding: '3px'
             }

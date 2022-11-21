@@ -1,4 +1,5 @@
 import {
+    Box,
     Divider,
     Heading,
     HStack,
@@ -6,6 +7,7 @@ import {
     Tag,
     Text,
     Tooltip,
+    useColorMode,
     VStack,
     Wrap
 } from '@chakra-ui/react';
@@ -18,6 +20,7 @@ function ConnectionStats(props) {
     const store = useContext(RootStoreContext);
     const [visiblity, setVisiblity] = useState(false);
     const [data, setData] = useState([]);
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         if (store.graphInstance.selfCentricType) {
@@ -155,7 +158,12 @@ function ConnectionStats(props) {
                 )}
 
                 <Wrap width="100%">
-                    <Tag borderRadius="6px">
+                    <Tag
+                        borderRadius="6px"
+                        backgroundColor={
+                            colorMode === 'light' && 'blackAlpha.300'
+                        }
+                    >
                         <Text
                             color="whiteAlpha.900"
                             fontSize="xs"
@@ -264,15 +272,18 @@ function ConnectionStats(props) {
 
     if (data.length === 0) {
         return (
-            <VStack
+            <Box
                 overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}
-                backgroundColor="blackAlpha.800"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
                 borderRadius="6px"
+                display="flex"
                 justifyContent="center"
-                padding="20%"
+                alignItems="center"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -288,7 +299,7 @@ function ConnectionStats(props) {
                         😉
                     </Text>
                 )}
-            </VStack>
+            </Box>
         );
     }
 
@@ -310,7 +321,11 @@ function ConnectionStats(props) {
                         <Stat
                             key={node.id}
                             borderRadius="10px"
-                            backgroundColor="blackAlpha.800"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'blackAlpha.800'
+                            }
                             padding="10px"
                             width="100%"
                             flex="0 1 0%"

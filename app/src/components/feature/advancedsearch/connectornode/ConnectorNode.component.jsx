@@ -54,7 +54,11 @@ const connectorNode = ({ id, data, isConnectable }) => {
                         defaultValue={data.connector}
                         borderRadius="5px"
                         onChange={modifyConnector}
-                        background="whiteAlpha.200"
+                        background={
+                            data.colorMode === 'light'
+                                ? 'whiteAlpha.800'
+                                : 'whiteAlpha.200'
+                        }
                         opacity="0.8"
                         _hover={{
                             opacity: 1,

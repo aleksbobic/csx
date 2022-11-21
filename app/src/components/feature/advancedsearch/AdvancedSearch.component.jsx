@@ -9,6 +9,7 @@ import {
     InputRightElement,
     Text,
     Tooltip,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
@@ -47,6 +48,13 @@ function AdvancedSearch(props) {
     const reactFlowWrapper = useRef(null);
     const store = useContext(RootStoreContext);
     const history = useHistory();
+    const { colorMode } = useColorMode();
+
+    useEffect(() => {
+        if (colorMode) {
+            store.workflow.updateNodeStyles();
+        }
+    }, [colorMode, store.workflow]);
 
     const onNodesChange = useCallback(
         changes =>
@@ -160,7 +168,9 @@ function AdvancedSearch(props) {
                 borderColor="whiteAlpha.400"
                 width="100%"
                 height="40px"
-                backgroundColor="blackAlpha.900"
+                backgroundColor={
+                    colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.900'
+                }
                 borderRadius="8px"
                 onDragStart={event => onDragStart(event, node.nodeType)}
                 draggable
@@ -170,11 +180,18 @@ function AdvancedSearch(props) {
                 alignItems="center"
                 transition="all 0.1s ease-in-out"
                 _hover={{
-                    backgroundColor: 'blue.700'
+                    backgroundColor:
+                        colorMode === 'light' ? 'blue.400' : 'blue.700',
+                    color: colorMode === 'light' ? 'black' : 'white'
                 }}
+                role="group"
             >
                 <Tooltip label={node.tooltip}>
-                    <Text fontSize="sm" fontWeight="bold">
+                    <Text
+                        fontSize="sm"
+                        fontWeight="bold"
+                        _groupHover={{ color: 'white' }}
+                    >
                         {node.label}
                     </Text>
                 </Tooltip>
@@ -281,10 +298,16 @@ function AdvancedSearch(props) {
                 <VStack
                     alignItems="start"
                     padding="20px"
-                    backgroundColor="rgba(0,0,0,0.85)"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'rgba(255,255,255,0.85)'
+                            : 'rgba(0,0,0,0.85)'
+                    }
                     borderTopLeftRadius="10px"
                     borderTopRightRadius="10px"
-                    borderBottomColor="#2d2d2d"
+                    borderBottomColor={
+                        colorMode === 'light' ? 'gray.300' : '#2d2d2d'
+                    }
                     borderBottomWidth="1px"
                 >
                     <Heading size="sm">Search Nodes</Heading>
@@ -295,15 +318,21 @@ function AdvancedSearch(props) {
                 <VStack
                     height="auto"
                     padding="10px 10px"
-                    backgroundColor="blackAlpha.500"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'whiteAlpha.500'
+                            : 'blackAlpha.500'
+                    }
                     flexGrow="1"
                 >
                     {renderNodeList()}
                 </VStack>
                 <VStack
-                    borderTopColor="#2d2d2d"
+                    borderTopColor={
+                        colorMode === 'light' ? 'gray.300' : '#2d2d2d'
+                    }
                     borderTopWidth="1px"
-                    backgroundColor="black"
+                    backgroundColor={colorMode === 'light' ? 'white' : 'black'}
                     padding="10px 10px"
                     borderBottomLeftRadius="10px"
                     borderBottomRightRadius="10px"
@@ -340,6 +369,8 @@ function AdvancedSearch(props) {
                         <InputRightElement>
                             <Tooltip label="Save current workflow">
                                 <IconButton
+                                    backgroundColor="blue.400"
+                                    _hover={{ backgroundColor: 'blue.500' }}
                                     disabled={!store.workflow.newWorkflowName}
                                     icon={<Check />}
                                     size="sm"

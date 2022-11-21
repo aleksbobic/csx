@@ -15,6 +15,7 @@ import {
     TabPanels,
     Tabs,
     Tooltip,
+    useColorMode,
     useColorModeValue
 } from '@chakra-ui/react';
 import Overview from 'components/feature/overview/Overview.component';
@@ -78,6 +79,11 @@ function DataPanel(props) {
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
 
     const [historyViewport, setHistoryViewport] = useState(null);
+    const { colorMode } = useColorMode();
+
+    useEffect(() => {
+        store.history.generateHistoryNodes();
+    }, [store.history, colorMode]);
 
     useEffect(() => {
         setHistoryNodes(store.history.nodes);
@@ -333,15 +339,28 @@ function DataPanel(props) {
                     >
                         <MiniMap
                             nodeColor={node =>
-                                node.data.isActive ? '#3182ceeb' : '#323232'
+                                node.data.isActive
+                                    ? '#3182ceeb'
+                                    : colorMode === 'light'
+                                    ? '#c5c5c5'
+                                    : '#323232'
                             }
                             nodeStrokeColor={node =>
-                                node.data.isActive ? '#3182ceeb' : '#323232'
+                                node.data.isActive
+                                    ? '#3182ceeb'
+                                    : colorMode === 'light'
+                                    ? '#7bc5c5c57b7b'
+                                    : '#323232'
                             }
                             nodeBorderRadius="15px"
-                            maskColor="#1a1a1a"
+                            maskColor={
+                                colorMode === 'light' ? '#c5c5c5' : '#1a1a1a'
+                            }
                             style={{
-                                backgroundColor: '#000000',
+                                backgroundColor:
+                                    colorMode === 'light'
+                                        ? '#7b7b7b'
+                                        : '#000000',
                                 border: '1px solid #ffffff22',
                                 borderRadius: '8px'
                             }}
@@ -382,7 +401,11 @@ function DataPanel(props) {
                         height="100%"
                         width="100%"
                         padding="14px"
-                        backgroundColor="whiteAlpha.100"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.100'
+                        }
                         borderRadius="10px"
                         overflow="scroll"
                     >
@@ -394,7 +417,11 @@ function DataPanel(props) {
                         height="100%"
                         width="100%"
                         padding="14px"
-                        backgroundColor="whiteAlpha.100"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.100'
+                        }
                         borderRadius="10px"
                         overflow="scroll"
                         paddingTop={activeTab === 1 && '30px'}
@@ -425,7 +452,11 @@ function DataPanel(props) {
                         height="100%"
                         width="100%"
                         padding="14px"
-                        backgroundColor="whiteAlpha.100"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.100'
+                        }
                         borderRadius="10px"
                         overflow="scroll"
                     >
@@ -437,7 +468,11 @@ function DataPanel(props) {
                         height="100%"
                         width="100%"
                         padding="14px"
-                        backgroundColor="whiteAlpha.100"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.100'
+                        }
                         borderRadius="10px"
                         overflow="scroll"
                     >

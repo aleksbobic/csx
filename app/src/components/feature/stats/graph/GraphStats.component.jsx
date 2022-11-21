@@ -6,6 +6,7 @@ import {
     Heading,
     Text,
     Tooltip,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
@@ -17,6 +18,7 @@ function GraphStats(props) {
     const store = useContext(RootStoreContext);
     const [graphData, setGraphData] = useState([]);
     const [nodeData, setNodeData] = useState([]);
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         if (props.demoData) {
@@ -136,7 +138,11 @@ function GraphStats(props) {
             >
                 <AspectRatio ratio={1} key={index} height="100%">
                     <Box
-                        backgroundColor={'blackAlpha.900'}
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.300'
+                                : 'blackAlpha.900'
+                        }
                         borderRadius="10px"
                         width="100%"
                         height="100%"
@@ -147,7 +153,11 @@ function GraphStats(props) {
                             justifyContent="center"
                         >
                             <Text
-                                color="whiteAlpha.900"
+                                color={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.900'
+                                        : 'whiteAlpha.900'
+                                }
                                 fontSize="xl"
                                 fontWeight="bold"
                             >
@@ -155,7 +165,11 @@ function GraphStats(props) {
                             </Text>
                             <Tooltip label={entry[1].label}>
                                 <Text
-                                    color="whiteAlpha.600"
+                                    color={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.600'
+                                            : 'whiteAlpha.600'
+                                    }
                                     textTransform="capitalize"
                                     opacity="0.75"
                                     textAlign="center"
@@ -184,7 +198,9 @@ function GraphStats(props) {
                 width="100%"
                 paddingLeft="4px"
                 size="xs"
-                color="whiteAlpha.300"
+                color={
+                    colorMode === 'light' ? 'blackAlpha.500' : 'whiteAlpha.300'
+                }
                 marginBottom="4px"
             >
                 {title}
@@ -207,15 +223,18 @@ function GraphStats(props) {
 
     if (nodeData.length === 0 && props.networkData !== 'all') {
         return (
-            <VStack
+            <Box
                 overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}
-                backgroundColor="blackAlpha.800"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
                 borderRadius="6px"
+                display="flex"
                 justifyContent="center"
-                padding="20%"
+                alignItems="center"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -230,7 +249,7 @@ function GraphStats(props) {
                         Select some nodes to see details here! 😉
                     </Text>
                 )}
-            </VStack>
+            </Box>
         );
     }
 

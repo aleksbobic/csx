@@ -184,16 +184,13 @@ function Graph(props) {
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
             cooldownTime={store.graphInstance.forceCooldownTime}
-            linkOpacity={() => {
-                if (store.core.colorMode === 'light') {
-                    return 0.7;
-                } else {
-                    return store.graphInstance.selectedColorSchema ===
-                        'component'
-                        ? 0.3
-                        : 0.1;
-                }
-            }}
+            linkOpacity={
+                store.core.colorMode === 'light'
+                    ? 0.7
+                    : store.graphInstance.selectedColorSchema === 'component'
+                    ? 0.3
+                    : 0.1
+            }
             onEngineStop={() => {
                 if (store.graphInstance.forceEngine) {
                     store.graphInstance.stopForce();

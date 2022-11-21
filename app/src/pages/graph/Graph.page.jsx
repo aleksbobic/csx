@@ -198,9 +198,12 @@ function GraphPage() {
             left="50%"
             transform="translate(-50%, 0)"
             zIndex="20"
-            backgroundColor="blackAlpha.800"
+            backgroundColor={
+                colorMode === 'light' ? 'whiteAlpha.800' : 'blackAlpha.800'
+            }
             borderRadius="12px"
-            border="1px solid gray.900"
+            border="1px solid"
+            borderColor={colorMode === 'light' ? 'blackAlpha.400' : 'gray.900'}
         >
             <Textarea
                 width="100%"

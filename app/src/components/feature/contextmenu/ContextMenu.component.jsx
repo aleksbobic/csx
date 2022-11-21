@@ -96,6 +96,8 @@ function ContextMenu() {
             padding="5px"
             borderRadius="10px"
             width="200px"
+            border="1px solid"
+            borderColor={colorMode === 'light' && 'blackAlpha.200'}
         >
             <ButtonGroup variant="ghost" size="xs" width="100%">
                 <VStack align="stretch" spacing="0" width="100%">

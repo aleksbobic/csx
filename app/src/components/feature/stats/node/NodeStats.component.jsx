@@ -8,6 +8,7 @@ import {
     TagLabel,
     Text,
     Tooltip,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { Remove } from 'css.gg';
@@ -19,6 +20,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         if (props.demoData.length) {
@@ -82,7 +84,11 @@ function SelectedNodeList(props) {
                         size="md"
                         borderRadius="4px"
                         variant="solid"
-                        backgroundColor="whiteAlpha.200"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
                     >
                         <TagLabel>Type: {node.feature}</TagLabel>
                     </Tag>
@@ -92,7 +98,11 @@ function SelectedNodeList(props) {
                     size="md"
                     borderRadius="4px"
                     variant="solid"
-                    backgroundColor="whiteAlpha.200"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'whiteAlpha.200'
+                    }
                 >
                     <TagLabel>
                         {`${node.neighbours.size} ${
@@ -108,15 +118,18 @@ function SelectedNodeList(props) {
 
     if (data.length === 0) {
         return (
-            <VStack
+            <Box
                 overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}
-                backgroundColor="blackAlpha.800"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
                 borderRadius="6px"
+                display="flex"
                 justifyContent="center"
-                padding="20%"
+                alignItems="center"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -131,7 +144,7 @@ function SelectedNodeList(props) {
                         Select some nodes to see details here! 😉
                     </Text>
                 )}
-            </VStack>
+            </Box>
         );
     }
 
@@ -142,7 +155,11 @@ function SelectedNodeList(props) {
                     <Stat
                         key={node.id}
                         borderRadius="10px"
-                        backgroundColor="blackAlpha.800"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'blackAlpha.800'
+                        }
                         padding="10px"
                         width="100%"
                         flex="0 1 0%"
@@ -153,6 +170,7 @@ function SelectedNodeList(props) {
                             whiteSpace="nowrap"
                             overflow="hidden"
                             textOverflow="ellipsis"
+                            opacity={colorMode === 'light' && 0.8}
                             width="100%"
                             paddingRight={
                                 props.networkData === 'selected' ? '30px' : '0'

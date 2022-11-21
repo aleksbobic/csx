@@ -19,6 +19,7 @@ import {
     Textarea,
     Tooltip,
     Tr,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { ChevronDown, ChevronUp, Close } from 'css.gg';
@@ -33,6 +34,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { RootStoreContext } from 'stores/RootStore';
+import classNames from 'classnames';
 import './Comment.scss';
 
 function CommentsComponent(props) {
@@ -41,6 +43,7 @@ function CommentsComponent(props) {
     const [comment, setComment] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [editCommentIndex, setEditCommentIndex] = useState(null);
+    const { colorMode } = useColorMode();
     const commentField = useRef(null);
 
     const submitComment = () => {
@@ -106,7 +109,9 @@ function CommentsComponent(props) {
             width="100%"
             spacing="40px"
             padding="14px"
-            backgroundColor="whiteAlpha.100"
+            backgroundColor={
+                colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.100'
+            }
             borderRadius="10px"
             style={{ justifyContent: 'space-between' }}
         >
@@ -126,6 +131,8 @@ function CommentsComponent(props) {
                                     backgroundColor={
                                         index === editCommentIndex
                                             ? 'blue.400'
+                                            : colorMode === 'light'
+                                            ? 'blackAlpha.300'
                                             : 'whiteAlpha.200'
                                     }
                                     opacity={
@@ -174,6 +181,17 @@ function CommentsComponent(props) {
                                                         language={match[1]}
                                                         showLineNumbers={true}
                                                         PreTag="div"
+                                                        className={classNames(
+                                                            'code-container',
+                                                            {
+                                                                light:
+                                                                    colorMode ===
+                                                                    'light',
+                                                                dark:
+                                                                    colorMode ===
+                                                                    'dark'
+                                                            }
+                                                        )}
                                                         useInlineStyles={true}
                                                         customStyle={{
                                                             background:
@@ -185,7 +203,10 @@ function CommentsComponent(props) {
                                                         codeTagProps={{
                                                             style: {
                                                                 background:
-                                                                    '#00000077',
+                                                                    colorMode ===
+                                                                    'light'
+                                                                        ? 'blackAlpha.200'
+                                                                        : '#00000077',
                                                                 borderRadius:
                                                                     '6px',
                                                                 display: 'block'
@@ -195,7 +216,12 @@ function CommentsComponent(props) {
                                                     />
                                                 ) : (
                                                     <code
-                                                        className={className}
+                                                        className={
+                                                            colorMode ===
+                                                            'light'
+                                                                ? 'light'
+                                                                : 'dark'
+                                                        }
                                                         {...props}
                                                     >
                                                         {children}
@@ -229,6 +255,10 @@ function CommentsComponent(props) {
                                                 size="sm"
                                                 variant="ghost"
                                                 marginRight="5px"
+                                                backgroundColor={
+                                                    colorMode === 'light' &&
+                                                    'blackAlpha.200'
+                                                }
                                                 onClick={() =>
                                                     editComment(index)
                                                 }
@@ -236,13 +266,22 @@ function CommentsComponent(props) {
                                                     <PencilIcon
                                                         style={{
                                                             width: '16px',
-                                                            height: '16px'
+                                                            height: '16px',
+                                                            opacity:
+                                                                colorMode ===
+                                                                    'light' &&
+                                                                0.5
                                                         }}
                                                     />
                                                 }
                                                 opacity="0"
                                                 transition="0.2s all ease-in-out"
-                                                _groupHover={{ opacity: '1' }}
+                                                _groupHover={{
+                                                    opacity: '1',
+                                                    backgroundColor:
+                                                        colorMode === 'light' &&
+                                                        'blackAlpha.200'
+                                                }}
                                             />
                                         </Tooltip>
                                         <Tooltip label="Delete comment">
@@ -252,14 +291,29 @@ function CommentsComponent(props) {
                                                 onClick={() =>
                                                     deleteComment(index)
                                                 }
+                                                backgroundColor={
+                                                    colorMode === 'light' &&
+                                                    'blackAlpha.200'
+                                                }
                                                 icon={
                                                     <Close
-                                                        style={{ '--ggs': 0.8 }}
+                                                        style={{
+                                                            '--ggs': 0.8,
+                                                            opacity:
+                                                                colorMode ===
+                                                                    'light' &&
+                                                                0.5
+                                                        }}
                                                     />
                                                 }
                                                 opacity="0"
                                                 transition="0.2s all ease-in-out"
-                                                _groupHover={{ opacity: '1' }}
+                                                _groupHover={{
+                                                    opacity: '1',
+                                                    backgroundColor:
+                                                        colorMode === 'light' &&
+                                                        'blackAlpha.200'
+                                                }}
                                             />
                                         </Tooltip>
                                     </Flex>
@@ -291,7 +345,11 @@ function CommentsComponent(props) {
                             resize="none"
                             placeholder="Enter your observations here ..."
                             fontSize="sm"
-                            backgroundColor="whiteAlpha.100"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.100'
+                            }
                             value={comment}
                             onFocus={() =>
                                 store.history.setCommentTrigger(false)
@@ -324,10 +382,16 @@ function CommentsComponent(props) {
                             zIndex="2"
                             borderRadius="4px"
                             transition="0.2s all ease-in-out"
+                            color={colorMode === 'light' ? 'white' : 'black'}
                             _hover={{ background: 'blue.500' }}
                             onClick={submitComment}
                             disabled={comment.trim() === ''}
-                            _disabled={{ backgroundColor: 'gray' }}
+                            _disabled={{
+                                backgroundColor:
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.400'
+                                        : 'gray'
+                            }}
                         >
                             {editMode ? 'Save edits' : 'Comment'}
                         </Button>

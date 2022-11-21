@@ -88,7 +88,11 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.updateSearchNodeData(id, event.target.value);
                 }}
                 opacity="0.8"
-                background="whiteAlpha.200"
+                background={
+                    data.colorMode === 'light'
+                        ? 'whiteAlpha.800'
+                        : 'whiteAlpha.200'
+                }
                 value={data.keyphrase}
                 _hover={{
                     opacity: 1
@@ -173,7 +177,11 @@ const searchNode = ({ id, data, isConnectable }) => {
                             borderRadius="5px"
                             defaultValue={data.feature}
                             onChange={modifyFeature}
-                            background="whiteAlpha.200"
+                            background={
+                                data.colorMode === 'light'
+                                    ? 'whiteAlpha.800'
+                                    : 'whiteAlpha.200'
+                            }
                             opacity="0.8"
                             _hover={{
                                 opacity: 1,

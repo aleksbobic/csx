@@ -58,7 +58,8 @@ export class HistoryStore {
                     loadStudy: this.loadStudy,
                     deleteNode: this.deleteNode,
                     nodeCount: historyItem.node_count,
-                    edgeCount: historyItem.edge_count
+                    edgeCount: historyItem.edge_count,
+                    colorMode: this.store.core.colorMode
                 },
                 position: {
                     x: 50,
@@ -70,6 +71,8 @@ export class HistoryStore {
                     background:
                         this.store.core.studyHistoryItemIndex === index
                             ? '#3182ceeb'
+                            : this.store.core.colorMode === 'light'
+                            ? '#ffffffeb'
                             : '#000000eb',
                     borderRadius: '6px',
                     height: `${this.nodeHeight}px`,

@@ -52,7 +52,11 @@ const filterNode = ({ id, data, isConnectable }) => {
                             size="sm"
                             borderRadius="5px"
                             value={data.feature}
-                            background="whiteAlpha.200"
+                            background={
+                                data.colorMode === 'light'
+                                    ? 'whiteAlpha.800'
+                                    : 'whiteAlpha.200'
+                            }
                             opacity="0.8"
                             _hover={{
                                 opacity: 1,
@@ -91,7 +95,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             min={data.min_value}
                             max={data.max}
                         >
-                            <NumberInputField />
+                            <NumberInputField borderRadius="5px" />
                         </NumberInput>
                     </Tooltip>
                     <Tooltip label="To">
@@ -111,7 +115,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             min={data.min}
                             max={data.max_value}
                         >
-                            <NumberInputField />
+                            <NumberInputField borderRadius="5px" />
                         </NumberInput>
                     </Tooltip>
                 </VStack>

@@ -211,7 +211,7 @@ export class GraphStore {
             side: THREE.DoubleSide
         });
 
-        const geometryTemplate = new THREE.SphereBufferGeometry(1, 4, 4);
+        const geometryTemplate = new THREE.SphereGeometry(1, 4, 4);
 
         const meshTemplate = new THREE.Mesh(
             geometryTemplate,
@@ -545,14 +545,13 @@ export class GraphStore {
             params.anchor_properties = [];
         }
 
-        console.log('request params: ', params);
-
         try {
             const response = await axios.post('study/modify', params);
 
-            console.log(response);
-
-            if (response.data.graph.nodes.length === 0) {
+            if (
+                !response.data.hasOwnProperty('graph') ||
+                response.data.graph.nodes.length === 0
+            ) {
                 this.graphData['isEmpty'] = true;
                 this.store.search.setSearchIsEmpty(true);
             } else {
@@ -688,6 +687,7 @@ export class GraphStore {
         };
         let response;
 
+        console.log(params);
         try {
             response = await axios.post('study', params);
         } catch (error) {
