@@ -190,10 +190,11 @@ export class CoreStore {
 
     getSavedStudies = async () => {
         const params = { user_uuid: this.userUuid };
-
-        await axios.get('study/saved', { params }).then(response => {
-            this.updateStudies(response.data);
-        });
+        if (params.user_uuid) {
+            await axios.get('study/saved', { params }).then(response => {
+                this.updateStudies(response.data);
+            });
+        }
     };
 
     setToastMessage = message => (this.toastInfo.message = message);

@@ -682,15 +682,14 @@ function HomePage() {
                                 zIndex="2"
                                 height="100%"
                                 width="100%"
-                                outline="3px solid"
-                                outlineColor={
+                                boxShadow={
                                     colorMode === 'light'
-                                        ? 'blackAlpha.200'
-                                        : 'whiteAlpha.100'
+                                        ? '0 0 0 3px #64646480'
+                                        : '0 0 0 3px #64646480'
                                 }
                                 transition="all ease-in-out 0.3s"
                                 _groupHover={{
-                                    outlineColor: 'transparent'
+                                    boxShadow: 'none'
                                 }}
                             >
                                 <Tooltip label="Delete study">
