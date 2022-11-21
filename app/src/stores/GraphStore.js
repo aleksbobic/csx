@@ -1159,9 +1159,9 @@ export class GraphStore {
                     this.store.core.studyHistory[
                         this.store.core.studyHistoryItemIndex
                     ].id,
-                charts: this.store.stats.charts[
-                    this.store.search.currentDataset
-                ]
+                charts:
+                    this.store.stats.charts[this.store.search.currentDataset] ||
+                    []
             });
 
             this.store.core.setStudyHistory(response.data.history);
@@ -1266,9 +1266,9 @@ export class GraphStore {
                     this.store.core.studyHistory[
                         this.store.core.studyHistoryItemIndex
                     ].id,
-                charts: this.store.stats.charts[
-                    this.store.search.currentDataset
-                ]
+                charts:
+                    this.store.stats.charts[this.store.search.currentDataset] ||
+                    []
             });
 
             this.store.core.setStudyHistory(response.data.history);

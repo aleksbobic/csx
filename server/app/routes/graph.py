@@ -1,6 +1,5 @@
 from typing import List, cast
 
-import app.services.data.redis as csx_redis
 
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
@@ -68,8 +67,6 @@ def trim_network(
         cache_data = calculate_trimmed_graph(cache_data, entries, "detail")
         if cache_data["overview"] != {}:
             cache_data = calculate_trimmed_graph(cache_data, entries, "overview")
-
-    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
 
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
@@ -159,10 +156,8 @@ def expand_network(
     history_parent_id = data.history_parent_id
     charts = data.charts
 
-    # cache_data = csx_redis.load_current_graph(user_id)
     cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
 
-    ## TODO: load the active history item and based on that do the comparison
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
     if len(values["nodes"]) == 1:

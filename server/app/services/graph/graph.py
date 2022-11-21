@@ -5,7 +5,6 @@ import app.services.data.mongo as csx_data
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
-import app.services.data.redis as csx_redis
 import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
@@ -334,7 +333,7 @@ def get_graph_from_scratch(
         graph_data,
     )
 
-    cache_data = csx_redis.generate_cache_data(
+    cache_data = csx_study.generate_cache_data(
         graph_type,
         cache_data,
         graph_data,
@@ -349,8 +348,7 @@ def get_graph_from_scratch(
         study_id,
     )
 
-    cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
-    from_graph_data(cache_data[graph_type])
+    cache_snapshot = csx_study.enrich_cache_with_ng_graph(cache_data, graph_type)
 
     csx_study.new_history_entry(
         study_id,
@@ -408,8 +406,6 @@ def get_graph_with_new_anchor_props(
         "anchor_property_values"
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
-
-    cache_snapshot = csx_redis.save_current_graph(user_id, cache_data, graph_type)
 
     print(
         "\n\n\n after processing anchor props: ",
@@ -486,15 +482,13 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    cache_snapshot = csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
-
     csx_study.new_history_entry(
         study_id,
         user_id,
         {
             "action": history_action,
             "graph_type": graph_type,
-            "graph_data": pickle.dumps(cache_snapshot),
+            "graph_data": pickle.dumps(cache_data),
             "query": query,
             "action_time": action_time,
             "schema": schema,

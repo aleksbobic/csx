@@ -14,7 +14,6 @@ import app.services.graph.graph as csx_graph
 import app.services.data.mongo as csx_data
 import app.services.data.elastic as csx_es
 import app.services.study.study as csx_study
-import app.services.data.redis as csx_redis
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Q, Search
@@ -292,7 +291,7 @@ def modify_study_graph(data: ModifyStudyData):
     if graph_type == "overview":
         current_dimensions = links + [anchor]
 
-    comparison_res = csx_redis.compare_instances(
+    comparison_res = csx_study.compare_instances(
         cache_data,
         {
             "index": index,

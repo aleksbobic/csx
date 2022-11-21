@@ -9,6 +9,8 @@ services:
       dockerfile: docker/Dockerfile.server
     ports:
       - 8881:80
+    environment:
+      DISABLE_UPLOAD: 'true'
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
   app:
     container_name: csxp_app
@@ -25,10 +27,11 @@ services:
       - elastic
       # - analytics
     environment:
-      REACT_APP_DISABLE_UPLOAD: 'false'
-      REACT_APP_DISABLE_DATASET_LIST: 'false'
-      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'false'
+      REACT_APP_DISABLE_UPLOAD: 'true'
+      REACT_APP_DISABLE_DATASET_LIST: 'true'
+      REACT_APP_DISABLE_DATASET_DOWNLOAD: 'true'
       REACT_APP_DISABLE_ADVANCED_SEARCH: 'false'
+      REACT_APP_DISABLE_TRACKING: 'true'
     # command: bash -c "node server.js"
   # mysql:
   #   image: "mysql:5.7"
@@ -67,14 +70,6 @@ services:
       - ./elasticsearch:/var/lib/elasticsearch/data
     restart: unless-stopped
     container_name: csx_elastic
-  redis:
-    image: redis:7.0.4
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis:/data
-    restart: unless-stopped
-    container_name: csx_redis
   mongo:
     image: mongo:4
     ports:
