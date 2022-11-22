@@ -609,7 +609,7 @@ export class GraphStore {
         let response;
 
         try {
-            response = await axios.post('study', params);
+            response = await axios.post('study/', params);
 
             this.store.stats.setChartListForDataset(response.data.charts);
 
@@ -689,7 +689,7 @@ export class GraphStore {
 
         console.log(params);
         try {
-            response = await axios.post('study', params);
+            response = await axios.post('study/', params);
         } catch (error) {
             this.store.core.setDataIsLoading(false);
             console.log(error);
