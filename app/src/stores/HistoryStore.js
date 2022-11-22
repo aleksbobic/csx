@@ -171,7 +171,7 @@ export class HistoryStore {
             this.store.core.studyHistoryItemIndex
         ].comments.push({ comment: comment, time: comment_time });
 
-        await axios.post('history/comment', params);
+        await axios.post('history/comment/', params);
         this.generateHistoryNodes();
 
         if (!this.store.core.studyIsSaved) {
