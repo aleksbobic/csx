@@ -210,7 +210,9 @@ function AdvancedSearch(props) {
                 width="100%"
                 justifyContent="space-between"
                 alignItems="center"
-                backgroundColor="whiteAlpha.100"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.100'
+                }
                 borderRadius="6px"
                 paddingLeft="10px"
             >
@@ -358,6 +360,11 @@ function AdvancedSearch(props) {
                             placeholder="Workflow name ..."
                             size="sm"
                             variant="filled"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.300'
+                            }
                             borderRadius="6px"
                             value={store.workflow.newWorkflowName}
                             onChange={e =>
@@ -369,8 +376,18 @@ function AdvancedSearch(props) {
                         <InputRightElement>
                             <Tooltip label="Save current workflow">
                                 <IconButton
-                                    backgroundColor="blue.400"
-                                    _hover={{ backgroundColor: 'blue.500' }}
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blue.400'
+                                            : 'whiteAlpha.300'
+                                    }
+                                    _hover={{
+                                        backgroundColor:
+                                            colorMode === 'light'
+                                                ? 'blue.500'
+                                                : 'whiteAlpha.500'
+                                    }}
+                                    role="group"
                                     disabled={!store.workflow.newWorkflowName}
                                     icon={<Check />}
                                     size="sm"

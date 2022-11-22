@@ -20,14 +20,14 @@ function CSX() {
     return (
         <HelmetProvider>
             <Router>
-                <Helmet>
-                    {process?.env.NODE_ENV === 'production' && (
+                {process?.env.REACT_APP_MANDATORY_HTTPS === 'true' && (
+                    <Helmet>
                         <meta
                             http-equiv="Content-Security-Policy"
                             content="upgrade-insecure-requests"
                         />
-                    )}
-                </Helmet>
+                    </Helmet>
+                )}
                 <NavigationPanelComponent />
                 <Box
                     backgroundColor={

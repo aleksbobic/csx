@@ -504,7 +504,13 @@ function HomePage() {
                     display="flex"
                     alignItems="center"
                 >
-                    <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
+                    <Heading
+                        colSpan={2}
+                        size="sm"
+                        opacity="0.76"
+                        width="100%"
+                        textAlign="center"
+                    >
                         Datasets
                     </Heading>
                 </Box>
