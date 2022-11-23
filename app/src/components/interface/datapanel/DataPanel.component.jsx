@@ -38,7 +38,7 @@ import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextr
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
 import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
-import CommentsComponent from 'components/feature/comments/Comments.component';
+import Comments from 'components/feature/comments/Comments.component';
 import historyNode from 'components/feature/historyNode/HistoryNode.component';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
@@ -73,7 +73,6 @@ function DataPanel(props) {
     const [schemaEdges, setSchemaEdges] = useState(
         store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
     );
-    const [commentsVisible, setCommentsVisible] = useState(true);
 
     const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
@@ -648,27 +647,30 @@ function DataPanel(props) {
                     size="sm"
                     variant="soft-rounded"
                     colorScheme="blue"
-                    height={commentsVisible ? '67%' : '100%'}
-                    paddingBottom={commentsVisible ? 0 : '80px'}
+                    height={store.comment.isCommentListVisible ? '67%' : '100%'}
+                    paddingBottom={
+                        store.comment.isCommentListVisible ? 0 : '80px'
+                    }
                     index={activeTab}
                 >
                     {activeTab === 1 && renderTabButtons()}
                     {renderTabPanels()}
                 </Tabs>
                 <Flex
-                    position={commentsVisible ? 'initial' : 'absolute'}
-                    bottom={!commentsVisible && 0}
+                    position={
+                        store.comment.isCommentListVisible
+                            ? 'initial'
+                            : 'absolute'
+                    }
+                    bottom={!store.comment.isCommentListVisible && 0}
                     spacing="10px"
                     width="100%"
-                    height={commentsVisible ? '33%' : '80px'}
+                    height={store.comment.isCommentListVisible ? '33%' : '80px'}
                     padding="20px"
                     paddingTop="0"
-                    paddingRight={!commentsVisible && 22}
+                    paddingRight={!store.comment.isCommentListVisible && 22}
                 >
-                    <CommentsComponent
-                        commentsVisible={commentsVisible}
-                        setCommentsVisible={setCommentsVisible}
-                    />
+                    <Comments />
                 </Flex>
             </Box>
         </Box>

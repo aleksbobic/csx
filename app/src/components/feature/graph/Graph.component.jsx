@@ -19,8 +19,8 @@ function Graph(props) {
     const { width, height } = useResizeDetector({ containerRef });
 
     const [windowSize, setWindowSize] = useState({
-        width: undefined,
-        height: undefined
+        width: window.innerWidth,
+        height: window.innerHeight
     });
 
     const [graphContainerElement, setGraphContainerElement] = useState(null);

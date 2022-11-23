@@ -13,6 +13,7 @@ import { WorkflowStore } from './WorkflowStore';
 import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
 import { HistoryStore } from './HistoryStore';
+import { CommentStore } from './CommentStore';
 
 export class RootStore {
     surveyLink = null;
@@ -32,6 +33,7 @@ export class RootStore {
         this.fileUpload = new FileUploadStore(this);
         this.stats = new StatsStore(this);
         this.history = new HistoryStore(this);
+        this.comment = new CommentStore(this);
         this.getSurveyLink();
     }
 
