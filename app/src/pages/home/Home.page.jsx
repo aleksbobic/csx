@@ -1138,7 +1138,7 @@ function HomePage() {
                         src={`data:image/jpeg;base64,${emptySearchImage}`}
                         height="70px"
                         filter="grayscale(100%) contrast(150%)"
-                        opacity="0.5"
+                        opacity={colorMode === 'light' ? '0.7' : '0.5'}
                         style={{ marginTop: '25px', marginBottom: '25px' }}
                     />
                 )}
