@@ -1,17 +1,19 @@
 import {
-    Center,
+    Box,
     IconButton,
     InputGroup,
     InputRightElement,
     Select,
+    Tag,
+    Text,
     useColorMode
 } from '@chakra-ui/react';
+import { LightBulbIcon } from '@heroicons/react/20/solid';
 import { Database, Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -47,7 +49,7 @@ function SearchBar(props) {
     };
 
     return (
-        <Center style={props.style}>
+        <Box style={props.style}>
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
@@ -158,7 +160,45 @@ function SearchBar(props) {
                     </Form>
                 )}
             </Formik>
-        </Center>
+
+            {store.search.default_search_features &&
+                store.search.default_search_features.length > 0 && (
+                    <Text
+                        fontSize="xs"
+                        textAlign="center"
+                        marginTop="10px"
+                        color={
+                            colorMode === 'light'
+                                ? 'blackAlpha.500'
+                                : 'whiteAlpha.500'
+                        }
+                        fontWeight="bold"
+                        role="group"
+                    >
+                        <LightBulbIcon
+                            width="12px"
+                            style={{
+                                display: 'inline',
+                                marginBottom: '-2px',
+                                marginRight: '2px'
+                            }}
+                        />
+                        Hint: This dataset can be searched by the values in its{' '}
+                        <Tag
+                            size="sm"
+                            opacity="0.7"
+                            marginRight="4px"
+                            marginLeft="1px"
+                            marginTop="-2px"
+                        >
+                            {store.search.default_search_features
+                                .join(', ')
+                                .toLowerCase()}
+                        </Tag>
+                        field.
+                    </Text>
+                )}
+        </Box>
     );
 }
 
