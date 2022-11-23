@@ -53,13 +53,13 @@ function CommentTextArea(props) {
     const submitComment = () => {
         if (comment.trim() !== '') {
             if (store.comment.editMode) {
-                store.history.editComment(
+                store.comment.editComment(
                     comment.trim(),
                     store.comment.editCommentIndex
                 );
                 exitEditMode();
             } else {
-                store.history.addComment(comment.trim());
+                store.comment.addComment(comment.trim());
                 setComment('');
             }
         }
@@ -71,10 +71,10 @@ function CommentTextArea(props) {
         if (
             submitCommentKey &&
             comment.trim() !== '' &&
-            !store.history.commentTrigger
+            !store.comment.commentTrigger
         ) {
             if (store.comment.editMode) {
-                store.history.editComment(
+                store.comment.editComment(
                     comment.trim(),
                     store.comment.editCommentIndex
                 );
@@ -83,7 +83,7 @@ function CommentTextArea(props) {
                 setComment('');
                 commentField.current.blur();
             } else {
-                store.history.addComment(comment.trim());
+                store.comment.addComment(comment.trim());
                 setComment('');
             }
         }
@@ -336,8 +336,8 @@ function CommentTextArea(props) {
                                 : 'whiteAlpha.100'
                         }
                         value={comment}
-                        onFocus={() => store.history.setCommentTrigger(false)}
-                        onBlur={() => store.history.setCommentTrigger(true)}
+                        onFocus={() => store.comment.setCommentTrigger(false)}
+                        onBlur={() => store.comment.setCommentTrigger(true)}
                         onChange={e => setComment(e.target.value)}
                     />
                     {store.comment.editMode && (

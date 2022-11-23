@@ -129,7 +129,7 @@ function CommentComponent(props) {
                     size="sm"
                     variant="ghost"
                     onClick={() =>
-                        store.history.deleteCommnet(props.commentIndex)
+                        store.comment.deleteCommnet(props.commentIndex)
                     }
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     icon={

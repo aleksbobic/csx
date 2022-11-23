@@ -148,7 +148,7 @@ function GraphPage() {
         if (
             openCommentModalKey &&
             !store.core.showCommentModal &&
-            store.history.commentTrigger
+            store.comment.commentTrigger
         ) {
             store.core.setShowCommentModal(true);
         }
@@ -160,8 +160,8 @@ function GraphPage() {
     }, [
         closeCommentModalKey,
         openCommentModalKey,
+        store.comment.commentTrigger,
         store.core,
-        store.history.commentTrigger,
         submitCommentModalKey
     ]);
 
@@ -174,16 +174,22 @@ function GraphPage() {
         if (
             submitCommentModalKey &&
             comment !== '' &&
-            store.history.commentTrigger
+            store.comment.commentTrigger
         ) {
-            store.history.addComment(comment);
+            store.comment.addComment(comment);
             closeCommentModal();
         }
-    }, [closeCommentModal, comment, store.history, submitCommentModalKey]);
+    }, [
+        closeCommentModal,
+        comment,
+        store.comment.commentTrigger,
+        store.history,
+        submitCommentModalKey
+    ]);
 
     const submitComment = () => {
         if (comment !== '') {
-            store.history.addComment(comment);
+            store.comment.addComment(comment);
             setComment('');
             closeCommentModal();
         }
