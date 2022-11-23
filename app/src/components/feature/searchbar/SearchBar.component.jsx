@@ -48,6 +48,37 @@ function SearchBar(props) {
         ));
     };
 
+    const renderSearchHint = () => (
+        <Text
+            fontSize="xs"
+            textAlign="center"
+            marginTop="10px"
+            color={colorMode === 'light' ? 'blackAlpha.500' : 'whiteAlpha.500'}
+            fontWeight="bold"
+            role="group"
+        >
+            <LightBulbIcon
+                width="12px"
+                style={{
+                    display: 'inline',
+                    marginBottom: '-2px',
+                    marginRight: '2px'
+                }}
+            />
+            Hint: This dataset can be searched by the values in its{' '}
+            <Tag
+                size="sm"
+                opacity="0.7"
+                marginRight="4px"
+                marginLeft="1px"
+                marginTop="-2px"
+            >
+                {store.search.default_search_features.join(', ').toLowerCase()}
+            </Tag>
+            field.
+        </Text>
+    );
+
     return (
         <Box style={props.style}>
             <Formik
@@ -162,42 +193,8 @@ function SearchBar(props) {
             </Formik>
 
             {store.search.default_search_features &&
-                store.search.default_search_features.length > 0 && (
-                    <Text
-                        fontSize="xs"
-                        textAlign="center"
-                        marginTop="10px"
-                        color={
-                            colorMode === 'light'
-                                ? 'blackAlpha.500'
-                                : 'whiteAlpha.500'
-                        }
-                        fontWeight="bold"
-                        role="group"
-                    >
-                        <LightBulbIcon
-                            width="12px"
-                            style={{
-                                display: 'inline',
-                                marginBottom: '-2px',
-                                marginRight: '2px'
-                            }}
-                        />
-                        Hint: This dataset can be searched by the values in its{' '}
-                        <Tag
-                            size="sm"
-                            opacity="0.7"
-                            marginRight="4px"
-                            marginLeft="1px"
-                            marginTop="-2px"
-                        >
-                            {store.search.default_search_features
-                                .join(', ')
-                                .toLowerCase()}
-                        </Tag>
-                        field.
-                    </Text>
-                )}
+                store.search.default_search_features.length > 0 &&
+                renderSearchHint()}
         </Box>
     );
 }

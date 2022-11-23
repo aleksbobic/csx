@@ -629,10 +629,12 @@ export class GraphStore {
 
             this.store.core.setCurrentGraph(historyGraphType);
 
-            this.store.search.links =
+            this.store.search.setLinks(
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex
-                ].links;
+                ].links
+            );
+
             this.store.search.anchor =
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex
@@ -722,10 +724,12 @@ export class GraphStore {
 
             this.store.core.setCurrentGraph(historyGraphType);
 
-            this.store.search.links =
+            this.store.search.setLinks(
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex
-                ].links;
+                ].links
+            );
+
             this.store.search.anchor =
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex

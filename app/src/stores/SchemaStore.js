@@ -435,8 +435,8 @@ export class SchemaStore {
 
     setLink = (link, nodeId) => {
         if (this.store.search.links.includes(link)) {
-            this.store.search.links = this.store.search.links.filter(
-                entry => entry !== link
+            this.store.search.setLinks(
+                this.store.search.links.filter(entry => entry !== link)
             );
 
             this.data = this.data.map(entry => {

@@ -365,7 +365,7 @@ function CommentTextArea(props) {
                         zIndex="2"
                         borderRadius="4px"
                         transition="0.2s all ease-in-out"
-                        color={colorMode === 'light' ? 'white' : 'black'}
+                        color={'white'}
                         _hover={{ backgroundColor: 'blue.500' }}
                         onClick={submitComment}
                         isDisabled={comment.trim() === ''}
@@ -374,7 +374,8 @@ function CommentTextArea(props) {
                                 colorMode === 'light'
                                     ? 'blackAlpha.400'
                                     : 'gray',
-                            cursor: 'not-allowed'
+                            cursor: 'not-allowed',
+                            opacity: 0.3
                         }}
                     >
                         {store.comment.editMode ? 'Save edits' : 'Comment'}
