@@ -489,6 +489,13 @@ function HomePage() {
     );
 
     const renderDatasetGrid = () => {
+        if (
+            process?.env.REACT_APP_DISABLE_DATASET_LIST === 'true' &&
+            process?.env.REACT_APP_DISABLE_UPLOAD === 'true'
+        ) {
+            return <></>;
+        }
+
         return (
             <VStack marginTop="40px">
                 <Box
