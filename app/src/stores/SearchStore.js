@@ -246,4 +246,9 @@ export class SearchStore {
             return [];
         }
     };
+
+    getRandomImage = async () => {
+        const response = await axios.get('file/randomimage');
+        return response.data;
+    };
 }

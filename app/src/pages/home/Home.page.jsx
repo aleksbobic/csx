@@ -41,6 +41,7 @@ import {
     Toolbox,
     TrashEmpty
 } from 'css.gg';
+
 import logo from 'images/logo.png';
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -51,11 +52,14 @@ import { useBeforeunload } from 'react-beforeunload';
 import { useDropzone } from 'react-dropzone';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { LightBulbIcon } from '@heroicons/react/20/solid';
 import './Home.scss';
 
 function HomePage() {
     const toast = useToast();
     const cookieToast = useToast();
+    const [emptySearchImage, setEmptySearchImage] = useState(null);
+    const [emptySearchAnimalType, setEmptySearchAnimalType] = useState(null);
 
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
@@ -127,6 +131,9 @@ function HomePage() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         onClick={() => {
+                            store.search.setSearchIsEmpty(false);
+                            setEmptySearchImage(null);
+                            setEmptySearchAnimalType(null);
                             setShowCookies(true);
                             store.core.setHideCookieBanner();
                             cookieToast.closeAll();
@@ -137,7 +144,7 @@ function HomePage() {
                 </HStack>
             </Box>
         ),
-        [cookieToast, store.core]
+        [cookieToast, store.core, store.search]
     );
 
     const renderLightCookie = useCallback(
@@ -277,7 +284,7 @@ function HomePage() {
 
     useEffect(() => {
         store.track.trackPageChange();
-        store.search.setSearchIsEmpty(false);
+        // store.search.setSearchIsEmpty(false);
         store.graph.resetDetailGraphData();
         store.graph.resetGraphData();
         store.core.updateIsStudySaved(false);
@@ -471,7 +478,12 @@ function HomePage() {
                         fontWeight="bold"
                         _hover={{ opacity: 1 }}
                         height="21px"
-                        onClick={() => setShowCookies(true)}
+                        onClick={() => {
+                            store.search.setSearchIsEmpty(false);
+                            setEmptySearchImage(null);
+                            setEmptySearchAnimalType(null);
+                            setShowCookies(true);
+                        }}
                     >
                         Cookies & local storage
                     </Button>
@@ -1059,6 +1071,103 @@ function HomePage() {
         );
     };
 
+    const renderEmptySearch = () => {
+        if (!emptySearchImage) {
+            store.search.getRandomImage().then(response => {
+                setEmptySearchImage(response.image);
+                setEmptySearchAnimalType(response.animal);
+            });
+        }
+
+        return (
+            <VStack
+                marginTop="40px"
+                padding="40px"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
+                }
+                borderRadius="12px"
+                position="relative"
+            >
+                <Button
+                    leftIcon={
+                        <ChevronLeft
+                            style={{ '--ggs': 0.6, marginRight: '-4px' }}
+                        />
+                    }
+                    position="absolute"
+                    top="20px"
+                    left="20px"
+                    size="xs"
+                    paddingLeft="0"
+                    variant="ghost"
+                    _hover={{
+                        backgroundColor:
+                            colorMode === 'light'
+                                ? 'blackAlpha.100'
+                                : 'whiteAlpha.100'
+                    }}
+                    onClick={() => {
+                        store.search.setSearchIsEmpty(false);
+                        setEmptySearchImage(null);
+                        setEmptySearchAnimalType(null);
+                    }}
+                >
+                    Back
+                </Button>
+                <Heading textAlign="center" size="md">
+                    No results
+                </Heading>
+                <Text
+                    textAlign="center"
+                    color={
+                        colorMode === 'light'
+                            ? 'blackAlpha.500'
+                            : 'whiteAlpha.500'
+                    }
+                    fontSize="xs"
+                    fontWeight="bold"
+                    width="70%"
+                >
+                    It seems like there's no results for your query. Here's a
+                    cute tiny {emptySearchAnimalType} to make you feel better:
+                </Text>
+                {emptySearchImage && (
+                    <Image
+                        // src={searchImage1}
+                        src={`data:image/jpeg;base64,${emptySearchImage}`}
+                        height="70px"
+                        filter="grayscale(100%) contrast(150%)"
+                        opacity="0.5"
+                        style={{ marginTop: '25px', marginBottom: '25px' }}
+                    />
+                )}
+                <Text
+                    textAlign="center"
+                    color={
+                        colorMode === 'light'
+                            ? 'blackAlpha.500'
+                            : 'whiteAlpha.500'
+                    }
+                    fontSize="xs"
+                    fontWeight="bold"
+                    width="70%"
+                >
+                    <LightBulbIcon
+                        width="12px"
+                        style={{
+                            display: 'inline',
+                            marginRight: '2px'
+                        }}
+                    />{' '}
+                    If you don't see any suggestions for your search it's most
+                    likely going to end up being empty. Don't give up try again!
+                    There's also a helpful hint bellow the search bar.
+                </Text>
+            </VStack>
+        );
+    };
+
     return (
         <Box
             className="App"
@@ -1095,19 +1204,31 @@ function HomePage() {
                     />
                 )}
 
-                <Fade in={!showCookies}>
-                    {!showCookies && renderDatasetGrid()}
-                </Fade>
+                {store.search.searchIsEmpty && (
+                    <Fade in={store.search.searchIsEmpty}>
+                        {renderEmptySearch()}
+                    </Fade>
+                )}
 
-                <Fade in={showCookies}>
-                    {showCookies && renderCookieInfo()}
-                </Fade>
+                {!store.search.searchIsEmpty && (
+                    <Fade in={!showCookies}>
+                        {!showCookies && renderDatasetGrid()}
+                    </Fade>
+                )}
 
-                <Fade in={!showCookies}>
-                    {store.core.studies.length > 0 &&
-                        !showCookies &&
-                        renderStudyGrid()}
-                </Fade>
+                {!store.search.searchIsEmpty && (
+                    <Fade in={showCookies && !store.search.searchIsEmpty}>
+                        {showCookies && renderCookieInfo()}
+                    </Fade>
+                )}
+
+                {!store.search.searchIsEmpty && (
+                    <Fade in={!showCookies}>
+                        {store.core.studies.length > 0 &&
+                            !showCookies &&
+                            renderStudyGrid()}
+                    </Fade>
+                )}
             </Container>
             {renderFooter()}
         </Box>

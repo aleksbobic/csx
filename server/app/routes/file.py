@@ -12,6 +12,8 @@ import app.services.data.autocomplete as csx_auto
 import pandas as pd
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, UploadFile
+import base64
+import random
 
 router = APIRouter()
 
@@ -43,6 +45,30 @@ def uploadfile(file: UploadFile):
 
         return {"name": file.filename.rpartition(".")[0], "columns": columns}
     return {}
+
+
+@router.get("/randomimage", responses={200: {"content": {"image/png": {}}}})
+def get_random_image():
+    image_number = random.randint(1, 10)
+
+    num_to_animal = {
+        1: "parrot",
+        2: "dog",
+        3: "bird",
+        4: "dog",
+        5: "dog",
+        6: "bunny",
+        7: "dog",
+        8: "cat",
+        9: "dog",
+        10: "cat",
+    }
+
+    with open(f"./app/data/images/{image_number}.png", "rb") as f:
+        base64image = base64.b64encode(f.read())
+    return {"image": base64image, "animal": num_to_animal[image_number]}
+
+    # return FileResponse(f"./app/data/images/{1}.png", media_type="image/png")
 
 
 def get_default_visible_dimensions(defaults):
