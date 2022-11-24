@@ -9,15 +9,15 @@ export class TrackingStore {
             process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
             this.store.core.trackingEnabled
         ) {
-            window._paq = window._paq || [];
-            window._paq.push(['trackPageView']);
-            window._paq.push(['enableLinkTracking']);
-
             this.initTracking();
         }
     }
 
     initTracking = () => {
+        window._paq = window._paq || [];
+        window._paq.push(['trackPageView']);
+        window._paq.push(['enableLinkTracking']);
+
         const url = `//${window.location.hostname}:8883/`;
 
         window._paq.push(['setTrackerUrl', url + 'matomo.php']);

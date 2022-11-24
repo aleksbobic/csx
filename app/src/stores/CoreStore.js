@@ -23,6 +23,7 @@ export class CoreStore {
     hideCookieBanner = false;
     trackingEnabled = false;
     colorMode = null;
+    showCookieInfo = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -39,11 +40,14 @@ export class CoreStore {
         }
         this.getSavedStudies();
         this.hideCookieBanner = this.getCookieBanner();
-        this.trackingEnabled = localStorage.getItem('trackingenabled');
+        this.trackingEnabled =
+            localStorage.getItem('trackingenabled') === 'true';
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setShowCookieInfo = val => (this.showCookieInfo = val);
 
     setDataIsLoading = val => (this.dataIsLoading = val);
 
@@ -120,7 +124,7 @@ export class CoreStore {
         this.trackingEnabled = val;
         localStorage.setItem('trackingenabled', val);
         if (val) {
-            this.store.tracking.initTracking();
+            this.store.track.initTracking();
         }
     };
 
