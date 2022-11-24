@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
 
 export class CoreStore {
     availableDatasets = [];
@@ -10,6 +11,19 @@ export class CoreStore {
     errorDetails = null;
     currentGraph = '';
     userUuid = null;
+    studyUuid = null;
+    studyName = '';
+    studyDescription = '';
+    studyHistory = [];
+    studyHistoryItemIndex = 0;
+    studyIsSaved = false;
+    showCommentModal = false;
+    studies = [];
+    dataIsLoading = false;
+    hideCookieBanner = false;
+    trackingEnabled = false;
+    colorMode = null;
+    showCookieInfo = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -24,15 +38,167 @@ export class CoreStore {
         if (!this.userUuid) {
             this.generateUUID();
         }
+        this.getSavedStudies();
+        this.hideCookieBanner = this.getCookieBanner();
+        this.trackingEnabled =
+            localStorage.getItem('trackingenabled') === 'true';
+        this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setShowCookieInfo = val => (this.showCookieInfo = val);
+
+    setDataIsLoading = val => (this.dataIsLoading = val);
+
+    setShowCommentModal = val => (this.showCommentModal = val);
+
+    updateIsStudySaved = val => (this.studyIsSaved = val);
+
+    updateStudies = val => (this.studies = val);
+
+    setStudyName = name => (this.studyName = name);
+
+    setColorMode = val => (this.colorMode = val);
+
+    setStudyDescription = description => (this.studyDescription = description);
+    setStudyUuid = id => {
+        this.studyUuid = id;
+        localStorage.setItem('studyuuid', id);
+    };
+
+    setStudyQuery = () => {
+        this.store.search.setSearchQuery(
+            this.studyHistory[this.studyHistoryItemIndex].query
+        );
+    };
+
+    setStudyHistory = history => (this.studyHistory = history);
+
+    setStudyHistoryItemIndex = index => (this.studyHistoryItemIndex = index);
+
+    setStudyHistoryItemIndexById = id => {
+        for (let i = 0; i < this.studyHistory.length; i++) {
+            if (this.studyHistory[i].id === id) {
+                this.setStudyHistoryItemIndex(i);
+                break;
+            }
+        }
+    };
+
+    updateStudyName = async name => {
+        this.studyName = name;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription
+        };
+
+        await axios.get('study/update', { params }).then(() => {
+            this.updateIsStudySaved(true);
+            this.getSavedStudies();
+        });
+    };
+
+    updateStudyDescription = async description => {
+        this.studyDescription = description;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription
+        };
+
+        console.log(params);
+
+        await axios.get('study/update', { params }).then(() => {
+            this.updateIsStudySaved(true);
+            this.getSavedStudies();
+        });
+    };
+
+    setTrackingEnabled = val => {
+        this.trackingEnabled = val;
+        localStorage.setItem('trackingenabled', val);
+        if (val) {
+            this.store.track.initTracking();
+        }
+    };
+
+    setHideCookieBanner = () => {
+        this.hideCookieBanner = true;
+        localStorage.setItem('hidecookiebanner', true);
+    };
+
+    getCookieBanner = () => {
+        return localStorage.getItem('hidecookiebanner');
+    };
 
     generateUUID = async () => {
         await axios.get('util/uuid').then(response => {
             localStorage.setItem('useruuid', response.data);
             this.userUuid = response.data;
         });
+    };
+
+    generateStudyUUID = async () => {
+        this.studyName = uniqueNamesGenerator({
+            dictionaries: [colors, animals],
+            separator: ' ',
+            length: 2,
+            seed: this.studyUuid
+        });
+
+        this.studyDescription = '';
+
+        const params = { user_uuid: this.userUuid, study_name: this.studyName };
+
+        await axios.get('study/generate', { params }).then(response => {
+            localStorage.setItem('studyuuid', response.data);
+            this.studyUuid = response.data;
+            this.setStudyHistory([]);
+            this.setStudyHistoryItemIndex(0);
+        });
+    };
+
+    deleteStudy = studyUuid => {
+        if (!this.studyIsSaved || studyUuid) {
+            const params = {
+                study_uuid: studyUuid ? studyUuid : this.studyUuid,
+                user_uuid: this.userUuid
+            };
+
+            if (params.study_uuid) {
+                if (studyUuid) {
+                    axios.get('study/delete', { params }).then(() => {
+                        this.getSavedStudies();
+                    });
+                } else {
+                    axios.get('study/delete', { params });
+                }
+            }
+        }
+    };
+
+    saveStudy = () => {
+        const params = {
+            study_uuid: this.studyUuid,
+            user_uuid: this.userUuid
+        };
+        axios.get('study/save', { params });
+        this.updateIsStudySaved(true);
+    };
+
+    getSavedStudies = async () => {
+        const params = { user_uuid: this.userUuid };
+        if (params.user_uuid) {
+            await axios.get('study/saved', { params }).then(response => {
+                this.updateStudies(response.data);
+            });
+        }
     };
 
     setToastMessage = message => (this.toastInfo.message = message);
@@ -86,14 +252,15 @@ export class CoreStore {
     }
 
     handleError = error => {
-        console.log(error);
-        this.errorMessage = error;
+        console.log(error.toString());
 
         if (error.response) {
             this.errorDetails = `${error.response.data} ${error.response.status} ${error.response.headers}`;
             console.log('data ', error.response.data);
             console.log('status ', error.response.status);
             console.log('headers ', error.response.headers);
+        } else {
+            this.errorDetails = error.toString();
         }
     };
 }

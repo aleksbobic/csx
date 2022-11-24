@@ -12,35 +12,63 @@ import app.services.data.autocomplete as csx_auto
 import pandas as pd
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, UploadFile
+import base64
+import random
 
 router = APIRouter()
 
 
 @router.post("/upload")
 def uploadfile(file: UploadFile):
-    data = pd.read_csv(file.file, lineterminator="\n")
+    if os.getenv("DISABLE_UPLOAD") != "true":
+        data = pd.read_csv(file.file, lineterminator="\n")
 
-    columns = data.dtypes.to_dict()
+        columns = data.dtypes.to_dict()
 
-    for column in list(columns.keys()):
-        if columns[column] == object:
-            if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
-                columns[column] = "list"
-            elif len(data.index) > 20 and len(list(data[column].unique())) < 10:
-                columns[column] = "category"
+        for column in list(columns.keys()):
+            if columns[column] == object:
+                if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
+                    columns[column] = "list"
+                elif len(data.index) > 20 and len(list(data[column].unique())) < 10:
+                    columns[column] = "category"
+                else:
+                    columns[column] = "string"
+            elif isinstance(columns[column], float):
+                columns[column] = "float"
             else:
-                columns[column] = "string"
-        elif isinstance(columns[column], float):
-            columns[column] = "float"
-        else:
-            columns[column] = "integer"
+                columns[column] = "integer"
 
-    if not os.path.exists("./app/data/files"):
-        os.makedirs("./app/data/files")
+        if not os.path.exists("./app/data/files"):
+            os.makedirs("./app/data/files")
 
-    data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
+        data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
-    return {"name": file.filename.rpartition(".")[0], "columns": columns}
+        return {"name": file.filename.rpartition(".")[0], "columns": columns}
+    return {}
+
+
+@router.get("/randomimage", responses={200: {"content": {"image/png": {}}}})
+def get_random_image():
+    image_number = random.randint(1, 10)
+
+    num_to_animal = {
+        1: "parrot",
+        2: "dog",
+        3: "bird",
+        4: "dog",
+        5: "dog",
+        6: "bunny",
+        7: "dog",
+        8: "cat",
+        9: "dog",
+        10: "cat",
+    }
+
+    with open(f"./app/data/images/{image_number}.png", "rb") as f:
+        base64image = base64.b64encode(f.read())
+    return {"image": base64image, "animal": num_to_animal[image_number]}
+
+    # return FileResponse(f"./app/data/images/{1}.png", media_type="image/png")
 
 
 def get_default_visible_dimensions(defaults):

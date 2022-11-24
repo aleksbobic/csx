@@ -18,19 +18,21 @@ import {
     Tag,
     Text,
     Tooltip,
+    useColorMode,
     useColorModeValue,
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
+import { ArrowsPointingOutIcon, ScissorsIcon } from '@heroicons/react/20/solid';
 import SettingsComponent from 'components/feature/settings/Settings.component';
+import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
-    Controller,
     DisplayFullwidth,
-    EditStraight,
     Eye,
     FormatSeparator,
+    Info,
     LayoutPin,
     LivePhoto,
     MediaLive,
@@ -38,12 +40,10 @@ import {
     PathIntersect,
     RadioChecked
 } from 'css.gg';
+import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import queryString from 'query-string';
-import { schemeYlOrRd } from 'd3-scale-chromatic';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -54,7 +54,7 @@ function ControlPanel() {
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [originNodeExists, setOriginNodeExists] = useState(false);
-    const location = useLocation();
+    const { colorMode } = useColorMode();
 
     const selfCentricMenuBackground = useColorModeValue(
         'whiteAlpha.800',
@@ -215,12 +215,9 @@ function ControlPanel() {
         onOpen();
     }, [onOpen]);
 
-    const getQueryString = param => queryString.parse(location.search)[param];
-
     const expandGraph = connector => {
         store.graph.expandNetwork(
             store.graph.currentGraphData.selectedNodes,
-            getQueryString('suuid'),
             connector
         );
         store.contextMenu.hideContextMenu();
@@ -234,9 +231,12 @@ function ControlPanel() {
             left="320px"
             zIndex={20}
             spacing="2"
-            backgroundColor={selfCentricMenuBackground}
+            backgroundColor={
+                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
+            }
             padding="5px 6px"
             borderRadius="8px"
+            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
         >
             <HStack spacing="1">
                 <Tooltip label="Trim network">
@@ -244,49 +244,55 @@ function ControlPanel() {
                         borderRadius="6px"
                         id="trimnetworkbutton"
                         size="sm"
-                        icon={<EditStraight style={{ '--ggs': '0.6' }} />}
+                        icon={<ScissorsIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.graph.trimNetwork();
                         }}
                     />
                 </Tooltip>
-                <Menu style={{ zIndex: 40 }}>
-                    <Tooltip label="Expand network">
-                        <MenuButton
-                            disabled={
-                                !store.graph.currentGraphData.selectedNodes
-                                    .length
-                            }
-                            as={IconButton}
-                            borderRadius="6px"
-                            id="trimnetworkbutton"
-                            size="sm"
-                            icon={<Controller style={{ '--ggs': '0.6' }} />}
-                        />
-                    </Tooltip>
-                    <MenuList
-                        backgroundColor="black"
-                        padding="5px"
-                        borderRadius="10px"
-                    >
-                        <MenuItem
-                            fontSize="xs"
-                            fontWeight="bold"
-                            borderRadius="6px"
-                            onClick={() => expandGraph('or')}
+                <Box>
+                    <Menu style={{ zIndex: 40 }}>
+                        <Tooltip label="Expand network">
+                            <MenuButton
+                                disabled={
+                                    !store.graph.currentGraphData.selectedNodes
+                                        .length
+                                }
+                                as={IconButton}
+                                borderRadius="6px"
+                                id="trimnetworkbutton"
+                                size="sm"
+                                icon={
+                                    <ArrowsPointingOutIcon
+                                        style={{ width: '16px' }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                        <MenuList
+                            backgroundColor="black"
+                            padding="5px"
+                            borderRadius="10px"
                         >
-                            Wide Expand
-                        </MenuItem>
-                        <MenuItem
-                            fontSize="xs"
-                            fontWeight="bold"
-                            borderRadius="6px"
-                            onClick={() => expandGraph('and')}
-                        >
-                            Narrow Expand
-                        </MenuItem>
-                    </MenuList>
-                </Menu>
+                            <MenuItem
+                                fontSize="xs"
+                                fontWeight="bold"
+                                borderRadius="6px"
+                                onClick={() => expandGraph('or')}
+                            >
+                                Wide Expand
+                            </MenuItem>
+                            <MenuItem
+                                fontSize="xs"
+                                fontWeight="bold"
+                                borderRadius="6px"
+                                onClick={() => expandGraph('and')}
+                            >
+                                Narrow Expand
+                            </MenuItem>
+                        </MenuList>
+                    </Menu>
+                </Box>
             </HStack>
         </HStack>
     );
@@ -299,9 +305,12 @@ function ControlPanel() {
             left="320px"
             zIndex={20}
             spacing="2"
-            backgroundColor={selfCentricMenuBackground}
+            backgroundColor={
+                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
+            }
             padding="5px 6px"
             borderRadius="8px"
+            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
         >
             <HStack spacing="1">
                 <Tooltip label="Show all nodes">
@@ -529,6 +538,40 @@ function ControlPanel() {
                             store.track.trackEvent(
                                 'controls panel',
                                 'button click',
+                                'show study info'
+                            );
+                        }}
+                        padding="8px"
+                        style={
+                            isOpen
+                                ? {}
+                                : {
+                                      color: tabInactiveColors,
+                                      borderColor: 'transparent'
+                                  }
+                        }
+                    >
+                        <Tooltip label="Study info">
+                            <Box
+                                id="viewsettingstab"
+                                width="100%"
+                                height="100%"
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Info />
+                            </Box>
+                        </Tooltip>
+                    </Tab>
+                    <Tab
+                        width="50px"
+                        height="50px"
+                        onClick={() => {
+                            openSliderIfClosed();
+                            store.track.trackEvent(
+                                'controls panel',
+                                'button click',
                                 'show view controls'
                             );
                         }}
@@ -578,6 +621,13 @@ function ControlPanel() {
                         borderColor={edgeColor}
                         position="relative"
                     >
+                        <TabPanel
+                            width="250px"
+                            overflowY="scroll"
+                            height="100%"
+                        >
+                            <StudyInfoComponent />
+                        </TabPanel>
                         <TabPanel
                             width="250px"
                             overflowY="scroll"

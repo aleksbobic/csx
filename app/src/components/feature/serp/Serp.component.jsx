@@ -1,57 +1,70 @@
-import { Box, IconButton, Text, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    IconButton,
+    Text,
+    Tooltip,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowRight } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
 import { useContext, useEffect, useRef, useState } from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { RootStoreContext } from 'stores/RootStore';
+import { useResizeDetector } from 'react-resize-detector';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
 
     const [listData, setListData] = useState([]);
+    const [listSizes, setListSizes] = useState([]);
     const [timer, setTimer] = useState(null);
 
-    const scrollTableContainerRefrence = useRef(null);
-    const listElement = useRef(null);
+    const listContainerRefrence = useRef(null);
+    const listItemRefrences = useRef([]);
+    const { width, height } = useResizeDetector({ listContainerRefrence });
 
-    const rowVirtualizer = useVirtualizer({
+    const { colorMode } = useColorMode();
+
+    const listVirtualizer = useVirtualizer({
         count: listData.length,
-        getScrollElement: () => scrollTableContainerRefrence.current,
-        estimateSize: () => 125
+        getScrollElement: () => listContainerRefrence.current,
+        estimateSize: index => (listSizes[index] ? listSizes[index] : 125),
+        measureElement: ({ index }) => listSizes[index]
     });
 
     const recalculateSizes = () => {
-        rowVirtualizer.measure();
-        rowVirtualizer
-            .getVirtualItems()
-            .map((item, index) =>
-                item.measureElement(
-                    listElement.current.children[index].children[0]
-                )
-            );
+        listVirtualizer.getVirtualItems().forEach(item => {
+            listSizes[item.index] =
+                listItemRefrences.current[item.index].firstChild.clientHeight +
+                10;
+        });
+        listVirtualizer.measure();
     };
 
     useEffect(() => {
         setListData(props.data);
+
         setTimeout(() => {
-            rowVirtualizer.measure();
-            rowVirtualizer
-                .getVirtualItems()
-                .map((item, index) =>
-                    item.measureElement(
-                        listElement.current.children[index].children[0]
-                    )
-                );
+            const newSizes = Array(props.data.length);
+
+            listVirtualizer.getVirtualItems().forEach(item => {
+                newSizes[item.index] =
+                    listItemRefrences.current[item.index].firstChild
+                        .clientHeight + 10;
+            });
+
+            setListSizes(newSizes);
+            listVirtualizer.measure();
         }, 100);
-    }, [props.data, rowVirtualizer, props.visibleProperties]);
+    }, [props.data, listVirtualizer, props.visibleProperties]);
 
     useEffect(() => {
         const resizeSERP = () => {
             clearTimeout(timer);
-            setTimer(setTimeout(recalculateSizes, 100));
+            setTimer(setTimeout(recalculateSizes, 50));
         };
         window.addEventListener('resize', resizeSERP);
 
@@ -149,20 +162,25 @@ function Serp(props) {
     };
     const renderResult = (index, key) => {
         const propertyObjects = props.visibleProperties.map(
-            (feature, feature_index) =>
-                getDataComponent(
+            (feature, feature_index) => {
+                return getDataComponent(
                     feature,
                     listData[index][feature],
                     index,
                     feature_index
-                )
+                );
+            }
         );
 
         return (
             <Box width="100%" paddingBottom="10px">
                 <VStack
                     key={key}
-                    backgroundColor="whiteAlpha.100"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'whiteAlpha.100'
+                    }
                     width="100%"
                     padding="20px"
                     paddingBottom="30px"
@@ -202,57 +220,60 @@ function Serp(props) {
     };
 
     return (
-        <VStack
-            height="100%"
-            width="100%"
-            marginTop="20px"
-            paddingBottom="10px"
-        >
-            <Box height="100%" width="100%">
-                <AutoSizer height="100%" width="100%">
-                    {({ height, width }) => (
-                        <Box
-                            ref={scrollTableContainerRefrence}
-                            style={{
-                                height: height,
-                                width: width,
-                                overflow: 'auto'
-                            }}
-                        >
-                            <div
-                                ref={listElement}
-                                style={{
-                                    height: rowVirtualizer.getTotalSize(),
-                                    width: '100%',
-                                    position: 'relative'
-                                }}
-                            >
-                                {rowVirtualizer
-                                    .getVirtualItems()
-                                    .map(virtualRow => {
-                                        return (
-                                            <div
-                                                key={virtualRow.index}
-                                                ref={virtualRow.measureElement}
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: 0,
-                                                    left: 0,
-                                                    width: '100%',
-                                                    transform: `translateY(${virtualRow.start}px)`
-                                                }}
-                                            >
-                                                {renderResult(
-                                                    virtualRow.index,
+        <VStack height="100%" width="100%" paddingTop="30px">
+            <Box
+                height="100%"
+                width="100%"
+                overflowY="scroll"
+                borderRadius="6px"
+            >
+                <Box
+                    ref={listContainerRefrence}
+                    style={{
+                        height: `${height}px`,
+                        width: `${width}px`,
+                        borderRadius: '6px'
+                    }}
+                >
+                    <Box
+                        style={{
+                            height: `${listVirtualizer.getTotalSize()}px`,
+                            width: '100%',
+                            position: 'relative'
+                        }}
+                    >
+                        {listVirtualizer.getVirtualItems().length > 0 &&
+                            listVirtualizer
+                                .getVirtualItems()
+                                .map((virtualRow, index) => {
+                                    return (
+                                        <Box
+                                            key={virtualRow?.key}
+                                            ref={element => {
+                                                listItemRefrences.current[
                                                     virtualRow.index
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                            </div>
-                        </Box>
-                    )}
-                </AutoSizer>
+                                                ] = element;
+                                            }}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: `${
+                                                    virtualRow?.size - 10
+                                                }px`,
+                                                transform: `translateY(${virtualRow?.start}px)`
+                                            }}
+                                        >
+                                            {renderResult(
+                                                virtualRow?.index,
+                                                virtualRow?.key
+                                            )}
+                                        </Box>
+                                    );
+                                })}
+                    </Box>
+                </Box>
             </Box>
         </VStack>
     );

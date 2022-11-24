@@ -1,6 +1,5 @@
 import {
     Box,
-    Checkbox,
     Editable,
     EditableInput,
     EditablePreview,
@@ -17,7 +16,8 @@ import {
     Th,
     Thead,
     Tooltip,
-    Tr
+    Tr,
+    useColorMode
 } from '@chakra-ui/react';
 import { Anchor, Link as LinkGG, Search } from 'css.gg';
 import { observer } from 'mobx-react';
@@ -27,6 +27,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function DatasetConfig(props) {
     const store = useContext(RootStoreContext);
+    const { colorMode } = useColorMode();
 
     const renderColumnTypeDropdown = (column, defaultType) => {
         return (
@@ -34,6 +35,21 @@ function DatasetConfig(props) {
                 defaultValue={defaultType}
                 size="sm"
                 isDisabled={props.formType !== 'upload'}
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
+                }
+                _hover={{
+                    backgroundColor:
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'blackAlpha.400'
+                }}
+                _focus={{
+                    backgroundColor:
+                        colorMode === 'light'
+                            ? 'blackAlpha.100'
+                            : 'blackAlpha.300'
+                }}
                 borderRadius="5px"
                 variant="filled"
                 onChange={val =>
@@ -148,7 +164,11 @@ function DatasetConfig(props) {
                                             store.fileUpload.fileUploadData
                                                 .defaults[column].name
                                         }
-                                        backgroundColor="blackAlpha.300"
+                                        backgroundColor={
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.100'
+                                                : 'blackAlpha.300'
+                                        }
                                         borderRadius="5px"
                                         maxWidth="176px"
                                         onSubmit={val =>
@@ -206,7 +226,8 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
-                                        process.env.REACT_APP_DISABLE_UPLOAD ===
+                                        process?.env
+                                            .REACT_APP_DISABLE_UPLOAD ===
                                             'true' ||
                                         store.fileUpload.fileUploadData.link ===
                                             column
@@ -222,7 +243,10 @@ function DatasetConfig(props) {
                                     }
                                     _disabled={{
                                         cursor: 'not-allowed',
-                                        backgroundColor: 'whiteAlpha.100',
+                                        backgroundColor:
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.100'
+                                                : 'whiteAlpha.100',
                                         border: 'none'
                                     }}
                                 />
@@ -237,7 +261,8 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
-                                        process.env.REACT_APP_DISABLE_UPLOAD ===
+                                        process?.env
+                                            .REACT_APP_DISABLE_UPLOAD ===
                                             'true' ||
                                         store.fileUpload.fileUploadData
                                             .anchor === column
@@ -253,7 +278,10 @@ function DatasetConfig(props) {
                                     }
                                     _disabled={{
                                         cursor: 'not-allowed',
-                                        backgroundColor: 'whiteAlpha.100',
+                                        backgroundColor:
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.100'
+                                                : 'whiteAlpha.100',
                                         border: 'none'
                                     }}
                                 />
@@ -266,23 +294,30 @@ function DatasetConfig(props) {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <Checkbox
+                                <Radio
                                     isDisabled={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].dataType ===
                                             'list' ||
                                         props.formType === 'modify'
                                     }
-                                    defaultChecked={
+                                    isChecked={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].isDefaultSearch
                                     }
                                     onChange={() =>
-                                        store.fileUpload.changeDefaultBoolToggle(
-                                            column,
-                                            'isDefaultSearch'
+                                        store.fileUpload.changeDefaultSearch(
+                                            column
                                         )
                                     }
+                                    _disabled={{
+                                        cursor: 'not-allowed',
+                                        backgroundColor:
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.100'
+                                                : 'whiteAlpha.100',
+                                        border: 'none'
+                                    }}
                                 />
                             </Flex>
                         </Td>
@@ -312,7 +347,11 @@ function DatasetConfig(props) {
                         defaultValue={
                             store.fileUpload.fileUploadData.originalName
                         }
-                        backgroundColor="blackAlpha.300"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.100'
+                                : 'blackAlpha.300'
+                        }
                         borderRadius="5px"
                         onSubmit={val =>
                             store.fileUpload.changeDatasetName(val)
@@ -329,7 +368,9 @@ function DatasetConfig(props) {
 
             <Box overflowX="scroll">
                 <TableContainer
-                    backgroundColor="blackAlpha.300"
+                    backgroundColor={
+                        colorMode === 'light' ? 'transparent' : 'blackAlpha.300'
+                    }
                     borderTopRadius="5px"
                     minWidth="700px"
                     width="700px"
@@ -349,7 +390,9 @@ function DatasetConfig(props) {
                     </Table>
                 </TableContainer>
                 <TableContainer
-                    backgroundColor="blackAlpha.300"
+                    backgroundColor={
+                        colorMode === 'light' ? 'transparent' : 'blackAlpha.300'
+                    }
                     borderBottomRadius="5px"
                     maxHeight="290px"
                     overflowY="scroll"

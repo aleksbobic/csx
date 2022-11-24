@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { format } from 'date-fns';
 
 export class SearchStore {
     nodeTypes = {};
@@ -10,11 +11,14 @@ export class SearchStore {
     schemas = [];
     datasets = [];
     searchHints = {};
+    query = '';
+    advancedSearchQuery = '';
+    searchID = '';
+    default_search_features = [];
 
     currentDataset = null;
     currentDatasetIndex = 0;
     searchIsEmpty = false;
-    advancedSearchQuery = '';
     datasetEdit = false;
 
     constructor(store) {
@@ -23,6 +27,10 @@ export class SearchStore {
         this.getDatasets();
     }
 
+    setSearchID = val => (this.searchID = val);
+
+    setSearchQuery = val => (this.query = val);
+
     setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);
@@ -30,6 +38,8 @@ export class SearchStore {
     getNodeTypeByFeature = feature => this.nodeTypes[feature];
 
     getSearchHintsByFeature = feature => this.searchHints[feature];
+
+    setLinks = val => (this.links = val);
 
     useDataset = index => {
         if (!this.datasets.length) {
@@ -50,6 +60,7 @@ export class SearchStore {
         this.schema = dataset_config.schemas[0]['relations'];
         this.schemas = dataset_config.schemas;
         this.searchHints = dataset_config.search_hints;
+        this.default_search_features = dataset_config.default_search_fields;
 
         Object.keys(this.searchHints).forEach(key => {
             this.searchHints[key] = JSON.parse(this.searchHints[key]);
@@ -123,7 +134,9 @@ export class SearchStore {
             anchor: this.anchor,
             graph_type: graphType,
             visible_entries: [],
-            user_id: this.store.core.userUuid
+            user_id: this.store.core.userUuid,
+            study_id: this.store.core.studyUuid,
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO')
         };
 
         if (graphType === 'overview') {
@@ -232,5 +245,10 @@ export class SearchStore {
             this.store.core.handleError(error);
             return [];
         }
+    };
+
+    getRandomImage = async () => {
+        const response = await axios.get('file/randomimage');
+        return response.data;
     };
 }

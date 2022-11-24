@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Table } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useGlobalFilter, useSortBy, useTable } from 'react-table';
@@ -7,7 +7,7 @@ import './table.scss';
 import TableBodyComponent from './tableBody/TableBody.component';
 import TableHeadComponent from './tableHead/TableHead.component';
 
-function Table(props) {
+function TableComponent(props) {
     const data = props.data;
     const columns = props.columns;
     const hiddenColumns = props.hiddenColumns;
@@ -47,27 +47,27 @@ function Table(props) {
                 />
             </Box>
             <Box height="100%" overflow="scroll" width="100%">
-                <table {...getTableProps()} style={{ width: '100%' }}>
+                <Table {...getTableProps()} style={{ width: '100%' }}>
                     <TableHeadComponent headerGroups={headerGroups} />
                     <TableBodyComponent
                         getTableBodyProps={getTableBodyProps}
                         prepareRow={prepareRow}
                         rows={rows}
                     />
-                </table>
+                </Table>
             </Box>
         </Box>
     );
 }
 
-Table.propTypes = {
+TableComponent.propTypes = {
     data: PropTypes.array,
     columns: PropTypes.array,
     hiddenColumns: PropTypes.array
 };
 
-Table.defaultProps = {
+TableComponent.defaultProps = {
     hiddenColumns: []
 };
 
-export default observer(Table);
+export default observer(TableComponent);

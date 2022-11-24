@@ -50,23 +50,26 @@ export class FileUploadStore {
             }
         });
 
-        Object.keys(response.data.columns).forEach(
-            column =>
-                (this.fileUploadData.defaults[column] = {
-                    name: column,
-                    isDefaultVisible: false,
-                    isDefaultSearch: false,
-                    isDefaultLink: false,
-                    dataType: response.data.columns[column],
-                    removeIfNull: false
-                })
-        );
+        if (Object.keys(response.data).length !== 0) {
+            Object.keys(response.data.columns).forEach(
+                column =>
+                    (this.fileUploadData.defaults[column] = {
+                        name: column,
+                        isDefaultVisible: false,
+                        isDefaultSearch: false,
+                        isDefaultLink: false,
+                        dataType: response.data.columns[column],
+                        removeIfNull: false
+                    })
+            );
 
-        this.changeOriginalName(response.data.name);
-        this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
-        this.changeDatasetName(response.data.name);
+            this.changeOriginalName(response.data.name);
+            this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
+            this.changeDatasetName(response.data.name);
 
-        return true;
+            return true;
+        }
+        return false;
     };
 
     changeOriginalName = val => (this.fileUploadData.originalName = val);
@@ -101,14 +104,13 @@ export class FileUploadStore {
         this.fileUploadData.link = val;
     };
 
-    changeDefaultBoolToggle = (column, feature) => {
-        this.fileUploadData.defaults[column][feature] =
-            !this.fileUploadData.defaults[column][feature];
+    changeDefaultSearch = column => {
+        Object.keys(this.fileUploadData.defaults).forEach(
+            col =>
+                (this.fileUploadData.defaults[col]['isDefaultSearch'] = false)
+        );
 
-        if (feature === 'isDefaultLink') {
-            this.fileUploadData.defaults[column]['isDefaultVisible'] =
-                !this.fileUploadData.defaults[column]['isDefaultVisible'];
-        }
+        this.fileUploadData.defaults[column]['isDefaultSearch'] = true;
     };
 
     changeColumnName = (column, val) => {

@@ -10,7 +10,6 @@ import {
     IconButton,
     Image,
     Link,
-    Slide,
     Text,
     Tooltip,
     useColorMode,
@@ -19,9 +18,11 @@ import {
     VStack
 } from '@chakra-ui/react';
 import {
-    Assign,
-    BorderRight,
+    AlignBottom,
+    Attribution,
+    Carousel,
     ChevronRight,
+    List,
     Moon,
     RadioCheck,
     Ratio,
@@ -31,8 +32,9 @@ import {
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
-import queryString from 'query-string';
-import { useContext } from 'react';
+
+import { CameraIcon } from '@heroicons/react/24/solid';
+import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
@@ -41,6 +43,7 @@ function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
     const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
+    const [panelType, setPanelType] = useState('');
     const location = useLocation();
     const bgColor = useColorModeValue('white', 'black');
 
@@ -57,21 +60,24 @@ function NavigationPanelComponent() {
     );
 
     const regenerateGraph = () => {
-        store.graph.getSearchGraph(
-            store.graph.currentGraphData.meta.query,
-            location.pathname.startsWith('/graph/detail')
-                ? 'detail'
-                : 'overview',
-            queryString.parse(location.search).suuid
-        );
+        store.graph.modifyStudy(store.core.currentGraph);
     };
 
-    const toggleDataPanel = () => {
-        onToggle();
+    const toggleDataPanel = panel => {
+        if (panelType === panel || panelType === '' || !isOpen) {
+            onToggle();
+        }
+
+        if (panelType === panel) {
+            setPanelType('');
+        } else {
+            setPanelType(panel);
+        }
+
         store.track.trackEvent(
             'navbar',
             'button click',
-            `data panel ${isOpen ? 'off' : 'on'}`
+            `${panel} panel ${isOpen ? 'off' : 'on'}`
         );
     };
 
@@ -82,44 +88,43 @@ function NavigationPanelComponent() {
             `color mode ${colorMode === 'light' ? 'dark' : 'light'}`
         );
         toggleColorMode();
+        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
     };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-105px" top="20px" id="graphutils">
+        <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
             <HStack
                 spacing="10px"
-                backgroundColor={graphUtilsMenuBackground}
+                backgroundColor={
+                    colorMode === 'light' ? '#ffffff' : graphUtilsMenuBackground
+                }
                 padding="5px 6px"
                 borderRadius="8px"
+                border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
             >
                 <Tooltip
                     label={
-                        location.pathname.startsWith('/graph/detail')
+                        store.core.currentGraph === 'detail'
                             ? 'View overview graph'
                             : 'View detail graph'
                     }
                 >
                     <IconButton
-                        as={NavLink}
-                        to={
-                            location.pathname.startsWith('/graph/detail')
-                                ? `/graph?query=${getQueryString(
-                                      'query'
-                                  )}&dataset=${getQueryString(
-                                      'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
-                                : `/graph/detail?query=${getQueryString(
-                                      'query'
-                                  )}&dataset=${getQueryString(
-                                      'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
-                        }
                         id="switchgraphviewbutton"
                         size="sm"
                         border="none"
                         aria-label="Switch graph view"
+                        onClick={() => {
+                            store.graph.modifyStudy(
+                                store.core.currentGraph === 'detail'
+                                    ? 'overview'
+                                    : 'detail'
+                            );
+                        }}
                         icon={
-                            location.pathname.startsWith('/graph/detail') ? (
+                            store.core.currentGraph === 'detail' ? (
                                 <RadioCheck
                                     style={{
                                         '--ggs': '0.68'
@@ -161,15 +166,23 @@ function NavigationPanelComponent() {
             right="0px"
             width="200px"
             spacing="5px"
-            backgroundColor="blackAlpha.600"
+            backgroundColor={
+                colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.600'
+            }
             borderRadius="10px"
+            border="1px solid"
+            borderColor={colorMode === 'light' ? 'gray.300' : 'transparent'}
             padding="10px"
         >
             {store.graphInstance.hoverData.map((entry, index) => (
                 <Box width="100%" key={`hover_data_${index}`}>
                     <Text
                         fontSize="xs"
-                        color="gray.400"
+                        color={
+                            colorMode === 'light'
+                                ? 'blackAlpha.800'
+                                : 'gray.400'
+                        }
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"
@@ -179,7 +192,7 @@ function NavigationPanelComponent() {
                     </Text>
                     <Text
                         fontSize="sm"
-                        color="gray.200"
+                        color={colorMode === 'light' ? 'gray.700' : 'gray.200'}
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"
@@ -196,7 +209,7 @@ function NavigationPanelComponent() {
         <Box
             position="absolute"
             marginLeft="-100px"
-            bottom="75px"
+            bottom="20px"
             id="viewutils"
         >
             {store.graphInstance.hoverData.length > 0 &&
@@ -208,7 +221,7 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Make Screenshot"
-                        icon={<Ratio />}
+                        icon={<CameraIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
                                 'view utils',
@@ -225,7 +238,7 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Zoom to fit"
-                        icon={<Assign />}
+                        icon={<Ratio style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
                                 'view utils',
@@ -240,8 +253,6 @@ function NavigationPanelComponent() {
         </Box>
     );
 
-    const getQueryString = param => queryString.parse(location.search)[param];
-
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>
             <Tooltip label="Retrieval workspace">
@@ -250,11 +261,7 @@ function NavigationPanelComponent() {
                         location.pathname === '/search' ? 'solid' : 'outline'
                     }
                     as={NavLink}
-                    to={`/search?query=${getQueryString(
-                        'query'
-                    )}&dataset=${getQueryString(
-                        'dataset'
-                    )}&suuid=${getQueryString('suuid')}`}
+                    to={`/search?study=${store.core.studyUuid}`}
                     border="1px solid transparent"
                     opacity={location.pathname === '/search' ? '1' : '0.5'}
                 >
@@ -268,11 +275,7 @@ function NavigationPanelComponent() {
                     }
                     border="1px solid transparent"
                     as={NavLink}
-                    to={`/graph?query=${getQueryString(
-                        'query'
-                    )}&dataset=${getQueryString(
-                        'dataset'
-                    )}&suuid=${getQueryString('suuid')}`}
+                    to={`/graph?study=${store.core.studyUuid}`}
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }
@@ -301,24 +304,131 @@ function NavigationPanelComponent() {
             borderColor={edgeColor}
         >
             {location.pathname.startsWith('/graph') && (
-                <Tooltip label="Toggle data panel">
-                    <IconButton
-                        border="none"
-                        aria-label="Data panel toggle"
-                        id="datapnaletoggle"
-                        onClick={toggleDataPanel}
-                        icon={<BorderRight />}
-                    />
-                </Tooltip>
+                <ButtonGroup
+                    variant="outline"
+                    size="md"
+                    display="flex"
+                    alignItems="center"
+                    height="100%"
+                    borderRight="1px solid"
+                    paddingRight="10px"
+                    borderColor={edgeColor}
+                >
+                    <Tooltip label="Toggle details panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Details panel toggle"
+                            id="detailspnaletoggle"
+                            color={
+                                panelType === 'details'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => toggleDataPanel('details')}
+                            icon={
+                                <AlignBottom
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle results panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Results panel toggle"
+                            id="resultspnaletoggle"
+                            color={
+                                panelType === 'results'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => toggleDataPanel('results')}
+                            icon={
+                                <List
+                                    style={{
+                                        '--ggs': '0.7'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle schema panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Schema panel toggle"
+                            id="schemapnaletoggle"
+                            color={
+                                panelType === 'schema'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => toggleDataPanel('schema')}
+                            icon={
+                                <Attribution
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle history panel">
+                        <IconButton
+                            border="none"
+                            aria-label="History panel toggle"
+                            id="historypnaletoggle"
+                            color={
+                                panelType === 'history'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => toggleDataPanel('history')}
+                            icon={
+                                <Carousel
+                                    style={{
+                                        '--ggs': '0.7',
+                                        transform:
+                                            'rotate(180deg) scale(0.7, 0.8)'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                </ButtonGroup>
             )}
-            {/* <Tooltip label="Toggle color mode">
+
+            <Tooltip label="Toggle color mode">
                 <IconButton
                     border="none"
                     aria-label="Color mode"
-                    icon={colorMode === 'light' ? <Moon /> : <Sun />}
+                    icon={
+                        colorMode === 'light' ? (
+                            <Moon
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        ) : (
+                            <Sun
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        )
+                    }
                     onClick={toggleColor}
                 />
-            </Tooltip> */}
+            </Tooltip>
         </ButtonGroup>
     );
 
@@ -327,7 +437,7 @@ function NavigationPanelComponent() {
             <Box
                 id="navigation"
                 pos="fixed"
-                zIndex="5"
+                zIndex="20"
                 height="50px"
                 backgroundColor={
                     location.pathname !== '/' ? bgColor : 'transparent'
@@ -350,13 +460,14 @@ function NavigationPanelComponent() {
                         borderRight="1px solid"
                         borderColor={edgeColor}
                         id="homelink"
-                        onClick={() =>
+                        onClick={() => {
+                            store.core.deleteStudy();
                             store.track.trackEvent(
                                 'navbar',
                                 'button click',
                                 'logo'
-                            )
-                        }
+                            );
+                        }}
                     >
                         <Image
                             src={logo}
@@ -366,15 +477,20 @@ function NavigationPanelComponent() {
                         />
                     </Link>
 
-                    {location.pathname !== '/' && renderWorkspaceSwitch()}
+                    {location.pathname !== '/' &&
+                        process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                            'true' &&
+                        renderWorkspaceSwitch()}
                     {location.pathname !== '/' && (
-                        <Box style={{ marginLeft: '125px' }}>
+                        <HStack
+                            height="40px"
+                            style={{ marginLeft: '125px' }}
+                            spacing="20px"
+                        >
                             <Divider
                                 opacity="0.4"
                                 orientation="vertical"
-                                height="80%"
-                                top="6px"
-                                position="absolute"
+                                height="100%"
                                 backgroundColor="gray.900"
                             />
                             <Breadcrumb
@@ -396,26 +512,35 @@ function NavigationPanelComponent() {
                                 </BreadcrumbItem>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink
-                                        as={NavLink}
-                                        to={`/graph?query=${getQueryString(
-                                            'query'
-                                        )}&dataset=${getQueryString(
-                                            'dataset'
-                                        )}`}
-                                        fontSize="xs"
-                                        fontWeight="regular"
+                                        as={Button}
+                                        onClick={() => {
+                                            store.graph.modifyStudy('overview');
+                                        }}
+                                        disabled={
+                                            store.core.currentGraph ===
+                                            'overview'
+                                        }
+                                        size="xs"
+                                        variant="ghost"
+                                        _hover={{
+                                            backgroundColor: 'transparent',
+                                            textDecoration:
+                                                store.core.currentGraph ===
+                                                'detail'
+                                                    ? 'underline'
+                                                    : 'none',
+                                            cursor:
+                                                store.core.currentGraph ===
+                                                'detail'
+                                                    ? 'pointer'
+                                                    : 'default'
+                                        }}
+                                        _disabled={{ opacity: '1' }}
                                     >
-                                        {location.pathname
-                                            .split('/')[1]
-                                            .charAt(0)
-                                            .toUpperCase() +
-                                            location.pathname
-                                                .split('/')[1]
-                                                .slice(1)}
+                                        Graph
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
-                                {location.pathname.split('/')[2] ===
-                                    'detail' && (
+                                {store.core.currentGraph === 'detail' && (
                                     <BreadcrumbItem>
                                         <BreadcrumbLink
                                             as={Text}
@@ -428,28 +553,27 @@ function NavigationPanelComponent() {
                                     </BreadcrumbItem>
                                 )}
                             </Breadcrumb>
-                        </Box>
+                        </HStack>
                     )}
                 </HStack>
                 {renderToggles()}
             </Box>
             {location.pathname.startsWith('/graph') && (
-                <Slide
-                    direction="right"
-                    in={isOpen}
+                <Box
                     style={{
                         zIndex: 10,
-                        right: '0px',
+                        right: isOpen ? '0px' : '-35%',
                         width: '35%',
                         position: 'fixed',
-                        top: '50px',
-                        height: '100%'
+                        top: 0,
+                        height: '100%',
+                        paddingTop: '50px'
                     }}
                 >
                     {renderGraphUtils()}
                     {renderViewUtils()}
-                    <DataPanelComponent />
-                </Slide>
+                    <DataPanelComponent panelType={panelType} />
+                </Box>
             )}
         </>
     );

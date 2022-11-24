@@ -1,29 +1,41 @@
-import { useColorModeValue } from '@chakra-ui/react';
+import { useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { observer, useLocalObservable } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { withRouter } from 'react-router-dom';
-import { withSize } from 'react-sizeme';
 import { RootStoreContext } from 'stores/RootStore';
 import * as THREE from 'three';
+import { useResizeDetector } from 'react-resize-detector';
+
 import './Graph.scss';
 
 function Graph(props) {
     const store = useContext(RootStoreContext);
     const containerRef = useRef();
     const bwColor = useColorModeValue('#303030', 'white');
-    const backgroundColor = useColorModeValue('#efefef', '#1A202C');
+    const backgroundColor = useColorModeValue('#ffffff', '#1A202C');
     const [timer, setTimer] = useState(null);
+    const { width, height } = useResizeDetector({ containerRef });
 
     const [windowSize, setWindowSize] = useState({
-        width: undefined,
-        height: undefined
+        width: window.innerWidth,
+        height: window.innerHeight
     });
 
     const [graphContainerElement, setGraphContainerElement] = useState(null);
 
+    const { colorMode } = useColorMode();
+
     useLocalObservable(() => ({}));
+
+    useEffect(() => {
+        if (colorMode === 'light') {
+            store.graphInstance.setOutlinePassColor('red');
+        } else {
+            store.graphInstance.setOutlinePassColor('white');
+        }
+    }, [colorMode, store.graphInstance]);
 
     useEffect(() => {
         const getNewSizes = () =>
@@ -175,15 +187,17 @@ function Graph(props) {
             backgroundColor={backgroundColor}
             graphData={props.graphData}
             numDimensions={2}
-            width={windowSize.width ? windowSize.width : props.size.width}
-            height={windowSize.height ? windowSize.height : props.size.height}
+            width={windowSize.width ? windowSize.width : width}
+            height={windowSize.height ? windowSize.height : height}
             linkColor={link => link.color}
             enableNodeDrag={true}
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
             cooldownTime={store.graphInstance.forceCooldownTime}
             linkOpacity={
-                store.graphInstance.selectedColorSchema === 'component'
+                store.core.colorMode === 'light'
+                    ? 0.7
+                    : store.graphInstance.selectedColorSchema === 'component'
                     ? 0.3
                     : 0.1
             }
@@ -195,7 +209,7 @@ function Graph(props) {
             // linkDirectionalArrowLength={store.core.isDetail ? 10 : 0}
             // linkDirectionalArrowResolution={2}
             // linkDirectionalArrowRelPos={1}
-            // linkCurvature={0.1}
+            // linkCurvature={0.2}
             onLinkHover={store.core.isOverview ? handleLinkHover : () => {}}
             linkWidth={0}
             linkResolution={2}
@@ -227,8 +241,4 @@ Graph.propTypes = {
     graphData: PropTypes.object
 };
 
-export default withSize({
-    monitorWidth: true,
-    monitorHeight: true,
-    noPlaceholder: true
-})(withRouter(observer(Graph)));
+export default withRouter(observer(Graph));

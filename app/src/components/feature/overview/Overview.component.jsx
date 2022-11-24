@@ -4,12 +4,13 @@ import {
     GridItem,
     IconButton,
     Tooltip,
+    useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { MathPlus } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import ChartComponent from '../stats/chart/Chart.component';
 import StatContainerComponent from '../stats/statcontainer/StatContainer';
@@ -18,8 +19,24 @@ import SelectedNodeListComponent from '../stats/node/NodeStats.component';
 import GraphStatsComponent from '../stats/graph/GraphStats.component';
 import ConnectionStatsComponent from '../stats/connections/ConnectionStats.component';
 import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
+import { useState } from 'react';
 function Overview(props) {
     const store = useContext(RootStoreContext);
+    const { colorMode } = useColorMode();
+
+    const [visibleCharts, setVisibleCharts] = useState(
+        store.stats
+            .getChartListForDataset()
+            .filter(chart => chart.network === store.core.currentGraph)
+    );
+
+    useEffect(() => {
+        setVisibleCharts(
+            store.stats
+                .getChartListForDataset()
+                .filter(chart => chart.network === store.core.currentGraph)
+        );
+    }, [store.core.currentGraph, store.stats, store.stats.charts]);
 
     const getChartTitle = chart => {
         if (chart.title) {
@@ -102,6 +119,17 @@ function Overview(props) {
                     <IconButton
                         width="100%"
                         height="100%"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        _hover={{
+                            backgroundColor:
+                                colorMode === 'light'
+                                    ? 'blackAlpha.400'
+                                    : 'whiteAlpha.400'
+                        }}
                         borderRadius="xl"
                         onClick={() =>
                             store.stats.toggleStatsModalVisiblity(
@@ -124,34 +152,30 @@ function Overview(props) {
     );
 
     const renderCharts = () =>
-        store.stats
-            .getChartListForDataset()
-            .filter(chart => chart.network === store.core.currentGraph)
-            .map((chart, index) => {
-                const title = getChartTitle(chart);
-                const chartObject = getChartData(chart, index, title);
+        visibleCharts.map((chart, index) => {
+            const title = getChartTitle(chart);
+            const chartObject = getChartData(chart, index, title);
 
-                return (
-                    <StatContainerComponent
-                        key={`Stat_${index}`}
-                        chart={chart}
-                        index={index}
-                        title={title}
-                    >
-                        {chartObject}
-                    </StatContainerComponent>
-                );
-            });
+            return (
+                <StatContainerComponent
+                    key={`Stat_${index}`}
+                    chart={chart}
+                    index={index}
+                    title={title}
+                >
+                    {chartObject}
+                </StatContainerComponent>
+            );
+        });
 
     return (
-        <VStack spacing="10px" marginTop="50px">
+        <VStack spacing="10px">
             <Grid
                 maxHeight="100%"
                 width="100%"
                 templateColumns="repeat(auto-fit, minmax(240px, 1fr))"
                 gap={5}
                 margin="0"
-                marginBottom="70px"
                 padding="0"
             >
                 {renderCharts()}

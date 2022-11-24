@@ -5,9 +5,10 @@ import app.services.data.mongo as csx_data
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
-import app.services.data.redis as csx_redis
+import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
+import pickle
 from app.types import SchemaElement, Node
 from app.utils.timer import use_timing
 
@@ -298,7 +299,6 @@ def get_graph_from_scratch(
     dimensions,
     elastic_json,
     visible_entries,
-    query,
     index,
     cache_data,
     search_uuid,
@@ -307,6 +307,12 @@ def get_graph_from_scratch(
     schema,
     anchor_properties,
     comparison_res,
+    study_id,
+    query,
+    action_time,
+    history_action,
+    history_parent_id,
+    charts,
 ):
     graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
@@ -326,7 +332,7 @@ def get_graph_from_scratch(
         graph_data,
     )
 
-    cache_data = csx_redis.generate_cache_data(
+    cache_data = csx_study.generate_cache_data(
         graph_type,
         cache_data,
         graph_data,
@@ -338,32 +344,93 @@ def get_graph_from_scratch(
         results,
         comparison_res,
         elastic_json,
+        study_id,
     )
 
-    csx_redis.save_current_graph(user_id, cache_data, graph_type)
-    from_graph_data(cache_data[graph_type])
+    cache_snapshot = csx_study.enrich_cache_with_ng_graph(cache_data, graph_type)
+
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_snapshot),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
+        },
+    )
 
     return graph_data
 
 
 def get_graph_with_new_anchor_props(
-    comparison_res, graph_type, dimensions, elastic_json, user_id
+    comparison_res,
+    graph_type,
+    dimensions,
+    elastic_json,
+    user_id,
+    study_id,
+    action,
+    query,
+    index,
+    action_time,
+    history_action,
+    schema,
+    anchor_properties,
+    history_parent_id,
+    cache_data,
+    charts,
 ):
+
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
     )
 
+    graph_data["meta"]["anchor_properties"] = anchor_properties
     graph_data["meta"]["anchor_property_values"] = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
     )
 
-    cache_data = csx_redis.load_current_graph(user_id)
     cache_data[graph_type]["meta"]["anchor_property_values"] = graph_data["meta"][
         "anchor_property_values"
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
 
-    csx_redis.save_current_graph(user_id, cache_data, graph_type)
+    print(
+        "\n\n\n after processing anchor props: ",
+        graph_data["meta"]["anchor_properties"],
+    )
+
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_data),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
+        },
+    )
 
     return graph_data
 
@@ -373,12 +440,18 @@ def get_graph_from_existing_data(
     dimensions,
     elastic_json,
     visible_entries,
-    query,
     cache_data,
     user_id,
     schema,
     anchor_properties,
     index,
+    study_id,
+    action,
+    query,
+    action_time,
+    history_action,
+    history_parent_id,
+    charts,
 ):
     # Take global table data and generate grpah
 
@@ -408,10 +481,65 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_data),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(graph_data["edges"]),
+            "node_count": len(graph_data["nodes"]),
+        },
+    )
 
     return graph_data
 
 
-def get_graph_from_cache(comparison_res, graph_type):
+def get_graph_from_cache(
+    comparison_res,
+    graph_type,
+    study_id,
+    action,
+    query,
+    user_id,
+    index,
+    action_time,
+    history_action,
+    schema,
+    anchor_properties,
+    dimensions,
+    history_parent_id,
+    charts,
+):
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": history_action,
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(comparison_res["data"]),
+            "query": query,
+            "action_time": action_time,
+            "schema": schema,
+            "anchor_properties": dimensions["anchor"]["props"],
+            "anchor": dimensions["anchor"]["dimension"],
+            "links": dimensions["links"],
+            "visible_dimensions": dimensions["visible"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(comparison_res["data"][graph_type]["edges"]),
+            "node_count": len(comparison_res["data"][graph_type]["nodes"]),
+        },
+    )
+
     return comparison_res["data"][graph_type]

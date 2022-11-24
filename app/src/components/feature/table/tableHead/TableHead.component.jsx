@@ -1,4 +1,11 @@
-import { Text, useColorMode, useColorModeValue } from '@chakra-ui/react';
+import {
+    Text,
+    useColorMode,
+    useColorModeValue,
+    Thead,
+    Tr,
+    Th
+} from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -64,7 +71,7 @@ function TableHead(props) {
 
     const renderHeader = (header, index, endIndex) => {
         return (
-            <th
+            <Th
                 {...header.getHeaderProps(header.getSortByToggleProps())}
                 style={{
                     color: 'white',
@@ -84,14 +91,14 @@ function TableHead(props) {
                 }}
             >
                 {header.render(renderHeaderCellContent)}
-            </th>
+            </Th>
         );
     };
 
     return (
-        <thead>
+        <Thead>
             {props.headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
+                <Tr {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map((header, index) =>
                         renderHeader(
                             header,
@@ -99,9 +106,9 @@ function TableHead(props) {
                             headerGroup.headers.length - 1
                         )
                     )}
-                </tr>
+                </Tr>
             ))}
-        </thead>
+        </Thead>
     );
 }
 

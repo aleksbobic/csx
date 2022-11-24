@@ -207,7 +207,7 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
 
 def convert_to_elastic_safe_query(query):
     return re.sub(
-        '(\+|\-|\=|&&|\|\||\>|\<|\!|\(|\)|\{|\}|\[|\]|\^|"|~|\*|\?|\:|\\\|\/)',
+        '(\+|\-|\=|&&|\|\||\>|\<|\!|\(|\)|\{|\}|\[|\]|\^|"|~|\?|\:|\\\|\/)',
         "\\\\\\1",
         query,
     )

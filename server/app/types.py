@@ -36,6 +36,7 @@ class ComparisonResults(TypedDict):
     difference: Union[CacheDifference, None]
     action: CacheDifferenceAction
     data: Optional[Dict]
+    history_action: str
 
 
 SchemaRelationship = Literal["oneToOne", "manyToOne", "oneToMany", "manyToMany"]

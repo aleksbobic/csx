@@ -12,6 +12,8 @@ import { CoreStore } from './CoreStore';
 import { WorkflowStore } from './WorkflowStore';
 import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
+import { HistoryStore } from './HistoryStore';
+import { CommentStore } from './CommentStore';
 
 export class RootStore {
     surveyLink = null;
@@ -30,12 +32,14 @@ export class RootStore {
         this.workflow = new WorkflowStore(this);
         this.fileUpload = new FileUploadStore(this);
         this.stats = new StatsStore(this);
+        this.history = new HistoryStore(this);
+        this.comment = new CommentStore(this);
         this.getSurveyLink();
     }
 
     initAxios = () => {
-        if (process.env.REACT_APP_SERVER_PORT) {
-            axios.defaults.baseURL = `http://localhost:${process.env.REACT_APP_SERVER_PORT}`;
+        if (process?.env.REACT_APP_SERVER_PORT) {
+            axios.defaults.baseURL = `http://localhost:${process?.env.REACT_APP_SERVER_PORT}`;
         } else {
             axios.defaults.baseURL = `${window.location.origin}/api`;
         }

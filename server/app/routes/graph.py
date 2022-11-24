@@ -1,17 +1,18 @@
 from typing import List, cast
 
-import app.services.data.redis as csx_redis
 
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
 import app.services.data.elastic as csx_es
+import app.services.study.study as csx_study
 
 import networkx as nx
 import pandas as pd
 from fastapi import APIRouter
 import json
+import pickle
 
 router = APIRouter()
 
@@ -21,7 +22,12 @@ from pydantic import BaseModel
 class TrimData(BaseModel):
     nodes: List
     user_id: str
+    study_id: str
+    history_item_id: str
     graph_type: str
+    action_time: str
+    history_parent_id: str
+    charts: List
 
 
 @router.post("/trim")
@@ -30,9 +36,16 @@ def trim_network(
 ):
     provided_nodes = data.nodes
     user_id = data.user_id
+    study_id = data.study_id
+    history_item_id = data.history_item_id
     graph_type = data.graph_type
+    action_time = data.action_time
+    history_parent_id = data.history_parent_id
+    charts = data.charts
 
-    cache_data = csx_redis.load_current_graph(user_id)
+    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+
+    last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
     # Get entries of visible_nodes
     entry_list = [
@@ -55,9 +68,35 @@ def trim_network(
         if cache_data["overview"] != {}:
             cache_data = calculate_trimmed_graph(cache_data, entries, "overview")
 
-    csx_redis.save_new_instance_of_cache_data(user_id, cache_data)
+    last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
-    return cache_data[graph_type]
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": "trim",
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_data),
+            "query": last_history_item["query"],
+            "action_time": action_time,
+            "schema": last_history_item["schema"],
+            "anchor_properties": last_history_item["anchor_properties"],
+            "anchor": last_history_item["anchor"],
+            "links": last_history_item["links"],
+            "visible_dimensions": last_history_item["visible_dimensions"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(cache_data[graph_type]["edges"]),
+            "node_count": len(cache_data[graph_type]["nodes"]),
+        },
+    )
+
+    study = csx_study.get_study(user_id, study_id)
+
+    return {
+        "graph": cache_data[graph_type],
+        "history": csx_study.extract_history_items(study),
+    }
 
 
 class ExpandData(BaseModel):
@@ -70,7 +109,11 @@ class ExpandData(BaseModel):
     graph_schema: List
     visible_dimensions: List
     links: List
-    search_uuid: str
+    study_id: str
+    history_item_id: str
+    action_time: str
+    history_parent_id: str
+    charts: List
 
 
 @router.post("/expand")
@@ -85,9 +128,15 @@ def expand_network(
     visible_dimensions = data.visible_dimensions
     anchor = data.anchor
     links = data.links
-    search_uuid = data.search_uuid
+    study_id = data.study_id
+    history_item_id = data.history_item_id
+    action_time = data.action_time
+    history_parent_id = data.history_parent_id
+    charts = data.charts
 
-    cache_data = csx_redis.load_current_graph(user_id)
+    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+
+    last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
     if len(values["nodes"]) == 1:
         query = {
@@ -174,21 +223,40 @@ def expand_network(
         ],
     }
 
-    return csx_graph.get_graph_from_scratch(
+    history_action = "expand"
+
+    if values["connector"] == "or":
+        history_action = "wide expand"
+    elif values["connector"] == "and":
+        history_action = "narrow expand"
+
+    graph = csx_graph.get_graph_from_scratch(
         graph_type,
         dimensions,
         elastic_json,
         [],
-        cache_data["global"]["query"],
         index,
         cache_data,
-        search_uuid,
+        cache_data["global"]["search_uuid"],
         results,
         user_id,
         schema,
         anchor_properties,
         {"difference": "search_uuid"},
+        study_id,
+        last_history_item["query"],
+        action_time,
+        history_action,
+        history_parent_id,
+        charts,
     )
+
+    study = csx_study.get_study(user_id, study_id)
+
+    return {
+        "graph": graph,
+        "history": csx_study.extract_history_items(study),
+    }
 
 
 def calculate_global_cache_properties(cache_data, entries):

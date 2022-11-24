@@ -48,7 +48,7 @@ const searchNode = ({ id, data, isConnectable }) => {
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.keyphrase = data.getDefaultValue(value.target.value);
-        data.updateActions();
+        data.updateActions(id);
     };
 
     const renderTextInput = () => {
@@ -79,6 +79,7 @@ const searchNode = ({ id, data, isConnectable }) => {
     const renderSelectInput = () => {
         return (
             <Select
+                className="nodrag"
                 size="sm"
                 variant="filled"
                 margin="0px"
@@ -87,7 +88,11 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.updateSearchNodeData(id, event.target.value);
                 }}
                 opacity="0.8"
-                background="whiteAlpha.200"
+                background={
+                    data.colorMode === 'light'
+                        ? 'whiteAlpha.800'
+                        : 'whiteAlpha.200'
+                }
                 value={data.keyphrase}
                 _hover={{
                     opacity: 1
@@ -165,13 +170,18 @@ const searchNode = ({ id, data, isConnectable }) => {
                     </HStack>
                     <Tooltip label="Dataset property">
                         <Select
+                            className="nodrag"
                             margin="0px"
                             variant="filled"
                             size="sm"
                             borderRadius="5px"
                             defaultValue={data.feature}
                             onChange={modifyFeature}
-                            background="whiteAlpha.200"
+                            background={
+                                data.colorMode === 'light'
+                                    ? 'whiteAlpha.800'
+                                    : 'whiteAlpha.200'
+                            }
                             opacity="0.8"
                             _hover={{
                                 opacity: 1,

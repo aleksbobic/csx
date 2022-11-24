@@ -8,6 +8,7 @@ import {
     TagLabel,
     Text,
     Tooltip,
+    useColorMode,
     VStack,
     Wrap
 } from '@chakra-ui/react';
@@ -20,6 +21,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         const components = store.graph.currentGraphData.components;
@@ -157,7 +159,9 @@ function SelectedComponentList(props) {
                 size="sm"
                 borderRadius="4px"
                 variant="solid"
-                backgroundColor="whiteAlpha.200"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.200'
+                }
             >
                 <TagLabel>
                     {component.node_count}{' '}
@@ -175,15 +179,18 @@ function SelectedComponentList(props) {
 
     if (data.length === 0) {
         return (
-            <VStack
+            <Box
+                overflowY="scroll"
                 height="100%"
                 width="100%"
-                overflowY="scroll"
                 spacing={1}
-                backgroundColor="blackAlpha.800"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
                 borderRadius="6px"
+                display="flex"
                 justifyContent="center"
-                padding="20%"
+                alignItems="center"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -198,7 +205,7 @@ function SelectedComponentList(props) {
                         Select some components to see details here! 😉
                     </Text>
                 )}
-            </VStack>
+            </Box>
         );
     }
 
@@ -220,7 +227,11 @@ function SelectedComponentList(props) {
                         <Stat
                             key={`selected_component_${component.id}`}
                             borderRadius="10px"
-                            backgroundColor="blackAlpha.800"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'blackAlpha.800'
+                            }
                             padding="10px"
                             width="100%"
                             flex="0 1 0%"

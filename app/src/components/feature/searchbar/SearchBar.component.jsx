@@ -1,17 +1,19 @@
 import {
-    Center,
+    Box,
     IconButton,
     InputGroup,
     InputRightElement,
     Select,
+    Tag,
+    Text,
     useColorMode
 } from '@chakra-ui/react';
+import { LightBulbIcon } from '@heroicons/react/20/solid';
 import { Database, Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,6 +33,10 @@ function SearchBar(props) {
     };
 
     useEffect(() => {
+        store.core.generateStudyUUID();
+    }, []);
+
+    useEffect(() => {
         setSelectedDataset(store.search.currentDatasetIndex);
     }, [store.search.currentDataset, store.search.currentDatasetIndex]);
 
@@ -42,22 +48,55 @@ function SearchBar(props) {
         ));
     };
 
+    const renderSearchHint = () => (
+        <Text
+            fontSize="xs"
+            textAlign="center"
+            marginTop="10px"
+            color={colorMode === 'light' ? 'blackAlpha.500' : 'whiteAlpha.500'}
+            fontWeight="bold"
+            role="group"
+        >
+            <LightBulbIcon
+                width="12px"
+                style={{
+                    display: 'inline',
+                    marginBottom: '-2px',
+                    marginRight: '2px'
+                }}
+            />
+            Hint: This dataset can be searched by the values in its{' '}
+            <Tag
+                size="sm"
+                opacity="0.7"
+                marginRight="4px"
+                marginLeft="1px"
+                marginTop="-2px"
+            >
+                {store.search.default_search_features.join(', ').toLowerCase()}
+            </Tag>
+            field.
+        </Text>
+    );
+
     return (
-        <Center style={props.style}>
+        <Box style={props.style}>
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
+                    store.search.setSearchIsEmpty(false);
+                    props.onSubmit();
                     store.core.setCurrentGraph('overview');
                     store.graphInstance.setNodeColorScheme('component');
                     store.search.useDataset(selectedDataset);
                     store.core.resetVisibleDimensions();
                     store.workflow.resetWorkflow();
                     store.schema.resetOverviewNodeProperties();
-                    history.push(
-                        `/graph?query=${values.search}&dataset=${
-                            store.search.datasets[selectedDataset]
-                        }&suuid=${uuidv4()}`
-                    );
+                    store.core.setStudyHistory([]);
+                    store.core.setStudyHistoryItemIndex(0);
+                    store.search.setSearchQuery(values.search);
+                    store.search.setSearchID(uuidv4());
+                    history.push(`/graph?study=${store.core.studyUuid}`);
                 }}
             >
                 {({ values, handleSubmit, setFieldValue }) => (
@@ -102,15 +141,22 @@ function SearchBar(props) {
                                 }
                                 style={{
                                     height: '40px',
-                                    borderRadius: '0px',
-                                    borderStartRadius:
+                                    borderRadius: '6px',
+                                    borderEndStartRadius:
+                                        props.datasetSelectorDisabled
+                                            ? '4px'
+                                            : '0',
+                                    borderStartStartRadius:
                                         props.datasetSelectorDisabled
                                             ? '4px'
                                             : '0'
                                 }}
                                 suggestionStyle={{
                                     position: 'absolute',
-                                    backgroundColor: '#141824',
+                                    backgroundColor:
+                                        colorMode === 'light'
+                                            ? '#d7d6d6'
+                                            : '#141824',
                                     top: '44px',
                                     left: '145px',
                                     zIndex: '10',
@@ -127,6 +173,11 @@ function SearchBar(props) {
                                         width="40px"
                                         height="40px"
                                         borderLeftRadius="0"
+                                        backgroundColor={
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.50'
+                                                : 'whiteAlpha.100'
+                                        }
                                         icon={
                                             <Search
                                                 style={{
@@ -141,18 +192,24 @@ function SearchBar(props) {
                     </Form>
                 )}
             </Formik>
-        </Center>
+
+            {store.search.default_search_features &&
+                store.search.default_search_features.length > 0 &&
+                renderSearchHint()}
+        </Box>
     );
 }
 
 SearchBar.propTypes = {
     datasetSelectorDisabled: PropTypes.bool,
-    placeholder: PropTypes.string
+    placeholder: PropTypes.string,
+    onSubmit: PropTypes.func
 };
 
 SearchBar.defaultProps = {
     datasetSelectorDisabled: false,
-    placeholder: 'Search through the dataset ...'
+    placeholder: 'Search through the dataset ...',
+    onSubmit: () => {}
 };
 
 export default observer(SearchBar);

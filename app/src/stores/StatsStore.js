@@ -213,6 +213,14 @@ export class StatsStore {
 
         this.toggleStatsModalVisiblity(false);
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        //TODO: Send info to backend and update current history item
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+
+        this.store.history.updateStudyCharts(charts);
     };
 
     removeChart = id => {
@@ -222,6 +230,12 @@ export class StatsStore {
         );
 
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+        this.store.history.updateStudyCharts(charts);
     };
 
     expandChart = id => {
@@ -238,6 +252,12 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+        this.store.history.updateStudyCharts(charts);
     };
 
     shrinkChart = id => {
@@ -263,6 +283,12 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+        this.charts = { ...this.charts };
+
+        this.store.history.updateStudyCharts(charts);
     };
 
     toggleLegend = id => {
@@ -278,6 +304,11 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.store.history.updateStudyCharts(charts);
     };
 
     toggleAxisLabels = (id, axis) => {
@@ -309,6 +340,20 @@ export class StatsStore {
                 };
             }
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+        this.charts = { ...this.charts };
+
+        this.store.history.updateStudyCharts(charts);
+    };
+
+    setChartListForDataset = charts => {
+        console.log('new charts: ', charts);
+        const dataset = this.store.search.currentDataset;
+        this.charts[dataset] = charts;
+        this.charts = { ...this.charts };
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 

@@ -4,9 +4,11 @@ import pymongo
 from app.types import Node
 from app.utils.timer import use_timing
 from pymongo import MongoClient
+import gridfs
 
 client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx
+fs = gridfs.GridFS(database)
 
 
 def list_collections() -> None:
@@ -21,7 +23,51 @@ def delete_collection(collection_name: str) -> None:
 
 def insert_document(collection_name: str, value: Any) -> None:
     """Insert a single value in a collection"""
-    database[collection_name].insert_one(value)
+    return database[collection_name].insert_one(value)
+
+
+def insert_large_document(doc) -> str:
+    return fs.put(doc)
+
+
+def get_large_document(item_id):
+    return fs.get(item_id).read()
+
+
+def delete_large_document(item_id):
+    return fs.delete(item_id)
+
+
+def update_document(collection_name: str, conditions: object, new_values) -> None:
+    """Update a single value in a collection"""
+    database[collection_name].update_one(conditions, new_values)
+
+
+def delete_document(collection_name: str, conditions: object) -> None:
+    """Delete a single value from a collection"""
+    database[collection_name].delete_one(conditions)
+
+
+def delete_documents(collection_name: str, conditions: object) -> None:
+    """Delete a single value from a collection"""
+    database[collection_name].delete_many(conditions)
+
+
+def delete_from_array(
+    collection_name: str, conditions: object, arr_name, index
+) -> None:
+    """Delete a value from an array"""
+    # database[collection_name].update_many(conditions, new_values)
+    database[collection_name].update_one(
+        conditions, {"$unset": {f"{arr_name}.{index}": 1}}
+    )
+    database[collection_name].update_one(conditions, {"$pull": {f"{arr_name}": None}})
+
+
+def edit_array(collection_name: str, conditions: object, value) -> None:
+    """Edit a value in an array"""
+    # database[collection_name].update_many(conditions, new_values)
+    database[collection_name].update_one(conditions, {"$set": value})
 
 
 def insert_documents(collection_name: str, values: List[Any]) -> None:
@@ -32,6 +78,13 @@ def insert_documents(collection_name: str, values: List[Any]) -> None:
 def get_all_documents(collection_name: str):
     """Retireve all collection documents"""
     return database[collection_name].find({})
+
+
+def get_all_documents_by_conditions(
+    collection_name: str, conditions: object, visiblity_filter={}
+):
+    """Retireve all collection documents based on conditions"""
+    return database[collection_name].find(conditions, visiblity_filter)
 
 
 @use_timing

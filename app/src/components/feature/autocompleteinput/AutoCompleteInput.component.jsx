@@ -1,10 +1,18 @@
-import { Box, Input, Text, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Input,
+    Text,
+    Tooltip,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
 function AutoCompleteInput(props) {
+    const { colorMode } = useColorMode();
     const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
@@ -126,6 +134,13 @@ function AutoCompleteInput(props) {
                     })}
                     backgroundColor={
                         index === activeSuggestion ? 'blue.400' : 'trnasparent'
+                    }
+                    color={
+                        colorMode === 'light'
+                            ? index === activeSuggestion
+                                ? 'white'
+                                : 'black'
+                            : 'white'
                     }
                     onMouseDown={() => clickSuggestion(entry)}
                     _hover={{

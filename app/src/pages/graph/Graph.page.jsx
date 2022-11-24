@@ -1,11 +1,13 @@
 import {
     Box,
+    Button,
     Center,
     Code,
     Heading,
     HStack,
     IconButton,
     Text,
+    Textarea,
     useColorMode,
     useToast,
     VStack
@@ -14,9 +16,12 @@ import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.com
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
 import { Close, Spinner } from 'css.gg';
+import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
+import { useState } from 'react';
 import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -29,38 +34,41 @@ function GraphPage() {
     const toastRef = useRef();
     const history = useHistory();
 
+    const [comment, setComment] = useState('');
+    const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
+
+    useEffect(() => {
+        setShowLoader(store.core.dataIsLoading);
+    }, [store.core.dataIsLoading]);
+
+    useBeforeunload(() => {
+        store.core.deleteStudy();
+    });
+
     useEffect(() => {
         store.track.trackPageChange();
 
-        store.core.setCurrentGraph(
-            location.pathname.startsWith('/graph/detail')
-                ? 'detail'
-                : 'overview'
-        );
-
-        const query = queryString.parse(location.search).query;
-        const suuid = queryString.parse(location.search).suuid;
+        const studyId = queryString.parse(location.search).study;
 
         store.graphInstance.toggleVisibleComponents(-1);
 
-        if (query) {
-            if (location.pathname.startsWith('/graph/detail')) {
-                store.graph.getSearchGraph(query, 'detail', suuid);
+        if (studyId) {
+            if (store.core.studyUuid === studyId) {
+                if (
+                    store.graph.graphData.nodes.length === 0 ||
+                    store.workflow.shouldRunWorkflow
+                ) {
+                    store.graph.modifyStudy(store.core.currentGraph);
+                }
             } else {
-                store.graph.getSearchGraph(query, 'overview', suuid);
+                store.core.deleteStudy();
+                store.core.setStudyUuid(studyId);
+                store.graph.getStudy(studyId);
             }
         } else {
             history.push('/');
         }
-    }, [
-        history,
-        location.search,
-        store.graph,
-        store.track,
-        location.pathname,
-        store.core,
-        store.graphInstance
-    ]);
+    }, []);
 
     useEffect(() => {
         if (store.search.searchIsEmpty) {
@@ -84,7 +92,7 @@ function GraphPage() {
                             alignItems="flex-start"
                         >
                             <HStack justifyContent="space-between" width="100%">
-                                <Heading size="md">Server error :(</Heading>
+                                <Heading size="md">Server error 😢</Heading>
                                 <IconButton
                                     variant="ghost"
                                     size="md"
@@ -132,19 +140,121 @@ function GraphPage() {
         }
     }, [store.core.errorMessage, renderToast, store.workflow]);
 
+    const openCommentModalKey = useKeyPress('c', 'shift');
+    const closeCommentModalKey = useKeyPress('escape');
+    const submitCommentModalKey = useKeyPress('enter', 'shift');
+
+    useEffect(() => {
+        if (
+            openCommentModalKey &&
+            !store.core.showCommentModal &&
+            store.comment.commentTrigger
+        ) {
+            store.core.setShowCommentModal(true);
+        }
+
+        if (closeCommentModalKey && store.core.showCommentModal) {
+            setComment('');
+            store.core.setShowCommentModal(false);
+        }
+    }, [
+        closeCommentModalKey,
+        openCommentModalKey,
+        store.comment.commentTrigger,
+        store.core,
+        submitCommentModalKey
+    ]);
+
+    const closeCommentModal = useCallback(() => {
+        setComment('');
+        store.core.setShowCommentModal(false);
+    }, [store.core]);
+
+    useEffect(() => {
+        if (
+            submitCommentModalKey &&
+            comment !== '' &&
+            store.comment.commentTrigger
+        ) {
+            store.comment.addComment(comment);
+            closeCommentModal();
+        }
+    }, [
+        closeCommentModal,
+        comment,
+        store.comment.commentTrigger,
+        store.history,
+        submitCommentModalKey
+    ]);
+
+    const submitComment = () => {
+        if (comment !== '') {
+            store.comment.addComment(comment);
+            setComment('');
+            closeCommentModal();
+        }
+    };
+
+    const renderCommentModal = () => (
+        <Box
+            width="500px"
+            height="120px"
+            position="fixed"
+            bottom="80px"
+            left="50%"
+            transform="translate(-50%, 0)"
+            zIndex="20"
+            backgroundColor={
+                colorMode === 'light' ? 'whiteAlpha.800' : 'blackAlpha.800'
+            }
+            borderRadius="12px"
+            border="1px solid"
+            borderColor={colorMode === 'light' ? 'blackAlpha.400' : 'gray.900'}
+        >
+            <Textarea
+                width="100%"
+                height="100%"
+                borderRadius="12px"
+                padding="20px"
+                paddingRight="40px"
+                border="none"
+                resize="none"
+                placeholder="Enter your observations here ..."
+                fontSize="sm"
+                autoFocus={true}
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+            />
+            <Button
+                size="xs"
+                position="absolute"
+                right="16px"
+                bottom="16px"
+                zIndex="2"
+                onClick={submitComment}
+            >
+                Comment
+            </Button>
+            <IconButton
+                size="xs"
+                icon={<Close style={{ '--ggs': 0.7 }} />}
+                position="absolute"
+                right="12px"
+                top="12px"
+                variant="ghost"
+                zIndex="2"
+                onClick={closeCommentModal}
+            />
+        </Box>
+    );
+
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
-            <GraphComponent
-                graphData={
-                    store.core.isDetail
-                        ? store.graph.detailGraphData
-                        : store.graph.graphData
-                }
-            />
+            {store.core.showCommentModal && renderCommentModal()}
 
-            {!store.graph.currentGraphData.nodes.length && (
+            {showLoader && (
                 <Center
                     width="100%"
                     height="100%"
@@ -154,6 +264,7 @@ function GraphPage() {
                     position="fixed"
                     top="0"
                     left="0"
+                    zIndex="2"
                 >
                     <Spinner
                         thickness="4px"
@@ -165,6 +276,14 @@ function GraphPage() {
                     />
                 </Center>
             )}
+
+            <GraphComponent
+                graphData={
+                    store.core.isDetail
+                        ? store.graph.detailGraphData
+                        : store.graph.graphData
+                }
+            />
         </Box>
     );
 }

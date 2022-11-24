@@ -5,7 +5,8 @@ import {
     HStack,
     IconButton,
     Select,
-    Tooltip
+    Tooltip,
+    useColorMode
 } from '@chakra-ui/react';
 import { ArrowsH, ArrowsMergeAltH, Close, ToolbarTop } from 'css.gg';
 import { observer } from 'mobx-react';
@@ -27,6 +28,7 @@ function StatContainer(props) {
     const [connectionFeature, setConnectionFeature] = useState('all');
     const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
     const [filterProperty, setFilterProperty] = useState('degree');
+    const { colorMode } = useColorMode();
 
     const renderChartContainerTopControls = () => (
         <HStack
@@ -365,7 +367,9 @@ function StatContainer(props) {
                     : '10px'
             }
             colSpan={props.chart.colSpan}
-            backgroundColor="whiteAlpha.200"
+            backgroundColor={
+                colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.200'
+            }
             borderRadius={8}
             position="relative"
         >

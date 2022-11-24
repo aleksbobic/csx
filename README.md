@@ -87,7 +87,7 @@ To disable the upload form please go to the `docker-compose.yml` file set the `R
 
 ### Starting the project in production mode 🚀
 
-Run `docker-compose -f docker-compose.prod.yml up --build --remove-orphans`
+Run `docker-compose -f docker-compose.prod.yml up --build --remove-orphans --force-recreate`
 
 Runs the app in production mode.
 Open [http://localhost:8880](http://localhost:8880) to view it in the browser.

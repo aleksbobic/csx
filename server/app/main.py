@@ -5,6 +5,11 @@ from app.routes.util import router as util_router
 from app.routes.search import router as search_router
 from app.routes.file import router as file_router
 from app.routes.graph import router as graph_router
+from app.routes.study import router as study_router
+from app.routes.history import router as history_router
+from app.routes.comment import router as comment_router
+
+import os
 
 
 def get_application():
@@ -14,6 +19,9 @@ def get_application():
     app.include_router(search_router, prefix="/search")
     app.include_router(file_router, prefix="/file")
     app.include_router(graph_router, prefix="/graph")
+    app.include_router(study_router, prefix="/study")
+    app.include_router(history_router, prefix="/history")
+    app.include_router(comment_router, prefix="/history/comment")
 
     app.add_middleware(
         CORSMiddleware,

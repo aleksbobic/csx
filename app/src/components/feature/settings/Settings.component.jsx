@@ -13,6 +13,7 @@ import {
     IconButton,
     Select,
     Tag,
+    useColorMode,
     useColorModeValue,
     Wrap
 } from '@chakra-ui/react';
@@ -20,16 +21,17 @@ import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
 import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useContext, useState } from 'react';
+
 import { RootStoreContext } from 'stores/RootStore';
 
 function Settings() {
-    const location = useLocation();
     const store = useContext(RootStoreContext);
+    const [forceRunning, setForceRunning] = useState(false);
+    const { colorMode } = useColorMode();
 
     const graphDimensionBackground = useColorModeValue(
-        'blackAlpha.400',
+        'blackAlpha.200',
         'whiteAlpha.300'
     );
 
@@ -41,8 +43,8 @@ function Settings() {
     const updateColorScheme = value => {
         store.graphInstance.setNodeColorScheme(value);
 
-        store.graph.updateLinkColor();
-        store.graph.updateNodeColor();
+        store.graph.updateLinkColor(colorMode);
+        store.graph.updateNodeColor(colorMode);
 
         store.track.trackEvent(
             'view settings',
@@ -168,18 +170,29 @@ function Settings() {
                             id="applyforcebutton"
                             size="sm"
                             leftIcon={<Bolt style={{ '--ggs': '0.6' }} />}
+                            backgroundColor={forceRunning && 'blue.400'}
                             onClick={() => {
-                                store.graphInstance.applyForce();
-                                store.track.trackEvent(
-                                    'view settings',
-                                    'button click',
-                                    'apply force'
-                                );
+                                if (forceRunning) {
+                                    store.graphInstance.stopForce();
+                                    setForceRunning(false);
+                                    store.track.trackEvent(
+                                        'view settings',
+                                        'button click',
+                                        'run force'
+                                    );
+                                } else {
+                                    store.graphInstance.applyForce();
+                                    setForceRunning(true);
+                                    store.track.trackEvent(
+                                        'view settings',
+                                        'button click',
+                                        'stop force'
+                                    );
+                                }
                             }}
-                            disabled={store.graphInstance.forceEngine}
                             width="100%"
                         >
-                            Apply force
+                            {forceRunning ? 'Stop force' : 'Run Force'}
                         </Button>
                     </Tooltip>
                     <Tooltip
@@ -307,6 +320,7 @@ function Settings() {
                 size="sm"
                 borderRadius="full"
                 variant="solid"
+                style={{ padding: 0 }}
                 backgroundColor={
                     store.core.visibleDimensions[
                         store.core.currentGraph
@@ -317,7 +331,8 @@ function Settings() {
                 transition="all 0.1s ease-in-out"
                 _hover={{
                     backgroundColor: graphDimensionHoverBackground,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    color: 'white'
                 }}
                 onClick={() => store.core.toggleVisibleDimension(property)}
             >
@@ -330,6 +345,17 @@ function Settings() {
                         maxWidth="140px"
                         overflow="hidden"
                         textOverflow="ellipsis"
+                        padding="0 8px"
+                        _hover={{ color: 'white' }}
+                        color={
+                            store.core.visibleDimensions[
+                                store.core.currentGraph
+                            ].includes(property)
+                                ? 'white'
+                                : colorMode === 'light'
+                                ? 'black'
+                                : 'white'
+                        }
                     >
                         {property}
                     </Text>
@@ -339,7 +365,7 @@ function Settings() {
 
         return (
             <Stack>
-                <Heading size="sm" marginTop="10px" marginBottom="5px">
+                <Heading size="xs" marginTop="10px" marginBottom="5px">
                     Graph dimensions:
                 </Heading>
                 <Wrap>{tags}</Wrap>
@@ -369,10 +395,9 @@ function Settings() {
                     {renderLabelOptions()}
                     <Divider />
                     {renderLayoutOptions()}
-                    {location.pathname.startsWith('/graph/detail') && (
-                        <Divider />
-                    )}
-                    {location.pathname.startsWith('/graph/detail') &&
+
+                    {store.core.currentGraph === 'detail' && <Divider />}
+                    {store.core.currentGraph === 'detail' &&
                         renderDimensionsToggle()}
                 </VStack>
             </FormControl>
