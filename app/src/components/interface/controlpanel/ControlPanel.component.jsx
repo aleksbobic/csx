@@ -42,9 +42,7 @@ import {
 } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
-import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function ControlPanel() {
@@ -57,8 +55,6 @@ function ControlPanel() {
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [originNodeExists, setOriginNodeExists] = useState(false);
     const { colorMode } = useColorMode();
-
-    const location = useLocation();
 
     const selfCentricMenuBackground = useColorModeValue(
         'whiteAlpha.800',

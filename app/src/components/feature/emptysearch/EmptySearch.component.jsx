@@ -78,7 +78,7 @@ function EmptySearch() {
                 fontWeight="bold"
                 width="70%"
             >
-                It seems like there's no results for your query. Here's a cute
+                It seems like there are no results for your query. Here's a cute
                 tiny {emptySearchAnimalType} to make you feel better:
             </Text>
             {emptySearchImage && (
@@ -107,9 +107,9 @@ function EmptySearch() {
                         marginRight: '2px'
                     }}
                 />{' '}
-                If you don't see any suggestions for your search it's most
-                likely going to end up being empty. Don't give up try again!
-                There's also a helpful hint bellow the search bar.
+                If you don't see any suggestions for your search, it will most
+                likely be empty. Don't give up. Try again! There's also a
+                helpful hint below the search bar.
             </Text>
         </VStack>
     );

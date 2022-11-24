@@ -32,35 +32,35 @@ function CookieInfo() {
     const localStorageValues = [
         [
             'index_{name}',
-            'Used for storing index data such as data types, features and more. This data enables us to provide features such as smart connection cardinality in the network schemas, the correct input fields for particular search nodes and much more.'
+            'Used for storing index data such as data types, features, and more. This data enables us to provide features such as smart connection cardinality in the network schemas, the correct input fields for particular search nodes, and much more.'
         ],
         [
             'chartConfig',
-            'Used for storing the last configuration details of charts (widgets) in the data panel. This enables you to have the last used charts at hand when creating a new study with a previsouyl explored dataset.'
+            'Used for storing the last configuration details of charts (widgets) in the data panel. This enables you to have the previously used charts when creating a new study with a previously explored dataset.'
         ],
         [
             'currentDatasetIndex',
-            'Stores the currently selected dataset index which is used to provide the correct index in the searchbar when you reopen csx as well as to set multiple default settings when reopening CSX.'
+            'Stores the currently selected dataset index, which is used to provide the correct index in the search bar when you reopen CSX and set multiple default settings when reopening CSX.'
         ],
         [
             'currentdataset',
-            'Stores the currently selected dataset name which is used similarly to the previous value for providing multiple default settings when reopening CSX.'
+            'Stores the currently selected dataset name, which is used similarly to the previous value for providing multiple default settings when reopening CSX.'
         ],
         [
             'useruuid',
-            'Stores the unique ID generated for your browser. This is mostly used to provide features such as storing your unique settings, searches and studies without asking you to login and provide any personally identifiable information. This value will stay the same unless you clear your local storage data or switch your browser.'
+            'Stores the unique ID generated for your browser. This is mainly used to provide features such as storing your settings, searches, and studies without asking you to log in and provide any personally identifiable information. This value will stay the same unless you clear your local storage data or switch your browser.'
         ],
         [
             'studyuuid',
-            'Stores a unique ID generated for the currently selected study. This is mostly used to store data related to your study.'
+            'Stores a unique ID generated for the currently selected study. This is mainly used to store data related to your study.'
         ],
         [
             'chakra-ui-color-mode',
-            'Used to store the current color mode which can be either dark or light and can be changed by clicking on the sun/moon icon.'
+            'Used to store the current color mode, which can be either dark or light and can be changed by clicking on the sun/moon icon.'
         ],
         [
             'hidecookiebanner',
-            'Used to store the status of the cookie banner. Once you close the cookie banner the message will disappear.'
+            'Used to store the status of the cookie banner. Once you close the cookie banner, the message will disappear.'
         ],
         [
             'trackingenabled',
@@ -85,11 +85,11 @@ function CookieInfo() {
                 padding="0 16px"
                 opacity="0.7"
             >
-                To further improve CSX and provide new and exciting features we
+                To further improve CSX and provide new and exciting features, we
                 would like to ask you to enable interaction tracking. As you can
-                see from the above provided information we do not store any user
-                identifiable information and will use the collected data for
-                exclusively two purposes:
+                see from the above-provided information, we do not store
+                user-identifiable information. We will use the collected data
+                for two purposes:
             </Text>
 
             <List fontSize="xs" width="100%" padding="8px" textAlign="left">
@@ -117,23 +117,22 @@ function CookieInfo() {
                 </ListItem>
             </List>
             <Text fontSize="xs" textAlign="justify" padding="0 16px 16px">
-                To enable us to{' '}
+                Please enable interaction trucking to enable us to{' '}
                 <b style={{ color: '#43a2fb' }}>
                     contribute to the scientific community
                 </b>
                 ,{' '}
                 <b style={{ color: '#43a2fb' }}>
-                    make CSX an even better and fully featured open source tool
-                </b>{' '}
-                and{' '}
+                    make CSX an even better and fully featured open-source tool
+                </b>
+                , and{' '}
                 <b style={{ color: '#43a2fb' }}>
                     provide its services to much broader communities
-                </b>{' '}
-                please enable interaction trucking. This will allow us to
-                collect additional interaction data with CSX (such as button
-                clicks and page navigation) in addition to the data mentioned
-                above and enable us to analyse the data associated with your
-                unique ID for the purposes stated above.
+                </b>
+                . This will allow us to collect additional interaction data with
+                CSX (such as button clicks and page navigation) in addition to
+                the data mentioned above and enable us to analyze the data
+                associated with your unique ID for the purposes stated above.
             </Text>
             <FormControl display="flex" alignItems="center" paddingLeft="16px">
                 <FormLabel
@@ -209,17 +208,16 @@ function CookieInfo() {
                 opacity="0.7"
             >
                 You might be wondering does Collaboration Spotting X use cookies
-                and what is their purpose? In short, CSX does not use cookies.
+                and what is their purpose. In short, CSX does not use cookies.
                 However, it does use local storage to store a multitude of
                 values necessary to provide various features such as studies,
-                multiple dataset, local settings storage and more without
-                demanding that you login. Here you can find a short description
+                multiple datasets, local settings storage, and more without
+                demanding that you log in. Here you can find a short description
                 of all local storage values and their purpose. Since storing
-                these values is necessary for the proper functioning of the
-                system these values are saved automaically. By using CSX you
-                also understand and agree that data such as your comments in
-                studies as well as the study history are have to be stored in
-                our database.
+                these values is necessary for the system's proper functioning,
+                these values are saved automatically. By using CSX, you also
+                understand and agree that data such as your comments in studies
+                and the study history have to be stored in our database.
             </Text>
 
             <Heading

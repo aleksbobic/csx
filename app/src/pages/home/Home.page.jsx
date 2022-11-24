@@ -79,9 +79,9 @@ function HomePage() {
                 <Text fontSize="xs" paddingRight="16px">
                     We use local storage to provide essential functionality.{' '}
                     {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
-                        'To read more about it click the button below or the cookies & local storage footer link.'}
+                        'To read more about it, click the button below or the cookies & local storage footer link.'}
                     {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
-                        'However, to further improve CSX and also contribute to the open source and scientific communities we would like to ask you to enable interaction tracking.'}
+                        'However, to further improve CSX and contribute to the open source and scientific communities, we would like to ask you to enable interaction tracking.'}
                 </Text>
                 <HStack paddingTop="8px">
                     {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
@@ -157,9 +157,9 @@ function HomePage() {
                 <Text fontSize="xs" paddingRight="16px">
                     We use local storage to provide essential functionality.{' '}
                     {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
-                        'To read more about it click the button below or the cookies & local storage footer link.'}
+                        'To read more about it, click the button below or the cookies & local storage footer link.'}
                     {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
-                        'However, to further improve CSX and also contribute to the open source and scientific communities we would like to ask you to enable interaction tracking.'}
+                        'However, to further improve CSX and contribute to the open source and scientific communities, we would like to ask you to enable interaction tracking.'}
                 </Text>
                 <HStack paddingTop="8px">
                     {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
