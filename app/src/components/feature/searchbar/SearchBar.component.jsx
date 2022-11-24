@@ -84,6 +84,7 @@ function SearchBar(props) {
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
+                    store.search.setSearchIsEmpty(false);
                     props.onSubmit();
                     store.core.setCurrentGraph('overview');
                     store.graphInstance.setNodeColorScheme('component');
