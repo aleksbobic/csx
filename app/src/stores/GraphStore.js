@@ -244,6 +244,11 @@ export class GraphStore {
                 nodes[i].size
             );
 
+            if (!nodes[i].x || !nodes[i].y) {
+                nodes[i].x = Math.floor(Math.random() * (300 - -300) + -300);
+                nodes[i].y = Math.floor(Math.random() * (300 - -300) + -300);
+            }
+
             nodes[i].initialx = nodes[i].x;
             nodes[i].initialy = nodes[i].y;
             nodes[i].initialz = nodes[i].z;
@@ -1128,8 +1133,7 @@ export class GraphStore {
             data.nodes[i].z = data.nodes[i].initialz;
         }
 
-        data.nodes.push({});
-        data.nodes.pop();
+        data.nodes = [...data.nodes];
     };
 
     trimNetwork = async () => {

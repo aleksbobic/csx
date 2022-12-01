@@ -21,6 +21,7 @@ import { Switch } from '@chakra-ui/switch';
 import { Tooltip } from '@chakra-ui/tooltip';
 import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
+import { useEffect } from 'react';
 import { useContext, useState } from 'react';
 
 import { RootStoreContext } from 'stores/RootStore';
@@ -39,6 +40,12 @@ function Settings() {
         'blue.500',
         'blue.700'
     );
+
+    useEffect(() => {
+        if (!store.graphInstance.forceEngine) {
+            setForceRunning(false);
+        }
+    }, [store.graphInstance.forceEngine]);
 
     const updateColorScheme = value => {
         store.graphInstance.setNodeColorScheme(value);
@@ -170,7 +177,13 @@ function Settings() {
                             id="applyforcebutton"
                             size="sm"
                             leftIcon={<Bolt style={{ '--ggs': '0.6' }} />}
-                            backgroundColor={forceRunning && 'blue.400'}
+                            backgroundColor={
+                                forceRunning
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.200'
+                            }
                             onClick={() => {
                                 if (forceRunning) {
                                     store.graphInstance.stopForce();

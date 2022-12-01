@@ -324,16 +324,22 @@ function DataPanel(props) {
                         onInit={instance => {
                             setHistoryViewport(instance);
 
-                            const selectedNodePosition =
+                            if (
                                 store.history.nodes[
                                     store.core.studyHistoryItemIndex
-                                ].position;
+                                ]
+                            ) {
+                                const selectedNodePosition =
+                                    store.history.nodes[
+                                        store.core.studyHistoryItemIndex
+                                    ].position;
 
-                            instance.setCenter(
-                                selectedNodePosition.x + 100,
-                                selectedNodePosition.y,
-                                { duration: 0, zoom: 1 }
-                            );
+                                instance.setCenter(
+                                    selectedNodePosition.x + 100,
+                                    selectedNodePosition.y,
+                                    { duration: 0, zoom: 1 }
+                                );
+                            }
                         }}
                     >
                         <MiniMap

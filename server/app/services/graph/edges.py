@@ -290,7 +290,7 @@ def get_shortest_schema_paths(
         source_leaf_nodes, shortest_schema_paths, shortest_path_candidates, "src", graph
     )
     shortest_schema_paths = add_shortest_path_from_leafs(
-        source_leaf_nodes,
+        target_leaf_nodes,
         shortest_schema_paths,
         shortest_path_candidates,
         "dest",
