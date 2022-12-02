@@ -523,9 +523,13 @@ function ControlPanel() {
                             onClick={toggleControlPanel}
                             icon={
                                 isOpen ? (
-                                    <ChevronDoubleLeft />
+                                    <ChevronDoubleLeft
+                                        style={{ '--ggs': 0.8 }}
+                                    />
                                 ) : (
-                                    <ChevronDoubleRight />
+                                    <ChevronDoubleRight
+                                        style={{ '--ggs': 0.8 }}
+                                    />
                                 )
                             }
                         />
@@ -560,7 +564,7 @@ function ControlPanel() {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <Info />
+                                <Info style={{ '--ggs': 0.8 }} />
                             </Box>
                         </Tooltip>
                     </Tab>
@@ -594,7 +598,7 @@ function ControlPanel() {
                                 justifyContent="center"
                                 alignItems="center"
                             >
-                                <Eye />
+                                <Eye style={{ '--ggs': 0.8 }} />
                             </Box>
                         </Tooltip>
                     </Tab>

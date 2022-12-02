@@ -7,7 +7,8 @@ import {
     EditableTextarea,
     Tag,
     Text,
-    Tooltip
+    Tooltip,
+    useColorMode
 } from '@chakra-ui/react';
 import { Heart } from 'css.gg';
 import { observer } from 'mobx-react';
@@ -16,6 +17,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function StudyInfo() {
     const store = useContext(RootStoreContext);
+    const { colorMode } = useColorMode();
 
     return (
         <Stack
@@ -27,8 +29,9 @@ function StudyInfo() {
             width="100%"
             alignItems="start"
         >
-            <Tag size="sm">Study name:</Tag>
-
+            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
+                Study name:
+            </Text>
             <Tooltip label={store.core.studyName}>
                 <Editable
                     value={store.core.studyName}
@@ -39,12 +42,21 @@ function StudyInfo() {
                     <EditablePreview
                         size="xs"
                         textTransform="uppercase"
-                        width="100%"
+                        maxWidth="100%"
+                        minWidth="40px"
+                        height="30px"
                         whiteSpace="nowrap"
                         overflow="hidden"
                         textOverflow="ellipsis"
-                        paddingLeft="8px"
+                        paddingLeft="10px"
                         fontWeight="bold"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        display="inline-block"
+                        paddingRight="10px"
                     />
                     <EditableInput
                         size="xs"
@@ -53,13 +65,22 @@ function StudyInfo() {
                         whiteSpace="nowrap"
                         overflow="hidden"
                         textOverflow="ellipsis"
-                        paddingLeft="8px"
+                        paddingLeft="10px"
                         fontWeight="bold"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        display="inline-block"
+                        paddingRight="10px"
                     />
                 </Editable>
             </Tooltip>
 
-            <Tag size="sm">Study description:</Tag>
+            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
+                Study description:
+            </Text>
             <Tooltip
                 label={
                     store.core.studyDescription === ''
@@ -74,7 +95,18 @@ function StudyInfo() {
                     width="100%"
                     placeholder="Click here to add a study description. 👀"
                 >
-                    <EditablePreview size="xs" width="100%" paddingLeft="8px" />
+                    <EditablePreview
+                        size="xs"
+                        width="100%"
+                        paddingLeft="10px"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        display="inline-block"
+                        paddingRight="10px"
+                    />
                     <EditableTextarea
                         size="xs"
                         width="100%"
@@ -82,7 +114,10 @@ function StudyInfo() {
                     />
                 </Editable>
             </Tooltip>
-            <Tag size="sm">Selected index:</Tag>
+            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
+                Selected index:
+            </Text>
+
             <Text fontSize="sm" paddingLeft="8px">
                 {store.search.currentDataset}
             </Text>

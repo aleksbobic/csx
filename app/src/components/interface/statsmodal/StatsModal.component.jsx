@@ -21,6 +21,7 @@ import {
     TabPanels,
     Tabs,
     Tooltip,
+    useColorMode,
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
@@ -53,6 +54,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { colorMode } = useColorMode();
 
     useEffect(() => {
         if (store.stats.isStatsModalVisible) {
@@ -408,61 +410,27 @@ function FileUploadModal() {
         return (
             <Box height="225px" overflowY="scroll" width="100%">
                 <SimpleGrid columns={3} spacing={2}>
-                    <FormControl
-                        backgroundColor="whiteAlpha.200"
-                        borderRadius="6px"
-                        padding="10px"
-                    >
-                        <Heading size="xs" marginBottom="6px">
-                            Custom Title:
-                        </Heading>
-                        <Editable
-                            defaultValue={
-                                store.stats.newChartProps.title
-                                    ? store.stats.newChartProps.title
-                                    : 'Chart title'
-                            }
-                            onSubmit={val => store.stats.changeChartTitle(val)}
-                            height="28px"
-                        >
-                            <EditablePreview
-                                padding="2px 6px"
-                                margin="0"
-                                maxWidth="100%"
-                                width="100%"
-                                overflow="hidden"
-                                whiteSpace="nowrap"
-                                textOverflow="ellipsis"
-                                backgroundColor="transparent"
-                                transition="all 0.1s ease-in-out"
-                                _hover={{ background: 'whiteAlpha.200' }}
-                            />
-                            <EditableInput
-                                padding="2px 6px"
-                                margin="0"
-                                maxWidth="100%"
-                                width="100%"
-                            />
-                        </Editable>
-                    </FormControl>
-
-                    {statTypes.type === 'chart' && (
+                    <Tooltip label="The title at the top of the widget">
                         <FormControl
-                            backgroundColor="whiteAlpha.200"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.200'
+                            }
                             borderRadius="6px"
                             padding="10px"
                         >
                             <Heading size="xs" marginBottom="6px">
-                                Hover label:
+                                Custom Title:
                             </Heading>
                             <Editable
                                 defaultValue={
-                                    store.stats.newChartProps.hoverLabel
-                                        ? store.stats.newChartProps.hoverLabel
-                                        : 'Hover label'
+                                    store.stats.newChartProps.title
+                                        ? store.stats.newChartProps.title
+                                        : 'Chart title'
                                 }
                                 onSubmit={val =>
-                                    store.stats.changeChartHoverLabel(val)
+                                    store.stats.changeChartTitle(val)
                                 }
                                 height="28px"
                             >
@@ -486,11 +454,66 @@ function FileUploadModal() {
                                 />
                             </Editable>
                         </FormControl>
+                    </Tooltip>
+
+                    {statTypes.type === 'chart' && (
+                        <Tooltip label="Label shown in front of value when hovering over one of the chart elements">
+                            <FormControl
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'whiteAlpha.200'
+                                }
+                                borderRadius="6px"
+                                padding="10px"
+                            >
+                                <Heading size="xs" marginBottom="6px">
+                                    Hover label:
+                                </Heading>
+                                <Editable
+                                    defaultValue={
+                                        store.stats.newChartProps.hoverLabel
+                                            ? store.stats.newChartProps
+                                                  .hoverLabel
+                                            : 'Hover label'
+                                    }
+                                    onSubmit={val =>
+                                        store.stats.changeChartHoverLabel(val)
+                                    }
+                                    height="28px"
+                                >
+                                    <EditablePreview
+                                        padding="2px 6px"
+                                        margin="0"
+                                        maxWidth="100%"
+                                        width="100%"
+                                        overflow="hidden"
+                                        whiteSpace="nowrap"
+                                        textOverflow="ellipsis"
+                                        backgroundColor="transparent"
+                                        transition="all 0.1s ease-in-out"
+                                        _hover={{
+                                            background: 'whiteAlpha.200'
+                                        }}
+                                    />
+                                    <EditableInput
+                                        padding="2px 6px"
+                                        margin="0"
+                                        maxWidth="100%"
+                                        width="100%"
+                                    />
+                                </Editable>
+                            </FormControl>
+                        </Tooltip>
                     )}
                     {statTypes.type === 'chart' &&
                         statTypes.chartType === 'grouped bar' && (
                             <FormControl
-                                backgroundColor="whiteAlpha.200"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'whiteAlpha.200'
+                                }
                                 borderRadius="6px"
                                 padding="10px"
                             >
@@ -538,7 +561,11 @@ function FileUploadModal() {
 
                     {statTypes.type === 'chart' && (
                         <FormControl
-                            backgroundColor="whiteAlpha.200"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.200'
+                            }
                             borderRadius="6px"
                             padding="10px"
                         >
@@ -570,7 +597,11 @@ function FileUploadModal() {
 
                     {statTypes.type === 'chart' && (
                         <FormControl
-                            backgroundColor="whiteAlpha.200"
+                            backgroundColor={
+                                colorMode === 'light'
+                                    ? 'blackAlpha.200'
+                                    : 'whiteAlpha.200'
+                            }
                             borderRadius="6px"
                             padding="10px"
                         >
@@ -605,7 +636,11 @@ function FileUploadModal() {
                     {statTypes.type === 'chart' &&
                         statTypes.chartType === 'grouped bar' && (
                             <FormControl
-                                backgroundColor="whiteAlpha.200"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'whiteAlpha.200'
+                                }
                                 borderRadius="6px"
                                 padding="10px"
                             >
@@ -643,7 +678,11 @@ function FileUploadModal() {
                         store.stats.newChartProps.element_values !==
                             'types' && (
                             <FormControl
-                                backgroundColor="whiteAlpha.200"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'whiteAlpha.200'
+                                }
                                 borderRadius="6px"
                                 padding="10px"
                             >
@@ -696,7 +735,11 @@ function FileUploadModal() {
                     <TabList
                         width="200px"
                         height="100%"
-                        backgroundColor="whiteAlpha.200"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
                         borderRadius="4px"
                         padding="8px"
                     >
@@ -782,10 +825,17 @@ function FileUploadModal() {
                                         height="100%"
                                         justifyContent="space-between"
                                     >
+                                        <Heading size="sm" opacity="0.7">
+                                            Example widget
+                                        </Heading>
                                         <Box
                                             height="250px"
                                             width="100%"
-                                            backgroundColor="whiteAlpha.200"
+                                            backgroundColor={
+                                                colorMode === 'light'
+                                                    ? 'blackAlpha.200'
+                                                    : 'whiteAlpha.200'
+                                            }
                                             padding="10px"
                                             borderRadius="6px"
                                         >
@@ -798,6 +848,9 @@ function FileUploadModal() {
                                                       entry['statType']
                                                   )}
                                         </Box>
+                                        <Heading size="sm" opacity="0.7">
+                                            Widget settings
+                                        </Heading>
                                         {renderSelectionElements(entry)}
                                     </VStack>
                                 </TabPanel>
@@ -818,12 +871,14 @@ function FileUploadModal() {
             closeOnEsc={false}
             closeOnOverlayClick={false}
         >
-            <ModalOverlay bg="blackAlpha.600" />
+            <ModalOverlay
+                bg={colorMode === 'light' ? 'blackAlpha.800' : 'blackAlpha.600'}
+            />
             <ModalContent
                 width="748px"
                 minWidth="748px"
                 maxWidth="748px"
-                background="black"
+                background={colorMode === 'light' ? 'white' : 'black'}
                 borderRadius="10px"
                 borderWidth="1px"
                 borderStyle="solid"
@@ -860,8 +915,9 @@ function FileUploadModal() {
                         _hover={{ backgroundColor: 'blue.600' }}
                         _active={{ backgroundColor: 'blue.700' }}
                         onClick={() => store.stats.addChart()}
+                        color={'white'}
                     >
-                        Add chart
+                        Add widget
                     </Button>
                 </ModalFooter>
             </ModalContent>

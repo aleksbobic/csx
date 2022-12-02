@@ -15,11 +15,11 @@ import {
     Tag,
     useColorMode,
     useColorModeValue,
-    Wrap
+    Wrap,
+    Tooltip
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
-import { Tooltip } from '@chakra-ui/tooltip';
-import { Anchor, Bolt, Undo } from 'css.gg';
+import { Anchor, Bolt, Info, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useEffect } from 'react';
 import { useContext, useState } from 'react';
@@ -261,64 +261,87 @@ function Settings() {
     const renderVisibilityOptions = () => {
         return (
             <>
-                <FormLabel htmlFor="edges" style={{ marginBottom: 0 }}>
-                    <Switch
-                        id="edges"
-                        size="sm"
-                        marginRight="10px"
-                        isChecked={store.graphInstance.linkVisibility}
-                        value={store.graphInstance.linkVisibility}
-                        onChange={() => {
-                            store.graphInstance.toggleLinkVisibility();
-                            store.track.trackEvent(
-                                'view settings',
-                                'toggle click',
-                                `${
-                                    store.graphInstance.linkVisibility
-                                        ? 'show'
-                                        : 'hide'
-                                } links`
-                            );
-                        }}
-                    />
-                    Edges
-                </FormLabel>
-
-                <FormLabel htmlFor="nodelabels">
-                    <Switch
-                        id="nodelabels"
-                        size="sm"
-                        marginRight="10px"
-                        isChecked={store.graphInstance.labels.isVisible}
-                        value={store.graphInstance.labels.isVisible}
-                        onChange={() => {
-                            store.graphInstance.toggleLabelVisibility();
-                            store.track.trackEvent(
-                                'view settings',
-                                'toggle click',
-                                `${
-                                    store.graphInstance.labels.isVisible
-                                        ? 'show'
-                                        : 'hide'
-                                } labels`
-                            );
-                        }}
-                    />
-                    Node labels
-                </FormLabel>
-                <FormLabel htmlFor="nodelabels">
-                    <Switch
-                        id="nodelabels"
-                        size="sm"
-                        marginRight="10px"
-                        isChecked={store.graphInstance.orphanNodeVisibility}
-                        value={store.graphInstance.orphanNodeVisibility}
-                        onChange={
-                            store.graphInstance.toggleOrphanNodeVisibility
-                        }
-                    />
-                    Orphan nodes
-                </FormLabel>
+                <Tooltip
+                    label={
+                        store.graphInstance.linkVisibility
+                            ? 'Hide edges'
+                            : 'Show edges'
+                    }
+                >
+                    <HStack spacing="1">
+                        <Switch
+                            id="edges"
+                            size="sm"
+                            marginRight="10px"
+                            isChecked={store.graphInstance.linkVisibility}
+                            value={store.graphInstance.linkVisibility}
+                            onChange={() => {
+                                store.graphInstance.toggleLinkVisibility();
+                                store.track.trackEvent(
+                                    'view settings',
+                                    'toggle click',
+                                    `${
+                                        store.graphInstance.linkVisibility
+                                            ? 'show'
+                                            : 'hide'
+                                    } links`
+                                );
+                            }}
+                        />
+                        <Text fontSize="sm">Edges</Text>
+                    </HStack>
+                </Tooltip>
+                <Tooltip
+                    label={
+                        store.graphInstance.labels.isVisible
+                            ? 'Hide node labels'
+                            : 'Show node labels'
+                    }
+                >
+                    <HStack spacing="1">
+                        <Switch
+                            id="nodelabels"
+                            size="sm"
+                            marginRight="10px"
+                            isChecked={store.graphInstance.labels.isVisible}
+                            value={store.graphInstance.labels.isVisible}
+                            onChange={() => {
+                                store.graphInstance.toggleLabelVisibility();
+                                store.track.trackEvent(
+                                    'view settings',
+                                    'toggle click',
+                                    `${
+                                        store.graphInstance.labels.isVisible
+                                            ? 'show'
+                                            : 'hide'
+                                    } labels`
+                                );
+                            }}
+                        />
+                        <Text fontSize="sm">Node labels</Text>
+                    </HStack>
+                </Tooltip>
+                <Tooltip
+                    label={
+                        store.graphInstance.orphanNodeVisibility
+                            ? 'Hide orphan nodes'
+                            : 'Show orphan nodes'
+                    }
+                >
+                    <HStack spacing="1">
+                        <Switch
+                            id="nodelabels"
+                            size="sm"
+                            marginRight="10px"
+                            isChecked={store.graphInstance.orphanNodeVisibility}
+                            value={store.graphInstance.orphanNodeVisibility}
+                            onChange={
+                                store.graphInstance.toggleOrphanNodeVisibility
+                            }
+                        />
+                        <Text fontSize="sm">Orphan nodes</Text>
+                    </HStack>
+                </Tooltip>
             </>
         );
     };

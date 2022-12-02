@@ -115,7 +115,7 @@ function Overview(props) {
             position="relative"
         >
             <Box width="100%" height="100%" padding="20px">
-                <Tooltip label="Add new statistic">
+                <Tooltip label="Add new widget">
                     <IconButton
                         width="100%"
                         height="100%"
