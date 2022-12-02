@@ -255,7 +255,7 @@ function NavigationPanelComponent() {
 
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>
-            <Tooltip label="Retrieval workspace">
+            <Tooltip label="Search workspace">
                 <Button
                     variant={
                         location.pathname === '/search' ? 'solid' : 'outline'
@@ -484,15 +484,25 @@ function NavigationPanelComponent() {
                     {location.pathname !== '/' && (
                         <HStack
                             height="40px"
-                            style={{ marginLeft: '125px' }}
+                            style={{
+                                marginLeft:
+                                    process?.env
+                                        .REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                                    'true'
+                                        ? '125px'
+                                        : '0'
+                            }}
                             spacing="20px"
                         >
-                            <Divider
-                                opacity="0.4"
-                                orientation="vertical"
-                                height="100%"
-                                backgroundColor="gray.900"
-                            />
+                            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                                'true' && (
+                                <Divider
+                                    opacity="0.4"
+                                    orientation="vertical"
+                                    height="100%"
+                                    backgroundColor="gray.900"
+                                />
+                            )}
                             <Breadcrumb
                                 marginLeft="20px"
                                 spacing="2px"

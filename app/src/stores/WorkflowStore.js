@@ -307,16 +307,16 @@ export class WorkflowStore {
                 keyphrase: query,
                 getDefaultValue: this.getDefaultValue,
                 deleteNode: this.deleteNode,
-                colorMode: this.store.core.colorMode
+                colorMode: this.store.core.colorMode || 'dark'
             },
             style: {
                 border: `1px solid ${
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'searchNode'
                     ]
                 }`,
                 backgroundColor:
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'background'
                     ],
                 borderRadius: '10px',
@@ -332,16 +332,16 @@ export class WorkflowStore {
                 children: [],
                 parents: [],
                 frunWorkflow: this.runWorkFlow,
-                colorMode: this.store.core.colorMode
+                colorMode: this.store.core.colorMode || 'dark'
             },
             style: {
                 border: `1px solid ${
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'resultsNode'
                     ]
                 }`,
                 backgroundColor:
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'background'
                     ],
                 borderRadius: '10px',
@@ -369,12 +369,6 @@ export class WorkflowStore {
     };
 
     addNodesFromJSONQuery = query => {
-        // search: {feature, keyphrase}
-        // get dataset: {dataset}
-        // filter: {feature, min, max}
-        // connect: {connector, queries}
-        // visualise
-
         switch (query.action) {
             case 'search':
                 this.nodes.push({
@@ -394,18 +388,18 @@ export class WorkflowStore {
                         keyphrase: query.keyphrase,
                         getDefaultValue: this.getDefaultValue,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode
+                        colorMode: this.store.core.colorMode || 'dark'
                     },
                     style: {
                         border: `1px solid ${
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'searchNode'
-                            ]
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['searchNode']
                         }`,
                         backgroundColor:
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'background'
-                            ],
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -421,18 +415,18 @@ export class WorkflowStore {
                         parents: [],
                         dataset: this.store.search.currentDataset,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode
+                        colorMode: this.store.core.colorMode || 'dark'
                     },
                     style: {
                         border: `1px solid ${
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'datasetNode'
-                            ]
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['datasetNode']
                         }`,
                         backgroundColor:
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'background'
-                            ],
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -459,18 +453,18 @@ export class WorkflowStore {
                             query.feature
                         )['max'],
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode
+                        colorMode: this.store.core.colorMode || 'dark'
                     },
                     style: {
                         border: `1px solid ${
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'filterNode'
-                            ]
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['filterNode']
                         }`,
                         backgroundColor:
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'background'
-                            ],
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -491,18 +485,18 @@ export class WorkflowStore {
                         parents: [],
                         connector: query.connector,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode
+                        colorMode: this.store.core.colorMode || 'dark'
                     },
                     style: {
                         border: `1px solid ${
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'connectorNode'
-                            ]
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['connectorNode']
                         }`,
                         backgroundColor:
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'background'
-                            ],
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
                         borderRadius: '10px',
                         padding: '3px'
                     }
@@ -544,18 +538,18 @@ export class WorkflowStore {
                         children: [],
                         parents: [],
                         runWorkflow: this.runWorkFlow,
-                        colorMode: this.store.core.colorMode
+                        colorMode: this.store.core.colorMode || 'dark'
                     },
                     style: {
                         border: `1px solid ${
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'resultsNode'
-                            ]
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['resultsNode']
                         }`,
                         backgroundColor:
-                            this.actionNodeColors[this.store.core.colorMode][
-                                'background'
-                            ],
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
                         borderRadius: '10px',
                         padding: '3px'
                     }

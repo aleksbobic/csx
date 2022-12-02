@@ -207,29 +207,35 @@ function DatasetGrid(props) {
                                             }
                                         />
                                     </Tooltip>
-                                    <Tooltip
-                                        label={`Explore entire ${dataset}`}
-                                    >
-                                        <IconButton
-                                            flexGrow="0"
-                                            size="sm"
-                                            variant="solid"
-                                            opacity="0.5"
-                                            _groupHover={{
-                                                opacity: '1'
-                                            }}
-                                            onClick={() =>
-                                                navigateToAdvancedSearch(
-                                                    dataset
-                                                )
-                                            }
-                                            icon={
-                                                <ArrowRight
-                                                    style={{ '--ggs': '0.7' }}
-                                                />
-                                            }
-                                        />
-                                    </Tooltip>
+                                    {process?.env
+                                        .REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                                        'true' && (
+                                        <Tooltip
+                                            label={`Explore entire ${dataset}`}
+                                        >
+                                            <IconButton
+                                                flexGrow="0"
+                                                size="sm"
+                                                variant="solid"
+                                                opacity="0.5"
+                                                _groupHover={{
+                                                    opacity: '1'
+                                                }}
+                                                onClick={() =>
+                                                    navigateToAdvancedSearch(
+                                                        dataset
+                                                    )
+                                                }
+                                                icon={
+                                                    <ArrowRight
+                                                        style={{
+                                                            '--ggs': '0.7'
+                                                        }}
+                                                    />
+                                                }
+                                            />
+                                        </Tooltip>
+                                    )}
                                 </Flex>
                             ))}
                         </SimpleGrid>
