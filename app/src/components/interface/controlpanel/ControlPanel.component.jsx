@@ -44,6 +44,8 @@ import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -625,19 +627,45 @@ function ControlPanel() {
                         borderColor={edgeColor}
                         position="relative"
                     >
-                        <TabPanel
-                            width="250px"
-                            overflowY="scroll"
-                            height="100%"
-                        >
-                            <StudyInfoComponent />
+                        <TabPanel width="250px" height="100%">
+                            <OverlayScrollbarsComponent
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    paddingLeft: '10px',
+                                    paddingRight: '10px'
+                                }}
+                                options={{
+                                    scrollbars: {
+                                        theme: 'os-theme-dark',
+                                        autoHide: 'scroll',
+                                        autoHideDelay: 600,
+                                        clickScroll: true
+                                    }
+                                }}
+                            >
+                                <StudyInfoComponent />
+                            </OverlayScrollbarsComponent>
                         </TabPanel>
-                        <TabPanel
-                            width="250px"
-                            overflowY="scroll"
-                            height="100%"
-                        >
-                            <SettingsComponent />
+                        <TabPanel width="250px" height="100%">
+                            <OverlayScrollbarsComponent
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    paddingLeft: '10px',
+                                    paddingRight: '10px'
+                                }}
+                                options={{
+                                    scrollbars: {
+                                        theme: 'os-theme-dark',
+                                        autoHide: 'scroll',
+                                        autoHideDelay: 600,
+                                        clickScroll: true
+                                    }
+                                }}
+                            >
+                                <SettingsComponent />
+                            </OverlayScrollbarsComponent>
                         </TabPanel>
                     </TabPanels>
 

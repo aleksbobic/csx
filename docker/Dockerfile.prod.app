@@ -19,6 +19,7 @@ RUN npm run build
 FROM nginx:1.23.1-alpine
 COPY --from=build /home/node/csx/build /usr/share/nginx/html
 COPY ./nginx/nginx.prod.conf /etc/nginx/nginx.conf
+COPY ./nginx/mime.types /etc/nginx/mime.types
 RUN apk update && apk add --no-cache bash
 
 EXPOSE 80

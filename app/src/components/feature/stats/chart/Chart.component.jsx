@@ -19,13 +19,14 @@ import {
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 
-import { Heading, Text, VStack } from '@chakra-ui/react';
+import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
 
 function Chart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
+    const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
 
     useEffect(() => {
@@ -216,7 +217,9 @@ function Chart(props) {
                 height="100%"
                 width="100%"
                 spacing={1}
-                backgroundColor="blackAlpha.800"
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
                 borderRadius="6px"
                 justifyContent="center"
                 padding="20%"

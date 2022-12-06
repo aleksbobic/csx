@@ -25,6 +25,9 @@ import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
+
 function CookieInfo() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
@@ -260,39 +263,56 @@ function CookieInfo() {
                 borderRadius="8px"
                 width="100%"
             >
-                <Box width="100%" height="168px" overflowY="scroll">
-                    <Table>
-                        <Tbody>
-                            {localStorageValues.map(entry => (
-                                <Tr
-                                    opacity="0.5"
-                                    transition="0.2s all ease-in-out"
-                                    _hover={{ opacity: 1 }}
-                                    key={`cookie_${entry[0]}`}
-                                >
-                                    <Td
-                                        borderBottom="none"
-                                        fontSize="xs"
-                                        fontWeight="bold"
-                                        padding="8px"
-                                        textTransform="uppercase"
-                                        verticalAlign="top"
-                                        paddingLeft="0"
+                <OverlayScrollbarsComponent
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px'
+                    }}
+                    options={{
+                        scrollbars: {
+                            theme: 'os-theme-dark',
+                            autoHide: 'scroll',
+                            autoHideDelay: 600,
+                            clickScroll: true
+                        }
+                    }}
+                >
+                    <Box width="100%" height="168px">
+                        <Table>
+                            <Tbody>
+                                {localStorageValues.map(entry => (
+                                    <Tr
+                                        opacity="0.5"
+                                        transition="0.2s all ease-in-out"
+                                        _hover={{ opacity: 1 }}
+                                        key={`cookie_${entry[0]}`}
                                     >
-                                        {entry[0]}
-                                    </Td>
-                                    <Td
-                                        borderBottom="none"
-                                        padding="8px"
-                                        fontSize="xs"
-                                    >
-                                        {entry[1]}
-                                    </Td>
-                                </Tr>
-                            ))}
-                        </Tbody>
-                    </Table>
-                </Box>
+                                        <Td
+                                            borderBottom="none"
+                                            fontSize="xs"
+                                            fontWeight="bold"
+                                            padding="8px"
+                                            textTransform="uppercase"
+                                            verticalAlign="top"
+                                            paddingLeft="0"
+                                        >
+                                            {entry[0]}
+                                        </Td>
+                                        <Td
+                                            borderBottom="none"
+                                            padding="8px"
+                                            fontSize="xs"
+                                        >
+                                            {entry[1]}
+                                        </Td>
+                                    </Tr>
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </Box>
+                </OverlayScrollbarsComponent>
             </Box>
             {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
                 renderInteractionTracking()}

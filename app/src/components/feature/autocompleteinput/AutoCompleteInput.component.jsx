@@ -10,6 +10,8 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function AutoCompleteInput(props) {
     const { colorMode } = useColorMode();
@@ -179,12 +181,27 @@ function AutoCompleteInput(props) {
                 <Box
                     width="auto"
                     maxHeight="200px"
-                    overflowX="scroll"
                     borderRadius="5px"
                     className="suggestionContainer"
                     style={{ ...props.suggestionStyle }}
                 >
-                    {getSuggestionList()}
+                    <OverlayScrollbarsComponent
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            maxHeight: '200px'
+                        }}
+                        options={{
+                            scrollbars: {
+                                theme: 'os-theme-dark',
+                                autoHide: 'move',
+                                autoHideDelay: 600,
+                                clickScroll: true
+                            }
+                        }}
+                    >
+                        {getSuggestionList()}
+                    </OverlayScrollbarsComponent>
                 </Box>
             )}
         </>

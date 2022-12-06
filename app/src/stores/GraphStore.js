@@ -699,7 +699,6 @@ export class GraphStore {
             response = await axios.post('study/', params);
         } catch (error) {
             this.store.core.setDataIsLoading(false);
-            console.log(error);
             this.store.search.setSearchIsEmpty(true);
             return this.store.core.handleError(error);
         }

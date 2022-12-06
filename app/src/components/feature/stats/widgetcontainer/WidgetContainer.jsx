@@ -11,6 +11,7 @@ import {
 import { ArrowsH, ArrowsMergeAltH, Close, ToolbarTop } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import {
     Children,
     cloneElement,
@@ -20,7 +21,7 @@ import {
 } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-function StatContainer(props) {
+function WidgetContainer(props) {
     const store = useContext(RootStoreContext);
     const [isExpanded, setIsExpanded] = useState(props.chart.colSpan === 2);
     const [networkData, setNetworkData] = useState(props.chart.network_data);
@@ -29,6 +30,16 @@ function StatContainer(props) {
     const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
     const [filterProperty, setFilterProperty] = useState('degree');
     const { colorMode } = useColorMode();
+
+    useEffect(() => {
+        if (props.maxColSize === 1) {
+            setIsExpanded(true);
+            store.stats.expandChart(props.chart.id, false);
+        } else {
+            setIsExpanded(false);
+            store.stats.shrinkChart(props.chart.id, false);
+        }
+    }, [props.chart.id, props.maxColSize, store.stats]);
 
     const renderChartContainerTopControls = () => (
         <HStack
@@ -237,42 +248,43 @@ function StatContainer(props) {
                     </Select>
                 </Tooltip>
             )}
-            {props.chart.colSpan === 1 ? (
-                <Tooltip label="Expand">
-                    <IconButton
-                        icon={<ArrowsH />}
-                        size="sm"
-                        variant="ghost"
-                        opacity={0.5}
-                        backgroundColor="transparent"
-                        _hover={{
-                            opacity: 1
-                        }}
-                        onClick={() => {
-                            setIsExpanded(true);
-                            store.stats.expandChart(props.chart.id);
-                        }}
-                    />
-                </Tooltip>
-            ) : (
-                <Tooltip label="Shrink">
-                    <IconButton
-                        icon={<ArrowsMergeAltH />}
-                        size="sm"
-                        variant="ghost"
-                        opacity={0.5}
-                        _hover={{
-                            opacity: 1
-                        }}
-                        onClick={() => {
-                            setIsExpanded(false);
-                            store.stats.shrinkChart(props.chart.id);
-                        }}
-                    />
-                </Tooltip>
-            )}
+            {props.maxColSize > 1 &&
+                (props.chart.colSpan === 1 ? (
+                    <Tooltip label="Expand">
+                        <IconButton
+                            icon={<ArrowsH />}
+                            size="sm"
+                            variant="ghost"
+                            opacity={0.5}
+                            backgroundColor="transparent"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            onClick={() => {
+                                setIsExpanded(true);
+                                store.stats.expandChart(props.chart.id);
+                            }}
+                        />
+                    </Tooltip>
+                ) : (
+                    <Tooltip label="Shrink">
+                        <IconButton
+                            icon={<ArrowsMergeAltH />}
+                            size="sm"
+                            variant="ghost"
+                            opacity={0.5}
+                            _hover={{
+                                opacity: 1
+                            }}
+                            onClick={() => {
+                                setIsExpanded(false);
+                                store.stats.shrinkChart(props.chart.id);
+                            }}
+                        />
+                    </Tooltip>
+                ))}
 
-            <Tooltip label="Remove chart">
+            <Tooltip label="Remove widget">
                 <IconButton
                     icon={<Close />}
                     size="sm"
@@ -388,11 +400,12 @@ function StatContainer(props) {
         </GridItem>
     );
 }
-StatContainer.propTypes = {
+WidgetContainer.propTypes = {
     statObject: PropTypes.object,
     chart: PropTypes.object,
     index: PropTypes.number,
-    title: PropTypes.string
+    title: PropTypes.string,
+    maxColSize: PropTypes.number
 };
 
-export default observer(StatContainer);
+export default observer(WidgetContainer);

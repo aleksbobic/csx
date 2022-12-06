@@ -14,6 +14,9 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
+
 function CSX() {
     const { colorMode } = useColorMode();
 
@@ -28,35 +31,54 @@ function CSX() {
                         />
                     </Helmet>
                 )}
-                <NavigationPanelComponent />
-                <Box
-                    backgroundColor={
-                        colorMode === 'light' ? 'white' : '#171A23'
-                    }
-                    height="100%"
-                    width="100%"
-                    zIndex="1"
+                <OverlayScrollbarsComponent
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        paddingLeft: '10px',
+                        paddingRight: '10px',
+                        backgroundColor:
+                            colorMode === 'light' ? 'white' : '#171A23'
+                    }}
+                    options={{
+                        scrollbars: {
+                            theme: 'os-theme-dark',
+                            autoHide: 'scroll',
+                            autoHideDelay: 600,
+                            clickScroll: true
+                        }
+                    }}
                 >
-                    <RRSwitch>
-                        <Route exact path="/" label="home">
-                            <HomePage />
-                        </Route>
-                        <Route path="/graph/detail" label="graphdetail">
-                            <ControlPanelComponent />
-                            <OverviewGraphPage />
-                        </Route>
-                        <Route path="/graph" label="graph">
-                            <ControlPanelComponent />
-                            <OverviewGraphPage />
-                        </Route>
-                        {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                            'true' && (
-                            <Route path="/search" label="search">
-                                <SearchPage />
+                    <NavigationPanelComponent />
+                    <Box
+                        backgroundColor={
+                            colorMode === 'light' ? 'white' : '#171A23'
+                        }
+                        height="100%"
+                        width="100%"
+                        zIndex="1"
+                    >
+                        <RRSwitch>
+                            <Route exact path="/" label="home">
+                                <HomePage />
                             </Route>
-                        )}
-                    </RRSwitch>
-                </Box>
+                            <Route path="/graph/detail" label="graphdetail">
+                                <ControlPanelComponent />
+                                <OverviewGraphPage />
+                            </Route>
+                            <Route path="/graph" label="graph">
+                                <ControlPanelComponent />
+                                <OverviewGraphPage />
+                            </Route>
+                            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                                'true' && (
+                                <Route path="/search" label="search">
+                                    <SearchPage />
+                                </Route>
+                            )}
+                        </RRSwitch>
+                    </Box>
+                </OverlayScrollbarsComponent>
             </Router>
         </HelmetProvider>
     );

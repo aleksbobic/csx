@@ -247,14 +247,16 @@ export class WorkflowStore {
 
     updateNodeStyles = () => {
         this.nodes = this.nodes.map(node => {
-            node.data.colorMode = this.store.core.colorMode;
+            node.data.colorMode = this.store.core.colorMode || 'dark';
             node.style = {
                 ...node.style,
                 border: `1px solid ${
-                    this.actionNodeColors[this.store.core.colorMode][node.type]
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        node.type
+                    ]
                 }`,
                 backgroundColor:
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'background'
                     ]
             };
@@ -641,7 +643,7 @@ export class WorkflowStore {
         }
 
         data.deleteNode = this.deleteNode;
-        data.colorMode = this.store.core.colorMode;
+        data.colorMode = this.store.core.colorMode || 'dark';
 
         const newNode = {
             id: uuidv4(),
@@ -650,10 +652,12 @@ export class WorkflowStore {
             data,
             style: {
                 border: `1px solid ${
-                    this.actionNodeColors[this.store.core.colorMode][nodeType]
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        nodeType
+                    ]
                 }`,
                 backgroundColor:
-                    this.actionNodeColors[this.store.core.colorMode][
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
                         'background'
                     ],
                 borderRadius: '10px',

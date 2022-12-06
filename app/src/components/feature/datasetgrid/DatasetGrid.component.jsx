@@ -16,6 +16,8 @@ import { useContext } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function DatasetGrid(props) {
     const { colorMode } = useColorMode();
@@ -120,114 +122,105 @@ function DatasetGrid(props) {
                                 ? 'blackAlpha.100'
                                 : 'blackAlpha.300'
                         }
-                        padding="0 20px"
+                        padding="0 10px"
                         style={{ margin: 0 }}
                     >
-                        <SimpleGrid
-                            width="100%"
-                            columns={[1, 1, 2]}
-                            spacing="10px"
-                            maxHeight="156px"
-                            overflowY="scroll"
-                            marginBottom="0"
-                            borderRadius="8px"
-                            style={{ marginTop: 0 }}
+                        <OverlayScrollbarsComponent
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                paddingRight: '10px',
+                                paddingLeft: '10px'
+                            }}
+                            options={{
+                                scrollbars: {
+                                    theme: 'os-theme-dark',
+                                    autoHide: 'scroll',
+                                    autoHideDelay: 600,
+                                    clickScroll: true
+                                }
+                            }}
                         >
-                            {store.search.datasets.map((dataset, index) => (
-                                <Flex
-                                    backgroundColor={
-                                        colorMode === 'light'
-                                            ? 'blackAlpha.100'
-                                            : 'whiteAlpha.50'
-                                    }
-                                    borderRadius="8px"
-                                    height="40px"
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    gap="5px"
-                                    paddingLeft="5px"
-                                    paddingRight="5px"
-                                    key={`dataset_list_${dataset}`}
-                                    opacity="0.7"
-                                    transition="all 0.1s ease-in-out"
-                                    _hover={{ opacity: '1' }}
-                                    role="group"
-                                >
-                                    <Heading
-                                        flexGrow="1"
-                                        size="xs"
-                                        textAlign="left"
-                                        paddingLeft="10px"
+                            <SimpleGrid
+                                width="100%"
+                                columns={[1, 1, 2]}
+                                spacing="10px"
+                                maxHeight="156px"
+                                marginBottom="0"
+                                borderRadius="8px"
+                                style={{ marginTop: 0 }}
+                            >
+                                {store.search.datasets.map((dataset, index) => (
+                                    <Flex
+                                        backgroundColor={
+                                            colorMode === 'light'
+                                                ? 'blackAlpha.100'
+                                                : 'whiteAlpha.50'
+                                        }
+                                        borderRadius="8px"
+                                        height="40px"
+                                        justifyContent="center"
+                                        alignItems="center"
+                                        gap="5px"
+                                        paddingLeft="5px"
+                                        paddingRight="5px"
+                                        key={`dataset_list_${dataset}`}
                                         opacity="0.7"
-                                        _groupHover={{ opacity: '1' }}
-                                        whiteSpace="nowrap"
-                                        overflow="hidden"
-                                        textOverflow="ellipsis"
+                                        transition="all 0.1s ease-in-out"
+                                        _hover={{ opacity: '1' }}
+                                        role="group"
                                     >
-                                        {dataset}
-                                    </Heading>
-                                    <Tooltip label={`Delete ${dataset}`}>
-                                        <IconButton
-                                            flexGrow="0"
-                                            size="sm"
-                                            variant="ghost"
-                                            opacity="0"
+                                        <Heading
+                                            flexGrow="1"
+                                            size="xs"
+                                            textAlign="left"
+                                            paddingLeft="10px"
+                                            opacity="0.7"
                                             _groupHover={{ opacity: '1' }}
-                                            onClick={() =>
-                                                store.search.deleteDataset(
-                                                    dataset
-                                                )
-                                            }
-                                            icon={
-                                                <TrashEmpty
-                                                    style={{
-                                                        '--ggs': '0.7',
-                                                        marginTop: '1px'
-                                                    }}
-                                                />
-                                            }
-                                        />
-                                    </Tooltip>
-                                    <Tooltip
-                                        label={`Change default settings for  ${dataset}`}
-                                    >
-                                        <IconButton
-                                            flexGrow="0"
-                                            size="sm"
-                                            variant="ghost"
-                                            opacity="0"
-                                            _groupHover={{ opacity: '1' }}
-                                            onClick={() =>
-                                                store.search.getConifg(dataset)
-                                            }
-                                            icon={
-                                                <Toolbox
-                                                    style={{ '--ggs': '0.7' }}
-                                                />
-                                            }
-                                        />
-                                    </Tooltip>
-                                    {process?.env
-                                        .REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                                        'true' && (
-                                        <Tooltip
-                                            label={`Explore entire ${dataset}`}
+                                            whiteSpace="nowrap"
+                                            overflow="hidden"
+                                            textOverflow="ellipsis"
                                         >
+                                            {dataset}
+                                        </Heading>
+                                        <Tooltip label={`Delete ${dataset}`}>
                                             <IconButton
                                                 flexGrow="0"
                                                 size="sm"
-                                                variant="solid"
-                                                opacity="0.5"
-                                                _groupHover={{
-                                                    opacity: '1'
-                                                }}
+                                                variant="ghost"
+                                                opacity="0"
+                                                _groupHover={{ opacity: '1' }}
                                                 onClick={() =>
-                                                    navigateToAdvancedSearch(
+                                                    store.search.deleteDataset(
                                                         dataset
                                                     )
                                                 }
                                                 icon={
-                                                    <ArrowRight
+                                                    <TrashEmpty
+                                                        style={{
+                                                            '--ggs': '0.7',
+                                                            marginTop: '1px'
+                                                        }}
+                                                    />
+                                                }
+                                            />
+                                        </Tooltip>
+                                        <Tooltip
+                                            label={`Change default settings for  ${dataset}`}
+                                        >
+                                            <IconButton
+                                                flexGrow="0"
+                                                size="sm"
+                                                variant="ghost"
+                                                opacity="0"
+                                                _groupHover={{ opacity: '1' }}
+                                                onClick={() =>
+                                                    store.search.getConifg(
+                                                        dataset
+                                                    )
+                                                }
+                                                icon={
+                                                    <Toolbox
                                                         style={{
                                                             '--ggs': '0.7'
                                                         }}
@@ -235,10 +228,39 @@ function DatasetGrid(props) {
                                                 }
                                             />
                                         </Tooltip>
-                                    )}
-                                </Flex>
-                            ))}
-                        </SimpleGrid>
+                                        {process?.env
+                                            .REACT_APP_DISABLE_ADVANCED_SEARCH !==
+                                            'true' && (
+                                            <Tooltip
+                                                label={`Explore entire ${dataset}`}
+                                            >
+                                                <IconButton
+                                                    flexGrow="0"
+                                                    size="sm"
+                                                    variant="solid"
+                                                    opacity="0.5"
+                                                    _groupHover={{
+                                                        opacity: '1'
+                                                    }}
+                                                    onClick={() =>
+                                                        navigateToAdvancedSearch(
+                                                            dataset
+                                                        )
+                                                    }
+                                                    icon={
+                                                        <ArrowRight
+                                                            style={{
+                                                                '--ggs': '0.7'
+                                                            }}
+                                                        />
+                                                    }
+                                                />
+                                            </Tooltip>
+                                        )}
+                                    </Flex>
+                                ))}
+                            </SimpleGrid>
+                        </OverlayScrollbarsComponent>
                     </Box>
                 )}
                 {process?.env.REACT_APP_DISABLE_UPLOAD !== 'true' && (

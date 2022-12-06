@@ -14,6 +14,8 @@ import PropTypes from 'prop-types';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { useResizeDetector } from 'react-resize-detector';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
@@ -221,60 +223,70 @@ function Serp(props) {
 
     return (
         <VStack height="100%" width="100%" paddingTop="30px">
-            <Box
-                height="100%"
-                width="100%"
-                overflowY="scroll"
-                borderRadius="6px"
+            <OverlayScrollbarsComponent
+                style={{
+                    width: '100%',
+                    height: '100%'
+                }}
+                options={{
+                    scrollbars: {
+                        theme: 'os-theme-dark',
+                        autoHide: 'scroll',
+                        autoHideDelay: 600,
+                        clickScroll: true
+                    }
+                }}
             >
-                <Box
-                    ref={listContainerRefrence}
-                    style={{
-                        height: `${height}px`,
-                        width: `${width}px`,
-                        borderRadius: '6px'
-                    }}
-                >
+                <Box height="100%" width="100%" borderRadius="6px">
                     <Box
+                        ref={listContainerRefrence}
                         style={{
-                            height: `${listVirtualizer.getTotalSize()}px`,
-                            width: '100%',
-                            position: 'relative'
+                            height: `${height}px`,
+                            width: `${width}px`,
+                            borderRadius: '6px'
                         }}
                     >
-                        {listVirtualizer.getVirtualItems().length > 0 &&
-                            listVirtualizer
-                                .getVirtualItems()
-                                .map((virtualRow, index) => {
-                                    return (
-                                        <Box
-                                            key={virtualRow?.key}
-                                            ref={element => {
-                                                listItemRefrences.current[
-                                                    virtualRow.index
-                                                ] = element;
-                                            }}
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                height: `${
-                                                    virtualRow?.size - 10
-                                                }px`,
-                                                transform: `translateY(${virtualRow?.start}px)`
-                                            }}
-                                        >
-                                            {renderResult(
-                                                virtualRow?.index,
-                                                virtualRow?.key
-                                            )}
-                                        </Box>
-                                    );
-                                })}
+                        <Box
+                            style={{
+                                height: `${listVirtualizer.getTotalSize()}px`,
+                                width: '100%',
+                                position: 'relative'
+                            }}
+                        >
+                            {listVirtualizer.getVirtualItems().length > 0 &&
+                                listVirtualizer
+                                    .getVirtualItems()
+                                    .map((virtualRow, index) => {
+                                        return (
+                                            <Box
+                                                key={virtualRow?.key}
+                                                ref={element => {
+                                                    listItemRefrences.current[
+                                                        virtualRow.index
+                                                    ] = element;
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: `${
+                                                        virtualRow?.size - 10
+                                                    }px`,
+                                                    transform: `translateY(${virtualRow?.start}px)`
+                                                }}
+                                            >
+                                                {renderResult(
+                                                    virtualRow?.index,
+                                                    virtualRow?.key
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
+            </OverlayScrollbarsComponent>
         </VStack>
     );
 }

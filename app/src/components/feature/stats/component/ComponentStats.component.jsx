@@ -17,6 +17,8 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
@@ -57,6 +59,7 @@ function SelectedComponentList(props) {
                 size="sm"
                 borderRadius="4px"
                 variant="solid"
+                maxWidth="150px"
                 key={`largest_component_node_${node.label}_${node.feature}`}
                 background={
                     store.graphInstance.nodeColorSchemeColors[
@@ -106,6 +109,7 @@ function SelectedComponentList(props) {
             <Tag
                 size="sm"
                 borderRadius="4px"
+                maxWidth="150px"
                 variant="solid"
                 key={`${component_id}_largest_connection_${id}`}
                 backgroundColor={`${
@@ -179,7 +183,7 @@ function SelectedComponentList(props) {
 
     if (data.length === 0) {
         return (
-            <Box
+            <VStack
                 overflowY="scroll"
                 height="100%"
                 width="100%"
@@ -188,9 +192,8 @@ function SelectedComponentList(props) {
                     colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
                 }
                 borderRadius="6px"
-                display="flex"
                 justifyContent="center"
-                alignItems="center"
+                padding="20%"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -205,108 +208,137 @@ function SelectedComponentList(props) {
                         Select some components to see details here! 😉
                     </Text>
                 )}
-            </Box>
+            </VStack>
         );
     }
 
     return (
-        <VStack height="100%" width="100%" overflowY="scroll" spacing={1}>
-            {data
-                .slice()
-                .sort((component1, component2) => {
-                    if (component1.node_count > component2.node_count) {
-                        return -1;
-                    } else if (component1.node_count < component2.node_count) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                })
-                .map(component => {
-                    return (
-                        <Stat
-                            key={`selected_component_${component.id}`}
-                            borderRadius="10px"
-                            backgroundColor={
-                                colorMode === 'light'
-                                    ? 'blackAlpha.200'
-                                    : 'blackAlpha.800'
-                            }
-                            padding="10px"
-                            width="100%"
-                            flex="0 1 0%"
-                        >
-                            <HStack
+        <OverlayScrollbarsComponent
+            style={{
+                width: '100%',
+                height: '100%',
+                paddingLeft: '10px',
+                paddingRight: '10px'
+            }}
+            options={{
+                scrollbars: {
+                    theme: 'os-theme-dark',
+                    autoHide: 'scroll',
+                    autoHideDelay: 600,
+                    clickScroll: true
+                }
+            }}
+        >
+            <VStack height="100%" width="100%" spacing={1}>
+                {data
+                    .slice()
+                    .sort((component1, component2) => {
+                        if (component1.node_count > component2.node_count) {
+                            return -1;
+                        } else if (
+                            component1.node_count < component2.node_count
+                        ) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    })
+                    .map(component => {
+                        return (
+                            <Stat
+                                key={`selected_component_${component.id}`}
+                                borderRadius="10px"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'blackAlpha.800'
+                                }
+                                padding="10px"
                                 width="100%"
-                                justifyContent="space-between"
-                                paddingBottom="5px"
+                                flex="0 1 0%"
                             >
-                                <Heading
-                                    size="xs"
-                                    marginBottom={
-                                        props.isExpanded ? '8px' : '0'
-                                    }
-                                    whiteSpace="nowrap"
-                                    overflow="hidden"
-                                    textOverflow="ellipsis"
-                                    maxWidth="300px"
-                                    paddingRight="30px"
+                                <HStack
+                                    width="100%"
+                                    justifyContent="space-between"
+                                    paddingBottom="5px"
                                 >
-                                    Component {component.id}
-                                </Heading>
-                                <Tooltip label="Toggle component visibility">
-                                    <IconButton
-                                        variant="ghost"
+                                    <Heading
                                         size="xs"
-                                        opacity={
-                                            store.graphInstance.visibleComponents.includes(
-                                                component.id
-                                            )
-                                                ? '1'
-                                                : '0.3'
+                                        marginBottom={
+                                            props.isExpanded ? '8px' : '0'
                                         }
-                                        _hover={{ opacity: 1 }}
-                                        onClick={() =>
-                                            store.graphInstance.toggleVisibleComponents(
-                                                component.id
-                                            )
-                                        }
-                                        icon={
-                                            <Eye style={{ '--ggs': '0.7' }} />
-                                        }
-                                    />
-                                </Tooltip>
-                            </HStack>
-                            {props.networkData !== 'all' && (
-                                <Box position="absolute" top="4px" right="8px">
-                                    <Tooltip label="Deselect component">
+                                        whiteSpace="nowrap"
+                                        overflow="hidden"
+                                        textOverflow="ellipsis"
+                                        maxWidth="300px"
+                                        paddingRight="30px"
+                                    >
+                                        Component {component.id}
+                                    </Heading>
+                                    <Tooltip label="Toggle component visibility">
                                         <IconButton
-                                            size="xs"
-                                            border="none"
                                             variant="ghost"
-                                            aria-label="Remove from list"
+                                            size="xs"
+                                            opacity={
+                                                store.graphInstance.visibleComponents.includes(
+                                                    component.id
+                                                )
+                                                    ? '1'
+                                                    : '0.3'
+                                            }
+                                            _hover={{ opacity: 1 }}
+                                            onClick={() =>
+                                                store.graphInstance.toggleVisibleComponents(
+                                                    component.id
+                                                )
+                                            }
                                             icon={
-                                                <Remove
-                                                    style={{ '--ggs': '0.8' }}
+                                                <Eye
+                                                    style={{ '--ggs': '0.7' }}
                                                 />
                                             }
-                                            onClick={() => {
-                                                if (!props.demoData.length) {
-                                                    store.graph.selectComponent(
-                                                        component.id
-                                                    );
-                                                }
-                                            }}
                                         />
                                     </Tooltip>
-                                </Box>
-                            )}
-                            {props.isExpanded &&
-                                renderComponentDetails(component)}
-                        </Stat>
-                    );
-                })}
-        </VStack>
+                                </HStack>
+                                {props.networkData !== 'all' && (
+                                    <Box
+                                        position="absolute"
+                                        top="4px"
+                                        right="8px"
+                                    >
+                                        <Tooltip label="Deselect component">
+                                            <IconButton
+                                                size="xs"
+                                                border="none"
+                                                variant="ghost"
+                                                aria-label="Remove from list"
+                                                icon={
+                                                    <Remove
+                                                        style={{
+                                                            '--ggs': '0.8'
+                                                        }}
+                                                    />
+                                                }
+                                                onClick={() => {
+                                                    if (
+                                                        !props.demoData.length
+                                                    ) {
+                                                        store.graph.selectComponent(
+                                                            component.id
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Box>
+                                )}
+                                {props.isExpanded &&
+                                    renderComponentDetails(component)}
+                            </Stat>
+                        );
+                    })}
+            </VStack>
+        </OverlayScrollbarsComponent>
     );
 }
 SelectedComponentList.propTypes = {

@@ -1,18 +1,19 @@
 import {
     AspectRatio,
     Box,
-    Grid,
-    GridItem,
     Heading,
     Text,
     Tooltip,
     useColorMode,
-    VStack
+    VStack,
+    Wrap
 } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function GraphStats(props) {
     const store = useContext(RootStoreContext);
@@ -129,12 +130,12 @@ function GraphStats(props) {
 
     const renderGraphStats = (title, data) =>
         data.map((entry, index) => (
-            <GridItem
+            <Box
                 padding="2px"
-                colSpan={1}
                 backgroundColor="transparent"
                 borderRadius={8}
                 key={`${title}_${index}_${entry[1].count}_${entry[1].label}`}
+                width="93px"
             >
                 <AspectRatio ratio={1} key={index} height="100%">
                     <Box
@@ -188,7 +189,7 @@ function GraphStats(props) {
                         </VStack>
                     </Box>
                 </AspectRatio>
-            </GridItem>
+            </Box>
         ));
 
     const renderStatsGroup = (data, title) => (
@@ -205,25 +206,16 @@ function GraphStats(props) {
             >
                 {title}
             </Heading>
-            <Grid
-                width="100%"
-                templateColumns={
-                    props.isExpanded
-                        ? 'repeat(6, minmax(0, 1fr))'
-                        : 'repeat(3, minmax(0, 1fr))'
-                }
-                gap={1}
-                margin="0"
-                padding="0"
-            >
+
+            <Wrap width="100%" spacing="0">
                 {renderGraphStats(title, data)}
-            </Grid>
+            </Wrap>
         </VStack>
     );
 
     if (nodeData.length === 0 && props.networkData !== 'all') {
         return (
-            <Box
+            <VStack
                 overflowY="scroll"
                 height="100%"
                 width="100%"
@@ -232,9 +224,8 @@ function GraphStats(props) {
                     colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
                 }
                 borderRadius="6px"
-                display="flex"
                 justifyContent="center"
-                alignItems="center"
+                padding="20%"
             >
                 <Heading size="md" opacity="0.5">
                     NO DATA
@@ -249,15 +240,32 @@ function GraphStats(props) {
                         Select some nodes to see details here! 😉
                     </Text>
                 )}
-            </Box>
+            </VStack>
         );
     }
 
     return (
-        <VStack overflowY="scroll" maxHeight="100%" width="100%">
-            {renderStatsGroup(graphData, 'Graph Stats')}
-            {renderStatsGroup(nodeData, 'Node Stats')}
-        </VStack>
+        <OverlayScrollbarsComponent
+            style={{
+                width: '100%',
+                height: '100%',
+                paddingLeft: '10px',
+                paddingRight: '10px'
+            }}
+            options={{
+                scrollbars: {
+                    theme: 'os-theme-dark',
+                    autoHide: 'scroll',
+                    autoHideDelay: 600,
+                    clickScroll: true
+                }
+            }}
+        >
+            <VStack maxHeight="100%" width="100%">
+                {renderStatsGroup(graphData, 'Graph Stats')}
+                {renderStatsGroup(nodeData, 'Node Stats')}
+            </VStack>
+        </OverlayScrollbarsComponent>
     );
 }
 GraphStats.propTypes = {

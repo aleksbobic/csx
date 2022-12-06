@@ -56,10 +56,26 @@ import {
 import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
 import AutoSizer from 'react-virtualized-auto-sizer';
+import { useResizeDetector } from 'react-resize-detector';
+
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
+    const [panelWidth, setPanelWidth] = useState(0);
 
+    const onResize = useCallback(width => {
+        if (activeTab === 0) {
+            store.contextMenu.setXOffset(0);
+            setPanelWidth(width);
+        } else {
+            store.contextMenu.setXOffset(width + 50);
+            setPanelWidth(width);
+        }
+    }, []);
+
+    const { ref } = useResizeDetector({ onResize });
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [useList, setUseList] = useState(false);
@@ -113,6 +129,12 @@ function DataPanel(props) {
     );
 
     useEffect(() => {
+        if (props.panelType === '') {
+            store.contextMenu.setXOffset(0);
+        } else {
+            store.contextMenu.setXOffset(panelWidth + 50);
+        }
+
         switch (props.panelType) {
             case 'details':
                 setActiveTab(0);
@@ -238,7 +260,7 @@ function DataPanel(props) {
     }, [store.graph.currentGraphData.activeTableData]);
 
     const renderSchema = () => (
-        <Box height="100%" minHeight="500px" width="100%">
+        <Box height="100%" minHeight="200px" width="100%">
             {store.core.isDetail && (
                 <Select
                     variant="filled"
@@ -295,7 +317,7 @@ function DataPanel(props) {
     const renderHistory = () => (
         <Box
             height="100%"
-            minHeight="500px"
+            minHeight="200px"
             width="100%"
             backgroundColor="whiteAlpha.200"
             borderRadius="8px"
@@ -400,7 +422,7 @@ function DataPanel(props) {
 
     const renderTabPanels = () => {
         return (
-            <TabPanels width="100%" padding="10px" height="100%">
+            <TabPanels width="100%" padding="10px" height="100%" ref={ref}>
                 <TabPanel padding="10px" height="100%">
                     <Box
                         height="100%"
@@ -412,9 +434,25 @@ function DataPanel(props) {
                                 : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
-                        overflow="scroll"
                     >
-                        <Overview />
+                        <OverlayScrollbarsComponent
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                paddingLeft: '10px',
+                                paddingRight: '10px'
+                            }}
+                            options={{
+                                scrollbars: {
+                                    theme: 'os-theme-dark',
+                                    autoHide: 'scroll',
+                                    autoHideDelay: 600,
+                                    clickScroll: true
+                                }
+                            }}
+                        >
+                            <Overview />
+                        </OverlayScrollbarsComponent>
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -428,28 +466,44 @@ function DataPanel(props) {
                                 : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
-                        overflow="scroll"
                         paddingTop={activeTab === 1 && '30px'}
                     >
-                        {store.graph.currentGraphData.activeTableData &&
-                            (useList ? (
-                                <SerpComponent
-                                    data={
-                                        store.graph.currentGraphData
-                                            .activeTableData
-                                    }
-                                    columns={store.graph.tableColumns}
-                                    visibleProperties={visibleProperties}
-                                />
-                            ) : (
-                                <TableComponent
-                                    data={
-                                        store.graph.currentGraphData
-                                            .activeTableData
-                                    }
-                                    columns={store.graph.tableColumns}
-                                />
-                            ))}
+                        <OverlayScrollbarsComponent
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                paddingLeft: '10px',
+                                paddingRight: '10px'
+                            }}
+                            options={{
+                                scrollbars: {
+                                    theme: 'os-theme-dark',
+                                    autoHide: 'scroll',
+                                    autoHideDelay: 600,
+                                    clickScroll: true
+                                }
+                            }}
+                        >
+                            {store.graph.currentGraphData.activeTableData &&
+                                (useList ? (
+                                    <SerpComponent
+                                        data={
+                                            store.graph.currentGraphData
+                                                .activeTableData
+                                        }
+                                        columns={store.graph.tableColumns}
+                                        visibleProperties={visibleProperties}
+                                    />
+                                ) : (
+                                    <TableComponent
+                                        data={
+                                            store.graph.currentGraphData
+                                                .activeTableData
+                                        }
+                                        columns={store.graph.tableColumns}
+                                    />
+                                ))}
+                        </OverlayScrollbarsComponent>
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -463,7 +517,6 @@ function DataPanel(props) {
                                 : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
-                        overflow="scroll"
                     >
                         {renderSchema()}
                     </Box>
@@ -479,7 +532,6 @@ function DataPanel(props) {
                                 : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
-                        overflow="scroll"
                     >
                         {renderHistory()}
                     </Box>

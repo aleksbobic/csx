@@ -6,6 +6,8 @@ import GlobalFilterComponent from './globalFilter/GlobalFilter.component';
 import './table.scss';
 import TableBodyComponent from './tableBody/TableBody.component';
 import TableHeadComponent from './tableHead/TableHead.component';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function TableComponent(props) {
     const data = props.data;
@@ -46,16 +48,31 @@ function TableComponent(props) {
                     setGlobalFilter={setGlobalFilter}
                 />
             </Box>
-            <Box height="100%" overflow="scroll" width="100%">
-                <Table {...getTableProps()} style={{ width: '100%' }}>
-                    <TableHeadComponent headerGroups={headerGroups} />
-                    <TableBodyComponent
-                        getTableBodyProps={getTableBodyProps}
-                        prepareRow={prepareRow}
-                        rows={rows}
-                    />
-                </Table>
-            </Box>
+            <OverlayScrollbarsComponent
+                style={{
+                    width: '100%',
+                    height: '100%'
+                }}
+                options={{
+                    scrollbars: {
+                        theme: 'os-theme-dark',
+                        autoHide: 'scroll',
+                        autoHideDelay: 600,
+                        clickScroll: true
+                    }
+                }}
+            >
+                <Box height="100%" width="100%">
+                    <Table {...getTableProps()} style={{ width: '100%' }}>
+                        <TableHeadComponent headerGroups={headerGroups} />
+                        <TableBodyComponent
+                            getTableBodyProps={getTableBodyProps}
+                            prepareRow={prepareRow}
+                            rows={rows}
+                        />
+                    </Table>
+                </Box>
+            </OverlayScrollbarsComponent>
         </Box>
     );
 }

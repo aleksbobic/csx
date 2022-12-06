@@ -13,16 +13,36 @@ import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import ChartComponent from '../stats/chart/Chart.component';
-import StatContainerComponent from '../stats/statcontainer/StatContainer';
+import WidgetContainer from '../stats/widgetcontainer/WidgetContainer';
 import SelectedComponentListComponent from '../stats/component/ComponentStats.component';
 import SelectedNodeListComponent from '../stats/node/NodeStats.component';
 import GraphStatsComponent from '../stats/graph/GraphStats.component';
 import ConnectionStatsComponent from '../stats/connections/ConnectionStats.component';
 import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
 import { useState } from 'react';
+import { useResizeDetector } from 'react-resize-detector';
+import { useCallback } from 'react';
 function Overview(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
+
+    const [templateColumn, setTemplateColumn] = useState('repeat(1, 1fr)');
+    const [maxColSize, setMaxColSize] = useState(2);
+
+    const onResize = useCallback(width => {
+        if (width < 480) {
+            setTemplateColumn('repeat(1, minmax(0, 1fr))');
+            setMaxColSize(1);
+        } else if (width < 720) {
+            setTemplateColumn('repeat(2, minmax(0, 1fr))');
+            setMaxColSize(2);
+        } else {
+            setTemplateColumn('repeat(3, minmax(0, 1fr))');
+            setMaxColSize(2);
+        }
+    }, []);
+
+    const { ref } = useResizeDetector({ onResize });
 
     const [visibleCharts, setVisibleCharts] = useState(
         store.stats
@@ -104,7 +124,7 @@ function Overview(props) {
         }
     };
 
-    const renderAddStatButton = () => (
+    const renderAddWidgetButton = () => (
         <GridItem
             key={'Chart grid add button'}
             height="200px"
@@ -157,29 +177,30 @@ function Overview(props) {
             const chartObject = getChartData(chart, index, title);
 
             return (
-                <StatContainerComponent
+                <WidgetContainer
                     key={`Stat_${index}`}
                     chart={chart}
                     index={index}
                     title={title}
+                    maxColSize={maxColSize}
                 >
                     {chartObject}
-                </StatContainerComponent>
+                </WidgetContainer>
             );
         });
 
     return (
-        <VStack spacing="10px">
+        <VStack spacing="10px" width="100%" ref={ref}>
             <Grid
                 maxHeight="100%"
                 width="100%"
-                templateColumns="repeat(auto-fit, minmax(240px, 1fr))"
+                templateColumns={templateColumn}
                 gap={5}
                 margin="0"
                 padding="0"
             >
                 {renderCharts()}
-                {renderAddStatButton()}
+                {renderAddWidgetButton()}
             </Grid>
         </VStack>
     );

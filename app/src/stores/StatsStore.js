@@ -238,7 +238,7 @@ export class StatsStore {
         this.store.history.updateStudyCharts(charts);
     };
 
-    expandChart = id => {
+    expandChart = (id, makeHistoryEntry = true) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
@@ -257,10 +257,13 @@ export class StatsStore {
             this.store.stats.charts[this.store.search.currentDataset];
 
         this.charts = { ...this.charts };
-        this.store.history.updateStudyCharts(charts);
+
+        if (makeHistoryEntry) {
+            this.store.history.updateStudyCharts(charts);
+        }
     };
 
-    shrinkChart = id => {
+    shrinkChart = (id, makeHistoryEntry = true) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
@@ -288,7 +291,9 @@ export class StatsStore {
             this.store.stats.charts[this.store.search.currentDataset];
         this.charts = { ...this.charts };
 
-        this.store.history.updateStudyCharts(charts);
+        if (makeHistoryEntry) {
+            this.store.history.updateStudyCharts(charts);
+        }
     };
 
     toggleLegend = id => {
@@ -350,7 +355,6 @@ export class StatsStore {
     };
 
     setChartListForDataset = charts => {
-        console.log('new charts: ', charts);
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = charts;
         this.charts = { ...this.charts };
