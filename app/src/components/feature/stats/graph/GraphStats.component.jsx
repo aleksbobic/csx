@@ -216,7 +216,6 @@ function GraphStats(props) {
     if (nodeData.length === 0 && props.networkData !== 'all') {
         return (
             <VStack
-                overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}

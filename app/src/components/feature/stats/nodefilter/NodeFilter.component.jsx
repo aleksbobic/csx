@@ -80,13 +80,7 @@ function NodeFilter(props) {
     };
 
     return (
-        <Box
-            overflowY="scroll"
-            height="100%"
-            width="100%"
-            position="relative"
-            padding="20px"
-        >
+        <Box height="100%" width="100%" position="relative" padding="20px">
             <Flex
                 direction="column"
                 height="100%"

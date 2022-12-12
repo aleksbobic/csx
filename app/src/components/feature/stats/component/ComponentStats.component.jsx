@@ -184,7 +184,6 @@ function SelectedComponentList(props) {
     if (data.length === 0) {
         return (
             <VStack
-                overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}

@@ -40,12 +40,7 @@ function CommentsComponent(props) {
                         }
                     }}
                 >
-                    <VStack
-                        heigh="auto"
-                        width="100%"
-                        overflowY={store.comment.editMode ? 'hidden' : 'scroll'}
-                        borderRadius="6px"
-                    >
+                    <VStack heigh="auto" width="100%" borderRadius="6px">
                         {store.core.studyHistory.length > 0 &&
                             store.core.studyHistory[
                                 store.core.studyHistoryItemIndex

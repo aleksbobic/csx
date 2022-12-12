@@ -1,4 +1,5 @@
 import {
+    Box,
     Divider,
     Heading,
     HStack,
@@ -274,7 +275,6 @@ function ConnectionStats(props) {
     if (data.length === 0) {
         return (
             <VStack
-                overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}
@@ -304,75 +304,78 @@ function ConnectionStats(props) {
     }
 
     return (
-        <OverlayScrollbarsComponent
-            style={{
-                width: '100%',
-                height: '100%',
-                paddingLeft: '10px',
-                paddingRight: '10px'
-            }}
-            options={{
-                scrollbars: {
-                    theme: 'os-theme-dark',
-                    autoHide: 'scroll',
-                    autoHideDelay: 600,
-                    clickScroll: true
-                }
-            }}
-        >
-            <VStack height="100%" width="100%" spacing={1}>
-                {data
-                    .slice()
-                    .sort((node1, node2) => {
-                        if (node1.neighbours.size > node2.neighbours.size) {
-                            return -1;
-                        } else if (
-                            node1.neighbours.size < node2.neighbours.size
-                        ) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
-                    })
-                    .map(node => {
-                        return (
-                            <Stat
-                                key={node.id}
-                                borderRadius="10px"
-                                backgroundColor={
-                                    colorMode === 'light'
-                                        ? 'blackAlpha.200'
-                                        : 'blackAlpha.800'
-                                }
-                                padding="10px"
-                                width="100%"
-                                flex="0 1 0%"
-                            >
-                                <Heading
-                                    size="xs"
-                                    marginBottom="8px"
-                                    whiteSpace="nowrap"
-                                    overflow="hidden"
-                                    textOverflow="ellipsis"
+        <Box height="100%" width="100%" position="relative">
+            <OverlayScrollbarsComponent
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    paddingLeft: '10px',
+                    paddingRight: '10px',
+                    position: 'absolute'
+                }}
+                options={{
+                    scrollbars: {
+                        theme: 'os-theme-dark',
+                        autoHide: 'scroll',
+                        autoHideDelay: 600,
+                        clickScroll: true
+                    }
+                }}
+            >
+                <VStack height="100%" width="100%" spacing={1}>
+                    {data
+                        .slice()
+                        .sort((node1, node2) => {
+                            if (node1.neighbours.size > node2.neighbours.size) {
+                                return -1;
+                            } else if (
+                                node1.neighbours.size < node2.neighbours.size
+                            ) {
+                                return 1;
+                            } else {
+                                return 0;
+                            }
+                        })
+                        .map(node => {
+                            return (
+                                <Stat
+                                    key={node.id}
+                                    borderRadius="10px"
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.200'
+                                            : 'blackAlpha.800'
+                                    }
+                                    padding="10px"
                                     width="100%"
-                                    paddingRight="30px"
-                                    _hover={{ cursor: 'pointer' }}
-                                    onClick={() => {
-                                        if (!props.demoData.length) {
-                                            store.graphInstance.zoomToFitByNodeId(
-                                                node.id
-                                            );
-                                        }
-                                    }}
+                                    flex="0 1 0%"
                                 >
-                                    {node.label}
-                                </Heading>
-                                {renderNodeDetails(node)}
-                            </Stat>
-                        );
-                    })}
-            </VStack>
-        </OverlayScrollbarsComponent>
+                                    <Heading
+                                        size="xs"
+                                        marginBottom="8px"
+                                        whiteSpace="nowrap"
+                                        overflow="hidden"
+                                        textOverflow="ellipsis"
+                                        width="100%"
+                                        paddingRight="30px"
+                                        _hover={{ cursor: 'pointer' }}
+                                        onClick={() => {
+                                            if (!props.demoData.length) {
+                                                store.graphInstance.zoomToFitByNodeId(
+                                                    node.id
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        {node.label}
+                                    </Heading>
+                                    {renderNodeDetails(node)}
+                                </Stat>
+                            );
+                        })}
+                </VStack>
+            </OverlayScrollbarsComponent>
+        </Box>
     );
 }
 ConnectionStats.propTypes = {

@@ -122,7 +122,6 @@ function SelectedNodeList(props) {
     if (data.length === 0) {
         return (
             <VStack
-                overflowY="scroll"
                 height="100%"
                 width="100%"
                 spacing={1}
@@ -151,115 +150,129 @@ function SelectedNodeList(props) {
     }
 
     return (
-        <OverlayScrollbarsComponent
-            style={{
-                width: '100%',
-                height: '100%',
-                paddingLeft: '10px',
-                paddingRight: '10px'
-            }}
-            options={{
-                scrollbars: {
-                    theme: 'os-theme-dark',
-                    autoHide: 'scroll',
-                    autoHideDelay: 600,
-                    clickScroll: true
-                }
-            }}
-        >
-            <VStack height="100%" width="100%" spacing={1}>
-                {data.map((node, index) => {
-                    return (
-                        <Stat
-                            key={node.id}
-                            borderRadius="10px"
-                            backgroundColor={
-                                colorMode === 'light'
-                                    ? 'blackAlpha.200'
-                                    : 'blackAlpha.800'
-                            }
-                            padding="10px"
-                            width="100%"
-                            flex="0 1 0%"
-                        >
-                            <Heading
-                                size="xs"
-                                marginBottom={props.isExpanded ? '8px' : '0'}
-                                whiteSpace="nowrap"
-                                overflow="hidden"
-                                textOverflow="ellipsis"
-                                opacity={colorMode === 'light' && 0.8}
-                                width="100%"
-                                paddingRight={
-                                    props.networkData === 'selected'
-                                        ? '30px'
-                                        : '0'
+        <Box height="100%" width="100%" position="relative">
+            <OverlayScrollbarsComponent
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    paddingLeft: '10px',
+                    paddingRight: '10px',
+                    position: 'absolute'
+                }}
+                options={{
+                    scrollbars: {
+                        theme: 'os-theme-dark',
+                        autoHide: 'scroll',
+                        autoHideDelay: 600,
+                        clickScroll: true
+                    }
+                }}
+            >
+                <VStack height="100%" width="100%" spacing={1}>
+                    {data.map((node, index) => {
+                        return (
+                            <Stat
+                                key={node.id}
+                                borderRadius="10px"
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.200'
+                                        : 'blackAlpha.800'
                                 }
-                                _hover={{ cursor: 'pointer' }}
-                                onClick={() => {
-                                    if (!props.demoData.length) {
-                                        store.graphInstance.zoomToFitByNodeId(
-                                            node.id
-                                        );
-                                    }
-                                }}
+                                padding="10px"
+                                width="100%"
+                                flex="0 1 0%"
                             >
-                                <Text
-                                    fontSize="xs"
-                                    fontWeight="black"
-                                    opacity="0.2"
-                                    display="inline"
-                                    marginRight="5px"
+                                <Heading
+                                    size="xs"
+                                    marginBottom={
+                                        props.isExpanded ? '8px' : '0'
+                                    }
+                                    whiteSpace="nowrap"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    opacity={colorMode === 'light' && 0.8}
+                                    width="100%"
+                                    paddingRight={
+                                        props.networkData === 'selected'
+                                            ? '30px'
+                                            : '0'
+                                    }
+                                    _hover={{ cursor: 'pointer' }}
+                                    onClick={() => {
+                                        if (!props.demoData.length) {
+                                            store.graphInstance.zoomToFitByNodeId(
+                                                node.id
+                                            );
+                                        }
+                                    }}
                                 >
-                                    {index} -
-                                </Text>
-                                {node.label}
-                            </Heading>
+                                    <Text
+                                        fontSize="xs"
+                                        fontWeight="black"
+                                        opacity="0.2"
+                                        display="inline"
+                                        marginRight="5px"
+                                    >
+                                        {index} -
+                                    </Text>
+                                    {node.label}
+                                </Heading>
 
-                            {props.isExpanded && renderNodeDetails(node)}
+                                {props.isExpanded && renderNodeDetails(node)}
 
-                            {props.networkData === 'selected' && (
-                                <Box position="absolute" top="4px" right="8px">
-                                    <Tooltip label="Deselect node">
-                                        <IconButton
-                                            size="xs"
-                                            border="none"
-                                            variant="ghost"
-                                            aria-label="Remove from list"
-                                            icon={
-                                                <Remove
-                                                    style={{ '--ggs': '0.8' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                if (!props.demoData.length) {
-                                                    store.track.trackEvent(
-                                                        'data panel selection tab',
-                                                        'button click',
-                                                        `deselect node {id: ${node.id}, label: ${node.label}}`
-                                                    );
-
-                                                    const nodeIndex =
-                                                        store.graph.currentGraphData.selectedNodes.findIndex(
-                                                            n =>
-                                                                n.id === node.id
+                                {props.networkData === 'selected' && (
+                                    <Box
+                                        position="absolute"
+                                        top="4px"
+                                        right="8px"
+                                    >
+                                        <Tooltip label="Deselect node">
+                                            <IconButton
+                                                size="xs"
+                                                border="none"
+                                                variant="ghost"
+                                                aria-label="Remove from list"
+                                                icon={
+                                                    <Remove
+                                                        style={{
+                                                            '--ggs': '0.8'
+                                                        }}
+                                                    />
+                                                }
+                                                onClick={() => {
+                                                    if (
+                                                        !props.demoData.length
+                                                    ) {
+                                                        store.track.trackEvent(
+                                                            'data panel selection tab',
+                                                            'button click',
+                                                            `deselect node {id: ${node.id}, label: ${node.label}}`
                                                         );
 
-                                                    store.graph.toggleNodeSelection(
-                                                        node.id,
-                                                        nodeIndex
-                                                    );
-                                                }
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </Box>
-                            )}
-                        </Stat>
-                    );
-                })}
-            </VStack>
-        </OverlayScrollbarsComponent>
+                                                        const nodeIndex =
+                                                            store.graph.currentGraphData.selectedNodes.findIndex(
+                                                                n =>
+                                                                    n.id ===
+                                                                    node.id
+                                                            );
+
+                                                        store.graph.toggleNodeSelection(
+                                                            node.id,
+                                                            nodeIndex
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    </Box>
+                                )}
+                            </Stat>
+                        );
+                    })}
+                </VStack>
+            </OverlayScrollbarsComponent>
+        </Box>
     );
 }
 SelectedNodeList.propTypes = {

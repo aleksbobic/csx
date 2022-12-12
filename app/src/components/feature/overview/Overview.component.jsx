@@ -171,7 +171,7 @@ function Overview(props) {
         </GridItem>
     );
 
-    const renderCharts = () =>
+    const renderWidgets = () =>
         visibleCharts.map((chart, index) => {
             const title = getChartTitle(chart);
             const chartObject = getChartData(chart, index, title);
@@ -199,7 +199,7 @@ function Overview(props) {
                 margin="0"
                 padding="0"
             >
-                {renderCharts()}
+                {renderWidgets()}
                 {renderAddWidgetButton()}
             </Grid>
         </VStack>
