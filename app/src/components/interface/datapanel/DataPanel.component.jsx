@@ -261,7 +261,7 @@ function DataPanel(props) {
 
     const renderSchema = () => (
         <Box height="100%" minHeight="200px" width="100%">
-            {store.core.isDetail && (
+            {/* {store.core.isDetail && (
                 <Select
                     variant="filled"
                     marginBottom="20px"
@@ -269,7 +269,7 @@ function DataPanel(props) {
                 >
                     {getPredefinedSchemas()}
                 </Select>
-            )}
+            )} */}
             <AutoSizer>
                 {({ height, width }) => (
                     <ReactFlow
