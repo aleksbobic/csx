@@ -752,10 +752,17 @@ export class StatsStore {
 
             const allValueCounts = new Array(uniqueValues.length).fill(0);
 
+            const visibleEntries =
+                this.store.graph.currentGraphData.activeTableData.map(
+                    row => row.entry
+                );
+
             data.map(node => {
                 return {
                     value: getNodeProp(node, nodeProperty.prop),
-                    weight: node.entries.length
+                    weight: node.entries.filter(entryID =>
+                        visibleEntries.includes(entryID)
+                    ).length
                 };
             }).forEach(entry => {
                 allValueCounts[uniqueValues.indexOf(entry.value)] +=
@@ -781,7 +788,9 @@ export class StatsStore {
                     );
 
                     groupedByCounts[group][labelLocation] +=
-                        node.entries.length;
+                        node.entries.filter(entryID =>
+                            visibleEntries.includes(entryID)
+                        ).length;
                 });
             });
 
@@ -797,16 +806,27 @@ export class StatsStore {
             let values = [];
             let counts = [];
 
+            const visibleEntries =
+                this.store.graph.currentGraphData.activeTableData.map(
+                    row => row.entry
+                );
+
             data.forEach(node => {
                 const labelLocation = values.indexOf(
                     getNodeProp(node, nodeProperty.prop)
                 );
 
                 if (labelLocation >= 0) {
-                    counts[labelLocation] += node.entries.length;
+                    counts[labelLocation] += node.entries.filter(entryID =>
+                        visibleEntries.includes(entryID)
+                    ).length;
                 } else {
                     values.push(getNodeProp(node, nodeProperty.prop));
-                    counts.push(node.entries.length);
+                    counts.push(
+                        node.entries.filter(entryID =>
+                            visibleEntries.includes(entryID)
+                        ).length
+                    );
                 }
             });
 

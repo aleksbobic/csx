@@ -225,6 +225,7 @@ export class GraphStore {
                 nodes[i].size
             );
 
+            nodes[i].originalSize = nodes[i].size;
             nodes[i].neighbours = new Set(nodes[i].neighbours);
 
             nodes[i].selected = false;
@@ -694,7 +695,6 @@ export class GraphStore {
         };
         let response;
 
-        console.log(params);
         try {
             response = await axios.post('study/', params);
         } catch (error) {

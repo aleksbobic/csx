@@ -57,7 +57,7 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
-    const selfCentric = () => {
+    const triggerSelfCentric = () => {
         store.track.trackEvent(
             'context menu',
             'button click',
@@ -73,7 +73,7 @@ function ContextMenu() {
             buttons.push(
                 <Button
                     justifyContent="left"
-                    onClick={selfCentric}
+                    onClick={triggerSelfCentric}
                     key="selfCentricButton"
                 >
                     Show direct connections
