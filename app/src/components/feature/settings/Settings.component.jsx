@@ -13,16 +13,15 @@ import {
     IconButton,
     Select,
     Tag,
+    Tooltip,
     useColorMode,
     useColorModeValue,
-    Wrap,
-    Tooltip
+    Wrap
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
-import { Anchor, Bolt, Info, Undo } from 'css.gg';
+import { Anchor, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
-import { useEffect } from 'react';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { RootStoreContext } from 'stores/RootStore';
 

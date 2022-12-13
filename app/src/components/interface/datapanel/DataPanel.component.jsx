@@ -9,7 +9,6 @@ import {
     MenuButton,
     MenuItem,
     MenuList,
-    Select,
     TabList,
     TabPanel,
     TabPanels,
@@ -55,8 +54,8 @@ import {
 } from 'css.gg';
 import { useCallback, useMemo } from 'react';
 import { CSVLink } from 'react-csv';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { useResizeDetector } from 'react-resize-detector';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
@@ -210,16 +209,16 @@ function DataPanel(props) {
         store.schema.updateSchemaConnection(oldEdge, newEdge);
     };
 
-    const changeSchema = e => {
-        store.search.changeSelectedSchema(e.target.value);
-    };
+    // const changeSchema = e => {
+    //     store.search.changeSelectedSchema(e.target.value);
+    // };
 
-    const getPredefinedSchemas = () =>
-        store.search.schemas.map(entry => (
-            <option value={entry.name} key={`schema_${entry.name}`}>
-                {entry.name.toUpperCase()}
-            </option>
-        ));
+    // const getPredefinedSchemas = () =>
+    //     store.search.schemas.map(entry => (
+    //         <option value={entry.name} key={`schema_${entry.name}`}>
+    //             {entry.name.toUpperCase()}
+    //         </option>
+    //     ));
 
     const getCsvHeaders = data => {
         if (!data || !data.length) {
