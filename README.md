@@ -81,8 +81,13 @@ When the dataset is uploaded a config file is created in the `server/app/data/co
 
 > 🚨 **Config files should never be manually modified. If you want to modify the config of a dataset either click on the change default settings for dataset button next to each of the datasets on the homepage or delete the dataset and upload it again with different settings.**:
 
-### Disabling upload form
-To disable the upload form please go to the `docker-compose.yml` file set the `REACT_APP_DISABLE_UPLOAD` under `app` and `environment` to true.
+### Running development with analytics enabled
+n additiona to making sure the flag `REACT_APP_DISABLE_TRACKING` in `./app/.env.development` is set to `false` you must run the docker-compose command with particular parameters: `docker-compose --profile analytics up`
+
+On the **first run** make sure to visit `localhost:8883` and go through the matomo setup process.
+
+### Disabling app features on start
+To disable various app features visit the  `./app/.env.{development/production}` file and set the feature flag to `true` or `false`.
 
 
 ### Starting the project in production mode 🚀
@@ -91,3 +96,6 @@ Run `docker-compose -f docker-compose.prod.yml up --build --remove-orphans --for
 
 Runs the app in production mode.
 Open [http://localhost:8880](http://localhost:8880) to view it in the browser.
+
+### Running production mode with analytics enabled
+In additiona to making sure the flag `REACT_APP_DISABLE_TRACKING` in `./app/.env.production` is set to `false` you must run the docker-compose command with particular parameters: `MATOMO_PASS=your_db_pass docker-compose -f docker-compose.prod.yml --profile analytics up --build --remove-orphans --force-recreate`

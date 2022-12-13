@@ -4,6 +4,7 @@ import {
     FormControl,
     FormLabel,
     Heading,
+    Link,
     List,
     ListItem,
     Switch,
@@ -137,6 +138,24 @@ function CookieInfo() {
                 the data mentioned above and enable us to analyze the data
                 associated with your unique ID for the purposes stated above.
             </Text>
+
+            <Text fontSize="xs" textAlign="justify" padding="0 16px 16px">
+                In case you decide to enable interaciton tracking we use{' '}
+                <b style={{ color: '#43a2fb' }}>Matomo</b> which{' '}
+                <b style={{ color: '#43a2fb' }}>will add additional cookies</b>.
+                You can read about Matomo's cookies by visiting the{' '}
+                <Link
+                    fontWeight="bold"
+                    textDecoration="underline"
+                    opacity="0.75"
+                    target="_blank"
+                    href="https://matomo.org/faq/general/faq_146/"
+                    _hover={{ opacity: 1 }}
+                >
+                    Matomo cookie explanation page
+                </Link>
+                .
+            </Text>
             <FormControl display="flex" alignItems="center" paddingLeft="16px">
                 <FormLabel
                     htmlFor="interaction-tracking"
@@ -211,9 +230,9 @@ function CookieInfo() {
                 opacity="0.7"
             >
                 You might be wondering does Collaboration Spotting X use cookies
-                and what is their purpose. In short, CSX does not use cookies.
-                However, it does use local storage to store a multitude of
-                values necessary to provide various features such as studies,
+                and what is their purpose. In short, CSX does not use cookies by
+                default. However, it does use local storage to store a multitude
+                of values necessary to provide various features such as studies,
                 multiple datasets, local settings storage, and more without
                 demanding that you log in. Here you can find a short description
                 of all local storage values and their purpose. Since storing

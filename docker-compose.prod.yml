@@ -24,37 +24,36 @@ services:
     ports:
       - 8882:8880
     depends_on:
-      # - mysql
       - server
       - elastic
-      # - analytics
-    # command: bash -c "node server.js"
-  # mysql:
-  #   image: "mysql:5.7"
-  #   restart: unless-stopped
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: test
-  #     MYSQL_DATABASE: test
-  #   command: --max_allowed_packet=128000000 #Bytes
-  #   # ports:
-  #   #     - "3316:3306"
-  #   volumes:
-  #     - ./mysql:/var/lib/mysql
-  #   container_name: csxp_analytics_db
-  # analytics:
-  #   image: matomo:latest
-  #   container_name: csxp_analytics
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./analytics:/var/www/html
-  #   environment:
-  #     MATOMO_DATABASE_HOST: csxp_analytics_db
-  #     MATOMO_DATABASE_USERNAME: test
-  #     MATOMO_DATABASE_PASSWORD: test
-  #     MATOMO_DATABASE_DBNAME: analytics
-  #   ports:
-  #     - 8883:80
-  #   links: [mysql]
+  mysql:
+    image: "mysql:5.7"
+    profiles:
+      - "analytics"
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MATOMO_PASS}
+      MYSQL_DATABASE: analytics
+    command: --max_allowed_packet=128000000 #Bytes
+    volumes:
+      - ./mysql:/var/lib/mysql
+    container_name: csxp_analytics_db
+  analytics:
+    image: matomo:latest
+    profiles:
+      - "analytics"
+    container_name: csxp_analytics
+    restart: unless-stopped
+    volumes:
+      - ./analytics:/var/www/html
+    environment:
+      MATOMO_DATABASE_HOST: csxp_analytics_db
+      MATOMO_DATABASE_USERNAME: root
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_PASS}
+      MATOMO_DATABASE_DBNAME: analytics
+    ports:
+      - 8883:80
+    links: [mysql]
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
     environment:
