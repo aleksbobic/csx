@@ -52,12 +52,20 @@ function DatasetConfig(props) {
                 }}
                 borderRadius="5px"
                 variant="filled"
-                onChange={val =>
+                onChange={val => {
+                    store.track.trackEvent(
+                        props.formType === 'modify'
+                            ? 'dataset config modal'
+                            : 'dataset upload modal',
+                        `set ${column} data type`,
+                        val.target.value
+                    );
+
                     store.fileUpload.changeFileUplodColumnType(
                         column,
                         val.target.value
-                    )
-                }
+                    );
+                }}
             >
                 <option value="string">string</option>
                 <option value="float">float</option>
@@ -171,12 +179,18 @@ function DatasetConfig(props) {
                                         }
                                         borderRadius="5px"
                                         maxWidth="176px"
-                                        onSubmit={val =>
+                                        onSubmit={val => {
+                                            store.track.trackEvent(
+                                                'dataset upload modal',
+                                                `${column} renamed`,
+                                                val
+                                            );
+
                                             store.fileUpload.changeColumnName(
                                                 column,
                                                 val
-                                            )
-                                        }
+                                            );
+                                        }}
                                     >
                                         <EditablePreview
                                             padding="5px 23px"
@@ -236,11 +250,18 @@ function DatasetConfig(props) {
                                         store.fileUpload.fileUploadData
                                             .anchor === column
                                     }
-                                    onChange={() =>
+                                    onChange={() => {
+                                        store.track.trackEvent(
+                                            props.formType === 'modify'
+                                                ? 'dataset config modal'
+                                                : 'dataset upload modal',
+                                            'set default anchor',
+                                            column
+                                        );
                                         store.fileUpload.changeFileUplodAnchor(
                                             column
-                                        )
-                                    }
+                                        );
+                                    }}
                                     _disabled={{
                                         cursor: 'not-allowed',
                                         backgroundColor:
@@ -271,11 +292,19 @@ function DatasetConfig(props) {
                                         store.fileUpload.fileUploadData.link ===
                                         column
                                     }
-                                    onChange={() =>
+                                    onChange={() => {
+                                        store.track.trackEvent(
+                                            props.formType === 'modify'
+                                                ? 'dataset config modal'
+                                                : 'dataset upload modal',
+                                            'set default link',
+                                            column
+                                        );
+
                                         store.fileUpload.changeDefaultLink(
                                             column
-                                        )
-                                    }
+                                        );
+                                    }}
                                     _disabled={{
                                         cursor: 'not-allowed',
                                         backgroundColor:
@@ -305,11 +334,18 @@ function DatasetConfig(props) {
                                         store.fileUpload.fileUploadData
                                             .defaults[column].isDefaultSearch
                                     }
-                                    onChange={() =>
+                                    onChange={() => {
+                                        store.track.trackEvent(
+                                            props.formType === 'modify'
+                                                ? 'dataset config modal'
+                                                : 'dataset upload modal',
+                                            'set default search',
+                                            column
+                                        );
                                         store.fileUpload.changeDefaultSearch(
                                             column
-                                        )
-                                    }
+                                        );
+                                    }}
                                     _disabled={{
                                         cursor: 'not-allowed',
                                         backgroundColor:
@@ -353,9 +389,14 @@ function DatasetConfig(props) {
                                 : 'blackAlpha.300'
                         }
                         borderRadius="5px"
-                        onSubmit={val =>
-                            store.fileUpload.changeDatasetName(val)
-                        }
+                        onSubmit={val => {
+                            store.track.trackEvent(
+                                'dataset upload modal',
+                                'dataset title change',
+                                val
+                            );
+                            store.fileUpload.changeDatasetName(val);
+                        }}
                     >
                         <EditablePreview padding="5px 23px" width="100%" />
                         <EditableInput padding="5px 23px" width="100%" />

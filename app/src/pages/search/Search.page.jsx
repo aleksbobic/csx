@@ -17,6 +17,10 @@ function SearchPage(props) {
     });
 
     useEffect(() => {
+        store.track.trackPageChange();
+    }, []);
+
+    useEffect(() => {
         if (
             store.core.currentGraph === '' ||
             store.search.currentDataset === null

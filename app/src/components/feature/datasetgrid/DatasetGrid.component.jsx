@@ -25,10 +25,13 @@ function DatasetGrid(props) {
     const history = useHistory();
 
     const onDrop = async files => {
+        store.track.trackEvent('File upload', 'File dropped');
+
         store.fileUpload.changeFileUploadModalVisiblity(true);
         const response = await store.fileUpload.uploadFile(files);
 
         if (!response) {
+            store.track.trackEvent('File upload', 'File upload failed');
             store.fileUpload.changeFileUploadModalVisiblity(false);
         }
     };
@@ -190,11 +193,17 @@ function DatasetGrid(props) {
                                                 variant="ghost"
                                                 opacity="0"
                                                 _groupHover={{ opacity: '1' }}
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    store.track.trackEvent(
+                                                        'Dataset grid',
+                                                        'delete dataset',
+                                                        dataset
+                                                    );
+
                                                     store.search.deleteDataset(
                                                         dataset
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 icon={
                                                     <TrashEmpty
                                                         style={{
@@ -214,11 +223,17 @@ function DatasetGrid(props) {
                                                 variant="ghost"
                                                 opacity="0"
                                                 _groupHover={{ opacity: '1' }}
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    store.track.trackEvent(
+                                                        'Dataset grid',
+                                                        'change dataset default settings',
+                                                        dataset
+                                                    );
+
                                                     store.search.getConifg(
                                                         dataset
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 icon={
                                                     <Toolbox
                                                         style={{
@@ -232,7 +247,7 @@ function DatasetGrid(props) {
                                             .REACT_APP_DISABLE_ADVANCED_SEARCH !==
                                             'true' && (
                                             <Tooltip
-                                                label={`Explore entire ${dataset}`}
+                                                label={`Open advanced search for ${dataset}`}
                                             >
                                                 <IconButton
                                                     flexGrow="0"
@@ -242,11 +257,17 @@ function DatasetGrid(props) {
                                                     _groupHover={{
                                                         opacity: '1'
                                                     }}
-                                                    onClick={() =>
+                                                    onClick={() => {
+                                                        store.track.trackEvent(
+                                                            'Dataset grid',
+                                                            'Open advanced search',
+                                                            dataset
+                                                        );
+
                                                         navigateToAdvancedSearch(
                                                             dataset
-                                                        )
-                                                    }
+                                                        );
+                                                    }}
                                                     icon={
                                                         <ArrowRight
                                                             style={{

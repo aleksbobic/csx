@@ -82,13 +82,27 @@ function FileUploadModal() {
                             <Button
                                 variant="outline"
                                 mr={3}
-                                onClick={store.fileUpload.cancelFileUpload}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'dataset upload modal',
+                                        'button click',
+                                        'cancel'
+                                    );
+                                    store.fileUpload.cancelFileUpload();
+                                }}
                             >
                                 Cancel
                             </Button>
                             <Button
                                 variant="solid"
-                                onClick={() => store.fileUpload.setDefaults()}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'dataset upload modal',
+                                        'button click',
+                                        'set default config'
+                                    );
+                                    store.fileUpload.setDefaults();
+                                }}
                             >
                                 Set defaults
                             </Button>

@@ -118,11 +118,17 @@ function StudyGrid(props) {
                                                     style={{ '--ggs': '0.7' }}
                                                 />
                                             }
-                                            onClick={() =>
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Study grid',
+                                                    'Delete study',
+                                                    study.study_uuid
+                                                );
+
                                                 store.core.deleteStudy(
                                                     study.study_uuid
-                                                )
-                                            }
+                                                );
+                                            }}
                                         />
                                     </Tooltip>
                                     <VStack
@@ -190,9 +196,14 @@ function StudyGrid(props) {
                                                     colorMode === 'light' &&
                                                     'white'
                                             }}
-                                            onClick={() =>
-                                                openStudy(study.study_uuid)
-                                            }
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Study grid',
+                                                    'Open study',
+                                                    study.study_uuid
+                                                );
+                                                openStudy(study.study_uuid);
+                                            }}
                                         >
                                             Open
                                         </Button>

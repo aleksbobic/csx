@@ -125,20 +125,17 @@ function Footer() {
                         _hover={{ opacity: 1 }}
                         height="21px"
                         onClick={() => {
+                            store.track.trackEvent(
+                                'Footer',
+                                'Button click',
+                                'Open tracking info'
+                            );
                             store.search.setSearchIsEmpty(false);
                             store.core.setShowCookieInfo(true);
                         }}
                     >
                         Cookies & local storage
                     </Button>
-                    <Text
-                        textAlign="left"
-                        fontWeight="bold"
-                        fontSize="xs"
-                        paddingTop="16px"
-                    >
-                        CERN &copy; 2022
-                    </Text>
                 </VStack>
             </Center>
         </Container>

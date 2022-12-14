@@ -170,6 +170,11 @@ function CookieInfo() {
                     isChecked={store.core.trackingEnabled}
                     value={store.core.trackingEnabled}
                     onChange={e => {
+                        store.track.trackEvent(
+                            'Home page',
+                            'Toggle interaction tracking',
+                            e.target.checked
+                        );
                         store.core.setTrackingEnabled(e.target.checked);
                         store.core.setHideCookieBanner();
                     }}
@@ -216,7 +221,14 @@ function CookieInfo() {
                             ? 'blackAlpha.100'
                             : 'whiteAlpha.100'
                 }}
-                onClick={() => store.core.setShowCookieInfo(false)}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Home page',
+                        'Button click',
+                        'Close tracking info page'
+                    );
+                    store.core.setShowCookieInfo(false);
+                }}
             >
                 Back
             </Button>

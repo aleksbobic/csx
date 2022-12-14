@@ -26,10 +26,20 @@ function DatasetConfigModal() {
     }, [isOpen, onClose, onOpen, store.fileUpload.showConfigChangeModal]);
 
     const updateConfig = () => {
+        store.track.trackEvent(
+            'dataset config modal',
+            'button click',
+            'update default config'
+        );
         store.fileUpload.updateConfig();
     };
 
     const cancelSettingsEdit = () => {
+        store.track.trackEvent(
+            'dataset config modal',
+            'button click',
+            'cancel'
+        );
         store.fileUpload.changeConfigChangeModalVisiblity(false);
         store.fileUpload.resetFileUploadData();
     };

@@ -28,6 +28,11 @@ function SearchBar(props) {
     const selectedDatasetChange = e => {
         setSelectedDataset(e.target.value);
         store.search.useDataset(e.target.value);
+        store.track.trackEvent(
+            'Searchbar',
+            'Dataset change',
+            store.search.currentDataset
+        );
         store.workflow.resetWorkflow();
         store.schema.resetOverviewNodeProperties();
     };
@@ -84,6 +89,12 @@ function SearchBar(props) {
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
+                    store.track.trackEvent(
+                        'Searchbar',
+                        `Run search on ${store.search.currentDataset}`,
+                        values.search
+                    );
+
                     store.search.setSearchIsEmpty(false);
                     props.onSubmit();
                     store.core.setCurrentGraph('overview');
