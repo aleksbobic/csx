@@ -55,8 +55,8 @@ function TableHead(props) {
                 color={headerTextColor}
                 onClick={() => {
                     store.track.trackEvent(
-                        'data panel nodes tab',
-                        'header click',
+                        'Search results',
+                        'Table header click',
                         eventData
                     );
                 }}

@@ -7,9 +7,12 @@ import {
 import { Search } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { RootStoreContext } from 'stores/RootStore';
 
 function GlobalFilter(props) {
+    const store = useContext(RootStoreContext);
+
     const [globalFilterValue, setGlobalFilterValue] = useState(
         props.globalFilter
     );
@@ -40,7 +43,15 @@ function GlobalFilter(props) {
                     variant="ghost"
                     size="sm"
                     icon={<Search style={{ '--ggs': '0.7' }} />}
-                    onClick={onChange}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Search results',
+                            'Button click',
+                            `Search table for ${globalFilterValue}`
+                        );
+
+                        onChange();
+                    }}
                 />
             </InputRightElement>
         </InputGroup>

@@ -67,8 +67,8 @@ function TableBody(props) {
                     maxWidth="150px"
                     onClick={() => {
                         store.track.trackEvent(
-                            'data panel nodes tab',
-                            'item click',
+                            'Search results',
+                            'Table body click',
                             `focus on node: ${cell.value}}`
                         );
 
@@ -140,8 +140,8 @@ function TableBody(props) {
                         maxWidth="150px"
                         onClick={() => {
                             store.track.trackEvent(
-                                'data panel nodes tab',
-                                'item click',
+                                'Search results',
+                                'Table body click',
                                 `focus on node: ${cell.value}}`
                             );
 

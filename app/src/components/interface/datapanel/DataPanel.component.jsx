@@ -573,6 +573,13 @@ function DataPanel(props) {
                                     target="_blank"
                                     variant="solid"
                                     opacity="0.5"
+                                    onClick={() => {
+                                        this.store.track.trackEvent(
+                                            'Search results',
+                                            'Button click',
+                                            'Download data'
+                                        );
+                                    }}
                                     transition="all 0.2 ease-in-out"
                                     _hover={{ opacity: 1 }}
                                     icon={
@@ -598,6 +605,13 @@ function DataPanel(props) {
                                             style={{ '--ggs': 0.8 }}
                                         />
                                     }
+                                    onClick={() => {
+                                        this.store.track.trackEvent(
+                                            'Search results',
+                                            'Button click',
+                                            'Open list options'
+                                        );
+                                    }}
                                     zIndex="3"
                                 />
                             </Tooltip>
@@ -621,6 +635,12 @@ function DataPanel(props) {
                                                 size="sm"
                                                 onChange={e => {
                                                     if (e.target.checked) {
+                                                        this.store.track.trackEvent(
+                                                            'Search results',
+                                                            'Button click',
+                                                            `Show ${feature} in SERP`
+                                                        );
+
                                                         setVisibleProperties([
                                                             ...visibleProperties,
                                                             feature
@@ -629,6 +649,12 @@ function DataPanel(props) {
                                                         visibleProperties.length >
                                                         1
                                                     ) {
+                                                        this.store.track.trackEvent(
+                                                            'Search results',
+                                                            'Button click',
+                                                            `Hide ${feature} from SERP`
+                                                        );
+
                                                         setVisibleProperties([
                                                             ...visibleProperties.filter(
                                                                 value =>
@@ -661,6 +687,12 @@ function DataPanel(props) {
                                 transition="all 0.2 ease-in-out"
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
+                                    this.store.track.trackEvent(
+                                        'Search results',
+                                        'Button click',
+                                        'Switch to table view'
+                                    );
+
                                     setUseList(false);
                                 }}
                             />
@@ -674,6 +706,12 @@ function DataPanel(props) {
                                 transition="all 0.2 ease-in-out"
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
+                                    this.store.track.trackEvent(
+                                        'Search results',
+                                        'Button click',
+                                        'Switch to list view'
+                                    );
+
                                     if (visibleProperties.length === 0) {
                                         setVisibleProperties(
                                             Object.keys(
