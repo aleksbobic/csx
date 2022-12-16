@@ -55,6 +55,12 @@ export class SchemaStore {
                 } else {
                     entry['data']['relationship'] = possibleRelationships[0];
                 }
+
+                this.store.track.trackEvent(
+                    'Schema',
+                    'Button click',
+                    `Change edge ${id} relationship to ${entry['data']['relationship']}`
+                );
             }
 
             return entry;
@@ -316,6 +322,12 @@ export class SchemaStore {
     addLinkNode = () => {
         const newNodeId = uuidv4();
 
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Add new link node ${newNodeId}`
+        );
+
         this.overviewNodes.push({
             id: newNodeId,
             position: { x: 250, y: 200 },
@@ -374,6 +386,12 @@ export class SchemaStore {
     };
 
     removeLinkNode = id => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Remove link node ${id}`
+        );
+
         this.overviewNodes = this.overviewNodes.filter(entry => {
             return entry.id !== id;
         });
@@ -386,6 +404,12 @@ export class SchemaStore {
     };
 
     setAnchor = anchor => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Dropdown select',
+            `Set anchor ${anchor}`
+        );
+
         this.store.search.anchor = anchor;
 
         if (this.store.search.nodeTypes[anchor] === 'list') {
@@ -434,6 +458,12 @@ export class SchemaStore {
     };
 
     setLink = (link, nodeId) => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Set ${link} as link with id ${nodeId}`
+        );
+
         if (this.store.search.links.includes(link)) {
             this.store.search.setLinks(
                 this.store.search.links.filter(entry => entry !== link)
@@ -654,6 +684,12 @@ export class SchemaStore {
     };
 
     addSchemaConnection = edge => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Connection creation',
+            `add edge ${edge['source']}${edge['target']}`
+        );
+
         const possibleConnections = this.getPossibleConnections(
             this.getNodeNameFromId(edge['source']),
             this.getNodeNameFromId(edge['target'])
@@ -694,6 +730,12 @@ export class SchemaStore {
     };
 
     removeSchemaConnection = id => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Remove edge ${id}`
+        );
+
         this.edges = this.edges.filter(entry => entry['id'] !== id);
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
@@ -708,6 +750,12 @@ export class SchemaStore {
     };
 
     addProperty = property => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Add nodde property ${property}`
+        );
+
         this.overviewDataNodeProperties.push(property);
         this.overviewNodes = this.overviewNodes.map(node => {
             node.data = { ...node.data };
@@ -717,6 +765,12 @@ export class SchemaStore {
     };
 
     removeProperty = property => {
+        this.store.track.trackEvent(
+            'Schema',
+            'Button click',
+            `Remove node property ${property}`
+        );
+
         const propIndex = this.overviewDataNodeProperties.indexOf(property);
         this.overviewDataNodeProperties.splice(propIndex, 1);
         this.overviewNodes = this.overviewNodes.map(node => {
