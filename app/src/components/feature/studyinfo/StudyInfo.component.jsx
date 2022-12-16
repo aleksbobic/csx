@@ -35,7 +35,14 @@ function StudyInfo() {
             <Tooltip label={store.core.studyName}>
                 <Editable
                     value={store.core.studyName}
-                    onSubmit={val => store.core.updateStudyName(val)}
+                    onSubmit={val => {
+                        store.track.trackEvent(
+                            'Graph page',
+                            'Change study name',
+                            val
+                        );
+                        store.core.updateStudyName(val);
+                    }}
                     onChange={val => store.core.setStudyName(val)}
                     width="100%"
                 >
@@ -90,7 +97,15 @@ function StudyInfo() {
             >
                 <Editable
                     value={store.core.studyDescription}
-                    onSubmit={val => store.core.updateStudyDescription(val)}
+                    onSubmit={val => {
+                        store.track.trackEvent(
+                            'Graph page',
+                            'Change study description',
+                            val
+                        );
+
+                        store.core.updateStudyDescription(val);
+                    }}
                     onChange={val => store.core.setStudyDescription(val)}
                     width="100%"
                     placeholder="Click here to add a study description. 👀"
@@ -126,7 +141,14 @@ function StudyInfo() {
                 width="100%"
                 size="sm"
                 disabled={store.core.studyIsSaved}
-                onClick={() => store.core.saveStudy()}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Graph page',
+                        'Button click',
+                        'Save study'
+                    );
+                    store.core.saveStudy();
+                }}
             >
                 {store.core.studyIsSaved ? 'Saved' : 'Save'}
                 <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />

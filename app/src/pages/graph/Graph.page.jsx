@@ -150,10 +150,20 @@ function GraphPage() {
             !store.core.showCommentModal &&
             store.comment.commentTrigger
         ) {
+            store.track.trackEvent(
+                'Graph page',
+                'Keyboard shortcut',
+                'Open comment modal shortcut'
+            );
             store.core.setShowCommentModal(true);
         }
 
         if (closeCommentModalKey && store.core.showCommentModal) {
+            store.track.trackEvent(
+                'Graph page',
+                'Keyboard shortcut',
+                'Close comment modal shortcut'
+            );
             setComment('');
             store.core.setShowCommentModal(false);
         }
@@ -162,6 +172,7 @@ function GraphPage() {
         openCommentModalKey,
         store.comment.commentTrigger,
         store.core,
+        store.track,
         submitCommentModalKey
     ]);
 
@@ -176,14 +187,21 @@ function GraphPage() {
             comment !== '' &&
             store.comment.commentTrigger
         ) {
+            store.track.trackEvent(
+                'Graph page',
+                'Keyboard shortcut',
+                'Submit comment'
+            );
             store.comment.addComment(comment);
             closeCommentModal();
         }
     }, [
         closeCommentModal,
         comment,
+        store.comment,
         store.comment.commentTrigger,
         store.history,
+        store.track,
         submitCommentModalKey
     ]);
 
@@ -231,7 +249,14 @@ function GraphPage() {
                 right="16px"
                 bottom="16px"
                 zIndex="2"
-                onClick={submitComment}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Graph page',
+                        'Button click',
+                        'Submit comment from comment modal'
+                    );
+                    submitComment();
+                }}
             >
                 Comment
             </Button>
@@ -243,7 +268,14 @@ function GraphPage() {
                 top="12px"
                 variant="ghost"
                 zIndex="2"
-                onClick={closeCommentModal}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Graph page',
+                        'Button click',
+                        'Close comment modal'
+                    );
+                    closeCommentModal();
+                }}
             />
         </Box>
     );

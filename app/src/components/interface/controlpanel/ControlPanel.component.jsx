@@ -248,6 +248,11 @@ function ControlPanel() {
                         size="sm"
                         icon={<ScissorsIcon style={{ width: '16px' }} />}
                         onClick={() => {
+                            store.track.trackEvent(
+                                'Graph page',
+                                'Button click',
+                                'Trim network'
+                            );
                             store.graph.trimNetwork();
                         }}
                     />
@@ -280,7 +285,14 @@ function ControlPanel() {
                                 fontSize="xs"
                                 fontWeight="bold"
                                 borderRadius="6px"
-                                onClick={() => expandGraph('or')}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Graph page',
+                                        'Button click',
+                                        'Wide expand network'
+                                    );
+                                    expandGraph('or');
+                                }}
                             >
                                 Wide Expand
                             </MenuItem>
@@ -288,7 +300,14 @@ function ControlPanel() {
                                 fontSize="xs"
                                 fontWeight="bold"
                                 borderRadius="6px"
-                                onClick={() => expandGraph('and')}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Graph page',
+                                        'Button click',
+                                        'Narrow expand network'
+                                    );
+                                    expandGraph('and');
+                                }}
                             >
                                 Narrow Expand
                             </MenuItem>
@@ -323,9 +342,9 @@ function ControlPanel() {
                         icon={<MediaLive style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'hide direct connections'
+                                'Graph page',
+                                'Button click',
+                                'Show all nodes'
                             );
                             store.graphInstance.toggleVisibleComponents(-1);
                             store.graphInstance.resetSelfCentric();
@@ -345,9 +364,9 @@ function ControlPanel() {
                         icon={<RadioChecked style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show selected nodes'
+                                'Graph page',
+                                'Button click',
+                                'Show selected nodes'
                             );
                             store.graphInstance.triggerSelectedNodes();
                         }}
@@ -366,9 +385,9 @@ function ControlPanel() {
                         icon={<FormatSeparator style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show nodes with same entries as context node'
+                                'Graph page',
+                                'Button click',
+                                'Show nodes with same entries as origin'
                             );
                             store.graphInstance.triggerSameEntry();
                         }}
@@ -389,9 +408,9 @@ function ControlPanel() {
                         icon={<DisplayFullwidth style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show nodes with same entries as context node'
+                                'Graph page',
+                                'Button click',
+                                'Show nodes with same entries as all selected nodes'
                             );
                             store.graphInstance.triggerSameEntry(true);
                         }}
@@ -409,9 +428,9 @@ function ControlPanel() {
                         icon={<PathDivide style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show union of direct all connections'
+                                'Graph page',
+                                'Button click',
+                                'Show direct connections of selected nodes'
                             );
                             store.graphInstance.triggerMultiSelfCentric();
                         }}
@@ -429,9 +448,9 @@ function ControlPanel() {
                         icon={<PathIntersect style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show intersection of direct connections'
+                                'Graph page',
+                                'Button click',
+                                'Show mutual connections of selected nodes'
                             );
                             store.graphInstance.triggerMultiSelfCentric(true);
                         }}
@@ -455,9 +474,9 @@ function ControlPanel() {
                         icon={<LivePhoto style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show direct connections of origin node'
+                                'Graph page',
+                                'Button click',
+                                'Show direct connections of origin node'
                             );
                             store.graphInstance.triggerSelfCentric();
                         }}
@@ -472,9 +491,9 @@ function ControlPanel() {
                         icon={<LayoutPin style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'direct connections menu',
-                                'button click',
-                                'show intersection of direct connections with origin node'
+                                'Graph page',
+                                'Button click',
+                                'Show mutual connections with origin node'
                             );
                             store.graphInstance.triggerMultiSelfCentric(
                                 true,
@@ -522,7 +541,17 @@ function ControlPanel() {
                             width="50px"
                             height="50px"
                             color={tabInactiveColors}
-                            onClick={toggleControlPanel}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Graph page',
+                                    'Button click',
+                                    isOpen
+                                        ? 'Minimize control panel'
+                                        : 'Maximize control panel'
+                                );
+
+                                toggleControlPanel();
+                            }}
                             icon={
                                 isOpen ? (
                                     <ChevronDoubleLeft
@@ -542,9 +571,9 @@ function ControlPanel() {
                         onClick={() => {
                             openSliderIfClosed();
                             store.track.trackEvent(
-                                'controls panel',
-                                'button click',
-                                'show study info'
+                                'Graph page',
+                                'Button click',
+                                'Open study info tab'
                             );
                         }}
                         padding="8px"
@@ -576,9 +605,9 @@ function ControlPanel() {
                         onClick={() => {
                             openSliderIfClosed();
                             store.track.trackEvent(
-                                'controls panel',
-                                'button click',
-                                'show view controls'
+                                'Graph page',
+                                'Button click',
+                                'Open view controls tab'
                             );
                         }}
                         padding="8px"

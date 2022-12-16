@@ -369,7 +369,21 @@ function Settings() {
                     cursor: 'pointer',
                     color: 'white'
                 }}
-                onClick={() => store.core.toggleVisibleDimension(property)}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Graph page',
+                        'Button click',
+                        `${
+                            store.core.visibleDimensions[
+                                store.core.currentGraph
+                            ].includes(property)
+                                ? 'hide'
+                                : 'show'
+                        } ${property}`
+                    );
+
+                    store.core.toggleVisibleDimension(property);
+                }}
             >
                 <Tooltip label={property}>
                     <Text

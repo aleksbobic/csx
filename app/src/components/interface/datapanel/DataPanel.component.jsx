@@ -413,7 +413,15 @@ function DataPanel(props) {
                             }}
                         />
                     }
-                    onClick={zoomToActiveHistoryNode}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'History',
+                            'Button click',
+                            'Navigate to active history node'
+                        );
+
+                        zoomToActiveHistoryNode();
+                    }}
                 />
             </Tooltip>
         </Box>

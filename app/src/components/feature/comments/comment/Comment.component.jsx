@@ -105,7 +105,15 @@ function CommentComponent(props) {
                     variant="ghost"
                     marginRight="5px"
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
-                    onClick={() => editComment(props.commentIndex)}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Comment area',
+                            'Button click',
+                            'Edit comment'
+                        );
+
+                        editComment(props.commentIndex);
+                    }}
                     icon={
                         <PencilIcon
                             style={{
@@ -128,9 +136,15 @@ function CommentComponent(props) {
                 <IconButton
                     size="sm"
                     variant="ghost"
-                    onClick={() =>
-                        store.comment.deleteCommnet(props.commentIndex)
-                    }
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Comment area',
+                            'Button click',
+                            'Delete comment'
+                        );
+
+                        store.comment.deleteCommnet(props.commentIndex);
+                    }}
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     icon={
                         <Close

@@ -256,7 +256,18 @@ function CommentTextArea(props) {
             <HStack spacing="1">
                 <Popover offset={[-200, 0]} closeOnBlur={true}>
                     <PopoverTrigger>
-                        <Button size="sm" variant="ghost" opacity="0.6">
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            opacity="0.6"
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Comment area',
+                                    'Button click',
+                                    'Markdown info'
+                                );
+                            }}
+                        >
                             ?
                         </Button>
                     </PopoverTrigger>
@@ -269,6 +280,13 @@ function CommentTextArea(props) {
                             <Heading size="sm">Markdown shortcuts</Heading>
                             <PopoverCloseButton
                                 style={{ top: '14px', right: '14px' }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Comment area',
+                                        'Button click',
+                                        'Close markdown info'
+                                    );
+                                }}
                             />
                         </PopoverHeader>
                         <PopoverBody>{renderMarkdownCheatSheet()}</PopoverBody>
@@ -286,11 +304,19 @@ function CommentTextArea(props) {
                         size="sm"
                         variant="ghost"
                         color="white"
-                        onClick={() =>
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Comment area',
+                                'Button click',
+                                store.comment.isCommentListVisible
+                                    ? 'Hide comments'
+                                    : 'Show comments'
+                            );
+
                             store.comment.setIsCommentListVisible(
                                 !store.comment.isCommentListVisible
-                            )
-                        }
+                            );
+                        }}
                         icon={
                             store.comment.isCommentListVisible ? (
                                 <ChevronDown style={{ '--ggs': '0.7' }} />
@@ -352,7 +378,15 @@ function CommentTextArea(props) {
                                 transition="0.2s all ease-in-out"
                                 icon={<Close style={{ '--ggs': '0.7' }} />}
                                 _hover={{ opacity: 0.8 }}
-                                onClick={exitEditMode}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Comment area',
+                                        'Button click',
+                                        'Exit edit mode'
+                                    );
+
+                                    exitEditMode();
+                                }}
                             />
                         </Tooltip>
                     )}
@@ -367,7 +401,15 @@ function CommentTextArea(props) {
                         transition="0.2s all ease-in-out"
                         color={'white'}
                         _hover={{ backgroundColor: 'blue.500' }}
-                        onClick={submitComment}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Comment area',
+                                'Button click',
+                                'Submit comment'
+                            );
+
+                            submitComment();
+                        }}
                         isDisabled={comment.trim() === ''}
                         _disabled={{
                             backgroundColor:

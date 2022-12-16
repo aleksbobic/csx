@@ -75,18 +75,19 @@ function NavigationPanelComponent() {
         }
 
         store.track.trackEvent(
-            'navbar',
-            'button click',
+            'Navbar',
+            'Button click',
             `${panel} panel ${isOpen ? 'off' : 'on'}`
         );
     };
 
     const toggleColor = () => {
         store.track.trackEvent(
-            'navbar',
-            'button click',
-            `color mode ${colorMode === 'light' ? 'dark' : 'light'}`
+            'Navbar',
+            'Button click',
+            `Change color mode to ${colorMode === 'light' ? 'dark' : 'light'}`
         );
+
         toggleColorMode();
         store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
         store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
@@ -117,6 +118,16 @@ function NavigationPanelComponent() {
                         border="none"
                         aria-label="Switch graph view"
                         onClick={() => {
+                            store.track.trackEvent(
+                                'Graph page',
+                                'Button click',
+                                `View ${
+                                    store.core.currentGraph === 'detail'
+                                        ? 'overview'
+                                        : 'detail'
+                                }`
+                            );
+
                             store.graph.modifyStudy(
                                 store.core.currentGraph === 'detail'
                                     ? 'overview'
@@ -224,9 +235,9 @@ function NavigationPanelComponent() {
                         icon={<CameraIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'view utils',
-                                'button click',
-                                'take screenshot'
+                                'Graph page',
+                                'Button click',
+                                'Make screenshot'
                             );
                             store.graphInstance.takeScreenshot();
                         }}
@@ -241,9 +252,9 @@ function NavigationPanelComponent() {
                         icon={<Ratio style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'view utils',
-                                'button click',
-                                'zoom to fit'
+                                'Graph page',
+                                'Button click',
+                                'Zoom to fit'
                             );
                             store.graphInstance.zoomToFit();
                         }}
@@ -326,7 +337,9 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
-                            onClick={() => toggleDataPanel('details')}
+                            onClick={() => {
+                                toggleDataPanel('details');
+                            }}
                             icon={
                                 <AlignBottom
                                     style={{
@@ -348,7 +361,9 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
-                            onClick={() => toggleDataPanel('results')}
+                            onClick={() => {
+                                toggleDataPanel('results');
+                            }}
                             icon={
                                 <List
                                     style={{
@@ -370,7 +385,9 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
-                            onClick={() => toggleDataPanel('schema')}
+                            onClick={() => {
+                                toggleDataPanel('schema');
+                            }}
                             icon={
                                 <Attribution
                                     style={{
@@ -392,7 +409,9 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
-                            onClick={() => toggleDataPanel('history')}
+                            onClick={() => {
+                                toggleDataPanel('history');
+                            }}
                             icon={
                                 <Carousel
                                     style={{
@@ -463,9 +482,9 @@ function NavigationPanelComponent() {
                         onClick={() => {
                             store.core.deleteStudy();
                             store.track.trackEvent(
-                                'navbar',
-                                'button click',
-                                'logo'
+                                'Navbar',
+                                'Button click',
+                                'Logo'
                             );
                         }}
                     >
