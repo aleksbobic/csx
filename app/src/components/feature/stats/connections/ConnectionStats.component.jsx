@@ -143,6 +143,12 @@ function ConnectionStats(props) {
                                 marginBottom="4px"
                                 minWidth="210px"
                                 onClick={() => {
+                                    store.track.trackEvent(
+                                        'Node connections widget',
+                                        'Click degree level',
+                                        `${level}`
+                                    );
+
                                     store.graphInstance.filterNodesById(
                                         origin,
                                         neighbours,
@@ -361,13 +367,19 @@ function ConnectionStats(props) {
                                         _hover={{ cursor: 'pointer' }}
                                         onClick={() => {
                                             if (!props.demoData.length) {
+                                                store.track.trackEvent(
+                                                    'Node connections widget',
+                                                    'Button click',
+                                                    `Navigate to node ${node.id}`
+                                                );
+
                                                 store.graphInstance.zoomToFitByNodeId(
                                                     node.id
                                                 );
                                             }
                                         }}
                                     >
-                                        {node.label}
+                                        Node: {node.label}
                                     </Heading>
                                     {renderNodeDetails(node)}
                                 </Stat>

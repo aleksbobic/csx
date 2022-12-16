@@ -151,12 +151,18 @@ function Overview(props) {
                                     : 'whiteAlpha.400'
                         }}
                         borderRadius="xl"
-                        onClick={() =>
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Details panel',
+                                'Button click',
+                                'Add new widget'
+                            );
+
                             store.stats.toggleStatsModalVisiblity(
                                 true,
                                 props.types
-                            )
-                        }
+                            );
+                        }}
                         icon={
                             <MathPlus
                                 style={{

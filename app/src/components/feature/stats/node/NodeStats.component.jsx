@@ -201,6 +201,12 @@ function SelectedNodeList(props) {
                                     _hover={{ cursor: 'pointer' }}
                                     onClick={() => {
                                         if (!props.demoData.length) {
+                                            store.track.trackEvent(
+                                                'Node list widget',
+                                                'Button click',
+                                                `Zoom to fit node ${node.id}`
+                                            );
+
                                             store.graphInstance.zoomToFitByNodeId(
                                                 node.id
                                             );
@@ -245,8 +251,8 @@ function SelectedNodeList(props) {
                                                         !props.demoData.length
                                                     ) {
                                                         store.track.trackEvent(
-                                                            'data panel selection tab',
-                                                            'button click',
+                                                            'Node list widget',
+                                                            'Button click',
                                                             `deselect node {id: ${node.id}, label: ${node.label}}`
                                                         );
 

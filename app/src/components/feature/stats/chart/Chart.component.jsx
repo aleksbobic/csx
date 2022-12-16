@@ -259,12 +259,24 @@ function Chart(props) {
                     let visibleNodeIds;
 
                     if ('nodeProperty' in data) {
+                        store.track.trackEvent(
+                            `${props.chart.type} chart with id ${props.chart.id}`,
+                            'Chart click',
+                            `Node property ${data.nodeProperty} with value ${data.labels[index]}`
+                        );
+
                         visibleNodeIds =
                             store.graphInstance.filterNodesWithValue(
                                 data.nodeProperty,
                                 data.labels[index]
                             );
                     } else {
+                        store.track.trackEvent(
+                            `${props.chart.type} chart with id ${props.chart.id}`,
+                            'Chart click',
+                            `Edge property ${data.edgeProperty} with value ${data.labels[index]}`
+                        );
+
                         visibleNodeIds =
                             store.graphInstance.filterEdgesWithValue(
                                 data.edgeProperty,

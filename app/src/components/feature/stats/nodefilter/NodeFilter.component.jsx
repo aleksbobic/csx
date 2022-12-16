@@ -103,6 +103,12 @@ function NodeFilter(props) {
                         width="84px"
                         value={sliderMinTooltipValue}
                         onChange={val => {
+                            store.track.trackEvent(
+                                'Node filter widget',
+                                'Enter min value',
+                                `${val}`
+                            );
+
                             setSliderMinTooltipValue(val);
                             if (!isDemo) {
                                 filterNodes(val, sliderMaxTooltipValue);
@@ -154,6 +160,12 @@ function NodeFilter(props) {
                         height={props.isExpanded ? '100px' : '50px'}
                         width="84px"
                         onChange={val => {
+                            store.track.trackEvent(
+                                'Node filter widget',
+                                'Enter max value',
+                                `${val}`
+                            );
+
                             setSliderMaxTooltipValue(val);
                             if (!isDemo) {
                                 filterNodes(sliderMinTooltipValue, val);
@@ -195,6 +207,12 @@ function NodeFilter(props) {
                     max={sliderMaxValue}
                     step={1}
                     onChange={val => {
+                        store.track.trackEvent(
+                            'Node filter widget',
+                            'Set slider',
+                            `Min: ${val[0]}  Max: ${val[1]}`
+                        );
+
                         setSliderMinTooltipValue(val[0]);
                         setSliderMaxTooltipValue(val[1]);
                     }}

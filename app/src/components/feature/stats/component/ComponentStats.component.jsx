@@ -286,11 +286,25 @@ function SelectedComponentList(props) {
                                                     : '0.3'
                                             }
                                             _hover={{ opacity: 1 }}
-                                            onClick={() =>
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Components widget',
+                                                    'Button click',
+                                                    `Make component ${
+                                                        component.id
+                                                    }  ${
+                                                        store.graphInstance.visibleComponents.includes(
+                                                            component.id
+                                                        )
+                                                            ? 'invisible'
+                                                            : 'visible'
+                                                    }`
+                                                );
+
                                                 store.graphInstance.toggleVisibleComponents(
                                                     component.id
-                                                )
-                                            }
+                                                );
+                                            }}
                                             icon={
                                                 <Eye
                                                     style={{ '--ggs': '0.7' }}
@@ -322,6 +336,12 @@ function SelectedComponentList(props) {
                                                     if (
                                                         !props.demoData.length
                                                     ) {
+                                                        store.track.trackEvent(
+                                                            'Components widget',
+                                                            'Button click',
+                                                            `Deselect component ${component.id}`
+                                                        );
+
                                                         store.graph.selectComponent(
                                                             component.id
                                                         );

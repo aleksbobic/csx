@@ -445,11 +445,17 @@ function FileUploadModal() {
                                     defaultValue={
                                         store.stats.newChartProps.title
                                             ? store.stats.newChartProps.title
-                                            : 'Chart title'
+                                            : 'Widget title'
                                     }
-                                    onSubmit={val =>
-                                        store.stats.changeChartTitle(val)
-                                    }
+                                    onSubmit={val => {
+                                        store.track.trackEvent(
+                                            'Widget modal',
+                                            'Set widget title',
+                                            `${val}`
+                                        );
+
+                                        store.stats.changeChartTitle(val);
+                                    }}
                                     height="28px"
                                 >
                                     <EditablePreview
@@ -497,11 +503,17 @@ function FileUploadModal() {
                                                       .hoverLabel
                                                 : 'Hover label'
                                         }
-                                        onSubmit={val =>
+                                        onSubmit={val => {
+                                            store.track.trackEvent(
+                                                'Widget modal',
+                                                'Set hover label',
+                                                `${val}`
+                                            );
+
                                             store.stats.changeChartHoverLabel(
                                                 val
-                                            )
-                                        }
+                                            );
+                                        }}
                                         height="28px"
                                     >
                                         <EditablePreview
@@ -550,11 +562,17 @@ function FileUploadModal() {
                                                       .groupHoverLabel
                                                 : 'Group hover label'
                                         }
-                                        onSubmit={val =>
+                                        onSubmit={val => {
+                                            store.track.trackEvent(
+                                                'Widget modal',
+                                                'Set group hover label',
+                                                `${val}`
+                                            );
+
                                             store.stats.changeChartGroupHoverLabel(
                                                 val
-                                            )
-                                        }
+                                            );
+                                        }}
                                         height="28px"
                                     >
                                         <EditablePreview
@@ -599,11 +617,17 @@ function FileUploadModal() {
                                         size="sm"
                                         defaultValue="nodes"
                                         variant="filled"
-                                        onChange={value =>
+                                        onChange={value => {
+                                            store.track.trackEvent(
+                                                'Widget modal',
+                                                'Set network elements',
+                                                `${value.target.value}`
+                                            );
+
                                             store.stats.changeChartNetworkElements(
                                                 value.target.value
-                                            )
-                                        }
+                                            );
+                                        }}
                                     >
                                         <option value="nodes">Nodes</option>
                                         {(statTypes.type === 'stat' ||
@@ -633,11 +657,17 @@ function FileUploadModal() {
                                 <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
                                     <Select
                                         size="sm"
-                                        onChange={value =>
+                                        onChange={value => {
+                                            store.track.trackEvent(
+                                                'Widget modal',
+                                                'Set element values',
+                                                `${value.target.value}`
+                                            );
+
                                             store.stats.changeChartElementValue(
                                                 value.target.value
-                                            )
-                                        }
+                                            );
+                                        }}
                                         variant="filled"
                                     >
                                         {store.stats
@@ -672,11 +702,17 @@ function FileUploadModal() {
                                     <Tooltip label="These values will be shown on the chart instead of 'First group', 'Second group' etc. and they will be used to group the element values.">
                                         <Select
                                             size="sm"
-                                            onChange={value =>
+                                            onChange={value => {
+                                                store.track.trackEvent(
+                                                    'Widget modal',
+                                                    'Set group by value',
+                                                    `${value.target.value}`
+                                                );
+
                                                 store.stats.changeChartGroupByValues(
                                                     value.target.value
-                                                )
-                                            }
+                                                );
+                                            }}
                                             variant="filled"
                                         >
                                             {store.stats
@@ -714,11 +750,17 @@ function FileUploadModal() {
                                     <Tooltip label="These values will define which types of nodes you want to explore.">
                                         <Select
                                             size="sm"
-                                            onChange={value =>
+                                            onChange={value => {
+                                                store.track.trackEvent(
+                                                    'Widget modal',
+                                                    'Set show only',
+                                                    `${value.target.value}`
+                                                );
+
                                                 store.stats.changeShowOnly(
                                                     value.target.value
-                                                )
-                                            }
+                                                );
+                                            }}
                                             variant="filled"
                                         >
                                             <option value={'all'}>All</option>
@@ -782,6 +824,13 @@ function FileUploadModal() {
                                     borderRadius: '4px',
                                     opacity: 0.5,
                                     cursor: 'pointer'
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Widget modal',
+                                        'Button click',
+                                        `Open ${entry} sample`
+                                    );
                                 }}
                             >
                                 {entry}
@@ -923,9 +972,15 @@ function FileUploadModal() {
                         top="20px"
                         right="20px"
                         icon={<Close />}
-                        onClick={() =>
-                            store.stats.toggleStatsModalVisiblity(false)
-                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Widget modal',
+                                'Button click',
+                                'Close'
+                            );
+
+                            store.stats.toggleStatsModalVisiblity(false);
+                        }}
                     />
                 </ModalHeader>
 
@@ -937,7 +992,15 @@ function FileUploadModal() {
                         backgroundColor="blue.500"
                         _hover={{ backgroundColor: 'blue.600' }}
                         _active={{ backgroundColor: 'blue.700' }}
-                        onClick={() => store.stats.addChart()}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Widget modal',
+                                'Button click',
+                                'Add chart'
+                            );
+
+                            store.stats.addChart();
+                        }}
                         color={'white'}
                     >
                         Add widget

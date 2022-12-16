@@ -80,9 +80,17 @@ function WidgetContainer(props) {
                             icon={<></>}
                             style={{ paddingRight: '8px' }}
                             defaultValue={maxConnectionDegree}
-                            onChange={e =>
-                                setMaxConnectionDegree(parseInt(e.target.value))
-                            }
+                            onChange={e => {
+                                store.track.trackEvent(
+                                    'Widget container',
+                                    'Dropdown selection',
+                                    `Max connection degree: ${e.target.value}`
+                                );
+
+                                setMaxConnectionDegree(
+                                    parseInt(e.target.value)
+                                );
+                            }}
                         >
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -110,7 +118,15 @@ function WidgetContainer(props) {
                         icon={<></>}
                         style={{ paddingRight: '8px' }}
                         defaultValue={filterProperty}
-                        onChange={e => setFilterProperty(e.target.value)}
+                        onChange={e => {
+                            store.track.trackEvent(
+                                'Widget container',
+                                'Dropdown selection',
+                                `Set filter property: ${e.target.value}`
+                            );
+
+                            setFilterProperty(e.target.value);
+                        }}
                     >
                         <option value="degree">degree</option>
                         {Object.keys(store.search.nodeTypes)
@@ -159,7 +175,15 @@ function WidgetContainer(props) {
                         icon={<></>}
                         style={{ paddingRight: '8px' }}
                         defaultValue={connectionFeature}
-                        onChange={e => setConnectionFeature(e.target.value)}
+                        onChange={e => {
+                            store.track.trackEvent(
+                                'Widget container',
+                                'Dropdown selection',
+                                `Set connection feature: ${e.target.value}`
+                            );
+
+                            setConnectionFeature(e.target.value);
+                        }}
                     >
                         <option value="all">all</option>
                         {store.graph.currentGraphData.perspectivesInGraph.map(
@@ -202,9 +226,17 @@ function WidgetContainer(props) {
                             icon={<></>}
                             style={{ paddingRight: '8px' }}
                             defaultValue={elementDisplayLimit}
-                            onChange={e =>
-                                setElementDisplayLimit(parseInt(e.target.value))
-                            }
+                            onChange={e => {
+                                store.track.trackEvent(
+                                    'Widget container',
+                                    'Dropdown selection',
+                                    `Set element display limit to: ${e.target.value}`
+                                );
+
+                                setElementDisplayLimit(
+                                    parseInt(e.target.value)
+                                );
+                            }}
                         >
                             <option value={10}>First 10</option>
                             <option value={50}>First 50</option>
@@ -236,7 +268,15 @@ function WidgetContainer(props) {
                         icon={<></>}
                         style={{ paddingRight: '8px' }}
                         defaultValue={props.chart.show_only}
-                        onChange={e => setNetworkData(e.target.value)}
+                        onChange={e => {
+                            store.track.trackEvent(
+                                'Widget container',
+                                'Dropdown selection',
+                                `Set network data to: ${e.target.value}`
+                            );
+
+                            setNetworkData(e.target.value);
+                        }}
                     >
                         {props.chart.elements !== 'edges' && (
                             <option value="selected">selected</option>
@@ -261,6 +301,12 @@ function WidgetContainer(props) {
                                 opacity: 1
                             }}
                             onClick={() => {
+                                store.track.trackEvent(
+                                    'Widget container',
+                                    'Button click',
+                                    `Expand widget ${props.chart.id}`
+                                );
+
                                 setIsExpanded(true);
                                 store.stats.expandChart(props.chart.id);
                             }}
@@ -277,6 +323,12 @@ function WidgetContainer(props) {
                                 opacity: 1
                             }}
                             onClick={() => {
+                                store.track.trackEvent(
+                                    'Widget container',
+                                    'Button click',
+                                    `Shrink widget ${props.chart.id}`
+                                );
+
                                 setIsExpanded(false);
                                 store.stats.shrinkChart(props.chart.id);
                             }}
@@ -293,7 +345,14 @@ function WidgetContainer(props) {
                     _hover={{
                         opacity: 1
                     }}
-                    onClick={() => store.stats.removeChart(props.chart.id)}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Widget container',
+                            'Button click',
+                            `Remove widget ${props.chart.id}`
+                        );
+                        store.stats.removeChart(props.chart.id);
+                    }}
                 />
             </Tooltip>
         </HStack>
@@ -301,7 +360,7 @@ function WidgetContainer(props) {
 
     const renderChartContainerBottomControls = () => (
         <HStack position="absolute" bottom="6px" right="6px">
-            <Tooltip label="Toggle legend">
+            {/* <Tooltip label="Toggle legend">
                 <IconButton
                     icon={<ToolbarTop />}
                     size="sm"
@@ -310,9 +369,13 @@ function WidgetContainer(props) {
                     _hover={{
                         opacity: 1
                     }}
-                    onClick={() => store.stats.toggleLegend(props.chart.id)}
+                    onClick={() => {
+                        console.log(props.chart.legend);
+
+                        store.stats.toggleLegend(props.chart.id);
+                    }}
                 />
-            </Tooltip>
+            </Tooltip> */}
             {!['doughnut'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Toggle x axis label">
                     <Button
@@ -322,9 +385,19 @@ function WidgetContainer(props) {
                         _hover={{
                             opacity: 1
                         }}
-                        onClick={() =>
-                            store.stats.toggleAxisLabels(props.chart.id, 'x')
-                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Widget container',
+                                'Button click',
+                                `Make x axis ${
+                                    !props.chart.labels.x.display
+                                        ? 'visible'
+                                        : 'invisible'
+                                }`
+                            );
+
+                            store.stats.toggleAxisLabels(props.chart.id, 'x');
+                        }}
                     >
                         X
                     </Button>
@@ -339,9 +412,19 @@ function WidgetContainer(props) {
                         _hover={{
                             opacity: 1
                         }}
-                        onClick={() =>
-                            store.stats.toggleAxisLabels(props.chart.id, 'y')
-                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Widget container',
+                                'Button click',
+                                `Make y axis ${
+                                    !props.chart.labels.y.display
+                                        ? 'visible'
+                                        : 'invisible'
+                                }`
+                            );
+
+                            store.stats.toggleAxisLabels(props.chart.id, 'y');
+                        }}
                     >
                         Y
                     </Button>
