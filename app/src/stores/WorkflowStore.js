@@ -168,6 +168,12 @@ export class WorkflowStore {
     };
 
     deleteNode = nodeID => {
+        this.store.track.trackEvent(
+            'Workflow',
+            'Button click',
+            `Delete node: ${nodeID}}`
+        );
+
         this.nodes = [
             ...this.nodes
                 .filter(node => node.id !== nodeID)
@@ -219,6 +225,10 @@ export class WorkflowStore {
 
             return node;
         });
+    };
+
+    trackNodeAction = (element, value) => {
+        this.store.track.trackEvent('Workflow', element, value);
     };
 
     updateFilterNodeData = (nodeID, dataKey, dataValue) => {
@@ -597,6 +607,7 @@ export class WorkflowStore {
             data.updateSearchNodeData = this.updateSearchNodeData;
             data.keyphrase = this.getDefaultValue(data.feature);
             data.getDefaultValue = this.getDefaultValue;
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'datasetNode') {
@@ -620,12 +631,14 @@ export class WorkflowStore {
             data.max_value = this.store.search.getSearchHintsByFeature(
                 data.feature
             )['max'];
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'countsNode') {
             data.features = this.getNodeTypesOfType(['list']);
             data.feature = this.getNodeTypesOfType(['list'])[0];
             data.newFeatureName = '';
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'keywordExtractionNode') {
@@ -636,6 +649,7 @@ export class WorkflowStore {
 
         if (nodeType === 'connectorNode') {
             data.connector = 'or';
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'resultsNode') {
@@ -731,6 +745,8 @@ export class WorkflowStore {
     };
 
     runWorkFlow = resultsNodeId => {
+        this.store.track.trackEvent('Workflow', 'Button click', 'Run workflow');
+
         this.nodes = [...this.nodes];
 
         console.log('the nodes: ', this.nodes);

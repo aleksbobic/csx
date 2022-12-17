@@ -115,31 +115,47 @@ function ControlPanel() {
                     padding="10px"
                     borderRadius="4px"
                     maxHeight="300px"
-                    overflowY="scroll"
                 >
-                    <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        position="absolute"
-                        left="15px"
-                        color="blackAlpha.700"
+                    <OverlayScrollbarsComponent
+                        style={{
+                            width: '100%',
+                            height: '100%'
+                        }}
+                        options={{
+                            scrollbars: {
+                                theme: 'os-theme-dark',
+                                autoHide: 'scroll',
+                                autoHideDelay: 600,
+                                clickScroll: true
+                            }
+                        }}
                     >
-                        {legendItems[0]}
-                    </Text>
-                    <Text
-                        fontSize="xs"
-                        fontWeight="bold"
-                        position="absolute"
-                        right="15px"
-                    >
-                        {legendItems[legendItems.length - 1]}
-                    </Text>
-                    <Box
-                        width="300px"
-                        height="20px"
-                        borderRadius="2px"
-                        bgGradient={`linear(to-r, ${String(schemeYlOrRd[9])})`}
-                    />
+                        <Text
+                            fontSize="xs"
+                            fontWeight="bold"
+                            position="absolute"
+                            left="15px"
+                            color="blackAlpha.700"
+                        >
+                            {legendItems[0]}
+                        </Text>
+                        <Text
+                            fontSize="xs"
+                            fontWeight="bold"
+                            position="absolute"
+                            right="15px"
+                        >
+                            {legendItems[legendItems.length - 1]}
+                        </Text>
+                        <Box
+                            width="300px"
+                            height="20px"
+                            borderRadius="2px"
+                            bgGradient={`linear(to-r, ${String(
+                                schemeYlOrRd[9]
+                            )})`}
+                        />
+                    </OverlayScrollbarsComponent>
                 </Flex>
             );
         }

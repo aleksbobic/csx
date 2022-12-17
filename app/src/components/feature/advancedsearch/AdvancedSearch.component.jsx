@@ -130,6 +130,12 @@ function AdvancedSearch(props) {
             y: event.clientY - reactFlowBounds.top
         });
 
+        store.track.trackEvent(
+            'Advanced search',
+            'Add new node',
+            `${nodeType}`
+        );
+
         store.workflow.addNewAction(nodeType, position);
     };
 
@@ -234,9 +240,15 @@ function AdvancedSearch(props) {
                             variant="ghost"
                             opacity="0.5"
                             _hover={{ opacity: 1 }}
-                            onClick={() =>
-                                store.workflow.removeWorkflow(workflow)
-                            }
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Advanced search',
+                                    'Button click',
+                                    `Remove workflow ${workflow}`
+                                );
+
+                                store.workflow.removeWorkflow(workflow);
+                            }}
                         />
                     </Tooltip>
                     <Tooltip label="Load workflow">
@@ -246,9 +258,15 @@ function AdvancedSearch(props) {
                             variant="ghost"
                             opacity="0.5"
                             _hover={{ opacity: 1 }}
-                            onClick={() =>
-                                store.workflow.loadWorkflow(workflow)
-                            }
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Advanced search',
+                                    'Button click',
+                                    `Load workflow ${workflow}`
+                                );
+
+                                store.workflow.loadWorkflow(workflow);
+                            }}
                         />
                     </Tooltip>
                 </HStack>
@@ -391,7 +409,15 @@ function AdvancedSearch(props) {
                                     disabled={!store.workflow.newWorkflowName}
                                     icon={<Check />}
                                     size="sm"
-                                    onClick={store.workflow.saveNewWorkflow}
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Advanced search',
+                                            'Button click',
+                                            `Save workflow ${store.workflow.newWorkflowName}`
+                                        );
+
+                                        store.workflow.saveNewWorkflow();
+                                    }}
                                 />
                             </Tooltip>
                         </InputRightElement>

@@ -14,6 +14,10 @@ import { Handle } from 'react-flow-renderer';
 const connectorNode = ({ id, data, isConnectable }) => {
     const modifyConnector = value => {
         data.connector = value.target.value;
+        data.trackNodeAction(
+            'Dropdown',
+            `Node ${id} value changed to ${value.target.value}`
+        );
     };
 
     return (

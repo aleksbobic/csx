@@ -15,15 +15,27 @@ import { Handle } from 'react-flow-renderer';
 const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
         data.updateFilterNodeData(id, 'min', value);
+        data.trackNodeAction(
+            'Input',
+            `Node ${id} min value for feature ${data.feature} changed to ${value}`
+        );
     };
 
     const modifyMax = value => {
         data.updateFilterNodeData(id, 'max', value);
+        data.trackNodeAction(
+            'Input',
+            `Node ${id} max value for feature ${data.feature} changed to ${value}`
+        );
     };
 
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.updateFilterNodeValues(id, value.target.value);
+        data.trackNodeAction(
+            'Dropdown',
+            `Node ${id} feature changed to ${value.target.value}`
+        );
     };
 
     return (

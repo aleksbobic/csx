@@ -43,12 +43,21 @@ const searchNode = ({ id, data, isConnectable }) => {
         } else {
             data.keyphrase = value;
         }
+
+        data.trackNodeAction(
+            'Input',
+            `Node ${id} keyphrase for feature ${data.feature} changed to ${data.keyphrase}`
+        );
     };
 
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.keyphrase = data.getDefaultValue(value.target.value);
         data.updateActions(id);
+        data.trackNodeAction(
+            'Dropdown',
+            `Node ${id} feature changed to ${data.feature}`
+        );
     };
 
     const renderTextInput = () => {
@@ -64,6 +73,10 @@ const searchNode = ({ id, data, isConnectable }) => {
                 }
                 getValue={value => {
                     data.updateSearchNodeData(id, value);
+                    data.trackNodeAction(
+                        'Input',
+                        `Node ${id} keyphrase for feature ${data.feature} changed to ${value}`
+                    );
                 }}
                 style={{ borderRadius: '5px' }}
                 suggestionStyle={{
@@ -86,6 +99,10 @@ const searchNode = ({ id, data, isConnectable }) => {
                 borderRadius="5px"
                 onChange={event => {
                     data.updateSearchNodeData(id, event.target.value);
+                    data.trackNodeAction(
+                        'Dropdown',
+                        `Node ${id} keyphrase for feature ${data.feature} changed to ${event.target.value}`
+                    );
                 }}
                 opacity="0.8"
                 background={
@@ -118,6 +135,10 @@ const searchNode = ({ id, data, isConnectable }) => {
                 borderRadius="5px"
                 onChange={value => {
                     data.updateSearchNodeData(id, value);
+                    data.trackNodeAction(
+                        'Input',
+                        `Node ${id} keyphrase for feature ${data.feature} changed to ${value}`
+                    );
                 }}
                 opacity="0.8"
                 background="whiteAlpha.200"
