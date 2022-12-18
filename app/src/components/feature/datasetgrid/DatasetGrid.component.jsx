@@ -186,63 +186,77 @@ function DatasetGrid(props) {
                                         >
                                             {dataset}
                                         </Heading>
-                                        <Tooltip label={`Delete ${dataset}`}>
-                                            <IconButton
-                                                flexGrow="0"
-                                                size="sm"
-                                                variant="ghost"
-                                                opacity="0"
-                                                _groupHover={{ opacity: '1' }}
-                                                onClick={() => {
-                                                    store.track.trackEvent(
-                                                        'Dataset grid',
-                                                        'delete dataset',
-                                                        dataset
-                                                    );
+                                        {process?.env
+                                            .REACT_APP_DISABLE_UPLOAD ===
+                                            'true' && (
+                                            <Tooltip
+                                                label={`Delete ${dataset}`}
+                                            >
+                                                <IconButton
+                                                    flexGrow="0"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    opacity="0"
+                                                    _groupHover={{
+                                                        opacity: '1'
+                                                    }}
+                                                    onClick={() => {
+                                                        store.track.trackEvent(
+                                                            'Dataset grid',
+                                                            'delete dataset',
+                                                            dataset
+                                                        );
 
-                                                    store.search.deleteDataset(
-                                                        dataset
-                                                    );
-                                                }}
-                                                icon={
-                                                    <TrashEmpty
-                                                        style={{
-                                                            '--ggs': '0.7',
-                                                            marginTop: '1px'
-                                                        }}
-                                                    />
-                                                }
-                                            />
-                                        </Tooltip>
-                                        <Tooltip
-                                            label={`Change default settings for  ${dataset}`}
-                                        >
-                                            <IconButton
-                                                flexGrow="0"
-                                                size="sm"
-                                                variant="ghost"
-                                                opacity="0"
-                                                _groupHover={{ opacity: '1' }}
-                                                onClick={() => {
-                                                    store.track.trackEvent(
-                                                        'Dataset grid',
-                                                        'change dataset default settings',
-                                                        dataset
-                                                    );
+                                                        store.search.deleteDataset(
+                                                            dataset
+                                                        );
+                                                    }}
+                                                    icon={
+                                                        <TrashEmpty
+                                                            style={{
+                                                                '--ggs': '0.7',
+                                                                marginTop: '1px'
+                                                            }}
+                                                        />
+                                                    }
+                                                />
+                                            </Tooltip>
+                                        )}
+                                        {process?.env
+                                            .REACT_APP_DISABLE_UPLOAD ===
+                                            'true' && (
+                                            <Tooltip
+                                                label={`Change default settings for  ${dataset}`}
+                                            >
+                                                <IconButton
+                                                    flexGrow="0"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    opacity="0"
+                                                    _groupHover={{
+                                                        opacity: '1'
+                                                    }}
+                                                    onClick={() => {
+                                                        store.track.trackEvent(
+                                                            'Dataset grid',
+                                                            'change dataset default settings',
+                                                            dataset
+                                                        );
 
-                                                    store.search.getConifg(
-                                                        dataset
-                                                    );
-                                                }}
-                                                icon={
-                                                    <Toolbox
-                                                        style={{
-                                                            '--ggs': '0.7'
-                                                        }}
-                                                    />
-                                                }
-                                            />
-                                        </Tooltip>
+                                                        store.search.getConifg(
+                                                            dataset
+                                                        );
+                                                    }}
+                                                    icon={
+                                                        <Toolbox
+                                                            style={{
+                                                                '--ggs': '0.7'
+                                                            }}
+                                                        />
+                                                    }
+                                                />
+                                            </Tooltip>
+                                        )}
                                         {process?.env
                                             .REACT_APP_DISABLE_ADVANCED_SEARCH !==
                                             'true' && (
