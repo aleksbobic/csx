@@ -187,7 +187,7 @@ function DatasetGrid(props) {
                                             {dataset}
                                         </Heading>
                                         {process?.env
-                                            .REACT_APP_DISABLE_UPLOAD ===
+                                            .REACT_APP_DISABLE_UPLOAD !==
                                             'true' && (
                                             <Tooltip
                                                 label={`Delete ${dataset}`}
@@ -223,7 +223,7 @@ function DatasetGrid(props) {
                                             </Tooltip>
                                         )}
                                         {process?.env
-                                            .REACT_APP_DISABLE_UPLOAD ===
+                                            .REACT_APP_DISABLE_UPLOAD !==
                                             'true' && (
                                             <Tooltip
                                                 label={`Change default settings for  ${dataset}`}
