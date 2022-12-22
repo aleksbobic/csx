@@ -19,7 +19,11 @@ import app.services.study.study as csx_study
 from app.utils.typecheck import isJson, isNumber
 
 router = APIRouter()
-es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
+es = Elasticsearch(
+    "csx_elastic:9200",
+    retry_on_timeout=True,
+    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+)
 
 
 @router.get("/datasets")

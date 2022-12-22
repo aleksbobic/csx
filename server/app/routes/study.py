@@ -21,7 +21,11 @@ from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter
 from app.utils.typecheck import isJson, isNumber
 
-es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
+es = Elasticsearch(
+    "csx_elastic:9200",
+    retry_on_timeout=True,
+    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+)
 
 router = APIRouter()
 

@@ -98,6 +98,7 @@ export class WorkflowStore {
             .map(node => {
                 node.data.runWorkflow = this.runWorkFlow;
                 node.data.deleteNode = this.deleteNode;
+                node.data.trackNodeAction = this.trackNodeAction;
                 return node;
             });
 
@@ -113,6 +114,7 @@ export class WorkflowStore {
             .map(node => {
                 node.data.deleteNode = this.deleteNode;
                 node.data.updateSearchNodeData = this.updateSearchNodeData;
+                node.data.trackNodeAction = this.trackNodeAction;
                 return node;
             });
 
@@ -125,6 +127,7 @@ export class WorkflowStore {
             )
             .map(node => {
                 node.data.deleteNode = this.deleteNode;
+                node.data.trackNodeAction = this.trackNodeAction;
                 return node;
             });
 
@@ -134,6 +137,7 @@ export class WorkflowStore {
             if (node.type === 'searchNode') {
                 node.data.updateActions = this.updateActions;
                 node.data.getSuggestions = this.store.search.suggest;
+                node.data.trackNodeAction = this.trackNodeAction;
             }
             return node;
         });
@@ -319,7 +323,8 @@ export class WorkflowStore {
                 keyphrase: query,
                 getDefaultValue: this.getDefaultValue,
                 deleteNode: this.deleteNode,
-                colorMode: this.store.core.colorMode || 'dark'
+                colorMode: this.store.core.colorMode || 'dark',
+                trackNodeAction: this.trackNodeAction
             },
             style: {
                 border: `1px solid ${
@@ -343,8 +348,9 @@ export class WorkflowStore {
             data: {
                 children: [],
                 parents: [],
-                frunWorkflow: this.runWorkFlow,
-                colorMode: this.store.core.colorMode || 'dark'
+                runWorkflow: this.runWorkFlow,
+                colorMode: this.store.core.colorMode || 'dark',
+                trackNodeAction: this.trackNodeAction
             },
             style: {
                 border: `1px solid ${
@@ -400,7 +406,8 @@ export class WorkflowStore {
                         keyphrase: query.keyphrase,
                         getDefaultValue: this.getDefaultValue,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode || 'dark'
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
                     },
                     style: {
                         border: `1px solid ${
@@ -427,7 +434,8 @@ export class WorkflowStore {
                         parents: [],
                         dataset: this.store.search.currentDataset,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode || 'dark'
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
                     },
                     style: {
                         border: `1px solid ${
@@ -465,7 +473,8 @@ export class WorkflowStore {
                             query.feature
                         )['max'],
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode || 'dark'
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
                     },
                     style: {
                         border: `1px solid ${
@@ -497,7 +506,8 @@ export class WorkflowStore {
                         parents: [],
                         connector: query.connector,
                         deleteNode: this.deleteNode,
-                        colorMode: this.store.core.colorMode || 'dark'
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
                     },
                     style: {
                         border: `1px solid ${
@@ -550,7 +560,8 @@ export class WorkflowStore {
                         children: [],
                         parents: [],
                         runWorkflow: this.runWorkFlow,
-                        colorMode: this.store.core.colorMode || 'dark'
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
                     },
                     style: {
                         border: `1px solid ${

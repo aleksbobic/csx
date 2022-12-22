@@ -574,7 +574,7 @@ function DataPanel(props) {
                                     variant="solid"
                                     opacity="0.5"
                                     onClick={() => {
-                                        this.store.track.trackEvent(
+                                        store.track.trackEvent(
                                             'Search results',
                                             'Button click',
                                             'Download data'
@@ -606,7 +606,7 @@ function DataPanel(props) {
                                         />
                                     }
                                     onClick={() => {
-                                        this.store.track.trackEvent(
+                                        store.track.trackEvent(
                                             'Search results',
                                             'Button click',
                                             'Open list options'
@@ -635,7 +635,7 @@ function DataPanel(props) {
                                                 size="sm"
                                                 onChange={e => {
                                                     if (e.target.checked) {
-                                                        this.store.track.trackEvent(
+                                                        store.track.trackEvent(
                                                             'Search results',
                                                             'Button click',
                                                             `Show ${feature} in SERP`
@@ -649,7 +649,7 @@ function DataPanel(props) {
                                                         visibleProperties.length >
                                                         1
                                                     ) {
-                                                        this.store.track.trackEvent(
+                                                        store.track.trackEvent(
                                                             'Search results',
                                                             'Button click',
                                                             `Hide ${feature} from SERP`
@@ -687,7 +687,7 @@ function DataPanel(props) {
                                 transition="all 0.2 ease-in-out"
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
-                                    this.store.track.trackEvent(
+                                    store.track.trackEvent(
                                         'Search results',
                                         'Button click',
                                         'Switch to table view'
@@ -706,7 +706,7 @@ function DataPanel(props) {
                                 transition="all 0.2 ease-in-out"
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
-                                    this.store.track.trackEvent(
+                                    store.track.trackEvent(
                                         'Search results',
                                         'Button click',
                                         'Switch to list view'

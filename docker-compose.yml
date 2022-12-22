@@ -12,6 +12,7 @@ services:
       - 8881:80
     environment:
       DISABLE_UPLOAD: 'false'
+      ELASTIC_PASSWORD: 'elasticroot'
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
   app:
     container_name: csx_app
@@ -56,9 +57,11 @@ services:
       - 8883:80
     links: [mysql]
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     environment:
       - discovery.type=single-node
+      - ELASTIC_PASSWORD=elasticroot
+      - xpack.security.enabled=true
     ports:
       - "9200:9200"
       - "9300:9300"

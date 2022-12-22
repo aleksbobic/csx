@@ -11,6 +11,7 @@ services:
       - 8881:80
     environment:
       DISABLE_UPLOAD: 'false'
+      ELASTIC_PASSWORD: ${ELASTIC_PASS}
     depends_on:
       - elastic
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
@@ -58,6 +59,8 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
     environment:
       - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASS}
+      - xpack.security.enabled=true
     ports:
       - "9200:9200"
       - "9300:9300"

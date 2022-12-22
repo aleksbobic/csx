@@ -7,12 +7,17 @@ from elasticsearch_dsl import Search, Q
 import pytextrank
 import spacy
 import re
+import os
 
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
-es = Elasticsearch("csx_elastic:9200", retry_on_timeout=True)
+es = Elasticsearch(
+    "csx_elastic:9200",
+    retry_on_timeout=True,
+    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+)
 
 
 def get_index(index: str) -> Dict[str, Any]:
