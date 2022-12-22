@@ -18,7 +18,10 @@ export class TrackingStore {
         window._paq.push(['trackPageView']);
         window._paq.push(['enableLinkTracking']);
 
-        const url = `//${window.location.hostname}:8883/`;
+        const url =
+            process.env.NODE_ENV === 'production'
+                ? `//${window.location.hostname}/analytics/`
+                : `//${window.location.hostname}:8883/`;
 
         window._paq.push(['setTrackerUrl', url + 'matomo.php']);
         window._paq.push(['setSiteId', '1']);
