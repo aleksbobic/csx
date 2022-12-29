@@ -415,9 +415,12 @@ function DataPanel(props) {
                     }
                     onClick={() => {
                         store.track.trackEvent(
-                            'History',
-                            'Button click',
-                            'Navigate to active history node'
+                            'History Panel',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: 'Navigate to active history node'
+                            })
                         );
 
                         zoomToActiveHistoryNode();
@@ -575,9 +578,12 @@ function DataPanel(props) {
                                     opacity="0.5"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Search results',
-                                            'Button click',
-                                            'Download data'
+                                            'Results Panel',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Download data as CSV'
+                                            })
                                         );
                                     }}
                                     transition="all 0.2 ease-in-out"
@@ -607,9 +613,12 @@ function DataPanel(props) {
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Search results',
-                                            'Button click',
-                                            'Open list options'
+                                            'Results Panel',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Open list options'
+                                            })
                                         );
                                     }}
                                     zIndex="3"
@@ -636,9 +645,12 @@ function DataPanel(props) {
                                                 onChange={e => {
                                                     if (e.target.checked) {
                                                         store.track.trackEvent(
-                                                            'Search results',
-                                                            'Button click',
-                                                            `Show ${feature} in SERP`
+                                                            'Results Panel',
+                                                            'Checkbox',
+                                                            JSON.stringify({
+                                                                type: 'Check',
+                                                                value: `Show ${feature} in list`
+                                                            })
                                                         );
 
                                                         setVisibleProperties([
@@ -650,9 +662,12 @@ function DataPanel(props) {
                                                         1
                                                     ) {
                                                         store.track.trackEvent(
-                                                            'Search results',
-                                                            'Button click',
-                                                            `Hide ${feature} from SERP`
+                                                            'Results Panel',
+                                                            'Checkbox',
+                                                            JSON.stringify({
+                                                                type: 'Check',
+                                                                value: `Hide ${feature} in list`
+                                                            })
                                                         );
 
                                                         setVisibleProperties([
@@ -688,9 +703,12 @@ function DataPanel(props) {
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Search results',
-                                        'Button click',
-                                        'Switch to table view'
+                                        'Results Panel',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Switch to table view'
+                                        })
                                     );
 
                                     setUseList(false);
@@ -707,9 +725,12 @@ function DataPanel(props) {
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Search results',
-                                        'Button click',
-                                        'Switch to list view'
+                                        'Results Panel',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Switch to list view'
+                                        })
                                     );
 
                                     if (visibleProperties.length === 0) {

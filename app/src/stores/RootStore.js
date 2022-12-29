@@ -50,7 +50,7 @@ export class RootStore {
             this.surveyLink =
                 'https://survey.tugraz.at/index.php/555429?lang=en&uuid=' +
                 response.data;
-            this.track.trackEvent('init', 'uuid', response.data);
+            this.track.trackEvent('Home Page', 'UUID', response.data);
         });
     };
 }

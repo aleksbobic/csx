@@ -288,17 +288,18 @@ function SelectedComponentList(props) {
                                             _hover={{ opacity: 1 }}
                                             onClick={() => {
                                                 store.track.trackEvent(
-                                                    'Components widget',
-                                                    'Button click',
-                                                    `Make component ${
-                                                        component.id
-                                                    }  ${
-                                                        store.graphInstance.visibleComponents.includes(
-                                                            component.id
-                                                        )
-                                                            ? 'invisible'
-                                                            : 'visible'
-                                                    }`
+                                                    `Details Panel - Widget - ${props.chart.id}`,
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: `${
+                                                            store.graphInstance.visibleComponents.includes(
+                                                                component.id
+                                                            )
+                                                                ? 'Hide'
+                                                                : 'Show'
+                                                        } ${component.id}`
+                                                    })
                                                 );
 
                                                 store.graphInstance.toggleVisibleComponents(
@@ -337,9 +338,12 @@ function SelectedComponentList(props) {
                                                         !props.demoData.length
                                                     ) {
                                                         store.track.trackEvent(
-                                                            'Components widget',
-                                                            'Button click',
-                                                            `Deselect component ${component.id}`
+                                                            `Details Panel - Widget - ${props.chart.id}`,
+                                                            'Button',
+                                                            JSON.stringify({
+                                                                type: 'Click',
+                                                                value: `Deselect ${component.id}`
+                                                            })
                                                         );
 
                                                         store.graph.selectComponent(

@@ -171,11 +171,24 @@ function CookieInfo() {
                     value={store.core.trackingEnabled}
                     onChange={e => {
                         store.track.trackEvent(
-                            'Home page',
-                            'Toggle interaction tracking',
-                            e.target.checked
+                            'Home Page - Tracking Information Panel',
+                            'Switch',
+                            JSON.stringify({
+                                type: 'Toggle',
+                                value: `Interaction tracking: ${e.target.checked}`
+                            })
                         );
+
                         store.core.setTrackingEnabled(e.target.checked);
+
+                        store.track.trackEvent(
+                            'Global',
+                            'Initialisation',
+                            JSON.stringify({
+                                userUUID: store.core.userUuid
+                            })
+                        );
+
                         store.core.setHideCookieBanner();
                     }}
                 />
@@ -223,9 +236,12 @@ function CookieInfo() {
                 }}
                 onClick={() => {
                     store.track.trackEvent(
-                        'Home page',
-                        'Button click',
-                        'Close tracking info page'
+                        'Home Page - Tracking Information Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Close panel'
+                        })
                     );
                     store.core.setShowCookieInfo(false);
                 }}

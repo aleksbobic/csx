@@ -199,12 +199,6 @@ function Serp(props) {
                         variant="ghost"
                         icon={<ArrowRight style={{ '--ggs': 0.6 }} />}
                         onClick={() => {
-                            this.store.track.trackEvent(
-                                'SERP',
-                                'Button click',
-                                `Show entry ${listData[index]['entry']} in graph.`
-                            );
-
                             const nodeIds = store.graph.currentGraphData.nodes
                                 .filter(node =>
                                     node.entries.includes(
@@ -212,6 +206,16 @@ function Serp(props) {
                                     )
                                 )
                                 .map(node => node.id);
+
+                            store.track.trackEvent(
+                                'Results Panel - List',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Navigate to entry ${listData[index]['entry']}`,
+                                    nodes: nodeIds
+                                })
+                            );
 
                             if (nodeIds.length > 1) {
                                 store.graphInstance.zoomToFitByNodeIds(nodeIds);

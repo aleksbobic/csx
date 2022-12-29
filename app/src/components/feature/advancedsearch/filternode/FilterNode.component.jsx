@@ -16,16 +16,24 @@ const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
         data.updateFilterNodeData(id, 'min', value);
         data.trackNodeAction(
-            'Input',
-            `Node ${id} min value for feature ${data.feature} changed to ${value}`
+            `Node - ${id} - Input Element - Min`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${value}`
+            })
         );
     };
 
     const modifyMax = value => {
         data.updateFilterNodeData(id, 'max', value);
         data.trackNodeAction(
-            'Input',
-            `Node ${id} max value for feature ${data.feature} changed to ${value}`
+            `Node - ${id} - Input Element - Max`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${value}`
+            })
         );
     };
 
@@ -33,8 +41,11 @@ const filterNode = ({ id, data, isConnectable }) => {
         data.feature = value.target.value;
         data.updateFilterNodeValues(id, value.target.value);
         data.trackNodeAction(
-            'Dropdown',
-            `Node ${id} feature changed to ${value.target.value}`
+            `Node - ${id} - Select Element - Feature`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${value.target.value}`
+            })
         );
     };
 

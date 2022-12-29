@@ -126,9 +126,12 @@ function Footer() {
                         height="21px"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Footer',
-                                'Button click',
-                                'Open tracking info'
+                                'Home Page - Footer',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open tracking information panel'
+                                })
                             );
                             store.search.setSearchIsEmpty(false);
                             store.core.setShowCookieInfo(true);

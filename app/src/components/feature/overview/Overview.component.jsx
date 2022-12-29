@@ -154,8 +154,11 @@ function Overview(props) {
                         onClick={() => {
                             store.track.trackEvent(
                                 'Details panel',
-                                'Button click',
-                                'Add new widget'
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Add new widget'
+                                })
                             );
 
                             store.stats.toggleStatsModalVisiblity(

@@ -130,13 +130,13 @@ function AdvancedSearch(props) {
             y: event.clientY - reactFlowBounds.top
         });
 
-        store.track.trackEvent(
-            'Advanced search',
-            'Add new node',
-            `${nodeType}`
-        );
+        const newNodeId = store.workflow.addNewAction(nodeType, position);
 
-        store.workflow.addNewAction(nodeType, position);
+        store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            `Node - ${newNodeId}`,
+            JSON.stringify({ type: 'Drop', value: `${nodeType}` })
+        );
     };
 
     const onDragOver = event => {
@@ -242,9 +242,12 @@ function AdvancedSearch(props) {
                             _hover={{ opacity: 1 }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Advanced search',
-                                    'Button click',
-                                    `Remove workflow ${workflow}`
+                                    'Advanced Search - Saved Workflows',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: `Remove ${workflow}`
+                                    })
                                 );
 
                                 store.workflow.removeWorkflow(workflow);
@@ -260,9 +263,12 @@ function AdvancedSearch(props) {
                             _hover={{ opacity: 1 }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Advanced search',
-                                    'Button click',
-                                    `Load workflow ${workflow}`
+                                    'Advanced Search - Saved Workflows',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: `Load ${workflow}`
+                                    })
                                 );
 
                                 store.workflow.loadWorkflow(workflow);
@@ -411,9 +417,12 @@ function AdvancedSearch(props) {
                                     size="sm"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Advanced search',
-                                            'Button click',
-                                            `Save workflow ${store.workflow.newWorkflowName}`
+                                            'Advanced Search - Saved Workflows',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: `Save ${store.workflow.newWorkflowName}`
+                                            })
                                         );
 
                                         store.workflow.saveNewWorkflow();

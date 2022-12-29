@@ -76,16 +76,24 @@ function NavigationPanelComponent() {
 
         store.track.trackEvent(
             'Navbar',
-            'Button click',
-            `${panel} panel ${isOpen ? 'off' : 'on'}`
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+            })
         );
     };
 
     const toggleColor = () => {
         store.track.trackEvent(
             'Navbar',
-            'Button click',
-            `Change color mode to ${colorMode === 'light' ? 'dark' : 'light'}`
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Change color mode to ${
+                    colorMode === 'light' ? 'dark' : 'light'
+                }`
+            })
         );
 
         toggleColorMode();
@@ -119,13 +127,16 @@ function NavigationPanelComponent() {
                         aria-label="Switch graph view"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                `View ${
-                                    store.core.currentGraph === 'detail'
-                                        ? 'overview'
-                                        : 'detail'
-                                }`
+                                'Graph Area - Graph Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Switch to ${
+                                        store.core.currentGraph === 'detail'
+                                            ? 'overview'
+                                            : 'detail'
+                                    } graph`
+                                })
                             );
 
                             store.graph.modifyStudy(
@@ -157,9 +168,12 @@ function NavigationPanelComponent() {
                         icon={<Sync style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'graph utils',
-                                'button click',
-                                'regenerate graph'
+                                'Graph Area - Graph Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Regenerate graph'
+                                })
                             );
                             regenerateGraph();
                         }}
@@ -235,9 +249,12 @@ function NavigationPanelComponent() {
                         icon={<CameraIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Make screenshot'
+                                'Graph Area - View Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Take screenshot'
+                                })
                             );
                             store.graphInstance.takeScreenshot();
                         }}
@@ -252,9 +269,12 @@ function NavigationPanelComponent() {
                         icon={<Ratio style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Zoom to fit'
+                                'Graph Area - View Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Zoom to fit'
+                                })
                             );
                             store.graphInstance.zoomToFit();
                         }}
@@ -481,10 +501,13 @@ function NavigationPanelComponent() {
                         id="homelink"
                         onClick={() => {
                             store.core.deleteStudy();
+
                             store.track.trackEvent(
                                 'Navbar',
-                                'Button click',
-                                'Logo'
+                                'Button - Logo',
+                                JSON.stringify({
+                                    type: 'Click'
+                                })
                             );
                         }}
                     >

@@ -57,9 +57,12 @@ export class SchemaStore {
                 }
 
                 this.store.track.trackEvent(
-                    'Schema',
-                    'Button click',
-                    `Change edge ${id} relationship to ${entry['data']['relationship']}`
+                    'Schema Panel',
+                    `Edge - ${id}`,
+                    JSON.stringify({
+                        type: 'Click',
+                        value: `Change relationship to ${entry['data']['relationship']}`
+                    })
                 );
             }
 
@@ -323,9 +326,12 @@ export class SchemaStore {
         const newNodeId = uuidv4();
 
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Add new link node ${newNodeId}`
+            'Schema Panel',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Add new link node ${newNodeId}`
+            })
         );
 
         this.overviewNodes.push({
@@ -387,9 +393,12 @@ export class SchemaStore {
 
     removeLinkNode = id => {
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Remove link node ${id}`
+            'Schema Panel',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Remove link node ${id}`
+            })
         );
 
         this.overviewNodes = this.overviewNodes.filter(entry => {
@@ -405,9 +414,12 @@ export class SchemaStore {
 
     setAnchor = anchor => {
         this.store.track.trackEvent(
-            'Schema',
-            'Dropdown select',
-            `Set anchor ${anchor}`
+            'Schema Panel - Anchor Node',
+            'Select Element - Anchor Propertu',
+            JSON.stringify({
+                type: 'Change selection',
+                value: anchor
+            })
         );
 
         this.store.search.anchor = anchor;
@@ -459,9 +471,12 @@ export class SchemaStore {
 
     setLink = (link, nodeId) => {
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Set ${link} as link with id ${nodeId}`
+            `Schema Panel - Link Node - ${nodeId}`,
+            'Select Element - Link Property',
+            JSON.stringify({
+                type: 'Change selection',
+                value: link
+            })
         );
 
         if (this.store.search.links.includes(link)) {
@@ -685,9 +700,11 @@ export class SchemaStore {
 
     addSchemaConnection = edge => {
         this.store.track.trackEvent(
-            'Schema',
-            'Connection creation',
-            `add edge ${edge['source']}${edge['target']}`
+            'Schema Panel',
+            `Edge ${edge['source']}${edge['target']}`,
+            JSON.stringify({
+                type: 'Create'
+            })
         );
 
         const possibleConnections = this.getPossibleConnections(
@@ -731,9 +748,11 @@ export class SchemaStore {
 
     removeSchemaConnection = id => {
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Remove edge ${id}`
+            'Schema Panel',
+            `Edge ${id}`,
+            JSON.stringify({
+                type: 'Remove'
+            })
         );
 
         this.edges = this.edges.filter(entry => entry['id'] !== id);
@@ -751,9 +770,12 @@ export class SchemaStore {
 
     addProperty = property => {
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Add nodde property ${property}`
+            'Schema Panel - Anchor Node',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Add node property ${property}`
+            })
         );
 
         this.overviewDataNodeProperties.push(property);
@@ -766,9 +788,12 @@ export class SchemaStore {
 
     removeProperty = property => {
         this.store.track.trackEvent(
-            'Schema',
-            'Button click',
-            `Remove node property ${property}`
+            'Schema Panel - Anchor Node',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Remove node property ${property}`
+            })
         );
 
         const propIndex = this.overviewDataNodeProperties.indexOf(property);

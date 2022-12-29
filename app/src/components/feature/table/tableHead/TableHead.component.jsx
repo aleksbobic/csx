@@ -35,17 +35,6 @@ function TableHead(props) {
             return <></>;
         }
 
-        const { canSort, isSorted, isSortedDesc, Header: columnType } = column;
-
-        const eventData = !isSorted
-            ? `sort ascending by ${columnType}`
-            : isSortedDesc
-            ? 'reset sort'
-            : `sort descending by ${columnType}`;
-
-        const showLeftArrow = isSorted && columnType !== 'Node';
-        const showRightArrow = isSorted && columnType === 'Node';
-
         return (
             <Text
                 textTransform="uppercase"
@@ -54,17 +43,36 @@ function TableHead(props) {
                 display="inline-block"
                 color={headerTextColor}
                 onClick={() => {
+                    const {
+                        isSorted,
+                        isSortedDesc,
+                        Header: columnType
+                    } = column;
+
+                    const eventData = !isSorted
+                        ? `Sort ascending by ${columnType}`
+                        : isSortedDesc
+                        ? `Reset sort for ${columnType}`
+                        : `Sort descending by ${columnType}`;
+
                     store.track.trackEvent(
-                        'Search results',
-                        'Table header click',
-                        eventData
+                        'Results Panel - Table',
+                        'Header',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: eventData
+                        })
                     );
                 }}
-                _hover={{ cursor: canSort ? 'pointer' : 'normal' }}
+                _hover={{ cursor: column.canSort ? 'pointer' : 'normal' }}
             >
-                {showLeftArrow && renderSortArrow('left', isSortedDesc)}
+                {column.isSorted &&
+                    column.Header !== 'Node' &&
+                    renderSortArrow('left', column.isSortedDesc)}
                 {column.Header}
-                {showRightArrow && renderSortArrow('right', isSortedDesc)}
+                {column.isSorted &&
+                    column.Header !== 'Node' &&
+                    renderSortArrow('right', column.isSortedDesc)}
             </Text>
         );
     };

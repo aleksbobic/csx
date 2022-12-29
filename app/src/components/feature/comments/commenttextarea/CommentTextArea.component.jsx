@@ -73,6 +73,15 @@ function CommentTextArea(props) {
             comment.trim() !== '' &&
             !store.comment.commentTrigger
         ) {
+            store.track.trackEvent(
+                'Comment Area - Textarea',
+                'Key',
+                JSON.stringify({
+                    type: 'Enter + Shift',
+                    value: `Submit comment: ${comment.trim()}`
+                })
+            );
+
             if (store.comment.editMode) {
                 store.comment.editComment(
                     comment.trim(),
@@ -262,9 +271,12 @@ function CommentTextArea(props) {
                             opacity="0.6"
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Comment area',
-                                    'Button click',
-                                    'Markdown info'
+                                    'Comment Area - Footer',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Markdown info'
+                                    })
                                 );
                             }}
                         >
@@ -282,9 +294,12 @@ function CommentTextArea(props) {
                                 style={{ top: '14px', right: '14px' }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Comment area',
-                                        'Button click',
-                                        'Close markdown info'
+                                        'Comment Area - Markdown Info',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Close'
+                                        })
                                     );
                                 }}
                             />
@@ -306,11 +321,14 @@ function CommentTextArea(props) {
                         color="white"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Comment area',
-                                'Button click',
-                                store.comment.isCommentListVisible
-                                    ? 'Hide comments'
-                                    : 'Show comments'
+                                'Comment Area - Footer',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: store.comment.isCommentListVisible
+                                        ? 'Hide comments'
+                                        : 'Show comments'
+                                })
                             );
 
                             store.comment.setIsCommentListVisible(
@@ -380,9 +398,12 @@ function CommentTextArea(props) {
                                 _hover={{ opacity: 0.8 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Comment area',
-                                        'Button click',
-                                        'Exit edit mode'
+                                        'Comment Area - Textarea',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Exit edit mode'
+                                        })
                                     );
 
                                     exitEditMode();
@@ -403,9 +424,12 @@ function CommentTextArea(props) {
                         _hover={{ backgroundColor: 'blue.500' }}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Comment area',
-                                'Button click',
-                                'Submit comment'
+                                'Comment Area - Textarea',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Submit comment: ${comment.trim()}`
+                                })
                             );
 
                             submitComment();

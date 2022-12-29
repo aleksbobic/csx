@@ -107,9 +107,12 @@ function CommentComponent(props) {
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     onClick={() => {
                         store.track.trackEvent(
-                            'Comment area',
-                            'Button click',
-                            'Edit comment'
+                            'Comment Area - Comment List',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Edit ${props.commentIndex}`
+                            })
                         );
 
                         editComment(props.commentIndex);
@@ -138,9 +141,12 @@ function CommentComponent(props) {
                     variant="ghost"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Comment area',
-                            'Button click',
-                            'Delete comment'
+                            'Comment Area - Comment List',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Delete ${props.commentIndex}`
+                            })
                         );
 
                         store.comment.deleteCommnet(props.commentIndex);

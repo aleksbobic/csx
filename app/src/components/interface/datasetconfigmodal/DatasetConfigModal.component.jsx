@@ -27,18 +27,24 @@ function DatasetConfigModal() {
 
     const updateConfig = () => {
         store.track.trackEvent(
-            'dataset config modal',
-            'button click',
-            'update default config'
+            'Home Page - Dataset Configuration Modal',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Update default configuration'
+            })
         );
         store.fileUpload.updateConfig();
     };
 
     const cancelSettingsEdit = () => {
         store.track.trackEvent(
-            'dataset config modal',
-            'button click',
-            'cancel'
+            'Home Page - Dataset Configuration Modal',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Cancel configuration change'
+            })
         );
         store.fileUpload.changeConfigChangeModalVisiblity(false);
         store.fileUpload.resetFileUploadData();

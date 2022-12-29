@@ -96,6 +96,13 @@ function HomePage() {
                                 cookieToast.closeAll();
                                 store.core.setHideCookieBanner();
                                 store.core.setTrackingEnabled(true);
+                                store.track.trackEvent(
+                                    'Global',
+                                    'Initialisation',
+                                    JSON.stringify({
+                                        userUUID: store.core.userUuid
+                                    })
+                                );
                             }}
                         >
                             Enable tracking

@@ -53,18 +53,25 @@ function Settings() {
         store.graph.updateNodeColor(colorMode);
 
         store.track.trackEvent(
-            'view settings',
-            'select value',
-            `color scheme: ${value.toLowerCase()}`
+            'Side panel - View Settings',
+            'Radio Element - Color Schema',
+            JSON.stringify({
+                type: 'Change Selection',
+                value: value.toLowerCase()
+            })
         );
     };
 
     const updateLabelDistance = value => {
         store.graphInstance.changeShowLabelDistance(value);
+
         store.track.trackEvent(
-            'view settings',
-            'select value',
-            `show label distance: ${value}`
+            'Side panel - View Settings',
+            'Select Element - Label Size',
+            JSON.stringify({
+                type: 'Change Selection',
+                value: value
+            })
         );
     };
 
@@ -187,18 +194,25 @@ function Settings() {
                                 if (forceRunning) {
                                     store.graphInstance.stopForce();
                                     setForceRunning(false);
+
                                     store.track.trackEvent(
-                                        'view settings',
-                                        'button click',
-                                        'run force'
+                                        'Side panel - View Settings',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Run Force'
+                                        })
                                     );
                                 } else {
                                     store.graphInstance.applyForce();
                                     setForceRunning(true);
                                     store.track.trackEvent(
-                                        'view settings',
-                                        'button click',
-                                        'stop force'
+                                        'Side panel - View Settings',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Stop Force'
+                                        })
                                     );
                                 }
                             }}
@@ -243,10 +257,14 @@ function Settings() {
                             icon={<Undo style={{ '--ggs': '0.6' }} />}
                             onClick={() => {
                                 store.graph.resetNodesPositions();
+
                                 store.track.trackEvent(
-                                    'view settings',
-                                    'button click',
-                                    'reset graph layout'
+                                    'Side panel - View Settings',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Reset layout'
+                                    })
                                 );
                             }}
                             disabled={store.graphInstance.forceEngine}
@@ -276,14 +294,18 @@ function Settings() {
                             value={store.graphInstance.linkVisibility}
                             onChange={() => {
                                 store.graphInstance.toggleLinkVisibility();
+
                                 store.track.trackEvent(
-                                    'view settings',
-                                    'toggle click',
-                                    `${
-                                        store.graphInstance.linkVisibility
-                                            ? 'show'
-                                            : 'hide'
-                                    } links`
+                                    'Side panel - View Settings',
+                                    'Switch',
+                                    JSON.stringify({
+                                        type: 'Toggle',
+                                        value: `${
+                                            store.graphInstance.linkVisibility
+                                                ? 'Show'
+                                                : 'Hide'
+                                        } links`
+                                    })
                                 );
                             }}
                         />
@@ -306,14 +328,18 @@ function Settings() {
                             value={store.graphInstance.labels.isVisible}
                             onChange={() => {
                                 store.graphInstance.toggleLabelVisibility();
+
                                 store.track.trackEvent(
-                                    'view settings',
-                                    'toggle click',
-                                    `${
-                                        store.graphInstance.labels.isVisible
-                                            ? 'show'
-                                            : 'hide'
-                                    } labels`
+                                    'Side panel - View Settings',
+                                    'Switch',
+                                    JSON.stringify({
+                                        type: 'Toggle',
+                                        value: `${
+                                            store.graphInstance.labels.isVisible
+                                                ? 'Show'
+                                                : 'Hide'
+                                        } labels`
+                                    })
                                 );
                             }}
                         />
@@ -334,9 +360,23 @@ function Settings() {
                             marginRight="10px"
                             isChecked={store.graphInstance.orphanNodeVisibility}
                             value={store.graphInstance.orphanNodeVisibility}
-                            onChange={
-                                store.graphInstance.toggleOrphanNodeVisibility
-                            }
+                            onChange={() => {
+                                store.graphInstance.toggleOrphanNodeVisibility();
+
+                                store.track.trackEvent(
+                                    'Side panel - View Settings',
+                                    'Switch',
+                                    JSON.stringify({
+                                        type: 'Toggle',
+                                        value: `${
+                                            store.graphInstance
+                                                .orphanNodeVisibility
+                                                ? 'Show'
+                                                : 'Hide'
+                                        } orphan nodes`
+                                    })
+                                );
+                            }}
                         />
                         <Text fontSize="sm">Orphan nodes</Text>
                     </HStack>
@@ -371,15 +411,18 @@ function Settings() {
                 }}
                 onClick={() => {
                     store.track.trackEvent(
-                        'Graph page',
-                        'Button click',
-                        `${
-                            store.core.visibleDimensions[
-                                store.core.currentGraph
-                            ].includes(property)
-                                ? 'hide'
-                                : 'show'
-                        } ${property}`
+                        'Side panel - View Settings',
+                        `Button - Dimensions - ${property}`,
+                        JSON.stringify({
+                            type: 'Click',
+                            value: `${
+                                store.core.visibleDimensions[
+                                    store.core.currentGraph
+                                ].includes(property)
+                                    ? 'Hide'
+                                    : 'Show'
+                            }`
+                        })
                     );
 
                     store.core.toggleVisibleDimension(property);

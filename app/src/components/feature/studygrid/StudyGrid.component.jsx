@@ -120,9 +120,12 @@ function StudyGrid(props) {
                                             }
                                             onClick={() => {
                                                 store.track.trackEvent(
-                                                    'Study grid',
-                                                    'Delete study',
-                                                    study.study_uuid
+                                                    'Home Page - Study Grid',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: `Delete ${study.study_uuid}`
+                                                    })
                                                 );
 
                                                 store.core.deleteStudy(
@@ -198,9 +201,12 @@ function StudyGrid(props) {
                                             }}
                                             onClick={() => {
                                                 store.track.trackEvent(
-                                                    'Study grid',
-                                                    'Open study',
-                                                    study.study_uuid
+                                                    'Home Page - Study Grid',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: `Open ${study.study_uuid}`
+                                                    })
                                                 );
                                                 openStudy(study.study_uuid);
                                             }}

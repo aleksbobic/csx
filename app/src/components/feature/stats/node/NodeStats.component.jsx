@@ -202,9 +202,12 @@ function SelectedNodeList(props) {
                                     onClick={() => {
                                         if (!props.demoData.length) {
                                             store.track.trackEvent(
-                                                'Node list widget',
-                                                'Button click',
-                                                `Zoom to fit node ${node.id}`
+                                                `Details Panel - Widget - ${props.chart.id}`,
+                                                'Button',
+                                                JSON.stringify({
+                                                    type: 'Click',
+                                                    value: `Zoom to fit ${node.id} - ${node.label}`
+                                                })
                                             );
 
                                             store.graphInstance.zoomToFitByNodeId(
@@ -251,9 +254,12 @@ function SelectedNodeList(props) {
                                                         !props.demoData.length
                                                     ) {
                                                         store.track.trackEvent(
-                                                            'Node list widget',
-                                                            'Button click',
-                                                            `deselect node {id: ${node.id}, label: ${node.label}}`
+                                                            `Details Panel - Widget - ${props.chart.id}`,
+                                                            'Button',
+                                                            JSON.stringify({
+                                                                type: 'Click',
+                                                                value: `Deselect ${node.id} - ${node.label}`
+                                                            })
                                                         );
 
                                                         const nodeIndex =

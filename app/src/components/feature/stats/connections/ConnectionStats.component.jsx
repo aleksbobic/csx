@@ -144,9 +144,12 @@ function ConnectionStats(props) {
                                 minWidth="210px"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Node connections widget',
-                                        'Click degree level',
-                                        `${level}`
+                                        `Details Panel - Widget - ${props.chart.id}`,
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: `Set max degree level to ${level}`
+                                        })
                                     );
 
                                     store.graphInstance.filterNodesById(
@@ -368,9 +371,12 @@ function ConnectionStats(props) {
                                         onClick={() => {
                                             if (!props.demoData.length) {
                                                 store.track.trackEvent(
-                                                    'Node connections widget',
-                                                    'Button click',
-                                                    `Navigate to node ${node.id}`
+                                                    `Details Panel - Widget - ${props.chart.id}`,
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: `Navigate to ${node.id} - ${node.label}`
+                                                    })
                                                 );
 
                                                 store.graphInstance.zoomToFitByNodeId(

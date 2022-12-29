@@ -16,9 +16,75 @@ import './App.scss';
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { useEffect, useContext } from 'react';
+import { RootStoreContext } from 'stores/RootStore';
 
 function CSX() {
     const { colorMode } = useColorMode();
+    const store = useContext(RootStoreContext);
+
+    useEffect(() => {
+        window.addEventListener('beforeunload', () => {
+            store.track.trackEvent(
+                'Global',
+                'Tab Switch',
+                JSON.stringify({
+                    value: 'User closed the tab'
+                })
+            );
+        });
+
+        window.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                store.track.trackEvent(
+                    'Global',
+                    'Tab Switch',
+                    JSON.stringify({
+                        value: 'User switched to a different tab'
+                    })
+                );
+            } else {
+                store.track.trackEvent(
+                    'Global',
+                    'Tab Switch',
+                    JSON.stringify({
+                        value: 'User returned to the csx tab'
+                    })
+                );
+            }
+        });
+
+        return () => {
+            window.removeEventListener('beforeunload', () => {
+                store.track.trackEvent(
+                    'Global',
+                    'Tab Switch',
+                    JSON.stringify({
+                        value: 'User closed the tab'
+                    })
+                );
+            });
+            window.removeEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    store.track.trackEvent(
+                        'Global',
+                        'Tab Switch',
+                        JSON.stringify({
+                            value: 'User switched to a different tab'
+                        })
+                    );
+                } else {
+                    store.track.trackEvent(
+                        'Global',
+                        'Tab Switch',
+                        JSON.stringify({
+                            value: 'User returned to the csx tab'
+                        })
+                    );
+                }
+            });
+        };
+    }, []);
 
     return (
         <HelmetProvider>

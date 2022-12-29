@@ -72,11 +72,13 @@ function ControlPanel() {
 
     const toggleControlPanel = () => {
         onToggle();
-
         store.track.trackEvent(
-            'controls panel',
-            'button click',
-            `${isOpen ? 'open' : 'close'} controls panel`
+            'Side Panel',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${isOpen ? 'Open' : 'Close'} side panel`
+            })
         );
     };
 
@@ -265,9 +267,12 @@ function ControlPanel() {
                         icon={<ScissorsIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Trim network'
+                                'Side Panel - Network Modification',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Trim network'
+                                })
                             );
                             store.graph.trimNetwork();
                         }}
@@ -303,9 +308,20 @@ function ControlPanel() {
                                 borderRadius="6px"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Graph page',
-                                        'Button click',
-                                        'Wide expand network'
+                                        'Side Panel - Network Modification',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Wide expand network',
+                                            nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                node => {
+                                                    return {
+                                                        id: node.id,
+                                                        label: node.label
+                                                    };
+                                                }
+                                            )
+                                        })
                                     );
                                     expandGraph('or');
                                 }}
@@ -318,10 +334,22 @@ function ControlPanel() {
                                 borderRadius="6px"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Graph page',
-                                        'Button click',
-                                        'Narrow expand network'
+                                        'Side Panel - Network Modification',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Narrow expand network',
+                                            nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                node => {
+                                                    return {
+                                                        id: node.id,
+                                                        label: node.label
+                                                    };
+                                                }
+                                            )
+                                        })
                                     );
+
                                     expandGraph('and');
                                 }}
                             >
@@ -358,9 +386,12 @@ function ControlPanel() {
                         icon={<MediaLive style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show all nodes'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show all nodes'
+                                })
                             );
                             store.graphInstance.toggleVisibleComponents(-1);
                             store.graphInstance.resetSelfCentric();
@@ -380,9 +411,20 @@ function ControlPanel() {
                         icon={<RadioChecked style={{ '--ggs': '0.6' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show selected nodes'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show selected nodes',
+                                    nodes: store.graph.currentGraphData.selectedNodes.map(
+                                        node => {
+                                            return {
+                                                id: node.id,
+                                                label: node.label
+                                            };
+                                        }
+                                    )
+                                })
                             );
                             store.graphInstance.triggerSelectedNodes();
                         }}
@@ -401,9 +443,21 @@ function ControlPanel() {
                         icon={<FormatSeparator style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show nodes with same entries as origin'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show nodes with same entries as origin',
+                                    origin: {
+                                        id: store.graphInstance
+                                            .selfCentricOriginNode.id,
+                                        label: store.graphInstance
+                                            .selfCentricOriginNode.label,
+                                        entries:
+                                            store.graphInstance
+                                                .selfCentricOriginNode.entries
+                                    }
+                                })
                             );
                             store.graphInstance.triggerSameEntry();
                         }}
@@ -424,9 +478,20 @@ function ControlPanel() {
                         icon={<DisplayFullwidth style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show nodes with same entries as all selected nodes'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show nodes with same entries as all selected nodes',
+                                    nodes: store.graph.currentGraphData.selectedNodes.map(
+                                        node => {
+                                            return {
+                                                id: node.id,
+                                                label: node.label
+                                            };
+                                        }
+                                    )
+                                })
                             );
                             store.graphInstance.triggerSameEntry(true);
                         }}
@@ -444,10 +509,22 @@ function ControlPanel() {
                         icon={<PathDivide style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show direct connections of selected nodes'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show direct connections of selected nodes',
+                                    nodes: store.graph.currentGraphData.selectedNodes.map(
+                                        node => {
+                                            return {
+                                                id: node.id,
+                                                label: node.label
+                                            };
+                                        }
+                                    )
+                                })
                             );
+
                             store.graphInstance.triggerMultiSelfCentric();
                         }}
                     />
@@ -464,9 +541,20 @@ function ControlPanel() {
                         icon={<PathIntersect style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show mutual connections of selected nodes'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show mutual connections of selected nodes',
+                                    nodes: store.graph.currentGraphData.selectedNodes.map(
+                                        node => {
+                                            return {
+                                                id: node.id,
+                                                label: node.label
+                                            };
+                                        }
+                                    )
+                                })
                             );
                             store.graphInstance.triggerMultiSelfCentric(true);
                         }}
@@ -490,10 +578,23 @@ function ControlPanel() {
                         icon={<LivePhoto style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show direct connections of origin node'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show direct connections of origin node',
+                                    origin: {
+                                        id: store.graphInstance
+                                            .selfCentricOriginNode.id,
+                                        label: store.graphInstance
+                                            .selfCentricOriginNode.label,
+                                        entries:
+                                            store.graphInstance
+                                                .selfCentricOriginNode.entries
+                                    }
+                                })
                             );
+
                             store.graphInstance.triggerSelfCentric();
                         }}
                     />
@@ -507,10 +608,31 @@ function ControlPanel() {
                         icon={<LayoutPin style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Show mutual connections with origin node'
+                                'Side Panel - Direct Connections',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Show mutual connections with origin node',
+                                    origin: {
+                                        id: store.graphInstance
+                                            .selfCentricOriginNode.id,
+                                        label: store.graphInstance
+                                            .selfCentricOriginNode.label,
+                                        entries:
+                                            store.graphInstance
+                                                .selfCentricOriginNode.entries
+                                    },
+                                    nodes: store.graph.currentGraphData.selectedNodes.map(
+                                        node => {
+                                            return {
+                                                id: node.id,
+                                                label: node.label
+                                            };
+                                        }
+                                    )
+                                })
                             );
+
                             store.graphInstance.triggerMultiSelfCentric(
                                 true,
                                 true
@@ -558,14 +680,6 @@ function ControlPanel() {
                             height="50px"
                             color={tabInactiveColors}
                             onClick={() => {
-                                store.track.trackEvent(
-                                    'Graph page',
-                                    'Button click',
-                                    isOpen
-                                        ? 'Minimize control panel'
-                                        : 'Maximize control panel'
-                                );
-
                                 toggleControlPanel();
                             }}
                             icon={
@@ -587,9 +701,12 @@ function ControlPanel() {
                         onClick={() => {
                             openSliderIfClosed();
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Open study info tab'
+                                'Side Panel',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open study info'
+                                })
                             );
                         }}
                         padding="8px"
@@ -621,9 +738,12 @@ function ControlPanel() {
                         onClick={() => {
                             openSliderIfClosed();
                             store.track.trackEvent(
-                                'Graph page',
-                                'Button click',
-                                'Open view controls tab'
+                                'Side Panel',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open view settings'
+                                })
                             );
                         }}
                         padding="8px"

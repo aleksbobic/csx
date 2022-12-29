@@ -104,9 +104,13 @@ function NodeFilter(props) {
                         value={sliderMinTooltipValue}
                         onChange={val => {
                             store.track.trackEvent(
-                                'Node filter widget',
-                                'Enter min value',
-                                `${val}`
+                                `Details Panel - Widget - ${props.chart.id}`,
+                                'Number Input - Min',
+                                JSON.stringify({
+                                    type: 'Write',
+                                    value: val,
+                                    property: props.filterProperty
+                                })
                             );
 
                             setSliderMinTooltipValue(val);
@@ -161,9 +165,13 @@ function NodeFilter(props) {
                         width="84px"
                         onChange={val => {
                             store.track.trackEvent(
-                                'Node filter widget',
-                                'Enter max value',
-                                `${val}`
+                                `Details Panel - Widget - ${props.chart.id}`,
+                                'Number Input - Max',
+                                JSON.stringify({
+                                    type: 'Write',
+                                    value: val,
+                                    property: props.filterProperty
+                                })
                             );
 
                             setSliderMaxTooltipValue(val);
@@ -208,9 +216,14 @@ function NodeFilter(props) {
                     step={1}
                     onChange={val => {
                         store.track.trackEvent(
-                            'Node filter widget',
-                            'Set slider',
-                            `Min: ${val[0]}  Max: ${val[1]}`
+                            `Details Panel - Widget - ${props.chart.id}`,
+                            'Slider',
+                            JSON.stringify({
+                                type: 'Slide',
+                                min: val[0],
+                                max: val[1],
+                                property: props.filterProperty
+                            })
                         );
 
                         setSliderMinTooltipValue(val[0]);

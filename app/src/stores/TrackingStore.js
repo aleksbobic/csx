@@ -60,7 +60,7 @@ export class TrackingStore {
             window._paq.push([
                 'trackEvent',
                 event_category,
-                event_action,
+                event_action.charAt(0).toUpperCase() + event_action.slice(1),
                 event_data
             ]);
         }

@@ -449,9 +449,12 @@ function FileUploadModal() {
                                     }
                                     onSubmit={val => {
                                         store.track.trackEvent(
-                                            'Widget modal',
-                                            'Set widget title',
-                                            `${val}`
+                                            'Widget Modal',
+                                            'Editable Element - Title',
+                                            JSON.stringify({
+                                                type: 'Write',
+                                                value: val
+                                            })
                                         );
 
                                         store.stats.changeChartTitle(val);
@@ -505,9 +508,12 @@ function FileUploadModal() {
                                         }
                                         onSubmit={val => {
                                             store.track.trackEvent(
-                                                'Widget modal',
-                                                'Set hover label',
-                                                `${val}`
+                                                'Widget Modal',
+                                                'Editable Element - Hover Label',
+                                                JSON.stringify({
+                                                    type: 'Write',
+                                                    value: val
+                                                })
                                             );
 
                                             store.stats.changeChartHoverLabel(
@@ -564,9 +570,12 @@ function FileUploadModal() {
                                         }
                                         onSubmit={val => {
                                             store.track.trackEvent(
-                                                'Widget modal',
-                                                'Set group hover label',
-                                                `${val}`
+                                                'Widget Modal',
+                                                'Editable Element - Group Hover Label',
+                                                JSON.stringify({
+                                                    type: 'Write',
+                                                    value: val
+                                                })
                                             );
 
                                             store.stats.changeChartGroupHoverLabel(
@@ -619,9 +628,12 @@ function FileUploadModal() {
                                         variant="filled"
                                         onChange={value => {
                                             store.track.trackEvent(
-                                                'Widget modal',
-                                                'Set network elements',
-                                                `${value.target.value}`
+                                                'Widget Modal',
+                                                'Select Element - Network Elements',
+                                                JSON.stringify({
+                                                    type: 'Change selection',
+                                                    value: value.target.value
+                                                })
                                             );
 
                                             store.stats.changeChartNetworkElements(
@@ -659,9 +671,12 @@ function FileUploadModal() {
                                         size="sm"
                                         onChange={value => {
                                             store.track.trackEvent(
-                                                'Widget modal',
-                                                'Set element values',
-                                                `${value.target.value}`
+                                                'Widget Modal',
+                                                'Select Element - Element Values',
+                                                JSON.stringify({
+                                                    type: 'Change selection',
+                                                    value: value.target.value
+                                                })
                                             );
 
                                             store.stats.changeChartElementValue(
@@ -704,9 +719,13 @@ function FileUploadModal() {
                                             size="sm"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget modal',
-                                                    'Set group by value',
-                                                    `${value.target.value}`
+                                                    'Widget Modal',
+                                                    'Select Element - Group By Value',
+                                                    JSON.stringify({
+                                                        type: 'Change selection',
+                                                        value: value.target
+                                                            .value
+                                                    })
                                                 );
 
                                                 store.stats.changeChartGroupByValues(
@@ -752,9 +771,13 @@ function FileUploadModal() {
                                             size="sm"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget modal',
-                                                    'Set show only',
-                                                    `${value.target.value}`
+                                                    'Widget Modal',
+                                                    'Select Element - Show Only',
+                                                    JSON.stringify({
+                                                        type: 'Change selection',
+                                                        value: value.target
+                                                            .value
+                                                    })
                                                 );
 
                                                 store.stats.changeShowOnly(
@@ -827,9 +850,12 @@ function FileUploadModal() {
                                 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Widget modal',
-                                        'Button click',
-                                        `Open ${entry} sample`
+                                        'Widget Modal',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: `Open ${entry} widget sample`
+                                        })
                                     );
                                 }}
                             >
@@ -974,9 +1000,12 @@ function FileUploadModal() {
                         icon={<Close />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Widget modal',
-                                'Button click',
-                                'Close'
+                                'Widget Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Close widget modal'
+                                })
                             );
 
                             store.stats.toggleStatsModalVisiblity(false);
@@ -993,12 +1022,6 @@ function FileUploadModal() {
                         _hover={{ backgroundColor: 'blue.600' }}
                         _active={{ backgroundColor: 'blue.700' }}
                         onClick={() => {
-                            store.track.trackEvent(
-                                'Widget modal',
-                                'Button click',
-                                'Add chart'
-                            );
-
                             store.stats.addChart();
                         }}
                         color={'white'}

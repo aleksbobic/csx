@@ -82,9 +82,12 @@ function WidgetContainer(props) {
                             defaultValue={maxConnectionDegree}
                             onChange={e => {
                                 store.track.trackEvent(
-                                    'Widget container',
-                                    'Dropdown selection',
-                                    `Max connection degree: ${e.target.value}`
+                                    `Details Panel - Widget Container - ${props.chart.id}`,
+                                    'Select Element - Max Connection Degree in Widget',
+                                    JSON.stringify({
+                                        type: 'Change selection',
+                                        value: e.target.value
+                                    })
                                 );
 
                                 setMaxConnectionDegree(
@@ -120,9 +123,12 @@ function WidgetContainer(props) {
                         defaultValue={filterProperty}
                         onChange={e => {
                             store.track.trackEvent(
-                                'Widget container',
-                                'Dropdown selection',
-                                `Set filter property: ${e.target.value}`
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Select Element - Filter Property',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
                             );
 
                             setFilterProperty(e.target.value);
@@ -177,9 +183,12 @@ function WidgetContainer(props) {
                         defaultValue={connectionFeature}
                         onChange={e => {
                             store.track.trackEvent(
-                                'Widget container',
-                                'Dropdown selection',
-                                `Set connection feature: ${e.target.value}`
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Select Element - Connection Feature',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
                             );
 
                             setConnectionFeature(e.target.value);
@@ -228,9 +237,12 @@ function WidgetContainer(props) {
                             defaultValue={elementDisplayLimit}
                             onChange={e => {
                                 store.track.trackEvent(
-                                    'Widget container',
-                                    'Dropdown selection',
-                                    `Set element display limit to: ${e.target.value}`
+                                    `Details Panel - Widget Container - ${props.chart.id}`,
+                                    'Select Element - Element Display Limit',
+                                    JSON.stringify({
+                                        type: 'Change selection',
+                                        value: e.target.value
+                                    })
                                 );
 
                                 setElementDisplayLimit(
@@ -270,9 +282,12 @@ function WidgetContainer(props) {
                         defaultValue={props.chart.show_only}
                         onChange={e => {
                             store.track.trackEvent(
-                                'Widget container',
-                                'Dropdown selection',
-                                `Set network data to: ${e.target.value}`
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Select Element - Network Data',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
                             );
 
                             setNetworkData(e.target.value);
@@ -302,9 +317,12 @@ function WidgetContainer(props) {
                             }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Widget container',
-                                    'Button click',
-                                    `Expand widget ${props.chart.id}`
+                                    `Details Panel - Widget Container - ${props.chart.id}`,
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Expand widget'
+                                    })
                                 );
 
                                 setIsExpanded(true);
@@ -324,9 +342,12 @@ function WidgetContainer(props) {
                             }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Widget container',
-                                    'Button click',
-                                    `Shrink widget ${props.chart.id}`
+                                    `Details Panel - Widget Container - ${props.chart.id}`,
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Shrink widget'
+                                    })
                                 );
 
                                 setIsExpanded(false);
@@ -347,9 +368,12 @@ function WidgetContainer(props) {
                     }}
                     onClick={() => {
                         store.track.trackEvent(
-                            'Widget container',
-                            'Button click',
-                            `Remove widget ${props.chart.id}`
+                            `Details Panel - Widget Container - ${props.chart.id}`,
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: 'Remove widget'
+                            })
                         );
                         store.stats.removeChart(props.chart.id);
                     }}
@@ -387,13 +411,14 @@ function WidgetContainer(props) {
                         }}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Widget container',
-                                'Button click',
-                                `Make x axis ${
-                                    !props.chart.labels.x.display
-                                        ? 'visible'
-                                        : 'invisible'
-                                }`
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Button - X Axis Visibility',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: !props.chart.labels.x.display
+                                        ? 'Visible'
+                                        : 'Invisible'
+                                })
                             );
 
                             store.stats.toggleAxisLabels(props.chart.id, 'x');
@@ -414,13 +439,14 @@ function WidgetContainer(props) {
                         }}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Widget container',
-                                'Button click',
-                                `Make y axis ${
-                                    !props.chart.labels.y.display
-                                        ? 'visible'
-                                        : 'invisible'
-                                }`
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Button - Y Axis Visibility',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: !props.chart.labels.y.display
+                                        ? 'Visible'
+                                        : 'Invisible'
+                                })
                             );
 
                             store.stats.toggleAxisLabels(props.chart.id, 'y');

@@ -1,5 +1,6 @@
 import {
     Box,
+    Button,
     Input,
     Text,
     Tooltip,
@@ -45,9 +46,19 @@ function AutoCompleteInput(props) {
 
     const clickSuggestion = clickedVal => {
         store.track.trackEvent(
-            'Autocomplete input',
-            'Suggestion selected through click',
-            clickedVal
+            props.trackingLocation,
+            props.trackingEventTarget,
+            props.trackingEventFeature
+                ? JSON.stringify({
+                      type: 'Change selection',
+                      feature: props.trackingEventFeature,
+                      value: `${clickedVal}`
+                  })
+                : JSON.stringify({
+                      type: 'Change selection',
+                      dataset: props.trackingEventDataset,
+                      value: `${clickedVal}`
+                  })
         );
 
         setInput(clickedVal);
@@ -67,9 +78,19 @@ function AutoCompleteInput(props) {
                 e.preventDefault();
 
                 store.track.trackEvent(
-                    'Autocomplete input',
-                    'Suggestion selected through key press',
-                    suggestions[activeSuggestion]
+                    props.trackingLocation,
+                    props.trackingEventTarget,
+                    props.trackingEventFeature
+                        ? JSON.stringify({
+                              type: 'Change selection through key press',
+                              feature: props.trackingEventFeature,
+                              value: `${suggestions[activeSuggestion]}`
+                          })
+                        : JSON.stringify({
+                              type: 'Change selection through key press',
+                              dataset: props.trackingEventDataset,
+                              value: `${suggestions[activeSuggestion]}`
+                          })
                 );
 
                 setInput(suggestions[activeSuggestion]);
@@ -145,7 +166,7 @@ function AutoCompleteInput(props) {
                     width="100%"
                     key={`${entry}_${index}`}
                     fontWeight="bold"
-                    className={classNames({
+                    className={classNames('nodrag', {
                         activeSuggestion: index === activeSuggestion,
                         suggestionItem: true
                     })}
@@ -232,7 +253,11 @@ AutoCompleteInput.propTypes = {
     style: PropTypes.object,
     suggestionStyle: PropTypes.object,
     externalChangeHandler: PropTypes.func,
-    initialValue: PropTypes.string
+    initialValue: PropTypes.string,
+    trackingLocation: PropTypes.string,
+    trackingEventTarget: PropTypes.string,
+    trackingEventFeature: PropTypes.string,
+    trackingEventDataset: PropTypes.string
 };
 
 AutoCompleteInput.defaultProps = {
@@ -240,7 +265,11 @@ AutoCompleteInput.defaultProps = {
     size: 'sm',
     style: {},
     suggestionStyle: {},
-    initialValue: ''
+    initialValue: '',
+    trackingLocation: '',
+    trackingEventTarget: '',
+    trackingEventFeature: '',
+    trackingEventDataset: ''
 };
 
 export default observer(AutoCompleteInput);

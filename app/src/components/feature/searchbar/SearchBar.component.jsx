@@ -28,11 +28,16 @@ function SearchBar(props) {
     const selectedDatasetChange = e => {
         setSelectedDataset(e.target.value);
         store.search.useDataset(e.target.value);
+
         store.track.trackEvent(
-            'Searchbar',
-            'Dataset change',
-            store.search.currentDataset
+            'Home Page - Search Area',
+            'Search Bar - Select element - Dataset',
+            JSON.stringify({
+                type: 'Change selection',
+                value: store.search.currentDataset
+            })
         );
+
         store.workflow.resetWorkflow();
         store.schema.resetOverviewNodeProperties();
     };
@@ -90,9 +95,14 @@ function SearchBar(props) {
                 initialValues={{ search: '' }}
                 onSubmit={values => {
                     store.track.trackEvent(
-                        'Searchbar',
-                        `Run search on ${store.search.currentDataset}`,
-                        values.search
+                        'Home Page - Search Area',
+                        'Search Bar - Button - Search',
+                        JSON.stringify({
+                            type: 'Click',
+                            dataset: store.search.currentDataset,
+                            value: values.search,
+                            studyID: store.core.studyUuid
+                        })
                     );
 
                     store.search.setSearchIsEmpty(false);
@@ -175,6 +185,11 @@ function SearchBar(props) {
                                 }}
                                 getValue={value =>
                                     setFieldValue('search', value)
+                                }
+                                trackingLocation="Home Page - Search Area"
+                                trackingEventTarget="Search Bar - Autocomplete Select Element - Keyphrase"
+                                trackingEventDataset={
+                                    store.search.currentDataset
                                 }
                             />
                             <InputRightElement

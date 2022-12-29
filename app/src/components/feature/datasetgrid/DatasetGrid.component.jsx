@@ -25,13 +25,25 @@ function DatasetGrid(props) {
     const history = useHistory();
 
     const onDrop = async files => {
-        store.track.trackEvent('File upload', 'File dropped');
+        store.track.trackEvent(
+            'Home Page - Dataset Grid',
+            'File Upload Area',
+            JSON.stringify({
+                type: 'Drop'
+            })
+        );
 
         store.fileUpload.changeFileUploadModalVisiblity(true);
         const response = await store.fileUpload.uploadFile(files);
 
         if (!response) {
-            store.track.trackEvent('File upload', 'File upload failed');
+            store.track.trackEvent(
+                'Home Page - Dataset Grid',
+                'File Upload Area',
+                JSON.stringify({
+                    type: 'Error'
+                })
+            );
             store.fileUpload.changeFileUploadModalVisiblity(false);
         }
     };
@@ -202,9 +214,12 @@ function DatasetGrid(props) {
                                                     }}
                                                     onClick={() => {
                                                         store.track.trackEvent(
-                                                            'Dataset grid',
-                                                            'delete dataset',
-                                                            dataset
+                                                            'Home Page - Dataset Grid',
+                                                            'Button',
+                                                            JSON.stringify({
+                                                                type: 'Click',
+                                                                value: `Delete ${dataset}`
+                                                            })
                                                         );
 
                                                         store.search.deleteDataset(
@@ -238,9 +253,12 @@ function DatasetGrid(props) {
                                                     }}
                                                     onClick={() => {
                                                         store.track.trackEvent(
-                                                            'Dataset grid',
-                                                            'change dataset default settings',
-                                                            dataset
+                                                            'Home Page - Dataset Grid',
+                                                            'Button',
+                                                            JSON.stringify({
+                                                                type: 'Click',
+                                                                value: `Change default settings of ${dataset}`
+                                                            })
                                                         );
 
                                                         store.search.getConifg(
@@ -273,9 +291,12 @@ function DatasetGrid(props) {
                                                     }}
                                                     onClick={() => {
                                                         store.track.trackEvent(
-                                                            'Dataset grid',
-                                                            'Open advanced search',
-                                                            dataset
+                                                            'Home Page - Dataset Grid',
+                                                            'Button',
+                                                            JSON.stringify({
+                                                                type: 'Click',
+                                                                value: `Open advanced search for ${dataset}`
+                                                            })
                                                         );
 
                                                         navigateToAdvancedSearch(

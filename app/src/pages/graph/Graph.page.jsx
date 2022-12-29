@@ -151,18 +151,24 @@ function GraphPage() {
             store.comment.commentTrigger
         ) {
             store.track.trackEvent(
-                'Graph page',
-                'Keyboard shortcut',
-                'Open comment modal shortcut'
+                'Graph Area - Comment Modal',
+                'Key',
+                JSON.stringify({
+                    type: 'C + Shift',
+                    value: 'Open comment modal'
+                })
             );
             store.core.setShowCommentModal(true);
         }
 
         if (closeCommentModalKey && store.core.showCommentModal) {
             store.track.trackEvent(
-                'Graph page',
-                'Keyboard shortcut',
-                'Close comment modal shortcut'
+                'Graph Area - Comment Modal',
+                'Key',
+                JSON.stringify({
+                    type: 'Esc',
+                    value: 'Close comment modal'
+                })
             );
             setComment('');
             store.core.setShowCommentModal(false);
@@ -188,10 +194,14 @@ function GraphPage() {
             store.comment.commentTrigger
         ) {
             store.track.trackEvent(
-                'Graph page',
-                'Keyboard shortcut',
-                'Submit comment'
+                'Graph Area - Comment Modal',
+                'Key',
+                JSON.stringify({
+                    type: 'Enter + Shift',
+                    value: `Submit comment: ${comment}`
+                })
             );
+
             store.comment.addComment(comment);
             closeCommentModal();
         }
@@ -251,9 +261,12 @@ function GraphPage() {
                 zIndex="2"
                 onClick={() => {
                     store.track.trackEvent(
-                        'Graph page',
-                        'Button click',
-                        'Submit comment from comment modal'
+                        'Graph Area - Comment Modal',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: `Submit comment: ${comment}`
+                        })
                     );
                     submitComment();
                 }}
@@ -270,9 +283,12 @@ function GraphPage() {
                 zIndex="2"
                 onClick={() => {
                     store.track.trackEvent(
-                        'Graph page',
-                        'Button click',
-                        'Close comment modal'
+                        'Graph Area - Comment Modal',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Close comment modal'
+                        })
                     );
                     closeCommentModal();
                 }}

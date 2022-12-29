@@ -37,9 +37,12 @@ function StudyInfo() {
                     value={store.core.studyName}
                     onSubmit={val => {
                         store.track.trackEvent(
-                            'Graph page',
-                            'Change study name',
-                            val
+                            'Side Panel - Study Info',
+                            'Editable Element - Study Name',
+                            JSON.stringify({
+                                type: 'Write',
+                                value: val
+                            })
                         );
                         store.core.updateStudyName(val);
                     }}
@@ -99,9 +102,12 @@ function StudyInfo() {
                     value={store.core.studyDescription}
                     onSubmit={val => {
                         store.track.trackEvent(
-                            'Graph page',
-                            'Change study description',
-                            val
+                            'Side Panel - Study Info',
+                            'Editable Element - Study Description',
+                            JSON.stringify({
+                                type: 'Write',
+                                value: val
+                            })
                         );
 
                         store.core.updateStudyDescription(val);
@@ -143,9 +149,12 @@ function StudyInfo() {
                 disabled={store.core.studyIsSaved}
                 onClick={() => {
                     store.track.trackEvent(
-                        'Graph page',
-                        'Button click',
-                        'Save study'
+                        'Side Panel - Study Info',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Save study'
+                        })
                     );
                     store.core.saveStudy();
                 }}

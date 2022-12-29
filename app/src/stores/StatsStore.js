@@ -191,10 +191,28 @@ export class StatsStore {
     addChart = () => {
         const dataset = this.store.search.currentDataset;
 
+        const newChartId = uuidv4();
+
+        this.store.track.trackEvent(
+            'Widget Modal',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Add new chart',
+                properties: {
+                    id: newChartId,
+                    type: this.newChartProps.type,
+                    elements: this.newChartProps.elements,
+                    element_values: this.newChartProps.element_values,
+                    network: this.newChartProps.network
+                }
+            })
+        );
+
         if (Object.keys(this.charts).includes(dataset)) {
             this.charts[dataset].push({
                 ...this.newChartProps,
-                id: uuidv4(),
+                id: newChartId,
                 colSpan: 1,
                 height: '200px',
                 network: this.store.core.currentGraph
@@ -203,7 +221,7 @@ export class StatsStore {
             this.charts[dataset] = [
                 {
                     ...this.newChartProps,
-                    id: uuidv4(),
+                    id: newChartId,
                     colSpan: 1,
                     height: '200px',
                     network: this.store.core.currentGraph

@@ -58,10 +58,13 @@ function Graph(props) {
 
     const onNodeClick = (node, event) => {
         store.track.trackEvent(
-            'graph',
-            'node click',
-            `node: {label: ${node.label}, id: ${node.id}}`
+            'Graph Area',
+            `Node - ${node.label} - ${node.id}`,
+            JSON.stringify({
+                type: 'Click'
+            })
         );
+
         store.contextMenu.showContextMenu(node, event.clientX, event.clientY);
     };
 
@@ -210,7 +213,22 @@ function Graph(props) {
             // linkDirectionalArrowResolution={2}
             // linkDirectionalArrowRelPos={1}
             // linkCurvature={0.2}
-            onLinkHover={store.core.isOverview ? handleLinkHover : () => {}}
+            onLinkHover={link => {
+                if (store.core.isOverview) {
+                    if (link) {
+                        store.track.trackEvent(
+                            'Graph Area',
+                            `Link - ${link.id}`,
+                            JSON.stringify({
+                                type: 'Hover',
+                                connections: link.connections
+                            })
+                        );
+                    }
+
+                    handleLinkHover(link);
+                }
+            }}
             linkWidth={0}
             linkResolution={2}
             linkHoverPrecision={8}
@@ -220,8 +238,29 @@ function Graph(props) {
                 powerPreference: 'high-performance'
             }}
             onNodeClick={onNodeClick}
-            onBackgroundClick={store.contextMenu.hideContextMenu}
+            onBackgroundClick={() => {
+                store.track.trackEvent(
+                    'Graph Area - Contex Menu',
+                    'Outised',
+                    JSON.stringify({
+                        type: 'Click',
+                        value: 'Close context menu'
+                    })
+                );
+
+                store.contextMenu.hideContextMenu();
+            }}
             onNodeDrag={store.contextMenu.hideContextMenu}
+            onNodeDragEnd={(node, translate) => {
+                store.track.trackEvent(
+                    'Graph Area',
+                    `Node - ${node.label} - ${node.id}`,
+                    JSON.stringify({
+                        type: 'Drag',
+                        value: translate
+                    })
+                );
+            }}
             showNavInfo={false}
             onNodeHover={handleNodeHover}
             d3VelocityDecay={0.1}

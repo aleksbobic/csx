@@ -260,9 +260,13 @@ function Chart(props) {
 
                     if ('nodeProperty' in data) {
                         store.track.trackEvent(
-                            `${props.chart.type} chart with id ${props.chart.id}`,
-                            'Chart click',
-                            `Node property ${data.nodeProperty} with value ${data.labels[index]}`
+                            `Details Panel - Widget - ${props.chart.id}`,
+                            'Chart Area',
+                            JSON.stringify({
+                                type: 'Click',
+                                property: data.nodeProperty,
+                                value: data.labels[index]
+                            })
                         );
 
                         visibleNodeIds =
@@ -272,9 +276,13 @@ function Chart(props) {
                             );
                     } else {
                         store.track.trackEvent(
-                            `${props.chart.type} chart with id ${props.chart.id}`,
-                            'Chart click',
-                            `Edge property ${data.edgeProperty} with value ${data.labels[index]}`
+                            `Details Panel - Widget - ${props.chart.id}`,
+                            'Chart area',
+                            JSON.stringify({
+                                type: 'Click',
+                                property: data.edgeProperty,
+                                value: data.labels[index]
+                            })
                         );
 
                         visibleNodeIds =

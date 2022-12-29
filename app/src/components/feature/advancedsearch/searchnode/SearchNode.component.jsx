@@ -45,8 +45,12 @@ const searchNode = ({ id, data, isConnectable }) => {
         }
 
         data.trackNodeAction(
-            'Input',
-            `Node ${id} keyphrase for feature ${data.feature} changed to ${data.keyphrase}`
+            `Node - ${id} - Input Element - Keyphrase`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${data.keyphrase}`
+            })
         );
     };
 
@@ -54,9 +58,13 @@ const searchNode = ({ id, data, isConnectable }) => {
         data.feature = value.target.value;
         data.keyphrase = data.getDefaultValue(value.target.value);
         data.updateActions(id);
+
         data.trackNodeAction(
-            'Dropdown',
-            `Node ${id} feature changed to ${data.feature}`
+            `Node - ${id} - Select Element - Feature`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${data.feature}`
+            })
         );
     };
 
@@ -73,9 +81,14 @@ const searchNode = ({ id, data, isConnectable }) => {
                 }
                 getValue={value => {
                     data.updateSearchNodeData(id, value);
+
                     data.trackNodeAction(
-                        'Input',
-                        `Node ${id} keyphrase for feature ${data.feature} changed to ${value}`
+                        `Node - ${id} - Input Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Write',
+                            feature: data.feature,
+                            value: `${value}`
+                        })
                     );
                 }}
                 style={{ borderRadius: '5px' }}
@@ -85,6 +98,9 @@ const searchNode = ({ id, data, isConnectable }) => {
                     position: 'fixed'
                 }}
                 initialValue={data.keyphrase}
+                trackingLocation="Advanced Search - Search Canvas"
+                trackingEventTarget={`Node - ${id} - Autocomplete Select Element - Keyphrase`}
+                trackingEventFeature={data.feature}
             />
         );
     };
@@ -99,9 +115,14 @@ const searchNode = ({ id, data, isConnectable }) => {
                 borderRadius="5px"
                 onChange={event => {
                     data.updateSearchNodeData(id, event.target.value);
+
                     data.trackNodeAction(
-                        'Dropdown',
-                        `Node ${id} keyphrase for feature ${data.feature} changed to ${event.target.value}`
+                        `Node - ${id} - Select Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Change selection',
+                            feature: data.feature,
+                            value: `${event.target.value}`
+                        })
                     );
                 }}
                 opacity="0.8"
@@ -135,9 +156,14 @@ const searchNode = ({ id, data, isConnectable }) => {
                 borderRadius="5px"
                 onChange={value => {
                     data.updateSearchNodeData(id, value);
+
                     data.trackNodeAction(
-                        'Input',
-                        `Node ${id} keyphrase for feature ${data.feature} changed to ${value}`
+                        `Node - ${id} - Number Input Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Write',
+                            feature: data.feature,
+                            value: `${value}`
+                        })
                     );
                 }}
                 opacity="0.8"

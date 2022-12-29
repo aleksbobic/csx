@@ -16,7 +16,15 @@ function ContextMenu() {
         ref: contextMenuRef,
         handler: () => {
             if (store.contextMenu.isVisible) {
-                store.track.trackEvent('graph', 'click', 'hide context menu');
+                store.track.trackEvent(
+                    'Graph Area - Context Menu',
+                    'Outside',
+                    JSON.stringify({
+                        type: 'Click',
+                        value: 'Close context menu'
+                    })
+                );
+
                 store.contextMenu.hideContextMenu();
             }
         }
@@ -28,11 +36,12 @@ function ContextMenu() {
         );
 
         store.track.trackEvent(
-            'context menu',
-            'button click',
-            `${nodeIndex !== -1 ? 'deselect' : 'select'} node: {label: ${
-                store.contextMenu.originNode.label
-            }, id: ${store.contextMenu.originNode.id}}`
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${nodeIndex !== -1 ? 'Deselect' : 'Select'} node`
+            })
         );
 
         store.graph.toggleNodeSelection(
@@ -43,6 +52,15 @@ function ContextMenu() {
     };
 
     const expandGraph = () => {
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Expand graph through node'
+            })
+        );
+
         const node = store.graph.currentGraphData.nodes.filter(
             node => node.id === store.contextMenu.originNode.id
         )[0];
@@ -53,15 +71,34 @@ function ContextMenu() {
 
     const selectComponent = () => {
         const componentId = store.contextMenu.originNode.component;
+
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${
+                    !store.graph.currentGraphData.selectedComponents.includes(
+                        componentId
+                    )
+                        ? 'Deselect'
+                        : 'Select'
+                } component ${componentId}`
+            })
+        );
+
         store.graph.selectComponent(componentId);
         store.contextMenu.hideContextMenu();
     };
 
     const triggerSelfCentric = () => {
         store.track.trackEvent(
-            'context menu',
-            'button click',
-            `view direct connections of node: {label: ${store.contextMenu.originNode.label}, id: ${store.contextMenu.originNode.id}}`
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Show direct connections'
+            })
         );
         store.graphInstance.triggerSelfCentric();
     };

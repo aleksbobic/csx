@@ -173,9 +173,12 @@ export class WorkflowStore {
 
     deleteNode = nodeID => {
         this.store.track.trackEvent(
-            'Workflow',
-            'Button click',
-            `Delete node: ${nodeID}}`
+            'Advanced Search - Search Canvas',
+            `Node - ${nodeID} - Button`,
+            JSON.stringify({
+                type: 'Click',
+                value: 'Delete'
+            })
         );
 
         this.nodes = [
@@ -232,7 +235,11 @@ export class WorkflowStore {
     };
 
     trackNodeAction = (element, value) => {
-        this.store.track.trackEvent('Workflow', element, value);
+        this.store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            element,
+            value
+        );
     };
 
     updateFilterNodeData = (nodeID, dataKey, dataValue) => {
@@ -691,9 +698,16 @@ export class WorkflowStore {
         };
         this.nodes.push(newNode);
         this.nodes = [...this.nodes];
+        return newNode.id;
     };
 
     onConnect = connection => {
+        this.store.track.trackEvent(
+            'Advanced search - Search Canvas',
+            `Edge - e${connection.source}-${connection.target}`,
+            JSON.stringify({ type: 'Create' })
+        );
+
         const newConnection = {
             id: `e${connection.source}-${connection.target}`,
             source: connection.source,
@@ -731,6 +745,12 @@ export class WorkflowStore {
     };
 
     removeEdge = id => {
+        this.store.track.trackEvent(
+            'Advanced search - Search Canvas',
+            `Edge - ${id}`,
+            JSON.stringify({ type: 'Remove' })
+        );
+
         const connection = this.edges.find(element => element.id === id);
 
         const source = this.nodes.find(
@@ -756,11 +776,17 @@ export class WorkflowStore {
     };
 
     runWorkFlow = resultsNodeId => {
-        this.store.track.trackEvent('Workflow', 'Button click', 'Run workflow');
+        this.store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            `Node - ${resultsNodeId} - Button`,
+            JSON.stringify({
+                type: 'Click',
+                value: 'Run Search'
+            })
+        );
 
         this.nodes = [...this.nodes];
 
-        console.log('the nodes: ', this.nodes);
         const generatedQuery = this.getQuery(resultsNodeId, this.nodes);
 
         this.store.search.setAdvancedSearchQuery(generatedQuery);

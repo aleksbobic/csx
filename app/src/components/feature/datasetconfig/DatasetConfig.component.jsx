@@ -54,11 +54,16 @@ function DatasetConfig(props) {
                 variant="filled"
                 onChange={val => {
                     store.track.trackEvent(
-                        props.formType === 'modify'
-                            ? 'dataset config modal'
-                            : 'dataset upload modal',
-                        `set ${column} data type`,
-                        val.target.value
+                        `Home Page - ${
+                            props.formType === 'modify'
+                                ? 'Dataset Configuration Modal'
+                                : 'Dataset Upload Modal'
+                        }`,
+                        `Select Element - ${column} - Data Type`,
+                        JSON.stringify({
+                            type: 'Change selection',
+                            value: `${val.target.value}`
+                        })
                     );
 
                     store.fileUpload.changeFileUplodColumnType(
@@ -181,9 +186,16 @@ function DatasetConfig(props) {
                                         maxWidth="176px"
                                         onSubmit={val => {
                                             store.track.trackEvent(
-                                                'dataset upload modal',
-                                                `${column} renamed`,
-                                                val
+                                                `Home Page - ${
+                                                    props.formType === 'modify'
+                                                        ? 'Dataset Configuration Modal'
+                                                        : 'Dataset Upload Modal'
+                                                }`,
+                                                `Editable Element - ${column} - Title`,
+                                                JSON.stringify({
+                                                    type: 'Write',
+                                                    value: `${val}`
+                                                })
                                             );
 
                                             store.fileUpload.changeColumnName(
@@ -252,12 +264,18 @@ function DatasetConfig(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            props.formType === 'modify'
-                                                ? 'dataset config modal'
-                                                : 'dataset upload modal',
-                                            'set default anchor',
-                                            column
+                                            `Home Page - ${
+                                                props.formType === 'modify'
+                                                    ? 'Dataset Configuration Modal'
+                                                    : 'Dataset Upload Modal'
+                                            }`,
+                                            `Radio Element - ${column} - Default Anchor`,
+                                            JSON.stringify({
+                                                type: 'Change selection',
+                                                value: column
+                                            })
                                         );
+
                                         store.fileUpload.changeFileUplodAnchor(
                                             column
                                         );
@@ -294,11 +312,16 @@ function DatasetConfig(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            props.formType === 'modify'
-                                                ? 'dataset config modal'
-                                                : 'dataset upload modal',
-                                            'set default link',
-                                            column
+                                            `Home Page - ${
+                                                props.formType === 'modify'
+                                                    ? 'Dataset Configuration Modal'
+                                                    : 'Dataset Upload Modal'
+                                            }`,
+                                            `Radio Element - ${column} - Default Link`,
+                                            JSON.stringify({
+                                                type: 'Change selection',
+                                                value: column
+                                            })
                                         );
 
                                         store.fileUpload.changeDefaultLink(
@@ -336,12 +359,18 @@ function DatasetConfig(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            props.formType === 'modify'
-                                                ? 'dataset config modal'
-                                                : 'dataset upload modal',
-                                            'set default search',
-                                            column
+                                            `Home Page - ${
+                                                props.formType === 'modify'
+                                                    ? 'Dataset Configuration Modal'
+                                                    : 'Dataset Upload Modal'
+                                            }`,
+                                            `Radio Element - ${column} - Default Search`,
+                                            JSON.stringify({
+                                                type: 'Change selection',
+                                                value: column
+                                            })
                                         );
+
                                         store.fileUpload.changeDefaultSearch(
                                             column
                                         );
@@ -391,10 +420,18 @@ function DatasetConfig(props) {
                         borderRadius="5px"
                         onSubmit={val => {
                             store.track.trackEvent(
-                                'dataset upload modal',
-                                'dataset title change',
-                                val
+                                `Home Page - ${
+                                    props.formType === 'modify'
+                                        ? 'Dataset Configuration Modal'
+                                        : 'Dataset Upload Modal'
+                                }`,
+                                'Editable Element - Dataset - Title',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: val
+                                })
                             );
+
                             store.fileUpload.changeDatasetName(val);
                         }}
                     >

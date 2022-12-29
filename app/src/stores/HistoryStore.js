@@ -97,9 +97,11 @@ export class HistoryStore {
 
     loadStudy = historyID => {
         this.store.track.trackEvent(
-            'History',
-            'History node click',
-            `${historyID}`
+            'History Panel',
+            `Node - ${historyID}`,
+            JSON.stringify({
+                type: 'Click'
+            })
         );
 
         this.store.graph.getStudyFromHistory(
@@ -178,9 +180,12 @@ export class HistoryStore {
 
     deleteNode = async id => {
         this.store.track.trackEvent(
-            'History',
-            'Button click',
-            `Delete node ${id}`
+            'History Panel',
+            `Node - ${id}`,
+            JSON.stringify({
+                type: 'Click',
+                value: 'Delete node'
+            })
         );
 
         const deleteNodeIDs = this.getAllChildNodes(id);

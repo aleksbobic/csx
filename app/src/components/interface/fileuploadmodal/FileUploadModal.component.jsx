@@ -84,9 +84,12 @@ function FileUploadModal() {
                                 mr={3}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'dataset upload modal',
-                                        'button click',
-                                        'cancel'
+                                        'Home Page - Dataset Upload Modal',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Cancel dataset upload'
+                                        })
                                     );
                                     store.fileUpload.cancelFileUpload();
                                 }}
@@ -97,9 +100,12 @@ function FileUploadModal() {
                                 variant="solid"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'dataset upload modal',
-                                        'button click',
-                                        'set default config'
+                                        'Home Page - Dataset Upload Modal',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Set default configuration'
+                                        })
                                     );
                                     store.fileUpload.setDefaults();
                                 }}

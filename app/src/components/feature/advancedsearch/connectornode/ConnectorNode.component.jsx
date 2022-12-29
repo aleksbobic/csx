@@ -15,8 +15,11 @@ const connectorNode = ({ id, data, isConnectable }) => {
     const modifyConnector = value => {
         data.connector = value.target.value;
         data.trackNodeAction(
-            'Dropdown',
-            `Node ${id} value changed to ${value.target.value}`
+            `Node - ${id} - Select Element`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${value.target.value}`
+            })
         );
     };
 

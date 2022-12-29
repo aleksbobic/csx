@@ -67,9 +67,12 @@ function TableBody(props) {
                     maxWidth="150px"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Search results',
-                            'Table body click',
-                            `focus on node: ${cell.value}}`
+                            'Results Panel - Table',
+                            'Cell',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Zoom to fit ${cell.value}`
+                            })
                         );
 
                         if (
@@ -140,9 +143,12 @@ function TableBody(props) {
                         maxWidth="150px"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Search results',
-                                'Table body click',
-                                `focus on node: ${cell.value}}`
+                                'Results Panel - Table',
+                                'Cell',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Zoom to fit ${cell.value}`
+                                })
                             );
 
                             if (

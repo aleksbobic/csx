@@ -45,9 +45,12 @@ function GlobalFilter(props) {
                     icon={<Search style={{ '--ggs': '0.7' }} />}
                     onClick={() => {
                         store.track.trackEvent(
-                            'Search results',
-                            'Button click',
-                            `Search table for ${globalFilterValue}`
+                            'Results Panel - Table - Search Bar',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Search for ${globalFilterValue}`
+                            })
                         );
 
                         onChange();
