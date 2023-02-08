@@ -93,6 +93,7 @@ function DataPanel(props) {
     const [historyEdges, setHistoryEdges] = useState(store.history.edges);
 
     const [historyViewport, setHistoryViewport] = useState(null);
+    const [schemaViewport, setSchemaViewport] = useState(null);
     const { colorMode } = useColorMode();
 
     useEffect(() => {
@@ -289,6 +290,7 @@ function DataPanel(props) {
                         edgeTypes={edgeTypes}
                         onInit={instance => {
                             instance.fitView();
+                            setSchemaViewport(instance);
                         }}
                     >
                         <Background
@@ -299,6 +301,37 @@ function DataPanel(props) {
                     </ReactFlow>
                 )}
             </AutoSizer>
+            <Tooltip label="Show all nodes">
+                <IconButton
+                    size="sm"
+                    zIndex="20"
+                    position="absolute"
+                    bottom="20px"
+                    left="20px"
+                    opacity="0.6"
+                    transition="0.2s all ease-in-out"
+                    _hover={{ opacity: 1 }}
+                    icon={
+                        <Assign
+                            style={{
+                                '--ggs': '0.8'
+                            }}
+                        />
+                    }
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Schema Panel',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: 'Show all schema nodes'
+                            })
+                        );
+
+                        schemaViewport.fitView();
+                    }}
+                />
+            </Tooltip>
         </Box>
     );
 
