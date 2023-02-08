@@ -375,7 +375,7 @@ export class WorkflowStore {
         };
 
         searchNode.data.children.push(resultsNode.id);
-        resultsNode.data.children.push(searchNode.id);
+        resultsNode.data.parents.push(searchNode.id);
 
         const newConnection = {
             id: `e${searchNode.id}-${resultsNode.id}`,
