@@ -99,6 +99,75 @@ def trim_network(
     }
 
 
+@router.post("/remove")
+def remove_network_nodes(
+    data: TrimData,
+):
+    provided_nodes = data.nodes
+    user_id = data.user_id
+    study_id = data.study_id
+    history_item_id = data.history_item_id
+    graph_type = data.graph_type
+    action_time = data.action_time
+    history_parent_id = data.history_parent_id
+    charts = data.charts
+
+    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+
+    last_history_item = csx_study.load_last_history_item(study_id, user_id)
+
+    # Get entries of visible_nodes
+    entry_list = [
+        node["entries"]
+        for node in cache_data[graph_type]["nodes"]
+        if node["id"] in provided_nodes
+    ]
+
+    # Flatten list of entries and get unique values
+    entries = list(set([entry for entries in entry_list for entry in entries]))
+
+    cache_data = calculate_global_cache_properties(cache_data, entries)
+
+    if graph_type == "overview":
+        cache_data = calculate_trimmed_graph(cache_data, entries, "overview")
+        if cache_data["detail"] != {}:
+            cache_data = calculate_trimmed_graph(cache_data, entries, "detail")
+    else:
+        cache_data = calculate_trimmed_graph(cache_data, entries, "detail")
+        if cache_data["overview"] != {}:
+            cache_data = calculate_trimmed_graph(cache_data, entries, "overview")
+
+    last_history_item = csx_study.load_last_history_item(study_id, user_id)
+
+    csx_study.new_history_entry(
+        study_id,
+        user_id,
+        {
+            "action": "remove nodes",
+            "graph_type": graph_type,
+            "graph_data": pickle.dumps(cache_data),
+            "query": last_history_item["query"],
+            "action_time": action_time,
+            "schema": last_history_item["schema"],
+            "anchor_properties": last_history_item["anchor_properties"],
+            "anchor": last_history_item["anchor"],
+            "links": last_history_item["links"],
+            "visible_dimensions": last_history_item["visible_dimensions"],
+            "history_parent_id": history_parent_id,
+            "charts": charts,
+            "edge_count": len(cache_data[graph_type]["edges"]),
+            "node_count": len(cache_data[graph_type]["nodes"]),
+        },
+    )
+
+    study = csx_study.get_study(user_id, study_id)
+
+    return {
+        "graph": cache_data[graph_type],
+        "history": csx_study.extract_history_items(study),
+    }
+
+
 class ExpandData(BaseModel):
     values: dict
     user_id: str

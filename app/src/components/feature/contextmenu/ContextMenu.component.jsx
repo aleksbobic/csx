@@ -51,13 +51,27 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
+    const removeSelection = () => {
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Remove node: ${store.contextMenu.originNode.id}`
+            })
+        );
+
+        store.graph.removeSelection(store.contextMenu.originNode);
+        store.contextMenu.hideContextMenu();
+    };
+
     const expandGraph = () => {
         store.track.trackEvent(
             'Graph Area - Context Menu',
             'Button',
             JSON.stringify({
                 type: 'Click',
-                value: 'Expand graph through node'
+                value: `Expand graph through node ${store.contextMenu.originNode.id}`
             })
         );
 
@@ -158,6 +172,9 @@ function ContextMenu() {
                         renderAdvcancedButtons()}
                     <Button justifyContent="left" onClick={expandGraph}>
                         Expand graph through node
+                    </Button>
+                    <Button justifyContent="left" onClick={removeSelection}>
+                        Remove node
                     </Button>
                 </VStack>
             </ButtonGroup>

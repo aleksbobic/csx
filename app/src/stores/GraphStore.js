@@ -1135,6 +1135,94 @@ export class GraphStore {
         data.nodes = [...data.nodes];
     };
 
+    removeSelection = async originNode => {
+        this.store.core.setDataIsLoading(true);
+
+        let removedNodeEntries;
+
+        if (originNode) {
+            removedNodeEntries = originNode.entries;
+        } else {
+            removedNodeEntries = this.store.graph.currentGraphData.selectedNodes
+                .map(node => node.entries)
+                .flat();
+        }
+
+        const graph_data_copy = { ...this.currentGraphData };
+        graph_data_copy.nodes = graph_data_copy.nodes
+            .filter(node => {
+                if (node.entries.length === 1) {
+                    return !removedNodeEntries.includes(node.entries[0]);
+                }
+
+                return !node.entries.some(entry =>
+                    removedNodeEntries.includes(entry)
+                );
+            })
+            .map(node => node.id);
+
+        if (graph_data_copy.nodes.length > 0) {
+            if (this.store.core.currentGraph === 'detail') {
+                this.resetDetailGraphData();
+                this.resetGraphData();
+            } else {
+                this.resetGraphData();
+            }
+
+            const currentStudyHistoryItem =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id;
+
+            try {
+                const response = await axios.post('graph/remove', {
+                    nodes: graph_data_copy.nodes,
+                    user_id: this.store.core.userUuid,
+                    history_item_id: currentStudyHistoryItem,
+                    graph_type: this.store.core.currentGraph,
+                    study_id: this.store.core.studyUuid,
+                    action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                    history_parent_id:
+                        this.store.core.studyHistory.length > 0 &&
+                        this.store.core.studyHistory[
+                            this.store.core.studyHistoryItemIndex
+                        ].id,
+                    charts:
+                        this.store.stats.charts[
+                            this.store.search.currentDataset
+                        ] || []
+                });
+
+                this.store.core.setStudyHistory(response.data.history);
+
+                this.store.core.setStudyHistoryItemIndex(
+                    this.store.core.studyHistory.length - 1
+                );
+                this.store.core.setStudyQuery();
+
+                const historyGraphType =
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].graph_type;
+
+                this.store.core.setCurrentGraph(historyGraphType);
+
+                this.store.history.generateHistoryNodes();
+
+                this.handleRetrievedGraph(
+                    response.data.graph,
+                    historyGraphType,
+                    this.store.search.query
+                );
+
+                this.store.history.generateHistoryNodes();
+            } catch (error) {
+                this.store.core.setDataIsLoading(false);
+                return this.store.core.handleError(error);
+            }
+        }
+    };
+
     trimNetwork = async () => {
         this.store.core.setDataIsLoading(true);
         const graph_data_copy = { ...this.currentGraphData };

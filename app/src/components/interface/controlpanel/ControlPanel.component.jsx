@@ -38,7 +38,8 @@ import {
     MediaLive,
     PathDivide,
     PathIntersect,
-    RadioChecked
+    RadioChecked,
+    Trash
 } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
@@ -275,6 +276,28 @@ function ControlPanel() {
                                 })
                             );
                             store.graph.trimNetwork();
+                        }}
+                    />
+                </Tooltip>
+                <Tooltip label="Remove selection">
+                    <IconButton
+                        disabled={
+                            !store.graph.currentGraphData.selectedNodes.length
+                        }
+                        borderRadius="6px"
+                        id="removeselectionbutton"
+                        size="sm"
+                        icon={<Trash style={{ '--ggs': '0.7' }} />}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Side Panel - Network Modification',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Remove selection'
+                                })
+                            );
+                            store.graph.removeSelection();
                         }}
                     />
                 </Tooltip>
