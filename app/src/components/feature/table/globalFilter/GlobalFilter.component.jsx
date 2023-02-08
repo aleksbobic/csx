@@ -36,6 +36,8 @@ function GlobalFilter(props) {
                     }
                 }}
                 placeholder={`${props.preGlobalFilteredRows.length} entries to search through...`}
+                onFocus={() => store.comment.setCommentTrigger(false)}
+                onBlur={() => store.comment.setCommentTrigger(true)}
                 borderRadius="6px"
             />
             <InputRightElement>
