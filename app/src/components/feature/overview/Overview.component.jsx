@@ -112,15 +112,15 @@ function Overview(props) {
                     />
                 );
             case 'nodes':
-                return <SelectedNodeListComponent />;
+                return <SelectedNodeListComponent chart={chart} />;
             case 'components':
-                return <SelectedComponentListComponent />;
+                return <SelectedComponentListComponent chart={chart} />;
             case 'graph stats':
-                return <GraphStatsComponent />;
+                return <GraphStatsComponent chart={chart} />;
             case 'node filter':
-                return <NodeFilterComponent />;
+                return <NodeFilterComponent chart={chart} />;
             default:
-                return <ConnectionStatsComponent />;
+                return <ConnectionStatsComponent chart={chart} />;
         }
     };
 

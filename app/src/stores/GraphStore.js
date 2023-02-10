@@ -207,11 +207,10 @@ export class GraphStore {
 
     generateNodeObjects = (nodes, graphType) => {
         const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
-            color: new THREE.Color('white'),
-            side: THREE.DoubleSide
+            color: new THREE.Color('white')
         });
 
-        const geometryTemplate = new THREE.SphereGeometry(1, 4, 4);
+        const geometryTemplate = new THREE.CircleGeometry(1, 16);
 
         const meshTemplate = new THREE.Mesh(
             geometryTemplate,

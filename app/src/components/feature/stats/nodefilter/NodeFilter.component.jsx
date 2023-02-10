@@ -79,6 +79,22 @@ function NodeFilter(props) {
         );
     };
 
+    const onSliderChange = val => {
+        store.track.trackEvent(
+            `Details Panel - Widget - ${props.chart.id}`,
+            'Slider',
+            JSON.stringify({
+                type: 'Slide',
+                min: val[0],
+                max: val[1],
+                property: props.filterProperty
+            })
+        );
+
+        setSliderMinTooltipValue(val[0]);
+        setSliderMaxTooltipValue(val[1]);
+    };
+
     return (
         <Box height="100%" width="100%" position="relative" padding="20px">
             <Flex
@@ -214,21 +230,7 @@ function NodeFilter(props) {
                     min={0}
                     max={sliderMaxValue}
                     step={1}
-                    onChange={val => {
-                        store.track.trackEvent(
-                            `Details Panel - Widget - ${props.chart.id}`,
-                            'Slider',
-                            JSON.stringify({
-                                type: 'Slide',
-                                min: val[0],
-                                max: val[1],
-                                property: props.filterProperty
-                            })
-                        );
-
-                        setSliderMinTooltipValue(val[0]);
-                        setSliderMaxTooltipValue(val[1]);
-                    }}
+                    onChange={onSliderChange}
                     onChangeEnd={val => {
                         if (!isDemo) {
                             filterNodes(val[0], val[1]);
