@@ -698,6 +698,22 @@ export class SchemaStore {
         }
     };
 
+    getConnectedNodes = () => {
+        return this.edges
+            .reduce((visibleNodes, edge) => {
+                if (!visibleNodes.includes(edge.source)) {
+                    visibleNodes.push(edge.source);
+                }
+
+                if (!visibleNodes.includes(edge.target)) {
+                    visibleNodes.push(edge.target);
+                }
+
+                return visibleNodes;
+            }, [])
+            .map(nodeId => this.getNodeNameFromId(nodeId));
+    };
+
     addSchemaConnection = edge => {
         this.store.track.trackEvent(
             'Schema Panel',

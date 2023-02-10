@@ -24,6 +24,7 @@ export class CoreStore {
     trackingEnabled = false;
     colorMode = null;
     showCookieInfo = false;
+    isSchemaNodeTypeBound = true;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -46,6 +47,13 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setIsSchemaNodeTypeBound = val => {
+        this.isSchemaNodeTypeBound = val;
+        if (val) {
+            this.updateVisibleDimensionsBasedOnSchema();
+        }
+    };
 
     setShowCookieInfo = val => (this.showCookieInfo = val);
 
@@ -241,6 +249,20 @@ export class CoreStore {
             );
         } else {
             this.visibleDimensions[this.currentGraph].push(dimension);
+        }
+    };
+
+    updateVisibleDimensionsBasedOnSchema = () => {
+        if (this.isSchemaNodeTypeBound) {
+            const connectedNodes = this.store.schema.getConnectedNodes();
+            if (!connectedNodes.length) {
+                this.visibleDimensions['detail'] = [
+                    this.store.search.links,
+                    this.store.search.anchor
+                ].flat();
+            } else {
+                this.visibleDimensions['detail'] = connectedNodes;
+            }
         }
     };
 

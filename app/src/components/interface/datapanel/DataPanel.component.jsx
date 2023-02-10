@@ -47,6 +47,8 @@ import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
     Assign,
+    Lock,
+    LockUnlock,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
@@ -117,15 +119,19 @@ function DataPanel(props) {
         [store.core.isOverview, store.schema]
     );
     const onEdgesChange = useCallback(
-        changes =>
-            store.core.isOverview
-                ? store.schema.updateOverviewEdges(
-                      applyEdgeChanges(changes, store.schema.overviewEdges)
-                  )
-                : store.schema.updateEdges(
-                      applyEdgeChanges(changes, store.schema.edges)
-                  ),
-        [store.core.isOverview, store.schema]
+        changes => {
+            if (store.core.isOverview) {
+                store.schema.updateOverviewEdges(
+                    applyEdgeChanges(changes, store.schema.overviewEdges)
+                );
+            } else {
+                store.schema.updateEdges(
+                    applyEdgeChanges(changes, store.schema.edges)
+                );
+                store.core.updateVisibleDimensionsBasedOnSchema();
+            }
+        },
+        [store.core, store.schema]
     );
 
     useEffect(() => {
@@ -204,6 +210,7 @@ function DataPanel(props) {
 
     const connectNodes = connection => {
         store.schema.addSchemaConnection(connection);
+        store.core.updateVisibleDimensionsBasedOnSchema();
     };
 
     const updateEdge = (oldEdge, newEdge) => {
@@ -332,6 +339,59 @@ function DataPanel(props) {
                     }}
                 />
             </Tooltip>
+            {store.core.isDetail && (
+                <Tooltip
+                    label={
+                        store.core.isSchemaNodeTypeBound
+                            ? 'Unbind schema and visible node types'
+                            : 'Bind schema and visible node types'
+                    }
+                >
+                    <IconButton
+                        size="sm"
+                        zIndex="20"
+                        position="absolute"
+                        bottom="20px"
+                        left="60px"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                        icon={
+                            store.core.isSchemaNodeTypeBound ? (
+                                <Lock
+                                    style={{
+                                        '--ggs': '0.7'
+                                    }}
+                                />
+                            ) : (
+                                <LockUnlock
+                                    style={{
+                                        '--ggs': '0.7',
+                                        marginBottom: '-2px',
+                                        marginRight: '-2px'
+                                    }}
+                                />
+                            )
+                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Schema Panel',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: store.core.isSchemaNodeTypeBound
+                                        ? 'Unbind schema and visible node types'
+                                        : 'Bind schema and visible node types'
+                                })
+                            );
+
+                            store.core.setIsSchemaNodeTypeBound(
+                                !store.core.isSchemaNodeTypeBound
+                            );
+                        }}
+                    />
+                </Tooltip>
+            )}
         </Box>
     );
 
