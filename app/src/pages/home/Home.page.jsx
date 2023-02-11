@@ -30,6 +30,8 @@ import { useBeforeunload } from 'react-beforeunload';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
+import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
+import { isEnvFalse, isEnvTrue } from 'utils';
 
 function HomePage() {
     const toast = useToast();
@@ -66,9 +68,7 @@ function HomePage() {
                     onClick={() => {
                         cookieToast.closeAll();
                         store.core.setHideCookieBanner();
-                        if (
-                            process?.env.REACT_APP_DISABLE_TRACKING !== 'true'
-                        ) {
+                        if (isEnvFalse('REACT_APP_DISABLE_TRACKING')) {
                             store.core.setTrackingEnabled(false);
                         }
                     }}
@@ -78,13 +78,13 @@ function HomePage() {
                 </Heading>
                 <Text fontSize="xs" paddingRight="16px">
                     We use local storage to provide essential functionality.{' '}
-                    {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
+                    {isEnvTrue('REACT_APP_DISABLE_TRACKING') &&
                         'To read more about it, click the button below or the cookies & local storage footer link.'}
-                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+                    {isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
                         'However, to further improve CSX and contribute to the open source and scientific communities, we would like to ask you to enable interaction tracking.'}
                 </Text>
                 <HStack paddingTop="8px">
-                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
+                    {isEnvFalse('REACT_APP_DISABLE_TRACKING') && (
                         <Button
                             size="xs"
                             variant="solid"
@@ -151,9 +151,7 @@ function HomePage() {
                     onClick={() => {
                         cookieToast.closeAll();
                         store.core.setHideCookieBanner();
-                        if (
-                            process?.env.REACT_APP_DISABLE_TRACKING !== 'true'
-                        ) {
+                        if (isEnvFalse('REACT_APP_DISABLE_TRACKING')) {
                             store.core.setTrackingEnabled(false);
                         }
                     }}
@@ -163,13 +161,13 @@ function HomePage() {
                 </Heading>
                 <Text fontSize="xs" paddingRight="16px">
                     We use local storage to provide essential functionality.{' '}
-                    {process?.env.REACT_APP_DISABLE_TRACKING === 'true' &&
+                    {isEnvTrue('REACT_APP_DISABLE_TRACKING') &&
                         'To read more about it, click the button below or the cookies & local storage footer link.'}
-                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+                    {isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
                         'However, to further improve CSX and contribute to the open source and scientific communities, we would like to ask you to enable interaction tracking.'}
                 </Text>
                 <HStack paddingTop="8px">
-                    {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' && (
+                    {isEnvFalse('REACT_APP_DISABLE_TRACKING') && (
                         <Button
                             size="xs"
                             variant="solid"
@@ -331,9 +329,17 @@ function HomePage() {
                 {!store.search.searchIsEmpty && (
                     <Fade in={!store.core.showCookieInfo}>
                         {!store.core.showCookieInfo && (
-                            <DatasetGrid
-                                onNavigate={() => cookieToast.closeAll()}
-                            />
+                            <DatasetGrid>
+                                {store.search.datasets.map(dataset => (
+                                    <DatasetElement
+                                        dataset={dataset}
+                                        key={`dataset_list_${dataset}`}
+                                        onNavigate={() =>
+                                            cookieToast.closeAll()
+                                        }
+                                    />
+                                ))}
+                            </DatasetGrid>
                         )}
                     </Fade>
                 )}

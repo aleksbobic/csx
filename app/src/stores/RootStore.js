@@ -14,6 +14,7 @@ import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
 import { HistoryStore } from './HistoryStore';
 import { CommentStore } from './CommentStore';
+import { isEnvSet } from 'utils';
 
 export class RootStore {
     surveyLink = null;
@@ -38,7 +39,7 @@ export class RootStore {
     }
 
     initAxios = () => {
-        if (process?.env.REACT_APP_SERVER_PORT) {
+        if (isEnvSet('REACT_APP_SERVER_PORT')) {
             axios.defaults.baseURL = `http://localhost:${process?.env.REACT_APP_SERVER_PORT}`;
         } else {
             axios.defaults.baseURL = `${window.location.origin}/api`;

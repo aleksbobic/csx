@@ -18,6 +18,7 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useEffect, useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvFalse, isEnvTrue } from 'utils';
 
 function CSX() {
     const { colorMode } = useColorMode();
@@ -89,7 +90,7 @@ function CSX() {
     return (
         <HelmetProvider>
             <Router>
-                {process?.env.REACT_APP_MANDATORY_HTTPS === 'true' && (
+                {isEnvTrue('REACT_APP_MANDATORY_HTTPS') && (
                     <Helmet>
                         <meta
                             http-equiv="Content-Security-Policy"
@@ -136,8 +137,9 @@ function CSX() {
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
                             </Route>
-                            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                                'true' && (
+                            {isEnvFalse(
+                                'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                            ) && (
                                 <Route path="/search" label="search">
                                     <SearchPage />
                                 </Route>

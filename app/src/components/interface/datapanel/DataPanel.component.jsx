@@ -61,6 +61,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { isEnvFalse } from 'utils';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
@@ -656,8 +657,7 @@ function DataPanel(props) {
                 justifyContent="space-between"
             >
                 <HStack>
-                    {process?.env.REACT_APP_DISABLE_DATASET_DOWNLOAD !==
-                        'true' && (
+                    {isEnvFalse('REACT_APP_DISABLE_DATASET_DOWNLOAD') && (
                         <Tooltip label="Download visible data as CSV">
                             <Box>
                                 <IconButton

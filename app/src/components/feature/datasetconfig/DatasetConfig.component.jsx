@@ -24,6 +24,7 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvTrue } from 'utils';
 
 function DatasetConfig(props) {
     const store = useContext(RootStoreContext);
@@ -252,9 +253,7 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
-                                        process?.env
-                                            .REACT_APP_DISABLE_UPLOAD ===
-                                            'true' ||
+                                        isEnvTrue('REACT_APP_DISABLE_UPLOAD') ||
                                         store.fileUpload.fileUploadData.link ===
                                             column
                                     }
@@ -300,9 +299,7 @@ function DatasetConfig(props) {
                             >
                                 <Radio
                                     isDisabled={
-                                        process?.env
-                                            .REACT_APP_DISABLE_UPLOAD ===
-                                            'true' ||
+                                        isEnvTrue('REACT_APP_DISABLE_UPLOAD') ||
                                         store.fileUpload.fileUploadData
                                             .anchor === column
                                     }

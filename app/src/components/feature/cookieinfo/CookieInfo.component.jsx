@@ -28,6 +28,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { isEnvFalse } from 'utils';
 
 function CookieInfo() {
     const { colorMode } = useColorMode();
@@ -361,7 +362,7 @@ function CookieInfo() {
                     </Box>
                 </OverlayScrollbarsComponent>
             </Box>
-            {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+            {isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
                 renderInteractionTracking()}
         </VStack>
     );
