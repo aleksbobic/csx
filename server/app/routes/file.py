@@ -10,10 +10,12 @@ import app.services.graph.nodes as csx_nodes
 import app.services.data.autocomplete as csx_auto
 
 import pandas as pd
+import polars as pl
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, UploadFile
 import base64
 import random
+
 
 router = APIRouter()
 
@@ -23,19 +25,22 @@ def uploadfile(file: UploadFile):
     if os.getenv("DISABLE_UPLOAD") == "true":
         return {}
 
-    data = pd.read_csv(file.file, lineterminator="\n")
+    data = pl.read_csv(file.file)
+    df_columns = data.schema
+    columns = {}
 
-    columns = data.dtypes.to_dict()
-
-    for column in list(columns.keys()):
-        if columns[column] == object:
-            if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
+    for column in list(df_columns.keys()):
+        if df_columns[column] == pl.Utf8:
+            if data[column][0][0] == "[" and data[column][0][-1] == "]":
                 columns[column] = "list"
-            elif len(data.index) > 20 and len(list(data[column].unique())) < 10:
+            elif (
+                data.shape[0] > 20
+                and data.select([pl.col(column).n_unique()])[0, 0] < 10
+            ):
                 columns[column] = "category"
             else:
                 columns[column] = "string"
-        elif isinstance(columns[column], float):
+        elif df_columns[column] in [pl.Float32, pl.Float64]:
             columns[column] = "float"
         else:
             columns[column] = "integer"
@@ -43,7 +48,7 @@ def uploadfile(file: UploadFile):
     if not os.path.exists("./app/data/files"):
         os.makedirs("./app/data/files")
 
-    data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
+    data.write_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
     return {"name": file.filename.rpartition(".")[0], "columns": columns}
 
