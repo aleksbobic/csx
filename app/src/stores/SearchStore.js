@@ -108,22 +108,26 @@ export class SearchStore {
         this.setLocalStorageDataset(this.currentDataset, dataset_config);
     };
 
-    getDatasets = () => {
-        axios
-            .get('search/datasets')
-            .then(response => {
-                // Initialise dataset locally and set the current dataset
-                this.initDatasets(response.data);
+    getDatasets = async () => {
+        const { response, error } = await safeRequest(
+            axios.get('search/datasets')
+        );
 
-                const currentDataset = localStorage.getItem('currentDataset');
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
 
-                if (currentDataset && this.datasets.includes(currentDataset)) {
-                    this.useDataset(this.datasets.indexOf(currentDataset));
-                } else {
-                    this.useDataset(0);
-                }
-            })
-            .catch(error => this.store.core.handleError(error));
+        // Initialise dataset locally and set the current dataset
+        this.initDatasets(response.data);
+
+        const currentDataset = localStorage.getItem('currentDataset');
+
+        if (currentDataset && this.datasets.includes(currentDataset)) {
+            this.useDataset(this.datasets.indexOf(currentDataset));
+        } else {
+            this.useDataset(0);
+        }
     };
 
     search = async (query, nodeTypes, schema, graphType, search_uuid) => {
@@ -245,18 +249,20 @@ export class SearchStore {
     };
 
     suggest = async (feature, input) => {
-        try {
-            return await axios
-                .post('search/suggest', {
-                    index: this.currentDataset,
-                    feature,
-                    input
-                })
-                .then(response => response.data);
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { response, error } = await safeRequest(
+            axios.post('search/suggest', {
+                index: this.currentDataset,
+                feature,
+                input
+            })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
             return [];
         }
+
+        return response.data;
     };
 
     getRandomImage = async () => {

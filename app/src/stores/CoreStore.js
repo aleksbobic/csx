@@ -316,19 +316,6 @@ export class CoreStore {
         return this.currentGraph === 'detail';
     }
 
-    handleError = error => {
-        console.log(error.toString());
-
-        if (error.response) {
-            this.errorDetails = `${error.response.data} ${error.response.status} ${error.response.headers}`;
-            console.log('data ', error.response.data);
-            console.log('status ', error.response.status);
-            console.log('headers ', error.response.headers);
-        } else {
-            this.errorDetails = error.toString();
-        }
-    };
-
     handleRequestError = error => {
         this.setErrorDetails(error);
 
