@@ -12,13 +12,13 @@ import {
     VStack,
     Wrap
 } from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { Eye, Remove } from 'css.gg';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
@@ -212,22 +212,7 @@ function SelectedComponentList(props) {
     }
 
     return (
-        <OverlayScrollbarsComponent
-            style={{
-                width: '100%',
-                height: '100%',
-                paddingLeft: '10px',
-                paddingRight: '10px'
-            }}
-            options={{
-                scrollbars: {
-                    theme: 'os-theme-dark',
-                    autoHide: 'scroll',
-                    autoHideDelay: 600,
-                    clickScroll: true
-                }
-            }}
-        >
+        <CustomScroll style={{ paddingLeft: '10px', paddingRight: '10px' }}>
             <VStack height="100%" width="100%" spacing={1}>
                 {data
                     .slice()
@@ -361,7 +346,7 @@ function SelectedComponentList(props) {
                         );
                     })}
             </VStack>
-        </OverlayScrollbarsComponent>
+        </CustomScroll>
     );
 }
 SelectedComponentList.propTypes = {

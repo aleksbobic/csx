@@ -59,7 +59,7 @@ import { CSVLink } from 'react-csv';
 import { useResizeDetector } from 'react-resize-detector';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { isEnvFalse } from 'utils';
 
@@ -539,24 +539,14 @@ function DataPanel(props) {
                         }
                         borderRadius="10px"
                     >
-                        <OverlayScrollbarsComponent
+                        <CustomScroll
                             style={{
-                                width: '100%',
-                                height: '100%',
                                 paddingLeft: '10px',
                                 paddingRight: '10px'
                             }}
-                            options={{
-                                scrollbars: {
-                                    theme: 'os-theme-dark',
-                                    autoHide: 'scroll',
-                                    autoHideDelay: 600,
-                                    clickScroll: true
-                                }
-                            }}
                         >
                             <Overview />
-                        </OverlayScrollbarsComponent>
+                        </CustomScroll>
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -572,20 +562,10 @@ function DataPanel(props) {
                         borderRadius="10px"
                         paddingTop={activeTab === 1 && '30px'}
                     >
-                        <OverlayScrollbarsComponent
+                        <CustomScroll
                             style={{
-                                width: '100%',
-                                height: '100%',
                                 paddingLeft: '10px',
                                 paddingRight: '10px'
-                            }}
-                            options={{
-                                scrollbars: {
-                                    theme: 'os-theme-dark',
-                                    autoHide: 'scroll',
-                                    autoHideDelay: 600,
-                                    clickScroll: true
-                                }
                             }}
                         >
                             {store.graph.currentGraphData.activeTableData &&
@@ -607,7 +587,7 @@ function DataPanel(props) {
                                         columns={store.graph.tableColumns}
                                     />
                                 ))}
-                        </OverlayScrollbarsComponent>
+                        </CustomScroll>
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">

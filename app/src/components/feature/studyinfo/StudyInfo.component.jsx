@@ -5,7 +5,6 @@ import {
     EditableInput,
     EditablePreview,
     EditableTextarea,
-    Tag,
     Text,
     Tooltip,
     useColorMode

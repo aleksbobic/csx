@@ -13,7 +13,7 @@ import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import { getReasonPhrase } from 'http-status-codes';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 export function ErrorModal(props) {
     const store = useContext(RootStoreContext);
@@ -111,20 +111,7 @@ export function ErrorModal(props) {
                 padding="10px 14px"
                 maxHeight="95px"
             >
-                <OverlayScrollbarsComponent
-                    style={{
-                        width: '100%',
-                        height: '100%'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
-                    }}
-                >
+                <CustomScroll>
                     {renderErrorProperty('Type', store.core.errorDetails.type)}
                     {renderErrorProperty('URL', store.core.errorDetails.url)}
                     {renderErrorProperty(
@@ -143,7 +130,7 @@ export function ErrorModal(props) {
                             'Message',
                             store.core.errorDetails.message
                         )}
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             </VStack>
         );
     };

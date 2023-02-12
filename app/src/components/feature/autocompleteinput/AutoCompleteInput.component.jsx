@@ -1,6 +1,5 @@
 import {
     Box,
-    Button,
     Input,
     Text,
     Tooltip,
@@ -9,11 +8,11 @@ import {
 } from '@chakra-ui/react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 function AutoCompleteInput(props) {
     const store = useContext(RootStoreContext);
@@ -221,23 +220,9 @@ function AutoCompleteInput(props) {
                     className="suggestionContainer"
                     style={{ ...props.suggestionStyle }}
                 >
-                    <OverlayScrollbarsComponent
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            maxHeight: '200px'
-                        }}
-                        options={{
-                            scrollbars: {
-                                theme: 'os-theme-dark',
-                                autoHide: 'move',
-                                autoHideDelay: 600,
-                                clickScroll: true
-                            }
-                        }}
-                    >
+                    <CustomScroll style={{ maxHeight: '200px' }}>
                         {getSuggestionList()}
-                    </OverlayScrollbarsComponent>
+                    </CustomScroll>
                 </Box>
             )}
         </>

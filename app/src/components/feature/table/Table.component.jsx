@@ -1,13 +1,13 @@
 import { Box, Table } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useGlobalFilter, useSortBy, useTable } from 'react-table';
+import CustomScroll from '../customscroll/CustomScroll.component';
 import GlobalFilterComponent from './globalFilter/GlobalFilter.component';
 import './table.scss';
 import TableBodyComponent from './tableBody/TableBody.component';
 import TableHeadComponent from './tableHead/TableHead.component';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function TableComponent(props) {
     const data = props.data;
@@ -48,20 +48,7 @@ function TableComponent(props) {
                     setGlobalFilter={setGlobalFilter}
                 />
             </Box>
-            <OverlayScrollbarsComponent
-                style={{
-                    width: '100%',
-                    height: '100%'
-                }}
-                options={{
-                    scrollbars: {
-                        theme: 'os-theme-dark',
-                        autoHide: 'scroll',
-                        autoHideDelay: 600,
-                        clickScroll: true
-                    }
-                }}
-            >
+            <CustomScroll>
                 <Box height="100%" width="100%">
                     <Table {...getTableProps()} style={{ width: '100%' }}>
                         <TableHeadComponent headerGroups={headerGroups} />
@@ -72,7 +59,7 @@ function TableComponent(props) {
                         />
                     </Table>
                 </Box>
-            </OverlayScrollbarsComponent>
+            </CustomScroll>
         </Box>
     );
 }

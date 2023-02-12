@@ -11,12 +11,12 @@ import {
     VStack,
     Wrap
 } from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function ConnectionStats(props) {
     const store = useContext(RootStoreContext);
@@ -314,21 +314,11 @@ function ConnectionStats(props) {
 
     return (
         <Box height="100%" width="100%" position="relative">
-            <OverlayScrollbarsComponent
+            <CustomScroll
                 style={{
-                    width: '100%',
-                    height: '100%',
                     paddingLeft: '10px',
                     paddingRight: '10px',
                     position: 'absolute'
-                }}
-                options={{
-                    scrollbars: {
-                        theme: 'os-theme-dark',
-                        autoHide: 'scroll',
-                        autoHideDelay: 600,
-                        clickScroll: true
-                    }
                 }}
             >
                 <VStack height="100%" width="100%" spacing={1}>
@@ -392,7 +382,7 @@ function ConnectionStats(props) {
                             );
                         })}
                 </VStack>
-            </OverlayScrollbarsComponent>
+            </CustomScroll>
         </Box>
     );
 }

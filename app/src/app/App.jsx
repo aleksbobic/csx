@@ -14,13 +14,12 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { isEnvFalse, isEnvTrue } from 'utils';
-import { useState } from 'react';
 
 function CSX() {
     const { colorMode } = useColorMode();
@@ -128,22 +127,12 @@ function CSX() {
                         />
                     </Helmet>
                 )}
-                <OverlayScrollbarsComponent
+                <CustomScroll
                     style={{
-                        width: '100%',
-                        height: '100%',
                         paddingLeft: '10px',
                         paddingRight: '10px',
                         backgroundColor:
                             colorMode === 'light' ? 'white' : '#171A23'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
                     }}
                 >
                     <NavigationPanelComponent />
@@ -176,7 +165,7 @@ function CSX() {
                             )}
                         </RRSwitch>
                     </Box>
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             </Router>
         </HelmetProvider>
     );

@@ -7,10 +7,10 @@ import {
 } from '@chakra-ui/react';
 
 import { observer } from 'mobx-react';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { withRouter } from 'react-router-dom';
 import { isEnvFalse, isEnvTrue } from 'utils';
+import CustomScroll from '../customscroll/CustomScroll.component';
 import { FileUploadArea } from '../fileupload/FileUploadArea.component';
 
 function DatasetGrid(props) {
@@ -18,22 +18,7 @@ function DatasetGrid(props) {
 
     const renderDatasets = () => (
         <Box width="100%" padding="0 10px" style={{ margin: 0 }}>
-            <OverlayScrollbarsComponent
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    paddingRight: '10px',
-                    paddingLeft: '10px'
-                }}
-                options={{
-                    scrollbars: {
-                        theme: 'os-theme-dark',
-                        autoHide: 'scroll',
-                        autoHideDelay: 600,
-                        clickScroll: true
-                    }
-                }}
-            >
+            <CustomScroll style={{ paddingRight: '10px', paddingLeft: '10px' }}>
                 <SimpleGrid
                     width="100%"
                     columns={[1, 1, 2]}
@@ -45,7 +30,7 @@ function DatasetGrid(props) {
                 >
                     {props.children}
                 </SimpleGrid>
-            </OverlayScrollbarsComponent>
+            </CustomScroll>
         </Box>
     );
 
