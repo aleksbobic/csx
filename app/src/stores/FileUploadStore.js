@@ -75,7 +75,6 @@ export class FileUploadStore {
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
             this.changeDatasetName(response.data.name);
         }
-
         this.changeFileUploadModalVisiblity(false);
     };
 

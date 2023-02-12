@@ -2,15 +2,9 @@ import {
     Box,
     Button,
     Center,
-    Code,
-    Heading,
-    HStack,
     IconButton,
-    Text,
     Textarea,
-    useColorMode,
-    useToast,
-    VStack
+    useColorMode
 } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
@@ -19,8 +13,7 @@ import { Close, Spinner } from 'css.gg';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
-import { useState } from 'react';
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
@@ -28,10 +21,8 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function GraphPage() {
     const store = useContext(RootStoreContext);
-    const toast = useToast();
     const location = useLocation();
     const { colorMode } = useColorMode();
-    const toastRef = useRef();
     const history = useHistory();
 
     const [comment, setComment] = useState('');
@@ -76,69 +67,9 @@ function GraphPage() {
         }
     }, [history, store.search.searchIsEmpty]);
 
-    const renderErrorToast = useCallback(() => {
-        toastRef.current = toast({
-            render: () => {
-                return (
-                    <Box
-                        backgroundColor="red.500"
-                        borderRadius="10px"
-                        padding="10px"
-                        key="id"
-                    >
-                        <VStack
-                            width="400px"
-                            position="relative"
-                            alignItems="flex-start"
-                        >
-                            <HStack justifyContent="space-between" width="100%">
-                                <Heading size="md">Server error 😢</Heading>
-                                <IconButton
-                                    variant="ghost"
-                                    size="md"
-                                    icon={<Close />}
-                                    onClick={() => {
-                                        toast.close(toastRef.current);
-                                    }}
-                                />
-                            </HStack>
-                            <Text>
-                                There seems to be some issues with our server.
-                                Sorry for that, we&#39;ll fix it as soon as
-                                possible. If you see one of our devs please
-                                share the following code with them:
-                            </Text>
-                            <Code
-                                colorScheme="black"
-                                maxHeight="100px"
-                                overflow="scroll"
-                                width="100%"
-                                padding="5px"
-                                borderRadius="10px"
-                            >
-                                {store.core.errorMessage.toString()}
-                                {store.core.errorDetails}
-                            </Code>
-                        </VStack>
-                    </Box>
-                );
-            },
-            status: 'error',
-            duration: 100000,
-            isClosable: true,
-            onCloseComplete: function () {
-                store.core.errorMessage = false;
-            }
-        });
-    }, [store.core, toast]);
-
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);
-
-        if (store.core.errorDetails) {
-            renderErrorToast();
-        }
-    }, [store.core.errorDetails, renderErrorToast, store.workflow]);
+    }, [store.workflow]);
 
     const openCommentModalKey = useKeyPress('c', 'shift');
     const closeCommentModalKey = useKeyPress('escape');

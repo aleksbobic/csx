@@ -20,12 +20,13 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { isEnvFalse, isEnvTrue } from 'utils';
+import { useState } from 'react';
 
 function CSX() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
-    const toastRef = useRef();
-    const toast = useToast();
+    const errorToastRef = useRef();
+    const errorToast = useToast();
 
     useEffect(() => {
         window.addEventListener('beforeunload', () => {
@@ -91,9 +92,13 @@ function CSX() {
     }, []);
 
     const renderErrorToast = useCallback(() => {
-        toastRef.current = toast({
+        errorToastRef.current = errorToast({
             render: () => (
-                <ErrorModal onClose={() => toast.close(toastRef.current)} />
+                <ErrorModal
+                    onClose={() => {
+                        errorToast.close(errorToastRef.current);
+                    }}
+                />
             ),
             status: 'error',
             duration: 50000,
@@ -102,13 +107,15 @@ function CSX() {
                 store.core.setErrorDetails(null);
             }
         });
-    }, [store.core, toast]);
+    }, [store.core, errorToast]);
 
     useEffect(() => {
         if (store.core.errorDetails) {
             renderErrorToast();
+        } else {
+            errorToast.closeAll();
         }
-    }, [renderErrorToast, store.core.errorDetails]);
+    }, [colorMode, errorToast, renderErrorToast, store.core.errorDetails]);
 
     return (
         <HelmetProvider>

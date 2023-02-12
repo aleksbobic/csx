@@ -20,8 +20,6 @@ export async function safeRequest(promise) {
             method: error.config.method
         };
 
-        console.log(error.request);
-
         if (error.response) {
             errorObject['type'] = 'response';
             errorObject['data'] = error.response.data;

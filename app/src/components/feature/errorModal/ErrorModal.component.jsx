@@ -19,6 +19,10 @@ export function ErrorModal(props) {
     const store = useContext(RootStoreContext);
     const modalBackground = useColorModeValue('white', '#202533');
     const modalBorder = useColorModeValue('#e6e6e6', '#343b50');
+    const errorDetailsBackground = useColorModeValue(
+        'blackAlpha.200',
+        'blackAlpha.400'
+    );
 
     const getAdditionalExplanations = code => {
         const explanationMap = new Map([
@@ -101,7 +105,7 @@ export function ErrorModal(props) {
     const renderComplexError = () => {
         return (
             <VStack
-                backgroundColor="blackAlpha.400"
+                backgroundColor={errorDetailsBackground}
                 width="100%"
                 borderRadius="6px"
                 padding="10px 14px"
@@ -152,7 +156,7 @@ export function ErrorModal(props) {
         );
     };
 
-    return (
+    return store.core.errorDetails ? (
         <Box
             backgroundColor={modalBackground}
             borderRadius="10px"
@@ -188,5 +192,7 @@ export function ErrorModal(props) {
                     : renderComplexError()}
             </VStack>
         </Box>
+    ) : (
+        <></>
     );
 }
