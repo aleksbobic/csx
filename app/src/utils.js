@@ -13,7 +13,7 @@ export function isEnvSet(name) {
 export async function safeRequest(promise) {
     try {
         const results = await promise;
-        return [results, null];
+        return { response: results, error: null };
     } catch (error) {
         const errorObject = {
             url: error.config.url,
@@ -33,6 +33,6 @@ export async function safeRequest(promise) {
             errorObject['message'] = error.message;
         }
 
-        return [null, errorObject];
+        return { response: null, error: errorObject };
     }
 }

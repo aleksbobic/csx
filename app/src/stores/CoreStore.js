@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
+import { safeRequest } from 'utils';
 
 export class CoreStore {
     availableDatasets = [];
@@ -105,10 +106,17 @@ export class CoreStore {
             study_description: this.studyDescription
         };
 
-        await axios.get('study/update', { params }).then(() => {
-            this.updateIsStudySaved(true);
-            this.getSavedStudies();
-        });
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
     };
 
     updateStudyDescription = async description => {
@@ -121,12 +129,17 @@ export class CoreStore {
             study_description: this.studyDescription
         };
 
-        console.log(params);
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
 
-        await axios.get('study/update', { params }).then(() => {
-            this.updateIsStudySaved(true);
-            this.getSavedStudies();
-        });
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
     };
 
     setTrackingEnabled = val => {
@@ -147,10 +160,15 @@ export class CoreStore {
     };
 
     generateUUID = async () => {
-        await axios.get('util/uuid').then(response => {
-            localStorage.setItem('useruuid', response.data);
-            this.userUuid = response.data;
-        });
+        const { response, error } = await safeRequest(axios.get('util/uuid'));
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('useruuid', response.data);
+        this.userUuid = response.data;
     };
 
     generateStudyUUID = async () => {
@@ -165,15 +183,22 @@ export class CoreStore {
 
         const params = { user_uuid: this.userUuid, study_name: this.studyName };
 
-        await axios.get('study/generate', { params }).then(response => {
-            localStorage.setItem('studyuuid', response.data);
-            this.studyUuid = response.data;
-            this.setStudyHistory([]);
-            this.setStudyHistoryItemIndex(0);
-        });
+        const { response, error } = await safeRequest(
+            axios.get('study/generate', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('studyuuid', response.data);
+        this.studyUuid = response.data;
+        this.setStudyHistory([]);
+        this.setStudyHistoryItemIndex(0);
     };
 
-    deleteStudy = studyUuid => {
+    deleteStudy = async studyUuid => {
         if (!this.studyIsSaved || studyUuid) {
             const params = {
                 study_uuid: studyUuid ? studyUuid : this.studyUuid,
@@ -181,32 +206,53 @@ export class CoreStore {
             };
 
             if (params.study_uuid) {
+                const { error } = await safeRequest(
+                    axios.get('study/delete', { params })
+                );
+
+                if (error) {
+                    this.store.core.handleRequestError(error);
+                    return;
+                }
+
                 if (studyUuid) {
-                    axios.get('study/delete', { params }).then(() => {
-                        this.getSavedStudies();
-                    });
-                } else {
-                    axios.get('study/delete', { params });
+                    this.getSavedStudies();
                 }
             }
         }
     };
 
-    saveStudy = () => {
+    saveStudy = async () => {
         const params = {
             study_uuid: this.studyUuid,
             user_uuid: this.userUuid
         };
-        axios.get('study/save', { params });
+
+        const { error } = await safeRequest(
+            axios.get('study/save', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         this.updateIsStudySaved(true);
     };
 
     getSavedStudies = async () => {
         const params = { user_uuid: this.userUuid };
         if (params.user_uuid) {
-            await axios.get('study/saved', { params }).then(response => {
-                this.updateStudies(response.data);
-            });
+            const { response, error } = await safeRequest(
+                axios.get('study/saved', { params })
+            );
+
+            if (error) {
+                this.store.core.handleRequestError(error);
+                return;
+            }
+
+            this.updateStudies(response.data);
         }
     };
 

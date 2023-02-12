@@ -17,8 +17,6 @@ import { CommentStore } from './CommentStore';
 import { isEnvSet } from 'utils';
 
 export class RootStore {
-    surveyLink = null;
-
     constructor() {
         this.initAxios();
         this.graphInstance = new GraphInstanceStore(this);
@@ -35,7 +33,6 @@ export class RootStore {
         this.stats = new StatsStore(this);
         this.history = new HistoryStore(this);
         this.comment = new CommentStore(this);
-        this.getSurveyLink();
     }
 
     initAxios = () => {
@@ -44,15 +41,6 @@ export class RootStore {
         } else {
             axios.defaults.baseURL = `${window.location.origin}/api`;
         }
-    };
-
-    getSurveyLink = () => {
-        axios.get('util/uuid').then(response => {
-            this.surveyLink =
-                'https://survey.tugraz.at/index.php/555429?lang=en&uuid=' +
-                response.data;
-            this.track.trackEvent('Home Page', 'UUID', response.data);
-        });
     };
 }
 

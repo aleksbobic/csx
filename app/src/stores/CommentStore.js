@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { safeRequest } from 'utils';
 
 export class CommentStore {
     editMode = false;
@@ -31,11 +32,19 @@ export class CommentStore {
             comment_time: comment_time
         };
 
+        const { error } = await safeRequest(
+            axios.post('history/comment/', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
         ].comments.push({ comment: comment, time: comment_time });
 
-        await axios.post('history/comment/', params);
         this.store.history.generateHistoryNodes();
 
         if (!this.store.core.studyIsSaved) {
@@ -51,11 +60,19 @@ export class CommentStore {
             comment_index: index
         };
 
+        const { error } = await safeRequest(
+            axios.post('history/comment/delete', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
         ].comments.splice(index, 1);
 
-        await axios.post('history/comment/delete', params);
         this.store.history.generateHistoryNodes();
     };
 
@@ -71,6 +88,15 @@ export class CommentStore {
             comment_time: comment_time
         };
 
+        const { error } = await safeRequest(
+            axios.post('history/comment/edit', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
         ].comments[index].comment = comment;
@@ -82,8 +108,6 @@ export class CommentStore {
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
         ].comments[index]['edited'] = true;
-
-        await axios.post('history/comment/edit', params);
 
         this.store.history.generateHistoryNodes();
     };

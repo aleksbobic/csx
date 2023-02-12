@@ -133,19 +133,11 @@ export function ErrorModal(props) {
                     )}
                     {store.core.errorDetails.type === 'response' &&
                         renderResponseErrorDetails()}
-                    {store.core.errorDetails.type === 'request' && (
-                        <>
-                            renderErrorProperty( 'State',
-                            store.core.errorDetails.status )
-                            <Text fontSize="sm" textAlign="left" width="100%">
-                                <Text fontWeight="bold" as="span">
-                                    Additional Explanation:
-                                </Text>{' '}
-                                If you're seeing this error it most likely means
-                                the server isn't running.
-                            </Text>
-                        </>
-                    )}
+                    {store.core.errorDetails.type === 'request' &&
+                        renderErrorProperty(
+                            'State',
+                            store.core.errorDetails.status
+                        )}
                     {store.core.errorDetails.type === 'setup' &&
                         renderErrorProperty(
                             'Message',
@@ -185,6 +177,20 @@ export function ErrorModal(props) {
                     you see one of our devs please share the below details with
                     them.
                 </Text>
+                {store.core.errorDetails.type === 'request' && (
+                    <Text
+                        fontSize="sm"
+                        textAlign="left"
+                        width="100%"
+                        fontWeight="bold"
+                        fontStyle="italic"
+                        display="inline"
+                    >
+                        If you're seeing this error it most likely means the
+                        server isn't running. Please wait for a few minutes
+                        before trying to analyise anything again.
+                    </Text>
+                )}
                 {store.core.errorDetails.type === 'response' &&
                     renderAdditionalExplanation()}
                 {typeof store.core.errorDetails === 'string'

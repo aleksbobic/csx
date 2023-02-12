@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import SpriteText from 'three-spritetext';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { safeRequest } from 'utils';
 
 export class GraphStore {
     perspectives = [];
@@ -550,55 +551,56 @@ export class GraphStore {
             params.anchor_properties = [];
         }
 
-        try {
-            const response = await axios.post('study/modify', params);
+        const { response, error } = await safeRequest(
+            axios.post('study/modify', params)
+        );
 
-            if (
-                !response.data.hasOwnProperty('graph') ||
-                response.data.graph.nodes.length === 0
-            ) {
-                this.graphData['isEmpty'] = true;
-                this.store.search.setSearchIsEmpty(true);
-            } else {
-                this.store.core.setStudyHistory(response.data.history);
-
-                this.store.core.setStudyHistoryItemIndex(
-                    this.store.core.studyHistory.length - 1
-                );
-
-                this.store.core.setStudyQuery();
-
-                const historyGraphType =
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].graph_type;
-
-                this.store.core.setCurrentGraph(historyGraphType);
-
-                this.store.history.generateHistoryNodes();
-
-                this.store.workflow.nodes = [];
-                this.store.workflow.edges = [];
-
-                try {
-                    this.store.workflow.addNodesFromJSONQuery(
-                        JSON.parse(this.store.search.query)
-                    );
-                } catch (e) {
-                    this.store.workflow.addNodesFromQuery(
-                        this.store.search.query
-                    );
-                }
-
-                this.handleRetrievedGraph(
-                    response.data.graph,
-                    historyGraphType,
-                    this.store.search.query
-                );
-            }
-        } catch (error) {
+        if (error) {
             this.store.core.setDataIsLoading(false);
-            return this.store.core.handleError(error);
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        if (
+            !response.data.hasOwnProperty('graph') ||
+            response.data.graph.nodes.length === 0
+        ) {
+            this.graphData['isEmpty'] = true;
+            this.store.search.setSearchIsEmpty(true);
+        } else {
+            this.store.core.setStudyHistory(response.data.history);
+
+            this.store.core.setStudyHistoryItemIndex(
+                this.store.core.studyHistory.length - 1
+            );
+
+            this.store.core.setStudyQuery();
+
+            const historyGraphType =
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].graph_type;
+
+            this.store.core.setCurrentGraph(historyGraphType);
+
+            this.store.history.generateHistoryNodes();
+
+            this.store.workflow.nodes = [];
+            this.store.workflow.edges = [];
+
+            try {
+                this.store.workflow.addNodesFromJSONQuery(
+                    JSON.parse(this.store.search.query)
+                );
+            } catch (e) {
+                this.store.workflow.addNodesFromQuery(this.store.search.query);
+            }
+
+            this.handleRetrievedGraph(
+                response.data.graph,
+                historyGraphType,
+                this.store.search.query
+            );
         }
     };
 
@@ -611,77 +613,76 @@ export class GraphStore {
             user_uuid: userId,
             history_id: historyID
         };
-        let response;
+
+        const { response, error } = await safeRequest(
+            axios.post('study/', params)
+        );
+
+        if (error) {
+            this.store.core.setDataIsLoading(false);
+            this.store.search.setSearchIsEmpty(true);
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.store.stats.setChartListForDataset(response.data.charts);
+
+        this.store.core.setStudyHistory(response.data.history);
+
+        this.store.core.setStudyHistoryItemIndexById(historyID);
+
+        this.store.core.setStudyQuery();
+
+        this.store.workflow.resetWorkflow();
+        this.store.schema.resetOverviewNodeProperties();
+
+        const historyGraphType =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .graph_type;
+
+        this.store.core.setCurrentGraph(historyGraphType);
+
+        this.store.search.setLinks(
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .links
+        );
+
+        this.store.search.anchor =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].anchor;
+        this.store.search.anchorProperties =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].anchor_properties;
+        this.store.schema.overviewDataNodeProperties =
+            this.store.search.anchorProperties;
+
+        this.store.search.schema =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].schema;
+
+        this.store.workflow.nodes = [];
+        this.store.workflow.edges = [];
 
         try {
-            response = await axios.post('study/', params);
-
-            this.store.stats.setChartListForDataset(response.data.charts);
-
-            this.store.core.setStudyHistory(response.data.history);
-
-            this.store.core.setStudyHistoryItemIndexById(historyID);
-
-            this.store.core.setStudyQuery();
-
-            this.store.workflow.resetWorkflow();
-            this.store.schema.resetOverviewNodeProperties();
-
-            const historyGraphType =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].graph_type;
-
-            this.store.core.setCurrentGraph(historyGraphType);
-
-            this.store.search.setLinks(
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].links
+            this.store.workflow.addNodesFromJSONQuery(
+                JSON.parse(this.store.search.query)
             );
-
-            this.store.search.anchor =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].anchor;
-            this.store.search.anchorProperties =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].anchor_properties;
-            this.store.schema.overviewDataNodeProperties =
-                this.store.search.anchorProperties;
-
-            this.store.search.schema =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].schema;
-
-            this.store.workflow.nodes = [];
-            this.store.workflow.edges = [];
-
-            try {
-                this.store.workflow.addNodesFromJSONQuery(
-                    JSON.parse(this.store.search.query)
-                );
-            } catch (e) {
-                this.store.workflow.addNodesFromQuery(this.store.search.query);
-            }
-
-            this.store.schema.populateStoreData();
-
-            this.store.history.generateHistoryNodes();
-
-            this.handleRetrievedGraph(
-                response.data.graph,
-                historyGraphType,
-                this.store.search.query
-            );
-        } catch (error) {
-            this.store.core.setDataIsLoading(false);
-            console.log(error);
-            this.store.search.setSearchIsEmpty(true);
-            return this.store.core.handleError(error);
+        } catch (e) {
+            this.store.workflow.addNodesFromQuery(this.store.search.query);
         }
+
+        this.store.schema.populateStoreData();
+
+        this.store.history.generateHistoryNodes();
+
+        this.handleRetrievedGraph(
+            response.data.graph,
+            historyGraphType,
+            this.store.search.query
+        );
     };
 
     getStudy = async studyId => {
@@ -692,84 +693,81 @@ export class GraphStore {
             study_uuid: studyId,
             user_uuid: userId
         };
-        let response;
 
-        try {
-            response = await axios.post('study/', params);
-        } catch (error) {
+        const { response, error } = await safeRequest(
+            axios.post('study/', params)
+        );
+
+        if (error) {
             this.store.core.setDataIsLoading(false);
             this.store.search.setSearchIsEmpty(true);
-            return this.store.core.handleError(error);
+            this.store.core.handleRequestError(error);
+            return;
         }
 
         if (response.data.history.length === 0) {
             this.modifyStudy('overview');
-        } else {
-            this.store.core.updateIsStudySaved(true);
-            this.store.core.setStudyName(response.data.name);
-            this.store.core.setStudyDescription(response.data.description);
-            this.store.core.setStudyHistory(response.data.history);
-            this.store.core.setStudyHistoryItemIndex(
-                this.store.core.studyHistory.length - 1
-            );
-            this.store.core.setStudyQuery();
-
-            this.store.search.useDataset(
-                this.store.search.datasets.indexOf(response.data.index)
-            );
-            this.store.workflow.resetWorkflow();
-            this.store.schema.resetOverviewNodeProperties();
-
-            const historyGraphType =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].graph_type;
-
-            this.store.core.setCurrentGraph(historyGraphType);
-
-            this.store.search.setLinks(
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].links
-            );
-
-            this.store.search.anchor =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].anchor;
-            this.store.search.anchorProperties =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].anchor_properties;
-            this.store.schema.overviewDataNodeProperties =
-                this.store.search.anchorProperties;
-
-            this.store.search.schema =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].schema;
-
-            this.store.workflow.nodes = [];
-            this.store.workflow.edges = [];
-
-            try {
-                this.store.workflow.addNodesFromJSONQuery(
-                    JSON.parse(this.store.search.query)
-                );
-            } catch (e) {
-                this.store.workflow.addNodesFromQuery(this.store.search.query);
-            }
-
-            this.store.schema.populateStoreData();
-
-            this.store.history.generateHistoryNodes();
-
-            this.handleRetrievedGraph(
-                response.data.graph,
-                historyGraphType,
-                ''
-            );
+            return;
         }
+
+        this.store.core.updateIsStudySaved(true);
+        this.store.core.setStudyName(response.data.name);
+        this.store.core.setStudyDescription(response.data.description);
+        this.store.core.setStudyHistory(response.data.history);
+        this.store.core.setStudyHistoryItemIndex(
+            this.store.core.studyHistory.length - 1
+        );
+        this.store.core.setStudyQuery();
+
+        this.store.search.useDataset(
+            this.store.search.datasets.indexOf(response.data.index)
+        );
+        this.store.workflow.resetWorkflow();
+        this.store.schema.resetOverviewNodeProperties();
+
+        const historyGraphType =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .graph_type;
+
+        this.store.core.setCurrentGraph(historyGraphType);
+
+        this.store.search.setLinks(
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .links
+        );
+
+        this.store.search.anchor =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].anchor;
+        this.store.search.anchorProperties =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].anchor_properties;
+        this.store.schema.overviewDataNodeProperties =
+            this.store.search.anchorProperties;
+
+        this.store.search.schema =
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].schema;
+
+        this.store.workflow.nodes = [];
+        this.store.workflow.edges = [];
+
+        try {
+            this.store.workflow.addNodesFromJSONQuery(
+                JSON.parse(this.store.search.query)
+            );
+        } catch (e) {
+            this.store.workflow.addNodesFromQuery(this.store.search.query);
+        }
+
+        this.store.schema.populateStoreData();
+
+        this.store.history.generateHistoryNodes();
+
+        this.handleRetrievedGraph(response.data.graph, historyGraphType, '');
     };
 
     getSearchGraph = (query, graphType, suuid) => {
@@ -1173,8 +1171,8 @@ export class GraphStore {
                     this.store.core.studyHistoryItemIndex
                 ].id;
 
-            try {
-                const response = await axios.post('graph/remove', {
+            const { response, error } = await safeRequest(
+                axios.post('graph/remove', {
                     nodes: graph_data_copy.nodes,
                     user_id: this.store.core.userUuid,
                     history_item_id: currentStudyHistoryItem,
@@ -1190,73 +1188,14 @@ export class GraphStore {
                         this.store.stats.charts[
                             this.store.search.currentDataset
                         ] || []
-                });
+                })
+            );
 
-                this.store.core.setStudyHistory(response.data.history);
-
-                this.store.core.setStudyHistoryItemIndex(
-                    this.store.core.studyHistory.length - 1
-                );
-                this.store.core.setStudyQuery();
-
-                const historyGraphType =
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].graph_type;
-
-                this.store.core.setCurrentGraph(historyGraphType);
-
-                this.store.history.generateHistoryNodes();
-
-                this.handleRetrievedGraph(
-                    response.data.graph,
-                    historyGraphType,
-                    this.store.search.query
-                );
-
-                this.store.history.generateHistoryNodes();
-            } catch (error) {
+            if (error) {
                 this.store.core.setDataIsLoading(false);
-                return this.store.core.handleError(error);
+                this.store.core.handleRequestError(error);
+                return;
             }
-        }
-    };
-
-    trimNetwork = async () => {
-        this.store.core.setDataIsLoading(true);
-        const graph_data_copy = { ...this.currentGraphData };
-        graph_data_copy.nodes = graph_data_copy.nodes
-            .filter(node => node.visible)
-            .map(node => node.id);
-
-        if (this.store.core.currentGraph === 'detail') {
-            this.resetDetailGraphData();
-            this.resetGraphData();
-        } else {
-            this.resetGraphData();
-        }
-
-        const currentStudyHistoryItem =
-            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
-                .id;
-
-        try {
-            const response = await axios.post('graph/trim', {
-                nodes: graph_data_copy.nodes,
-                user_id: this.store.core.userUuid,
-                history_item_id: currentStudyHistoryItem,
-                graph_type: this.store.core.currentGraph,
-                study_id: this.store.core.studyUuid,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                history_parent_id:
-                    this.store.core.studyHistory.length > 0 &&
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].id,
-                charts:
-                    this.store.stats.charts[this.store.search.currentDataset] ||
-                    []
-            });
 
             this.store.core.setStudyHistory(response.data.history);
 
@@ -1281,10 +1220,74 @@ export class GraphStore {
             );
 
             this.store.history.generateHistoryNodes();
-        } catch (error) {
-            this.store.core.setDataIsLoading(false);
-            return this.store.core.handleError(error);
         }
+    };
+
+    trimNetwork = async () => {
+        this.store.core.setDataIsLoading(true);
+        const graph_data_copy = { ...this.currentGraphData };
+        graph_data_copy.nodes = graph_data_copy.nodes
+            .filter(node => node.visible)
+            .map(node => node.id);
+
+        if (this.store.core.currentGraph === 'detail') {
+            this.resetDetailGraphData();
+            this.resetGraphData();
+        } else {
+            this.resetGraphData();
+        }
+
+        const currentStudyHistoryItem =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+
+        const { response, error } = await safeRequest(
+            axios.post('graph/trim', {
+                nodes: graph_data_copy.nodes,
+                user_id: this.store.core.userUuid,
+                history_item_id: currentStudyHistoryItem,
+                graph_type: this.store.core.currentGraph,
+                study_id: this.store.core.studyUuid,
+                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                history_parent_id:
+                    this.store.core.studyHistory.length > 0 &&
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].id,
+                charts:
+                    this.store.stats.charts[this.store.search.currentDataset] ||
+                    []
+            })
+        );
+
+        if (error) {
+            this.store.core.setDataIsLoading(false);
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.store.core.setStudyHistory(response.data.history);
+
+        this.store.core.setStudyHistoryItemIndex(
+            this.store.core.studyHistory.length - 1
+        );
+        this.store.core.setStudyQuery();
+
+        const historyGraphType =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .graph_type;
+
+        this.store.core.setCurrentGraph(historyGraphType);
+
+        this.store.history.generateHistoryNodes();
+
+        this.handleRetrievedGraph(
+            response.data.graph,
+            historyGraphType,
+            this.store.search.query
+        );
+
+        this.store.history.generateHistoryNodes();
     };
 
     expandNetwork = async (nodes, connector = null) => {
@@ -1335,8 +1338,8 @@ export class GraphStore {
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
 
-        try {
-            const response = await axios.post('graph/expand', {
+        const { response, error } = await safeRequest(
+            axios.post('graph/expand', {
                 values: {
                     connector: connector,
                     nodes: nodes.map(node => {
@@ -1362,35 +1365,37 @@ export class GraphStore {
                 charts:
                     this.store.stats.charts[this.store.search.currentDataset] ||
                     []
-            });
+            })
+        );
 
-            this.store.core.setStudyHistory(response.data.history);
-
-            this.store.core.setStudyHistoryItemIndex(
-                this.store.core.studyHistory.length - 1
-            );
-            this.store.core.setStudyQuery();
-
-            const historyGraphType =
-                this.store.core.studyHistory[
-                    this.store.core.studyHistoryItemIndex
-                ].graph_type;
-
-            this.store.core.setCurrentGraph(historyGraphType);
-
-            this.store.history.generateHistoryNodes();
-
-            this.handleRetrievedGraph(
-                response.data.graph,
-                historyGraphType,
-                this.store.search.query
-            );
-
-            this.store.history.generateHistoryNodes();
-        } catch (error) {
+        if (error) {
             this.store.core.setDataIsLoading(false);
-            return this.store.core.handleError(error);
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        this.store.core.setStudyHistory(response.data.history);
+
+        this.store.core.setStudyHistoryItemIndex(
+            this.store.core.studyHistory.length - 1
+        );
+        this.store.core.setStudyQuery();
+
+        const historyGraphType =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .graph_type;
+
+        this.store.core.setCurrentGraph(historyGraphType);
+
+        this.store.history.generateHistoryNodes();
+
+        this.handleRetrievedGraph(
+            response.data.graph,
+            historyGraphType,
+            this.store.search.query
+        );
+
+        this.store.history.generateHistoryNodes();
     };
 
     get graphObjectCount() {

@@ -52,12 +52,13 @@ export class FileUploadStore {
             }
         };
 
-        const [response, error] = await safeRequest(
+        const { response, error } = await safeRequest(
             axios.post('file/upload', formData, requestConfig)
         );
 
         if (error) {
             this.store.core.handleRequestError(error);
+            this.changeFileUploadModalVisiblity(false);
         } else {
             Object.keys(response.data.columns).forEach(
                 column =>
@@ -75,7 +76,6 @@ export class FileUploadStore {
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
             this.changeDatasetName(response.data.name);
         }
-        this.changeFileUploadModalVisiblity(false);
     };
 
     changeOriginalName = val => (this.fileUploadData.originalName = val);
@@ -163,10 +163,12 @@ export class FileUploadStore {
             defaults: JSON.stringify(this.fileUploadData.defaults)
         };
 
-        try {
-            await axios.get('file/settings', { params });
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            axios.get('file/settings', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
         }
 
         this.resetFileUploadData();
@@ -180,15 +182,18 @@ export class FileUploadStore {
     cancelFileUpload = async () => {
         const params = { name: this.fileUploadData.originalName };
 
-        try {
-            await axios.get('file/cancel', { params });
+        const { error } = await safeRequest(
+            axios.get('file/cancel', { params })
+        );
+
+        if (error) {
+            this.changeFileUploadModalVisiblity(false);
+            this.store.core.handleRequestError(error);
+        } else {
             this.resetFileUploadData();
             this.changeFileUploadModalVisiblity(false);
             this.store.core.setToastType('info');
             this.store.core.setToastMessage('File upload canceled 😢');
-        } catch (error) {
-            this.store.core.handleError(error);
-            this.changeFileUploadModalVisiblity(false);
         }
     };
 
@@ -228,10 +233,12 @@ export class FileUploadStore {
             defaults: JSON.stringify(this.fileUploadData.defaults)
         };
 
-        try {
-            await axios.get('file/settingsupdate', { params });
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            axios.get('file/settingsupdate', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
         }
 
         this.resetFileUploadData();

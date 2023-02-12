@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { format } from 'date-fns';
+import { safeRequest } from 'utils';
 
 export class SearchStore {
     nodeTypes = {};
@@ -187,13 +188,16 @@ export class SearchStore {
         // Set selected index
         params['index'] = localStorage.getItem('currentDataset');
 
-        try {
-            const response = await axios.post('search/', params);
+        const { response, error } = await safeRequest(
+            axios.post('search/', params)
+        );
 
-            return response.data;
-        } catch (error) {
-            return this.store.core.handleError(error);
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        return response.data;
     };
 
     deleteDataset = async dataset => {
@@ -201,19 +205,23 @@ export class SearchStore {
             name: dataset
         };
 
-        try {
-            await axios.get('file/delete', { params });
-            this.store.core.setToastType('info');
-            this.store.core.setToastMessage(
-                `${dataset.charAt(0).toUpperCase()}${dataset.slice(
-                    1
-                )} dataset deleted 🙂`
-            );
-            localStorage.removeItem(`index_${dataset}`);
-            this.getDatasets();
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            axios.get('file/delete', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        this.store.core.setToastType('info');
+        this.store.core.setToastMessage(
+            `${dataset.charAt(0).toUpperCase()}${dataset.slice(
+                1
+            )} dataset deleted 🙂`
+        );
+        localStorage.removeItem(`index_${dataset}`);
+        this.getDatasets();
     };
 
     getConifg = async dataset => {
@@ -221,15 +229,19 @@ export class SearchStore {
             name: dataset
         };
 
-        try {
-            const results = await axios.get('file/config', { params });
-            this.store.fileUpload.populateDataFromConfig(
-                dataset,
-                results.data.config
-            );
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { response, error } = await safeRequest(
+            axios.get('file/config', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        this.store.fileUpload.populateDataFromConfig(
+            dataset,
+            response.data.config
+        );
     };
 
     suggest = async (feature, input) => {
@@ -248,7 +260,15 @@ export class SearchStore {
     };
 
     getRandomImage = async () => {
-        const response = await axios.get('file/randomimage');
+        const { response, error } = await safeRequest(
+            axios.get('file/randomimage')
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         return response.data;
     };
 }
