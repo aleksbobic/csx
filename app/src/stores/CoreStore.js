@@ -7,7 +7,6 @@ export class CoreStore {
     demoMode = false;
     demoNavigationData = [];
     activeDemoIndex = 1;
-    errorMessage = null;
     errorDetails = null;
     currentGraph = '';
     userUuid = null;
@@ -68,6 +67,8 @@ export class CoreStore {
     setStudyName = name => (this.studyName = name);
 
     setColorMode = val => (this.colorMode = val);
+
+    setErrorDetails = val => (this.errorDetails = val);
 
     setStudyDescription = description => (this.studyDescription = description);
     setStudyUuid = id => {
@@ -225,10 +226,6 @@ export class CoreStore {
         this.visibleDimensions = { overview: [], detail: [] };
     };
 
-    setErrorMessage = message => {
-        this.errorMessage = message;
-    };
-
     setDemoMode = val => {
         this.demoMode = val;
     };
@@ -283,6 +280,51 @@ export class CoreStore {
             console.log('headers ', error.response.headers);
         } else {
             this.errorDetails = error.toString();
+        }
+    };
+
+    handleRequestError = error => {
+        this.setErrorDetails(error);
+
+        switch (error['type']) {
+            case 'response':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Response Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        message: error.data.detail[0].msg
+                    })
+                );
+
+                break;
+            case 'request':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        state: error.state
+                    })
+                );
+
+                break;
+            default:
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request setup error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        message: error.message
+                    })
+                );
+
+                break;
         }
     };
 }

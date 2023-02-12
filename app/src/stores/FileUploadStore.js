@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { safeRequest } from 'utils';
 
 export class FileUploadStore {
     fileUploadData = {
@@ -41,16 +42,23 @@ export class FileUploadStore {
         });
 
     uploadFile = async files => {
+        this.changeFileUploadModalVisiblity(true);
+
         const formData = new FormData();
         formData.append('file', files[0]);
-
-        const response = await axios.post('file/upload', formData, {
+        const requestConfig = {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
-        });
+        };
 
-        if (Object.keys(response.data).length !== 0) {
+        const [response, error] = await safeRequest(
+            axios.post('file/upload', formData, requestConfig)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+        } else {
             Object.keys(response.data.columns).forEach(
                 column =>
                     (this.fileUploadData.defaults[column] = {
@@ -66,10 +74,9 @@ export class FileUploadStore {
             this.changeOriginalName(response.data.name);
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
             this.changeDatasetName(response.data.name);
-
-            return true;
         }
-        return false;
+
+        this.changeFileUploadModalVisiblity(false);
     };
 
     changeOriginalName = val => (this.fileUploadData.originalName = val);

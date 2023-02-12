@@ -16,19 +16,7 @@ export function FileUploadArea() {
             })
         );
 
-        store.fileUpload.changeFileUploadModalVisiblity(true);
-        const response = await store.fileUpload.uploadFile(files);
-
-        if (!response) {
-            store.track.trackEvent(
-                'Home Page - Dataset Grid',
-                'File Upload Area',
-                JSON.stringify({
-                    type: 'Error'
-                })
-            );
-            store.fileUpload.changeFileUploadModalVisiblity(false);
-        }
+        store.fileUpload.uploadFile(files);
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({

@@ -1,4 +1,4 @@
-import { Box, useColorMode } from '@chakra-ui/react';
+import { Box, useColorMode, useToast } from '@chakra-ui/react';
 import ControlPanelComponent from 'components/interface/controlpanel/ControlPanel.component';
 import NavigationPanelComponent from 'components/interface/navigation/NavigationPanel.component';
 import { observer } from 'mobx-react';
@@ -14,15 +14,18 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
+import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import { useEffect, useContext } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { isEnvFalse, isEnvTrue } from 'utils';
 
 function CSX() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
+    const toastRef = useRef();
+    const toast = useToast();
 
     useEffect(() => {
         window.addEventListener('beforeunload', () => {
@@ -86,6 +89,26 @@ function CSX() {
             });
         };
     }, []);
+
+    const renderErrorToast = useCallback(() => {
+        toastRef.current = toast({
+            render: () => (
+                <ErrorModal onClose={() => toast.close(toastRef.current)} />
+            ),
+            status: 'error',
+            duration: 50000,
+            isClosable: true,
+            onCloseComplete: function () {
+                store.core.setErrorDetails(null);
+            }
+        });
+    }, [store.core, toast]);
+
+    useEffect(() => {
+        if (store.core.errorDetails) {
+            renderErrorToast();
+        }
+    }, [renderErrorToast, store.core.errorDetails]);
 
     return (
         <HelmetProvider>

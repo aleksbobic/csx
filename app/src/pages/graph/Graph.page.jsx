@@ -76,7 +76,7 @@ function GraphPage() {
         }
     }, [history, store.search.searchIsEmpty]);
 
-    const renderToast = useCallback(() => {
+    const renderErrorToast = useCallback(() => {
         toastRef.current = toast({
             render: () => {
                 return (
@@ -135,10 +135,10 @@ function GraphPage() {
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);
 
-        if (store.core.errorMessage) {
-            renderToast();
+        if (store.core.errorDetails) {
+            renderErrorToast();
         }
-    }, [store.core.errorMessage, renderToast, store.workflow]);
+    }, [store.core.errorDetails, renderErrorToast, store.workflow]);
 
     const openCommentModalKey = useKeyPress('c', 'shift');
     const closeCommentModalKey = useKeyPress('escape');
