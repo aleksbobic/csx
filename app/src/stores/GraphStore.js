@@ -546,7 +546,7 @@ export class GraphStore {
 
         if (graphType === 'overview') {
             params.anchor_properties =
-                this.store.schema.overviewDataNodeProperties;
+                this.store.overviewSchema.anchorProperties;
         } else {
             params.anchor_properties = [];
         }
@@ -634,7 +634,7 @@ export class GraphStore {
         this.store.core.setStudyQuery();
 
         this.store.workflow.resetWorkflow();
-        this.store.schema.resetOverviewNodeProperties();
+        this.store.overviewSchema.setAnchorProperties([]);
 
         const historyGraphType =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
@@ -655,8 +655,9 @@ export class GraphStore {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].anchor_properties;
-        this.store.schema.overviewDataNodeProperties =
-            this.store.search.anchorProperties;
+        this.store.overviewSchema.setAnchorProperties(
+            this.store.search.anchorProperties
+        );
 
         this.store.search.schema =
             this.store.core.studyHistory[
@@ -675,6 +676,7 @@ export class GraphStore {
         }
 
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
 
         this.store.history.generateHistoryNodes();
 
@@ -723,7 +725,7 @@ export class GraphStore {
             this.store.search.datasets.indexOf(response.data.index)
         );
         this.store.workflow.resetWorkflow();
-        this.store.schema.resetOverviewNodeProperties();
+        this.store.overviewSchema.setAnchorProperties([]);
 
         const historyGraphType =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
@@ -764,6 +766,7 @@ export class GraphStore {
         }
 
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
 
         this.store.history.generateHistoryNodes();
 
@@ -906,7 +909,7 @@ export class GraphStore {
 
                 this.addNeighbourObjectsToNodes();
 
-                this.store.schema.populateStoreData();
+                this.store.overviewSchema.populateStoreData();
             } else {
                 // Handle detail graph data
                 this.detailGraphData.meta.query = query;
@@ -1302,7 +1305,7 @@ export class GraphStore {
 
         const anchor_properties =
             this.store.core.currentGraph === 'overview'
-                ? this.store.schema.overviewDataNodeProperties
+                ? this.store.overviewSchema.anchorProperties
                 : [];
         let visible_entries;
 

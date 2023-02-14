@@ -38,10 +38,10 @@ function SchemaFlow() {
     const [schemaViewport, setSchemaViewport] = useState(null);
 
     const [schemaNodes, setSchemaNodes] = useState(
-        store.core.isOverview ? store.schema.overviewNodes : store.schema.nodes
+        store.core.isOverview ? store.overviewSchema.nodes : store.schema.nodes
     );
     const [schemaEdges, setSchemaEdges] = useState(
-        store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
+        store.core.isOverview ? store.overviewSchema.edges : store.schema.edges
     );
 
     const nodeTypes = useMemo(
@@ -72,21 +72,21 @@ function SchemaFlow() {
     useEffect(() => {
         setSchemaNodes(
             store.core.isOverview
-                ? store.schema.overviewNodes
+                ? store.overviewSchema.nodes
                 : store.schema.nodes
         );
         setSchemaEdges(
             store.core.isOverview
-                ? store.schema.overviewEdges
+                ? store.overviewSchema.edges
                 : store.schema.edges
         );
     }, [
         store.core.currentGraph,
         store.core.isOverview,
+        store.overviewSchema.edges,
+        store.overviewSchema.nodes,
         store.schema.edges,
-        store.schema.nodes,
-        store.schema.overviewEdges,
-        store.schema.overviewNodes
+        store.schema.nodes
     ]);
 
     const connectNodes = connection => {
@@ -101,19 +101,19 @@ function SchemaFlow() {
     const onNodesChange = useCallback(
         changes =>
             store.core.isOverview
-                ? store.schema.updateOverviewNodes(
-                      applyNodeChanges(changes, store.schema.overviewNodes)
+                ? store.overviewSchema.updateNodes(
+                      applyNodeChanges(changes, store.overviewSchema.nodes)
                   )
                 : store.schema.updateNodes(
                       applyNodeChanges(changes, store.schema.nodes)
                   ),
-        [store.core.isOverview, store.schema]
+        [store.core.isOverview, store.overviewSchema, store.schema]
     );
     const onEdgesChange = useCallback(
         changes => {
             if (store.core.isOverview) {
-                store.schema.updateOverviewEdges(
-                    applyEdgeChanges(changes, store.schema.overviewEdges)
+                store.overviewSchema.updateEdges(
+                    applyEdgeChanges(changes, store.overviewSchema.edges)
                 );
             } else {
                 store.schema.updateEdges(
@@ -122,7 +122,7 @@ function SchemaFlow() {
                 store.core.updateVisibleDimensionsBasedOnSchema();
             }
         },
-        [store.core, store.schema]
+        [store.core, store.overviewSchema, store.schema]
     );
 
     return (

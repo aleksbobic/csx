@@ -70,6 +70,7 @@ export class SearchStore {
         this.nodeTypes = dataset_config.types;
         this.anchor = dataset_config.anchor;
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
     };
 
     changeSelectedSchema = selectedSchema => {
@@ -78,6 +79,7 @@ export class SearchStore {
                 this.schemas.findIndex(entry => entry.name === selectedSchema)
             ]['relations'];
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
     };
 
     getLocalStorageDataset = dataset_name =>
@@ -146,7 +148,7 @@ export class SearchStore {
 
         if (graphType === 'overview') {
             params.anchor_properties =
-                this.store.schema.overviewDataNodeProperties;
+                this.store.overviewSchema.anchorProperties;
         } else {
             params.anchor_properties = [];
         }

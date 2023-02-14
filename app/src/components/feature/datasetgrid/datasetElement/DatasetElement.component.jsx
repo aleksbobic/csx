@@ -28,7 +28,7 @@ function DatasetElement(props) {
         store.search.useDataset(store.search.datasets.indexOf(dataset));
         store.core.resetVisibleDimensions();
         store.workflow.resetWorkflow();
-        store.schema.resetOverviewNodeProperties();
+        store.overviewSchema.setAnchorProperties([]);
 
         history.push(`/search?dataset=${dataset}`);
     };

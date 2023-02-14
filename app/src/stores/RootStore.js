@@ -14,6 +14,7 @@ import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
 import { HistoryStore } from './HistoryStore';
 import { CommentStore } from './CommentStore';
+import { OverviewSchemaStore } from './OverviewSchemaStore';
 import { isEnvSet } from 'general.utils';
 
 export class RootStore {
@@ -33,6 +34,7 @@ export class RootStore {
         this.stats = new StatsStore(this);
         this.history = new HistoryStore(this);
         this.comment = new CommentStore(this);
+        this.overviewSchema = new OverviewSchemaStore(this);
     }
 
     initAxios = () => {
