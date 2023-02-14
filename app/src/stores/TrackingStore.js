@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx';
-import { isEnvFalse } from 'utils';
+import { isEnvFalse } from 'general.utils';
 
 export class TrackingStore {
     constructor(store) {

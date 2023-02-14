@@ -209,7 +209,7 @@ function Graph(props) {
                     store.graphInstance.stopForce();
                 }
             }}
-            // linkDirectionalArrowLength={store.core.isDetail ? 10 : 0}
+            // linkDirectionalArrowLength={store.core.isDetail ? 5 : 0}
             // linkDirectionalArrowResolution={2}
             // linkDirectionalArrowRelPos={1}
             // linkCurvature={0.2}
@@ -229,6 +229,7 @@ function Graph(props) {
                     handleLinkHover(link);
                 }
             }}
+            d3AlphaDecay={0}
             linkWidth={0}
             linkResolution={2}
             linkHoverPrecision={8}

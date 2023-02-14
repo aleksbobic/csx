@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse } from 'utils';
+import { isEnvFalse } from 'general.utils';
 
 function DatasetElement(props) {
     const store = useContext(RootStoreContext);

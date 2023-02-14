@@ -19,7 +19,7 @@ import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse, isEnvTrue } from 'utils';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 
 function CSX() {
     const { colorMode } = useColorMode();

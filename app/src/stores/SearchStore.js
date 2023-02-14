@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { format } from 'date-fns';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class SearchStore {
     nodeTypes = {};

@@ -9,7 +9,7 @@ import {
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { withRouter } from 'react-router-dom';
-import { isEnvFalse, isEnvTrue } from 'utils';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 import CustomScroll from '../customscroll/CustomScroll.component';
 import { FileUploadArea } from '../fileupload/FileUploadArea.component';
 

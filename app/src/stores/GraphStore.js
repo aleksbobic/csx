@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import SpriteText from 'three-spritetext';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class GraphStore {
     perspectives = [];
@@ -211,7 +211,7 @@ export class GraphStore {
             color: new THREE.Color('white')
         });
 
-        const geometryTemplate = new THREE.CircleGeometry(1, 16);
+        const geometryTemplate = new THREE.CircleGeometry(1, 32);
 
         const meshTemplate = new THREE.Mesh(
             geometryTemplate,

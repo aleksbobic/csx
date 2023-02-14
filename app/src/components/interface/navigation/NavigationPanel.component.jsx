@@ -38,7 +38,7 @@ import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
-import { isEnvFalse } from 'utils';
+import { isEnvFalse } from 'general.utils';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);

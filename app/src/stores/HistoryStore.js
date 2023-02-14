@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { MarkerType } from 'react-flow-renderer';
 import dagre from 'dagre';
 import axios from 'axios';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class HistoryStore {
     nodes = [];

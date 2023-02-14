@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class FileUploadStore {
     fileUploadData = {
@@ -60,17 +60,29 @@ export class FileUploadStore {
             this.store.core.handleRequestError(error);
             this.changeFileUploadModalVisiblity(false);
         } else {
-            Object.keys(response.data.columns).forEach(
-                column =>
-                    (this.fileUploadData.defaults[column] = {
-                        name: column,
-                        isDefaultVisible: false,
-                        isDefaultSearch: false,
-                        isDefaultLink: false,
-                        dataType: response.data.columns[column],
-                        removeIfNull: false
-                    })
-            );
+            Object.keys(response.data.columns).forEach((column, index) => {
+                this.fileUploadData.defaults[column] = {
+                    name: column,
+                    isDefaultVisible: false,
+                    isDefaultSearch: false,
+                    isDefaultLink: index === 1,
+                    dataType: response.data.columns[column],
+                    removeIfNull: false
+                };
+
+                if (index === 1) {
+                    this.changeDefaultLink(column);
+                }
+
+                if (
+                    this.isDefaultSarchNotSelected() &&
+                    ['string', 'integer'].includes(
+                        response.data.columns[column]
+                    )
+                ) {
+                    this.changeDefaultSearch(column);
+                }
+            });
 
             this.changeOriginalName(response.data.name);
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
@@ -125,31 +137,12 @@ export class FileUploadStore {
 
     changeDatasetName = val => (this.fileUploadData.name = val);
 
-    isVisibleByDefaultSelected = () =>
-        (this.fileUploadErrors.defaultVisible = !Object.keys(
-            this.fileUploadData.defaults
-        ).some(
-            column => this.fileUploadData.defaults[column].isDefaultVisible
-        ));
-
-    isDefaultLinkSelected = () =>
-        (this.fileUploadErrors.defaultLinks = !Object.keys(
-            this.fileUploadData.defaults
-        ).some(column => this.fileUploadData.defaults[column].isDefaultLink));
-
-    isDefaultSarchSelected = () =>
+    isDefaultSarchNotSelected = () =>
         (this.fileUploadErrors.defaultSearchable = !Object.keys(
             this.fileUploadData.defaults
         ).some(column => this.fileUploadData.defaults[column].isDefaultSearch));
 
     setDefaults = async () => {
-        this.isVisibleByDefaultSelected();
-        this.isDefaultLinkSelected();
-        this.isDefaultSarchSelected();
-        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
-            errorCode => this.fileUploadErrors[errorCode]
-        );
-
         if (this.showFileUploadError) {
             return false;
         }
@@ -218,7 +211,7 @@ export class FileUploadStore {
     updateConfig = async () => {
         this.isVisibleByDefaultSelected();
         this.isDefaultLinkSelected();
-        this.isDefaultSarchSelected();
+        this.isDefaultSarchNotSelected();
         this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
             errorCode => this.fileUploadErrors[errorCode]
         );

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class CoreStore {
     availableDatasets = [];

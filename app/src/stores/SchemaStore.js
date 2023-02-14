@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx';
-import dagre from 'dagre';
 import { v4 as uuidv4 } from 'uuid';
+import { generateNodePositions, getSchemaElementPositions } from 'schema.utils';
 
 export class SchemaStore {
     edgeRelationshipTypes = ['1:1', '1:M', 'M:N', 'M:1'];
@@ -43,284 +43,214 @@ export class SchemaStore {
     resetOverviewNodeProperties = () => (this.overviewDataNodeProperties = []);
 
     toggleRelationship = (id, possibleRelationships) => {
-        this.edges = this.edges.map(entry => {
-            if (entry['id'] === id) {
-                const currentRelIndex = possibleRelationships.indexOf(
-                    entry['data']['relationship']
-                );
+        const edge = this.edges.find(edge => edge.id === id);
 
-                if (currentRelIndex < possibleRelationships.length - 1) {
-                    entry['data']['relationship'] =
-                        possibleRelationships[currentRelIndex + 1];
-                } else {
-                    entry['data']['relationship'] = possibleRelationships[0];
-                }
+        const currentRelIndex = possibleRelationships.indexOf(
+            edge.data.relationship
+        );
 
-                this.store.track.trackEvent(
-                    'Schema Panel',
-                    `Edge - ${id}`,
-                    JSON.stringify({
-                        type: 'Click',
-                        value: `Change relationship to ${entry['data']['relationship']}`
-                    })
-                );
-            }
+        if (currentRelIndex < possibleRelationships.length - 1) {
+            edge.data.relationship = possibleRelationships[currentRelIndex + 1];
+        } else {
+            edge.data.relationship = possibleRelationships[0];
+        }
 
-            return entry;
-        });
+        this.store.track.trackEvent(
+            'Schema Panel',
+            `Edge - ${id}`,
+            JSON.stringify({
+                type: 'Click',
+                value: `Change relationship to ${edge.data.relationship}`
+            })
+        );
 
+        this.edges = [...this.edges];
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
     };
 
     getServerSchema = () => {
-        const serverSchema = [];
+        return this.edges.map(edge => {
+            const source = this.nodes.find(node => node.id === edge.source).data
+                .label;
 
-        this.edges.forEach(entry => {
-            if ('source' in entry && 'target' in entry) {
-                const source = this.nodes.find(
-                    node => node['id'] === entry['source']
-                )['data']['label'];
+            const target = this.nodes.find(node => node.id === edge.target).data
+                .label;
 
-                const target = this.nodes.find(
-                    node => node['id'] === entry['target']
-                )['data']['label'];
+            let serverRelationship = this.shortRelToRel[edge.data.relationship];
 
-                let serverRelationship =
-                    this.shortRelToRel[entry['data']['relationship']];
-
-                serverSchema.push({
-                    src: source,
-                    dest: target,
-                    relationship: serverRelationship
-                });
-            }
+            return {
+                src: source,
+                dest: target,
+                relationship: serverRelationship
+            };
         });
-
-        return serverSchema;
     };
 
     schemaContainsLinks = schema =>
         schema.some(entry => Object.keys(entry).includes('source'));
 
-    generateNodePositions = schema => {
-        const graph = new dagre.graphlib.Graph()
-            .setDefaultEdgeLabel(() => ({}))
-            .setGraph({
-                rankdir: 'LR',
-                align: 'UL'
-            });
-
-        schema.forEach(entry => {
-            if (!Object.keys(entry).includes('source')) {
-                graph.setNode(entry.id, {
-                    width: 208,
-                    height: 32,
-                    position: {
-                        x: 0,
-                        y: 0
-                    }
-                });
-            } else {
-                graph.setEdge(entry.source, entry.target);
-            }
-        });
-
-        dagre.layout(graph);
-
-        return schema.map(entry => {
-            if (!Object.keys(entry).includes('source')) {
-                const nodeWithPosition = graph.node(entry.id);
-                entry.targetPosition = 'top';
-                entry.sourcePosition = 'bottom';
-
-                entry.position = {
-                    y: nodeWithPosition.y - 32 / 2,
-                    x: nodeWithPosition.x - 208 / 2
-                };
-            }
-
-            return entry;
-        });
-    };
-
     getOverviewNodeProperties = () => {
-        const data = {
-            ...this.store.search.newNodeTypes,
-            ...this.store.search.nodeTypes
-        };
-
-        if (data[this.store.search.anchor] !== 'list') {
-            return Object.entries(data)
-                .filter(
-                    entry =>
-                        entry[0] !== this.store.search.anchor &&
-                        !['list', 'string'].includes(data[entry[0]])
-                )
-                .map(entry => entry[0]);
+        if (this.store.search.nodeTypes[this.store.search.anchor] === 'list') {
+            return [];
         }
 
-        return [];
+        return Object.entries(this.store.search.nodeTypes)
+            .filter(
+                entry =>
+                    entry[0] !== this.store.search.anchor &&
+                    !['list', 'string'].includes(entry[1])
+            )
+            .map(entry => entry[0]);
     };
 
-    populateStoreData = () => {
-        const schema = [];
-        const overviewSchema = [];
-        const overviewSchemaLinks = [];
+    generateSchemaNode = label => {
+        const isLink = this.store.search.links.includes(label);
+        const isAnchor = label === this.store.search.anchor;
+        const id = uuidv4();
+        this.nameToId[label] = id;
 
-        const relToShortRel = {
+        return {
+            id: `${id}`,
+            type: 'schemaNode',
+            position: { x: 0, y: 0 },
+            targetPosition: 'top',
+            sourcePosition: 'bottom',
+            data: {
+                label: label,
+                isAnchor: isAnchor,
+                setAnchor: this.setAnchor,
+                isLink: isLink,
+                setLink: this.setLink
+            },
+            style: {
+                background: this.colors.normal,
+                color: 'white',
+                borderRadius: '8px',
+                height: 'auto',
+                borderWidth: 0,
+                padding: '10px',
+                minWidth: 50
+            }
+        };
+    };
+
+    generateOverviewSchemaNode = (label, id) => {
+        const isLink = label ? this.store.search.links.includes(label) : true;
+        const isAnchor = label ? label === this.store.search.anchor : false;
+
+        return {
+            id: `${id}`,
+            type: 'overviewSchemaNode',
+            position: isLink ? { x: 250, y: 200 } : { x: 5, y: 200 },
+            targetPosition: 'top',
+            sourcePosition: 'bottom',
+            data: {
+                label: label,
+                isAnchor: isAnchor,
+                isLink: isLink,
+                position: isLink ? 'both' : 'left',
+                features: Object.keys(this.store.search.nodeTypes).filter(
+                    feature => !this.store.search.links.includes(feature)
+                ),
+                properties: this.getOverviewNodeProperties(),
+                addedProperties: this.overviewDataNodeProperties,
+                setAnchor: this.setAnchor,
+                addProperty: this.addProperty,
+                removeProperty: this.removeProperty,
+                addLinkNode: this.addLinkNode,
+                anchor: this.store.search.anchor,
+                setLink: this.setLink,
+                removeLink: this.removeLinkNode
+            },
+            style: {
+                background: this.colors.normal,
+                color: 'white',
+                borderRadius: '8px',
+                height: 'auto',
+                borderWidth: 0,
+                padding: '10px',
+                minWidth: 50
+            }
+        };
+    };
+
+    generateOverviewLink = linkNodeID => {
+        return {
+            id: `${-1}${linkNodeID}`,
+            source: `${-1}`,
+            target: `${linkNodeID}`,
+            arrowHeadType: 'none',
+            data: {},
+            type: 'overviewCustomEdge'
+        };
+    };
+
+    generateLink = link => {
+        const relationMap = {
             oneToOne: '1:1',
             oneToMany: '1:M',
             manyToMany: 'M:N',
             manyToOne: 'M:1'
         };
 
-        const features = [
-            ...Object.keys(this.store.search.nodeTypes),
-            ...Object.keys(this.store.search.newNodeTypes)
-        ];
+        const source = this.nameToId[link.src];
+        const target = this.nameToId[link.dest];
+
+        const possibleRelations = this.getPossibleRelations(
+            link.src,
+            link.dest
+        );
+
+        return {
+            id: `${source}${target}`,
+            source: `${source}`,
+            target: `${target}`,
+            type: 'schemaEdge',
+            arrowHeadType: 'arrowclosed',
+            data: {
+                possibleRelationships: possibleRelations,
+                relationship: link?.relationship
+                    ? relationMap[link?.relationship]
+                    : possibleRelations[0],
+                changeRelationship: this.toggleRelationship,
+                removeEdge: this.removeSchemaConnection
+            }
+        };
+    };
+
+    populateStoreData = () => {
+        const features = Object.keys(this.store.search.nodeTypes);
         const anchor = this.store.search.anchor;
 
-        features.forEach(node => {
-            const schemaNode = {
-                id: `${schema.length}`,
-                type: 'schemaNode',
-                data: {
-                    label: node,
-                    isAnchor: node === anchor,
-                    setAnchor: this.setAnchor,
-                    isLink: this.store.search.links.includes(node),
-                    setLink: this.setLink
-                },
-                position: { x: 0, y: 0 },
-                targetPosition: 'top',
-                sourcePosition: 'bottom',
-                style: {
-                    background:
-                        node === anchor
-                            ? this.colors.anchor
-                            : this.colors.normal,
-                    color: 'white',
-                    borderRadius: '8px',
-                    height: 'auto',
-                    borderWidth: 0,
-                    padding: '10px',
-                    minWidth: 50
+        this.overviewNodes = features
+            .filter(
+                node =>
+                    node === anchor || this.store.search.links.includes(node)
+            )
+            .map(node => {
+                if (node === anchor) {
+                    return this.generateOverviewSchemaNode(node, -1);
                 }
-            };
 
-            schema.push({
-                ...schemaNode,
-                style: { ...schemaNode.style, background: this.colors.normal }
+                return this.generateOverviewSchemaNode(node, uuidv4());
             });
 
-            if (node === anchor) {
-                overviewSchema.push({
-                    ...schemaNode,
-                    position: { x: 5, y: 200 },
-                    data: {
-                        ...schemaNode.data,
-                        position: 'left',
-                        features: [
-                            ...Object.keys(this.store.search.nodeTypes),
-                            ...Object.keys(this.store.search.newNodeTypes)
-                        ].filter(
-                            feature =>
-                                !this.store.search.links.includes(feature)
-                        ),
-                        properties: [...this.getOverviewNodeProperties()],
-                        addedProperties: this.overviewDataNodeProperties,
-                        setAnchor: this.setAnchor,
-                        addProperty: this.addProperty,
-                        removeProperty: this.removeProperty,
-                        addLinkNode: this.addLinkNode,
-                        anchor: this.store.search.anchor
-                    },
-                    style: {
-                        ...schemaNode.style,
-                        borderRadius: '8px',
-                        height: 'auto',
-                        padding: '10px'
-                    },
-                    id: '-1',
-                    type: 'overviewSchemaNode'
-                });
-            } else if (this.store.search.links.includes(node)) {
-                overviewSchema.push({
-                    ...schemaNode,
-                    position: { x: 250, y: 200 },
-                    id: uuidv4(),
-                    data: {
-                        ...schemaNode.data,
-                        position: 'both',
-                        setLink: this.setLink,
-                        removeLink: this.removeLinkNode,
-                        anchor: this.store.search.anchor
-                    },
-                    type: 'overviewSchemaNode'
-                });
-            }
+        this.overviewEdges = this.overviewNodes
+            .filter(node => node.data.isLink)
+            .map(node => this.generateOverviewLink(node.id));
 
-            this.nameToId[node] = schema.length - 1;
-        });
+        const schema = [
+            ...features.map(node => this.generateSchemaNode(node)),
+            ...this.store?.search?.schema.map(entry => this.generateLink(entry))
+        ];
 
-        overviewSchema.forEach(node => {
-            if (node.data.isLink) {
-                overviewSchemaLinks.push({
-                    id: `${-1}${node.id}`,
-                    source: `${-1}`,
-                    target: `${node.id}`,
-                    arrowHeadType: 'none',
-                    data: {},
-                    type: 'overviewCustomEdge'
-                });
-            }
-        });
+        this.data = generateNodePositions(schema);
 
-        this.store?.search?.schema.forEach(edge => {
-            const possibleConnections = this.getPossibleConnections(
-                edge['src'],
-                edge['dest']
-            );
-
-            schema.push({
-                id: `${this.nameToId[edge['src']]}${
-                    this.nameToId[edge['dest']]
-                }`,
-                source: `${this.nameToId[edge['src']]}`,
-                target: `${this.nameToId[edge['dest']]}`,
-                type: 'schemaEdge',
-                arrowHeadType: 'arrowclosed',
-                data: {
-                    possibleRelationships: possibleConnections,
-                    relationship: relToShortRel[edge['relationship']],
-                    changeRelationship: this.toggleRelationship,
-                    removeEdge: this.removeSchemaConnection
-                }
-            });
-        });
-
-        this.data = this.generateNodePositions(schema);
-
-        const nodes = [];
-        const edges = [];
-        this.data.forEach(entry => {
-            if (Object.keys(entry).includes('source')) {
-                edges.push(entry);
-            } else {
-                nodes.push(entry);
-            }
-        });
-
-        this.edges = edges;
-        this.nodes = nodes;
-
-        this.overviewNodes = [...overviewSchema];
-        this.overviewEdges = [...overviewSchemaLinks];
+        this.edges = this.data.filter(entry => 'source' in entry);
+        this.nodes = this.data.filter(entry => !('source' in entry));
 
         this.generateLayout();
     };
-
-    //TODO: implement a way to update schema when new values show up
 
     addLinkNode = () => {
         const newNodeId = uuidv4();
@@ -334,59 +264,11 @@ export class SchemaStore {
             })
         );
 
-        this.overviewNodes.push({
-            id: newNodeId,
-            position: { x: 250, y: 200 },
-            type: 'overviewSchemaNode',
-            data: {
-                label: null,
-                isAnchor: false,
-                setAnchor: this.setAnchor,
-                addProperty: this.addProperty,
-                removeProperty: this.removeProperty,
-                addedProperties: this.overviewDataNodeProperties,
-                isLink: true,
-                setLink: this.setLink,
-                removeLink: this.removeLinkNode,
-                position: 'both',
-                features: [
-                    ...Object.keys(this.store.search.nodeTypes),
-                    ...Object.keys(this.store.search.newNodeTypes)
-                ].filter(feature => !this.store.search.links.includes(feature)),
-                anchor: this.store.search.anchor
-            },
-            targetPosition: 'top',
-            sourcePosition: 'bottom',
-            style: {
-                background: this.colors.normal,
-                color: 'white',
-                borderRadius: '8px',
-                height: 'auto',
-                borderWidth: 0,
-                padding: '10px',
-                minWidth: 50
-            }
-        });
+        this.overviewNodes.push(
+            this.generateOverviewSchemaNode(null, newNodeId)
+        );
 
-        this.overviewEdges.push({
-            id: `${-1}${newNodeId}`,
-            source: `${-1}`,
-            target: `${newNodeId}`,
-            arrowHeadType: 'none',
-            data: {},
-            type: 'overviewCustomEdge'
-        });
-        this.overviewEdges.push({
-            id: `${newNodeId}${-2}`,
-            source: `${newNodeId}`,
-            target: `${-2}`,
-            arrowHeadType: 'none',
-            data: {},
-            type: 'overviewCustomEdge'
-        });
-
-        this.overviewNodes = [...this.overviewNodes];
-        this.overviewEdges = [...this.overviewEdges];
+        this.overviewEdges.push(this.generateOverviewLink(newNodeId));
 
         this.generateLayout();
     };
@@ -401,13 +283,11 @@ export class SchemaStore {
             })
         );
 
-        this.overviewNodes = this.overviewNodes.filter(entry => {
-            return entry.id !== id;
-        });
+        this.overviewNodes = this.overviewNodes.filter(node => node.id !== id);
 
-        this.overviewEdges = this.overviewEdges.filter(entry => {
-            return entry.id !== `${-1}${id}` && entry.id !== `${id}${-2}`;
-        });
+        this.overviewEdges = this.overviewEdges.filter(
+            edge => edge.id !== `-1${id}`
+        );
 
         this.generateLayout();
     };
@@ -428,44 +308,30 @@ export class SchemaStore {
             this.resetProperties();
         }
 
+        const freeFeatures = Object.keys(this.store.search.nodeTypes).filter(
+            feature =>
+                feature === this.store.search.anchor ||
+                !this.store.search.links.includes(feature)
+        );
+
         this.overviewNodes = this.overviewNodes.map(entry => {
-            if ('isAnchor' in entry.data && entry.data.isAnchor) {
-                entry.data.label = anchor;
-                entry.data.properties = this.getOverviewNodeProperties();
+            if (entry?.data?.isAnchor) {
+                entry.data = {
+                    ...entry.data,
+                    label: anchor,
+                    properties: this.getOverviewNodeProperties()
+                };
 
                 if (this.store.search.nodeTypes[anchor] === 'list') {
                     entry.data.addedProperties =
                         this.overviewDataNodeProperties;
                 }
-
-                entry.style = {
-                    background:
-                        entry.data.isAnchor && entry.data.position === 'left'
-                            ? this.colors.anchor
-                            : 'rgba(100,100,100,0.5)',
-                    color: 'white',
-                    borderRadius: '8px',
-                    height: 'auto',
-                    borderWidth: 0,
-                    padding: '10px',
-                    minWidth: 50,
-                    opacity: 1
-                };
+            } else {
+                entry.data = { ...entry.data, features: freeFeatures };
             }
 
             entry.data.anchor = this.store.search.anchor;
             return entry;
-        });
-
-        this.overviewEdges = this.overviewEdges.map(entry => {
-            return {
-                id: `${entry.id}`,
-                source: `${entry.source}`,
-                target: `${entry.target}`,
-                arrowHeadType: 'none',
-                data: {},
-                type: 'overviewCustomEdge'
-            };
         });
     };
 
@@ -484,27 +350,13 @@ export class SchemaStore {
                 this.store.search.links.filter(entry => entry !== link)
             );
 
-            this.data = this.data.map(entry => {
-                if ('isAnchor' in entry.data) {
-                    if (entry.data.label === link) {
-                        entry.data.isLink = false;
-                    }
-
-                    entry.style = {
-                        background:
-                            entry.data.label === link
-                                ? this.colors.normal
-                                : entry.style.background,
-                        color: 'white',
-                        borderRadius: '8px',
-                        height: 'auto',
-                        borderWidth: 0,
-                        padding: '10px',
-                        minWidth: 50
-                    };
-                }
-                return entry;
-            });
+            const freeFeatures = Object.keys(
+                this.store.search.nodeTypes
+            ).filter(
+                feature =>
+                    feature === this.store.search.anchor ||
+                    !this.store.search.links.includes(feature)
+            );
 
             const overviewLinkNodeId = this.overviewNodes.find(
                 entry => entry.data.label === link
@@ -513,153 +365,32 @@ export class SchemaStore {
             this.overviewNodes = this.overviewNodes
                 .filter(entry => entry.id !== overviewLinkNodeId)
                 .map(entry => {
-                    if (
-                        (entry.data.isLink && !entry.data.label) ||
-                        entry.data.isAnchor
-                    ) {
-                        entry.data.features = Object.keys(
-                            this.store.search.nodeTypes
-                        ).filter(
-                            feature =>
-                                !this.store.search.links.includes(feature)
-                        );
-                    }
-
+                    entry.data = { ...entry.data, features: freeFeatures };
                     return entry;
                 });
 
-            this.overviewEdges = this.overviewEdges
-                .filter(
-                    entry =>
-                        entry.id !== `${-1}${overviewLinkNodeId}` &&
-                        entry.id !== `${overviewLinkNodeId}${-2}`
-                )
-                .map(entry => {
-                    if (
-                        (entry.data.isLink && !entry.data.label) ||
-                        entry.data.isAnchor
-                    ) {
-                        entry.data.features = Object.keys(
-                            this.store.search.nodeTypes
-                        ).filter(
-                            feature =>
-                                !this.store.search.links.includes(feature)
-                        );
-                    }
-
-                    return {
-                        id: `${entry.id}`,
-                        source: `${entry.source}`,
-                        target: `${entry.target}`,
-                        arrowHeadType: 'none',
-                        data: {},
-                        type: 'overviewCustomEdge'
-                    };
-                });
+            this.overviewEdges = this.overviewEdges.filter(
+                entry => entry.id !== `${-1}${overviewLinkNodeId}`
+            );
         } else {
             this.store.search.links.push(link);
 
-            this.data = this.data.map(entry => {
-                if ('isAnchor' in entry.data) {
-                    if (entry.data.label === link) {
-                        entry.data.isLink = true;
-                    }
-
-                    entry.style = {
-                        background: entry.style.background,
-                        color: 'white',
-                        borderRadius: '8px',
-                        height: 'auto',
-                        borderWidth: 0,
-                        padding: '10px',
-                        minWidth: 50
-                    };
-                }
-                return entry;
-            });
-
-            let nodeValueChanged = false;
-
-            if (
-                !nodeId &&
-                !this.overviewNodes.find(
-                    node => node.data.isLink && !node.data.label
-                )
-            ) {
-                this.addLinkNode();
-            }
+            const freeFeatures = Object.keys(
+                this.store.search.nodeTypes
+            ).filter(
+                feature =>
+                    feature === this.store.search.anchor ||
+                    !this.store.search.links.includes(feature)
+            );
 
             this.overviewNodes = this.overviewNodes.map(entry => {
-                if (nodeId) {
-                    if (
-                        'isLink' in entry.data &&
-                        entry.data.isLink &&
-                        entry.id === nodeId
-                    ) {
-                        entry.data.label = link;
-                        nodeValueChanged = true;
-
-                        entry.style = {
-                            background: entry.data.isAnchor
-                                ? this.colors.anchor
-                                : this.colors.normal,
-                            color: 'white',
-                            borderRadius: '8px',
-                            height: 'auto',
-                            borderWidth: 0,
-                            padding: '10px',
-                            minWidth: 50,
-                            opacity: 1
-                        };
-                    }
-                } else {
-                    if (
-                        'isLink' in entry.data &&
-                        entry.data.isLink &&
-                        !entry.data.label &&
-                        !nodeValueChanged
-                    ) {
-                        entry.data.label = link;
-                        nodeValueChanged = true;
-
-                        entry.style = {
-                            background: entry.data.isAnchor
-                                ? this.colors.anchor
-                                : this.colors.normal,
-                            color: 'white',
-                            borderRadius: '8px',
-                            height: 'auto',
-                            borderWidth: 0,
-                            padding: '10px',
-                            minWidth: 50,
-                            opacity: 1
-                        };
-                    }
+                if (entry.id === nodeId) {
+                    entry.data = { ...entry.data, label: link };
                 }
 
-                if (
-                    (entry.data.isLink && !entry.data.label) ||
-                    entry.data.isAnchor
-                ) {
-                    entry.data.features = Object.keys(
-                        this.store.search.nodeTypes
-                    ).filter(
-                        feature => !this.store.search.links.includes(feature)
-                    );
-                }
+                entry.data = { ...entry.data, features: freeFeatures };
 
                 return entry;
-            });
-
-            this.overviewEdges = this.overviewEdges.map(entry => {
-                return {
-                    id: `${entry.id}`,
-                    source: `${entry.source}`,
-                    target: `${entry.target}`,
-                    arrowHeadType: 'none',
-                    data: {},
-                    type: 'overviewCustomEdge'
-                };
             });
         }
 
@@ -667,35 +398,30 @@ export class SchemaStore {
     };
 
     getNodeNameFromId = id => {
-        let name = '';
-
-        Object.keys(this.nameToId).forEach(key => {
-            if (this.nameToId[key] === Number(id)) {
-                name = key;
-            }
-        });
-
-        return name;
+        return (
+            Object.keys(this.nameToId).filter(
+                key => this.nameToId[key] === id
+            )[0] || ''
+        );
     };
 
-    getPossibleConnections = (source, target) => {
-        const types = {
-            ...this.store.search.nodeTypes,
-            ...this.store.search.newNodeTypes
-        };
+    getPossibleRelations = (source, target) => {
+        const source_type = this.store.search.nodeTypes[source];
+        const target_type = this.store.search.nodeTypes[target];
 
-        const src_type = types[source];
-        const tar_type = types[target];
-
-        if (src_type === 'list' && tar_type === 'list') {
+        if (source_type === 'list' && target_type === 'list') {
             return ['M:N', '1:1'];
-        } else if (src_type === 'list' && tar_type !== 'list') {
-            return ['M:1'];
-        } else if (src_type !== 'list' && tar_type === 'list') {
-            return ['1:M'];
-        } else {
-            return ['1:1'];
         }
+
+        if (source_type === 'list' && target_type !== 'list') {
+            return ['M:1'];
+        }
+
+        if (source_type !== 'list' && target_type === 'list') {
+            return ['1:M'];
+        }
+
+        return ['1:1'];
     };
 
     getConnectedNodes = () => {
@@ -723,29 +449,16 @@ export class SchemaStore {
             })
         );
 
-        const possibleConnections = this.getPossibleConnections(
-            this.getNodeNameFromId(edge['source']),
-            this.getNodeNameFromId(edge['target'])
-        );
-
         this.edges = [
             ...this.edges,
-            {
-                id: `${edge['source']}${edge['target']}`,
-                source: edge['source'],
-                target: edge['target'],
-                type: 'schemaEdge',
-                arrowHeadType: 'arrowclosed',
-                data: {
-                    possibleRelationships: possibleConnections,
-                    relationship: possibleConnections[0],
-                    changeRelationship: this.toggleRelationship,
-                    removeEdge: this.removeSchemaConnection
-                }
-            }
+            this.generateLink({
+                src: this.getNodeNameFromId(edge.source),
+                dest: this.getNodeNameFromId(edge.target)
+            })
         ];
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+        this.store.core.updateVisibleDimensionsBasedOnSchema();
     };
 
     updateSchemaConnection = (oldEdge, newEdge) => {
@@ -774,6 +487,7 @@ export class SchemaStore {
         this.edges = this.edges.filter(entry => entry['id'] !== id);
 
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+        this.store.core.updateVisibleDimensionsBasedOnSchema();
     };
 
     resetProperties = () => {
@@ -821,88 +535,13 @@ export class SchemaStore {
         this.generateLayout();
     };
 
-    getLayoutedElements = (nodes, edges, direction = 'TB') => {
-        const dagreGraph = new dagre.graphlib.Graph();
-        dagreGraph.setDefaultEdgeLabel(() => ({}));
-
-        const isHorizontal = direction === 'LR';
-        dagreGraph.setGraph({ rankdir: direction });
-
-        nodes.forEach(node => {
-            let height = node.data.isAnchor
-                ? 98 + this.overviewDataNodeProperties.length * 38
-                : 41;
-
-            if (
-                node.data.isAnchor &&
-                node.data.addedProperties.length === node.data.properties.length
-            ) {
-                height = height - 24;
-            }
-
-            let width = node.data.isAnchor ? 224 : 195;
-
-            if (
-                node.data.isAnchor &&
-                node.data.addedProperties.length === node.data.properties.length
-            ) {
-                width = width - 39;
-            }
-
-            dagreGraph.setNode(node.id, {
-                width: width,
-                height: height
-            });
-        });
-
-        edges.forEach(edge => {
-            dagreGraph.setEdge(edge.source, edge.target);
-        });
-
-        dagre.layout(dagreGraph);
-
-        nodes.forEach(node => {
-            const nodeWithPosition = dagreGraph.node(node.id);
-            node.targetPosition = isHorizontal ? 'left' : 'top';
-            node.sourcePosition = isHorizontal ? 'right' : 'bottom';
-
-            let height = node.data.isAnchor
-                ? 98 + this.overviewDataNodeProperties.length * 38
-                : 41;
-
-            if (
-                node.data.isAnchor &&
-                node.data.addedProperties.length === node.data.properties.length
-            ) {
-                height = height - 24;
-            }
-
-            let width = node.data.isAnchor ? 224 : 195;
-
-            if (
-                node.data.isAnchor &&
-                node.data.addedProperties.length === node.data.properties.length
-            ) {
-                width = width - 39;
-            }
-
-            node.position = {
-                x: nodeWithPosition.x - width / 2,
-                y: nodeWithPosition.y - height / 2
-            };
-
-            return node;
-        });
-
-        return { nodes, edges };
-    };
-
     generateLayout = () => {
         const { nodes: layoutedNodes, edges: layoutedEdges } =
-            this.getLayoutedElements(
+            getSchemaElementPositions(
                 this.overviewNodes,
                 this.overviewEdges,
-                'LR' // Horizontal layout left -> right
+                this.overviewDataNodeProperties.length,
+                'LR'
             );
 
         this.overviewNodes = [...layoutedNodes];

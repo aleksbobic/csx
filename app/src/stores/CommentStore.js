@@ -1,7 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { safeRequest } from 'utils';
+import { safeRequest } from 'general.utils';
 
 export class CommentStore {
     editMode = false;

@@ -14,7 +14,7 @@ import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
 import { HistoryStore } from './HistoryStore';
 import { CommentStore } from './CommentStore';
-import { isEnvSet } from 'utils';
+import { isEnvSet } from 'general.utils';
 
 export class RootStore {
     constructor() {

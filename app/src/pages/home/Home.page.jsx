@@ -31,7 +31,7 @@ import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
-import { isEnvFalse, isEnvTrue } from 'utils';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 
 function HomePage() {
     const toast = useToast();

@@ -27,7 +27,7 @@ import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import { isEnvFalse } from 'utils';
+import { isEnvFalse } from 'general.utils';
 import CustomScroll from '../customscroll/CustomScroll.component';
 
 function CookieInfo() {
