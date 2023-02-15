@@ -32,6 +32,8 @@ export class SearchStore {
 
     setSearchQuery = val => (this.query = val);
 
+    setAnchor = val => (this.anchor = val);
+
     setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
     setSearchIsEmpty = searchIsEmpty => (this.searchIsEmpty = searchIsEmpty);

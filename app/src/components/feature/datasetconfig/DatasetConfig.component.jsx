@@ -41,6 +41,7 @@ function DatasetConfig(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
     const [activeTab, setActiveTab] = useState(0);
+    const [schemaName, setSchemaName] = useState('');
 
     const renderColumnTypeDropdown = (column, defaultType) => {
         return (
@@ -92,35 +93,6 @@ function DatasetConfig(props) {
                 <option value="category">category</option>
             </Select>
         );
-    };
-
-    const getTextForErrorCode = errorCode => {
-        switch (errorCode) {
-            case 'defaultVisible':
-                return 'visible nodes';
-            case 'defaultSearchable':
-                return 'searchable nodes';
-            default:
-                return 'link nodes';
-        }
-    };
-
-    const generateErrorMessage = () => {
-        const errors = Object.keys(store.fileUpload.fileUploadErrors)
-            .map(errorCode =>
-                store.fileUpload.fileUploadErrors[errorCode]
-                    ? getTextForErrorCode(errorCode)
-                    : ''
-            )
-            .filter(val => val !== '');
-
-        if (errors.length === 1) {
-            return errors[0];
-        } else if (errors.length === 2) {
-            return `${errors[0]} and ${errors[1]}`;
-        } else {
-            return `${errors[0]}, ${errors[1]} and ${errors[2]}`;
-        }
     };
 
     const renderTableHeader = () => (
@@ -509,6 +481,53 @@ function DatasetConfig(props) {
         </>
     );
 
+    const renderDefultSchemas = graphType => {
+        return store.fileUpload.fileUploadData.schemas[graphType].map(
+            schema => (
+                <HStack
+                    height="40px"
+                    width="100%"
+                    key={`schema_${schema.id}`}
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.100'
+                            : 'blackAlpha.300'
+                    }
+                    padding="10px"
+                    justifyContent="space-between"
+                    marginBottom="8px"
+                    borderRadius="8px"
+                >
+                    <Tooltip label={schema.name}>
+                        <Text
+                            fontSize="sm"
+                            fontWeight="bold"
+                            overflow="hidden"
+                            whiteSpace="nowrap"
+                            textOverflow="ellipsis"
+                        >
+                            {schema.name}
+                        </Text>
+                    </Tooltip>
+                    )
+                    <Tooltip label={`Delete ${schema.name} schema`}>
+                        <IconButton
+                            variant="ghost"
+                            size="xs"
+                            onClick={() =>
+                                store.fileUpload.deleteDefaultSchema(
+                                    schema.id,
+                                    graphType
+                                )
+                            }
+                            icon={<Close style={{ '--ggs': 0.8 }} />}
+                        />
+                    </Tooltip>
+                </HStack>
+            )
+        );
+    };
+
     const renderDefaultOverviewSchemaConfig = () => {
         return (
             <>
@@ -533,40 +552,7 @@ function DatasetConfig(props) {
                         borderRadius="10px"
                     >
                         <CustomScroll style={{ padding: '10px 10px 0 10px' }}>
-                            <HStack
-                                height="40px"
-                                width="100%"
-                                backgroundColor={
-                                    colorMode === 'light'
-                                        ? 'blackAlpha.100'
-                                        : 'blackAlpha.300'
-                                }
-                                padding="10px"
-                                justifyContent="space-between"
-                                marginBottom="8px"
-                                borderRadius="8px"
-                            >
-                                <Tooltip label="First Schema very long">
-                                    <Text
-                                        fontSize="sm"
-                                        fontWeight="bold"
-                                        overflow="hidden"
-                                        whiteSpace="nowrap"
-                                        textOverflow="ellipsis"
-                                    >
-                                        First Schema very long
-                                    </Text>
-                                </Tooltip>
-                                <Tooltip label="Delete default schema">
-                                    <IconButton
-                                        variant="ghost"
-                                        size="xs"
-                                        icon={
-                                            <Close style={{ '--ggs': 0.8 }} />
-                                        }
-                                    />
-                                </Tooltip>
-                            </HStack>
+                            {renderDefultSchemas('overview')}
                             <HStack
                                 height="40px"
                                 width="100%"
@@ -590,11 +576,26 @@ function DatasetConfig(props) {
                                     textOverflow="ellipsis"
                                     placeholder="Schema name"
                                     borderRadius="4px"
+                                    value={schemaName}
+                                    onChange={e =>
+                                        setSchemaName(e.target.value)
+                                    }
                                 ></Input>
                                 <Tooltip label="Add default schema">
                                     <IconButton
                                         variant="ghost"
                                         size="xs"
+                                        isDisabled={
+                                            schemaName === '' ||
+                                            !store.overviewSchema.schemaHasLink
+                                        }
+                                        onClick={() => {
+                                            store.fileUpload.addDefaultSchema(
+                                                schemaName,
+                                                'overview'
+                                            );
+                                            setSchemaName('');
+                                        }}
                                         icon={
                                             <MathPlus
                                                 style={{ '--ggs': 0.7 }}
@@ -646,6 +647,7 @@ function DatasetConfig(props) {
                         borderRadius="10px"
                     >
                         <CustomScroll style={{ padding: '10px 10px 0 10px' }}>
+                            {renderDefultSchemas('detail')}
                             <HStack
                                 height="40px"
                                 width="100%"
@@ -659,20 +661,40 @@ function DatasetConfig(props) {
                                 marginBottom="8px"
                                 borderRadius="8px"
                             >
-                                <Text
+                                <Input
                                     fontSize="sm"
+                                    size="xs"
+                                    variant="filled"
                                     fontWeight="bold"
                                     overflow="hidden"
                                     whiteSpace="nowrap"
                                     textOverflow="ellipsis"
-                                >
-                                    First Schema very long
-                                </Text>
-                                <IconButton
-                                    variant="ghost"
-                                    size="xs"
-                                    icon={<Close style={{ '--ggs': 0.8 }} />}
-                                />
+                                    placeholder="Schema name"
+                                    borderRadius="4px"
+                                    value={schemaName}
+                                    onChange={e =>
+                                        setSchemaName(e.target.value)
+                                    }
+                                ></Input>
+                                <Tooltip label="Add default schema">
+                                    <IconButton
+                                        variant="ghost"
+                                        size="xs"
+                                        isDisabled={schemaName === ''}
+                                        onClick={() => {
+                                            store.fileUpload.addDefaultSchema(
+                                                schemaName,
+                                                'detail'
+                                            );
+                                            setSchemaName('');
+                                        }}
+                                        icon={
+                                            <MathPlus
+                                                style={{ '--ggs': 0.7 }}
+                                            />
+                                        }
+                                    />
+                                </Tooltip>
                             </HStack>
                         </CustomScroll>
                     </VStack>
@@ -788,7 +810,14 @@ function DatasetConfig(props) {
                         {activeTab > 0 && (
                             <Button
                                 variant="outline"
-                                onClick={() => setActiveTab(activeTab - 1)}
+                                onClick={() => {
+                                    if (activeTab === 2) {
+                                        store.overviewSchema.populateStoreData(
+                                            true
+                                        );
+                                    }
+                                    setActiveTab(activeTab - 1);
+                                }}
                             >
                                 Prev
                             </Button>
@@ -807,6 +836,14 @@ function DatasetConfig(props) {
                                         })
                                     );
 
+                                    if (activeTab === 0) {
+                                        store.overviewSchema.populateStoreData(
+                                            true
+                                        );
+                                    }
+                                    if (activeTab === 1) {
+                                        store.schema.populateStoreData(true);
+                                    }
                                     setActiveTab(activeTab + 1);
                                 }}
                             >

@@ -174,7 +174,9 @@ def transform_to_list(raw_entry):
 
 
 @router.get("/settings")
-def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
+def set_defaults(
+    original_name: str, name="", anchor="", defaults="{}", default_schemas="{}"
+):
     defaults = json.loads(defaults)
 
     # Generate default config
@@ -185,6 +187,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
         "schemas": [{"name": "default", "relations": []}],
+        "default_schemas": json.loads(default_schemas),
     }
 
     dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { safeRequest } from 'general.utils';
+import { v4 as uuidv4 } from 'uuid';
 
 export class FileUploadStore {
     fileUploadData = {
@@ -8,7 +9,11 @@ export class FileUploadStore {
         originalName: '',
         anchor: '',
         link: '',
-        defaults: {}
+        defaults: {},
+        schemas: {
+            overview: [],
+            detail: []
+        }
     };
     fileUploadErrors = {
         defaultVisible: false,
@@ -38,7 +43,11 @@ export class FileUploadStore {
             originalName: '',
             anchor: '',
             link: '',
-            defaults: {}
+            defaults: {},
+            schemas: {
+                overview: [],
+                detail: []
+            }
         });
 
     uploadFile = async files => {
@@ -88,6 +97,31 @@ export class FileUploadStore {
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
             this.changeDatasetName(response.data.name);
         }
+    };
+
+    addDefaultSchema = (name, graphType) => {
+        if (graphType === 'overview') {
+            this.fileUploadData.schemas[graphType].push({
+                id: uuidv4(),
+                name: name,
+                links: this.store.overviewSchema.links,
+                anchor: this.store.overviewSchema.anchor,
+                anchorProperties: this.store.overviewSchema.anchorProperties
+            });
+        } else {
+            this.fileUploadData.schemas[graphType].push({
+                id: uuidv4(),
+                name: name,
+                nodes: this.store.schema.nodes,
+                edges: this.store.schema.edges
+            });
+        }
+    };
+
+    deleteDefaultSchema = (id, graphType) => {
+        this.fileUploadData.schemas[graphType] = this.fileUploadData.schemas[
+            graphType
+        ].filter(schema => schema.id !== id);
     };
 
     changeOriginalName = val => (this.fileUploadData.originalName = val);
@@ -153,7 +187,8 @@ export class FileUploadStore {
             original_name: this.fileUploadData.originalName,
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
-            defaults: JSON.stringify(this.fileUploadData.defaults)
+            defaults: JSON.stringify(this.fileUploadData.defaults),
+            default_schemas: JSON.stringify(this.fileUploadData.schemas)
         };
 
         const { error } = await safeRequest(

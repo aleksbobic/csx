@@ -8,7 +8,11 @@ export class OverviewSchemaStore {
 
     anchorProperties = [];
     schemaHasLink = true;
-
+    useUploadData = false;
+    features = [];
+    featureTypes = {};
+    anchor = null;
+    links = [];
     nodeLabelToID = {};
 
     updateNodes = nodes => (this.nodes = nodes);
@@ -20,24 +24,26 @@ export class OverviewSchemaStore {
     }
 
     setAnchorProperties = properties => (this.anchorProperties = properties);
+    setUseUploadData = val => (this.useUploadData = val);
+    setSchemaHasLink = val => (this.schemaHasLink = val);
 
     getNodeProperties = () => {
-        if (this.store.search.nodeTypes[this.store.search.anchor] === 'list') {
+        if (this.featureTypes[this.anchor] === 'list') {
             return [];
         }
 
-        return Object.entries(this.store.search.nodeTypes)
+        return Object.entries(this.featureTypes)
             .filter(
                 entry =>
-                    entry[0] !== this.store.search.anchor &&
+                    entry[0] !== this.anchor &&
                     !['list', 'string'].includes(entry[1])
             )
             .map(entry => entry[0]);
     };
 
     generateNode = (label, id) => {
-        const isLink = label ? this.store.search.links.includes(label) : true;
-        const isAnchor = label ? label === this.store.search.anchor : false;
+        const isLink = label ? this.links.includes(label) : true;
+        const isAnchor = label ? label === this.anchor : false;
 
         return {
             id: `${id}`,
@@ -50,8 +56,8 @@ export class OverviewSchemaStore {
                 isAnchor: isAnchor,
                 isLink: isLink,
                 position: isLink ? 'both' : 'left',
-                features: Object.keys(this.store.search.nodeTypes).filter(
-                    feature => !this.store.search.links.includes(feature)
+                features: this.features.filter(
+                    feature => !this.links.includes(feature)
                 ),
                 properties: this.getNodeProperties(),
                 addedProperties: this.anchorProperties,
@@ -59,7 +65,7 @@ export class OverviewSchemaStore {
                 addProperty: this.addProperty,
                 removeProperty: this.removeProperty,
                 addLinkNode: this.addLinkNode,
-                anchor: this.store.search.anchor,
+                anchor: this.anchor,
                 setLink: this.setLink,
                 removeLink: this.removeLinkNode
             },
@@ -86,22 +92,44 @@ export class OverviewSchemaStore {
         };
     };
 
-    populateStoreData = () => {
-        const features = Object.keys(this.store.search.nodeTypes);
-        const anchor = this.store.search.anchor;
+    populateStoreData = (useUploadData = false) => {
+        this.setUseUploadData(useUploadData);
+        this.resetProperties();
 
-        this.nodes = features
-            .filter(
-                node =>
-                    node === anchor || this.store.search.links.includes(node)
-            )
+        if (useUploadData) {
+            this.features = Object.keys(
+                this.store.fileUpload.fileUploadData.defaults
+            );
+            this.featureTypes = {};
+            Object.keys(this.store.fileUpload.fileUploadData.defaults).forEach(
+                feature => {
+                    this.featureTypes[feature] =
+                        this.store.fileUpload.fileUploadData.defaults[
+                            feature
+                        ].dataType;
+                }
+            );
+
+            this.anchor = this.store.fileUpload.fileUploadData.anchor;
+            this.links = [this.store.fileUpload.fileUploadData.link];
+        } else {
+            this.features = Object.keys(this.store.search.nodeTypes);
+            this.featureTypes = this.store.search.nodeTypes;
+            this.anchor = this.store.search.anchor;
+            this.links = this.store.search.links;
+        }
+
+        this.nodes = this.features
+            .filter(node => node === this.anchor || this.links.includes(node))
             .map(node => {
-                if (node === anchor) {
+                if (node === this.anchor) {
                     return this.generateNode(node, -1);
                 }
 
                 return this.generateNode(node, uuidv4());
             });
+
+        this.setSchemaHasLink(this.nodes.length > 1);
 
         this.edges = this.nodes
             .filter(node => node.data.isLink)
@@ -143,6 +171,10 @@ export class OverviewSchemaStore {
 
         this.edges = this.edges.filter(edge => edge.id !== `-1${id}`);
 
+        if (this.nodes.length === 1) {
+            this.setSchemaHasLink(false);
+        }
+
         this.generateLayout();
     };
 
@@ -156,16 +188,17 @@ export class OverviewSchemaStore {
             })
         );
 
-        this.store.search.anchor = anchor;
+        this.anchor = anchor;
+        if (!this.useUploadData) {
+            this.store.search.setAnchor(anchor);
+        }
 
-        if (this.store.search.nodeTypes[anchor] === 'list') {
+        if (this.featureTypes[anchor] === 'list') {
             this.resetProperties();
         }
 
-        const freeFeatures = Object.keys(this.store.search.nodeTypes).filter(
-            feature =>
-                feature === this.store.search.anchor ||
-                !this.store.search.links.includes(feature)
+        const freeFeatures = this.features.filter(
+            feature => feature === this.anchor || !this.links.includes(feature)
         );
 
         this.nodes = this.nodes.map(entry => {
@@ -176,14 +209,14 @@ export class OverviewSchemaStore {
                     properties: this.getNodeProperties()
                 };
 
-                if (this.store.search.nodeTypes[anchor] === 'list') {
+                if (this.featureTypes[anchor] === 'list') {
                     entry.data.addedProperties = this.anchorProperties;
                 }
             } else {
                 entry.data = { ...entry.data, features: freeFeatures };
             }
 
-            entry.data.anchor = this.store.search.anchor;
+            entry.data.anchor = this.anchor;
             return entry;
         });
     };
@@ -198,17 +231,15 @@ export class OverviewSchemaStore {
             })
         );
 
-        if (this.store.search.links.includes(link)) {
-            this.store.search.setLinks(
-                this.store.search.links.filter(entry => entry !== link)
-            );
+        if (this.links.includes(link)) {
+            this.links = this.links.filter(entry => entry !== link);
+            if (!this.useUploadData) {
+                this.store.search.setLinks(this.links);
+            }
 
-            const freeFeatures = Object.keys(
-                this.store.search.nodeTypes
-            ).filter(
+            const freeFeatures = this.features.filter(
                 feature =>
-                    feature === this.store.search.anchor ||
-                    !this.store.search.links.includes(feature)
+                    feature === this.anchor || !this.links.includes(feature)
             );
 
             const overviewLinkNodeId = this.nodes.find(
@@ -222,18 +253,25 @@ export class OverviewSchemaStore {
                     return entry;
                 });
 
+            if (this.nodes.length === 1) {
+                this.setSchemaHasLink(false);
+            }
+
             this.edges = this.edges.filter(
                 entry => entry.id !== `${-1}${overviewLinkNodeId}`
             );
         } else {
-            this.store.search.links.push(link);
+            this.links.push(link);
 
-            const freeFeatures = Object.keys(
-                this.store.search.nodeTypes
-            ).filter(
+            this.setSchemaHasLink(true);
+
+            if (!this.useUploadData) {
+                this.store.search.setLinks(this.links);
+            }
+
+            const freeFeatures = this.features.filter(
                 feature =>
-                    feature === this.store.search.anchor ||
-                    !this.store.search.links.includes(feature)
+                    feature === this.anchor || !this.links.includes(feature)
             );
 
             this.nodes = this.nodes.map(entry => {

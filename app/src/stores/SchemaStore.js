@@ -7,6 +7,15 @@ export class SchemaStore {
     edges = [];
 
     nodeLabelToID = {};
+    useUploadData = false;
+    features = [];
+    featureTypes = {};
+    relationshipMapping = {
+        '1:1': 'oneToOne',
+        '1:M': 'oneToMany',
+        'M:N': 'manyToMany',
+        'M:1': 'manyToOne'
+    };
 
     updateNodes = nodes => (this.nodes = nodes);
     updateEdges = edges => (this.edges = edges);
@@ -15,6 +24,8 @@ export class SchemaStore {
         this.store = store;
         makeAutoObservable(this);
     }
+
+    setUseUploadData = val => (this.useUploadData = val);
 
     toggleRelationship = (id, possibleRelationships) => {
         const edge = this.edges.find(edge => edge.id === id);
@@ -39,17 +50,14 @@ export class SchemaStore {
         );
 
         this.edges = [...this.edges];
-        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+        if (!this.useUploadData) {
+            this.store.search.updateCurrentDatasetSchema(
+                this.getServerSchema()
+            );
+        }
     };
 
     getServerSchema = () => {
-        const relationshipMapping = {
-            '1:1': 'oneToOne',
-            '1:M': 'oneToMany',
-            'M:N': 'manyToMany',
-            'M:1': 'manyToOne'
-        };
-
         return this.edges.map(edge => {
             const source = this.nodes.find(node => node.id === edge.source).data
                 .label;
@@ -58,7 +66,7 @@ export class SchemaStore {
                 .label;
 
             let serverRelationship =
-                relationshipMapping[edge.data.relationship];
+                this.relationshipMapping[edge.data.relationship];
 
             return {
                 src: source,
@@ -132,13 +140,48 @@ export class SchemaStore {
         };
     };
 
-    populateStoreData = () => {
-        const features = Object.keys(this.store.search.nodeTypes);
+    populateStoreData = (useUploadData = false) => {
+        this.setUseUploadData(useUploadData);
+        let schema;
 
-        const schema = [
-            ...features.map(node => this.generateSchemaNode(node)),
-            ...this.store?.search?.schema.map(entry => this.generateLink(entry))
-        ];
+        if (useUploadData) {
+            this.features = Object.keys(
+                this.store.fileUpload.fileUploadData.defaults
+            );
+            this.featureTypes = {};
+            Object.keys(this.store.fileUpload.fileUploadData.defaults).forEach(
+                feature => {
+                    this.featureTypes[feature] =
+                        this.store.fileUpload.fileUploadData.defaults[
+                            feature
+                        ].dataType;
+                }
+            );
+
+            const source = this.store.fileUpload.fileUploadData.anchor;
+            const dest = this.store.fileUpload.fileUploadData.link;
+
+            schema = [
+                ...this.features.map(node => this.generateSchemaNode(node)),
+                this.generateLink({
+                    src: source,
+                    dest: dest,
+                    relationship:
+                        this.relationshipMapping[
+                            this.getPossibleRelations(source, dest)[0]
+                        ]
+                })
+            ];
+        } else {
+            this.features = Object.keys(this.store.search.nodeTypes);
+            this.featureTypes = this.store.search.nodeTypes;
+            schema = [
+                ...this.features.map(node => this.generateSchemaNode(node)),
+                ...this.store?.search?.schema.map(entry =>
+                    this.generateLink(entry)
+                )
+            ];
+        }
 
         const nodePositions = generateNodePositions(schema);
 
@@ -155,8 +198,8 @@ export class SchemaStore {
     };
 
     getPossibleRelations = (source, target) => {
-        const source_type = this.store.search.nodeTypes[source];
-        const target_type = this.store.search.nodeTypes[target];
+        const source_type = this.featureTypes[source];
+        const target_type = this.featureTypes[target];
 
         if (source_type === 'list' && target_type === 'list') {
             return ['M:N', '1:1'];
@@ -206,8 +249,12 @@ export class SchemaStore {
             })
         ];
 
-        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
-        this.store.core.updateVisibleDimensionsBasedOnSchema();
+        if (!this.useUploadData) {
+            this.store.search.updateCurrentDatasetSchema(
+                this.getServerSchema()
+            );
+            this.store.core.updateVisibleDimensionsBasedOnSchema();
+        }
     };
 
     updateSchemaConnection = (oldEdge, newEdge) => {
@@ -221,7 +268,11 @@ export class SchemaStore {
             return entry;
         });
 
-        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+        if (!this.useUploadData) {
+            this.store.search.updateCurrentDatasetSchema(
+                this.getServerSchema()
+            );
+        }
     };
 
     removeSchemaConnection = id => {
@@ -235,7 +286,11 @@ export class SchemaStore {
 
         this.edges = this.edges.filter(entry => entry['id'] !== id);
 
-        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
-        this.store.core.updateVisibleDimensionsBasedOnSchema();
+        if (!this.useUploadData) {
+            this.store.search.updateCurrentDatasetSchema(
+                this.getServerSchema()
+            );
+            this.store.core.updateVisibleDimensionsBasedOnSchema();
+        }
     };
 }

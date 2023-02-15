@@ -8,7 +8,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Lock, LockUnlock } from 'css.gg';
+import { Assign } from 'css.gg';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -16,7 +16,9 @@ import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.
 import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
+import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import PropTypes from 'prop-types';
 import ReactFlow, {
     applyEdgeChanges,
     applyNodeChanges,
@@ -24,14 +26,12 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import DatasetNode from '../advancedsearch/datasetNode/Dataset.component';
-import SchemaEdge from '../schemaedge/SchemaEdge.component';
 import SearchNode from '../advancedsearch/searchnode/SearchNode.component';
 import HistoryNode from '../historyNode/HistoryNode.component';
 import OverviewCustomEdge from '../overviewschemaedge/OverviewSchemaEdge.component';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
+import SchemaEdge from '../schemaedge/SchemaEdge.component';
 import SchemaNode from '../schemanode/SchemaNode.component';
-import { observer } from 'mobx-react';
-import PropTypes from 'prop-types';
 
 function SchemaConfig(props) {
     const store = useContext(RootStoreContext);
@@ -40,12 +40,12 @@ function SchemaConfig(props) {
 
     const [schemaNodes, setSchemaNodes] = useState(
         props.graphType === 'overview'
-            ? store.schema.overviewNodes
+            ? store.overviewSchema.nodes
             : store.schema.nodes
     );
     const [schemaEdges, setSchemaEdges] = useState(
         props.graphType === 'overview'
-            ? store.schema.overviewEdges
+            ? store.overviewSchema.edges
             : store.schema.edges
     );
 
@@ -77,20 +77,20 @@ function SchemaConfig(props) {
     useEffect(() => {
         setSchemaNodes(
             props.graphType === 'overview'
-                ? store.schema.overviewNodes
+                ? store.overviewSchema.nodes
                 : store.schema.nodes
         );
         setSchemaEdges(
             props.graphType === 'overview'
-                ? store.schema.overviewEdges
+                ? store.overviewSchema.edges
                 : store.schema.edges
         );
     }, [
         props.graphType,
+        store.overviewSchema.edges,
+        store.overviewSchema.nodes,
         store.schema.edges,
-        store.schema.nodes,
-        store.schema.overviewEdges,
-        store.schema.overviewNodes
+        store.schema.nodes
     ]);
 
     const connectNodes = connection => {
@@ -105,19 +105,19 @@ function SchemaConfig(props) {
     const onNodesChange = useCallback(
         changes =>
             props.graphType === 'overview'
-                ? store.schema.updateOverviewNodes(
-                      applyNodeChanges(changes, store.schema.overviewNodes)
+                ? store.overviewSchema.updateNodes(
+                      applyNodeChanges(changes, store.overviewSchema.nodes)
                   )
                 : store.schema.updateNodes(
                       applyNodeChanges(changes, store.schema.nodes)
                   ),
-        [props.graphType, store.schema]
+        [props.graphType, store.overviewSchema, store.schema]
     );
     const onEdgesChange = useCallback(
         changes => {
             if (props.graphType === 'overview') {
-                store.schema.updateOverviewEdges(
-                    applyEdgeChanges(changes, store.schema.overviewEdges)
+                store.overviewSchema.updateEdges(
+                    applyEdgeChanges(changes, store.overviewSchema.edges)
                 );
             } else {
                 store.schema.updateEdges(
@@ -126,7 +126,7 @@ function SchemaConfig(props) {
                 store.core.updateVisibleDimensionsBasedOnSchema();
             }
         },
-        [props.graphType, store.core, store.schema]
+        [props.graphType, store.core, store.overviewSchema, store.schema]
     );
 
     return (
@@ -164,7 +164,7 @@ function SchemaConfig(props) {
             </AutoSizer>
             <HStack
                 backgroundColor={
-                    colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.900'
+                    colorMode === 'light' ? 'whiteAlpha.300' : 'blackAlpha.300'
                 }
                 position="absolute"
                 bottom="10px"
@@ -203,55 +203,6 @@ function SchemaConfig(props) {
                         }}
                     />
                 </Tooltip>
-                {props.graphType === 'detail' && (
-                    <Tooltip
-                        label={
-                            store.core.isSchemaNodeTypeBound
-                                ? 'Unbind schema and visible node types'
-                                : 'Bind schema and visible node types'
-                        }
-                    >
-                        <IconButton
-                            size="sm"
-                            opacity="0.6"
-                            transition="0.2s all ease-in-out"
-                            _hover={{ opacity: 1 }}
-                            icon={
-                                store.core.isSchemaNodeTypeBound ? (
-                                    <Lock
-                                        style={{
-                                            '--ggs': '0.7'
-                                        }}
-                                    />
-                                ) : (
-                                    <LockUnlock
-                                        style={{
-                                            '--ggs': '0.7',
-                                            marginBottom: '-2px',
-                                            marginRight: '-2px'
-                                        }}
-                                    />
-                                )
-                            }
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Schema Panel',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: store.core.isSchemaNodeTypeBound
-                                            ? 'Unbind schema and visible node types'
-                                            : 'Bind schema and visible node types'
-                                    })
-                                );
-
-                                store.core.setIsSchemaNodeTypeBound(
-                                    !store.core.isSchemaNodeTypeBound
-                                );
-                            }}
-                        />
-                    </Tooltip>
-                )}
             </HStack>
         </Box>
     );
