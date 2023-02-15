@@ -1,9 +1,7 @@
 import {
-    Button,
     Modal,
     ModalBody,
     ModalContent,
-    ModalFooter,
     ModalHeader,
     ModalOverlay,
     useDisclosure
@@ -25,31 +23,6 @@ function DatasetConfigModal() {
         }
     }, [isOpen, onClose, onOpen, store.fileUpload.showConfigChangeModal]);
 
-    const updateConfig = () => {
-        store.track.trackEvent(
-            'Home Page - Dataset Configuration Modal',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: 'Update default configuration'
-            })
-        );
-        store.fileUpload.updateConfig();
-    };
-
-    const cancelSettingsEdit = () => {
-        store.track.trackEvent(
-            'Home Page - Dataset Configuration Modal',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: 'Cancel configuration change'
-            })
-        );
-        store.fileUpload.changeConfigChangeModalVisiblity(false);
-        store.fileUpload.resetFileUploadData();
-    };
-
     return (
         <Modal
             isOpen={isOpen}
@@ -67,21 +40,6 @@ function DatasetConfigModal() {
                         <DatasetConfigComponent formType="modify" />
                     </ModalBody>
                 )}
-
-                {/* {store.fileUpload.fileUploadData.name !== '' && (
-                    <ModalFooter>
-                        <Button
-                            variant="outline"
-                            mr={3}
-                            onClick={cancelSettingsEdit}
-                        >
-                            Cancel
-                        </Button>
-                        <Button variant="solid" onClick={() => updateConfig()}>
-                            Update config
-                        </Button>
-                    </ModalFooter>
-                )} */}
             </ModalContent>
         </Modal>
     );
