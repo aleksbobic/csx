@@ -8,12 +8,12 @@ import {
     VStack,
     Wrap
 } from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function GraphStats(props) {
     const store = useContext(RootStoreContext);
@@ -244,27 +244,12 @@ function GraphStats(props) {
     }
 
     return (
-        <OverlayScrollbarsComponent
-            style={{
-                width: '100%',
-                height: '100%',
-                paddingLeft: '10px',
-                paddingRight: '10px'
-            }}
-            options={{
-                scrollbars: {
-                    theme: 'os-theme-dark',
-                    autoHide: 'scroll',
-                    autoHideDelay: 600,
-                    clickScroll: true
-                }
-            }}
-        >
+        <CustomScroll style={{ paddingLeft: '10px', paddingRight: '10px' }}>
             <VStack maxHeight="100%" width="100%">
                 {renderStatsGroup(graphData, 'Graph Stats')}
                 {renderStatsGroup(nodeData, 'Node Stats')}
             </VStack>
-        </OverlayScrollbarsComponent>
+        </CustomScroll>
     );
 }
 GraphStats.propTypes = {

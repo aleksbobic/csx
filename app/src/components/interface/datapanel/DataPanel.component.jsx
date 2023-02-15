@@ -21,44 +21,27 @@ import Overview from 'components/feature/overview/Overview.component';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
-import ReactFlow, {
-    applyEdgeChanges,
-    applyNodeChanges,
-    Background,
-    MiniMap
-} from 'react-flow-renderer';
 import { RootStoreContext } from 'stores/RootStore';
 
-import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
-import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
-import DatasetNode from 'components/feature/advancedsearch/datasetNode/Dataset.component';
-import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
-import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
-import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
-import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
-import SearchNode from 'components/feature/advancedsearch/searchnode/SearchNode.component';
 import Comments from 'components/feature/comments/Comments.component';
-import historyNode from 'components/feature/historyNode/HistoryNode.component';
-import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
-import OverviewSchemaNode from 'components/feature/overviewschemanode/OverviewSchemaNode.component';
-import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
-import SchemaNode from 'components/feature/schemanode/SchemaNode.component';
 import SerpComponent from 'components/feature/serp/Serp.component';
 import TableComponent from 'components/feature/table/Table.component';
 import {
-    Assign,
     MenuBoxed,
     MoreVerticalAlt,
     SoftwareDownload,
     ViewComfortable
 } from 'css.gg';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { CSVLink } from 'react-csv';
 import { useResizeDetector } from 'react-resize-detector';
-import AutoSizer from 'react-virtualized-auto-sizer';
 
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
+import { HistoryFlow } from 'components/feature/historyflow/HistoryFlow.component';
+import SchemaFlow from 'components/feature/schemaflow/SchemaFlow.component';
+import { SchemaList } from 'components/feature/schemalist/SchemaList.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { isEnvFalse } from 'general.utils';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
@@ -82,51 +65,8 @@ function DataPanel(props) {
     const [visibleProperties, setVisibleProperties] = useState([]);
     const [csvData, setCsvData] = useState([]);
     const [csvHeaders, setCsvHeaders] = useState([]);
-    const [schemaNodes, setSchemaNodes] = useState(
-        store.core.isOverview ? store.schema.overviewNodes : store.schema.nodes
-    );
-    const [schemaEdges, setSchemaEdges] = useState(
-        store.core.isOverview ? store.schema.overviewEdges : store.schema.edges
-    );
 
-    const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
-    const [historyEdges, setHistoryEdges] = useState(store.history.edges);
-
-    const [historyViewport, setHistoryViewport] = useState(null);
-    const [schemaViewport, setSchemaViewport] = useState(null);
     const { colorMode } = useColorMode();
-
-    useEffect(() => {
-        store.history.generateHistoryNodes();
-    }, [store.history, colorMode]);
-
-    useEffect(() => {
-        setHistoryNodes(store.history.nodes);
-        setHistoryEdges(store.history.edges);
-    }, [store.history.edges, store.history.nodes]);
-
-    const onNodesChange = useCallback(
-        changes =>
-            store.core.isOverview
-                ? store.schema.updateOverviewNodes(
-                      applyNodeChanges(changes, store.schema.overviewNodes)
-                  )
-                : store.schema.updateNodes(
-                      applyNodeChanges(changes, store.schema.nodes)
-                  ),
-        [store.core.isOverview, store.schema]
-    );
-    const onEdgesChange = useCallback(
-        changes =>
-            store.core.isOverview
-                ? store.schema.updateOverviewEdges(
-                      applyEdgeChanges(changes, store.schema.overviewEdges)
-                  )
-                : store.schema.updateEdges(
-                      applyEdgeChanges(changes, store.schema.edges)
-                  ),
-        [store.core.isOverview, store.schema]
-    );
 
     useEffect(() => {
         if (props.panelType === '') {
@@ -156,70 +96,6 @@ function DataPanel(props) {
                 break;
         }
     }, [props.panelType]);
-
-    const nodeTypes = useMemo(
-        () => ({
-            datasetNode: DatasetNode,
-            schemaNode: SchemaNode,
-            overviewSchemaNode: OverviewSchemaNode,
-            historyNode: historyNode,
-            searchNode: SearchNode,
-            connectorNode: ConnectorNode,
-            filterNode: FilterNode,
-            keywordExtractionNode: KeywordExtractionNode,
-            countsNode: CountsNode,
-            resultsNode: ResultsNode
-        }),
-        []
-    );
-
-    const edgeTypes = useMemo(
-        () => ({
-            schemaEdge: SchemaEdge,
-            overviewCustomEdge: OverviewCustomEdge,
-            searchEdge: SearchEdge
-        }),
-        []
-    );
-
-    useEffect(() => {
-        setSchemaNodes(
-            store.core.isOverview
-                ? store.schema.overviewNodes
-                : store.schema.nodes
-        );
-        setSchemaEdges(
-            store.core.isOverview
-                ? store.schema.overviewEdges
-                : store.schema.edges
-        );
-    }, [
-        store.core.currentGraph,
-        store.core.isOverview,
-        store.schema.edges,
-        store.schema.nodes,
-        store.schema.overviewEdges,
-        store.schema.overviewNodes
-    ]);
-
-    const connectNodes = connection => {
-        store.schema.addSchemaConnection(connection);
-    };
-
-    const updateEdge = (oldEdge, newEdge) => {
-        store.schema.updateSchemaConnection(oldEdge, newEdge);
-    };
-
-    // const changeSchema = e => {
-    //     store.search.changeSelectedSchema(e.target.value);
-    // };
-
-    // const getPredefinedSchemas = () =>
-    //     store.search.schemas.map(entry => (
-    //         <option value={entry.name} key={`schema_${entry.name}`}>
-    //             {entry.name.toUpperCase()}
-    //         </option>
-    //     ));
 
     const getCsvHeaders = data => {
         if (!data || !data.length) {
@@ -259,208 +135,27 @@ function DataPanel(props) {
         }
     }, [store.graph.currentGraphData.activeTableData]);
 
-    const renderSchema = () => (
-        <Box height="100%" minHeight="200px" width="100%">
-            {/* {store.core.isDetail && (
-                <Select
-                    variant="filled"
-                    marginBottom="20px"
-                    onChange={changeSchema}
-                >
-                    {getPredefinedSchemas()}
-                </Select>
-            )} */}
-            <AutoSizer>
-                {({ height, width }) => (
-                    <ReactFlow
-                        style={{
-                            height: `${height}px`,
-                            width: `${width}px`
-                        }}
-                        nodes={schemaNodes}
-                        edges={schemaEdges}
-                        nodesDraggable={true}
-                        nodesConnectable={true}
-                        snapToGrid={true}
-                        onConnect={connectNodes}
-                        onEdgeUpdate={updateEdge}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        onInit={instance => {
-                            instance.fitView();
-                            setSchemaViewport(instance);
-                        }}
-                    >
-                        <Background
-                            gap={12}
-                            size={1}
-                            style={{ opacity: 0.5 }}
-                        />
-                    </ReactFlow>
-                )}
-            </AutoSizer>
-            <Tooltip label="Show all nodes">
-                <IconButton
-                    size="sm"
-                    zIndex="20"
-                    position="absolute"
-                    bottom="20px"
-                    left="20px"
-                    opacity="0.6"
-                    transition="0.2s all ease-in-out"
-                    _hover={{ opacity: 1 }}
-                    icon={
-                        <Assign
-                            style={{
-                                '--ggs': '0.8'
-                            }}
-                        />
-                    }
-                    onClick={() => {
-                        store.track.trackEvent(
-                            'Schema Panel',
-                            'Button',
-                            JSON.stringify({
-                                type: 'Click',
-                                value: 'Show all schema nodes'
-                            })
-                        );
-
-                        schemaViewport.fitView();
-                    }}
-                />
-            </Tooltip>
-        </Box>
-    );
-
-    const zoomToActiveHistoryNode = () => {
-        const selectedNodePosition =
-            store.history.nodes[store.core.studyHistoryItemIndex].position;
-
-        historyViewport.setCenter(
-            selectedNodePosition.x + 100,
-            selectedNodePosition.y,
-            { duration: 0, zoom: 1 }
-        );
-    };
-
-    const renderHistory = () => (
-        <Box
-            height="100%"
-            minHeight="200px"
-            width="100%"
-            backgroundColor="whiteAlpha.200"
-            borderRadius="8px"
+    const renderResultsTabContent = () => (
+        <CustomScroll
+            style={{
+                paddingLeft: '10px',
+                paddingRight: '10px'
+            }}
         >
-            <AutoSizer>
-                {({ height, width }) => (
-                    <ReactFlow
-                        style={{
-                            height: `${height}px`,
-                            width: `${width}px`
-                        }}
-                        nodes={historyNodes}
-                        edges={historyEdges}
-                        nodesDraggable={false}
-                        nodesConnectable={false}
-                        snapToGrid={true}
-                        onConnect={connectNodes}
-                        onEdgeUpdate={updateEdge}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        minZoom={0.2}
-                        defaultZoom={1.25}
-                        maxZoom={1.5}
-                        onInit={instance => {
-                            setHistoryViewport(instance);
-
-                            if (
-                                store.history.nodes[
-                                    store.core.studyHistoryItemIndex
-                                ]
-                            ) {
-                                const selectedNodePosition =
-                                    store.history.nodes[
-                                        store.core.studyHistoryItemIndex
-                                    ].position;
-
-                                instance.setCenter(
-                                    selectedNodePosition.x + 100,
-                                    selectedNodePosition.y,
-                                    { duration: 0, zoom: 1 }
-                                );
-                            }
-                        }}
-                    >
-                        <MiniMap
-                            nodeColor={node =>
-                                node.data.isActive
-                                    ? '#3182ceeb'
-                                    : colorMode === 'light'
-                                    ? '#c5c5c5'
-                                    : '#323232'
-                            }
-                            nodeStrokeColor={node =>
-                                node.data.isActive
-                                    ? '#3182ceeb'
-                                    : colorMode === 'light'
-                                    ? '#7bc5c5c57b7b'
-                                    : '#323232'
-                            }
-                            nodeBorderRadius="15px"
-                            maskColor={
-                                colorMode === 'light' ? '#c5c5c5' : '#1a1a1a'
-                            }
-                            style={{
-                                backgroundColor:
-                                    colorMode === 'light'
-                                        ? '#7b7b7b'
-                                        : '#000000',
-                                border: '1px solid #ffffff22',
-                                borderRadius: '8px'
-                            }}
-                            nodeStrokeWidth={3}
-                        />
-                    </ReactFlow>
-                )}
-            </AutoSizer>
-
-            <Tooltip label="Navigate to current history node">
-                <IconButton
-                    size="sm"
-                    zIndex="20"
-                    position="absolute"
-                    bottom="20px"
-                    left="20px"
-                    opacity="0.6"
-                    transition="0.2s all ease-in-out"
-                    _hover={{ opacity: 1 }}
-                    icon={
-                        <Assign
-                            style={{
-                                '--ggs': '0.8'
-                            }}
-                        />
-                    }
-                    onClick={() => {
-                        store.track.trackEvent(
-                            'History Panel',
-                            'Button',
-                            JSON.stringify({
-                                type: 'Click',
-                                value: 'Navigate to active history node'
-                            })
-                        );
-
-                        zoomToActiveHistoryNode();
-                    }}
-                />
-            </Tooltip>
-        </Box>
+            {store.graph.currentGraphData.activeTableData &&
+                (useList ? (
+                    <SerpComponent
+                        data={store.graph.currentGraphData.activeTableData}
+                        columns={store.graph.tableColumns}
+                        visibleProperties={visibleProperties}
+                    />
+                ) : (
+                    <TableComponent
+                        data={store.graph.currentGraphData.activeTableData}
+                        columns={store.graph.tableColumns}
+                    />
+                ))}
+        </CustomScroll>
     );
 
     const renderTabPanels = () => {
@@ -478,24 +173,14 @@ function DataPanel(props) {
                         }
                         borderRadius="10px"
                     >
-                        <OverlayScrollbarsComponent
+                        <CustomScroll
                             style={{
-                                width: '100%',
-                                height: '100%',
                                 paddingLeft: '10px',
                                 paddingRight: '10px'
                             }}
-                            options={{
-                                scrollbars: {
-                                    theme: 'os-theme-dark',
-                                    autoHide: 'scroll',
-                                    autoHideDelay: 600,
-                                    clickScroll: true
-                                }
-                            }}
                         >
                             <Overview />
-                        </OverlayScrollbarsComponent>
+                        </CustomScroll>
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -511,42 +196,7 @@ function DataPanel(props) {
                         borderRadius="10px"
                         paddingTop={activeTab === 1 && '30px'}
                     >
-                        <OverlayScrollbarsComponent
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                paddingLeft: '10px',
-                                paddingRight: '10px'
-                            }}
-                            options={{
-                                scrollbars: {
-                                    theme: 'os-theme-dark',
-                                    autoHide: 'scroll',
-                                    autoHideDelay: 600,
-                                    clickScroll: true
-                                }
-                            }}
-                        >
-                            {store.graph.currentGraphData.activeTableData &&
-                                (useList ? (
-                                    <SerpComponent
-                                        data={
-                                            store.graph.currentGraphData
-                                                .activeTableData
-                                        }
-                                        columns={store.graph.tableColumns}
-                                        visibleProperties={visibleProperties}
-                                    />
-                                ) : (
-                                    <TableComponent
-                                        data={
-                                            store.graph.currentGraphData
-                                                .activeTableData
-                                        }
-                                        columns={store.graph.tableColumns}
-                                    />
-                                ))}
-                        </OverlayScrollbarsComponent>
+                        {renderResultsTabContent()}
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -561,7 +211,7 @@ function DataPanel(props) {
                         }
                         borderRadius="10px"
                     >
-                        {renderSchema()}
+                        <SchemaFlow />
                     </Box>
                 </TabPanel>
                 <TabPanel padding="10px" height="100%">
@@ -576,12 +226,85 @@ function DataPanel(props) {
                         }
                         borderRadius="10px"
                     >
-                        {renderHistory()}
+                        <HistoryFlow />
                     </Box>
                 </TabPanel>
             </TabPanels>
         );
     };
+
+    const renderListMenu = () => (
+        <Menu closeOnSelect={false} zIndex="3">
+            <Tooltip label="List options">
+                <MenuButton
+                    disabled={!useList}
+                    size="sm"
+                    as={IconButton}
+                    icon={<MoreVerticalAlt style={{ '--ggs': 0.8 }} />}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Results Panel',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: 'Open list options'
+                            })
+                        );
+                    }}
+                    zIndex="3"
+                />
+            </Tooltip>
+            <MenuList backgroundColor="black" padding="5px" borderRadius="10px">
+                {Object.keys(store.search.nodeTypes).map(feature => (
+                    <MenuItem
+                        key={`serp_list_checkbox_${feature}`}
+                        fontSize="xs"
+                        fontWeight="bold"
+                        borderRadius="6px"
+                    >
+                        <Checkbox
+                            isChecked={visibleProperties.includes(feature)}
+                            size="sm"
+                            onChange={e => {
+                                if (e.target.checked) {
+                                    store.track.trackEvent(
+                                        'Results Panel',
+                                        'Checkbox',
+                                        JSON.stringify({
+                                            type: 'Check',
+                                            value: `Show ${feature} in list`
+                                        })
+                                    );
+
+                                    setVisibleProperties([
+                                        ...visibleProperties,
+                                        feature
+                                    ]);
+                                } else if (visibleProperties.length > 1) {
+                                    store.track.trackEvent(
+                                        'Results Panel',
+                                        'Checkbox',
+                                        JSON.stringify({
+                                            type: 'Check',
+                                            value: `Hide ${feature} in list`
+                                        })
+                                    );
+
+                                    setVisibleProperties([
+                                        ...visibleProperties.filter(
+                                            value => value !== feature
+                                        )
+                                    ]);
+                                }
+                            }}
+                        >
+                            {feature}
+                        </Checkbox>
+                    </MenuItem>
+                ))}
+            </MenuList>
+        </Menu>
+    );
 
     const renderTabButtons = () => {
         return (
@@ -596,8 +319,7 @@ function DataPanel(props) {
                 justifyContent="space-between"
             >
                 <HStack>
-                    {process?.env.REACT_APP_DISABLE_DATASET_DOWNLOAD !==
-                        'true' && (
+                    {isEnvFalse('REACT_APP_DISABLE_DATASET_DOWNLOAD') && (
                         <Tooltip label="Download visible data as CSV">
                             <Box>
                                 <IconButton
@@ -632,95 +354,7 @@ function DataPanel(props) {
                             </Box>
                         </Tooltip>
                     )}
-                    <Box>
-                        <Menu closeOnSelect={false} zIndex="3">
-                            <Tooltip label="List options">
-                                <MenuButton
-                                    disabled={!useList}
-                                    size="sm"
-                                    as={IconButton}
-                                    icon={
-                                        <MoreVerticalAlt
-                                            style={{ '--ggs': 0.8 }}
-                                        />
-                                    }
-                                    onClick={() => {
-                                        store.track.trackEvent(
-                                            'Results Panel',
-                                            'Button',
-                                            JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Open list options'
-                                            })
-                                        );
-                                    }}
-                                    zIndex="3"
-                                />
-                            </Tooltip>
-                            <MenuList
-                                backgroundColor="black"
-                                padding="5px"
-                                borderRadius="10px"
-                            >
-                                {Object.keys(store.search.nodeTypes).map(
-                                    feature => (
-                                        <MenuItem
-                                            key={`serp_list_checkbox_${feature}`}
-                                            fontSize="xs"
-                                            fontWeight="bold"
-                                            borderRadius="6px"
-                                        >
-                                            <Checkbox
-                                                isChecked={visibleProperties.includes(
-                                                    feature
-                                                )}
-                                                size="sm"
-                                                onChange={e => {
-                                                    if (e.target.checked) {
-                                                        store.track.trackEvent(
-                                                            'Results Panel',
-                                                            'Checkbox',
-                                                            JSON.stringify({
-                                                                type: 'Check',
-                                                                value: `Show ${feature} in list`
-                                                            })
-                                                        );
-
-                                                        setVisibleProperties([
-                                                            ...visibleProperties,
-                                                            feature
-                                                        ]);
-                                                    } else if (
-                                                        visibleProperties.length >
-                                                        1
-                                                    ) {
-                                                        store.track.trackEvent(
-                                                            'Results Panel',
-                                                            'Checkbox',
-                                                            JSON.stringify({
-                                                                type: 'Check',
-                                                                value: `Hide ${feature} in list`
-                                                            })
-                                                        );
-
-                                                        setVisibleProperties([
-                                                            ...visibleProperties.filter(
-                                                                value =>
-                                                                    value !==
-                                                                    feature
-                                                            )
-                                                        ]);
-                                                    }
-                                                }}
-                                            >
-                                                {feature}
-                                            </Checkbox>
-                                        </MenuItem>
-                                    )
-                                )}
-                            </MenuList>
-                        </Menu>
-                    </Box>
+                    <Box>{renderListMenu()}</Box>
                     <ButtonGroup spacing="0" paddingRight="10px">
                         <Tooltip label="Use table view">
                             <IconButton
@@ -800,6 +434,7 @@ function DataPanel(props) {
                 borderLeft="1px solid"
                 borderColor={edgeColor}
             >
+                {activeTab === 2 && <SchemaList />}
                 <Tabs
                     size="sm"
                     variant="soft-rounded"
@@ -808,6 +443,7 @@ function DataPanel(props) {
                     paddingBottom={
                         store.comment.isCommentListVisible ? 0 : '80px'
                     }
+                    paddingTop={activeTab === 2 && '110px'}
                     index={activeTab}
                 >
                     {activeTab === 1 && renderTabButtons()}

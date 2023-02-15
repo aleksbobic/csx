@@ -39,7 +39,7 @@ function SearchBar(props) {
         );
 
         store.workflow.resetWorkflow();
-        store.schema.resetOverviewNodeProperties();
+        store.overviewSchema.setAnchorProperties([]);
     };
 
     useEffect(() => {
@@ -112,7 +112,7 @@ function SearchBar(props) {
                     store.search.useDataset(selectedDataset);
                     store.core.resetVisibleDimensions();
                     store.workflow.resetWorkflow();
-                    store.schema.resetOverviewNodeProperties();
+                    store.overviewSchema.setAnchorProperties([]);
                     store.core.setStudyHistory([]);
                     store.core.setStudyHistoryItemIndex(0);
                     store.search.setSearchQuery(values.search);

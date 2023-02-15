@@ -1,4 +1,4 @@
-import { Box, useColorMode } from '@chakra-ui/react';
+import { Box, useColorMode, useToast } from '@chakra-ui/react';
 import ControlPanelComponent from 'components/interface/controlpanel/ControlPanel.component';
 import NavigationPanelComponent from 'components/interface/navigation/NavigationPanel.component';
 import { observer } from 'mobx-react';
@@ -14,14 +14,18 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
+import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import { useEffect, useContext } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 
 function CSX() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
+    const errorToastRef = useRef();
+    const errorToast = useToast();
 
     useEffect(() => {
         window.addEventListener('beforeunload', () => {
@@ -86,10 +90,36 @@ function CSX() {
         };
     }, []);
 
+    const renderErrorToast = useCallback(() => {
+        errorToastRef.current = errorToast({
+            render: () => (
+                <ErrorModal
+                    onClose={() => {
+                        errorToast.close(errorToastRef.current);
+                    }}
+                />
+            ),
+            status: 'error',
+            duration: 50000,
+            isClosable: true,
+            onCloseComplete: function () {
+                store.core.setErrorDetails(null);
+            }
+        });
+    }, [store.core, errorToast]);
+
+    useEffect(() => {
+        if (store.core.errorDetails) {
+            renderErrorToast();
+        } else {
+            errorToast.closeAll();
+        }
+    }, [colorMode, errorToast, renderErrorToast, store.core.errorDetails]);
+
     return (
         <HelmetProvider>
             <Router>
-                {process?.env.REACT_APP_MANDATORY_HTTPS === 'true' && (
+                {isEnvTrue('REACT_APP_MANDATORY_HTTPS') && (
                     <Helmet>
                         <meta
                             http-equiv="Content-Security-Policy"
@@ -97,22 +127,12 @@ function CSX() {
                         />
                     </Helmet>
                 )}
-                <OverlayScrollbarsComponent
+                <CustomScroll
                     style={{
-                        width: '100%',
-                        height: '100%',
                         paddingLeft: '10px',
                         paddingRight: '10px',
                         backgroundColor:
                             colorMode === 'light' ? 'white' : '#171A23'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
                     }}
                 >
                     <NavigationPanelComponent />
@@ -136,15 +156,16 @@ function CSX() {
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
                             </Route>
-                            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                                'true' && (
+                            {isEnvFalse(
+                                'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                            ) && (
                                 <Route path="/search" label="search">
                                     <SearchPage />
                                 </Route>
                             )}
                         </RRSwitch>
                     </Box>
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             </Router>
         </HelmetProvider>
     );

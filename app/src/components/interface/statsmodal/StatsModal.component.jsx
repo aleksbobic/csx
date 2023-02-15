@@ -27,19 +27,20 @@ import {
 } from '@chakra-ui/react';
 import {
     ArcElement,
+    BarController,
     BarElement,
     CategoryScale,
     Chart as ChartJS,
+    DoughnutController,
     Legend,
     LinearScale,
+    LineController,
     LineElement,
     PointElement,
     Title,
-    DoughnutController,
-    LineController,
-    BarController,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import ChartComponent from 'components/feature/stats/chart/Chart.component';
 import ComponentStatsComponent from 'components/feature/stats/component/ComponentStats.component';
 import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
@@ -48,10 +49,9 @@ import NodeStatsComponent from 'components/feature/stats/node/NodeStats.componen
 import NodeFilterComponent from 'components/feature/stats/nodefilter/NodeFilter.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
@@ -411,21 +411,8 @@ function FileUploadModal() {
         // statTypes = type = chart, stat / statType / chartType = grouped bar
         return (
             <Box height="225px" width="100%">
-                <OverlayScrollbarsComponent
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        paddingLeft: '10px',
-                        paddingRight: '10px'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
-                    }}
+                <CustomScroll
+                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
                 >
                     <SimpleGrid columns={3} spacing={2}>
                         <Tooltip label="The title at the top of the widget">
@@ -803,7 +790,7 @@ function FileUploadModal() {
                                 </FormControl>
                             )}
                     </SimpleGrid>
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             </Box>
         );
     };

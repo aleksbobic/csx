@@ -24,6 +24,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { ArrowsPointingOutIcon, ScissorsIcon } from '@heroicons/react/20/solid';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 import {
@@ -43,10 +44,9 @@ import {
 } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function ControlPanel() {
     const store = useContext(RootStoreContext);
@@ -119,20 +119,7 @@ function ControlPanel() {
                     borderRadius="4px"
                     maxHeight="300px"
                 >
-                    <OverlayScrollbarsComponent
-                        style={{
-                            width: '100%',
-                            height: '100%'
-                        }}
-                        options={{
-                            scrollbars: {
-                                theme: 'os-theme-dark',
-                                autoHide: 'scroll',
-                                autoHideDelay: 600,
-                                clickScroll: true
-                            }
-                        }}
-                    >
+                    <CustomScroll>
                         <Text
                             fontSize="xs"
                             fontWeight="bold"
@@ -158,7 +145,7 @@ function ControlPanel() {
                                 schemeYlOrRd[9]
                             )})`}
                         />
-                    </OverlayScrollbarsComponent>
+                    </CustomScroll>
                 </Flex>
             );
         }
@@ -816,44 +803,24 @@ function ControlPanel() {
                         position="relative"
                     >
                         <TabPanel width="250px" height="100%">
-                            <OverlayScrollbarsComponent
+                            <CustomScroll
                                 style={{
-                                    width: '100%',
-                                    height: '100%',
                                     paddingLeft: '10px',
                                     paddingRight: '10px'
-                                }}
-                                options={{
-                                    scrollbars: {
-                                        theme: 'os-theme-dark',
-                                        autoHide: 'scroll',
-                                        autoHideDelay: 600,
-                                        clickScroll: true
-                                    }
                                 }}
                             >
                                 <StudyInfoComponent />
-                            </OverlayScrollbarsComponent>
+                            </CustomScroll>
                         </TabPanel>
                         <TabPanel width="250px" height="100%">
-                            <OverlayScrollbarsComponent
+                            <CustomScroll
                                 style={{
-                                    width: '100%',
-                                    height: '100%',
                                     paddingLeft: '10px',
                                     paddingRight: '10px'
                                 }}
-                                options={{
-                                    scrollbars: {
-                                        theme: 'os-theme-dark',
-                                        autoHide: 'scroll',
-                                        autoHideDelay: 600,
-                                        clickScroll: true
-                                    }
-                                }}
                             >
                                 <SettingsComponent />
-                            </OverlayScrollbarsComponent>
+                            </CustomScroll>
                         </TabPanel>
                     </TabPanels>
 

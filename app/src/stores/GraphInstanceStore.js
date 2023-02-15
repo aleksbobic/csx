@@ -31,6 +31,8 @@ export class GraphInstanceStore {
     selfCentricOriginNode = null;
     linkVisibility = true;
     orphanNodeVisibility = true;
+    edgeDirectionVisiblity = false;
+    useCurvedEdges = false;
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
@@ -707,6 +709,10 @@ export class GraphInstanceStore {
         this.linkVisibility = val ? val : !this.linkVisibility;
     };
 
+    toggleEdgeDirectionVisiblity = val => {
+        this.edgeDirectionVisiblity = !this.edgeDirectionVisiblity;
+    };
+
     setNodeColorScheme = val => {
         this.nodeColorScheme[this.store.core.currentGraph] = val;
         this.nodeColorScheme = { ...this.nodeColorScheme };
@@ -757,6 +763,10 @@ export class GraphInstanceStore {
 
     setOrphanNodeVisiblity = val => {
         this.orphanNodeVisibility = val;
+    };
+
+    toggleUseCurvedEdges = () => {
+        this.useCurvedEdges = !this.useCurvedEdges;
     };
 
     toggleOrphanNodeVisibility = () => {

@@ -1,11 +1,9 @@
 import {
-    Button,
     Flex,
     Heading,
     Modal,
     ModalBody,
     ModalContent,
-    ModalFooter,
     ModalHeader,
     ModalOverlay,
     Spinner,
@@ -52,7 +50,7 @@ function FileUploadModal() {
         }
 
         return (
-            <ModalBody overflowY="scroll" width="748px">
+            <ModalBody overflowY="scroll" width="748px" height="502px">
                 <DatasetConfigComponent />
             </ModalBody>
         );
@@ -75,45 +73,6 @@ function FileUploadModal() {
                     )}
 
                 {isOpen && renderModalBody()}
-
-                {store.fileUpload.fileUploadData.originalName !== '' &&
-                    !store.fileUpload.isPopulating && (
-                        <ModalFooter>
-                            <Button
-                                variant="outline"
-                                mr={3}
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Home Page - Dataset Upload Modal',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Cancel dataset upload'
-                                        })
-                                    );
-                                    store.fileUpload.cancelFileUpload();
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="solid"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Home Page - Dataset Upload Modal',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Set default configuration'
-                                        })
-                                    );
-                                    store.fileUpload.setDefaults();
-                                }}
-                            >
-                                Set defaults
-                            </Button>
-                        </ModalFooter>
-                    )}
             </ModalContent>
         </Modal>
     );

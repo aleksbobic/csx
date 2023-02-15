@@ -162,7 +162,7 @@ export class StatsStore {
 
             if (this.store.core.currentGraph !== 'detail') {
                 elementValues = elementValues.concat(
-                    this.store.schema.overviewDataNodeProperties.map(entry => {
+                    this.store.overviewSchema.anchorProperties.map(entry => {
                         return {
                             value: entry,
                             label:

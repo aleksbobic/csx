@@ -1,13 +1,13 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
+import { safeRequest } from 'general.utils';
 
 export class CoreStore {
     availableDatasets = [];
     demoMode = false;
     demoNavigationData = [];
     activeDemoIndex = 1;
-    errorMessage = null;
     errorDetails = null;
     currentGraph = '';
     userUuid = null;
@@ -24,6 +24,7 @@ export class CoreStore {
     trackingEnabled = false;
     colorMode = null;
     showCookieInfo = false;
+    isSchemaNodeTypeBound = true;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -47,6 +48,13 @@ export class CoreStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    setIsSchemaNodeTypeBound = val => {
+        this.isSchemaNodeTypeBound = val;
+        if (val) {
+            this.updateVisibleDimensionsBasedOnSchema();
+        }
+    };
+
     setShowCookieInfo = val => (this.showCookieInfo = val);
 
     setDataIsLoading = val => (this.dataIsLoading = val);
@@ -60,6 +68,8 @@ export class CoreStore {
     setStudyName = name => (this.studyName = name);
 
     setColorMode = val => (this.colorMode = val);
+
+    setErrorDetails = val => (this.errorDetails = val);
 
     setStudyDescription = description => (this.studyDescription = description);
     setStudyUuid = id => {
@@ -96,10 +106,17 @@ export class CoreStore {
             study_description: this.studyDescription
         };
 
-        await axios.get('study/update', { params }).then(() => {
-            this.updateIsStudySaved(true);
-            this.getSavedStudies();
-        });
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
     };
 
     updateStudyDescription = async description => {
@@ -112,12 +129,17 @@ export class CoreStore {
             study_description: this.studyDescription
         };
 
-        console.log(params);
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
 
-        await axios.get('study/update', { params }).then(() => {
-            this.updateIsStudySaved(true);
-            this.getSavedStudies();
-        });
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
     };
 
     setTrackingEnabled = val => {
@@ -138,10 +160,15 @@ export class CoreStore {
     };
 
     generateUUID = async () => {
-        await axios.get('util/uuid').then(response => {
-            localStorage.setItem('useruuid', response.data);
-            this.userUuid = response.data;
-        });
+        const { response, error } = await safeRequest(axios.get('util/uuid'));
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('useruuid', response.data);
+        this.userUuid = response.data;
     };
 
     generateStudyUUID = async () => {
@@ -156,15 +183,22 @@ export class CoreStore {
 
         const params = { user_uuid: this.userUuid, study_name: this.studyName };
 
-        await axios.get('study/generate', { params }).then(response => {
-            localStorage.setItem('studyuuid', response.data);
-            this.studyUuid = response.data;
-            this.setStudyHistory([]);
-            this.setStudyHistoryItemIndex(0);
-        });
+        const { response, error } = await safeRequest(
+            axios.get('study/generate', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('studyuuid', response.data);
+        this.studyUuid = response.data;
+        this.setStudyHistory([]);
+        this.setStudyHistoryItemIndex(0);
     };
 
-    deleteStudy = studyUuid => {
+    deleteStudy = async studyUuid => {
         if (!this.studyIsSaved || studyUuid) {
             const params = {
                 study_uuid: studyUuid ? studyUuid : this.studyUuid,
@@ -172,32 +206,53 @@ export class CoreStore {
             };
 
             if (params.study_uuid) {
+                const { error } = await safeRequest(
+                    axios.get('study/delete', { params })
+                );
+
+                if (error) {
+                    this.store.core.handleRequestError(error);
+                    return;
+                }
+
                 if (studyUuid) {
-                    axios.get('study/delete', { params }).then(() => {
-                        this.getSavedStudies();
-                    });
-                } else {
-                    axios.get('study/delete', { params });
+                    this.getSavedStudies();
                 }
             }
         }
     };
 
-    saveStudy = () => {
+    saveStudy = async () => {
         const params = {
             study_uuid: this.studyUuid,
             user_uuid: this.userUuid
         };
-        axios.get('study/save', { params });
+
+        const { error } = await safeRequest(
+            axios.get('study/save', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         this.updateIsStudySaved(true);
     };
 
     getSavedStudies = async () => {
         const params = { user_uuid: this.userUuid };
         if (params.user_uuid) {
-            await axios.get('study/saved', { params }).then(response => {
-                this.updateStudies(response.data);
-            });
+            const { response, error } = await safeRequest(
+                axios.get('study/saved', { params })
+            );
+
+            if (error) {
+                this.store.core.handleRequestError(error);
+                return;
+            }
+
+            this.updateStudies(response.data);
         }
     };
 
@@ -215,10 +270,6 @@ export class CoreStore {
 
     resetVisibleDimensions = () => {
         this.visibleDimensions = { overview: [], detail: [] };
-    };
-
-    setErrorMessage = message => {
-        this.errorMessage = message;
     };
 
     setDemoMode = val => {
@@ -244,6 +295,21 @@ export class CoreStore {
         }
     };
 
+    updateVisibleDimensionsBasedOnSchema = () => {
+        if (this.isSchemaNodeTypeBound) {
+            const connectedNodes = this.store.schema.getConnectedNodes();
+
+            if (!connectedNodes.length) {
+                this.visibleDimensions['detail'] = [
+                    this.store.search.links,
+                    this.store.search.anchor
+                ].flat();
+            } else {
+                this.visibleDimensions['detail'] = connectedNodes;
+            }
+        }
+    };
+
     get isOverview() {
         return this.currentGraph === 'overview';
     }
@@ -251,16 +317,48 @@ export class CoreStore {
         return this.currentGraph === 'detail';
     }
 
-    handleError = error => {
-        console.log(error.toString());
+    handleRequestError = error => {
+        this.setErrorDetails(error);
 
-        if (error.response) {
-            this.errorDetails = `${error.response.data} ${error.response.status} ${error.response.headers}`;
-            console.log('data ', error.response.data);
-            console.log('status ', error.response.status);
-            console.log('headers ', error.response.headers);
-        } else {
-            this.errorDetails = error.toString();
+        switch (error['type']) {
+            case 'response':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Response Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        message: error.data.detail[0].msg
+                    })
+                );
+
+                break;
+            case 'request':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        state: error.state
+                    })
+                );
+
+                break;
+            default:
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request setup error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        message: error.message
+                    })
+                );
+
+                break;
         }
     };
 }

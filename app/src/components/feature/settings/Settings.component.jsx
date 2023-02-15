@@ -314,12 +314,88 @@ function Settings() {
                 </Tooltip>
                 <Tooltip
                     label={
+                        store.graphInstance.useCurvedEdges
+                            ? 'Use straight edges'
+                            : 'Use curved edges'
+                    }
+                >
+                    <HStack spacing="1">
+                        <Switch
+                            id="curvedEdges"
+                            size="sm"
+                            marginRight="10px"
+                            isChecked={store.graphInstance.useCurvedEdges}
+                            value={store.graphInstance.useCurvedEdges}
+                            onChange={() => {
+                                store.graphInstance.toggleUseCurvedEdges();
+
+                                store.track.trackEvent(
+                                    'Side panel - View Settings',
+                                    'Switch',
+                                    JSON.stringify({
+                                        type: 'Toggle',
+                                        value: `${
+                                            store.graphInstance.useCurvedEdges
+                                                ? 'Use curved edges'
+                                                : 'Use straight edges'
+                                        }`
+                                    })
+                                );
+                            }}
+                        />
+                        <Text fontSize="sm">Curved edges</Text>
+                    </HStack>
+                </Tooltip>
+                {store.core.isDetail && (
+                    <Tooltip
+                        label={
+                            store.graphInstance.edgeDirectionVisiblity
+                                ? 'Use undirected edges'
+                                : 'Use directed edges'
+                        }
+                    >
+                        <HStack spacing="1">
+                            <Switch
+                                id="curvedEdges"
+                                size="sm"
+                                marginRight="10px"
+                                isChecked={
+                                    store.graphInstance.edgeDirectionVisiblity
+                                }
+                                value={
+                                    store.graphInstance.edgeDirectionVisiblity
+                                }
+                                onChange={() => {
+                                    store.graphInstance.toggleEdgeDirectionVisiblity();
+
+                                    store.track.trackEvent(
+                                        'Side panel - View Settings',
+                                        'Switch',
+                                        JSON.stringify({
+                                            type: 'Toggle',
+                                            value: `${
+                                                store.graphInstance
+                                                    .edgeDirectionVisiblity
+                                                    ? 'Use directed edges'
+                                                    : 'Use undirected edges'
+                                            }`
+                                        })
+                                    );
+                                }}
+                            />
+                            <Text fontSize="sm">Directed edges</Text>
+                        </HStack>
+                    </Tooltip>
+                )}
+                <Divider paddingTop="10px" />
+                <Tooltip
+                    label={
                         store.graphInstance.labels.isVisible
                             ? 'Hide node labels'
                             : 'Show node labels'
                     }
                 >
-                    <HStack spacing="1">
+                    <HStack spacing="1" paddingTop="10px">
                         <Switch
                             id="nodelabels"
                             size="sm"

@@ -26,8 +26,9 @@ import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { isEnvFalse } from 'general.utils';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 function CookieInfo() {
     const { colorMode } = useColorMode();
@@ -310,21 +311,8 @@ function CookieInfo() {
                 borderRadius="8px"
                 width="100%"
             >
-                <OverlayScrollbarsComponent
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        paddingLeft: '10px',
-                        paddingRight: '10px'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
-                    }}
+                <CustomScroll
+                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
                 >
                     <Box width="100%" height="168px">
                         <Table>
@@ -359,9 +347,9 @@ function CookieInfo() {
                             </Tbody>
                         </Table>
                     </Box>
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             </Box>
-            {process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+            {isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
                 renderInteractionTracking()}
         </VStack>
     );

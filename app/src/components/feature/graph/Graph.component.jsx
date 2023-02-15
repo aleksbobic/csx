@@ -125,6 +125,7 @@ function Graph(props) {
         store.graphInstance.isSelfCentric,
         store.graphInstance.selfCentricType,
         store.graph.showLabelDistance,
+        store.graphInstance.useCurvedEdges,
         store.graph
     ]);
 
@@ -209,10 +210,15 @@ function Graph(props) {
                     store.graphInstance.stopForce();
                 }
             }}
-            // linkDirectionalArrowLength={store.core.isDetail ? 10 : 0}
-            // linkDirectionalArrowResolution={2}
-            // linkDirectionalArrowRelPos={1}
-            // linkCurvature={0.2}
+            linkDirectionalArrowLength={
+                store.core.isDetail &&
+                store.graphInstance.edgeDirectionVisiblity
+                    ? 10
+                    : 0
+            }
+            linkDirectionalArrowResolution={2}
+            linkDirectionalArrowRelPos={1}
+            linkCurvature={store.graphInstance.useCurvedEdges ? 0.4 : 0}
             onLinkHover={link => {
                 if (store.core.isOverview) {
                     if (link) {
@@ -229,6 +235,7 @@ function Graph(props) {
                     handleLinkHover(link);
                 }
             }}
+            d3AlphaDecay={0}
             linkWidth={0}
             linkResolution={2}
             linkHoverPrecision={8}

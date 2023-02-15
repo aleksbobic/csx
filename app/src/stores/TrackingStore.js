@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import { isEnvFalse } from 'general.utils';
 
 export class TrackingStore {
     constructor(store) {
@@ -6,7 +7,7 @@ export class TrackingStore {
         makeAutoObservable(this);
 
         if (
-            process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+            isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
             this.store.core.trackingEnabled
         ) {
             this.initTracking();
@@ -37,7 +38,7 @@ export class TrackingStore {
 
     trackPageChange = () => {
         if (
-            process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+            isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
             this.store.core.trackingEnabled
         ) {
             const title =
@@ -54,7 +55,7 @@ export class TrackingStore {
 
     trackEvent = (event_category, event_action, event_data) => {
         if (
-            process?.env.REACT_APP_DISABLE_TRACKING !== 'true' &&
+            isEnvFalse('REACT_APP_DISABLE_TRACKING') &&
             this.store.core.trackingEnabled
         ) {
             window._paq.push([

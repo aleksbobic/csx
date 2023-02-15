@@ -72,7 +72,12 @@ export default function CustomEdge({
                     }}
                 >
                     <TagLabel>{data.relationship}</TagLabel>
-                    <TagCloseButton onClick={() => data.removeEdge(id)} />
+                    <TagCloseButton
+                        onClick={e => {
+                            e.stopPropagation();
+                            data.removeEdge(id);
+                        }}
+                    />
                 </Tag>
             </foreignObject>
         </>

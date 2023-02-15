@@ -13,12 +13,12 @@ import {
 import { Close } from 'css.gg';
 
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 function StudyGrid(props) {
     const { colorMode } = useColorMode();
@@ -43,22 +43,7 @@ function StudyGrid(props) {
                 Studies
             </Heading>
 
-            <OverlayScrollbarsComponent
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    paddingLeft: '10px',
-                    paddingRight: '10px'
-                }}
-                options={{
-                    scrollbars: {
-                        theme: 'os-theme-dark',
-                        autoHide: 'scroll',
-                        autoHideDelay: 600,
-                        clickScroll: true
-                    }
-                }}
-            >
+            <CustomScroll style={{ paddingLeft: '10px', paddingRight: '10px' }}>
                 <SimpleGrid
                     width="100%"
                     columns={[1, 2, 3]}
@@ -156,20 +141,7 @@ function StudyGrid(props) {
                                                 {study.study_name}
                                             </Text>
                                         </Tooltip>
-                                        <OverlayScrollbarsComponent
-                                            style={{
-                                                width: '100%',
-                                                height: '100%'
-                                            }}
-                                            options={{
-                                                scrollbars: {
-                                                    theme: 'os-theme-dark',
-                                                    autoHide: 'scroll',
-                                                    autoHideDelay: 600,
-                                                    clickScroll: true
-                                                }
-                                            }}
-                                        >
+                                        <CustomScroll>
                                             <Text
                                                 width="100%"
                                                 heigh="100%"
@@ -183,7 +155,7 @@ function StudyGrid(props) {
                                                     ? study.study_description
                                                     : 'No description yet ...'}
                                             </Text>
-                                        </OverlayScrollbarsComponent>
+                                        </CustomScroll>
 
                                         <Button
                                             width="100%"
@@ -219,7 +191,7 @@ function StudyGrid(props) {
                         </AspectRatio>
                     ))}
                 </SimpleGrid>
-            </OverlayScrollbarsComponent>
+            </CustomScroll>
         </VStack>
     );
 }

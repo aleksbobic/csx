@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { safeRequest } from 'general.utils';
+import { v4 as uuidv4 } from 'uuid';
 
 export class FileUploadStore {
     fileUploadData = {
@@ -7,7 +9,11 @@ export class FileUploadStore {
         originalName: '',
         anchor: '',
         link: '',
-        defaults: {}
+        defaults: {},
+        schemas: {
+            overview: [],
+            detail: []
+        }
     };
     fileUploadErrors = {
         defaultVisible: false,
@@ -37,39 +43,85 @@ export class FileUploadStore {
             originalName: '',
             anchor: '',
             link: '',
-            defaults: {}
-        });
-
-    uploadFile = async files => {
-        const formData = new FormData();
-        formData.append('file', files[0]);
-
-        const response = await axios.post('file/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
+            defaults: {},
+            schemas: {
+                overview: [],
+                detail: []
             }
         });
 
-        if (Object.keys(response.data).length !== 0) {
-            Object.keys(response.data.columns).forEach(
-                column =>
-                    (this.fileUploadData.defaults[column] = {
-                        name: column,
-                        isDefaultVisible: false,
-                        isDefaultSearch: false,
-                        isDefaultLink: false,
-                        dataType: response.data.columns[column],
-                        removeIfNull: false
-                    })
-            );
+    uploadFile = async files => {
+        this.changeFileUploadModalVisiblity(true);
+
+        const formData = new FormData();
+        formData.append('file', files[0]);
+        const requestConfig = {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        };
+
+        const { response, error } = await safeRequest(
+            axios.post('file/upload', formData, requestConfig)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            this.changeFileUploadModalVisiblity(false);
+        } else {
+            Object.keys(response.data.columns).forEach((column, index) => {
+                this.fileUploadData.defaults[column] = {
+                    name: column,
+                    isDefaultVisible: false,
+                    isDefaultSearch: false,
+                    isDefaultLink: index === 1,
+                    dataType: response.data.columns[column],
+                    removeIfNull: false
+                };
+
+                if (index === 1) {
+                    this.changeDefaultLink(column);
+                }
+
+                if (
+                    this.isDefaultSarchNotSelected() &&
+                    ['string', 'integer'].includes(
+                        response.data.columns[column]
+                    )
+                ) {
+                    this.changeDefaultSearch(column);
+                }
+            });
 
             this.changeOriginalName(response.data.name);
             this.changeFileUplodAnchor(Object.keys(response.data.columns)[0]);
             this.changeDatasetName(response.data.name);
-
-            return true;
         }
-        return false;
+    };
+
+    addDefaultSchema = (name, graphType) => {
+        if (graphType === 'overview') {
+            this.fileUploadData.schemas[graphType].push({
+                id: uuidv4(),
+                name: name,
+                links: this.store.overviewSchema.links,
+                anchor: this.store.overviewSchema.anchor,
+                anchorProperties: this.store.overviewSchema.anchorProperties
+            });
+        } else {
+            this.fileUploadData.schemas[graphType].push({
+                id: uuidv4(),
+                name: name,
+                nodes: this.store.schema.nodes,
+                edges: this.store.schema.edges
+            });
+        }
+    };
+
+    deleteDefaultSchema = (id, graphType) => {
+        this.fileUploadData.schemas[graphType] = this.fileUploadData.schemas[
+            graphType
+        ].filter(schema => schema.id !== id);
     };
 
     changeOriginalName = val => (this.fileUploadData.originalName = val);
@@ -119,31 +171,12 @@ export class FileUploadStore {
 
     changeDatasetName = val => (this.fileUploadData.name = val);
 
-    isVisibleByDefaultSelected = () =>
-        (this.fileUploadErrors.defaultVisible = !Object.keys(
-            this.fileUploadData.defaults
-        ).some(
-            column => this.fileUploadData.defaults[column].isDefaultVisible
-        ));
-
-    isDefaultLinkSelected = () =>
-        (this.fileUploadErrors.defaultLinks = !Object.keys(
-            this.fileUploadData.defaults
-        ).some(column => this.fileUploadData.defaults[column].isDefaultLink));
-
-    isDefaultSarchSelected = () =>
+    isDefaultSarchNotSelected = () =>
         (this.fileUploadErrors.defaultSearchable = !Object.keys(
             this.fileUploadData.defaults
         ).some(column => this.fileUploadData.defaults[column].isDefaultSearch));
 
     setDefaults = async () => {
-        this.isVisibleByDefaultSelected();
-        this.isDefaultLinkSelected();
-        this.isDefaultSarchSelected();
-        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
-            errorCode => this.fileUploadErrors[errorCode]
-        );
-
         if (this.showFileUploadError) {
             return false;
         }
@@ -154,13 +187,17 @@ export class FileUploadStore {
             original_name: this.fileUploadData.originalName,
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
-            defaults: JSON.stringify(this.fileUploadData.defaults)
+            defaults: this.fileUploadData.defaults,
+            default_schemas: this.fileUploadData.schemas
         };
 
-        try {
-            await axios.get('file/settings', { params });
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            // axios.get('file/settings', { params })
+            axios.post('file/settings', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
         }
 
         this.resetFileUploadData();
@@ -174,15 +211,18 @@ export class FileUploadStore {
     cancelFileUpload = async () => {
         const params = { name: this.fileUploadData.originalName };
 
-        try {
-            await axios.get('file/cancel', { params });
+        const { error } = await safeRequest(
+            axios.get('file/cancel', { params })
+        );
+
+        if (error) {
+            this.changeFileUploadModalVisiblity(false);
+            this.store.core.handleRequestError(error);
+        } else {
             this.resetFileUploadData();
             this.changeFileUploadModalVisiblity(false);
             this.store.core.setToastType('info');
             this.store.core.setToastMessage('File upload canceled 😢');
-        } catch (error) {
-            this.store.core.handleError(error);
-            this.changeFileUploadModalVisiblity(false);
         }
     };
 
@@ -205,27 +245,18 @@ export class FileUploadStore {
     };
 
     updateConfig = async () => {
-        this.isVisibleByDefaultSelected();
-        this.isDefaultLinkSelected();
-        this.isDefaultSarchSelected();
-        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
-            errorCode => this.fileUploadErrors[errorCode]
-        );
-
-        if (this.showFileUploadError) {
-            return false;
-        }
-
         const params = {
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
-            defaults: JSON.stringify(this.fileUploadData.defaults)
+            defaults: this.fileUploadData.defaults
         };
 
-        try {
-            await axios.get('file/settingsupdate', { params });
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            axios.patch('file/settingsupdate', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
         }
 
         this.resetFileUploadData();

@@ -2,6 +2,7 @@ import { makeAutoObservable } from 'mobx';
 import { MarkerType } from 'react-flow-renderer';
 import dagre from 'dagre';
 import axios from 'axios';
+import { safeRequest } from 'general.utils';
 
 export class HistoryStore {
     nodes = [];
@@ -196,7 +197,14 @@ export class HistoryStore {
             history_item_indexes: deleteNodeIDs
         };
 
-        await axios.post('history/delete', params);
+        const { error } = await safeRequest(
+            axios.post('history/delete', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
 
         const deletedNodeParent = this.nodes.find(node => node.id === id).data
             .parent;
@@ -225,6 +233,12 @@ export class HistoryStore {
             charts: charts
         };
 
-        await axios.post('study/updatecharts', params);
+        const { error } = await safeRequest(
+            axios.post('study/updatecharts', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+        }
     };
 }

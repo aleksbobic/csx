@@ -8,15 +8,15 @@ import {
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
-import { ArrowsH, ArrowsMergeAltH, Close, ToolbarTop } from 'css.gg';
+import { ArrowsH, ArrowsMergeAltH, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
 import {
     Children,
     cloneElement,
     isValidElement,
     useContext,
+    useEffect,
     useState
 } from 'react';
 import { RootStoreContext } from 'stores/RootStore';

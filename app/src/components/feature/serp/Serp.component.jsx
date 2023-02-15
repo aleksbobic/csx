@@ -11,11 +11,11 @@ import { ArrowRight } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
-import { useContext, useEffect, useRef, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
-import { useResizeDetector } from 'react-resize-detector';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { useResizeDetector } from 'react-resize-detector';
+import { RootStoreContext } from 'stores/RootStore';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
@@ -233,20 +233,7 @@ function Serp(props) {
 
     return (
         <VStack height="100%" width="100%" paddingTop="30px">
-            <OverlayScrollbarsComponent
-                style={{
-                    width: '100%',
-                    height: '100%'
-                }}
-                options={{
-                    scrollbars: {
-                        theme: 'os-theme-dark',
-                        autoHide: 'scroll',
-                        autoHideDelay: 600,
-                        clickScroll: true
-                    }
-                }}
-            >
+            <CustomScroll>
                 <Box height="100%" width="100%" borderRadius="6px">
                     <Box
                         ref={listContainerRefrence}
@@ -296,7 +283,7 @@ function Serp(props) {
                         </Box>
                     </Box>
                 </Box>
-            </OverlayScrollbarsComponent>
+            </CustomScroll>
         </VStack>
     );
 }

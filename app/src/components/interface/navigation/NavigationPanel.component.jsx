@@ -38,6 +38,7 @@ import { useContext, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
+import { isEnvFalse } from 'general.utils';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
@@ -520,24 +521,23 @@ function NavigationPanelComponent() {
                     </Link>
 
                     {location.pathname !== '/' &&
-                        process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                            'true' &&
+                        isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') &&
                         renderWorkspaceSwitch()}
                     {location.pathname !== '/' && (
                         <HStack
                             height="40px"
                             style={{
-                                marginLeft:
-                                    process?.env
-                                        .REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                                    'true'
-                                        ? '125px'
-                                        : '0'
+                                marginLeft: isEnvFalse(
+                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                                )
+                                    ? '125px'
+                                    : '0'
                             }}
                             spacing="20px"
                         >
-                            {process?.env.REACT_APP_DISABLE_ADVANCED_SEARCH !==
-                                'true' && (
+                            {isEnvFalse(
+                                'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                            ) && (
                                 <Divider
                                     opacity="0.4"
                                     orientation="vertical"

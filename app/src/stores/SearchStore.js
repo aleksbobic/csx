@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { format } from 'date-fns';
+import { safeRequest } from 'general.utils';
 
 export class SearchStore {
     nodeTypes = {};
@@ -9,6 +10,7 @@ export class SearchStore {
     links = [];
     schema = [];
     schemas = [];
+    default_schemas = {};
     datasets = [];
     searchHints = {};
     query = '';
@@ -30,6 +32,8 @@ export class SearchStore {
     setSearchID = val => (this.searchID = val);
 
     setSearchQuery = val => (this.query = val);
+
+    setAnchor = val => (this.anchor = val);
 
     setAdvancedSearchQuery = val => (this.advancedSearchQuery = val);
 
@@ -58,7 +62,10 @@ export class SearchStore {
         this.links = dataset_config.links;
 
         this.schema = dataset_config.schemas[0]['relations'];
+
         this.schemas = dataset_config.schemas;
+
+        this.default_schemas = dataset_config.default_schemas;
         this.searchHints = dataset_config.search_hints;
         this.default_search_features = dataset_config.default_search_fields;
 
@@ -69,6 +76,7 @@ export class SearchStore {
         this.nodeTypes = dataset_config.types;
         this.anchor = dataset_config.anchor;
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
     };
 
     changeSelectedSchema = selectedSchema => {
@@ -77,6 +85,7 @@ export class SearchStore {
                 this.schemas.findIndex(entry => entry.name === selectedSchema)
             ]['relations'];
         this.store.schema.populateStoreData();
+        this.store.overviewSchema.populateStoreData();
     };
 
     getLocalStorageDataset = dataset_name =>
@@ -107,22 +116,26 @@ export class SearchStore {
         this.setLocalStorageDataset(this.currentDataset, dataset_config);
     };
 
-    getDatasets = () => {
-        axios
-            .get('search/datasets')
-            .then(response => {
-                // Initialise dataset locally and set the current dataset
-                this.initDatasets(response.data);
+    getDatasets = async () => {
+        const { response, error } = await safeRequest(
+            axios.get('search/datasets')
+        );
 
-                const currentDataset = localStorage.getItem('currentDataset');
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
 
-                if (currentDataset && this.datasets.includes(currentDataset)) {
-                    this.useDataset(this.datasets.indexOf(currentDataset));
-                } else {
-                    this.useDataset(0);
-                }
-            })
-            .catch(error => this.store.core.handleError(error));
+        // Initialise dataset locally and set the current dataset
+        this.initDatasets(response.data);
+
+        const currentDataset = localStorage.getItem('currentDataset');
+
+        if (currentDataset && this.datasets.includes(currentDataset)) {
+            this.useDataset(this.datasets.indexOf(currentDataset));
+        } else {
+            this.useDataset(0);
+        }
     };
 
     search = async (query, nodeTypes, schema, graphType, search_uuid) => {
@@ -141,7 +154,7 @@ export class SearchStore {
 
         if (graphType === 'overview') {
             params.anchor_properties =
-                this.store.schema.overviewDataNodeProperties;
+                this.store.overviewSchema.anchorProperties;
         } else {
             params.anchor_properties = [];
         }
@@ -187,13 +200,16 @@ export class SearchStore {
         // Set selected index
         params['index'] = localStorage.getItem('currentDataset');
 
-        try {
-            const response = await axios.post('search/', params);
+        const { response, error } = await safeRequest(
+            axios.post('search/', params)
+        );
 
-            return response.data;
-        } catch (error) {
-            return this.store.core.handleError(error);
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        return response.data;
     };
 
     deleteDataset = async dataset => {
@@ -201,19 +217,23 @@ export class SearchStore {
             name: dataset
         };
 
-        try {
-            await axios.get('file/delete', { params });
-            this.store.core.setToastType('info');
-            this.store.core.setToastMessage(
-                `${dataset.charAt(0).toUpperCase()}${dataset.slice(
-                    1
-                )} dataset deleted 🙂`
-            );
-            localStorage.removeItem(`index_${dataset}`);
-            this.getDatasets();
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { error } = await safeRequest(
+            axios.get('file/delete', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        this.store.core.setToastType('info');
+        this.store.core.setToastMessage(
+            `${dataset.charAt(0).toUpperCase()}${dataset.slice(
+                1
+            )} dataset deleted 🙂`
+        );
+        localStorage.removeItem(`index_${dataset}`);
+        this.getDatasets();
     };
 
     getConifg = async dataset => {
@@ -221,34 +241,48 @@ export class SearchStore {
             name: dataset
         };
 
-        try {
-            const results = await axios.get('file/config', { params });
-            this.store.fileUpload.populateDataFromConfig(
-                dataset,
-                results.data.config
-            );
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { response, error } = await safeRequest(
+            axios.get('file/config', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
         }
+
+        this.store.fileUpload.populateDataFromConfig(
+            dataset,
+            response.data.config
+        );
     };
 
     suggest = async (feature, input) => {
-        try {
-            return await axios
-                .post('search/suggest', {
-                    index: this.currentDataset,
-                    feature,
-                    input
-                })
-                .then(response => response.data);
-        } catch (error) {
-            this.store.core.handleError(error);
+        const { response, error } = await safeRequest(
+            axios.post('search/suggest', {
+                index: this.currentDataset,
+                feature,
+                input
+            })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
             return [];
         }
+
+        return response.data;
     };
 
     getRandomImage = async () => {
-        const response = await axios.get('file/randomimage');
+        const { response, error } = await safeRequest(
+            axios.get('file/randomimage')
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
         return response.data;
     };
 }

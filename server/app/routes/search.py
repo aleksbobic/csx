@@ -44,6 +44,7 @@ def get_datasets() -> dict:
             with open(f"./app/data/config/{index}.json") as config:
                 loaded_config = json.load(config)
                 datasets[index]["schemas"] = loaded_config["schemas"]
+                datasets[index]["default_schemas"] = loaded_config["default_schemas"]
                 datasets[index]["anchor"] = loaded_config["anchor"]
                 datasets[index]["links"] = loaded_config["links"]
                 datasets[index]["default_search_fields"] = loaded_config[
@@ -58,6 +59,7 @@ def get_datasets() -> dict:
                 }
         except Exception as e:
             datasets[index]["schemas"] = []
+            datasets[index]["default_schemas"] = []
             datasets[index]["anchor"] = []
             datasets[index]["links"] = []
             datasets[index]["search_hints"] = []

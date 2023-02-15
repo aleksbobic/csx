@@ -106,7 +106,7 @@ function Chart(props) {
             }
             const anchor_properties =
                 store.core.currentGraph === 'overview'
-                    ? store.schema.overviewDataNodeProperties
+                    ? store.overviewSchema.anchorProperties
                     : [];
 
             if (props.chart.elements === 'nodes') {
@@ -158,7 +158,7 @@ function Chart(props) {
         props.networkData,
         props.chart.group_by,
         store.core.currentGraph,
-        store.schema.overviewDataNodeProperties
+        store.overviewSchema.anchorProperties
     ]);
 
     const getPluginOptions = () => {

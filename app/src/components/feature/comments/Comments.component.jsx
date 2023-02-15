@@ -1,12 +1,12 @@
 import { useColorMode, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import CustomScroll from '../customscroll/CustomScroll.component';
 import Comment from './comment/Comment.component';
 import CommentTextArea from './commenttextarea/CommentTextArea.component';
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function CommentsComponent(props) {
     const store = useContext(RootStoreContext);
@@ -24,21 +24,8 @@ function CommentsComponent(props) {
             style={{ justifyContent: 'space-between' }}
         >
             {store.comment.isCommentListVisible && (
-                <OverlayScrollbarsComponent
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        paddingLeft: '10px',
-                        paddingRight: '10px'
-                    }}
-                    options={{
-                        scrollbars: {
-                            theme: 'os-theme-dark',
-                            autoHide: 'scroll',
-                            autoHideDelay: 600,
-                            clickScroll: true
-                        }
-                    }}
+                <CustomScroll
+                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
                 >
                     <VStack heigh="auto" width="100%" borderRadius="6px">
                         {store.core.studyHistory.length > 0 &&
@@ -54,7 +41,7 @@ function CommentsComponent(props) {
                                 );
                             })}
                     </VStack>
-                </OverlayScrollbarsComponent>
+                </CustomScroll>
             )}
             <CommentTextArea />
         </VStack>

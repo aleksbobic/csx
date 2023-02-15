@@ -8,43 +8,50 @@ import app.services.data.elastic as csx_es
 import app.services.data.mongo as csx_data
 import app.services.graph.nodes as csx_nodes
 import app.services.data.autocomplete as csx_auto
+from pydantic import BaseModel
 
 import pandas as pd
+import polars as pl
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, UploadFile
 import base64
 import random
+
 
 router = APIRouter()
 
 
 @router.post("/upload")
 def uploadfile(file: UploadFile):
-    if os.getenv("DISABLE_UPLOAD") != "true":
-        data = pd.read_csv(file.file, lineterminator="\n")
+    if os.getenv("DISABLE_UPLOAD") == "true":
+        return {}
 
-        columns = data.dtypes.to_dict()
+    data = pl.read_csv(file.file)
+    df_columns = data.schema
+    columns = {}
 
-        for column in list(columns.keys()):
-            if columns[column] == object:
-                if data.iloc[0][column][0] == "[" and data.iloc[0][column][-1] == "]":
-                    columns[column] = "list"
-                elif len(data.index) > 20 and len(list(data[column].unique())) < 10:
-                    columns[column] = "category"
-                else:
-                    columns[column] = "string"
-            elif isinstance(columns[column], float):
-                columns[column] = "float"
+    for column in list(df_columns.keys()):
+        if df_columns[column] == pl.Utf8:
+            if data[column][0][0] == "[" and data[column][0][-1] == "]":
+                columns[column] = "list"
+            elif (
+                data.shape[0] > 20
+                and data.select([pl.col(column).n_unique()])[0, 0] < 10
+            ):
+                columns[column] = "category"
             else:
-                columns[column] = "integer"
+                columns[column] = "string"
+        elif df_columns[column] in [pl.Float32, pl.Float64]:
+            columns[column] = "float"
+        else:
+            columns[column] = "integer"
 
-        if not os.path.exists("./app/data/files"):
-            os.makedirs("./app/data/files")
+    if not os.path.exists("./app/data/files"):
+        os.makedirs("./app/data/files")
 
-        data.to_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
+    data.write_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
-        return {"name": file.filename.rpartition(".")[0], "columns": columns}
-    return {}
+    return {"name": file.filename.rpartition(".")[0], "columns": columns}
 
 
 @router.get("/randomimage", responses={200: {"content": {"image/png": {}}}})
@@ -67,8 +74,6 @@ def get_random_image():
     with open(f"./app/data/images/{image_number}.png", "rb") as f:
         base64image = base64.b64encode(f.read())
     return {"image": base64image, "animal": num_to_animal[image_number]}
-
-    # return FileResponse(f"./app/data/images/{1}.png", media_type="image/png")
 
 
 def get_default_visible_dimensions(defaults):
@@ -169,26 +174,35 @@ def transform_to_list(raw_entry):
     ]
 
 
-@router.get("/settings")
-def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
-    defaults = json.loads(defaults)
+class SettingsData(BaseModel):
+    original_name: str
+    name: str
+    anchor: str
+    defaults: dict
+    default_schemas: dict
+
+
+@router.post("/settings")
+def set_defaults(data: SettingsData):
+    defaults = data.defaults
 
     # Generate default config
     config = {
         "default_visible_dimensions": get_default_visible_dimensions(defaults),
-        "anchor": defaults[anchor]["name"],
+        "anchor": defaults[data.anchor]["name"],
         "links": get_default_link_dimensions(defaults),
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
         "schemas": [{"name": "default", "relations": []}],
+        "default_schemas": data.default_schemas,
     }
 
     dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]
-    src_type = config["dimension_types"][defaults[anchor]["name"]]
+    src_type = config["dimension_types"][defaults[data.anchor]["name"]]
 
     initial_relationship = {
         "dest": get_default_link_dimensions(defaults)[0],
-        "src": defaults[anchor]["name"],
+        "src": defaults[data.anchor]["name"],
         "relationship": "",
     }
 
@@ -206,18 +220,20 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     if not os.path.exists("./app/data/config"):
         os.makedirs("./app/data/config")
 
-    data = pd.read_csv(f"./app/data/files/{original_name}.csv", lineterminator="\n")
+    dataset = pd.read_csv(
+        f"./app/data/files/{data.original_name}.csv", lineterminator="\n"
+    )
 
     rename_mapping = get_renamed_dimensions(defaults)
     if bool(rename_mapping):
-        data.rename(columns=rename_mapping, inplace=True)
+        dataset.rename(columns=rename_mapping, inplace=True)
 
     null_dimensions = get_remove_row_if_null_dimensions(defaults)
     if len(null_dimensions) != 0:
-        data.dropna(axis=0, subset=null_dimensions, inplace=True)
+        dataset.dropna(axis=0, subset=null_dimensions, inplace=True)
 
     for null_dim in null_dimensions:
-        data = data[data[null_dim] != ""]
+        dataset = dataset[dataset[null_dim] != ""]
 
     columns = get_dimensions(defaults)
 
@@ -235,23 +251,23 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     for key in config["dimension_types"]:
         if config["dimension_types"][key] == "integer":
             dimension_search_hints[key] = {
-                "min": int(data[key].min()),
-                "max": int(data[key].max()),
+                "min": int(dataset[key].min()),
+                "max": int(dataset[key].max()),
             }
         elif config["dimension_types"][key] == "float":
             dimension_search_hints[key] = {
-                "min": float(data[key].min()),
-                "max": float(data[key].max()),
+                "min": float(dataset[key].min()),
+                "max": float(dataset[key].max()),
             }
         elif config["dimension_types"][key] == "category":
-            dimension_search_hints[key] = {"values": list(data[key].unique())}
+            dimension_search_hints[key] = {"values": list(dataset[key].unique())}
         elif config["dimension_types"][key] == "list":
             dimension_search_hints[key] = {
                 "values": sorted(
                     list(
                         set(
                             itertools.chain.from_iterable(
-                                data[key].apply(transform_to_list).tolist()
+                                dataset[key].apply(transform_to_list).tolist()
                             )
                         )
                     )
@@ -260,21 +276,21 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     config["search_hints"] = dimension_search_hints
 
-    with open(f"./app/data/config/{name}.json", "w") as f:
+    with open(f"./app/data/config/{data.name}.json", "w") as f:
         json.dump(config, f)
 
-    csx_es.create_index(name, mapping)
+    csx_es.create_index(data.name, mapping)
 
     try:
         print("***** Populating elastic")
         csx_es.bulk_populate(
             generate_entries_from_dataframe(
-                data, columns, name, config["dimension_types"]
+                dataset, columns, data.name, config["dimension_types"]
             )
         )
     except Exception as exception:
-        os.remove(f"./app/data/files/{original_name}.csv")
-        delete_dataset(name)
+        os.remove(f"./app/data/files/{data.original_name}.csv")
+        delete_dataset(data.name)
         print("\n\n\n\n", exception)
         return exception
 
@@ -284,7 +300,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
 
     if len(list_properties) > 0:
         print("***** Retrieving elastic")
-        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), name, False)
+        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), data.name, False)
         print("***** Generating nodes")
         nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
 
@@ -293,7 +309,7 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
         mongo_nodes = [node for node in nodes if node["feature"] in list_properties]
 
         print("***** Populating mongo")
-        csx_data.insert_documents(name, mongo_nodes)
+        csx_data.insert_documents(data.name, mongo_nodes)
     else:
         print("***** Skipped populating mongo")
 
@@ -302,7 +318,9 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
     ]
 
     for prop in string_properties:
-        csx_auto.generate_auto_index(name, prop, data[prop].astype(str).to_list())
+        csx_auto.generate_auto_index(
+            data.name, prop, dataset[prop].astype(str).to_list()
+        )
 
     for prop in list_properties:
         unique_entries = list(
@@ -310,13 +328,13 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
                 itertools.chain.from_iterable(
                     [
                         entry.lstrip("[").rstrip("]").replace("'", "").split(", ")
-                        for entry in data[prop].astype(str).to_list()
+                        for entry in dataset[prop].astype(str).to_list()
                     ]
                 )
             )
         )
 
-        csx_auto.generate_list_auto_index(name, prop, unique_entries)
+        csx_auto.generate_list_auto_index(data.name, prop, unique_entries)
 
     string_search_fields = []
     other_search_fields = []
@@ -328,10 +346,10 @@ def set_defaults(original_name: str, name="", anchor="", defaults="{}"):
             other_search_fields.append(search_field)
 
     csx_auto.generate_main_auto_index(
-        name, other_search_fields, string_search_fields, data
+        data.name, other_search_fields, string_search_fields, dataset
     )
 
-    os.remove(f"./app/data/files/{original_name}.csv")
+    os.remove(f"./app/data/files/{data.original_name}.csv")
 
     return {"status": "success"}
 
@@ -380,29 +398,37 @@ def get_dataset_config(name: str):
         return {"config": data}
 
 
-@router.get("/settingsupdate")
-def update_settings(name="", anchor="", defaults="{}"):
-    defaults = json.loads(defaults)
+class UpdateSettingsData(BaseModel):
+    name: str
+    anchor: str
+    defaults: dict
+
+
+@router.patch("/settingsupdate")
+def update_settings(data: UpdateSettingsData):
+    defaults = data.defaults
     schemas = []
     search_hints = {}
 
-    with open(f"./app/data/config/{name}.json") as f:
-        data = json.load(f)
-        schemas = data["schemas"]
-        search_hints = data["search_hints"]
+    with open(f"./app/data/config/{data.name}.json") as f:
+        config_data = json.load(f)
+        schemas = config_data["schemas"]
+        search_hints = config_data["search_hints"]
+        default_schemas = config_data["default_schemas"]
 
     # Generate default config
     config = {
         "default_visible_dimensions": get_default_visible_dimensions(defaults),
-        "anchor": anchor,
+        "anchor": data.anchor,
         "links": get_default_link_dimensions(defaults),
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
         "schemas": schemas,
+        "default_schemas": default_schemas,
         "search_hints": search_hints,
     }
 
-    with open(f"./app/data/config/{name}.json", "w") as f:
+    with open(f"./app/data/config/{data.name}.json", "w") as f:
         json.dump(config, f)
 
     return {"status": "success"}
