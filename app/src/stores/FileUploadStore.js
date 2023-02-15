@@ -187,12 +187,13 @@ export class FileUploadStore {
             original_name: this.fileUploadData.originalName,
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
-            defaults: JSON.stringify(this.fileUploadData.defaults),
-            default_schemas: JSON.stringify(this.fileUploadData.schemas)
+            defaults: this.fileUploadData.defaults,
+            default_schemas: this.fileUploadData.schemas
         };
 
         const { error } = await safeRequest(
-            axios.get('file/settings', { params })
+            // axios.get('file/settings', { params })
+            axios.post('file/settings', params)
         );
 
         if (error) {
@@ -244,25 +245,14 @@ export class FileUploadStore {
     };
 
     updateConfig = async () => {
-        this.isVisibleByDefaultSelected();
-        this.isDefaultLinkSelected();
-        this.isDefaultSarchNotSelected();
-        this.showFileUploadError = Object.keys(this.fileUploadErrors).some(
-            errorCode => this.fileUploadErrors[errorCode]
-        );
-
-        if (this.showFileUploadError) {
-            return false;
-        }
-
         const params = {
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
-            defaults: JSON.stringify(this.fileUploadData.defaults)
+            defaults: this.fileUploadData.defaults
         };
 
         const { error } = await safeRequest(
-            axios.get('file/settingsupdate', { params })
+            axios.patch('file/settingsupdate', params)
         );
 
         if (error) {

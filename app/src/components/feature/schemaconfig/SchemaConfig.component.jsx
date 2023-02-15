@@ -162,6 +162,7 @@ function SchemaConfig(props) {
                     </ReactFlow>
                 )}
             </AutoSizer>
+
             <HStack
                 backgroundColor={
                     colorMode === 'light' ? 'whiteAlpha.300' : 'blackAlpha.300'
@@ -170,7 +171,7 @@ function SchemaConfig(props) {
                 bottom="10px"
                 left="10px"
                 zIndex="20"
-                width={store.core.isDetail ? '82px' : '44px'}
+                width="44px"
                 height="42px"
                 padding="6px"
                 borderRadius="10px"

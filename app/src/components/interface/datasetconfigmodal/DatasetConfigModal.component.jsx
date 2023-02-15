@@ -68,7 +68,7 @@ function DatasetConfigModal() {
                     </ModalBody>
                 )}
 
-                {store.fileUpload.fileUploadData.name !== '' && (
+                {/* {store.fileUpload.fileUploadData.name !== '' && (
                     <ModalFooter>
                         <Button
                             variant="outline"
@@ -81,7 +81,7 @@ function DatasetConfigModal() {
                             Update config
                         </Button>
                     </ModalFooter>
-                )}
+                )} */}
             </ModalContent>
         </Modal>
     );

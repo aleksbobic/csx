@@ -36,6 +36,7 @@ import { RootStoreContext } from 'stores/RootStore';
 import { isEnvTrue } from 'general.utils';
 import CustomScroll from '../customscroll/CustomScroll.component';
 import SchemaConfig from '../schemaconfig/SchemaConfig.component';
+import { v4 as uuidv4 } from 'uuid';
 
 function DatasetConfig(props) {
     const store = useContext(RootStoreContext);
@@ -715,162 +716,200 @@ function DatasetConfig(props) {
         );
     };
 
+    const renderFooter = () => {
+        if (props.formType === 'modify') {
+            return (
+                <HStack
+                    justifyContent="center"
+                    paddingBottom="20px"
+                    marginTop="-40px"
+                >
+                    <Button
+                        variant="outline"
+                        mr={3}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Home Page - Dataset Configuration Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Cancel configuration change'
+                                })
+                            );
+                            store.fileUpload.changeConfigChangeModalVisiblity(
+                                false
+                            );
+                            store.fileUpload.resetFileUploadData();
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="solid"
+                        backgroundColor="blue.500"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Home Page - Dataset Configuration Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Update default configuration'
+                                })
+                            );
+
+                            store.fileUpload.updateConfig();
+                        }}
+                    >
+                        Update
+                    </Button>
+                </HStack>
+            );
+        }
+        return (
+            <HStack justifyContent="center" paddingBottom="20px">
+                {activeTab === 0 && (
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Home Page - Dataset Upload Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Cancel dataset upload'
+                                })
+                            );
+                            store.fileUpload.cancelFileUpload();
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                )}
+                {activeTab > 0 && (
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            if (activeTab === 2) {
+                                store.overviewSchema.populateStoreData(true);
+                            }
+                            setActiveTab(activeTab - 1);
+                        }}
+                    >
+                        Prev
+                    </Button>
+                )}
+                {activeTab < 2 && (
+                    <Button
+                        variant="solid"
+                        backgroundColor="blue.500"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Home Page - Dataset Upload Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Store dataset config'
+                                })
+                            );
+
+                            if (activeTab === 0) {
+                                store.overviewSchema.populateStoreData(true);
+                            }
+                            if (activeTab === 1) {
+                                store.schema.populateStoreData(true);
+                            }
+                            setActiveTab(activeTab + 1);
+                        }}
+                    >
+                        Next
+                    </Button>
+                )}
+                {activeTab === 2 && (
+                    <Button
+                        variant="solid"
+                        backgroundColor="blue.500"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Home Page - Dataset Upload Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Set default configuration'
+                                })
+                            );
+                            store.fileUpload.setDefaults();
+                        }}
+                    >
+                        Save
+                    </Button>
+                )}
+            </HStack>
+        );
+    };
+
+    const renderTabs = count => {
+        const tabKeys = [];
+
+        for (let i = 0; i < count; i++) {
+            tabKeys[i] = uuidv4();
+        }
+
+        return (
+            <TabList
+                justifyContent="center"
+                marginTop="20px"
+                marginBottom="20px"
+            >
+                {tabKeys.map(key => (
+                    <Tab
+                        key={key}
+                        width="10px"
+                        height="10px"
+                        borderRadius="full"
+                        padding="0"
+                        border="2px solid"
+                        borderColor="whiteAlpha.500"
+                        margin="4px"
+                        cursor="default"
+                        _hover={{ cursor: 'default' }}
+                        isDisabled
+                        _selected={{
+                            backgroundColor: 'blue.500',
+                            border: 'none'
+                        }}
+                    ></Tab>
+                ))}
+            </TabList>
+        );
+    };
+
     return (
         <>
             <Tabs variant="solid-rounded" size="sm" index={activeTab}>
                 <TabPanels>
-                    <TabPanel padding="20px 0 0 0" height="450px">
+                    <TabPanel
+                        padding={
+                            props.formType === 'upload' ? '20px 0 0 0' : '0'
+                        }
+                        height="450px"
+                    >
                         {renderDatasetNameConfig()}
                         {renderColumnConfig()}
                     </TabPanel>
-                    <TabPanel padding="20px 0 0 0" height="450px">
-                        {renderDefaultOverviewSchemaConfig()}
-                    </TabPanel>
-                    <TabPanel padding="20px 0 0 0" height="450px">
-                        {renderDefaultDetailSchemaConfig()}
-                    </TabPanel>
+                    {props.formType === 'upload' && (
+                        <TabPanel padding="20px 0 0 0" height="450px">
+                            {renderDefaultOverviewSchemaConfig()}
+                        </TabPanel>
+                    )}
+                    {props.formType === 'upload' && (
+                        <TabPanel padding="20px 0 0 0" height="450px">
+                            {renderDefaultDetailSchemaConfig()}
+                        </TabPanel>
+                    )}
                 </TabPanels>
-
-                <TabList
-                    justifyContent="center"
-                    marginTop="20px"
-                    marginBottom="20px"
-                >
-                    <Tab
-                        width="10px"
-                        height="10px"
-                        borderRadius="full"
-                        padding="0"
-                        border="2px solid"
-                        borderColor="whiteAlpha.500"
-                        margin="4px"
-                        cursor="default"
-                        _hover={{ cursor: 'default' }}
-                        isDisabled
-                        _selected={{
-                            backgroundColor: 'blue.500',
-                            border: 'none'
-                        }}
-                    ></Tab>
-                    <Tab
-                        width="10px"
-                        height="10px"
-                        borderRadius="full"
-                        padding="0"
-                        border="2px solid"
-                        borderColor="whiteAlpha.500"
-                        margin="4px"
-                        cursor="deafult"
-                        _hover={{ cursor: 'default' }}
-                        isDisabled
-                        _selected={{
-                            backgroundColor: 'blue.500',
-                            border: 'none'
-                        }}
-                    ></Tab>
-                    <Tab
-                        width="10px"
-                        height="10px"
-                        borderRadius="full"
-                        padding="0"
-                        border="2px solid"
-                        borderColor="whiteAlpha.500"
-                        margin="4px"
-                        cursor="default"
-                        _hover={{ cursor: 'default' }}
-                        isDisabled
-                        _selected={{
-                            backgroundColor: 'blue.500',
-                            border: 'none'
-                        }}
-                    ></Tab>
-                </TabList>
+                {props.formType === 'upload' && renderTabs(3)}
             </Tabs>
-            {store.fileUpload.fileUploadData.originalName !== '' &&
-                !store.fileUpload.isPopulating && (
-                    <HStack justifyContent="center" paddingBottom="20px">
-                        {activeTab === 0 && (
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Home Page - Dataset Upload Modal',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Cancel dataset upload'
-                                        })
-                                    );
-                                    store.fileUpload.cancelFileUpload();
-                                }}
-                            >
-                                Cancel
-                            </Button>
-                        )}
-                        {activeTab > 0 && (
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    if (activeTab === 2) {
-                                        store.overviewSchema.populateStoreData(
-                                            true
-                                        );
-                                    }
-                                    setActiveTab(activeTab - 1);
-                                }}
-                            >
-                                Prev
-                            </Button>
-                        )}
-                        {activeTab < 2 && (
-                            <Button
-                                variant="solid"
-                                backgroundColor="blue.500"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Home Page - Dataset Upload Modal',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Store dataset config'
-                                        })
-                                    );
-
-                                    if (activeTab === 0) {
-                                        store.overviewSchema.populateStoreData(
-                                            true
-                                        );
-                                    }
-                                    if (activeTab === 1) {
-                                        store.schema.populateStoreData(true);
-                                    }
-                                    setActiveTab(activeTab + 1);
-                                }}
-                            >
-                                Next
-                            </Button>
-                        )}
-                        {activeTab === 2 && (
-                            <Button
-                                variant="solid"
-                                backgroundColor="blue.500"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Home Page - Dataset Upload Modal',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Set default configuration'
-                                        })
-                                    );
-                                    store.fileUpload.setDefaults();
-                                }}
-                            >
-                                Save
-                            </Button>
-                        )}
-                    </HStack>
-                )}
+            {renderFooter()}
         </>
     );
 }
