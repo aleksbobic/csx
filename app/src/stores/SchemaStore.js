@@ -140,6 +140,22 @@ export class SchemaStore {
         };
     };
 
+    loadDefaultSchema = id => {
+        const schema_to_load = this.store.search.default_schemas.detail.find(
+            schema => schema.id === id
+        );
+
+        this.edges = schema_to_load.edges;
+        this.nodes = schema_to_load.nodes;
+        this.nodeLabelToID = {};
+
+        this.nodes.forEach(node => {
+            this.nodeLabelToID[node.data.label] = node.id;
+        });
+        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+        this.store.core.updateVisibleDimensionsBasedOnSchema();
+    };
+
     populateStoreData = (useUploadData = false) => {
         this.setUseUploadData(useUploadData);
         let schema;

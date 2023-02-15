@@ -298,6 +298,7 @@ export class CoreStore {
     updateVisibleDimensionsBasedOnSchema = () => {
         if (this.isSchemaNodeTypeBound) {
             const connectedNodes = this.store.schema.getConnectedNodes();
+
             if (!connectedNodes.length) {
                 this.visibleDimensions['detail'] = [
                     this.store.search.links,

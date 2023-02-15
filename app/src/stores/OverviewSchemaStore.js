@@ -92,33 +92,56 @@ export class OverviewSchemaStore {
         };
     };
 
+    loadDefaultSchema = id => {
+        const schema_to_load = this.store.search.default_schemas.overview.find(
+            schema => schema.id === id
+        );
+
+        this.resetProperties();
+        this.store.search.setLinks(schema_to_load.links);
+        this.store.search.setAnchor(schema_to_load.anchor);
+        this.setAnchorProperties(schema_to_load.anchorProperties);
+        this.setDefaultsFromSearchStore();
+        this.generateNodesAndEdges();
+    };
+
+    setDefaultsFromSearchStore = () => {
+        this.features = Object.keys(this.store.search.nodeTypes);
+        this.featureTypes = this.store.search.nodeTypes;
+        this.anchor = this.store.search.anchor;
+        this.links = this.store.search.links;
+    };
+
+    setDefaultsFromFileUploadForm = () => {
+        this.features = Object.keys(
+            this.store.fileUpload.fileUploadData.defaults
+        );
+        this.featureTypes = {};
+        Object.keys(this.store.fileUpload.fileUploadData.defaults).forEach(
+            feature => {
+                this.featureTypes[feature] =
+                    this.store.fileUpload.fileUploadData.defaults[
+                        feature
+                    ].dataType;
+            }
+        );
+
+        this.anchor = this.store.fileUpload.fileUploadData.anchor;
+        this.links = [this.store.fileUpload.fileUploadData.link];
+    };
+
     populateStoreData = (useUploadData = false) => {
         this.setUseUploadData(useUploadData);
-        this.resetProperties();
 
         if (useUploadData) {
-            this.features = Object.keys(
-                this.store.fileUpload.fileUploadData.defaults
-            );
-            this.featureTypes = {};
-            Object.keys(this.store.fileUpload.fileUploadData.defaults).forEach(
-                feature => {
-                    this.featureTypes[feature] =
-                        this.store.fileUpload.fileUploadData.defaults[
-                            feature
-                        ].dataType;
-                }
-            );
-
-            this.anchor = this.store.fileUpload.fileUploadData.anchor;
-            this.links = [this.store.fileUpload.fileUploadData.link];
+            this.setDefaultsFromFileUploadForm();
         } else {
-            this.features = Object.keys(this.store.search.nodeTypes);
-            this.featureTypes = this.store.search.nodeTypes;
-            this.anchor = this.store.search.anchor;
-            this.links = this.store.search.links;
+            this.setDefaultsFromSearchStore();
         }
+        this.generateNodesAndEdges();
+    };
 
+    generateNodesAndEdges = () => {
         this.nodes = this.features
             .filter(node => node === this.anchor || this.links.includes(node))
             .map(node => {

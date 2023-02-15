@@ -10,6 +10,7 @@ export class SearchStore {
     links = [];
     schema = [];
     schemas = [];
+    default_schemas = {};
     datasets = [];
     searchHints = {};
     query = '';
@@ -61,7 +62,10 @@ export class SearchStore {
         this.links = dataset_config.links;
 
         this.schema = dataset_config.schemas[0]['relations'];
+
         this.schemas = dataset_config.schemas;
+
+        this.default_schemas = dataset_config.default_schemas;
         this.searchHints = dataset_config.search_hints;
         this.default_search_features = dataset_config.default_search_fields;
 

@@ -46,6 +46,10 @@ function HomePage() {
         }
     }, [store.core.trackingEnabled]);
 
+    useEffect(() => {
+        store.overviewSchema.resetProperties();
+    }, []);
+
     const renderDarkCookie = useCallback(
         () => (
             <Box

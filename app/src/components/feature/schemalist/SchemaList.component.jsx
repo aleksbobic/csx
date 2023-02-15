@@ -1,8 +1,6 @@
-import { Box, Button, Divider, HStack, Text, Tooltip } from '@chakra-ui/react';
+import { Box, Button, HStack, Text, Tooltip } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-
-import { MathPlus } from 'css.gg';
 
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import CustomScroll from '../customscroll/CustomScroll.component';
@@ -10,25 +8,44 @@ import CustomScroll from '../customscroll/CustomScroll.component';
 export function SchemaList() {
     const store = useContext(RootStoreContext);
 
-    const renderSchemaItem = name => {
-        return (
-            <Tooltip label={`Load ${name} schema`}>
-                <Box minHeight="60px" minWidth="60px">
-                    <Button
-                        style={{
-                            width: '60px',
-                            height: '60px',
-                            borderRadius: '8px'
-                        }}
-                        _hover={{
-                            backgroundColor: 'blue.500',
-                            color: 'white'
-                        }}
+    const renderSchemas = () => {
+        return store.search.default_schemas[store.core.currentGraph].map(
+            schema => {
+                return (
+                    <Box
+                        minHeight="60px"
+                        minWidth="60px"
+                        key={`default_schema_${schema.id}`}
                     >
-                        {name.slice(0, 2).toUpperCase()}
-                    </Button>
-                </Box>
-            </Tooltip>
+                        <Tooltip label={`Load ${schema.name} schema`}>
+                            <Button
+                                style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    borderRadius: '8px'
+                                }}
+                                _hover={{
+                                    backgroundColor: 'blue.500',
+                                    color: 'white'
+                                }}
+                                onClick={() => {
+                                    if (store.core.isOverview) {
+                                        store.overviewSchema.loadDefaultSchema(
+                                            schema.id
+                                        );
+                                    } else {
+                                        store.schema.loadDefaultSchema(
+                                            schema.id
+                                        );
+                                    }
+                                }}
+                            >
+                                {schema.name.slice(0, 2).toUpperCase()}
+                            </Button>
+                        </Tooltip>
+                    </Box>
+                );
+            }
         );
     };
 
@@ -43,63 +60,23 @@ export function SchemaList() {
             paddingBottom="0"
         >
             <CustomScroll style={{ paddingBottom: '20px' }}>
-                <HStack spacing="10px">
-                    <HStack
-                        width="210px"
-                        height="90px"
-                        paddingBottom="10px"
-                        alignItems="flex-end"
+                <HStack
+                    spacing="10px"
+                    alignItems="flex-end"
+                    height="90px"
+                    paddingBottom="4px"
+                >
+                    <Text
+                        fontSize="xs"
+                        position="absolute"
+                        top="0px"
+                        left="10px"
+                        fontWeight="bold"
+                        opacity="0.6"
                     >
-                        <Text
-                            fontSize="xs"
-                            position="absolute"
-                            top="0px"
-                            left="10px"
-                            fontWeight="bold"
-                            opacity="0.6"
-                        >
-                            Default
-                        </Text>
-                        {renderSchemaItem('abcdef')}
-                        {renderSchemaItem('bcdef')}
-                        {renderSchemaItem('cdef')}
-                    </HStack>
-                    <Divider orientation="vertical" height="70px" />
-                    <HStack
-                        width="auto"
-                        height="90px"
-                        paddingBottom="10px"
-                        alignItems="flex-end"
-                        position="relative"
-                    >
-                        <Text
-                            fontSize="xs"
-                            position="absolute"
-                            top="0px"
-                            left="10px"
-                            fontWeight="bold"
-                            opacity="0.6"
-                        >
-                            Custom
-                        </Text>
-                        <Tooltip label="Store current schema">
-                            <Box minHeight="60px" minWidth="60px">
-                                <Button
-                                    style={{
-                                        width: '60px',
-                                        height: '60px',
-                                        borderRadius: '8px'
-                                    }}
-                                    _hover={{
-                                        backgroundColor: 'blue.500',
-                                        color: 'white'
-                                    }}
-                                >
-                                    <MathPlus />
-                                </Button>
-                            </Box>
-                        </Tooltip>
-                    </HStack>
+                        Default schemas
+                    </Text>
+                    {renderSchemas()}
                 </HStack>
             </CustomScroll>
         </Box>
