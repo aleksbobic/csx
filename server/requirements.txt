@@ -15,4 +15,4 @@ python-multipart
 pymongo
 marisa-trie
 palettable
-polars
+polars==0.16.4
