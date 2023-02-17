@@ -1,10 +1,15 @@
 import {
     Box,
     Button,
+    Checkbox,
     Heading,
     HStack,
     IconButton,
     Kbd,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
     Popover,
     PopoverBody,
     PopoverCloseButton,
@@ -21,7 +26,9 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { ChevronDown, ChevronUp, Close } from 'css.gg';
+import { CameraIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { Chart, ChevronDown, ChevronUp, Close } from 'css.gg';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 
@@ -263,50 +270,54 @@ function CommentTextArea(props) {
                 to add a comment.
             </Text>
             <HStack spacing="1">
-                <Popover offset={[-200, 0]} closeOnBlur={true}>
-                    <PopoverTrigger>
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            opacity="0.6"
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Comment Area - Footer',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Markdown info'
-                                    })
-                                );
-                            }}
-                        >
-                            ?
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                        backgroundColor="#0f1010"
-                        borderRadius="10px"
-                        padding="20px"
-                    >
-                        <PopoverHeader padding="14px" border="none">
-                            <Heading size="sm">Markdown shortcuts</Heading>
-                            <PopoverCloseButton
-                                style={{ top: '14px', right: '14px' }}
+                <Box>
+                    <Popover offset={[-200, 0]} closeOnBlur={true}>
+                        <PopoverTrigger>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                opacity="0.6"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Comment Area - Markdown Info',
+                                        'Comment Area - Footer',
                                         'Button',
                                         JSON.stringify({
                                             type: 'Click',
-                                            value: 'Close'
+                                            value: 'Markdown info'
                                         })
                                     );
                                 }}
-                            />
-                        </PopoverHeader>
-                        <PopoverBody>{renderMarkdownCheatSheet()}</PopoverBody>
-                    </PopoverContent>
-                </Popover>
+                            >
+                                ?
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                            backgroundColor="#0f1010"
+                            borderRadius="10px"
+                            padding="20px"
+                        >
+                            <PopoverHeader padding="14px" border="none">
+                                <Heading size="sm">Markdown shortcuts</Heading>
+                                <PopoverCloseButton
+                                    style={{ top: '14px', right: '14px' }}
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Comment Area - Markdown Info',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Close'
+                                            })
+                                        );
+                                    }}
+                                />
+                            </PopoverHeader>
+                            <PopoverBody>
+                                {renderMarkdownCheatSheet()}
+                            </PopoverBody>
+                        </PopoverContent>
+                    </Popover>
+                </Box>
                 <Tooltip
                     label={
                         store.comment.isCommentListVisible
@@ -348,6 +359,45 @@ function CommentTextArea(props) {
         </HStack>
     );
 
+    const renderAvailableCharts = () => {
+        const acceptedCharts = [
+            'bar',
+            'vertical bar',
+            'grouped bar',
+            'line',
+            'doughnut'
+        ];
+
+        return store.stats
+            .getChartListForDataset()
+            .filter(
+                chart =>
+                    chart.network === store.core.currentGraph &&
+                    acceptedCharts.includes(chart.type.toLowerCase())
+            )
+            .map(chart => {
+                return {
+                    title: chart.title ? chart.title : chart.type,
+                    id: chart.id
+                };
+            })
+            .map(chart => (
+                <MenuItem
+                    fontSize="xs"
+                    as={Button}
+                    opacity="0.6"
+                    borderRadius="6px"
+                    transition="0.2s all ease-in-out"
+                    key={`available_chart_${chart.id}`}
+                    onClick={() => {
+                        store.comment.setChartToAttach(chart.id);
+                    }}
+                    _hover={{ textDecoration: 'none', opacity: 1 }}
+                >
+                    {chart.title}
+                </MenuItem>
+            ));
+    };
     return (
         <VStack
             width="100%"
@@ -411,41 +461,153 @@ function CommentTextArea(props) {
                             />
                         </Tooltip>
                     )}
-                    <Button
-                        size="sm"
-                        position="absolute"
-                        right="12px"
-                        bottom="12px"
-                        backgroundColor="blue.400"
-                        zIndex="2"
-                        borderRadius="4px"
-                        transition="0.2s all ease-in-out"
-                        color={'white'}
-                        _hover={{ backgroundColor: 'blue.500' }}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Comment Area - Textarea',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: `Submit comment: ${comment.trim()}`
-                                })
-                            );
+                    <Menu size="sm" isLazy={true} placement="top-start">
+                        <Tooltip
+                            label={
+                                store.comment.screenshot
+                                    ? 'Remove chart from comment.'
+                                    : 'Attach chart to comment.'
+                            }
+                        >
+                            <MenuButton
+                                as={IconButton}
+                                icon={
+                                    <Chart
+                                        style={{
+                                            '--ggs': 0.7,
+                                            marginLeft: '5px',
+                                            marginBottom: '5px'
+                                        }}
+                                    />
+                                }
+                                size="sm"
+                                position="absolute"
+                                right="90px"
+                                bottom="12px"
+                                opacity="0.5"
+                                zIndex="2"
+                                borderRadius="4px"
+                                transition="0.2s all ease-in-out"
+                                backgroundColor={
+                                    store.comment.screenshot
+                                        ? 'blue.500'
+                                        : 'auto'
+                                }
+                                color="white"
+                                _hover={{
+                                    opacity: 1
+                                }}
+                            />
+                        </Tooltip>
+                        <MenuList
+                            backgroundColor="black"
+                            padding="5px"
+                            borderRadius="10px"
+                            zIndex="21"
+                        >
+                            {renderAvailableCharts()}
+                        </MenuList>
+                    </Menu>
 
-                            submitComment();
-                        }}
-                        isDisabled={comment.trim() === ''}
-                        _disabled={{
-                            backgroundColor:
-                                colorMode === 'light'
-                                    ? 'blackAlpha.400'
-                                    : 'gray',
-                            cursor: 'not-allowed',
-                            opacity: 0.3
-                        }}
+                    <Tooltip
+                        label={
+                            store.comment.screenshot
+                                ? 'Remove screenshot from comment.'
+                                : 'Attach screenshot of current graph view to comment.'
+                        }
                     >
-                        {store.comment.editMode ? 'Save edits' : 'Comment'}
-                    </Button>
+                        <IconButton
+                            size="sm"
+                            position="absolute"
+                            right="50px"
+                            bottom="12px"
+                            opacity="0.5"
+                            zIndex="2"
+                            borderRadius="4px"
+                            transition="0.2s all ease-in-out"
+                            onClick={() => {
+                                if (store.comment.screenshot) {
+                                    store.comment.removeScreenshot();
+                                } else {
+                                    store.comment.attachScreenshot(
+                                        window.innerWidth,
+                                        window.innerHeight
+                                    );
+                                }
+                            }}
+                            backgroundColor={
+                                store.comment.screenshot ? 'blue.500' : 'auto'
+                            }
+                            color="white"
+                            _hover={{
+                                opacity: 1
+                            }}
+                            icon={
+                                <CameraIcon
+                                    width="12px"
+                                    style={{
+                                        display: 'inline'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip
+                        label={
+                            store.comment.editMode ? 'Save edits' : 'Comment'
+                        }
+                    >
+                        <IconButton
+                            size="sm"
+                            position="absolute"
+                            right="12px"
+                            bottom="12px"
+                            backgroundColor="blue.400"
+                            zIndex="2"
+                            borderRadius="4px"
+                            transition="0.2s all ease-in-out"
+                            color={'white'}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            icon={
+                                store.comment.editMode ? (
+                                    <PencilSquareIcon
+                                        width="12px"
+                                        style={{
+                                            display: 'inline'
+                                        }}
+                                    />
+                                ) : (
+                                    <PaperAirplaneIcon
+                                        width="12px"
+                                        style={{
+                                            display: 'inline'
+                                        }}
+                                    />
+                                )
+                            }
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Comment Area - Textarea',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: `Submit comment: ${comment.trim()}`
+                                    })
+                                );
+
+                                submitComment();
+                            }}
+                            isDisabled={comment.trim() === ''}
+                            _disabled={{
+                                backgroundColor:
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.400'
+                                        : 'gray',
+                                cursor: 'not-allowed',
+                                opacity: 0.3
+                            }}
+                        />
+                    </Tooltip>
                 </Box>
             )}
 

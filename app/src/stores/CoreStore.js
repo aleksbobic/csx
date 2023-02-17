@@ -14,6 +14,7 @@ export class CoreStore {
     studyUuid = null;
     studyName = '';
     studyDescription = '';
+    studyAuthor = '';
     studyHistory = [];
     studyHistoryItemIndex = 0;
     studyIsSaved = false;
@@ -25,6 +26,9 @@ export class CoreStore {
     colorMode = null;
     showCookieInfo = false;
     isSchemaNodeTypeBound = true;
+    isLeftSidePanelOpen = true;
+    isRightSidePanelOpen = false;
+    rightPanelWidth = 0;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -48,12 +52,17 @@ export class CoreStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
+    setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
+
     setIsSchemaNodeTypeBound = val => {
         this.isSchemaNodeTypeBound = val;
         if (val) {
             this.updateVisibleDimensionsBasedOnSchema();
         }
     };
+
+    setRightPanelWidth = val => (this.rightPanelWidth = val);
 
     setShowCookieInfo = val => (this.showCookieInfo = val);
 
@@ -66,6 +75,8 @@ export class CoreStore {
     updateStudies = val => (this.studies = val);
 
     setStudyName = name => (this.studyName = name);
+
+    setStudyAuthor = author => (this.studyAuthor = author);
 
     setColorMode = val => (this.colorMode = val);
 
@@ -103,7 +114,32 @@ export class CoreStore {
             user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
             study_name: this.studyName,
-            study_description: this.studyDescription
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
+    };
+
+    updateStudyAuthor = async author => {
+        this.studyAuthor = author;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(
@@ -126,7 +162,8 @@ export class CoreStore {
             user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
             study_name: this.studyName,
-            study_description: this.studyDescription
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(

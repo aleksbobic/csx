@@ -145,7 +145,12 @@ export class SchemaStore {
             schema => schema.id === id
         );
 
-        this.edges = schema_to_load.edges;
+        this.edges = schema_to_load.edges.map(edge => {
+            edge.data.changeRelationship = this.toggleRelationship;
+            edge.data.removeEdge = this.removeSchemaConnection;
+            return edge;
+        });
+
         this.nodes = schema_to_load.nodes;
         this.nodeLabelToID = {};
 

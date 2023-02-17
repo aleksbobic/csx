@@ -20,6 +20,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
+import PresentPage from 'pages/present/Present.page';
 
 function CSX() {
     const { colorMode } = useColorMode();
@@ -155,6 +156,9 @@ function CSX() {
                             <Route path="/graph" label="graph">
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
+                            </Route>
+                            <Route exact path="/present" label="present">
+                                <PresentPage />
                             </Route>
                             {isEnvFalse(
                                 'REACT_APP_DISABLE_ADVANCED_SEARCH'

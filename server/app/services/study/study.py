@@ -7,6 +7,7 @@ from app.types import ComparisonResults
 import pandas as pd
 import networkx as nx
 import app.services.graph.graph as csx_graph
+from typing import Union
 
 
 def store_history_entry(entry):
@@ -89,6 +90,11 @@ def add_comment(
     history_item_index: int,
     comment: str,
     comment_time: str,
+    screenshot: Union[str, None],
+    screenshot_width: Union[int, None],
+    screenshot_height: Union[int, None],
+    screenshot_x_offset: Union[int, None],
+    chart: Union[str, None],
 ):
 
     csx_data.update_document(
@@ -99,6 +105,11 @@ def add_comment(
                 f"history.{history_item_index}.comments": {
                     "comment": comment,
                     "time": comment_time,
+                    "screenshot": screenshot,
+                    "screenshot_width": screenshot_width,
+                    "screenshot_height": screenshot_height,
+                    "screenshot_x_offset": screenshot_x_offset,
+                    "chart": chart,
                 }
             }
         },

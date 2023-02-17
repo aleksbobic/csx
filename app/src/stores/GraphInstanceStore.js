@@ -379,17 +379,17 @@ export class GraphInstanceStore {
         );
     };
 
-    takeScreenshot = () => {
+    retireveScreenshot = () => {
         const renderer = this.graphInstance.renderer();
         const scene = this.graphInstance.scene();
         const camera = this.graphInstance.camera();
 
         renderer.render(scene, camera);
+        return renderer.domElement.toDataURL('image/octet-stream', 1.0);
+    };
 
-        const screenshot = renderer.domElement.toDataURL(
-            'image/octet-stream',
-            1.0
-        );
+    takeScreenshot = () => {
+        const screenshot = this.retireveScreenshot();
 
         const element = document.createElement('a');
         element.setAttribute('href', screenshot);
@@ -397,6 +397,7 @@ export class GraphInstanceStore {
 
         element.click();
     };
+
     resetSelfCentric = () => {
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;

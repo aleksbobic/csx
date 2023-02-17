@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, remove } from 'mobx';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { safeRequest } from 'general.utils';
@@ -9,6 +9,9 @@ export class CommentStore {
     editedCommentContent = null;
     isCommentListVisible = true;
     commentTrigger = true;
+    screenshot = null;
+    chartToAttach = null;
+    chart = null;
 
     constructor(store) {
         this.store = store;
@@ -21,6 +24,39 @@ export class CommentStore {
     setIsCommentListVisible = val => (this.isCommentListVisible = val);
     setCommentTrigger = val => (this.commentTrigger = val);
 
+    attachScreenshot = (windowWidth, windowHeight) => {
+        let imageWidth = windowWidth;
+
+        if (this.store.core.isLeftSidePanelOpen) {
+            imageWidth = imageWidth - 300;
+        }
+
+        if (this.store.core.isRightSidePanelOpen) {
+            imageWidth = imageWidth - this.store.core.rightPanelWidth;
+        }
+
+        this.screenshot = {
+            image: this.store.graphInstance.retireveScreenshot(),
+            width: imageWidth,
+            height: windowHeight,
+            xOffset: this.store.core.isLeftSidePanelOpen ? 300 : 0
+        };
+    };
+
+    removeScreenshot = () => (this.screenshot = null);
+
+    attachChart = chartImage => {
+        this.chart = chartImage;
+    };
+
+    setChartToAttach = id => {
+        this.chartToAttach = id;
+    };
+
+    removeChart = () => {
+        this.chart = null;
+    };
+
     addComment = async comment => {
         const comment_time = format(new Date(), 'H:mm do MMM yyyy OOOO');
 
@@ -31,6 +67,19 @@ export class CommentStore {
             comment: comment,
             comment_time: comment_time
         };
+
+        if (this.screenshot) {
+            params['screenshot'] = this.screenshot.image;
+            params['screenshot_width'] = parseInt(this.screenshot.width);
+            params['screenshot_height'] = parseInt(this.screenshot.height);
+            params['screenshot_x_offset'] = parseInt(this.screenshot.xOffset);
+            this.removeScreenshot();
+        }
+
+        if (this.chart) {
+            params['chart'] = this.chart;
+            this.removeChart();
+        }
 
         const { error } = await safeRequest(
             axios.post('history/comment/', params)

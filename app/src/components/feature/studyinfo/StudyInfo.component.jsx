@@ -1,4 +1,4 @@
-import { Stack } from '@chakra-ui/layout';
+import { Divider, Stack } from '@chakra-ui/layout';
 import {
     Button,
     Editable,
@@ -46,11 +46,12 @@ function StudyInfo() {
                         store.core.updateStudyName(val);
                     }}
                     onChange={val => store.core.setStudyName(val)}
+                    onFocus={() => store.comment.setCommentTrigger(false)}
+                    onBlur={() => store.comment.setCommentTrigger(true)}
                     width="100%"
                 >
                     <EditablePreview
                         size="xs"
-                        textTransform="uppercase"
                         maxWidth="100%"
                         minWidth="40px"
                         height="30px"
@@ -69,7 +70,6 @@ function StudyInfo() {
                     />
                     <EditableInput
                         size="xs"
-                        textTransform="uppercase"
                         width="100%"
                         whiteSpace="nowrap"
                         overflow="hidden"
@@ -112,6 +112,8 @@ function StudyInfo() {
                         store.core.updateStudyDescription(val);
                     }}
                     onChange={val => store.core.setStudyDescription(val)}
+                    onFocus={() => store.comment.setCommentTrigger(false)}
+                    onBlur={() => store.comment.setCommentTrigger(true)}
                     width="100%"
                     placeholder="Click here to add a study description. 👀"
                 >
@@ -161,6 +163,67 @@ function StudyInfo() {
                 {store.core.studyIsSaved ? 'Saved' : 'Save'}
                 <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
             </Button>
+            <Divider />
+
+            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
+                Study author
+            </Text>
+            <Tooltip label="The study author name">
+                <Editable
+                    value={store.core.studyAuthor}
+                    onSubmit={val => {
+                        store.track.trackEvent(
+                            'Side Panel - Study Info',
+                            'Editable Element - Study author',
+                            JSON.stringify({
+                                type: 'Write',
+                                value: val
+                            })
+                        );
+                        store.core.updateStudyAuthor(val);
+                    }}
+                    onChange={val => store.core.setStudyAuthor(val)}
+                    onFocus={() => store.comment.setCommentTrigger(false)}
+                    onBlur={() => store.comment.setCommentTrigger(true)}
+                    width="100%"
+                >
+                    <EditablePreview
+                        size="xs"
+                        width="100%"
+                        maxWidth="100%"
+                        minWidth="40px"
+                        height="30px"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        paddingLeft="10px"
+                        fontWeight="bold"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        display="inline-block"
+                        paddingRight="10px"
+                    />
+                    <EditableInput
+                        size="xs"
+                        width="100%"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        paddingLeft="10px"
+                        fontWeight="bold"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.200'
+                        }
+                        display="inline-block"
+                        paddingRight="10px"
+                    />
+                </Editable>
+            </Tooltip>
         </Stack>
     );
 }

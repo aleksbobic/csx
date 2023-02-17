@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import app.services.study.study as csx_study
 import app.services.data.mongo as csx_data
 from bson import ObjectId
+from typing import Union
 
 router = APIRouter()
 
@@ -13,6 +14,11 @@ class HistoryCommentData(BaseModel):
     history_item_index: int
     comment: str
     comment_time: str
+    screenshot: Union[str, None]
+    screenshot_width: Union[int, None]
+    screenshot_height: Union[int, None]
+    screenshot_x_offset: Union[int, None]
+    chart: Union[str, None]
 
 
 @router.post("/")
@@ -24,7 +30,16 @@ def add_comment(data: HistoryCommentData):
     comment_time = data.comment_time
 
     csx_study.add_comment(
-        study_uuid, user_uuid, history_item_index, comment, comment_time
+        study_uuid,
+        user_uuid,
+        history_item_index,
+        comment,
+        comment_time,
+        data.screenshot,
+        data.screenshot_width,
+        data.screenshot_height,
+        data.screenshot_x_offset,
+        data.chart
     )
 
     return

@@ -10,6 +10,7 @@ import {
     Image,
     Text,
     useColorMode,
+    useColorModeValue,
     useToast
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
@@ -37,6 +38,7 @@ function HomePage() {
     const toast = useToast();
     const cookieToast = useToast();
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
     const [cookieToastVisible, setCookieToastVisible] = useState(false);
 
@@ -312,6 +314,7 @@ function HomePage() {
                     fontWeight="extrabold"
                     marginBottom="20px"
                     textAlign="center"
+                    color={textColor}
                 >
                     COLLABORATION SPOTTING X
                 </Heading>

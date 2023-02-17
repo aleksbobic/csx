@@ -83,6 +83,12 @@ function ControlPanel() {
         );
     };
 
+    useEffect(() => {
+        if (isOpen !== store.core.isLeftSidePanelOpen) {
+            store.core.setIsLeftSidePanelOpen(isOpen);
+        }
+    }, [isOpen, store.core]);
+
     const openSliderIfClosed = () => {
         if (!isOpen) {
             onOpen();

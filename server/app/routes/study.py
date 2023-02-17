@@ -66,6 +66,18 @@ def get_new_features(query):
     )
 
 
+@router.get("/history")
+def get_study_history(study_uuid: str, user_uuid: str):
+    study = csx_study.get_study(user_uuid, study_uuid)
+    history = csx_study.extract_history_items(study)
+    return {
+        "name": study["study_name"],
+        "author": study["study_author"],
+        "description": study["study_description"],
+        "history": history,
+    }
+
+
 class GetStudyData(BaseModel):
     study_uuid: str
     user_uuid: str
@@ -91,6 +103,7 @@ def get_study(data: GetStudyData):
     history_entry_id = data.history_id
 
     study = csx_study.get_study(user_uuid, study_uuid)
+    print(study.keys())
 
     if len(study["history"]) > 0:
         if history_entry_id:
@@ -125,6 +138,7 @@ def get_study(data: GetStudyData):
             "graph": pickle.loads(history_item)[graph_type],
             "name": study["study_name"],
             "description": study["study_description"],
+            "author": study["study_author"],
             "history": history,
             "index": study["index"],
             "charts": charts,
@@ -134,6 +148,7 @@ def get_study(data: GetStudyData):
         "graph": {},
         "name": study["study_name"],
         "description": study["study_description"],
+        "author": study["study_author"],
         "history": [],
         "index": study["index"],
     }
@@ -404,7 +419,11 @@ def generate_study(user_uuid: str, study_name: str) -> str:
 
 @router.get("/update")
 def update_study(
-    study_uuid: str, user_uuid: str, study_name: str, study_description: str
+    study_uuid: str,
+    user_uuid: str,
+    study_name: str,
+    study_description: str,
+    study_author: Union[str, None],
 ):
     csx_data.update_document(
         "studies",
@@ -413,6 +432,7 @@ def update_study(
             "$set": {
                 "study_name": study_name,
                 "study_description": study_description,
+                "study_author": study_author,
                 "saved": True,
             }
         },

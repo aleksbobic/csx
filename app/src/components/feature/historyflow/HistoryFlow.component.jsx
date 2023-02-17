@@ -1,8 +1,19 @@
-import { Box, IconButton, Tooltip, useColorMode } from '@chakra-ui/react';
+import {
+    Box,
+    Button,
+    IconButton,
+    Link,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
+    Tooltip,
+    useColorMode
+} from '@chakra-ui/react';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign } from 'css.gg';
+import { Assign, Presentation } from 'css.gg';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -185,6 +196,59 @@ export function HistoryFlow() {
                     }}
                 />
             </Tooltip>
+            <Box>
+                <Menu size="sm" isLazy={true} placement="top-start">
+                    <MenuButton
+                        as={IconButton}
+                        icon={
+                            <Presentation
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        }
+                        size="sm"
+                        zIndex="20"
+                        position="absolute"
+                        bottom="20px"
+                        left="60px"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                    />
+                    <MenuList
+                        backgroundColor="black"
+                        padding="5px"
+                        borderRadius="10px"
+                        zIndex="21"
+                    >
+                        <MenuItem
+                            fontSize="xs"
+                            as={Link}
+                            opacity="0.6"
+                            borderRadius="6px"
+                            transition="0.2s all ease-in-out"
+                            href={`http://localhost:8882/present?study=${store.core.studyUuid}`}
+                            isExternal
+                            _hover={{ textDecoration: 'none', opacity: 1 }}
+                        >
+                            Present full tree
+                        </MenuItem>
+                        <MenuItem
+                            fontSize="xs"
+                            as={Link}
+                            opacity="0.6"
+                            borderRadius="6px"
+                            transition="0.2s all ease-in-out"
+                            href={`http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`}
+                            isExternal
+                            _hover={{ textDecoration: 'none', opacity: 1 }}
+                        >
+                            Present to active item
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
+            </Box>
         </Box>
     );
 }

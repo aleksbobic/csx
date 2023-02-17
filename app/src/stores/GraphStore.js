@@ -714,6 +714,7 @@ export class GraphStore {
 
         this.store.core.updateIsStudySaved(true);
         this.store.core.setStudyName(response.data.name);
+        this.store.core.setStudyAuthor(response.data.author);
         this.store.core.setStudyDescription(response.data.description);
         this.store.core.setStudyHistory(response.data.history);
         this.store.core.setStudyHistoryItemIndex(

@@ -47,6 +47,15 @@ function Chart(props) {
     });
 
     useEffect(() => {
+        if (store.comment.chartToAttach === props.chart.id) {
+            store.comment.attachChart(
+                chartRef.current.toBase64Image('image/octet-stream', 1.0)
+            );
+            store.comment.setChartToAttach(null);
+        }
+    }, [props.chart.id, store.comment.chartToAttach]);
+
+    useEffect(() => {
         if (props.demoData) {
             setData(props.demoData);
         } else {
@@ -305,6 +314,7 @@ function Chart(props) {
             options={{
                 maintainAspectRatio: false,
                 responsive: true,
+                animation: false,
                 indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
                 onHover: (event, elements) => {
                     if (elements.length) {
