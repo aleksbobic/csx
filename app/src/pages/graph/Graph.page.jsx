@@ -89,6 +89,7 @@ function GraphPage() {
                     value: 'Open comment modal'
                 })
             );
+
             store.core.setShowCommentModal(true);
         }
 
@@ -107,6 +108,7 @@ function GraphPage() {
     }, [
         closeCommentModalKey,
         openCommentModalKey,
+        store.comment,
         store.comment.commentTrigger,
         store.core,
         store.track,

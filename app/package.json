@@ -15,6 +15,7 @@
     "@yaireo/tagify": "^4.7.2",
     "axios": "^0.21.1",
     "chart.js": "^3.9.1",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "classnames": "^2.3.1",
     "color-scheme": "^1.0.1",
     "css.gg": "^2.0.0",

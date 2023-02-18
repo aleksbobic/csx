@@ -1,7 +1,7 @@
-import { makeAutoObservable, remove } from 'mobx';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { safeRequest } from 'general.utils';
+import { makeAutoObservable } from 'mobx';
 
 export class CommentStore {
     editMode = false;
@@ -20,7 +20,18 @@ export class CommentStore {
 
     setEditMode = val => (this.editMode = val);
     setEditCommentIndex = val => (this.editCommentIndex = val);
-    setEditedCommentContent = val => (this.editedCommentContent = val);
+    setEditedCommentContent = content => {
+        this.editedCommentContent = content.comment;
+        this.screenshot = {
+            image: content.screenshot,
+            width: content.screenshot_width,
+            height: content.screenshot_height,
+            xOffset: content.screenshot_x_offset
+        };
+
+        this.chart = content.chart;
+    };
+
     setIsCommentListVisible = val => (this.isCommentListVisible = val);
     setCommentTrigger = val => (this.commentTrigger = val);
 
@@ -90,9 +101,27 @@ export class CommentStore {
             return;
         }
 
+        const newComment = {
+            comment: comment,
+            time: comment_time,
+            chart: params.chart ? params.chart : null
+        };
+
+        if (params.screenshot) {
+            newComment.screenshot = params.screenshot;
+            newComment.screenshot_width = params.screenshot_width;
+            newComment.screenshot_height = params.screenshot_height;
+            newComment.screenshot_x_offset = params.screenshot_x_offset;
+        } else {
+            newComment.screenshot = null;
+            newComment.screenshot_width = null;
+            newComment.screenshot_height = null;
+            newComment.screenshot_x_offset = null;
+        }
+
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
-        ].comments.push({ comment: comment, time: comment_time });
+        ].comments.push(newComment);
 
         this.store.history.generateHistoryNodes();
 
@@ -137,6 +166,19 @@ export class CommentStore {
             comment_time: comment_time
         };
 
+        if (this.screenshot) {
+            params['screenshot'] = this.screenshot.image;
+            params['screenshot_width'] = parseInt(this.screenshot.width);
+            params['screenshot_height'] = parseInt(this.screenshot.height);
+            params['screenshot_x_offset'] = parseInt(this.screenshot.xOffset);
+            this.removeScreenshot();
+        }
+
+        if (this.chart) {
+            params['chart'] = this.chart;
+            this.removeChart();
+        }
+
         const { error } = await safeRequest(
             axios.post('history/comment/edit', params)
         );
@@ -145,6 +187,38 @@ export class CommentStore {
             this.store.core.handleRequestError(error);
             return;
         }
+
+        if (params.screenshot) {
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot = params.screenshot;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_width = params.screenshot_width;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_height = params.screenshot_height;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_x_offset = params.screenshot_x_offset;
+        } else {
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot = null;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_width = null;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_height = null;
+            this.store.core.studyHistory[
+                this.store.core.studyHistoryItemIndex
+            ].comments[index].screenshot_x_offset = null;
+        }
+
+        this.store.core.studyHistory[
+            this.store.core.studyHistoryItemIndex
+        ].comments[index].chart = params.chart ? params.chart : null;
 
         this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex

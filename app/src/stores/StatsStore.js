@@ -1,5 +1,11 @@
 import { makeAutoObservable } from 'mobx';
-import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
+import {
+    interpolateRainbow,
+    schemeTableau10,
+    interpolateYlGnBu,
+    interpolateBlues,
+    interpolatePlasma
+} from 'd3-scale-chromatic';
 import { v4 as uuidv4 } from 'uuid';
 
 export class StatsStore {
@@ -65,17 +71,26 @@ export class StatsStore {
         this.isStatsModalVisible = val;
     };
 
-    getGraphColors = labels => {
+    getGraphColors = (labels, data) => {
         const skipfactor = labels.length > 10 ? 1 / labels.length : null;
+        let uniqueValues;
+
+        if (data) {
+            uniqueValues = [...new Set(data)];
+        }
 
         const graphColors = [];
 
-        for (let i = 0; i < labels.length; i++) {
-            graphColors.push(
-                skipfactor
-                    ? interpolateRainbow(i * skipfactor)
-                    : schemeTableau10[i]
-            );
+        if (data && uniqueValues && uniqueValues?.length <= 10) {
+            for (let i = 0; i < labels.length; i++) {
+                graphColors.push(
+                    schemeTableau10[uniqueValues.indexOf(data[i])]
+                );
+            }
+        } else {
+            for (let i = 0; i < labels.length; i++) {
+                graphColors.push('#3182CE');
+            }
         }
 
         return graphColors;
@@ -394,7 +409,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgb(0,0,0)'
                 }
             ]
@@ -428,7 +443,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgba(255,255,255,0.25)'
                 }
             ]
@@ -442,7 +457,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgb(0,0,0)'
                 }
             ]
@@ -614,18 +629,20 @@ export class StatsStore {
             });
         } else {
             data.forEach(link => {
-                link.connections.forEach(connection => {
-                    const labelLocation = values.indexOf(
-                        connection[edgeProperty.prop]
-                    );
+                if (link.connections) {
+                    link.connections.forEach(connection => {
+                        const labelLocation = values.indexOf(
+                            connection[edgeProperty.prop]
+                        );
 
-                    if (labelLocation >= 0) {
-                        counts[labelLocation] += 1;
-                    } else {
-                        values.push(connection[edgeProperty.prop]);
-                        counts.push(1);
-                    }
-                });
+                        if (labelLocation >= 0) {
+                            counts[labelLocation] += 1;
+                        } else {
+                            values.push(connection[edgeProperty.prop]);
+                            counts.push(1);
+                        }
+                    });
+                }
             });
         }
 

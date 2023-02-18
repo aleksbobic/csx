@@ -126,7 +126,7 @@ function ConnectionStats(props) {
             >
                 {props.isExpanded && (
                     <HStack width="100%">
-                        <Divider />
+                        <Divider style={{ opacity: 0.2 }} />
                         <Tooltip
                             label={`Show all nodes with selected feature ${
                                 level + 1
@@ -164,7 +164,7 @@ function ConnectionStats(props) {
                                 {neighbours[level].title}
                             </Heading>
                         </Tooltip>
-                        <Divider />
+                        <Divider style={{ opacity: 0.5 }} />
                     </HStack>
                 )}
 

@@ -387,7 +387,7 @@ function Settings() {
                         </HStack>
                     </Tooltip>
                 )}
-                <Divider paddingTop="10px" />
+                <Divider paddingTop="10px" style={{ opacity: 0.2 }} />
                 <Tooltip
                     label={
                         store.graphInstance.labels.isVisible
@@ -555,13 +555,13 @@ function Settings() {
                         View Settings
                     </Heading>
                     {renderVisibilityOptions()}
-                    <Divider style={{ marginTop: '10px' }} />
+                    <Divider style={{ marginTop: '10px', opacity: 0.2 }} />
                     {renderColorOptions()}
                 </VStack>
-                <Divider style={{ marginTop: '10px' }} />
+                <Divider style={{ marginTop: '10px', opacity: 0.2 }} />
                 <VStack spacing="10px" align="start" mt="10px" width="100%">
                     {renderLabelOptions()}
-                    <Divider />
+                    <Divider style={{ opacity: 0.2 }} />
                     {renderLayoutOptions()}
 
                     {store.core.currentGraph === 'detail' && <Divider />}

@@ -163,7 +163,7 @@ function StudyInfo() {
                 {store.core.studyIsSaved ? 'Saved' : 'Save'}
                 <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
             </Button>
-            <Divider />
+            <Divider style={{ opacity: 0.2 }} />
 
             <Text fontSize="xs" fontWeight="bold" opacity="0.7">
                 Study author

@@ -134,12 +134,22 @@ def edit_comment(
     comment_index: int,
     comment: str,
     comment_time: str,
+    screenshot: Union[str, None],
+    screenshot_width: Union[int, None],
+    screenshot_height: Union[int, None],
+    screenshot_x_offset: Union[int, None],
+    chart: Union[str, None],
 ):
     csx_data.edit_array(
         "studies",
         {"study_uuid": study_id, "user_uuid": user_id},
         {
             f"history.{history_item_index}.comments.{comment_index}.comment": comment,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot": screenshot,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot_width": screenshot_width,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot_height": screenshot_height,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot_x_offset": screenshot_x_offset,
+            f"history.{history_item_index}.comments.{comment_index}.chart": chart,
             f"history.{history_item_index}.comments.{comment_index}.time": comment_time,
             f"history.{history_item_index}.comments.{comment_index}.edited": True,
         },

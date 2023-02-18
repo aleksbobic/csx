@@ -446,6 +446,12 @@ function FileUploadModal() {
 
                                         store.stats.changeChartTitle(val);
                                     }}
+                                    onFocus={() =>
+                                        store.comment.setCommentTrigger(false)
+                                    }
+                                    onBlur={() =>
+                                        store.comment.setCommentTrigger(true)
+                                    }
                                     height="28px"
                                 >
                                     <EditablePreview
@@ -507,6 +513,16 @@ function FileUploadModal() {
                                                 val
                                             );
                                         }}
+                                        onFocus={() =>
+                                            store.comment.setCommentTrigger(
+                                                false
+                                            )
+                                        }
+                                        onBlur={() =>
+                                            store.comment.setCommentTrigger(
+                                                true
+                                            )
+                                        }
                                         height="28px"
                                     >
                                         <EditablePreview
@@ -569,6 +585,16 @@ function FileUploadModal() {
                                                 val
                                             );
                                         }}
+                                        onFocus={() =>
+                                            store.comment.setCommentTrigger(
+                                                false
+                                            )
+                                        }
+                                        onBlur={() =>
+                                            store.comment.setCommentTrigger(
+                                                true
+                                            )
+                                        }
                                         height="28px"
                                     >
                                         <EditablePreview

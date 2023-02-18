@@ -251,12 +251,22 @@ function WidgetContainer(props) {
                             }}
                         >
                             <option value={10}>First 10</option>
-                            <option value={50}>First 50</option>
-                            <option value={100}>First 100</option>
+                            {!['bar', 'vertical bar'].includes(
+                                props.chart.type.toLowerCase()
+                            ) && <option value={50}>First 50</option>}
+                            {!['bar', 'vertical bar'].includes(
+                                props.chart.type.toLowerCase()
+                            ) && <option value={100}>First 100</option>}
                             <option value={-10}>Last 10</option>
-                            <option value={-50}>Last 50</option>
-                            <option value={-100}>Last 100</option>
-                            <option value={0}>All</option>
+                            {!['bar', 'vertical bar'].includes(
+                                props.chart.type.toLowerCase()
+                            ) && <option value={-50}>Last 50</option>}
+                            {!['bar', 'vertical bar'].includes(
+                                props.chart.type.toLowerCase()
+                            ) && <option value={-100}>Last 100</option>}
+                            {!['bar', 'vertical bar'].includes(
+                                props.chart.type.toLowerCase()
+                            ) && <option value={0}>All</option>}
                         </Select>
                     </Tooltip>
                 )}
@@ -400,7 +410,7 @@ function WidgetContainer(props) {
                     }}
                 />
             </Tooltip> */}
-            {!['doughnut'].includes(props.chart.type.toLowerCase()) && (
+            {!['doughnut', 'bar'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Toggle x axis label">
                     <Button
                         size="sm"
@@ -428,7 +438,7 @@ function WidgetContainer(props) {
                     </Button>
                 </Tooltip>
             )}
-            {!['doughnut'].includes(props.chart.type.toLowerCase()) && (
+            {!['doughnut', 'bar'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Toggle y axis label">
                     <Button
                         size="sm"

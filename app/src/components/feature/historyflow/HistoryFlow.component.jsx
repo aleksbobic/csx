@@ -1,6 +1,7 @@
 import {
     Box,
     Button,
+    HStack,
     IconButton,
     Link,
     Menu,
@@ -165,41 +166,42 @@ export function HistoryFlow() {
                 )}
             </AutoSizer>
 
-            <Tooltip label="Navigate to current history node">
-                <IconButton
-                    size="sm"
-                    zIndex="20"
-                    position="absolute"
-                    bottom="20px"
-                    left="20px"
-                    opacity="0.6"
-                    transition="0.2s all ease-in-out"
-                    _hover={{ opacity: 1 }}
-                    icon={
-                        <Assign
-                            style={{
-                                '--ggs': '0.8'
-                            }}
-                        />
-                    }
-                    onClick={() => {
-                        store.track.trackEvent(
-                            'History Panel',
-                            'Button',
-                            JSON.stringify({
-                                type: 'Click',
-                                value: 'Navigate to active history node'
-                            })
-                        );
+            <HStack position="absolute" bottom="20px" left="20px" zIndex="20">
+                <Tooltip label="Navigate to current history node">
+                    <IconButton
+                        size="sm"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                        icon={
+                            <Assign
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'History Panel',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Navigate to active history node'
+                                })
+                            );
 
-                        zoomToActiveHistoryNode();
-                    }}
-                />
-            </Tooltip>
-            <Box>
-                <Menu size="sm" isLazy={true} placement="top-start">
-                    <MenuButton
-                        as={IconButton}
+                            zoomToActiveHistoryNode();
+                        }}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Open presentation up to active history item.">
+                    <IconButton
+                        size="sm"
+                        as={Link}
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
                         icon={
                             <Presentation
                                 style={{
@@ -207,48 +209,11 @@ export function HistoryFlow() {
                                 }}
                             />
                         }
-                        size="sm"
-                        zIndex="20"
-                        position="absolute"
-                        bottom="20px"
-                        left="60px"
-                        opacity="0.6"
-                        transition="0.2s all ease-in-out"
-                        _hover={{ opacity: 1 }}
+                        href={`http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`}
+                        isExternal
                     />
-                    <MenuList
-                        backgroundColor="black"
-                        padding="5px"
-                        borderRadius="10px"
-                        zIndex="21"
-                    >
-                        <MenuItem
-                            fontSize="xs"
-                            as={Link}
-                            opacity="0.6"
-                            borderRadius="6px"
-                            transition="0.2s all ease-in-out"
-                            href={`http://localhost:8882/present?study=${store.core.studyUuid}`}
-                            isExternal
-                            _hover={{ textDecoration: 'none', opacity: 1 }}
-                        >
-                            Present full tree
-                        </MenuItem>
-                        <MenuItem
-                            fontSize="xs"
-                            as={Link}
-                            opacity="0.6"
-                            borderRadius="6px"
-                            transition="0.2s all ease-in-out"
-                            href={`http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`}
-                            isExternal
-                            _hover={{ textDecoration: 'none', opacity: 1 }}
-                        >
-                            Present to active item
-                        </MenuItem>
-                    </MenuList>
-                </Menu>
-            </Box>
+                </Tooltip>
+            </HStack>
         </Box>
     );
 }

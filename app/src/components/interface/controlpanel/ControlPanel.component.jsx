@@ -581,7 +581,8 @@ function ControlPanel() {
                 orientation="vertical"
                 style={{
                     height: '26px',
-                    width: '1px'
+                    width: '1px',
+                    opacity: 0.2
                 }}
             />
             <HStack spacing="1">

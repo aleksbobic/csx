@@ -1,7 +1,6 @@
 import {
     Box,
     Center,
-    Divider,
     Heading,
     HStack,
     Image,
@@ -13,14 +12,14 @@ import {
 
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
+import queryString from 'query-string';
 import { useContext, useEffect } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import remarkGfm from 'remark-gfm';
 import { useLocation } from 'react-router';
 import { withRouter } from 'react-router-dom';
+import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
 import { RootStoreContext } from 'stores/RootStore';
-import queryString from 'query-string';
 import './Present.scss';
 
 function PresentPage() {

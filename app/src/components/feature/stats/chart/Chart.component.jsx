@@ -18,6 +18,7 @@ import {
     BarController,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
@@ -42,7 +43,8 @@ function Chart(props) {
             LineElement,
             DoughnutController,
             LineController,
-            BarController
+            BarController,
+            ChartDataLabels
         );
     });
 
@@ -170,6 +172,35 @@ function Chart(props) {
         store.overviewSchema.anchorProperties
     ]);
 
+    const getAnchorLabelAlignForChart = () => {
+        switch (props.chart.type) {
+            case 'Bar':
+                return 'end';
+            case 'Vertical Bar':
+            case 'doughnut':
+                return 'center';
+            case 'Grouped Bar':
+            case 'Line':
+                return 'end';
+            default:
+                return 'end';
+        }
+    };
+
+    const getLabelAlignForChart = () => {
+        switch (props.chart.type) {
+            case 'Bar':
+                return 'center';
+            case 'Vertical Bar':
+            case 'doughnut':
+            case 'Grouped Bar':
+            case 'Line':
+                return 'end';
+            default:
+                return 'end';
+        }
+    };
+
     const getPluginOptions = () => {
         const pluginOptions = {};
 
@@ -194,6 +225,108 @@ function Chart(props) {
                     label: tooltipItem => tooltipItem.label,
                     afterLabel: tooltipItem => {
                         return `Frequency: ${tooltipItem.formattedValue}`;
+                    }
+                }
+            };
+        }
+
+        if (props.chart.type === 'Bar') {
+            pluginOptions.datalabels = {
+                display:
+                    props.isExpanded &&
+                    [10, -10].includes(props.elementDisplayLimit)
+                        ? 'auto'
+                        : false,
+                color: 'white',
+                offset: -60,
+                clamp: true,
+                labels: {
+                    value: {
+                        anchor: 'end',
+                        align: 'end',
+                        color: 'black',
+                        backgroundColor: 'white',
+                        borderRadius: 10,
+                        padding: {
+                            left: 7,
+                            right: 7,
+                            top: 4,
+                            bottom: 4
+                        },
+                        formatter: (value, context) => {
+                            let name =
+                                context.chart.data.labels[context.dataIndex];
+                            if (name && name.length > 15) {
+                                return `${name.slice(0, 15)}...: ${value}`;
+                            } else {
+                                return `${name}: ${value}`;
+                            }
+                        }
+                    }
+                    // name: {
+                    //     anchor: 'center',
+                    //     align: 'center',
+                    //     color: 'white',
+                    //     fontWeight: 'bold',
+                    //     backgroundColor: 'transparent',
+                    //     formatter: (value, context) => {
+                    //         return `${
+                    //             context.chart.data.labels[context.dataIndex]
+                    //         }`;
+                    //     }
+                    // }
+                }
+            };
+        } else if (props.chart.type === 'Line') {
+            pluginOptions.datalabels = {
+                display: props.isExpanded ? 'auto' : false,
+                color: 'white',
+                anchor: 'start',
+                align: 'start',
+                offset: store.core.rightPanelWidth === 600 ? -10 : -46,
+                font: {
+                    weight: 'bold'
+                },
+                formatter: (value, context) => {
+                    let name = context.chart.data.labels[context.dataIndex];
+                    if (name?.length > 15) {
+                        return `${name.slice(0, 15)}... : ${value}`;
+                    } else {
+                        return `${name}: ${value}`;
+                    }
+                },
+                labels: {
+                    value: {
+                        color: 'black',
+                        backgroundColor: 'white',
+                        borderRadius: 4
+                    }
+                }
+            };
+        } else {
+            pluginOptions.datalabels = {
+                display: props.isExpanded ? 'auto' : false,
+                color: 'white',
+                anchor: getAnchorLabelAlignForChart(),
+                align: getLabelAlignForChart(),
+                offset: store.core.rightPanelWidth === 600 ? -10 : -46,
+                clamp: true,
+                font: {
+                    weight: 'bold'
+                },
+                formatter: (value, context) => {
+                    let name = context.chart.data.labels[context.dataIndex];
+                    if (name?.length > 15) {
+                        return `${name.slice(0, 15)}... : ${value}`;
+                    } else {
+                        return `${name}: ${value}`;
+                    }
+                },
+                labels: {
+                    value: {
+                        color: 'black',
+                        backgroundColor: 'white',
+                        borderRadius: 4
                     }
                 }
             };
@@ -260,10 +393,17 @@ function Chart(props) {
             data={{ ...data }}
             onClick={event => {
                 if (!props.isExample) {
-                    const { index } = getElementAtEvent(
-                        chartRef.current,
-                        event
-                    )[0];
+                    let dataIndex;
+
+                    try {
+                        const { index } = getElementAtEvent(
+                            chartRef.current,
+                            event
+                        )[0];
+                        dataIndex = index;
+                    } catch (error) {
+                        return;
+                    }
 
                     let visibleNodeIds;
 
@@ -274,14 +414,14 @@ function Chart(props) {
                             JSON.stringify({
                                 type: 'Click',
                                 property: data.nodeProperty,
-                                value: data.labels[index]
+                                value: data.labels[dataIndex]
                             })
                         );
 
                         visibleNodeIds =
                             store.graphInstance.filterNodesWithValue(
                                 data.nodeProperty,
-                                data.labels[index]
+                                data.labels[dataIndex]
                             );
                     } else {
                         store.track.trackEvent(
@@ -290,14 +430,14 @@ function Chart(props) {
                             JSON.stringify({
                                 type: 'Click',
                                 property: data.edgeProperty,
-                                value: data.labels[index]
+                                value: data.labels[dataIndex]
                             })
                         );
 
                         visibleNodeIds =
                             store.graphInstance.filterEdgesWithValue(
                                 data.edgeProperty,
-                                data.labels[index]
+                                data.labels[dataIndex]
                             );
                     }
 
@@ -315,7 +455,24 @@ function Chart(props) {
                 maintainAspectRatio: false,
                 responsive: true,
                 animation: false,
+                borderColor: '#fff',
                 indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
+                layout: {
+                    padding:
+                        props.chart.type === 'Line'
+                            ? props.isExpanded
+                                ? 40
+                                : 5
+                            : {
+                                  y: props.isExpanded ? 20 : 5,
+                                  left: props.isExpanded ? 20 : 5,
+                                  right: props.isExpanded
+                                      ? props.chart.type === 'Bar'
+                                          ? 50
+                                          : 20
+                                      : 5
+                              }
+                },
                 onHover: (event, elements) => {
                     if (elements.length) {
                         event.native.target.style.cursor = 'pointer';
@@ -328,19 +485,24 @@ function Chart(props) {
                         display: props.chart.labels.y.display,
                         ticks: {
                             diplay: props.chart.labels.y.display
+                        },
+                        gridLines: {
+                            display: false
                         }
                     },
                     x: {
                         display: props.chart.labels.x.display,
                         ticks: {
                             diplay: props.chart.labels.x.display
+                        },
+                        gridLines: {
+                            display: false
                         }
                     }
                 },
                 plugins: {
                     title: {
-                        display: props.isExpanded,
-                        text: props.title
+                        display: false
                     },
                     legend: {
                         display: props.chart.legend

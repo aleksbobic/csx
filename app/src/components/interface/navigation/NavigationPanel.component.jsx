@@ -24,6 +24,7 @@ import {
     ChevronRight,
     List,
     Moon,
+    Presentation,
     RadioCheck,
     Ratio,
     Ring,
@@ -39,6 +40,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
 import { isEnvFalse } from 'general.utils';
+import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
@@ -581,7 +583,7 @@ function NavigationPanelComponent() {
                                     'REACT_APP_DISABLE_ADVANCED_SEARCH'
                                 ) && (
                                     <Divider
-                                        opacity="0.4"
+                                        opacity="0.2"
                                         orientation="vertical"
                                         height="100%"
                                         backgroundColor="gray.900"
@@ -654,7 +656,35 @@ function NavigationPanelComponent() {
                             </HStack>
                         )}
                 </HStack>
-                {renderToggles()}
+                <HStack spacing="20px">
+                    {location.pathname.startsWith('/graph') && (
+                        <Tooltip label="Open presentation mode in new tab">
+                            <Button
+                                size="sm"
+                                as={Link}
+                                variant="ghost"
+                                borderRadius="6px"
+                                leftIcon={
+                                    <PresentationChartLineIcon
+                                        width="16px"
+                                        height="16px"
+                                        display="inline"
+                                    />
+                                }
+                                transition="0.2s all ease-in-out"
+                                href={`http://localhost:8882/present?study=${store.core.studyUuid}`}
+                                isExternal
+                                _hover={{
+                                    textDecoration: 'none',
+                                    backgroundColor: 'blue.500'
+                                }}
+                            >
+                                Present
+                            </Button>
+                        </Tooltip>
+                    )}
+                    {renderToggles()}
+                </HStack>
             </Box>
             {location.pathname.startsWith('/graph') && (
                 <Box
