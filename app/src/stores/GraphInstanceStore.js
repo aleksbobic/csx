@@ -278,7 +278,10 @@ export class GraphInstanceStore {
     };
 
     applyForce = () => {
-        this.toggleLinkVisibility(false);
+        if (this.linkVisibility) {
+            this.toggleLinkVisibility(false);
+        }
+
         this.forceCooldownTicks = Infinity;
         this.forceCooldownTime = 15000;
         this.forceEngine = true;
@@ -372,10 +375,32 @@ export class GraphInstanceStore {
     };
 
     zoomToFit = (x = 0, y = 0, z = 2000) => {
+        const graphBoundingBox = this.graphInstance.getGraphBbox();
+
+        const cameraX = Math.round(
+            (graphBoundingBox.x[0] + graphBoundingBox.x[1]) / 2,
+            2
+        );
+        const cameraY = Math.round(
+            (graphBoundingBox.y[0] + graphBoundingBox.y[1]) / 2,
+            2
+        );
+
+        const xDistance =
+            Math.abs(graphBoundingBox.x[1]) + Math.abs(graphBoundingBox.x[0]);
+        const yDistance =
+            Math.abs(graphBoundingBox.y[1]) + Math.abs(graphBoundingBox.y[0]);
+
+        const largestDinstance = xDistance > yDistance ? xDistance : yDistance;
+
         this.graphInstance.cameraPosition(
-            { x, y, z },
-            new THREE.Vector3(x, y, -1),
-            x !== 0 ? 0 : 500
+            {
+                x: cameraX,
+                y: cameraY,
+                z: largestDinstance + largestDinstance * 0.3
+            },
+            new THREE.Vector3(cameraX, cameraY, -1),
+            200
         );
     };
 

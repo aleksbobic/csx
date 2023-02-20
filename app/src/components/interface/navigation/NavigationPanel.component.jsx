@@ -308,6 +308,7 @@ function NavigationPanelComponent() {
                                     value: 'Zoom to fit'
                                 })
                             );
+
                             store.graphInstance.zoomToFit();
                         }}
                     />
