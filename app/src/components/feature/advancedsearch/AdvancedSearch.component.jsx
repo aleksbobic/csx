@@ -444,7 +444,7 @@ AdvancedSearch.propTypes = {
 
 AdvancedSearch.defaultProps = {
     datasetSelectorDisabled: false,
-    placeholder: 'Search through the dataset ...'
+    placeholder: 'Search through the selected dataset ...'
 };
 
 export default observer(AdvancedSearch);

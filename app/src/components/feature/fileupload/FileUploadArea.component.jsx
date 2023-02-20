@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Text, useColorModeValue } from '@chakra-ui/react';
 import { FileAdd } from 'css.gg';
 import { useContext } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -6,6 +6,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 export function FileUploadArea() {
     const store = useContext(RootStoreContext);
+    const textColor = useColorModeValue('black', 'white');
 
     const onDrop = async files => {
         store.track.trackEvent(
@@ -51,12 +52,13 @@ export function FileUploadArea() {
                     style={{
                         '--ggs': '1.2',
                         marginBottom: '10px',
-                        opacity: 0.5
+                        opacity: 0.5,
+                        color: textColor
                     }}
                 />
                 <input {...getInputProps()} width="100%" height="100%" />
                 {isDragActive ? (
-                    <Text style={{ opacity: 0.5 }}>
+                    <Text style={{ opacity: 0.5, color: textColor }}>
                         Drop your dataset files here ...
                     </Text>
                 ) : (
@@ -64,7 +66,8 @@ export function FileUploadArea() {
                         style={{
                             opacity: 0.5,
                             paddingLeft: '50px',
-                            paddingRight: '50px'
+                            paddingRight: '50px',
+                            color: textColor
                         }}
                     >
                         Drop your dataset files here, or click to select files.

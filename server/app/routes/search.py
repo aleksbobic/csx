@@ -55,7 +55,7 @@ def get_datasets() -> dict:
                     feature: json.dumps(loaded_config["search_hints"][feature])
                     for feature in loaded_config["search_hints"]
                     if data["dimension_types"][feature]
-                    in ["integer", "float", "category", "list"]
+                    in ["integer", "float", "category"]
                 }
         except Exception as e:
             datasets[index]["schemas"] = []

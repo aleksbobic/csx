@@ -16,6 +16,7 @@ import {
     Thead,
     Tr,
     useColorMode,
+    useColorModeValue,
     VStack
 } from '@chakra-ui/react';
 import { ChevronLeft, ChevronRight } from 'css.gg';
@@ -32,6 +33,7 @@ import CustomScroll from '../customscroll/CustomScroll.component';
 
 function CookieInfo() {
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
 
     const localStorageValues = [
@@ -81,6 +83,7 @@ function CookieInfo() {
                 width="100%"
                 paddingTop="20px"
                 paddingLeft="16px"
+                color={textColor}
             >
                 Interaction Tracking
             </Heading>
@@ -89,6 +92,7 @@ function CookieInfo() {
                 textAlign="justify"
                 padding="0 16px"
                 opacity="0.7"
+                color={textColor}
             >
                 To further improve CSX and provide new and exciting features, we
                 would like to ask you to enable interaction tracking. As you can
@@ -97,7 +101,13 @@ function CookieInfo() {
                 for two purposes:
             </Text>
 
-            <List fontSize="xs" width="100%" padding="8px" textAlign="left">
+            <List
+                fontSize="xs"
+                width="100%"
+                padding="8px"
+                textAlign="left"
+                color={textColor}
+            >
                 <ListItem>
                     <ChevronRight
                         style={{
@@ -121,7 +131,12 @@ function CookieInfo() {
                     Contributing to research through interaction data analysis.
                 </ListItem>
             </List>
-            <Text fontSize="xs" textAlign="justify" padding="0 16px 16px">
+            <Text
+                fontSize="xs"
+                textAlign="justify"
+                padding="0 16px 16px"
+                color={textColor}
+            >
                 Please enable interaction trucking to enable us to{' '}
                 <b style={{ color: '#43a2fb' }}>
                     contribute to the scientific community
@@ -140,7 +155,12 @@ function CookieInfo() {
                 associated with your unique ID for the purposes stated above.
             </Text>
 
-            <Text fontSize="xs" textAlign="justify" padding="0 16px 16px">
+            <Text
+                fontSize="xs"
+                textAlign="justify"
+                padding="0 16px 16px"
+                color={textColor}
+            >
                 In case you decide to enable interaciton tracking we use{' '}
                 <b style={{ color: '#43a2fb' }}>Matomo</b> which{' '}
                 <b style={{ color: '#43a2fb' }}>will add additional cookies</b>.
@@ -162,6 +182,7 @@ function CookieInfo() {
                     htmlFor="interaction-tracking"
                     marginBottom="0px"
                     fontSize="xs"
+                    color={textColor}
                 >
                     Enable interaction tracking?
                 </FormLabel>
@@ -199,6 +220,7 @@ function CookieInfo() {
                     fontWeight="bold"
                     opacity="0.7"
                     paddingTop="1px"
+                    color={textColor}
                 >
                     Tracking{' '}
                     {store.core.trackingEnabled ? 'enabled' : 'disabled'}
@@ -228,6 +250,7 @@ function CookieInfo() {
                 left="20px"
                 size="xs"
                 paddingLeft="0"
+                color={textColor}
                 variant="ghost"
                 _hover={{
                     backgroundColor:
@@ -249,7 +272,7 @@ function CookieInfo() {
             >
                 Back
             </Button>
-            <Heading size="md" opacity="0.7">
+            <Heading size="md" opacity="0.7" color={textColor}>
                 Cookies & Local Storage
             </Heading>
             <Text
@@ -257,6 +280,7 @@ function CookieInfo() {
                 textAlign="justify"
                 padding="0 16px"
                 opacity="0.7"
+                color={textColor}
             >
                 You might be wondering does Collaboration Spotting X use cookies
                 and what is their purpose. In short, CSX does not use cookies by
@@ -277,6 +301,7 @@ function CookieInfo() {
                 width="100%"
                 paddingTop="20px"
                 paddingLeft="16px"
+                color={textColor}
             >
                 Local Storage Values
             </Heading>
@@ -294,10 +319,15 @@ function CookieInfo() {
                                 paddingLeft="0"
                                 borderBottom="none"
                                 width="162px"
+                                color={textColor}
                             >
                                 Value
                             </Th>
-                            <Th padding="8px" borderBottom="none">
+                            <Th
+                                padding="8px"
+                                borderBottom="none"
+                                color={textColor}
+                            >
                                 Purpose
                             </Th>
                         </Tr>
@@ -332,6 +362,7 @@ function CookieInfo() {
                                             textTransform="uppercase"
                                             verticalAlign="top"
                                             paddingLeft="0"
+                                            color={textColor}
                                         >
                                             {entry[0]}
                                         </Td>
@@ -339,6 +370,7 @@ function CookieInfo() {
                                             borderBottom="none"
                                             padding="8px"
                                             fontSize="xs"
+                                            color={textColor}
                                         >
                                             {entry[1]}
                                         </Td>

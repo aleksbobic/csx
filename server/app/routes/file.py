@@ -280,6 +280,7 @@ def set_defaults(data: SettingsData):
         json.dump(config, f)
 
     csx_es.create_index(data.name, mapping)
+    csx_es.set_result_window(data.name)
 
     try:
         print("***** Populating elastic")

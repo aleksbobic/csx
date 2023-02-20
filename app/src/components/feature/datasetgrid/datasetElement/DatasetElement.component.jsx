@@ -15,6 +15,7 @@ import { isEnvFalse } from 'general.utils';
 
 function DatasetElement(props) {
     const store = useContext(RootStoreContext);
+    const textColor = useColorModeValue('black', 'white');
 
     const elementBackground = useColorModeValue(
         'blackAlpha.100',
@@ -59,6 +60,7 @@ function DatasetElement(props) {
                 whiteSpace="nowrap"
                 overflow="hidden"
                 textOverflow="ellipsis"
+                color={textColor}
             >
                 {props.dataset}
             </Heading>
@@ -70,6 +72,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="ghost"
                         opacity="0"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}
@@ -105,6 +108,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="ghost"
                         opacity="0"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}
@@ -137,6 +141,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="solid"
                         opacity="0.5"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}

@@ -7,6 +7,7 @@ import {
     Link,
     Text,
     useColorMode,
+    useColorModeValue,
     VStack
 } from '@chakra-ui/react';
 
@@ -18,6 +19,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function Footer() {
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
 
     return (
@@ -46,9 +48,16 @@ function Footer() {
                         height="20px"
                         display={colorMode === 'light' ? 'block' : 'none'}
                     />{' '}
-                    <Text fontWeight="bold">Collaboration Spotting X</Text>
+                    <Text fontWeight="bold" color={textColor}>
+                        Collaboration Spotting X
+                    </Text>
                 </HStack>
-                <Text marginBottom="20px" textAlign="left" fontSize="xs">
+                <Text
+                    marginBottom="20px"
+                    textAlign="left"
+                    fontSize="xs"
+                    color={textColor}
+                >
                     Developed at <b>CERN</b>, Geneva, Switzerland by{' '}
                     <b>Aleksandar Bobić</b> led by <b>Dr. Jean-Marie Le Goff</b>{' '}
                     and <b>prof. Christian Gütl</b>.
@@ -59,6 +68,7 @@ function Footer() {
                     fontSize="xs"
                     textAlign="left"
                     marginBottom="20px"
+                    color={textColor}
                 >
                     This project was inspired by the{' '}
                     <Link
@@ -96,6 +106,7 @@ function Footer() {
                         display="inline"
                         opacity="0.75"
                         target="_blank"
+                        color={textColor}
                         href="https://github.com/aleksbobic/csx"
                         _hover={{ opacity: 1 }}
                     >
@@ -109,6 +120,7 @@ function Footer() {
                         opacity="0.75"
                         target="_blank"
                         href="https://csxp.me"
+                        color={textColor}
                         _hover={{ opacity: 1 }}
                     >
                         Webpage
@@ -124,6 +136,7 @@ function Footer() {
                         fontWeight="bold"
                         _hover={{ opacity: 1 }}
                         height="21px"
+                        color={textColor}
                         onClick={() => {
                             store.track.trackEvent(
                                 'Home Page - Footer',
@@ -133,6 +146,7 @@ function Footer() {
                                     value: 'Open tracking information panel'
                                 })
                             );
+                            store.core.setStudyIsEmpty(false);
                             store.search.setSearchIsEmpty(false);
                             store.core.setShowCookieInfo(true);
                         }}

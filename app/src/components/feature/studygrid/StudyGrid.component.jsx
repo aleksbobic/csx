@@ -8,6 +8,7 @@ import {
     Text,
     Tooltip,
     useColorMode,
+    useColorModeValue,
     VStack
 } from '@chakra-ui/react';
 import { Close } from 'css.gg';
@@ -22,6 +23,7 @@ import CustomScroll from '../customscroll/CustomScroll.component';
 
 function StudyGrid(props) {
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
     const history = useHistory();
 
@@ -39,7 +41,13 @@ function StudyGrid(props) {
             }
             borderRadius="12px"
         >
-            <Heading colSpan={2} size="sm" opacity="0.76" width="100%">
+            <Heading
+                colSpan={2}
+                size="sm"
+                opacity="0.76"
+                width="100%"
+                color={textColor}
+            >
                 Studies
             </Heading>
 
@@ -98,6 +106,7 @@ function StudyGrid(props) {
                                             right="10px"
                                             variant="ghost"
                                             zIndex="3"
+                                            color={textColor}
                                             icon={
                                                 <Close
                                                     style={{ '--ggs': '0.7' }}
@@ -137,6 +146,7 @@ function StudyGrid(props) {
                                                 whiteSpace="nowrap"
                                                 textOverflow="ellipsis"
                                                 flexShrink="0"
+                                                color={textColor}
                                             >
                                                 {study.study_name}
                                             </Text>
@@ -149,6 +159,7 @@ function StudyGrid(props) {
                                                 fontSize="sm"
                                                 paddingLeft="10px"
                                                 paddingRight="10px"
+                                                color={textColor}
                                                 opacity="0.7"
                                             >
                                                 {study.study_description
@@ -161,6 +172,7 @@ function StudyGrid(props) {
                                             width="100%"
                                             size="xs"
                                             flexShrink="0"
+                                            color={textColor}
                                             backgroundColor={
                                                 colorMode === 'light' &&
                                                 '#d4d4d4'

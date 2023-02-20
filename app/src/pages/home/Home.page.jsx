@@ -122,6 +122,7 @@ function HomePage() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         onClick={() => {
+                            store.core.setStudyIsEmpty(false);
                             store.search.setSearchIsEmpty(false);
                             store.core.setShowCookieInfo(true);
                             store.core.setHideCookieBanner();

@@ -15,6 +15,7 @@ import { FileUploadArea } from '../fileupload/FileUploadArea.component';
 
 function DatasetGrid(props) {
     const gridBGColor = useColorModeValue('blackAlpha.100', 'blackAlpha.300');
+    const textColor = useColorModeValue('black', 'white');
 
     const renderDatasets = () => (
         <Box width="100%" padding="0 10px" style={{ margin: 0 }}>
@@ -51,6 +52,7 @@ function DatasetGrid(props) {
                     width="100%"
                     textAlign="center"
                     lineHeight="50px"
+                    color={textColor}
                 >
                     Datasets
                 </Heading>
