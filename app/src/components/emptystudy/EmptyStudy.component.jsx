@@ -15,7 +15,7 @@ import { useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
-function EmptySearch() {
+function EmptyStudy() {
     const store = useContext(RootStoreContext);
     const [emptySearchImage, setEmptySearchImage] = useState(null);
     const [emptySearchAnimalType, setEmptySearchAnimalType] = useState(null);
@@ -59,7 +59,7 @@ function EmptySearch() {
                             : 'whiteAlpha.100'
                 }}
                 onClick={() => {
-                    store.search.setSearchIsEmpty(false);
+                    store.core.setStudyIsEmpty(false);
                     setEmptySearchImage(null);
                     setEmptySearchAnimalType(null);
                 }}
@@ -67,7 +67,7 @@ function EmptySearch() {
                 Back
             </Button>
             <Heading textAlign="center" size="md">
-                No Search Results
+                Study Not Found
             </Heading>
             <Text
                 textAlign="center"
@@ -78,8 +78,9 @@ function EmptySearch() {
                 fontWeight="bold"
                 width="70%"
             >
-                It seems like there are no results for your query. Here's a cute
-                tiny {emptySearchAnimalType} to make you feel better:
+                It seems like the study you tried accessing doesn't exist
+                anymore. Here's a cute tiny {emptySearchAnimalType} to make you
+                feel better:
             </Text>
             {emptySearchImage && (
                 <Image
@@ -107,16 +108,34 @@ function EmptySearch() {
                         marginRight: '2px'
                     }}
                 />{' '}
-                If you don't see any suggestions for your search, it will most
-                likely be empty. Don't give up. Try again! There's also a
-                helpful hint below the search bar.
+                If you tried accessing a study you created make sure to save the
+                study before leaving Collaboration Spotting X.
+            </Text>
+            <Text
+                textAlign="center"
+                color={
+                    colorMode === 'light' ? 'blackAlpha.500' : 'whiteAlpha.500'
+                }
+                fontSize="xs"
+                fontWeight="bold"
+                width="70%"
+            >
+                <LightBulbIcon
+                    width="12px"
+                    style={{
+                        display: 'inline',
+                        marginRight: '2px'
+                    }}
+                />{' '}
+                If you tried accessing a study someone shared with you make sure
+                they made it publically available.
             </Text>
         </VStack>
     );
 }
 
-EmptySearch.propTypes = {
+EmptyStudy.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(EmptySearch));
+export default withRouter(observer(EmptyStudy));

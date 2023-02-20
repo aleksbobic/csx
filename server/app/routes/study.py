@@ -69,25 +69,33 @@ def get_new_features(query):
 @router.get("/history")
 def get_study_history(study_uuid: str, user_uuid: str):
     study = csx_study.get_study(user_uuid, study_uuid)
-    history = csx_study.extract_history_items(study)
-    return {
-        "name": study["study_name"],
-        "author": study["study_author"],
-        "description": study["study_description"],
-        "history": history,
-    }
+    if study:
+        history = csx_study.extract_history_items(study)
+        return {
+            "name": study["study_name"],
+            "author": study["study_author"],
+            "description": study["study_description"],
+            "history": history,
+            "empty": False,
+        }
+    else:
+        return {"empty": True}
 
 
 @router.get("/history/public")
 def get_public_study_history(public_study_uuid: str):
     study = csx_study.get_public_study(public_study_uuid)
-    history = csx_study.extract_history_items(study)
-    return {
-        "name": study["study_name"],
-        "author": study["study_author"],
-        "description": study["study_description"],
-        "history": history,
-    }
+    if study:
+        history = csx_study.extract_history_items(study)
+        return {
+            "name": study["study_name"],
+            "author": study["study_author"],
+            "description": study["study_description"],
+            "history": history,
+            "empty": False,
+        }
+    else:
+        return {"empty": True}
 
 
 class GetStudyData(BaseModel):
@@ -115,55 +123,59 @@ def get_study(data: GetStudyData):
     history_entry_id = data.history_id
 
     study = csx_study.get_study(user_uuid, study_uuid)
-    print(study.keys())
 
-    if len(study["history"]) > 0:
-        if history_entry_id:
-            history_id = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["item_id"]
-            charts = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["charts"]
-        else:
-            history_id = study["history"][-1]["item_id"]
-            charts = study["history"][-1]["charts"]
+    if study:
+        if len(study["history"]) > 0:
+            if history_entry_id:
+                history_id = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["item_id"]
+                charts = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["charts"]
+            else:
+                history_id = study["history"][-1]["item_id"]
+                charts = study["history"][-1]["charts"]
 
-        history_item = csx_data.get_large_document(history_id)
+            history_item = csx_data.get_large_document(history_id)
 
-        history = csx_study.extract_history_items(study)
+            history = csx_study.extract_history_items(study)
 
-        if history_entry_id:
-            graph_type = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["graph_type"]
-        else:
-            graph_type = history[len(history) - 1]["graph_type"]
+            if history_entry_id:
+                graph_type = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["graph_type"]
+            else:
+                graph_type = history[len(history) - 1]["graph_type"]
+
+            return {
+                "graph": pickle.loads(history_item)[graph_type],
+                "name": study["study_name"],
+                "description": study["study_description"],
+                "author": study["study_author"],
+                "history": history,
+                "index": study["index"],
+                "charts": charts,
+                "empty": False,
+            }
 
         return {
-            "graph": pickle.loads(history_item)[graph_type],
+            "graph": {},
             "name": study["study_name"],
             "description": study["study_description"],
             "author": study["study_author"],
-            "history": history,
+            "history": [],
             "index": study["index"],
-            "charts": charts,
+            "empty": False,
         }
-
-    return {
-        "graph": {},
-        "name": study["study_name"],
-        "description": study["study_description"],
-        "author": study["study_author"],
-        "history": [],
-        "index": study["index"],
-    }
+    else:
+        return {"empty": True}
 
 
 class ModifyStudyData(BaseModel):

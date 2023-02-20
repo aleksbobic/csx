@@ -545,6 +545,8 @@ function NavigationPanelComponent() {
                         id="homelink"
                         onClick={() => {
                             store.core.deleteStudy();
+                            store.core.setStudyIsEmpty(false);
+                            store.search.setSearchIsEmpty(false);
 
                             store.track.trackEvent(
                                 'Navbar',

@@ -33,6 +33,7 @@ import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
+import EmptyStudy from 'components/emptystudy/EmptyStudy.component';
 
 function HomePage() {
     const toast = useToast();
@@ -331,9 +332,10 @@ function HomePage() {
                     />
                 )}
 
+                {store.core.studyIsEmpty && <EmptyStudy />}
                 {store.search.searchIsEmpty && <EmptySearch />}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade in={!store.core.showCookieInfo}>
                         {!store.core.showCookieInfo && (
                             <DatasetGrid>
@@ -351,7 +353,7 @@ function HomePage() {
                     </Fade>
                 )}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade
                         in={
                             store.core.showCookieInfo &&
@@ -362,7 +364,7 @@ function HomePage() {
                     </Fade>
                 )}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade in={!store.core.showCookieInfo}>
                         {store.core.studies.length > 0 &&
                             !store.core.showCookieInfo && (

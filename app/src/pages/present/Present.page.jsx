@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import { useContext, useEffect } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import { useLocation } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
@@ -26,6 +26,7 @@ function PresentPage() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
     const location = useLocation();
+    const history = useHistory();
 
     useEffect(() => {
         const studyID = queryString.parse(location.search).study;
@@ -44,6 +45,12 @@ function PresentPage() {
             });
         }
     }, [store.present.slides]);
+
+    useEffect(() => {
+        if (store.core.studyIsEmpty) {
+            history.push('/');
+        }
+    }, [history, store.core.studyIsEmpty]);
 
     const renderLoader = () => (
         <Center

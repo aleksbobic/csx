@@ -707,6 +707,11 @@ export class GraphStore {
             return;
         }
 
+        if (response.data.empty) {
+            this.store.core.setStudyIsEmpty(true);
+            return;
+        }
+
         if (response.data.history.length === 0) {
             this.modifyStudy('overview');
             return;

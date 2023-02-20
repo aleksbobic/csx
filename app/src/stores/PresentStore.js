@@ -44,6 +44,11 @@ export class PresentStore {
             studyDetails = await this.getPublicStudyDetails(publicStudyID);
         }
 
+        if (studyDetails.empty) {
+            this.store.core.setStudyIsEmpty(true);
+            return;
+        }
+
         if (activeItem) {
             const includedIDs = this.getParentIDs(
                 studyDetails.history[activeItem].id,
@@ -217,7 +222,6 @@ export class PresentStore {
     };
 
     getPublicStudyDetails = async studyID => {
-        console.log(studyID);
         const params = {
             public_study_uuid: studyID
         };

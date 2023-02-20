@@ -53,10 +53,10 @@ function GraphPage() {
     }, []);
 
     useEffect(() => {
-        if (store.search.searchIsEmpty) {
+        if (store.search.searchIsEmpty || store.core.studyIsEmpty) {
             history.push('/');
         }
-    }, [history, store.search.searchIsEmpty]);
+    }, [history, store.core.studyIsEmpty, store.search.searchIsEmpty]);
 
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);

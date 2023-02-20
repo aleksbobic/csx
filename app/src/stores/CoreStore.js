@@ -16,6 +16,7 @@ export class CoreStore {
     studyDescription = '';
     studyAuthor = '';
     studyHistory = [];
+    studyIsEmpty = false;
     studyHistoryItemIndex = 0;
     studyIsSaved = false;
     isStudyPublic = false;
@@ -53,6 +54,8 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setStudyIsEmpty = val => (this.studyIsEmpty = val);
 
     toggleIsStudyPublic = async () => {
         this.isStudyPublic = !this.isStudyPublic;
