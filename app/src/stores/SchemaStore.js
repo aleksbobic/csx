@@ -196,6 +196,7 @@ export class SchemaStore {
         } else {
             this.features = Object.keys(this.store.search.nodeTypes);
             this.featureTypes = this.store.search.nodeTypes;
+
             schema = [
                 ...this.features.map(node => this.generateSchemaNode(node)),
                 ...this.store?.search?.schema.map(entry =>

@@ -439,7 +439,7 @@ function DataPanel(props) {
                     size="sm"
                     variant="soft-rounded"
                     colorScheme="blue"
-                    height={store.comment.isCommentListVisible ? '67%' : '100%'}
+                    height={store.comment.isCommentListVisible ? '50%' : '100%'}
                     paddingBottom={
                         store.comment.isCommentListVisible ? 0 : '80px'
                     }
@@ -458,7 +458,7 @@ function DataPanel(props) {
                     bottom={!store.comment.isCommentListVisible && 0}
                     spacing="10px"
                     width="100%"
-                    height={store.comment.isCommentListVisible ? '33%' : '80px'}
+                    height={store.comment.isCommentListVisible ? '50%' : '80px'}
                     padding="20px"
                     paddingTop="0"
                     paddingRight={!store.comment.isCommentListVisible && 22}

@@ -409,12 +409,33 @@ def update_settings(data: UpdateSettingsData):
     defaults = data.defaults
     schemas = []
     search_hints = {}
+    initial_relationship = {}
 
     with open(f"./app/data/config/{data.name}.json") as f:
         config_data = json.load(f)
         schemas = config_data["schemas"]
         search_hints = config_data["search_hints"]
         default_schemas = config_data["default_schemas"]
+
+        dest_type = config_data["dimension_types"][
+            get_default_link_dimensions(defaults)[0]
+        ]
+        src_type = config_data["dimension_types"][defaults[data.anchor]["name"]]
+
+        initial_relationship = {
+            "dest": get_default_link_dimensions(defaults)[0],
+            "src": defaults[data.anchor]["name"],
+            "relationship": "",
+        }
+
+        if src_type == "list" and dest_type == "list":
+            initial_relationship["relationship"] = "manyToMany"
+        elif src_type == "list" and dest_type != "list":
+            initial_relationship["relationship"] = "ManyToOne"
+        elif src_type != "list" and dest_type == "list":
+            initial_relationship["relationship"] = "oneToMany"
+        else:
+            initial_relationship["relationship"] = "oneToOne"
 
     # Generate default config
     config = {
@@ -423,7 +444,7 @@ def update_settings(data: UpdateSettingsData):
         "links": get_default_link_dimensions(defaults),
         "dimension_types": get_dimension_types(defaults),
         "default_search_fields": get_default_searchable_dimensions(defaults),
-        "schemas": schemas,
+        "schemas": [{"name": "default", "relations": [initial_relationship]}],
         "default_schemas": default_schemas,
         "search_hints": search_hints,
     }
