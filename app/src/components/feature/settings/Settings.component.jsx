@@ -63,7 +63,10 @@ function Settings() {
     };
 
     const updateLabelDistance = value => {
-        store.graphInstance.changeShowLabelDistance(value);
+        store.graphInstance.changeShowLabelDistance(
+            value,
+            6 + Math.round((8 * value) / 900)
+        );
 
         store.track.trackEvent(
             'Side panel - View Settings',
@@ -75,7 +78,7 @@ function Settings() {
         );
     };
 
-    const renderColorSchemeSelectionElements = () => {
+    const renderColorSchemeOptionElements = () => {
         const colorSchemas = [
             { value: 'none', label: 'None', tooltip: 'Nodes are not colored' },
             {
@@ -110,66 +113,62 @@ function Settings() {
         }
 
         return colorSchemas.map(entry => (
-            <Radio
+            <option
                 value={entry.value}
                 key={`node_cololr_schema${entry.value}`}
-                width="100%"
             >
-                <Tooltip label={entry.tooltip}>
-                    <Text
-                        overflow="hidden"
-                        textOverflow="ellipsis"
-                        whiteSpace="nowrap"
-                        width="170px"
-                    >
-                        {entry.label}
-                    </Text>
-                </Tooltip>
-            </Radio>
+                {entry.label}
+            </option>
         ));
     };
 
     const renderColorOptions = () => {
         return (
-            <FormLabel htmlFor="customColors" width="100%">
-                <Heading size="sm" marginTop="10px" marginBottom="5px">
-                    Color scheme:
-                </Heading>
-                <RadioGroup
-                    id="colorschemeselector"
-                    value={
-                        store.graphInstance.nodeColorScheme[
-                            store.core.currentGraph
-                        ]
-                    }
-                    onChange={updateColorScheme}
-                >
-                    <Stack direction="column" spacing="1px" width="100%">
-                        {renderColorSchemeSelectionElements()}
-                    </Stack>
-                </RadioGroup>
-            </FormLabel>
+            <HStack justifyContent="space-between" width="100%">
+                <Text fontSize="sm">Color: </Text>
+                <Tooltip label="Select property used for node colors.">
+                    <Select
+                        size="sm"
+                        value={
+                            store.graphInstance.nodeColorScheme[
+                                store.core.currentGraph
+                            ]
+                        }
+                        onChange={e => updateColorScheme(e.target.value)}
+                        variant="filled"
+                        borderRadius="6px"
+                        width="100px"
+                        overflow="hidden"
+                        whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                    >
+                        {renderColorSchemeOptionElements()}
+                    </Select>
+                </Tooltip>
+            </HStack>
         );
     };
 
     const renderLabelOptions = () => {
         return (
             <HStack justifyContent="space-between" width="100%">
-                <Text>Label size: </Text>
-                <Select
-                    size="sm"
-                    value={store.graphInstance.labels.visibilityDistance}
-                    onChange={e => updateLabelDistance(e.target.value)}
-                    variant="filled"
-                    borderRadius="6px"
-                    width="115px"
-                >
-                    <option value={600}>small</option>
-                    <option value={1500}>medium</option>
-                    <option value={2400}>large</option>
-                    <option value={3300}>extra large</option>
-                    <option value={4200}>2x large</option>
-                </Select>
+                <Text fontSize="sm">Label size: </Text>
+                <Tooltip label="Select node label size.">
+                    <Select
+                        size="sm"
+                        value={store.graphInstance.labels.visibilityDistance}
+                        onChange={e => updateLabelDistance(e.target.value)}
+                        variant="filled"
+                        borderRadius="6px"
+                        width="100px"
+                    >
+                        <option value={600}>Small</option>
+                        <option value={1500}>Medium</option>
+                        <option value={2400}>Large</option>
+                        <option value={3300}>Extra large</option>
+                        <option value={4200}>2x large</option>
+                    </Select>
+                </Tooltip>
             </HStack>
         );
     };
@@ -278,6 +277,9 @@ function Settings() {
     const renderVisibilityOptions = () => {
         return (
             <>
+                <Heading size="sm" style={{ marginBottom: '10px' }}>
+                    Edge settings
+                </Heading>
                 <Tooltip
                     label={
                         store.graphInstance.linkVisibility
@@ -387,7 +389,13 @@ function Settings() {
                         </HStack>
                     </Tooltip>
                 )}
-                <Divider paddingTop="10px" style={{ opacity: 0.2 }} />
+                {/* <Divider paddingTop="10px" style={{ opacity: 0.2 }} /> */}
+                <Heading
+                    size="sm"
+                    style={{ marginTop: '20px', marginBottom: '10px' }}
+                >
+                    Node settings
+                </Heading>
                 <Tooltip
                     label={
                         store.graphInstance.labels.isVisible
@@ -395,7 +403,7 @@ function Settings() {
                             : 'Show node labels'
                     }
                 >
-                    <HStack spacing="1" paddingTop="10px">
+                    <HStack spacing="1">
                         <Switch
                             id="nodelabels"
                             size="sm"
@@ -533,8 +541,11 @@ function Settings() {
 
         return (
             <Stack>
-                <Heading size="xs" marginTop="10px" marginBottom="5px">
-                    Graph dimensions:
+                <Heading
+                    size="sm"
+                    style={{ marginBottom: '10px', marginTop: '10px' }}
+                >
+                    Visible features
                 </Heading>
                 <Wrap>{tags}</Wrap>
             </Stack>
@@ -551,20 +562,15 @@ function Settings() {
         >
             <FormControl display="flex" alignItems="center" flexDir="column">
                 <VStack spacing="2px" align="start" width="100%">
-                    <Heading size="md" marginBottom="10px">
-                        View Settings
-                    </Heading>
                     {renderVisibilityOptions()}
-                    <Divider style={{ marginTop: '10px', opacity: 0.2 }} />
                     {renderColorOptions()}
-                </VStack>
-                <Divider style={{ marginTop: '10px', opacity: 0.2 }} />
-                <VStack spacing="10px" align="start" mt="10px" width="100%">
                     {renderLabelOptions()}
-                    <Divider style={{ opacity: 0.2 }} />
+                </VStack>
+                <VStack spacing="10px" align="start" mt="10px" width="100%">
+                    <Heading size="sm" style={{ marginBottom: '10px' }}>
+                        Layout settings
+                    </Heading>
                     {renderLayoutOptions()}
-
-                    {store.core.currentGraph === 'detail' && <Divider />}
                     {store.core.currentGraph === 'detail' &&
                         renderDimensionsToggle()}
                 </VStack>

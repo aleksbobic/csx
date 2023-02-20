@@ -662,6 +662,7 @@ function NavigationPanelComponent() {
                             <Button
                                 size="sm"
                                 as={Link}
+                                isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
                                 borderRadius="6px"
                                 leftIcon={
@@ -671,8 +672,17 @@ function NavigationPanelComponent() {
                                         display="inline"
                                     />
                                 }
+                                onClick={e => {
+                                    if (!store.core.studyIsSaved) {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 transition="0.2s all ease-in-out"
-                                href={`http://localhost:8882/present?study=${store.core.studyUuid}`}
+                                href={
+                                    store.core.studyIsSaved
+                                        ? `http://localhost:8882/present?study=${store.core.studyUuid}`
+                                        : ''
+                                }
                                 isExternal
                                 _hover={{
                                     textDecoration: 'none',

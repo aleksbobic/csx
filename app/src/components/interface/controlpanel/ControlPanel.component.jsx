@@ -23,7 +23,14 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
-import { ArrowsPointingOutIcon, ScissorsIcon } from '@heroicons/react/20/solid';
+import {
+    ArrowsPointingOutIcon,
+    Cog6ToothIcon,
+    DocumentIcon,
+    FolderOpenIcon,
+    PaintBrushIcon,
+    ScissorsIcon
+} from '@heroicons/react/20/solid';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
@@ -51,7 +58,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function ControlPanel() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onToggle } = useDisclosure();
-    const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
+    const bgColor = useColorModeValue('white', 'black');
     const tabListbgColor = useColorModeValue('white', 'black');
     const tabInactiveColors = useColorModeValue('black', 'white');
     const tabBorderColor = useColorModeValue('white', 'black');
@@ -660,6 +667,144 @@ function ControlPanel() {
             </HStack>
         </HStack>
     );
+
+    const renderTabs = () => (
+        <TabList
+            position="absolute"
+            top="0"
+            width="50px"
+            height="100%"
+            zIndex="2"
+            bgColor={tabListbgColor}
+        >
+            <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
+                <IconButton
+                    borderRadius="0"
+                    variant="link"
+                    width="50px"
+                    height="50px"
+                    color={tabInactiveColors}
+                    onClick={() => {
+                        toggleControlPanel();
+                    }}
+                    icon={
+                        isOpen ? (
+                            <ChevronDoubleLeft style={{ '--ggs': 0.8 }} />
+                        ) : (
+                            <ChevronDoubleRight style={{ '--ggs': 0.8 }} />
+                        )
+                    }
+                />
+            </Tooltip>
+            <Tab
+                width="50px"
+                height="50px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open study info'
+                        })
+                    );
+                }}
+                padding="8px"
+                style={
+                    isOpen
+                        ? {}
+                        : {
+                              color: tabInactiveColors,
+                              borderColor: 'transparent'
+                          }
+                }
+            >
+                <Tooltip label="Study Settings">
+                    <Box
+                        id="viewsettingstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <FolderOpenIcon width="20px" height="20px" />
+                    </Box>
+                </Tooltip>
+            </Tab>
+            <Tab
+                width="50px"
+                height="50px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open view settings'
+                        })
+                    );
+                }}
+                padding="8px"
+                style={
+                    isOpen
+                        ? {}
+                        : {
+                              color: tabInactiveColors,
+                              borderColor: 'transparent'
+                          }
+                }
+            >
+                <Tooltip label="View settings">
+                    <Box
+                        id="viewsettingstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <PaintBrushIcon width="18px" height="18px" />
+                    </Box>
+                </Tooltip>
+            </Tab>
+        </TabList>
+    );
+
+    const renderTabPanels = () => (
+        <TabPanels
+            width="250px"
+            height="100%"
+            marginLeft="50px"
+            bgColor={bgColor}
+            borderRight="1px solid"
+            borderColor={edgeColor}
+            position="relative"
+        >
+            <TabPanel width="250px" height="100%">
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '10px'
+                    }}
+                >
+                    <StudyInfoComponent />
+                </CustomScroll>
+            </TabPanel>
+            <TabPanel width="250px" height="100%">
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '10px'
+                    }}
+                >
+                    <SettingsComponent />
+                </CustomScroll>
+            </TabPanel>
+        </TabPanels>
+    );
     return (
         <Box
             minW="50px"
@@ -681,112 +826,7 @@ function ControlPanel() {
                 borderColor={tabBorderColor}
                 isLazy
             >
-                <TabList
-                    position="absolute"
-                    top="0"
-                    width="50px"
-                    height="100%"
-                    zIndex="2"
-                    bgColor={tabListbgColor}
-                >
-                    <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
-                        <IconButton
-                            borderRadius="0"
-                            variant="link"
-                            width="50px"
-                            height="50px"
-                            color={tabInactiveColors}
-                            onClick={() => {
-                                toggleControlPanel();
-                            }}
-                            icon={
-                                isOpen ? (
-                                    <ChevronDoubleLeft
-                                        style={{ '--ggs': 0.8 }}
-                                    />
-                                ) : (
-                                    <ChevronDoubleRight
-                                        style={{ '--ggs': 0.8 }}
-                                    />
-                                )
-                            }
-                        />
-                    </Tooltip>
-                    <Tab
-                        width="50px"
-                        height="50px"
-                        onClick={() => {
-                            openSliderIfClosed();
-                            store.track.trackEvent(
-                                'Side Panel',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open study info'
-                                })
-                            );
-                        }}
-                        padding="8px"
-                        style={
-                            isOpen
-                                ? {}
-                                : {
-                                      color: tabInactiveColors,
-                                      borderColor: 'transparent'
-                                  }
-                        }
-                    >
-                        <Tooltip label="Study info">
-                            <Box
-                                id="viewsettingstab"
-                                width="100%"
-                                height="100%"
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Info style={{ '--ggs': 0.8 }} />
-                            </Box>
-                        </Tooltip>
-                    </Tab>
-                    <Tab
-                        width="50px"
-                        height="50px"
-                        onClick={() => {
-                            openSliderIfClosed();
-                            store.track.trackEvent(
-                                'Side Panel',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open view settings'
-                                })
-                            );
-                        }}
-                        padding="8px"
-                        style={
-                            isOpen
-                                ? {}
-                                : {
-                                      color: tabInactiveColors,
-                                      borderColor: 'transparent'
-                                  }
-                        }
-                    >
-                        <Tooltip label="View settings">
-                            <Box
-                                id="viewsettingstab"
-                                width="100%"
-                                height="100%"
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Eye style={{ '--ggs': 0.8 }} />
-                            </Box>
-                        </Tooltip>
-                    </Tab>
-                </TabList>
+                {renderTabs()}
                 <Slide
                     direction="left"
                     id="controlpanelslide"
@@ -800,37 +840,7 @@ function ControlPanel() {
                         marginTop: '50px'
                     }}
                 >
-                    <TabPanels
-                        width="250px"
-                        height="100%"
-                        marginLeft="50px"
-                        bgColor={bgColor}
-                        borderRight="1px solid"
-                        borderColor={edgeColor}
-                        position="relative"
-                    >
-                        <TabPanel width="250px" height="100%">
-                            <CustomScroll
-                                style={{
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
-                            >
-                                <StudyInfoComponent />
-                            </CustomScroll>
-                        </TabPanel>
-                        <TabPanel width="250px" height="100%">
-                            <CustomScroll
-                                style={{
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
-                            >
-                                <SettingsComponent />
-                            </CustomScroll>
-                        </TabPanel>
-                    </TabPanels>
-
+                    {renderTabPanels()}
                     {renderDirectConnectionsMenu()}
                     {renderNetworkModificationMenu()}
 

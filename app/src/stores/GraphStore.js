@@ -125,7 +125,7 @@ export class GraphStore {
     generateNodeLabelSprite = (label, size) =>
         new SpriteText(
             label,
-            6,
+            10,
             this.store.core.colorMode === 'light' ? 'black' : 'white'
         ).translateY(size + 5);
 

@@ -78,6 +78,18 @@ def get_study_history(study_uuid: str, user_uuid: str):
     }
 
 
+@router.get("/history/public")
+def get_public_study_history(public_study_uuid: str):
+    study = csx_study.get_public_study(public_study_uuid)
+    history = csx_study.extract_history_items(study)
+    return {
+        "name": study["study_name"],
+        "author": study["study_author"],
+        "description": study["study_description"],
+        "history": history,
+    }
+
+
 class GetStudyData(BaseModel):
     study_uuid: str
     user_uuid: str
@@ -410,11 +422,53 @@ def generate_study(user_uuid: str, study_name: str) -> str:
             "study_name": study_name,
             "study_description": "",
             "saved": False,
+            "public": False,
+            "public_url": "",
             "index": "",
             "history": [],
         },
     )
     return study_uuid
+
+
+class StudyData(BaseModel):
+    study_uuid: str
+    user_uuid: str
+
+
+@router.post("/public")
+def make_study_public(data: StudyData) -> str:
+    public_url = uuid.uuid4().hex
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
+        {
+            "$set": {
+                "public": True,
+                "public_url": public_url,
+                "saved": True,
+            }
+        },
+    )
+
+    return public_url
+
+
+@router.post("/private")
+def make_study_private(data: StudyData):
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
+        {
+            "$set": {
+                "public": False,
+                "public_url": "",
+                "saved": True,
+            }
+        },
+    )
+    return
 
 
 @router.get("/update")

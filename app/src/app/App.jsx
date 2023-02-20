@@ -14,13 +14,14 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
+import CommentModal from 'components/feature/commentmodal/CommentModal.component';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import PresentPage from 'pages/present/Present.page';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse, isEnvTrue } from 'general.utils';
-import PresentPage from 'pages/present/Present.page';
 
 function CSX() {
     const { colorMode } = useColorMode();
@@ -150,10 +151,12 @@ function CSX() {
                                 <HomePage />
                             </Route>
                             <Route path="/graph/detail" label="graphdetail">
+                                <CommentModal />
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
                             </Route>
                             <Route path="/graph" label="graph">
+                                <CommentModal />
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
                             </Route>

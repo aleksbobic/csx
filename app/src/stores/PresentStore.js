@@ -35,8 +35,14 @@ export class PresentStore {
         }
     };
 
-    generateSlides = async (studyID, activeItem) => {
-        const studyDetails = await this.getStudyDetails(studyID);
+    generateSlides = async (studyID, publicStudyID, activeItem) => {
+        let studyDetails;
+
+        if (studyID) {
+            studyDetails = await this.getStudyDetails(studyID);
+        } else {
+            studyDetails = await this.getPublicStudyDetails(publicStudyID);
+        }
 
         if (activeItem) {
             const includedIDs = this.getParentIDs(
@@ -200,6 +206,24 @@ export class PresentStore {
 
         const { response, error } = await safeRequest(
             axios.get('study/history', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        return response.data;
+    };
+
+    getPublicStudyDetails = async studyID => {
+        console.log(studyID);
+        const params = {
+            public_study_uuid: studyID
+        };
+
+        const { response, error } = await safeRequest(
+            axios.get('study/history/public', { params })
         );
 
         if (error) {

@@ -1,10 +1,11 @@
-import { Divider, Stack } from '@chakra-ui/layout';
+import { Heading, HStack, Stack } from '@chakra-ui/layout';
 import {
     Button,
     Editable,
     EditableInput,
     EditablePreview,
     EditableTextarea,
+    Switch,
     Text,
     Tooltip,
     useColorMode
@@ -23,11 +24,11 @@ function StudyInfo() {
             align="center"
             direction="column"
             paddingLeft="0"
-            paddingRight="10px"
             id="studyinfocomponent"
             width="100%"
             alignItems="start"
         >
+            <Heading size="sm">Study details</Heading>
             <Text fontSize="xs" fontWeight="bold" opacity="0.7">
                 Study name:
             </Text>
@@ -45,6 +46,7 @@ function StudyInfo() {
                         );
                         store.core.updateStudyName(val);
                     }}
+                    fontSize="sm"
                     onChange={val => store.core.setStudyName(val)}
                     onFocus={() => store.comment.setCommentTrigger(false)}
                     onBlur={() => store.comment.setCommentTrigger(true)}
@@ -53,6 +55,7 @@ function StudyInfo() {
                     <EditablePreview
                         size="xs"
                         maxWidth="100%"
+                        width="100%"
                         minWidth="40px"
                         height="30px"
                         whiteSpace="nowrap"
@@ -111,6 +114,7 @@ function StudyInfo() {
 
                         store.core.updateStudyDescription(val);
                     }}
+                    fontSize="sm"
                     onChange={val => store.core.setStudyDescription(val)}
                     onFocus={() => store.comment.setCommentTrigger(false)}
                     onBlur={() => store.comment.setCommentTrigger(true)}
@@ -137,35 +141,6 @@ function StudyInfo() {
                 </Editable>
             </Tooltip>
             <Text fontSize="xs" fontWeight="bold" opacity="0.7">
-                Selected index:
-            </Text>
-
-            <Text fontSize="sm" paddingLeft="8px">
-                {store.search.currentDataset}
-            </Text>
-
-            <Button
-                width="100%"
-                size="sm"
-                disabled={store.core.studyIsSaved}
-                onClick={() => {
-                    store.track.trackEvent(
-                        'Side Panel - Study Info',
-                        'Button',
-                        JSON.stringify({
-                            type: 'Click',
-                            value: 'Save study'
-                        })
-                    );
-                    store.core.saveStudy();
-                }}
-            >
-                {store.core.studyIsSaved ? 'Saved' : 'Save'}
-                <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
-            </Button>
-            <Divider style={{ opacity: 0.2 }} />
-
-            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
                 Study author
             </Text>
             <Tooltip label="The study author name">
@@ -186,6 +161,7 @@ function StudyInfo() {
                     onFocus={() => store.comment.setCommentTrigger(false)}
                     onBlur={() => store.comment.setCommentTrigger(true)}
                     width="100%"
+                    fontSize="sm"
                 >
                     <EditablePreview
                         size="xs"
@@ -224,6 +200,108 @@ function StudyInfo() {
                     />
                 </Editable>
             </Tooltip>
+            <Text fontSize="xs" fontWeight="bold" opacity="0.7">
+                Selected index:
+            </Text>
+
+            <Text fontSize="sm" paddingLeft="8px">
+                {store.search.currentDataset}
+            </Text>
+
+            <Button
+                width="100%"
+                size="sm"
+                disabled={store.core.studyIsSaved}
+                onClick={() => {
+                    store.track.trackEvent(
+                        'Side Panel - Study Info',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Save study'
+                        })
+                    );
+                    store.core.saveStudy();
+                }}
+                style={{ marginBottom: '10px' }}
+                _hover={{ backgroundColor: 'blue.500' }}
+                _disabled={{ backgroundColor: 'blue.500', opacity: 0.5 }}
+            >
+                {store.core.studyIsSaved ? 'Saved' : 'Save'}
+                <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
+            </Button>
+
+            <Heading size="sm" style={{ marginTop: '20px' }}>
+                Presentation settings
+            </Heading>
+
+            <Tooltip
+                label={
+                    store.core.isStudyPublic
+                        ? 'Make study private'
+                        : 'Make study public'
+                }
+            >
+                <HStack spacing="1">
+                    <Switch
+                        id="curvedEdges"
+                        size="sm"
+                        isDisabled={!store.core.studyIsSaved}
+                        marginRight="10px"
+                        isChecked={store.core.isStudyPublic}
+                        value={store.core.isStudyPublic}
+                        onChange={() => {
+                            store.core.toggleIsStudyPublic();
+
+                            store.track.trackEvent(
+                                'Side panel - View Settings',
+                                'Switch',
+                                JSON.stringify({
+                                    type: 'Toggle',
+                                    value: `${
+                                        store.core.isStudyPublic
+                                            ? 'Make study public'
+                                            : 'Make study private'
+                                    }`
+                                })
+                            );
+                        }}
+                    />
+                    <Text fontSize="sm">Public</Text>
+                </HStack>
+            </Tooltip>
+            {store.core.isStudyPublic && (
+                <>
+                    <Text fontSize="xs" fontWeight="bold">
+                        Access Link:
+                    </Text>
+                    <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        opacity="0.8"
+                        color="blue.500"
+                        marginTop="0"
+                        _hover={{ opacity: 1 }}
+                    >
+                        {`${window.location.href
+                            .replace('graph', 'present')
+                            .replace(/^https?:\/\//, '')
+                            .split('=')[0]
+                            .replace('study', 'pstudy')}=${
+                            store.core.studyPublicURL
+                        }`}
+                    </Text>
+                    <Text
+                        fontSize="xs"
+                        fontWeight="bold"
+                        opacity="0.5"
+                        marginTop="0"
+                    >
+                        Anyone with this link can access your study in
+                        presentation mode.
+                    </Text>
+                </>
+            )}
         </Stack>
     );
 }

@@ -18,6 +18,8 @@ export class CoreStore {
     studyHistory = [];
     studyHistoryItemIndex = 0;
     studyIsSaved = false;
+    isStudyPublic = false;
+    studyPublicURL = '';
     showCommentModal = false;
     studies = [];
     dataIsLoading = false;
@@ -52,6 +54,45 @@ export class CoreStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    toggleIsStudyPublic = async () => {
+        this.isStudyPublic = !this.isStudyPublic;
+
+        if (this.isStudyPublic) {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { response, error } = await safeRequest(
+                axios.post('study/public', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL(response.data);
+        } else {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { error } = await safeRequest(
+                axios.post('study/private', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL('');
+        }
+    };
+
+    setStudyPublicURL = val => (this.studyPublicURL = val);
     setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
     setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
 

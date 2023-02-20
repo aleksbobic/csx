@@ -29,8 +29,9 @@ function PresentPage() {
 
     useEffect(() => {
         const studyID = queryString.parse(location.search).study;
+        const publicStudyID = queryString.parse(location.search).pstudy;
         const activeItem = queryString.parse(location.search).active_item;
-        store.present.generateSlides(studyID, activeItem);
+        store.present.generateSlides(studyID, publicStudyID, activeItem);
     }, []);
 
     useEffect(() => {

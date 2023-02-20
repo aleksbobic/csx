@@ -201,6 +201,7 @@ export function HistoryFlow() {
                         as={Link}
                         opacity="0.6"
                         transition="0.2s all ease-in-out"
+                        isDisabled={!store.core.studyIsSaved}
                         _hover={{ opacity: 1 }}
                         icon={
                             <Presentation
@@ -209,7 +210,16 @@ export function HistoryFlow() {
                                 }}
                             />
                         }
-                        href={`http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`}
+                        onClick={e => {
+                            if (!store.core.studyIsSaved) {
+                                e.preventDefault();
+                            }
+                        }}
+                        href={
+                            store.core.studyIsSaved
+                                ? `http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`
+                                : ''
+                        }
                         isExternal
                     />
                 </Tooltip>

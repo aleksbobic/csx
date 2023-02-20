@@ -75,6 +75,16 @@ def get_study(user_id, study_id):
     )[0]
 
 
+def get_public_study(public_study_id):
+    return list(
+        csx_data.get_all_documents_by_conditions(
+            "studies",
+            {"$and": [{"public_url": public_study_id}]},
+            {"_id": 0},
+        )
+    )[0]
+
+
 def add_index(study_uuid: str, user_uuid: str, index: str):
     csx_data.update_document(
         "studies",

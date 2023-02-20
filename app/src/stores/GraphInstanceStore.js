@@ -775,9 +775,9 @@ export class GraphInstanceStore {
         this.store.graph.setOrphanNodeVisiblity(this.orphanNodeVisibility);
     };
 
-    changeShowLabelDistance = val => {
-        this.labels.visibilityDistance = val;
-        this.labels.textHeight = 2 + (4 * val) / 900;
+    changeShowLabelDistance = (visibilityDistance, textHeight) => {
+        this.labels.visibilityDistance = visibilityDistance;
+        this.labels.textHeight = textHeight;
         this.store.graph.setLabelTextHeight(this.labels.textHeight);
     };
 
