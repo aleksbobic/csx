@@ -52,9 +52,9 @@ export class PresentStore {
         let tempSlides = [
             {
                 type: 'intro',
-                title: studyDetails.name,
-                text: studyDetails.description,
-                author: studyDetails.author,
+                title: studyDetails?.name,
+                text: studyDetails?.description,
+                author: studyDetails?.author,
                 time: format(new Date(), 'do MMM yyyy')
             }
         ];

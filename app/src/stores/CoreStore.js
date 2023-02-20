@@ -261,8 +261,11 @@ export class CoreStore {
 
     saveStudy = async () => {
         const params = {
+            user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
-            user_uuid: this.userUuid
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(

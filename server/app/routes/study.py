@@ -463,11 +463,24 @@ def update_study_charts(data: UpdateChartsData):
 
 
 @router.get("/save")
-def save_study(study_uuid: str, user_uuid: str):
+def save_study(
+    study_uuid: str,
+    user_uuid: str,
+    study_name: str,
+    study_description: str,
+    study_author: str,
+):
     csx_data.update_document(
         "studies",
         {"study_uuid": study_uuid, "user_uuid": user_uuid},
-        {"$set": {"saved": True}},
+        {
+            "$set": {
+                "study_name": study_name,
+                "study_description": study_description,
+                "study_author": study_author,
+                "saved": True,
+            }
+        },
     )
     return
 
