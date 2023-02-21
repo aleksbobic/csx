@@ -17,7 +17,6 @@ class HistoryCommentData(BaseModel):
     screenshot: Union[str, None]
     screenshot_width: Union[int, None]
     screenshot_height: Union[int, None]
-    screenshot_x_offset: Union[int, None]
     chart: Union[str, None]
 
 
@@ -38,8 +37,7 @@ def add_comment(data: HistoryCommentData):
         data.screenshot,
         data.screenshot_width,
         data.screenshot_height,
-        data.screenshot_x_offset,
-        data.chart
+        data.chart,
     )
 
     return
@@ -74,7 +72,6 @@ class HistoryEditCommentData(BaseModel):
     screenshot: Union[str, None]
     screenshot_width: Union[int, None]
     screenshot_height: Union[int, None]
-    screenshot_x_offset: Union[int, None]
     chart: Union[str, None]
 
 
@@ -88,11 +85,16 @@ def edit_comment(data: HistoryEditCommentData):
     comment_time = data.comment_time
 
     csx_study.edit_comment(
-        study_uuid, user_uuid, history_item_index, comment_index, comment, comment_time, data.screenshot,
+        study_uuid,
+        user_uuid,
+        history_item_index,
+        comment_index,
+        comment,
+        comment_time,
+        data.screenshot,
         data.screenshot_width,
         data.screenshot_height,
-        data.screenshot_x_offset,
-        data.chart
+        data.chart,
     )
 
     return

@@ -25,8 +25,7 @@ export class CommentStore {
         this.screenshot = {
             image: content.screenshot,
             width: content.screenshot_width,
-            height: content.screenshot_height,
-            xOffset: content.screenshot_x_offset
+            height: content.screenshot_height
         };
 
         this.chart = content.chart;
@@ -36,21 +35,10 @@ export class CommentStore {
     setCommentTrigger = val => (this.commentTrigger = val);
 
     attachScreenshot = (windowWidth, windowHeight) => {
-        let imageWidth = windowWidth;
-
-        if (this.store.core.isLeftSidePanelOpen) {
-            imageWidth = imageWidth - 300;
-        }
-
-        if (this.store.core.isRightSidePanelOpen) {
-            imageWidth = imageWidth - this.store.core.rightPanelWidth;
-        }
-
         this.screenshot = {
             image: this.store.graphInstance.retireveScreenshot(),
-            width: imageWidth,
-            height: windowHeight,
-            xOffset: this.store.core.isLeftSidePanelOpen ? 300 : 0
+            width: windowWidth,
+            height: windowHeight
         };
     };
 
@@ -83,7 +71,6 @@ export class CommentStore {
             params['screenshot'] = this.screenshot.image;
             params['screenshot_width'] = parseInt(this.screenshot.width);
             params['screenshot_height'] = parseInt(this.screenshot.height);
-            params['screenshot_x_offset'] = parseInt(this.screenshot.xOffset);
             this.removeScreenshot();
         }
 
@@ -111,12 +98,10 @@ export class CommentStore {
             newComment.screenshot = params.screenshot;
             newComment.screenshot_width = params.screenshot_width;
             newComment.screenshot_height = params.screenshot_height;
-            newComment.screenshot_x_offset = params.screenshot_x_offset;
         } else {
             newComment.screenshot = null;
             newComment.screenshot_width = null;
             newComment.screenshot_height = null;
-            newComment.screenshot_x_offset = null;
         }
 
         this.store.core.studyHistory[
@@ -170,7 +155,6 @@ export class CommentStore {
             params['screenshot'] = this.screenshot.image;
             params['screenshot_width'] = parseInt(this.screenshot.width);
             params['screenshot_height'] = parseInt(this.screenshot.height);
-            params['screenshot_x_offset'] = parseInt(this.screenshot.xOffset);
             this.removeScreenshot();
         }
 
@@ -198,9 +182,6 @@ export class CommentStore {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].comments[index].screenshot_height = params.screenshot_height;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_x_offset = params.screenshot_x_offset;
         } else {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
@@ -211,9 +192,6 @@ export class CommentStore {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].comments[index].screenshot_height = null;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_x_offset = null;
         }
 
         this.store.core.studyHistory[

@@ -131,8 +131,6 @@ function CSX() {
                 )}
                 <CustomScroll
                     style={{
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
                         backgroundColor:
                             colorMode === 'light' ? 'white' : '#171A23'
                     }}

@@ -113,7 +113,6 @@ def add_comment(
     screenshot: Union[str, None],
     screenshot_width: Union[int, None],
     screenshot_height: Union[int, None],
-    screenshot_x_offset: Union[int, None],
     chart: Union[str, None],
 ):
 
@@ -128,7 +127,6 @@ def add_comment(
                     "screenshot": screenshot,
                     "screenshot_width": screenshot_width,
                     "screenshot_height": screenshot_height,
-                    "screenshot_x_offset": screenshot_x_offset,
                     "chart": chart,
                 }
             }
@@ -157,7 +155,6 @@ def edit_comment(
     screenshot: Union[str, None],
     screenshot_width: Union[int, None],
     screenshot_height: Union[int, None],
-    screenshot_x_offset: Union[int, None],
     chart: Union[str, None],
 ):
     csx_data.edit_array(
@@ -168,7 +165,6 @@ def edit_comment(
             f"history.{history_item_index}.comments.{comment_index}.screenshot": screenshot,
             f"history.{history_item_index}.comments.{comment_index}.screenshot_width": screenshot_width,
             f"history.{history_item_index}.comments.{comment_index}.screenshot_height": screenshot_height,
-            f"history.{history_item_index}.comments.{comment_index}.screenshot_x_offset": screenshot_x_offset,
             f"history.{history_item_index}.comments.{comment_index}.chart": chart,
             f"history.{history_item_index}.comments.{comment_index}.time": comment_time,
             f"history.{history_item_index}.comments.{comment_index}.edited": True,

@@ -481,28 +481,30 @@ function NavigationPanelComponent() {
                 </ButtonGroup>
             )}
 
-            <Tooltip label="Toggle color mode">
-                <IconButton
-                    border="none"
-                    aria-label="Color mode"
-                    icon={
-                        colorMode === 'light' ? (
-                            <Moon
-                                style={{
-                                    '--ggs': '0.8'
-                                }}
-                            />
-                        ) : (
-                            <Sun
-                                style={{
-                                    '--ggs': '0.8'
-                                }}
-                            />
-                        )
-                    }
-                    onClick={toggleColor}
-                />
-            </Tooltip>
+            {location.pathname !== '/present' && (
+                <Tooltip label="Toggle color mode">
+                    <IconButton
+                        border="none"
+                        aria-label="Color mode"
+                        icon={
+                            colorMode === 'light' ? (
+                                <Moon
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            ) : (
+                                <Sun
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            )
+                        }
+                        onClick={toggleColor}
+                    />
+                </Tooltip>
+            )}
         </ButtonGroup>
     );
 
@@ -531,39 +533,41 @@ function NavigationPanelComponent() {
                 }
             >
                 <HStack spacing="10px">
-                    <Link
-                        as={NavLink}
-                        to="/"
-                        paddingRight="5px"
-                        paddingLeft="5px"
-                        borderRight="1px solid"
-                        borderColor={
-                            location.pathname !== '/present'
-                                ? edgeColor
-                                : 'transparent'
-                        }
-                        id="homelink"
-                        onClick={() => {
-                            store.core.deleteStudy();
-                            store.core.setStudyIsEmpty(false);
-                            store.search.setSearchIsEmpty(false);
+                    {location.pathname !== '/present' && (
+                        <Link
+                            as={NavLink}
+                            to="/"
+                            paddingRight="5px"
+                            paddingLeft="5px"
+                            borderRight="1px solid"
+                            borderColor={
+                                location.pathname !== '/present'
+                                    ? edgeColor
+                                    : 'transparent'
+                            }
+                            id="homelink"
+                            onClick={() => {
+                                store.core.deleteStudy();
+                                store.core.setStudyIsEmpty(false);
+                                store.search.setSearchIsEmpty(false);
 
-                            store.track.trackEvent(
-                                'Navbar',
-                                'Button - Logo',
-                                JSON.stringify({
-                                    type: 'Click'
-                                })
-                            );
-                        }}
-                    >
-                        <Image
-                            src={logo}
-                            alt="Collaboration spotting logo"
-                            height="40px"
-                            padding="10px"
-                        />
-                    </Link>
+                                store.track.trackEvent(
+                                    'Navbar',
+                                    'Button - Logo',
+                                    JSON.stringify({
+                                        type: 'Click'
+                                    })
+                                );
+                            }}
+                        >
+                            <Image
+                                src={logo}
+                                alt="Collaboration spotting logo"
+                                height="40px"
+                                padding="10px"
+                            />
+                        </Link>
+                    )}
 
                     {location.pathname !== '/' &&
                         location.pathname !== '/present' &&

@@ -1,18 +1,28 @@
 import {
     Box,
     Center,
+    Flex,
     Heading,
     HStack,
+    IconButton,
     Image,
+    Kbd,
+    Link,
     Spinner,
     Text,
     useColorMode,
     VStack
 } from '@chakra-ui/react';
+import {
+    ArrowDownTrayIcon,
+    ChevronDownIcon,
+    ChevronUpIcon
+} from '@heroicons/react/20/solid';
 
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
+import { useState } from 'react';
 import { useContext, useEffect } from 'react';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useHistory, useLocation } from 'react-router';
@@ -20,6 +30,7 @@ import { withRouter } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
 import { RootStoreContext } from 'stores/RootStore';
+import logo from 'images/logo.png';
 import './Present.scss';
 
 function PresentPage() {
@@ -27,6 +38,8 @@ function PresentPage() {
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const history = useHistory();
+    const [revealInstance, setRevealInstance] = useState(null);
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         const studyID = queryString.parse(location.search).study;
@@ -38,11 +51,14 @@ function PresentPage() {
     useEffect(() => {
         if (store.present.slides.length > 0) {
             const deck = new Reveal();
+            setRevealInstance(deck);
             deck.initialize({
                 transition: 'slide',
-                slideNumber: true,
+                slideNumber: false,
+                controls: false,
                 maxScale: 2.5
             });
+            deck.on('slidechanged', e => setCurrentSlide(e.indexv));
         }
     }, [store.present.slides]);
 
@@ -75,6 +91,17 @@ function PresentPage() {
 
     const renderSlides = () => {
         return store.present.slides.map((slide, index) => {
+            let flexDirection;
+            let textAlign;
+
+            if (slide.align) {
+                textAlign = slide.align;
+                flexDirection = slide.align === 'left' ? 'row' : 'row-reverse';
+            } else {
+                textAlign = index % 2 ? 'left' : 'right';
+                flexDirection = index % 2 ? 'row' : 'row-reverse';
+            }
+
             switch (slide.type) {
                 case 'intro':
                     return (
@@ -113,15 +140,20 @@ function PresentPage() {
                             key={`slide_${index}`}
                             data-background-color="#1A202C"
                         >
-                            <ReactMarkdown
-                                className="comment"
-                                children={slide.content}
-                                remarkPlugins={[remarkGfm]}
-                                disallowedElements={['img', 'a']}
-                            />
+                            <Flex justifyContent="center" alignItems="center">
+                                <Box maxWidth="800px">
+                                    <ReactMarkdown
+                                        className="mkdslide"
+                                        children={slide.content}
+                                        remarkPlugins={[remarkGfm]}
+                                        disallowedElements={['img', 'a']}
+                                        style={{ maxWidth: '800px' }}
+                                    />
+                                </Box>
+                            </Flex>
                         </Box>
                     );
-                case 'markdownscreenshotandchart':
+                case 'markdownmedia':
                     return (
                         <Box
                             as="section"
@@ -130,149 +162,79 @@ function PresentPage() {
                             data-background-color="#1A202C"
                             height="100%"
                             width="80%"
+                            data-transition={
+                                slide.transition ? slide.transition : 'slide'
+                            }
                         >
                             <HStack
-                                flexDirection={
-                                    index % 2 ? 'row' : 'row-reverse'
-                                }
+                                flexDirection={flexDirection}
                                 height="100%"
                                 width="100%"
                             >
-                                <Center
-                                    className="fragment fade-in-then-out"
+                                <Box
+                                    overflow="hidden"
                                     width="70%"
-                                    height="100%"
+                                    height="auto"
+                                    padding={slide.chart ? '50px' : '0px'}
                                 >
-                                    <Box
-                                        overflow="hidden"
-                                        width="100%"
-                                        height="100%"
-                                    >
-                                        <Image
-                                            height="100%"
-                                            objectFit="cover"
-                                            objectPosition={`${slide.screenshotXOffset}% 0`}
-                                            src={slide.screenshot}
-                                        />
-                                    </Box>
-                                </Center>
-                                <Center
-                                    className="fragment fade-in"
-                                    width="50%"
-                                    height="100%"
-                                    padding={
-                                        index % 2
-                                            ? '10% 0 10% 20%'
-                                            : '10% 20% 10% 0'
-                                    }
+                                    <Image
+                                        src={
+                                            slide.chart
+                                                ? slide.chart
+                                                : slide.screenshot
+                                        }
+                                    />
+                                </Box>
+
+                                <Box
+                                    textAlign={textAlign}
+                                    width="30%"
+                                    height="auto"
                                 >
-                                    <Image src={slide.chart} />
-                                </Center>
-                                <Center width="30%" height="100%">
-                                    <Box
-                                        textAlign={index % 2 ? 'left' : 'right'}
-                                        width="100%"
-                                    >
-                                        <ReactMarkdown
-                                            className="comment"
-                                            children={slide.content}
-                                            remarkPlugins={[remarkGfm]}
-                                            disallowedElements={['img', 'a']}
-                                        />
-                                    </Box>
-                                </Center>
+                                    <ReactMarkdown
+                                        className="mkdslide"
+                                        children={slide.content}
+                                        remarkPlugins={[remarkGfm]}
+                                        disallowedElements={['img', 'a']}
+                                    />
+                                </Box>
                             </HStack>
                         </Box>
                     );
-                case 'markdownchart':
+                case 'final':
                     return (
                         <Box
                             as="section"
                             display="inherit !important"
                             key={`slide_${index}`}
                             data-background-color="#1A202C"
-                            height="100%"
-                            width="80%"
                         >
-                            <HStack
-                                flexDirection={
-                                    index % 2 ? 'row' : 'row-reverse'
-                                }
-                                height="100%"
-                                width="100%"
-                            >
-                                <Center
-                                    width="50%"
-                                    height="100%"
-                                    padding={
-                                        index % 2
-                                            ? '10% 0 10% 20%'
-                                            : '10% 20% 10% 0'
-                                    }
-                                >
-                                    <Image src={slide.chart} />
-                                </Center>
-                                <Center width="50%" height="100%">
-                                    <Box
-                                        textAlign={index % 2 ? 'left' : 'right'}
-                                        width="100%"
-                                    >
-                                        <ReactMarkdown
-                                            className="comment"
-                                            children={slide.content}
-                                            remarkPlugins={[remarkGfm]}
-                                            disallowedElements={['img', 'a']}
-                                        />
-                                    </Box>
-                                </Center>
-                            </HStack>
-                        </Box>
-                    );
-                case 'markdownscreenshot':
-                    return (
-                        <Box
-                            as="section"
-                            display="inherit !important"
-                            key={`slide_${index}`}
-                            data-background-color="#1A202C"
-                            height="100%"
-                            width="80%"
-                        >
-                            <HStack
-                                flexDirection={
-                                    index % 2 ? 'row' : 'row-reverse'
-                                }
-                                height="100%"
-                                width="100%"
-                            >
-                                <Center width="70%" height="100%">
-                                    <Box
-                                        overflow="hidden"
-                                        width="100%"
-                                        height="100%"
-                                    >
+                            <Center>
+                                <VStack padding="15%">
+                                    <Heading size="sm">{slide.title}</Heading>
+                                    <VStack paddingTop="15%">
+                                        <Text fontSize="sm" fontWeight="bold">
+                                            {slide.text}
+                                        </Text>
                                         <Image
-                                            height="100%"
-                                            objectFit="cover"
-                                            objectPosition={`${slide.screenshotXOffset}% 0`}
-                                            src={slide.screenshot}
+                                            src={logo}
+                                            alt="Collaboration spotting logo"
+                                            height="50px"
                                         />
-                                    </Box>
-                                </Center>
-                                <Center width="30%" height="100%">
-                                    <Box
-                                        textAlign={index % 2 ? 'left' : 'right'}
-                                        width="100%"
-                                    >
-                                        <ReactMarkdown
-                                            className="comment"
-                                            children={slide.content}
-                                            remarkPlugins={[remarkGfm]}
-                                            disallowedElements={['img', 'a']}
-                                        />
-                                    </Box>
-                                </Center>
-                            </HStack>
+                                        <Link
+                                            fontWeight="bold"
+                                            textDecoration="underline"
+                                            fontSize="sm"
+                                            display="inline"
+                                            color="blue.500"
+                                            target="_blank"
+                                            href="https://csxp.me"
+                                        >
+                                            csxp.me
+                                        </Link>
+                                    </VStack>
+                                </VStack>
+                            </Center>
                         </Box>
                     );
                 default:
@@ -304,6 +266,43 @@ function PresentPage() {
             backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
             className="reveal"
         >
+            <HStack
+                width="100%"
+                height="35px"
+                position="absolute"
+                left="0px"
+                bottom="20px"
+                zIndex="3"
+                padding="0 20px"
+                justifyContent="space-between"
+            >
+                <Text fontSize="md" fontWeight="bold">
+                    {currentSlide + 1} / {store.present.slides.length}
+                </Text>
+                <HStack>
+                    <IconButton
+                        opacity="0.5"
+                        variant="ghost"
+                        _hover={{ opacity: 1 }}
+                        onClick={() => store.present.generatePPT()}
+                        icon={<ArrowDownTrayIcon width="20px" height="20px" />}
+                    />
+                    <IconButton
+                        opacity="0.5"
+                        variant="ghost"
+                        _hover={{ opacity: 1 }}
+                        onClick={() => revealInstance.next()}
+                        icon={<ChevronDownIcon width="20px" height="20px" />}
+                    />
+                    <IconButton
+                        opacity="0.5"
+                        variant="ghost"
+                        _hover={{ opacity: 1 }}
+                        onClick={() => revealInstance.prev()}
+                        icon={<ChevronUpIcon width="20px" height="20px" />}
+                    />
+                </HStack>
+            </HStack>
             <Box className="slides" data-transition="slide">
                 <Box as="section">{renderSlides()}</Box>
             </Box>

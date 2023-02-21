@@ -43,10 +43,7 @@ function CommentComponent(props) {
                     .comments[index].screenshot_width,
             screenshot_height:
                 store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].screenshot_height,
-            screenshot_x_offset:
-                store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].screenshot_x_offset
+                    .comments[index].screenshot_height
         });
     };
 

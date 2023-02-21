@@ -92,7 +92,6 @@ export class SearchStore {
         localStorage.getItem(`index_${dataset_name}`);
 
     setLocalStorageDataset = (dataset_name, dataset) => {
-        console.log(dataset);
         localStorage.setItem(`index_${dataset_name}`, JSON.stringify(dataset));
     };
 
