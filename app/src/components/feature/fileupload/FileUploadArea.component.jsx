@@ -1,4 +1,5 @@
 import { Box, Text, useColorModeValue } from '@chakra-ui/react';
+import { DocumentArrowUpIcon } from '@heroicons/react/20/solid';
 import { FileAdd } from 'css.gg';
 import { useContext } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -48,13 +49,11 @@ export function FileUploadArea() {
                     background: 'rgba(100,100,100,0.05)'
                 }}
             >
-                <FileAdd
-                    style={{
-                        '--ggs': '1.2',
-                        marginBottom: '10px',
-                        opacity: 0.5,
-                        color: textColor
-                    }}
+                <DocumentArrowUpIcon
+                    width="22px"
+                    height="22px"
+                    opacity="0.5"
+                    style={{ marginBottom: '10px' }}
                 />
                 <input {...getInputProps()} width="100%" height="100%" />
                 {isDragActive ? (

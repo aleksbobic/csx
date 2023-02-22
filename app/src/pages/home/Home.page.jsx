@@ -34,6 +34,7 @@ import './Home.scss';
 import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
 import EmptyStudy from 'components/emptystudy/EmptyStudy.component';
+import TutorialGrid from 'components/feature/tutorialgrid/TutorialGrid.component';
 
 function HomePage() {
     const toast = useToast();
@@ -373,6 +374,12 @@ function HomePage() {
                                     onOpenStudy={() => cookieToast.closeAll()}
                                 />
                             )}
+                    </Fade>
+                )}
+
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
+                    <Fade in={!store.core.showCookieInfo}>
+                        {!store.core.showCookieInfo && <TutorialGrid />}
                     </Fade>
                 )}
             </Container>

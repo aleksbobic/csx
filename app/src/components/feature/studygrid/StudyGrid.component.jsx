@@ -11,6 +11,7 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
+import { FolderOpenIcon } from '@heroicons/react/20/solid';
 import { Close } from 'css.gg';
 
 import { observer } from 'mobx-react';
@@ -48,6 +49,15 @@ function StudyGrid(props) {
                 width="100%"
                 color={textColor}
             >
+                <FolderOpenIcon
+                    width="18px"
+                    height="18px"
+                    style={{
+                        display: 'inline',
+                        marginBottom: '-2px',
+                        marginRight: '10px'
+                    }}
+                />
                 Studies
             </Heading>
 
