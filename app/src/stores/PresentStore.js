@@ -331,14 +331,16 @@ export class PresentStore {
                     }`;
                     textWidthBasedOnOffset = `${
                         10 -
-                        3.5 * (slide.screenshotWidth / slide.screenshotHeight)
+                        3.5 * (slide.screenshotWidth / slide.screenshotHeight) -
+                        0.2
                     }`;
                 } else {
                     xOffset = `${
                         10 -
-                        3.5 * (slide.screenshotWidth / slide.screenshotHeight)
+                        3.5 * (slide.screenshotWidth / slide.screenshotHeight) -
+                        0.2
                     }`;
-                    textXOffset = '0%';
+                    textXOffset = '0.2';
                     textWidthBasedOnOffset = xOffset;
                 }
             } else {
@@ -358,18 +360,21 @@ export class PresentStore {
                               3.5 *
                               (slide.screenshotWidth / slide.screenshotHeight)
                           }`
-                        : '0%';
+                        : '0.2';
                 textWidthBasedOnOffset =
                     index % 2
                         ? `${
                               10 -
                               3.5 *
                                   (slide.screenshotWidth /
-                                      slide.screenshotHeight)
+                                      slide.screenshotHeight) -
+                              0.2
                           }`
                         : `${
                               3.5 *
-                              (slide.screenshotWidth / slide.screenshotHeight)
+                                  (slide.screenshotWidth /
+                                      slide.screenshotHeight) -
+                              0.2
                           }`;
             }
 
@@ -387,16 +392,16 @@ export class PresentStore {
                 if (slide.align === 'left') {
                     xOffset = '0%';
                     textXOffset = `${10 - 4.35}`;
-                    textWidthBasedOnOffset = `${4.35}`;
+                    textWidthBasedOnOffset = `${4.35 - 0.2}`;
                 } else {
                     xOffset = '4.35';
-                    textXOffset = '0%';
-                    textWidthBasedOnOffset = `${4.35}`;
+                    textXOffset = '0.2';
+                    textWidthBasedOnOffset = `${4.35 - 0.2}`;
                 }
             } else {
                 xOffset = index % 2 ? '0%' : '4.35';
-                textXOffset = index % 2 ? `${10 - 4.35}` : '0%';
-                textWidthBasedOnOffset = `${4.35}`;
+                textXOffset = index % 2 ? `${10 - 4.35}` : '0.2';
+                textWidthBasedOnOffset = `${4.35 - 0.2}`;
             }
 
             pptxSlide.addImage({
@@ -408,7 +413,8 @@ export class PresentStore {
             });
         }
 
-        let nextOffset = this.getInchesFromPoints(this.getPointsFromPixels(40));
+        // let nextOffset = this.getInchesFromPoints(this.getPointsFromPixels(40));
+        let nextOffset = 0;
 
         const slidesWithOffsets = [];
         const headingPixelSizes = [32, 24, 18, 16, 16, 16];
@@ -569,6 +575,16 @@ export class PresentStore {
             unorderedListStack = [];
         }
 
+        let height =
+            slidesWithOffsets[slidesWithOffsets.length - 1].offset +
+            slidesWithOffsets[slidesWithOffsets.length - 1].height;
+
+        let initialYOffset = 0;
+
+        if (height < 5.625) {
+            initialYOffset = (5.625 - height) / 2;
+        }
+
         slidesWithOffsets.forEach(entry => {
             switch (entry.type) {
                 case 'heading':
@@ -577,7 +593,7 @@ export class PresentStore {
                         entry.content,
                         entry.height,
                         entry.fontSize,
-                        entry.offset,
+                        entry.offset + initialYOffset,
                         textXOffset,
                         textWidthBasedOnOffset
                     );
@@ -588,7 +604,7 @@ export class PresentStore {
                         entry.content,
                         entry.height,
                         entry.fontSize,
-                        entry.offset,
+                        entry.offset + initialYOffset,
                         textXOffset,
                         textWidthBasedOnOffset
                     );
@@ -599,7 +615,7 @@ export class PresentStore {
                         entry.content,
                         entry.height,
                         entry.fontSize,
-                        entry.offset,
+                        entry.offset + initialYOffset,
                         textXOffset,
                         textWidthBasedOnOffset
                     );
@@ -610,7 +626,7 @@ export class PresentStore {
                         entry.content,
                         entry.height,
                         entry.fontSize,
-                        entry.offset,
+                        entry.offset + initialYOffset,
                         textXOffset,
                         textWidthBasedOnOffset
                     );
@@ -621,7 +637,7 @@ export class PresentStore {
                         entry.content,
                         entry.height,
                         entry.fontSize,
-                        entry.offset,
+                        entry.offset + initialYOffset,
                         textXOffset,
                         textWidthBasedOnOffset
                     );
