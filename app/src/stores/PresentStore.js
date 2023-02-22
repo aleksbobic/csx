@@ -272,13 +272,27 @@ export class PresentStore {
     handleUnorderedList = (
         slidesWithOffsets,
         unorderedListStack,
-        nextOffset
+        nextOffset,
+        textWidthBasedOnOffset
     ) => {
+        const numberOfLines =
+            Math.ceil(
+                this.getInchesFromPoints(
+                    this.getPointsFromPixels(
+                        this.getTextWidth(
+                            unorderedListStack.join('\n'),
+                            `${this.getPointsFromPixels(13)}pt arial`
+                        ) +
+                            unorderedListStack.length * 80
+                    )
+                ) / textWidthBasedOnOffset
+            ) + 1;
+
         slidesWithOffsets.push({
             offset: nextOffset,
             type: 'unorderedlist',
             height: this.getInchesFromPoints(
-                this.getPointsFromPixels(13 * unorderedListStack.length)
+                this.getPointsFromPixels(13 * numberOfLines)
             ),
             fontSize: this.getPointsFromPixels(13),
             content: unorderedListStack.join('\n')
@@ -286,7 +300,7 @@ export class PresentStore {
 
         const newNextOffset =
             this.getInchesFromPoints(
-                this.getPointsFromPixels(13 * unorderedListStack.length)
+                this.getPointsFromPixels(13 * numberOfLines)
             ) +
             slidesWithOffsets[slidesWithOffsets.length - 1].height +
             slidesWithOffsets[slidesWithOffsets.length - 1].offset;
@@ -294,12 +308,30 @@ export class PresentStore {
         return newNextOffset;
     };
 
-    handleOrderedList = (slidesWithOffsets, orderedListStack, nextOffset) => {
+    handleOrderedList = (
+        slidesWithOffsets,
+        orderedListStack,
+        nextOffset,
+        textWidthBasedOnOffset
+    ) => {
+        const numberOfLines =
+            Math.ceil(
+                this.getInchesFromPoints(
+                    this.getPointsFromPixels(
+                        this.getTextWidth(
+                            orderedListStack.join('\n'),
+                            `${this.getPointsFromPixels(13)}pt arial`
+                        ) +
+                            orderedListStack.length * 80
+                    )
+                ) / textWidthBasedOnOffset
+            ) + 1;
+
         slidesWithOffsets.push({
             offset: nextOffset,
             type: 'orderedlist',
             height: this.getInchesFromPoints(
-                this.getPointsFromPixels(13 * orderedListStack.length)
+                this.getPointsFromPixels(13 * numberOfLines)
             ),
             fontSize: this.getPointsFromPixels(13),
             content: orderedListStack.join('\n')
@@ -307,7 +339,7 @@ export class PresentStore {
 
         const newNextOffset =
             this.getInchesFromPoints(
-                this.getPointsFromPixels(13 * orderedListStack.length)
+                this.getPointsFromPixels(13 * numberOfLines)
             ) +
             slidesWithOffsets[slidesWithOffsets.length - 1].height +
             slidesWithOffsets[slidesWithOffsets.length - 1].offset;
@@ -424,13 +456,16 @@ export class PresentStore {
         let orderedListStack = [];
         let unorderedListStack = [];
 
+        let numberOfLines;
+
         contentChunks.forEach((row, index) => {
             if (/^#{1,6} /.test(row)) {
                 if (orderedListStack.length > 0) {
                     nextOffset = this.handleOrderedList(
                         slidesWithOffsets,
                         orderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     orderedListStack = [];
                 }
@@ -439,17 +474,34 @@ export class PresentStore {
                     nextOffset = this.handleUnorderedList(
                         slidesWithOffsets,
                         unorderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     unorderedListStack = [];
                 }
+
+                numberOfLines = Math.ceil(
+                    this.getInchesFromPoints(
+                        this.getPointsFromPixels(
+                            this.getTextWidth(
+                                row.slice(row.indexOf(' ') + 1),
+                                `${this.getPointsFromPixels(
+                                    headingPixelSizes[
+                                        row.split(' ')[0].length - 1
+                                    ] + 5
+                                )}pt arial`
+                            )
+                        )
+                    ) / textWidthBasedOnOffset
+                );
 
                 slidesWithOffsets.push({
                     offset: nextOffset,
                     type: 'heading',
                     height: this.getInchesFromPoints(
                         this.getPointsFromPixels(
-                            headingPixelSizes[row.split(' ')[0].length - 1]
+                            headingPixelSizes[row.split(' ')[0].length - 1] *
+                                numberOfLines
                         )
                     ),
                     fontSize: this.getPointsFromPixels(
@@ -461,7 +513,8 @@ export class PresentStore {
                 nextOffset =
                     this.getInchesFromPoints(
                         this.getPointsFromPixels(
-                            headingPixelSizes[row.split(' ')[0].length - 1]
+                            headingPixelSizes[row.split(' ')[0].length - 1] *
+                                numberOfLines
                         )
                     ) +
                     slidesWithOffsets[slidesWithOffsets.length - 1].height +
@@ -471,7 +524,8 @@ export class PresentStore {
                     nextOffset = this.handleOrderedList(
                         slidesWithOffsets,
                         orderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     orderedListStack = [];
                 }
@@ -482,7 +536,8 @@ export class PresentStore {
                     nextOffset = this.handleUnorderedList(
                         slidesWithOffsets,
                         unorderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     unorderedListStack = [];
                 }
@@ -493,7 +548,8 @@ export class PresentStore {
                     nextOffset = this.handleOrderedList(
                         slidesWithOffsets,
                         orderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     orderedListStack = [];
                 }
@@ -502,23 +558,38 @@ export class PresentStore {
                     nextOffset = this.handleUnorderedList(
                         slidesWithOffsets,
                         unorderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     unorderedListStack = [];
                 }
+
+                numberOfLines =
+                    Math.ceil(
+                        this.getInchesFromPoints(
+                            this.getPointsFromPixels(
+                                this.getTextWidth(
+                                    row.slice(row.indexOf(' ') + 1),
+                                    `${this.getPointsFromPixels(13)}pt arial`
+                                )
+                            )
+                        ) / textWidthBasedOnOffset
+                    ) + 1;
 
                 slidesWithOffsets.push({
                     offset: nextOffset,
                     type: 'quote',
                     height: this.getInchesFromPoints(
-                        this.getPointsFromPixels(50)
+                        this.getPointsFromPixels(13 * numberOfLines + 30)
                     ),
                     fontSize: this.getPointsFromPixels(13),
                     content: row.slice(row.indexOf(' ') + 1)
                 });
 
                 nextOffset =
-                    this.getInchesFromPoints(this.getPointsFromPixels(13)) +
+                    this.getInchesFromPoints(
+                        this.getPointsFromPixels(13 * numberOfLines)
+                    ) +
                     slidesWithOffsets[slidesWithOffsets.length - 1].height +
                     slidesWithOffsets[slidesWithOffsets.length - 1].offset;
             } else if (row !== '') {
@@ -526,7 +597,8 @@ export class PresentStore {
                     nextOffset = this.handleOrderedList(
                         slidesWithOffsets,
                         orderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     orderedListStack = [];
                 }
@@ -535,23 +607,38 @@ export class PresentStore {
                     nextOffset = this.handleUnorderedList(
                         slidesWithOffsets,
                         unorderedListStack,
-                        nextOffset
+                        nextOffset,
+                        textWidthBasedOnOffset
                     );
                     unorderedListStack = [];
                 }
+
+                numberOfLines =
+                    Math.ceil(
+                        this.getInchesFromPoints(
+                            this.getPointsFromPixels(
+                                this.getTextWidth(
+                                    row,
+                                    `${this.getPointsFromPixels(13)}pt arial`
+                                )
+                            )
+                        ) / textWidthBasedOnOffset
+                    ) + 1;
 
                 slidesWithOffsets.push({
                     offset: nextOffset,
                     type: 'text',
                     height: this.getInchesFromPoints(
-                        this.getPointsFromPixels(13)
+                        this.getPointsFromPixels(13) * numberOfLines
                     ),
                     fontSize: this.getPointsFromPixels(13),
                     content: row
                 });
 
                 nextOffset =
-                    this.getInchesFromPoints(this.getPointsFromPixels(13)) +
+                    this.getInchesFromPoints(
+                        this.getPointsFromPixels(13) * numberOfLines
+                    ) +
                     slidesWithOffsets[slidesWithOffsets.length - 1].height +
                     slidesWithOffsets[slidesWithOffsets.length - 1].offset;
             }
@@ -561,7 +648,8 @@ export class PresentStore {
             nextOffset = this.handleOrderedList(
                 slidesWithOffsets,
                 orderedListStack,
-                nextOffset
+                nextOffset,
+                textWidthBasedOnOffset
             );
             orderedListStack = [];
         }
@@ -570,7 +658,8 @@ export class PresentStore {
             nextOffset = this.handleUnorderedList(
                 slidesWithOffsets,
                 unorderedListStack,
-                nextOffset
+                nextOffset,
+                textWidthBasedOnOffset
             );
             unorderedListStack = [];
         }
