@@ -139,7 +139,10 @@ function TutorialGrid(props) {
                                         transition="all ease-in-out 0.3s"
                                         _groupHover={{
                                             boxShadow: 'none',
-                                            backgroundColor: '#231f2d',
+                                            backgroundColor:
+                                                colorMode === 'light'
+                                                    ? '#e2d6e4'
+                                                    : '#231f2d',
                                             cursor: 'pointer'
                                         }}
                                     >
