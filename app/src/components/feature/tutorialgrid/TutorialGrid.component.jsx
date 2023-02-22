@@ -1,32 +1,24 @@
 import {
     AspectRatio,
     Box,
-    Button,
     Heading,
-    IconButton,
     Link,
     SimpleGrid,
     Text,
-    Tooltip,
     useColorMode,
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
 import { AcademicCapIcon } from '@heroicons/react/20/solid';
-import { Close } from 'css.gg';
 
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import PropTypes from 'prop-types';
-import { useContext } from 'react';
-import { useHistory, withRouter } from 'react-router-dom';
-import { RootStoreContext } from 'stores/RootStore';
+import { withRouter } from 'react-router-dom';
 import CustomScroll from '../customscroll/CustomScroll.component';
 
 function TutorialGrid(props) {
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue('black', 'white');
-    const store = useContext(RootStoreContext);
 
     const tutorialList = [
         {
