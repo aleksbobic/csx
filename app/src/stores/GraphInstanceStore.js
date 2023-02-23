@@ -784,7 +784,6 @@ export class GraphInstanceStore {
 
     toggleLabelVisibility = () => {
         this.labels.isVisible = !this.labels.isVisible;
-        this.store.graph.setLabelVisibility(this.labels.isVisible);
     };
 
     setOrphanNodeVisiblity = val => {

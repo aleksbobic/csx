@@ -119,6 +119,7 @@ function Graph(props) {
         store.graphInstance.orphanNodeVisibility,
         store.graphInstance.linkVisibility,
         store.graphInstance.labels.visibilityDistance,
+        store.graphInstance.labels.isVisible,
         store.graphInstance.forceEngine,
         store.graphInstance.visibleComponents,
         store.graph.currentGraphData.selectedNodes,
@@ -152,11 +153,15 @@ function Graph(props) {
     const generateNode = useCallback(
         node => {
             const nodeLevels = new THREE.LOD();
-            nodeLevels.addLevel(node.nodeWithLabel, 0);
-            nodeLevels.addLevel(
-                node.nodeWithoutLabel,
-                store.graphInstance.labels.visibilityDistance
-            );
+            if (store.graphInstance.labels.isVisible) {
+                nodeLevels.addLevel(node.nodeWithLabel, 0);
+                nodeLevels.addLevel(
+                    node.nodeWithoutLabel,
+                    store.graphInstance.labels.visibilityDistance
+                );
+            } else {
+                nodeLevels.addLevel(node.nodeWithoutLabelSolo, 0);
+            }
 
             nodeLevels.nodeid = node.id;
 

@@ -203,7 +203,7 @@ export class GraphStore {
         mesh.scale.x = size;
         mesh.scale.y = size;
         mesh.scale.z = size;
-        return [mesh, mesh.clone()];
+        return [mesh, mesh.clone(), mesh.clone()];
     };
 
     generateNodeObjects = (nodes, graphType) => {
@@ -260,6 +260,8 @@ export class GraphStore {
 
             nodes[i].nodeWithoutLabel = new THREE.Group();
             nodes[i].nodeWithoutLabel.add(point[1]);
+            nodes[i].nodeWithoutLabelSolo = new THREE.Group();
+            nodes[i].nodeWithoutLabelSolo.add(point[2]);
 
             if (graphType === 'overview') {
                 if (this.graphData.types[nodes[i].feature]) {
@@ -715,6 +717,11 @@ export class GraphStore {
         if (response.data.history.length === 0) {
             this.modifyStudy('overview');
             return;
+        }
+
+        if (response.data.public) {
+            this.store.core.isStudyPublic = true;
+            this.store.core.setStudyPublicURL(response.data.public_url);
         }
 
         this.store.core.updateIsStudySaved(true);

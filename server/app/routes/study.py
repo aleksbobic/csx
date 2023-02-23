@@ -163,6 +163,8 @@ def get_study(data: GetStudyData):
                 "index": study["index"],
                 "charts": charts,
                 "empty": False,
+                "public": study["public"],
+                "public_url": study["public_url"],
             }
 
         return {
@@ -173,6 +175,8 @@ def get_study(data: GetStudyData):
             "history": [],
             "index": study["index"],
             "empty": False,
+            "public": study["public"],
+            "public_url": study["public_url"],
         }
     else:
         return {"empty": True}
