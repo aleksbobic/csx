@@ -16,13 +16,18 @@ import {
     DoughnutController,
     LineController,
     BarController,
+    Filler,
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
-import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
+import {
+    Chart as ChartReactCharts,
+    getElementAtEvent,
+    Line
+} from 'react-chartjs-2';
 
 function Chart(props) {
     const store = useContext(RootStoreContext);
@@ -44,7 +49,8 @@ function Chart(props) {
             DoughnutController,
             LineController,
             BarController,
-            ChartDataLabels
+            ChartDataLabels,
+            Filler
         );
     });
 
@@ -59,7 +65,35 @@ function Chart(props) {
 
     useEffect(() => {
         if (props.demoData) {
-            setData(props.demoData);
+            setData({
+                ...props.demoData,
+                datasets: [
+                    {
+                        ...props.demoData.datasets[0],
+                        fill: true,
+                        backgroundColor: function (context) {
+                            if (!context.chart.chartArea) {
+                                return 'transparent';
+                            }
+                            const gradient =
+                                context.chart.ctx.createLinearGradient(
+                                    0,
+                                    context.chart.chartArea.top,
+                                    0,
+                                    context.chart.chartArea.bottom
+                                );
+
+                            gradient.addColorStop(0, '#3182CE99');
+                            gradient.addColorStop(1, '#3182CE01');
+                            return gradient;
+                        },
+                        borderColor: '#3182CE',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3182CE',
+                        pointRadius: props.isExpanded ? 4 : 0
+                    }
+                ]
+            });
         } else {
             let elementProperty;
             let groupBy;
@@ -127,27 +161,98 @@ function Chart(props) {
                 ) {
                     setData(null);
                 } else {
-                    setData(
-                        store.stats.getNodeCounts(
-                            elementProperty,
-                            props.chart.type,
-                            props.elementDisplayLimit,
-                            props.networkData,
-                            groupBy,
-                            props.chart.show_only
-                        )
-                    );
-                }
-            } else {
-                setData(
-                    store.stats.getEdgeCounts(
+                    const nodeData = store.stats.getNodeCounts(
                         elementProperty,
                         props.chart.type,
                         props.elementDisplayLimit,
+                        props.networkData,
                         groupBy,
-                        props.networkData
-                    )
+                        props.chart.show_only
+                    );
+
+                    if (nodeData.labels.length > 0) {
+                        setData({
+                            ...nodeData,
+                            datasets: [
+                                {
+                                    ...nodeData.datasets[0],
+                                    fill: true,
+                                    backgroundColor: function (context) {
+                                        if (!context.chart.chartArea) {
+                                            return 'transparent';
+                                        }
+                                        const gradient =
+                                            context.chart.ctx.createLinearGradient(
+                                                0,
+                                                context.chart.chartArea.top,
+                                                0,
+                                                context.chart.chartArea.bottom
+                                            );
+
+                                        gradient.addColorStop(0, '#3182CE99');
+                                        gradient.addColorStop(1, '#3182CE01');
+                                        return gradient;
+                                    },
+                                    borderColor: '#3182CE',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#3182CE',
+                                    pointRadius: props.isExpanded ? 4 : 0
+                                }
+                            ]
+                        });
+                    } else {
+                        setData(nodeData);
+                    }
+                }
+            } else {
+                const edgeData = store.stats.getEdgeCounts(
+                    elementProperty,
+                    props.chart.type,
+                    props.elementDisplayLimit,
+                    groupBy,
+                    props.networkData
                 );
+
+                if (edgeData.labels.length > 0) {
+                    setData({
+                        ...edgeData,
+                        datasets: [
+                            {
+                                ...edgeData.datasets[0],
+                                fill: true,
+                                backgroundColor: function (context) {
+                                    if (!context.chart.chartArea) {
+                                        return 'transparent';
+                                    }
+                                    const gradient =
+                                        context.chart.ctx.createLinearGradient(
+                                            0,
+                                            context.chart.chartArea.top,
+                                            0,
+                                            context.chart.chartArea.bottom
+                                        );
+
+                                    gradient.addColorStop(0, '#3182CE99');
+                                    gradient.addColorStop(1, '#3182CE01');
+                                    return gradient;
+                                },
+                                borderColor: '#3182CE',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#3182CE',
+                                pointRadius: props.isExpanded
+                                    ? function (context) {
+                                          if (edgeData.labels.length > 10) {
+                                              return 2;
+                                          }
+                                          return 4;
+                                      }
+                                    : 0
+                            }
+                        ]
+                    });
+                } else {
+                    setData(edgeData);
+                }
             }
         }
     }, [
@@ -169,7 +274,8 @@ function Chart(props) {
         props.networkData,
         props.chart.group_by,
         store.core.currentGraph,
-        store.overviewSchema.anchorProperties
+        store.overviewSchema.anchorProperties,
+        props.isExpanded
     ]);
 
     const getAnchorLabelAlignForChart = () => {
@@ -230,107 +336,107 @@ function Chart(props) {
             };
         }
 
-        if (props.chart.type === 'Bar') {
-            pluginOptions.datalabels = {
-                display:
-                    props.isExpanded &&
-                    [10, -10].includes(props.elementDisplayLimit)
-                        ? 'auto'
-                        : false,
-                color: 'white',
-                offset: -60,
-                clamp: true,
-                labels: {
-                    value: {
-                        anchor: 'end',
-                        align: 'end',
-                        color: 'black',
-                        backgroundColor: 'white',
-                        borderRadius: 10,
-                        padding: {
-                            left: 7,
-                            right: 7,
-                            top: 4,
-                            bottom: 4
-                        },
-                        formatter: (value, context) => {
-                            let name =
-                                context.chart.data.labels[context.dataIndex];
-                            if (name && name.length > 15) {
-                                return `${name.slice(0, 15)}...: ${value}`;
-                            } else {
-                                return `${name}: ${value}`;
-                            }
-                        }
-                    }
-                    // name: {
-                    //     anchor: 'center',
-                    //     align: 'center',
-                    //     color: 'white',
-                    //     fontWeight: 'bold',
-                    //     backgroundColor: 'transparent',
-                    //     formatter: (value, context) => {
-                    //         return `${
-                    //             context.chart.data.labels[context.dataIndex]
-                    //         }`;
-                    //     }
-                    // }
-                }
-            };
-        } else if (props.chart.type === 'Line') {
-            pluginOptions.datalabels = {
-                display: props.isExpanded ? 'auto' : false,
-                color: 'white',
-                anchor: 'start',
-                align: 'start',
-                offset: store.core.rightPanelWidth === 600 ? -10 : -46,
-                font: {
-                    weight: 'bold'
-                },
-                formatter: (value, context) => {
-                    let name = context.chart.data.labels[context.dataIndex];
-                    if (name?.length > 15) {
-                        return `${name.slice(0, 15)}... : ${value}`;
-                    } else {
-                        return `${name}: ${value}`;
-                    }
-                },
-                labels: {
-                    value: {
-                        color: 'black',
-                        backgroundColor: 'white',
-                        borderRadius: 4
-                    }
-                }
-            };
-        } else {
-            pluginOptions.datalabels = {
-                display: props.isExpanded ? 'auto' : false,
-                color: 'white',
-                anchor: getAnchorLabelAlignForChart(),
-                align: getLabelAlignForChart(),
-                offset: store.core.rightPanelWidth === 600 ? -10 : -46,
-                clamp: true,
-                font: {
-                    weight: 'bold'
-                },
-                formatter: (value, context) => {
-                    let name = context.chart.data.labels[context.dataIndex];
-                    if (name?.length > 15) {
-                        return `${name.slice(0, 15)}... : ${value}`;
-                    } else {
-                        return `${name}: ${value}`;
-                    }
-                },
-                labels: {
-                    value: {
-                        color: 'black',
-                        backgroundColor: 'white',
-                        borderRadius: 4
-                    }
-                }
-            };
-        }
+        // if (props.chart.type === 'Bar') {
+        //     pluginOptions.datalabels = {
+        //         display:
+        //             props.isExpanded &&
+        //             [10, -10].includes(props.elementDisplayLimit)
+        //                 ? 'auto'
+        //                 : false,
+        //         color: 'white',
+        //         clamp: true,
+        //         labels: {
+        //             value: {
+        //                 anchor: 'end',
+        //                 align: 'end',
+        //                 color: 'black',
+        //                 backgroundColor: 'white',
+        //                 borderRadius: 10,
+        //                 padding: {
+        //                     left: 7,
+        //                     right: 7,
+        //                     top: 4,
+        //                     bottom: 4
+        //                 },
+        //                 formatter: (value, context) => {
+        //                     let name =
+        //                         context.chart.data.labels[context.dataIndex];
+        //                     if (name && name.length > 15) {
+        //                         return `${name.slice(0, 15)}...: ${value}`;
+        //                     } else {
+        //                         return `${name}: ${value}`;
+        //                     }
+        //                 }
+        //             }
+        //             // name: {
+        //             //     anchor: 'center',
+        //             //     align: 'center',
+        //             //     color: 'white',
+        //             //     fontWeight: 'bold',
+        //             //     backgroundColor: 'transparent',
+        //             //     formatter: (value, context) => {
+        //             //         return `${
+        //             //             context.chart.data.labels[context.dataIndex]
+        //             //         }`;
+        //             //     }
+        //             // }
+        //         }
+        //     };
+        // } else if (props.chart.type === 'Line') {
+        //     pluginOptions.datalabels = {
+        //         display: props.isExpanded ? 'auto' : false,
+        //         color: 'white',
+        //         anchor: 'end',
+        //         align: 'end',
+        //         offset: 30,
+
+        //         font: {
+        //             weight: 'bold'
+        //         },
+        //         formatter: (value, context) => {
+        //             let name = context.chart.data.labels[context.dataIndex];
+        //             if (name?.length > 15) {
+        //                 return `${name.slice(0, 15)}... : ${value}`;
+        //             } else {
+        //                 return `${name}: ${value}`;
+        //             }
+        //         },
+        //         labels: {
+        //             value: {
+        //                 color: 'black',
+        //                 backgroundColor: 'white',
+        //                 borderRadius: 4
+        //             }
+        //         }
+        //     };
+        // } else {
+        //     pluginOptions.datalabels = {
+        //         display: props.isExpanded ? 'auto' : false,
+        //         color: 'white',
+        //         anchor: getAnchorLabelAlignForChart(),
+        //         align: getLabelAlignForChart(),
+        //         offset: store.core.rightPanelWidth === 600 ? -10 : -46,
+        //         clamp: true,
+        //         font: {
+        //             weight: 'bold'
+        //         },
+        //         formatter: (value, context) => {
+        //             let name = context.chart.data.labels[context.dataIndex];
+        //             if (name?.length > 15) {
+        //                 return `${name.slice(0, 15)}... : ${value}`;
+        //             } else {
+        //                 return `${name}: ${value}`;
+        //             }
+        //         },
+        //         labels: {
+        //             value: {
+        //                 color: 'black',
+        //                 backgroundColor: 'white',
+        //                 borderRadius: 4
+        //             }
+        //         }
+        //     };
+        // }
 
         if (props.chart.groupHoverLabel) {
             pluginOptions.tooltip.callbacks.title = tooltipItems => {
@@ -349,6 +455,38 @@ function Chart(props) {
                 return 'bar';
             default:
                 return props.chart.type.toLowerCase();
+        }
+    };
+
+    const getAxisTitle = () => {
+        if (props.chart.elements === 'edges') {
+            if (props.demoData) {
+                return 'Edge property';
+            }
+            switch (props.chart.element_values) {
+                case 'values':
+                    return 'Edge values';
+                case 'types':
+                    return 'Edge types';
+                default:
+                    return 'Edge weights';
+            }
+        }
+
+        if (props.demoData) {
+            return 'Node property';
+        }
+
+        switch (props.chart.element_values) {
+            case 'values':
+                return 'Node values';
+            case 'types':
+                return 'Node types';
+            default:
+                return (
+                    props.chart.element_values.charAt(0).toUpperCase() +
+                    props.chart.element_values.slice(1).toLowerCase()
+                );
         }
     };
 
@@ -382,6 +520,128 @@ function Chart(props) {
         );
     }
 
+    if (props.chart.type.toLowerCase() === 'line') {
+        return (
+            <Line
+                style={{ maxWidth: '100%' }}
+                ref={chartRef}
+                data={{ ...data }}
+                height="250px"
+                key={`chart_instance_${props.chartIndex}_${Math.random()}`}
+                redraw
+                options={{
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    animation: false,
+                    devicePixelRatio: 2,
+                    layout: {
+                        padding: {
+                            right: props.isExpanded ? 5 : 0,
+                            top: props.isExpanded ? 5 : 0,
+                            bottom: props.isExpanded ? 5 : 0,
+                            left: props.isExpanded ? 5 : 0
+                        }
+                    },
+                    onHover: (event, elements) => {
+                        if (elements.length) {
+                            event.native.target.style.cursor = 'pointer';
+                        } else {
+                            event.native.target.style.cursor = 'default';
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                color: 'white',
+                                text: 'Frequency'
+                            },
+                            display: props.isExpanded,
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'white',
+                                diplay: props.isExpanded,
+
+                                callback: function (value, index, ticks) {
+                                    const stringValue =
+                                        this.getLabelForValue(value);
+                                    if (stringValue.length > 17) {
+                                        return `${stringValue.slice(0, 17)}...`;
+                                    } else {
+                                        return stringValue;
+                                    }
+                                }
+                            },
+                            grid: {
+                                color: context => {
+                                    if (
+                                        props.chart.type.toLowerCase() ===
+                                            'bar' ||
+                                        context.index === 0
+                                    ) {
+                                        return 'transparent';
+                                    }
+                                    return '#FFFFFF55';
+                                },
+                                drawBorder: false,
+                                borderDash: [2, 8]
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                color: 'white',
+                                text: getAxisTitle()
+                            },
+                            display: props.isExpanded,
+                            ticks: {
+                                color: 'white',
+                                diplay: props.isExpanded,
+                                beginAtZero: true,
+                                callback: function (value, index, ticks) {
+                                    const stringValue =
+                                        this.getLabelForValue(value);
+                                    if (stringValue.length > 17) {
+                                        return `${stringValue.slice(0, 17)}...`;
+                                    } else {
+                                        return stringValue;
+                                    }
+                                }
+                            },
+                            grid: {
+                                display: false,
+                                color: context => {
+                                    if (
+                                        props.chart.type.toLowerCase() ===
+                                            'vertical bar' ||
+                                        context.index === 0
+                                    ) {
+                                        return 'transparent';
+                                    }
+                                    return '#FFFFFF55';
+                                },
+                                drawBorder: false,
+                                borderDash: [2, 8]
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        legend: {
+                            display: props.chart.legend
+                        },
+                        datalabels: {
+                            display: false
+                        },
+                        ...getPluginOptions()
+                    }
+                }}
+            />
+        );
+    }
+
     return (
         <ChartReactCharts
             style={{ maxWidth: '100%' }}
@@ -390,7 +650,9 @@ function Chart(props) {
             height="250px"
             key={`chart_instance_${props.chartIndex}_${Math.random()}`}
             redraw
-            data={{ ...data }}
+            data={{
+                ...data
+            }}
             onClick={event => {
                 if (!props.isExample) {
                     let dataIndex;
@@ -456,23 +718,8 @@ function Chart(props) {
                 responsive: true,
                 animation: false,
                 borderColor: '#fff',
+                devicePixelRatio: 2,
                 indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
-                layout: {
-                    padding:
-                        props.chart.type === 'Line'
-                            ? props.isExpanded
-                                ? 40
-                                : 5
-                            : {
-                                  y: props.isExpanded ? 20 : 5,
-                                  left: props.isExpanded ? 20 : 5,
-                                  right: props.isExpanded
-                                      ? props.chart.type === 'Bar'
-                                          ? 50
-                                          : 20
-                                      : 5
-                              }
-                },
                 onHover: (event, elements) => {
                     if (elements.length) {
                         event.native.target.style.cursor = 'pointer';

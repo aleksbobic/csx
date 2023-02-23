@@ -22,6 +22,9 @@ import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
 import { useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
+import DoughnutChart from '../stats/chart/DoughnutChart.component';
+import BarChart from '../stats/chart/BarChart.component';
+
 function Overview(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
@@ -100,12 +103,28 @@ function Overview(props) {
     const getChartData = (chart, index, title) => {
         switch (chart.type.toLowerCase()) {
             case 'bar':
+                return (
+                    <BarChart title={title} chart={chart} chartIndex={index} />
+                );
             case 'vertical bar':
+                return (
+                    <BarChart title={title} chart={chart} chartIndex={index} />
+                );
             case 'grouped bar':
+                return (
+                    <BarChart title={title} chart={chart} chartIndex={index} />
+                );
             case 'line':
-            case 'doughnut':
                 return (
                     <ChartComponent
+                        title={title}
+                        chart={chart}
+                        chartIndex={index}
+                    />
+                );
+            case 'doughnut':
+                return (
+                    <DoughnutChart
                         title={title}
                         chart={chart}
                         chartIndex={index}

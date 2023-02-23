@@ -7,7 +7,9 @@ import logo from 'images/logo.png';
 
 export class PresentStore {
     slides = [];
-
+    studyTitle = '';
+    studyDescription = '';
+    studyAuthor = '';
     getInchesFromPoints = valuePoints => valuePoints * 0.0138889;
     getPointsFromPixels = pixelValue => pixelValue * 0.75;
 
@@ -738,6 +740,11 @@ export class PresentStore {
     generatePPT = () => {
         let pptx = new pptxgen();
 
+        pptx.author = this.studyAuthor;
+        pptx.company = 'Made with Collaboration Spotting X';
+        pptx.subject = this.studyDescription;
+        pptx.title = this.studyTitle;
+
         this.slides.forEach((slide, index) => {
             let pptxSlide = pptx.addSlide();
             pptxSlide.background = { color: '#1B202B' };
@@ -805,6 +812,10 @@ export class PresentStore {
             this.store.core.setStudyIsEmpty(true);
             return;
         }
+
+        this.studyTitle = studyDetails.name;
+        this.studyAuthor = studyDetails.author;
+        this.studyDescription = studyDetails.description;
 
         if (activeItem) {
             const includedIDs = this.getParentIDs(

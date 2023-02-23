@@ -41,7 +41,10 @@ import {
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
+import BarChartComponent from 'components/feature/stats/chart/BarChart.component';
+import BarChart from 'components/feature/stats/chart/BarChart.component';
 import ChartComponent from 'components/feature/stats/chart/Chart.component';
+import DoughnutChart from 'components/feature/stats/chart/DoughnutChart.component';
 import ComponentStatsComponent from 'components/feature/stats/component/ComponentStats.component';
 import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
 import GraphStatsComponent from 'components/feature/stats/graph/GraphStats.component';
@@ -112,7 +115,24 @@ function FileUploadModal() {
                         }
                     }
                 };
-                break;
+
+                return (
+                    <DoughnutChart
+                        demoData={chartData}
+                        title={title}
+                        chart={{
+                            type: chartType,
+                            labels: {
+                                y: { display: false },
+                                x: { display: false }
+                            }
+                        }}
+                        chartIndex={1}
+                        isExample={true}
+                        options={chartOptions}
+                    />
+                );
+
             case 'bar':
                 chartData = {
                     labels: ['First value', 'Second value', 'Third value'],
@@ -136,7 +156,23 @@ function FileUploadModal() {
                         }
                     }
                 };
-                break;
+
+                return (
+                    <BarChart
+                        demoData={chartData}
+                        title={title}
+                        chart={{
+                            type: chartType,
+                            labels: {
+                                y: { display: false },
+                                x: { display: false }
+                            }
+                        }}
+                        chartIndex={1}
+                        isExample={true}
+                        options={chartOptions}
+                    />
+                );
             case 'vertical bar':
                 chartData = {
                     labels: ['First value', 'Second value', 'Third value'],
@@ -159,27 +195,43 @@ function FileUploadModal() {
                         }
                     }
                 };
-                break;
+
+                return (
+                    <BarChartComponent
+                        demoData={chartData}
+                        title={title}
+                        chart={{
+                            type: chartType,
+                            labels: {
+                                y: { display: false },
+                                x: { display: false }
+                            }
+                        }}
+                        chartIndex={1}
+                        isExample={true}
+                        options={chartOptions}
+                    />
+                );
             case 'grouped bar':
                 chartData = {
-                    labels: ['First value', 'Second value', 'Third value'],
+                    labels: ['Group 1', 'Group 2', 'Group 3'],
                     datasets: [
                         {
-                            label: 'First group',
+                            label: 'Value 1',
                             data: [5, 12, 3],
                             backgroundColor: '#3182ce',
                             borderColor: 'rgb(0,0,0)',
                             stack: 'stack 1'
                         },
                         {
-                            label: 'Second group',
+                            label: 'Value 2',
                             data: [2, 5, 9],
                             backgroundColor: '#ce317b',
                             borderColor: 'rgb(0,0,0)',
                             stack: 'stack 2'
                         },
                         {
-                            label: 'Third group',
+                            label: 'Value 3',
                             data: [10, 3, 8],
                             backgroundColor: '#ce7c31',
                             borderColor: 'rgb(0,0,0)',
@@ -187,7 +239,22 @@ function FileUploadModal() {
                         }
                     ]
                 };
-                break;
+                return (
+                    <BarChartComponent
+                        demoData={chartData}
+                        title={title}
+                        chart={{
+                            type: chartType,
+                            labels: {
+                                y: { display: false },
+                                x: { display: false }
+                            }
+                        }}
+                        chartIndex={1}
+                        isExample={true}
+                        options={chartOptions}
+                    />
+                );
             default:
                 chartData = {
                     labels: [

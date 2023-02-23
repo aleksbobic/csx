@@ -251,22 +251,12 @@ function WidgetContainer(props) {
                             }}
                         >
                             <option value={10}>First 10</option>
-                            {!['bar', 'vertical bar'].includes(
-                                props.chart.type.toLowerCase()
-                            ) && <option value={50}>First 50</option>}
-                            {!['bar', 'vertical bar'].includes(
-                                props.chart.type.toLowerCase()
-                            ) && <option value={100}>First 100</option>}
+                            <option value={50}>First 50</option>
+                            <option value={100}>First 100</option>
                             <option value={-10}>Last 10</option>
-                            {!['bar', 'vertical bar'].includes(
-                                props.chart.type.toLowerCase()
-                            ) && <option value={-50}>Last 50</option>}
-                            {!['bar', 'vertical bar'].includes(
-                                props.chart.type.toLowerCase()
-                            ) && <option value={-100}>Last 100</option>}
-                            {!['bar', 'vertical bar'].includes(
-                                props.chart.type.toLowerCase()
-                            ) && <option value={0}>All</option>}
+                            <option value={-50}>Last 50</option>
+                            <option value={-100}>Last 100</option>
+                            <option value={0}>All</option>
                         </Select>
                     </Tooltip>
                 )}
@@ -410,7 +400,13 @@ function WidgetContainer(props) {
                     }}
                 />
             </Tooltip> */}
-            {!['doughnut', 'bar'].includes(props.chart.type.toLowerCase()) && (
+            {![
+                'doughnut',
+                'bar',
+                'line',
+                'vertical bar',
+                'grouped bar'
+            ].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Toggle x axis label">
                     <Button
                         size="sm"
@@ -438,7 +434,13 @@ function WidgetContainer(props) {
                     </Button>
                 </Tooltip>
             )}
-            {!['doughnut', 'bar'].includes(props.chart.type.toLowerCase()) && (
+            {![
+                'doughnut',
+                'bar',
+                'line',
+                'vertical bar',
+                'grouped bar'
+            ].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Toggle y axis label">
                     <Button
                         size="sm"
@@ -489,14 +491,7 @@ function WidgetContainer(props) {
             height={props.chart.height}
             padding="10px"
             paddingTop="42px"
-            paddingBottom={
-                props.chart.colSpan === 2 &&
-                !['graph stats', 'connections', 'components', 'nodes'].includes(
-                    props.chart.type.toLowerCase()
-                )
-                    ? '50px'
-                    : '10px'
-            }
+            paddingBottom={props.chart.colSpan === 2 && '10px'}
             colSpan={props.chart.colSpan}
             backgroundColor={
                 colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.200'

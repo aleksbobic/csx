@@ -89,7 +89,11 @@ export class StatsStore {
             }
         } else {
             for (let i = 0; i < labels.length; i++) {
-                graphColors.push('#3182CE');
+                if (labels.length <= 10) {
+                    graphColors.push(schemeTableau10[i]);
+                } else {
+                    graphColors.push('#3182CE');
+                }
             }
         }
 
@@ -419,19 +423,25 @@ export class StatsStore {
     getGroupedBarChartData = (labels, data, label) => {
         const datasets = [];
 
-        const groupColors = this.getGraphColors(Object.keys(data));
+        const groupColors = this.getGraphColors(labels);
+
+        const groups = [];
 
         Object.keys(data).forEach((group, index) => {
+            groups.push(group);
+        });
+
+        labels.forEach((label, index) => {
             datasets.push({
-                label: group,
-                data: data[group],
+                label: label,
+                data: groups.map(group => data[group][index]),
                 backgroundColor: groupColors[index],
-                borderColor: 'rgb(0,0,0)'
+                borderColor: 'transparent'
             });
         });
 
         return {
-            labels: labels,
+            labels: groups,
             datasets: datasets
         };
     };
@@ -777,16 +787,20 @@ export class StatsStore {
         if (groupBy) {
             let groupedByCounts = {};
 
+            // Nodes grouped in the groupBy groups
             const groups = this.getNodeGroups(groupBy, data);
 
+            // Unique node values
             const uniqueValues = [
                 ...new Set(
                     data.map(node => getNodeProp(node, nodeProperty.prop))
                 )
             ];
 
+            // Unique node value counts (so the frequnecy for each entry in uniqueValues)
             const allValueCounts = new Array(uniqueValues.length).fill(0);
 
+            // Get all visible nodes
             const visibleEntries =
                 this.store.graph.currentGraphData.activeTableData.map(
                     row => row.entry
@@ -804,16 +818,25 @@ export class StatsStore {
                     entry.weight;
             });
 
+            // For each group form groups the counts for each of the values in unique node values
             Object.keys(groups).forEach(group => {
                 groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
             });
 
+            // node vlaues but ordered based on frequency
             const [valuesSorted] = this.getSortedValues(
                 allValueCounts,
                 uniqueValues,
                 display_limit
             );
 
+            // generate data for groupedByCounts
+            // The format is:
+            // {
+            //     groupName1: [val1freq1, val2freq1],
+            //     groupName2: [val1freq2, val2freq2],
+            //     groupName3: [val1freq3, val2freq3]
+            // }
             Object.keys(groups).forEach(group => {
                 data = groups[group];
 

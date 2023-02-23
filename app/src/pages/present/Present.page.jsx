@@ -32,6 +32,7 @@ import Reveal from 'reveal.js';
 import { RootStoreContext } from 'stores/RootStore';
 import logo from 'images/logo.png';
 import './Present.scss';
+import { Helmet } from 'react-helmet-async';
 
 function PresentPage() {
     const { colorMode } = useColorMode();
@@ -266,6 +267,9 @@ function PresentPage() {
             backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
             className="reveal"
         >
+            <Helmet>
+                <title>{store.present.studyTitle}</title>
+            </Helmet>
             <HStack
                 width="100%"
                 height="35px"
