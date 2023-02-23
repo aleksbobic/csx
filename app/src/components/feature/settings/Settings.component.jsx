@@ -93,7 +93,7 @@ function Settings() {
             store.graphInstance.nodeColorSchemeColors[[store.core.currentGraph]]
         ) {
             colorSchemas.push({
-                value: 'type',
+                value: 'node type',
                 label: 'Node type',
                 tooltip: 'Color nodes based on their type'
             });

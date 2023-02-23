@@ -137,31 +137,44 @@ function DoughnutChart(props) {
     const getPluginOptions = () => {
         const pluginOptions = {};
 
-        if (props.chart.hoverLabel) {
-            pluginOptions.tooltip = {
-                callbacks: {
-                    label: tooltipItem => {
-                        if (props.chart.groupHoverLabel) {
-                            return `${props.chart.groupHoverLabel}: ${tooltipItem.dataset.label}`;
-                        }
+        let propsInChart = '';
 
-                        return `${props.chart.hoverLabel}: ${tooltipItem.label}`;
-                    },
-                    afterLabel: tooltipItem => {
-                        return `Frequency: ${tooltipItem.formattedValue}`;
-                    }
-                }
-            };
-        } else {
-            pluginOptions.tooltip = {
-                callbacks: {
-                    label: tooltipItem => tooltipItem.label,
-                    afterLabel: tooltipItem => {
-                        return `Frequency: ${tooltipItem.formattedValue}`;
-                    }
-                }
-            };
+        switch (props.chart.element_values) {
+            case 'values':
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? props.chart.show_only !== 'all'
+                            ? props.chart.show_only
+                            : 'Node value'
+                        : 'Edge value';
+                break;
+            case 'types':
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? 'Node feature'
+                        : 'Edge feature';
+                break;
+            default:
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? props.chart.element_values
+                        : 'Edge weight';
+                break;
         }
+
+        pluginOptions.tooltip = {
+            displayColors: false,
+            callbacks: {
+                title: tooltipItem => {
+                    return `${propsInChart}:${
+                        tooltipItem[0].label.length > 10 ? '\n' : ' '
+                    }${tooltipItem[0].label}`;
+                },
+                label: tooltipItem => {
+                    return `Frequency: ${tooltipItem.formattedValue}`;
+                }
+            }
+        };
 
         pluginOptions.datalabels = {
             display: props.isExpanded ? 'auto' : false,
@@ -175,10 +188,14 @@ function DoughnutChart(props) {
             },
             formatter: (value, context) => {
                 let name = context.chart.data.labels[context.dataIndex];
-                if (name?.length > 15) {
-                    return `${name.slice(0, 15)}... : ${value}`;
+                if (name?.length > 18) {
+                    return `${
+                        propsInChart === 'Edge weight' ? 'Edge weight: ' : ''
+                    }${name.slice(0, 15)}... \nFrequency: ${value}`;
                 } else {
-                    return `${name}: ${value}`;
+                    return `${
+                        propsInChart === 'Edge weight' ? 'Edge weight: ' : ''
+                    }${name}\nFrequency: ${value}`;
                 }
             },
             labels: {
@@ -297,6 +314,14 @@ function DoughnutChart(props) {
                 responsive: true,
                 animation: false,
                 borderColor: '#fff',
+                layout: {
+                    padding: {
+                        right: props.isExpanded ? 30 : 0,
+                        top: props.isExpanded ? 30 : 0,
+                        bottom: props.isExpanded ? 30 : 0,
+                        left: props.isExpanded ? 30 : 0
+                    }
+                },
                 devicePixelRatio: 2,
                 indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
                 onHover: (event, elements) => {

@@ -117,7 +117,8 @@ function ControlPanel() {
                 store.search.nodeTypes[
                     store.graphInstance.nodeColorScheme[store.core.currentGraph]
                 ]
-            )
+            ) &&
+            legendItems.length > 10
         ) {
             return (
                 <Flex
@@ -163,7 +164,7 @@ function ControlPanel() {
             );
         }
 
-        if (selectedColorScheme === 'type') {
+        if (selectedColorScheme === 'node type') {
             legendItems = legendItems.filter(key =>
                 store.graph.detailGraphData.perspectivesInGraph.includes(key)
             );

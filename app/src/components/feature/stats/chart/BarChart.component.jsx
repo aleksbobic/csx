@@ -170,93 +170,52 @@ function BarChart(props) {
     const getPluginOptions = () => {
         const pluginOptions = {};
 
-        if (props.chart.hoverLabel) {
-            pluginOptions.tooltip = {
-                callbacks: {
-                    label: tooltipItem => {
-                        if (props.chart.groupHoverLabel) {
-                            return `${props.chart.groupHoverLabel}: ${tooltipItem.dataset.label}`;
-                        }
+        let propsInChart = '';
 
-                        return `${props.chart.hoverLabel}: ${tooltipItem.label}`;
-                    },
-                    afterLabel: tooltipItem => {
-                        return `Frequency: ${tooltipItem.formattedValue}`;
-                    }
-                }
-            };
-        } else {
-            pluginOptions.tooltip = {
-                callbacks: {
-                    label: tooltipItem => tooltipItem.label,
-                    afterLabel: tooltipItem => {
-                        return `Frequency: ${tooltipItem.formattedValue}`;
-                    }
-                }
-            };
+        switch (props.chart.element_values) {
+            case 'values':
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? props.chart.show_only !== 'all'
+                            ? props.chart.show_only
+                            : 'Node value'
+                        : 'Edge value';
+                break;
+            case 'types':
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? 'Node feature'
+                        : 'Edge feature';
+                break;
+            default:
+                propsInChart =
+                    props.chart.elements === 'nodes'
+                        ? props.chart.element_values
+                        : 'Edge weight';
+                break;
         }
 
-        // const anchor =
-        //     props.chart.type.toLowerCase() === 'bar' ? 'start' : 'start';
-        // const align =
-        //     props.chart.type.toLowerCase() === 'bar' ? 'start' : 'start';
-        // const rotation = props.chart.type.toLowerCase() === 'bar' ? 0 : 45;
+        pluginOptions.tooltip = {
+            displayColors: false,
+            callbacks: {
+                title: tooltipItem => {
+                    if (props.chart.type.toLowerCase() === 'grouped bar') {
+                        return `${propsInChart}:${
+                            tooltipItem[0].dataset.label.length > 10
+                                ? '\n'
+                                : ' '
+                        }${tooltipItem[0].dataset.label}`;
+                    }
 
-        // pluginOptions.datalabels = {
-        //     display: props.isExpanded ? 'auto' : false,
-        //     color: 'white',
-        //     clamp: true,
-        //     labels: {
-        //         label: {
-        //             anchor: anchor,
-        //             align: align,
-        //             color: 'black',
-        //             backgroundColor: 'white',
-        //             borderRadius: 4,
-        //             rotation: rotation,
-        //             offset: 20,
-        //             font: {
-        //                 size: data && data.labels.length <= 10 ? 12 : 10
-        //             },
-        //             padding: {
-        //                 left: data && data.labels.length <= 10 ? 7 : 4,
-        //                 right: data && data.labels.length <= 10 ? 7 : 4,
-        //                 top: data && data.labels.length <= 10 ? 2 : 2,
-        //                 bottom: data && data.labels.length <= 10 ? 2 : 2
-        //             },
-        //             formatter: (value, context) => {
-        //                 let name = context.chart.data.labels[context.dataIndex];
-
-        //                 if (name && name.length > 20) {
-        //                     return `${name.slice(0, 20)}...`;
-        //                 } else {
-        //                     return `${name}`;
-        //                 }
-        //             }
-        //         }
-        //     }
-        // };
-
-        // if (data && data.labels.length <= 10) {
-        //     pluginOptions.datalabels.labels['value'] = {
-        //         anchor: 'end',
-        //         align: 'end',
-        //         color: 'white',
-        //         backgroundColor: context => {
-        //             return context.dataset.backgroundColor[context.dataIndex];
-        //         },
-        //         borderRadius: 4,
-        //         padding: {
-        //             left: 7,
-        //             right: 7,
-        //             top: 4,
-        //             bottom: 4
-        //         },
-        //         formatter: (value, context) => {
-        //             return `${value}`;
-        //         }
-        //     };
-        // }
+                    return `${propsInChart}:${
+                        tooltipItem[0].label.length > 10 ? '\n' : ' '
+                    }${tooltipItem[0].label}`;
+                },
+                label: tooltipItem => {
+                    return `Frequency: ${tooltipItem.formattedValue}`;
+                }
+            }
+        };
 
         if (props.chart.groupHoverLabel) {
             pluginOptions.tooltip.callbacks.title = tooltipItems => {
@@ -311,6 +270,7 @@ function BarChart(props) {
             if (props.demoData) {
                 return 'Group by property';
             }
+
             return (
                 props.chart.group_by.charAt(0).toUpperCase() +
                 props.chart.group_by.slice(1).toLowerCase()
@@ -338,7 +298,9 @@ function BarChart(props) {
 
         switch (props.chart.element_values) {
             case 'values':
-                return 'Node values';
+                return props.chart.show_only
+                    ? props.chart.show_only
+                    : 'Node values';
             case 'types':
                 return 'Node types';
             default:
@@ -453,11 +415,13 @@ function BarChart(props) {
                             callback: function (value, index, ticks) {
                                 const stringValue =
                                     this.getLabelForValue(value);
-                                if (stringValue.length > 17) {
-                                    return `${stringValue.slice(0, 17)}...`;
-                                } else {
+                                if (stringValue) {
+                                    if (stringValue.length > 17) {
+                                        return `${stringValue.slice(0, 17)}...`;
+                                    }
                                     return stringValue;
                                 }
+                                return value;
                             }
                         },
                         grid: {
@@ -491,11 +455,13 @@ function BarChart(props) {
                             callback: function (value, index, ticks) {
                                 const stringValue =
                                     this.getLabelForValue(value);
-                                if (stringValue.length > 17) {
-                                    return `${stringValue.slice(0, 17)}...`;
-                                } else {
+                                if (stringValue) {
+                                    if (stringValue.length > 17) {
+                                        return `${stringValue.slice(0, 17)}...`;
+                                    }
                                     return stringValue;
                                 }
+                                return value;
                             }
                         },
                         grid: {
@@ -528,7 +494,10 @@ function BarChart(props) {
                     },
                     legend: {
                         display:
-                            props.chart.type.toLowerCase() === 'grouped bar',
+                            props.chart.type.toLowerCase() === 'grouped bar' &&
+                            props.isExpanded &&
+                            data.datasets &&
+                            data.datasets.length <= 10,
                         labels: {
                             usePointStyle: true,
                             pointStyle: 'rectRounded'

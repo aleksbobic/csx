@@ -64,7 +64,7 @@ function SelectedComponentList(props) {
                 background={
                     store.graphInstance.nodeColorSchemeColors[
                         [store.core.currentGraph]
-                    ]['type'][node.feature]
+                    ]['node type'][node.feature]
                 }
             >
                 <Tooltip

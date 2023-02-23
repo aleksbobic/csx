@@ -83,7 +83,7 @@ function ConnectionStats(props) {
                         store.core.currentGraph === 'detail'
                             ? store.graphInstance.nodeColorSchemeColors[
                                   [store.core.currentGraph]
-                              ]['type'][feature]
+                              ]['node type'][feature]
                             : 'blue.600'
                     }
                 >

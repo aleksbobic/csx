@@ -144,11 +144,11 @@ export class GraphStore {
             ];
 
         switch (selectedColorSchemaAttribute) {
-            case 'type':
+            case 'node type':
                 material.color.set(
                     this.store.graphInstance.nodeColorSchemeColors[
                         this.store.core.currentGraph
-                    ]['type'][node.feature]
+                    ]['node type'][node.feature]
                 );
                 break;
             case 'component':
@@ -330,12 +330,12 @@ export class GraphStore {
             ];
 
         switch (selectedSchema) {
-            case 'type':
+            case 'node type':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
                     data.nodes[i].material.color.set(
                         this.store.graphInstance.nodeColorSchemeColors[
                             this.store.core.currentGraph
-                        ]['type'][data.nodes[i].feature]
+                        ]['node type'][data.nodes[i].feature]
                     );
                 }
                 break;
@@ -752,7 +752,8 @@ export class GraphStore {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].anchor_properties;
-        this.store.schema.overviewDataNodeProperties =
+
+        this.store.overviewSchema.anchorProperties =
             this.store.search.anchorProperties;
 
         this.store.search.schema =
@@ -828,7 +829,8 @@ export class GraphStore {
                 response.meta.anchor_property_values.forEach(entry => {
                     if (
                         this.store.search.nodeTypes[entry.property] ===
-                        'category'
+                            'category' ||
+                        entry.values.length <= 10
                     ) {
                         this.store.graphInstance.generateSchemeColorsFromArray(
                             entry.values,
@@ -936,7 +938,7 @@ export class GraphStore {
                         ...Object.keys(this.store.search.nodeTypes),
                         ...Object.keys(this.store.search.newNodeTypes)
                     ],
-                    'type'
+                    'node type'
                 );
 
                 this.store.graphInstance.generateSchemeColorsFromArray(
