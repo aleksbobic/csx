@@ -887,7 +887,7 @@ export class GraphInstanceStore {
         return this.nodeColorScheme[this.store.core.currentGraph];
     }
 
-    filterNodesWithValue = (property, value) => {
+    filterNodesWithValue = (property, value, groupValue, groupProperty) => {
         this.toggleVisibleComponents(-1);
         this.resetSelfCentric();
 
@@ -901,17 +901,41 @@ export class GraphInstanceStore {
 
         const visibleIds = [];
 
-        for (let i = 0; i < nodeCount; i++) {
-            const isVisible =
-                getNodeProp(
-                    this.store.graph.currentGraphData.nodes[i],
-                    property.prop
-                ) === value;
+        if (groupProperty) {
+            for (let i = 0; i < nodeCount; i++) {
+                const isVisible =
+                    getNodeProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        property.prop
+                    ) === value &&
+                    this.store.stats.getNodeAdvancedProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        groupProperty
+                    ) === groupValue;
 
-            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+                this.store.graph.currentGraphData.nodes[i].visible = isVisible;
 
-            if (isVisible) {
-                visibleIds.push(this.store.graph.currentGraphData.nodes[i].id);
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.nodes[i].id
+                    );
+                }
+            }
+        } else {
+            for (let i = 0; i < nodeCount; i++) {
+                const isVisible =
+                    getNodeProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        property.prop
+                    ) === value;
+
+                this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.nodes[i].id
+                    );
+                }
             }
         }
 

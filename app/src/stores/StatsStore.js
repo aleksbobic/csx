@@ -1,12 +1,23 @@
+import { schemeTableau10 } from 'd3-scale-chromatic';
 import { makeAutoObservable } from 'mobx';
-import {
-    interpolateRainbow,
-    schemeTableau10,
-    interpolateYlGnBu,
-    interpolateBlues,
-    interpolatePlasma
-} from 'd3-scale-chromatic';
 import { v4 as uuidv4 } from 'uuid';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    DoughnutController,
+    LineController,
+    BarController,
+    Filler,
+    Tooltip as ChartJSTooltip
+} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 export class StatsStore {
     isStatsModalVisible = false;
@@ -60,6 +71,23 @@ export class StatsStore {
         }
 
         makeAutoObservable(this);
+
+        ChartJS.register(
+            ArcElement,
+            ChartJSTooltip,
+            CategoryScale,
+            LinearScale,
+            BarElement,
+            Title,
+            Legend,
+            PointElement,
+            LineElement,
+            DoughnutController,
+            LineController,
+            BarController,
+            ChartDataLabels,
+            Filler
+        );
     }
 
     toggleStatsModalVisiblity = (val, types) => {
@@ -172,12 +200,13 @@ export class StatsStore {
         this.newChartProps.show_only = val;
     };
 
-    getElementValues = () => {
+    getElementValues = (group = false) => {
         if (this.newChartProps.elements === 'nodes') {
-            let elementValues = [
-                { value: 'values', label: 'Node values' },
-                { value: 'types', label: 'Node types' }
-            ];
+            let elementValues = [];
+            if (!group) {
+                elementValues.push({ value: 'values', label: 'Node values' });
+                elementValues.push({ value: 'types', label: 'Node types' });
+            }
 
             if (this.store.core.currentGraph !== 'detail') {
                 elementValues = elementValues.concat(
@@ -744,6 +773,8 @@ export class StatsStore {
 
     getNodeBasicProp = (node, prop) => node[prop];
 
+    getNodeFeature = node => node.feature;
+
     getNodeAdvancedProp = (node, prop) => node.properties[prop];
 
     getNodeGroups = (groupBy, data) => {
@@ -802,9 +833,13 @@ export class StatsStore {
 
             // Get all visible nodes
             const visibleEntries =
-                this.store.graph.currentGraphData.activeTableData.map(
-                    row => row.entry
-                );
+                network_data === 'visible'
+                    ? this.store.graph.currentGraphData.activeTableData.map(
+                          row => row.entry
+                      )
+                    : this.store.graph.currentGraphData.tableData.map(
+                          row => row.entry
+                      );
 
             data.map(node => {
                 return {
@@ -865,9 +900,13 @@ export class StatsStore {
             let counts = [];
 
             const visibleEntries =
-                this.store.graph.currentGraphData.activeTableData.map(
-                    row => row.entry
-                );
+                network_data === 'visible'
+                    ? this.store.graph.currentGraphData.activeTableData.map(
+                          row => row.entry
+                      )
+                    : this.store.graph.currentGraphData.tableData.map(
+                          row => row.entry
+                      );
 
             data.forEach(node => {
                 const labelLocation = values.indexOf(

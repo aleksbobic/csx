@@ -3,17 +3,6 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import {
-    BarController,
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip as ChartJSTooltip
-} from 'chart.js';
-
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
@@ -23,18 +12,6 @@ function BarChart(props) {
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
-
-    useEffect(() => {
-        ChartJS.register(
-            ChartJSTooltip,
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Legend,
-            BarController
-        );
-    });
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -323,12 +300,29 @@ function BarChart(props) {
             onClick={event => {
                 if (!props.isExample) {
                     let dataIndex;
+                    let groupValue;
+                    let groupProperty;
+                    let clickedValue;
 
                     try {
                         const { index } = getElementAtEvent(
                             chartRef.current,
                             event
                         )[0];
+
+                        const points =
+                            chartRef.current.getElementsAtEventForMode(
+                                event,
+                                'nearest',
+                                { intersect: true },
+                                true
+                            );
+
+                        groupProperty = props.chart.group_by;
+                        groupValue =
+                            data.datasets[points[0].datasetIndex].label;
+                        clickedValue = data.labels[points[0].index];
+
                         dataIndex = index;
                     } catch (error) {
                         return;
@@ -347,11 +341,21 @@ function BarChart(props) {
                             })
                         );
 
-                        visibleNodeIds =
-                            store.graphInstance.filterNodesWithValue(
-                                data.nodeProperty,
-                                data.labels[dataIndex]
-                            );
+                        if (props.chart.type.toLowerCase() === 'grouped bar') {
+                            visibleNodeIds =
+                                store.graphInstance.filterNodesWithValue(
+                                    data.nodeProperty,
+                                    groupValue,
+                                    clickedValue,
+                                    groupProperty
+                                );
+                        } else {
+                            visibleNodeIds =
+                                store.graphInstance.filterNodesWithValue(
+                                    data.nodeProperty,
+                                    clickedValue
+                                );
+                        }
                     } else {
                         store.track.trackEvent(
                             `Details Panel - Widget - ${props.chart.id}`,
@@ -366,7 +370,7 @@ function BarChart(props) {
                         visibleNodeIds =
                             store.graphInstance.filterEdgesWithValue(
                                 data.edgeProperty,
-                                data.labels[dataIndex]
+                                clickedValue
                             );
                     }
 

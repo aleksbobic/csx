@@ -3,18 +3,6 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import {
-    ArcElement,
-    CategoryScale,
-    Chart as ChartJS,
-    DoughnutController,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip as ChartJSTooltip
-} from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
@@ -24,19 +12,6 @@ function DoughnutChart(props) {
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
-
-    useEffect(() => {
-        ChartJS.register(
-            ArcElement,
-            ChartJSTooltip,
-            CategoryScale,
-            LinearScale,
-            Title,
-            Legend,
-            DoughnutController,
-            ChartDataLabels
-        );
-    });
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {

@@ -51,6 +51,8 @@ function HomePage() {
     }, [store.core.trackingEnabled]);
 
     useEffect(() => {
+        store.core.isStudyPublic = false;
+        store.core.setStudyPublicURL('');
         store.overviewSchema.resetProperties();
     }, []);
 

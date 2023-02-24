@@ -3,24 +3,6 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import {
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    LineElement,
-    PointElement,
-    Title,
-    DoughnutController,
-    LineController,
-    BarController,
-    Filler,
-    Tooltip as ChartJSTooltip
-} from 'chart.js';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -34,25 +16,6 @@ function Chart(props) {
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
-
-    useEffect(() => {
-        ChartJS.register(
-            ArcElement,
-            ChartJSTooltip,
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Legend,
-            PointElement,
-            LineElement,
-            DoughnutController,
-            LineController,
-            BarController,
-            ChartDataLabels,
-            Filler
-        );
-    });
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -413,6 +376,69 @@ function Chart(props) {
                 height="250px"
                 key={`chart_instance_${props.chartIndex}_${Math.random()}`}
                 redraw
+                onClick={event => {
+                    if (!props.isExample) {
+                        console.log(event);
+                        let dataIndex;
+
+                        try {
+                            const { index } = getElementAtEvent(
+                                chartRef.current,
+                                event
+                            )[0];
+                            dataIndex = index;
+                        } catch (error) {
+                            return;
+                        }
+
+                        let visibleNodeIds;
+
+                        if ('nodeProperty' in data) {
+                            store.track.trackEvent(
+                                `Details Panel - Widget - ${props.chart.id}`,
+                                'Chart Area',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    property: data.nodeProperty,
+                                    value: data.labels[dataIndex]
+                                })
+                            );
+
+                            visibleNodeIds =
+                                store.graphInstance.filterNodesWithValue(
+                                    data.nodeProperty,
+                                    data.labels[dataIndex]
+                                );
+                        } else {
+                            store.track.trackEvent(
+                                `Details Panel - Widget - ${props.chart.id}`,
+                                'Chart area',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    property: data.edgeProperty,
+                                    value: data.labels[dataIndex]
+                                })
+                            );
+
+                            visibleNodeIds =
+                                store.graphInstance.filterEdgesWithValue(
+                                    data.edgeProperty,
+                                    data.labels[dataIndex]
+                                );
+                        }
+
+                        if (visibleNodeIds.length === 1) {
+                            store.graphInstance.zoomToFitByNodeId(
+                                visibleNodeIds[0],
+                                400
+                            );
+                        } else {
+                            store.graphInstance.zoomToFitByNodeIds(
+                                visibleNodeIds
+                            );
+                        }
+                    }
+                }}
                 options={{
                     maintainAspectRatio: false,
                     responsive: true,
@@ -539,6 +565,7 @@ function Chart(props) {
             }}
             onClick={event => {
                 if (!props.isExample) {
+                    console.log(event);
                     let dataIndex;
 
                     try {
