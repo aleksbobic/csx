@@ -481,7 +481,7 @@ function NavigationPanelComponent() {
                 </ButtonGroup>
             )}
 
-            {location.pathname !== '/present' && (
+            {/* {location.pathname !== '/present' && (
                 <Tooltip label="Toggle color mode">
                     <IconButton
                         border="none"
@@ -504,7 +504,7 @@ function NavigationPanelComponent() {
                         onClick={toggleColor}
                     />
                 </Tooltip>
-            )}
+            )} */}
         </ButtonGroup>
     );
 

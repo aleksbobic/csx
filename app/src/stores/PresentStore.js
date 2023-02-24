@@ -442,7 +442,7 @@ export class PresentStore {
                 data: slide.chart,
                 x: xOffset,
                 w: '5.565',
-                h: '3.5',
+                h: '3.95',
                 y: '1.0625'
             });
         }
