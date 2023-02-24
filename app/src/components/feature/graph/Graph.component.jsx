@@ -175,7 +175,7 @@ function Graph(props) {
     );
 
     const handleLinkHover = link => {
-        if (link) {
+        if (link && link.connections) {
             store.graphInstance.setHoverData(
                 link.connections.map(connection => {
                     return {

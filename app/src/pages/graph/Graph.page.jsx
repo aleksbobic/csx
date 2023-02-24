@@ -1,4 +1,4 @@
-import { Box, Center, useColorMode } from '@chakra-ui/react';
+import { Box, Center, useColorMode, useToast } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
@@ -10,12 +10,18 @@ import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvSet } from 'general.utils';
+import { useCallback } from 'react';
+import { useRef } from 'react';
+import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 
 function GraphPage() {
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const { colorMode } = useColorMode();
     const history = useHistory();
+    const surveyToastRef = useRef();
+    const surveyToast = useToast();
 
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
 
@@ -61,6 +67,39 @@ function GraphPage() {
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);
     }, [store.workflow]);
+
+    const renderSurveyToast = useCallback(() => {
+        surveyToastRef.current = surveyToast({
+            render: () => (
+                <SurveyInfoModal
+                    onClose={() => {
+                        surveyToast.close(surveyToastRef.current);
+                        store.core.setSurveyHidden(true);
+                    }}
+                />
+            ),
+            position: 'bottom-left',
+            status: 'error',
+            duration: null,
+            isClosable: true
+        });
+    }, [surveyToast]);
+
+    useEffect(() => {
+        if (
+            isEnvSet('REACT_APP_SURVEY_LINK') &&
+            store.core.studyHistory.length >
+                store.core.surveyHistoryDepthTrigger &&
+            !store.core.surveyHidden
+        ) {
+            renderSurveyToast();
+        }
+    }, [
+        renderSurveyToast,
+        store.core.studyHistory.length,
+        store.core.surveyHidden,
+        store.core.surveyHistoryDepthTrigger
+    ]);
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">

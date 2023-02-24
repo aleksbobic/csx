@@ -11,7 +11,7 @@ import {
     Line
 } from 'react-chartjs-2';
 
-function Chart(props) {
+function LineChart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
@@ -367,202 +367,14 @@ function Chart(props) {
         );
     }
 
-    if (props.chart.type.toLowerCase() === 'line') {
-        return (
-            <Line
-                style={{ maxWidth: '100%' }}
-                ref={chartRef}
-                data={{ ...data }}
-                height="250px"
-                key={`chart_instance_${props.chartIndex}_${Math.random()}`}
-                redraw
-                onClick={event => {
-                    if (!props.isExample) {
-                        console.log(event);
-                        let dataIndex;
-
-                        try {
-                            const { index } = getElementAtEvent(
-                                chartRef.current,
-                                event
-                            )[0];
-                            dataIndex = index;
-                        } catch (error) {
-                            return;
-                        }
-
-                        let visibleNodeIds;
-
-                        if ('nodeProperty' in data) {
-                            store.track.trackEvent(
-                                `Details Panel - Widget - ${props.chart.id}`,
-                                'Chart Area',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    property: data.nodeProperty,
-                                    value: data.labels[dataIndex]
-                                })
-                            );
-
-                            visibleNodeIds =
-                                store.graphInstance.filterNodesWithValue(
-                                    data.nodeProperty,
-                                    data.labels[dataIndex]
-                                );
-                        } else {
-                            store.track.trackEvent(
-                                `Details Panel - Widget - ${props.chart.id}`,
-                                'Chart area',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    property: data.edgeProperty,
-                                    value: data.labels[dataIndex]
-                                })
-                            );
-
-                            visibleNodeIds =
-                                store.graphInstance.filterEdgesWithValue(
-                                    data.edgeProperty,
-                                    data.labels[dataIndex]
-                                );
-                        }
-
-                        if (visibleNodeIds.length === 1) {
-                            store.graphInstance.zoomToFitByNodeId(
-                                visibleNodeIds[0],
-                                400
-                            );
-                        } else {
-                            store.graphInstance.zoomToFitByNodeIds(
-                                visibleNodeIds
-                            );
-                        }
-                    }
-                }}
-                options={{
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    animation: false,
-                    devicePixelRatio: 2,
-                    layout: {
-                        padding: {
-                            right: props.isExpanded ? 5 : 0,
-                            top: props.isExpanded ? 5 : 0,
-                            bottom: props.isExpanded ? 5 : 0,
-                            left: props.isExpanded ? 5 : 0
-                        }
-                    },
-                    onHover: (event, elements) => {
-                        if (elements.length) {
-                            event.native.target.style.cursor = 'pointer';
-                        } else {
-                            event.native.target.style.cursor = 'default';
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: {
-                                display: true,
-                                color: 'white',
-                                text: 'Frequency'
-                            },
-                            display: props.isExpanded,
-                            beginAtZero: true,
-                            ticks: {
-                                color: 'white',
-                                diplay: props.isExpanded,
-
-                                callback: function (value, index, ticks) {
-                                    const stringValue =
-                                        this.getLabelForValue(value);
-                                    if (stringValue.length > 17) {
-                                        return `${stringValue.slice(0, 17)}...`;
-                                    } else {
-                                        return stringValue;
-                                    }
-                                }
-                            },
-                            grid: {
-                                color: context => {
-                                    if (
-                                        props.chart.type.toLowerCase() ===
-                                            'bar' ||
-                                        context.index === 0
-                                    ) {
-                                        return 'transparent';
-                                    }
-                                    return '#FFFFFF55';
-                                },
-                                drawBorder: false,
-                                borderDash: [2, 8]
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                color: 'white',
-                                text: getAxisTitle()
-                            },
-                            display: props.isExpanded,
-                            ticks: {
-                                color: 'white',
-                                diplay: props.isExpanded,
-                                beginAtZero: true,
-                                callback: function (value, index, ticks) {
-                                    const stringValue =
-                                        this.getLabelForValue(value);
-                                    if (stringValue.length > 17) {
-                                        return `${stringValue.slice(0, 17)}...`;
-                                    } else {
-                                        return stringValue;
-                                    }
-                                }
-                            },
-                            grid: {
-                                display: false,
-                                color: context => {
-                                    if (
-                                        props.chart.type.toLowerCase() ===
-                                            'vertical bar' ||
-                                        context.index === 0
-                                    ) {
-                                        return 'transparent';
-                                    }
-                                    return '#FFFFFF55';
-                                },
-                                drawBorder: false,
-                                borderDash: [2, 8]
-                            }
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: false
-                        },
-                        legend: {
-                            display: props.chart.legend
-                        },
-                        datalabels: {
-                            display: false
-                        },
-                        ...getPluginOptions()
-                    }
-                }}
-            />
-        );
-    }
-
     return (
-        <ChartReactCharts
+        <Line
             style={{ maxWidth: '100%' }}
             ref={chartRef}
-            type={getChartType()}
+            data={{ ...data }}
             height="250px"
             key={`chart_instance_${props.chartIndex}_${Math.random()}`}
             redraw
-            data={{
-                ...data
-            }}
             onClick={event => {
                 if (!props.isExample) {
                     console.log(event);
@@ -628,9 +440,15 @@ function Chart(props) {
                 maintainAspectRatio: false,
                 responsive: true,
                 animation: false,
-                borderColor: '#fff',
                 devicePixelRatio: 2,
-                indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
+                layout: {
+                    padding: {
+                        right: props.isExpanded ? 5 : 0,
+                        top: props.isExpanded ? 5 : 0,
+                        bottom: props.isExpanded ? 5 : 0,
+                        left: props.isExpanded ? 5 : 0
+                    }
+                },
                 onHover: (event, elements) => {
                     if (elements.length) {
                         event.native.target.style.cursor = 'pointer';
@@ -640,21 +458,76 @@ function Chart(props) {
                 },
                 scales: {
                     y: {
-                        display: props.chart.labels.y.display,
-                        ticks: {
-                            diplay: props.chart.labels.y.display
+                        title: {
+                            display: true,
+                            color: 'white',
+                            text: 'Frequency'
                         },
-                        gridLines: {
-                            display: false
+                        display: props.isExpanded,
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'white',
+                            diplay: props.isExpanded,
+
+                            callback: function (value, index, ticks) {
+                                const stringValue =
+                                    this.getLabelForValue(value);
+                                if (stringValue.length > 17) {
+                                    return `${stringValue.slice(0, 17)}...`;
+                                } else {
+                                    return stringValue;
+                                }
+                            }
+                        },
+                        grid: {
+                            color: context => {
+                                if (
+                                    props.chart.type.toLowerCase() === 'bar' ||
+                                    context.index === 0
+                                ) {
+                                    return 'transparent';
+                                }
+                                return '#FFFFFF55';
+                            },
+                            drawBorder: false,
+                            borderDash: [2, 8]
                         }
                     },
                     x: {
-                        display: props.chart.labels.x.display,
-                        ticks: {
-                            diplay: props.chart.labels.x.display
+                        title: {
+                            display: true,
+                            color: 'white',
+                            text: getAxisTitle()
                         },
-                        gridLines: {
-                            display: false
+                        display: props.isExpanded,
+                        ticks: {
+                            color: 'white',
+                            diplay: props.isExpanded,
+                            beginAtZero: true,
+                            callback: function (value, index, ticks) {
+                                const stringValue =
+                                    this.getLabelForValue(value);
+                                if (stringValue.length > 17) {
+                                    return `${stringValue.slice(0, 17)}...`;
+                                } else {
+                                    return stringValue;
+                                }
+                            }
+                        },
+                        grid: {
+                            display: false,
+                            color: context => {
+                                if (
+                                    props.chart.type.toLowerCase() ===
+                                        'vertical bar' ||
+                                    context.index === 0
+                                ) {
+                                    return 'transparent';
+                                }
+                                return '#FFFFFF55';
+                            },
+                            drawBorder: false,
+                            borderDash: [2, 8]
                         }
                     }
                 },
@@ -665,13 +538,17 @@ function Chart(props) {
                     legend: {
                         display: props.chart.legend
                     },
+                    datalabels: {
+                        display: false
+                    },
                     ...getPluginOptions()
                 }
             }}
         />
     );
 }
-Chart.propTypes = {
+
+LineChart.propTypes = {
     demoData: PropTypes.any,
     title: PropTypes.string,
     chart: PropTypes.object,
@@ -683,11 +560,11 @@ Chart.propTypes = {
     elementDisplayLimit: PropTypes.number
 };
 
-Chart.defaultProps = {
+LineChart.defaultProps = {
     isExpanded: false,
     isExample: false,
     networkData: 'all',
     elementDisplayLimit: 10
 };
 
-export default observer(Chart);
+export default observer(LineChart);

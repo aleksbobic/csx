@@ -72,6 +72,10 @@ function CookieInfo() {
         [
             'trackingenabled',
             'Used to store your choice regarding interaction tracking.'
+        ],
+        [
+            'surveyhidden',
+            'Used to track if a user closed the survey popup. If set to true the popup will not appear.'
         ]
     ];
 

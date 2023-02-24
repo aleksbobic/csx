@@ -152,7 +152,7 @@ function Settings() {
     const renderLabelOptions = () => {
         return (
             <HStack justifyContent="space-between" width="100%">
-                <Text fontSize="sm">Label size: </Text>
+                <Text fontSize="sm">Label feature: </Text>
                 <Tooltip label="Select node label size.">
                     <Select
                         size="sm"

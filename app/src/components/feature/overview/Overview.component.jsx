@@ -12,7 +12,7 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import ChartComponent from '../stats/chart/Chart.component';
+import LineChart from '../stats/chart/LineChart.component';
 import WidgetContainer from '../stats/widgetcontainer/WidgetContainer';
 import SelectedComponentListComponent from '../stats/component/ComponentStats.component';
 import SelectedNodeListComponent from '../stats/node/NodeStats.component';
@@ -116,11 +116,7 @@ function Overview(props) {
                 );
             case 'line':
                 return (
-                    <ChartComponent
-                        title={title}
-                        chart={chart}
-                        chartIndex={index}
-                    />
+                    <LineChart title={title} chart={chart} chartIndex={index} />
                 );
             case 'doughnut':
                 return (

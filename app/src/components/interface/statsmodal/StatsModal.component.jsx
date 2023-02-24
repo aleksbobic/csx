@@ -41,9 +41,8 @@ import {
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import BarChartComponent from 'components/feature/stats/chart/BarChart.component';
 import BarChart from 'components/feature/stats/chart/BarChart.component';
-import ChartComponent from 'components/feature/stats/chart/Chart.component';
+import LineChart from 'components/feature/stats/chart/LineChart.component';
 import DoughnutChart from 'components/feature/stats/chart/DoughnutChart.component';
 import ComponentStatsComponent from 'components/feature/stats/component/ComponentStats.component';
 import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
@@ -197,7 +196,7 @@ function FileUploadModal() {
                 };
 
                 return (
-                    <BarChartComponent
+                    <BarChart
                         demoData={chartData}
                         title={title}
                         chart={{
@@ -240,7 +239,7 @@ function FileUploadModal() {
                     ]
                 };
                 return (
-                    <BarChartComponent
+                    <BarChart
                         demoData={chartData}
                         title={title}
                         chart={{
@@ -295,7 +294,7 @@ function FileUploadModal() {
         }
 
         return (
-            <ChartComponent
+            <LineChart
                 demoData={chartData}
                 title={title}
                 chart={{

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
-import { safeRequest } from 'general.utils';
+import { isEnvSet, safeRequest } from 'general.utils';
 
 export class CoreStore {
     availableDatasets = [];
@@ -32,6 +32,8 @@ export class CoreStore {
     isLeftSidePanelOpen = true;
     isRightSidePanelOpen = false;
     rightPanelWidth = 0;
+    surveyHidden = false;
+    surveyHistoryDepthTrigger = 3;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -50,10 +52,22 @@ export class CoreStore {
         this.hideCookieBanner = this.getCookieBanner();
         this.trackingEnabled =
             localStorage.getItem('trackingenabled') === 'true';
+        this.surveyHidden = localStorage.getItem('surveyhidden') === 'true';
+        if (isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')) {
+            this.surveyHistoryDepthTrigger = parseInt(
+                isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')
+            );
+        }
+
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setSurveyHidden = val => {
+        this.surveyHidden = val;
+        localStorage.setItem('surveyhidden', val);
+    };
 
     setStudyIsEmpty = val => (this.studyIsEmpty = val);
 
