@@ -783,6 +783,7 @@ function ControlPanel() {
             borderRight="1px solid"
             borderColor={edgeColor}
             position="relative"
+            style={{ overflowX: 'hidden' }}
         >
             <TabPanel width="250px" height="100%">
                 <CustomScroll
@@ -794,7 +795,11 @@ function ControlPanel() {
                     <StudyInfoComponent />
                 </CustomScroll>
             </TabPanel>
-            <TabPanel width="250px" height="100%">
+            <TabPanel
+                width="250px"
+                height="100%"
+                style={{ overflowX: 'hidden' }}
+            >
                 <CustomScroll
                     style={{
                         paddingLeft: '10px',

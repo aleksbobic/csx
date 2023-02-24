@@ -120,6 +120,7 @@ function Graph(props) {
         store.graphInstance.linkVisibility,
         store.graphInstance.labels.visibilityDistance,
         store.graphInstance.labels.isVisible,
+        store.graphInstance.labels.labelFeatures.length,
         store.graphInstance.forceEngine,
         store.graphInstance.visibleComponents,
         store.graph.currentGraphData.selectedNodes,
@@ -153,7 +154,14 @@ function Graph(props) {
     const generateNode = useCallback(
         node => {
             const nodeLevels = new THREE.LOD();
-            if (store.graphInstance.labels.isVisible) {
+
+            if (
+                store.graphInstance.labels.isVisible &&
+                (store.graphInstance.labels.labelFeatures.length === 0 ||
+                    store.graphInstance.labels.labelFeatures.includes(
+                        node.feature
+                    ))
+            ) {
                 nodeLevels.addLevel(node.nodeWithLabel, 0);
                 nodeLevels.addLevel(
                     node.nodeWithoutLabel,

@@ -1002,6 +1002,7 @@ export class GraphStore {
                     this.generateNodeKeyValueStore(this.detailGraphData.nodes);
 
                 this.addNeighbourObjectsToNodes();
+                this.store.core.updateVisibleDimensionsBasedOnSchema();
                 // this.store.schema.populateStoreData();
             }
             this.store.core.setDataIsLoading(false);

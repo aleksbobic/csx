@@ -49,13 +49,20 @@ export class GraphInstanceStore {
             3300: 'x large',
             4200: '2x large'
         },
-        textHeight: 4.5
+        textHeight: 4.5,
+        labelFeatures: []
     };
 
     constructor(store) {
         this.store = store;
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    addLabelFeature = feature => this.labels.labelFeatures.push(feature);
+    removeLabelFeature = feature =>
+        (this.labels.labelFeatures = this.labels.labelFeatures.filter(
+            entry => entry !== feature
+        ));
 
     setHoverData = hoverData => (this.hoverData = hoverData);
 

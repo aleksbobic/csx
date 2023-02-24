@@ -354,7 +354,7 @@ export class PresentStore {
 
         let xOffset;
         let textXOffset = null;
-        let textWidthBasedOnOffset = null;
+        let textWidthBasedOnOffset = 9;
 
         if ((index || slide.align) && slide.screenshot) {
             if (slide.align) {
@@ -799,6 +799,33 @@ export class PresentStore {
         }
     };
 
+    sortSections = sections => {
+        const orderedSections = [{ ...sections[0], children: 0 }];
+
+        sections.forEach(entry => {
+            if (entry.section !== '1') {
+                const originalParentLocation = entry.section.lastIndexOf('.');
+                const parent = entry.section.slice(0, originalParentLocation);
+                const parentLocation = orderedSections.findIndex(
+                    entry => entry.section === parent
+                );
+                orderedSections.splice(
+                    parentLocation +
+                        1 +
+                        orderedSections[parentLocation].children,
+                    0,
+                    {
+                        ...entry,
+                        children: 0
+                    }
+                );
+                orderedSections[parentLocation].children += 1;
+            }
+        });
+
+        return orderedSections;
+    };
+
     generateSlides = async (studyID, publicStudyID, activeItem) => {
         let studyDetails;
 
@@ -890,7 +917,7 @@ export class PresentStore {
             }
         });
 
-        const sections = [];
+        let sections = [];
 
         sectionToOrder.forEach((value, key) => {
             sections.push({
@@ -904,6 +931,8 @@ export class PresentStore {
                     })
             });
         });
+
+        sections = this.sortSections(sections);
 
         sections.forEach(section => {
             const sectionSlides = [];

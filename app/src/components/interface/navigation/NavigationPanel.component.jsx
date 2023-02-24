@@ -550,6 +550,7 @@ function NavigationPanelComponent() {
                                 store.core.deleteStudy();
                                 store.core.setStudyIsEmpty(false);
                                 store.search.setSearchIsEmpty(false);
+                                store.core.setShowCookieInfo(false);
 
                                 store.track.trackEvent(
                                     'Navbar',

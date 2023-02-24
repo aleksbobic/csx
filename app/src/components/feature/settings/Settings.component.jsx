@@ -1,6 +1,7 @@
 import { Button } from '@chakra-ui/button';
 import { FormControl, FormLabel } from '@chakra-ui/form-control';
 import {
+    Box,
     Divider,
     Heading,
     HStack,
@@ -10,7 +11,12 @@ import {
 } from '@chakra-ui/layout';
 import { Radio, RadioGroup } from '@chakra-ui/radio';
 import {
+    Checkbox,
     IconButton,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
     Select,
     Tag,
     Tooltip,
@@ -19,7 +25,7 @@ import {
     Wrap
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
-import { Anchor, Bolt, Undo } from 'css.gg';
+import { Anchor, Awards, Bolt, Undo } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -152,7 +158,7 @@ function Settings() {
     const renderLabelOptions = () => {
         return (
             <HStack justifyContent="space-between" width="100%">
-                <Text fontSize="sm">Label feature: </Text>
+                <Text fontSize="sm">Label size: </Text>
                 <Tooltip label="Select node label size.">
                     <Select
                         size="sm"
@@ -170,6 +176,96 @@ function Settings() {
                     </Select>
                 </Tooltip>
             </HStack>
+        );
+    };
+
+    const renderLabelFeatureSelection = () => {
+        return (
+            <Box>
+                <Menu closeOnSelect={false} zIndex="3">
+                    <Tooltip label="Select node types that should have visible labels.">
+                        <MenuButton
+                            width="100%"
+                            size="sm"
+                            as={IconButton}
+                            icon={<Awards style={{ '--ggs': 0.7 }} />}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Side panel - Node Settings',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Open label types'
+                                    })
+                                );
+                            }}
+                            zIndex="3"
+                        />
+                    </Tooltip>
+                    <MenuList
+                        backgroundColor="#222222"
+                        padding="5px"
+                        borderRadius="10px"
+                        width="200px"
+                        minWidth="200px"
+                    >
+                        {store.core.visibleDimensions[
+                            store.core.currentGraph
+                        ].map(feature => (
+                            <MenuItem
+                                key={`label_feature_checkbox_${feature}`}
+                                fontSize="xs"
+                                fontWeight="bold"
+                                borderRadius="6px"
+                                width="190px"
+                                minWidth="190px"
+                            >
+                                <Checkbox
+                                    isChecked={store.graphInstance.labels.labelFeatures.includes(
+                                        feature
+                                    )}
+                                    width="190px"
+                                    minWidth="190px"
+                                    size="sm"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                    onChange={e => {
+                                        if (!e.target.checked) {
+                                            store.track.trackEvent(
+                                                'Side panel - Node Settings',
+                                                'Checkbox',
+                                                JSON.stringify({
+                                                    type: 'Check',
+                                                    value: `Hide labels for ${feature}`
+                                                })
+                                            );
+                                            store.graphInstance.removeLabelFeature(
+                                                feature
+                                            );
+                                        } else {
+                                            store.track.trackEvent(
+                                                'Side panel - Node Settings',
+                                                'Checkbox',
+                                                JSON.stringify({
+                                                    type: 'Check',
+                                                    value: `Show labels for ${feature} `
+                                                })
+                                            );
+
+                                            store.graphInstance.addLabelFeature(
+                                                feature
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {feature}
+                                </Checkbox>
+                            </MenuItem>
+                        ))}
+                    </MenuList>
+                </Menu>
+            </Box>
         );
     };
 
@@ -277,98 +373,35 @@ function Settings() {
     const renderVisibilityOptions = () => {
         return (
             <>
-                <Heading size="sm" style={{ marginBottom: '10px' }}>
-                    Edge settings
-                </Heading>
-                <Tooltip
-                    label={
-                        store.graphInstance.linkVisibility
-                            ? 'Hide edges'
-                            : 'Show edges'
-                    }
+                <VStack
+                    width="100%"
+                    backgroundColor="whiteAlpha.100"
+                    padding="10px"
+                    borderRadius="10px"
                 >
-                    <HStack spacing="1">
-                        <Switch
-                            id="edges"
-                            size="sm"
-                            marginRight="10px"
-                            isChecked={store.graphInstance.linkVisibility}
-                            value={store.graphInstance.linkVisibility}
-                            onChange={() => {
-                                store.graphInstance.toggleLinkVisibility();
-
-                                store.track.trackEvent(
-                                    'Side panel - View Settings',
-                                    'Switch',
-                                    JSON.stringify({
-                                        type: 'Toggle',
-                                        value: `${
-                                            store.graphInstance.linkVisibility
-                                                ? 'Show'
-                                                : 'Hide'
-                                        } links`
-                                    })
-                                );
-                            }}
-                        />
-                        <Text fontSize="sm">Edges</Text>
-                    </HStack>
-                </Tooltip>
-                <Tooltip
-                    label={
-                        store.graphInstance.useCurvedEdges
-                            ? 'Use straight edges'
-                            : 'Use curved edges'
-                    }
-                >
-                    <HStack spacing="1">
-                        <Switch
-                            id="curvedEdges"
-                            size="sm"
-                            marginRight="10px"
-                            isChecked={store.graphInstance.useCurvedEdges}
-                            value={store.graphInstance.useCurvedEdges}
-                            onChange={() => {
-                                store.graphInstance.toggleUseCurvedEdges();
-
-                                store.track.trackEvent(
-                                    'Side panel - View Settings',
-                                    'Switch',
-                                    JSON.stringify({
-                                        type: 'Toggle',
-                                        value: `${
-                                            store.graphInstance.useCurvedEdges
-                                                ? 'Use curved edges'
-                                                : 'Use straight edges'
-                                        }`
-                                    })
-                                );
-                            }}
-                        />
-                        <Text fontSize="sm">Curved edges</Text>
-                    </HStack>
-                </Tooltip>
-                {store.core.isDetail && (
+                    <Heading
+                        size="sm"
+                        style={{ marginBottom: '10px' }}
+                        width="100%"
+                    >
+                        Edge settings
+                    </Heading>
                     <Tooltip
                         label={
-                            store.graphInstance.edgeDirectionVisiblity
-                                ? 'Use undirected edges'
-                                : 'Use directed edges'
+                            store.graphInstance.linkVisibility
+                                ? 'Hide edges'
+                                : 'Show edges'
                         }
                     >
-                        <HStack spacing="1">
+                        <HStack spacing="1" width="100%">
                             <Switch
-                                id="curvedEdges"
+                                id="edges"
                                 size="sm"
                                 marginRight="10px"
-                                isChecked={
-                                    store.graphInstance.edgeDirectionVisiblity
-                                }
-                                value={
-                                    store.graphInstance.edgeDirectionVisiblity
-                                }
+                                isChecked={store.graphInstance.linkVisibility}
+                                value={store.graphInstance.linkVisibility}
                                 onChange={() => {
-                                    store.graphInstance.toggleEdgeDirectionVisiblity();
+                                    store.graphInstance.toggleLinkVisibility();
 
                                     store.track.trackEvent(
                                         'Side panel - View Settings',
@@ -377,94 +410,190 @@ function Settings() {
                                             type: 'Toggle',
                                             value: `${
                                                 store.graphInstance
-                                                    .edgeDirectionVisiblity
-                                                    ? 'Use directed edges'
-                                                    : 'Use undirected edges'
+                                                    .linkVisibility
+                                                    ? 'Show'
+                                                    : 'Hide'
+                                            } links`
+                                        })
+                                    );
+                                }}
+                            />
+                            <Text fontSize="sm">Edges</Text>
+                        </HStack>
+                    </Tooltip>
+                    <Tooltip
+                        label={
+                            store.graphInstance.useCurvedEdges
+                                ? 'Use straight edges'
+                                : 'Use curved edges'
+                        }
+                    >
+                        <HStack spacing="1" width="100%">
+                            <Switch
+                                id="curvedEdges"
+                                size="sm"
+                                marginRight="10px"
+                                isChecked={store.graphInstance.useCurvedEdges}
+                                value={store.graphInstance.useCurvedEdges}
+                                onChange={() => {
+                                    store.graphInstance.toggleUseCurvedEdges();
+
+                                    store.track.trackEvent(
+                                        'Side panel - View Settings',
+                                        'Switch',
+                                        JSON.stringify({
+                                            type: 'Toggle',
+                                            value: `${
+                                                store.graphInstance
+                                                    .useCurvedEdges
+                                                    ? 'Use curved edges'
+                                                    : 'Use straight edges'
                                             }`
                                         })
                                     );
                                 }}
                             />
-                            <Text fontSize="sm">Directed edges</Text>
+                            <Text fontSize="sm">Curved edges</Text>
                         </HStack>
                     </Tooltip>
-                )}
-                {/* <Divider paddingTop="10px" style={{ opacity: 0.2 }} /> */}
-                <Heading
-                    size="sm"
-                    style={{ marginTop: '20px', marginBottom: '10px' }}
-                >
-                    Node settings
-                </Heading>
-                <Tooltip
-                    label={
-                        store.graphInstance.labels.isVisible
-                            ? 'Hide node labels'
-                            : 'Show node labels'
-                    }
-                >
-                    <HStack spacing="1">
-                        <Switch
-                            id="nodelabels"
-                            size="sm"
-                            marginRight="10px"
-                            isChecked={store.graphInstance.labels.isVisible}
-                            value={store.graphInstance.labels.isVisible}
-                            onChange={() => {
-                                store.graphInstance.toggleLabelVisibility();
+                    {store.core.isDetail && (
+                        <Tooltip
+                            label={
+                                store.graphInstance.edgeDirectionVisiblity
+                                    ? 'Use undirected edges'
+                                    : 'Use directed edges'
+                            }
+                        >
+                            <HStack spacing="1" width="100%">
+                                <Switch
+                                    id="curvedEdges"
+                                    size="sm"
+                                    marginRight="10px"
+                                    isChecked={
+                                        store.graphInstance
+                                            .edgeDirectionVisiblity
+                                    }
+                                    value={
+                                        store.graphInstance
+                                            .edgeDirectionVisiblity
+                                    }
+                                    onChange={() => {
+                                        store.graphInstance.toggleEdgeDirectionVisiblity();
 
-                                store.track.trackEvent(
-                                    'Side panel - View Settings',
-                                    'Switch',
-                                    JSON.stringify({
-                                        type: 'Toggle',
-                                        value: `${
-                                            store.graphInstance.labels.isVisible
-                                                ? 'Show'
-                                                : 'Hide'
-                                        } labels`
-                                    })
-                                );
-                            }}
-                        />
-                        <Text fontSize="sm">Node labels</Text>
-                    </HStack>
-                </Tooltip>
-                <Tooltip
-                    label={
-                        store.graphInstance.orphanNodeVisibility
-                            ? 'Hide orphan nodes'
-                            : 'Show orphan nodes'
-                    }
+                                        store.track.trackEvent(
+                                            'Side panel - View Settings',
+                                            'Switch',
+                                            JSON.stringify({
+                                                type: 'Toggle',
+                                                value: `${
+                                                    store.graphInstance
+                                                        .edgeDirectionVisiblity
+                                                        ? 'Use directed edges'
+                                                        : 'Use undirected edges'
+                                                }`
+                                            })
+                                        );
+                                    }}
+                                />
+                                <Text fontSize="sm">Directed edges</Text>
+                            </HStack>
+                        </Tooltip>
+                    )}
+                </VStack>
+                <VStack
+                    width="100%"
+                    backgroundColor="whiteAlpha.100"
+                    padding="10px"
+                    borderRadius="10px"
+                    style={{ marginTop: '20px' }}
                 >
-                    <HStack spacing="1">
-                        <Switch
-                            id="nodelabels"
-                            size="sm"
-                            marginRight="10px"
-                            isChecked={store.graphInstance.orphanNodeVisibility}
-                            value={store.graphInstance.orphanNodeVisibility}
-                            onChange={() => {
-                                store.graphInstance.toggleOrphanNodeVisibility();
+                    <Heading
+                        size="sm"
+                        style={{ marginBottom: '10px', width: '100%' }}
+                    >
+                        Node settings
+                    </Heading>
+                    <HStack justifyContent="space-between" width="100%">
+                        <Tooltip
+                            label={
+                                store.graphInstance.labels.isVisible
+                                    ? 'Hide node labels'
+                                    : 'Show node labels'
+                            }
+                        >
+                            <HStack spacing="1" width="100%">
+                                <Switch
+                                    id="nodelabels"
+                                    size="sm"
+                                    marginRight="10px"
+                                    isChecked={
+                                        store.graphInstance.labels.isVisible
+                                    }
+                                    value={store.graphInstance.labels.isVisible}
+                                    onChange={() => {
+                                        store.graphInstance.toggleLabelVisibility();
 
-                                store.track.trackEvent(
-                                    'Side panel - View Settings',
-                                    'Switch',
-                                    JSON.stringify({
-                                        type: 'Toggle',
-                                        value: `${
-                                            store.graphInstance
-                                                .orphanNodeVisibility
-                                                ? 'Show'
-                                                : 'Hide'
-                                        } orphan nodes`
-                                    })
-                                );
-                            }}
-                        />
-                        <Text fontSize="sm">Orphan nodes</Text>
+                                        store.track.trackEvent(
+                                            'Side panel - View Settings',
+                                            'Switch',
+                                            JSON.stringify({
+                                                type: 'Toggle',
+                                                value: `${
+                                                    store.graphInstance.labels
+                                                        .isVisible
+                                                        ? 'Show'
+                                                        : 'Hide'
+                                                } labels`
+                                            })
+                                        );
+                                    }}
+                                />
+                                <Text fontSize="sm">Node labels</Text>
+                            </HStack>
+                        </Tooltip>
+                        {store.core.currentGraph === 'detail' &&
+                            renderLabelFeatureSelection()}
                     </HStack>
-                </Tooltip>
+                    <Tooltip
+                        label={
+                            store.graphInstance.orphanNodeVisibility
+                                ? 'Hide orphan nodes'
+                                : 'Show orphan nodes'
+                        }
+                    >
+                        <HStack spacing="1" width="100%">
+                            <Switch
+                                id="nodelabels"
+                                size="sm"
+                                marginRight="10px"
+                                isChecked={
+                                    store.graphInstance.orphanNodeVisibility
+                                }
+                                value={store.graphInstance.orphanNodeVisibility}
+                                onChange={() => {
+                                    store.graphInstance.toggleOrphanNodeVisibility();
+
+                                    store.track.trackEvent(
+                                        'Side panel - View Settings',
+                                        'Switch',
+                                        JSON.stringify({
+                                            type: 'Toggle',
+                                            value: `${
+                                                store.graphInstance
+                                                    .orphanNodeVisibility
+                                                    ? 'Show'
+                                                    : 'Hide'
+                                            } orphan nodes`
+                                        })
+                                    );
+                                }}
+                            />
+                            <Text fontSize="sm">Orphan nodes</Text>
+                        </HStack>
+                    </Tooltip>
+                    {renderColorOptions()}
+                    {renderLabelOptions()}
+                </VStack>
             </>
         );
     };
@@ -539,43 +668,64 @@ function Settings() {
             </Tag>
         ));
 
+        if (tags.length === 0) {
+            return <></>;
+        }
+
         return (
-            <Stack>
-                <Heading
-                    size="sm"
-                    style={{ marginBottom: '10px', marginTop: '10px' }}
-                >
-                    Visible features
-                </Heading>
-                <Wrap>{tags}</Wrap>
-            </Stack>
+            <VStack
+                width="100%"
+                backgroundColor="whiteAlpha.100"
+                padding="10px"
+                borderRadius="10px"
+                spacing="10px"
+                align="start"
+                style={{ marginTop: '20px' }}
+            >
+                <Stack>
+                    <Heading
+                        size="sm"
+                        style={{ marginBottom: '10px', marginTop: '10px' }}
+                    >
+                        Visible features
+                    </Heading>
+                    <Wrap>{tags}</Wrap>
+                </Stack>
+            </VStack>
         );
     };
 
     return (
-        <Stack
+        <VStack
             align="center"
             direction="column"
             paddingLeft="0"
-            paddingRight="10px"
+            paddingRight="0"
             id="viewsettingscomponent"
+            width="100%"
         >
-            <FormControl display="flex" alignItems="center" flexDir="column">
-                <VStack spacing="2px" align="start" width="100%">
-                    {renderVisibilityOptions()}
-                    {renderColorOptions()}
-                    {renderLabelOptions()}
-                </VStack>
-                <VStack spacing="10px" align="start" mt="10px" width="100%">
-                    <Heading size="sm" style={{ marginBottom: '10px' }}>
-                        Layout settings
-                    </Heading>
-                    {renderLayoutOptions()}
-                    {store.core.currentGraph === 'detail' &&
-                        renderDimensionsToggle()}
-                </VStack>
-            </FormControl>
-        </Stack>
+            <VStack spacing="2px" align="start" width="100%">
+                {renderVisibilityOptions()}
+            </VStack>
+            <VStack
+                width="100%"
+                backgroundColor="whiteAlpha.100"
+                padding="10px"
+                borderRadius="10px"
+                style={{ marginTop: '20px' }}
+            >
+                <Heading
+                    size="sm"
+                    style={{ marginBottom: '10px' }}
+                    width="100%"
+                >
+                    Layout settings
+                </Heading>
+                {renderLayoutOptions()}
+            </VStack>
+
+            {store.core.currentGraph === 'detail' && renderDimensionsToggle()}
+        </VStack>
     );
 }
 
