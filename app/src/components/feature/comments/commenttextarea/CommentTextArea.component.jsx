@@ -373,7 +373,8 @@ function CommentTextArea(props) {
             'vertical bar',
             'grouped bar',
             'line',
-            'doughnut'
+            'doughnut',
+            'radar'
         ];
 
         const chartItems = store.stats

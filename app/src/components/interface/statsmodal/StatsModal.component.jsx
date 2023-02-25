@@ -54,6 +54,7 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import RadarChartComponent from 'components/feature/stats/chart/RadarChart.component';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
@@ -254,6 +255,40 @@ function FileUploadModal() {
                         options={chartOptions}
                     />
                 );
+            case 'radar':
+                chartData = {
+                    labels: [
+                        'Property 1',
+                        'Property 2',
+                        'Property 3',
+                        'Property 4',
+                        'Property 5'
+                    ],
+                    datasets: [
+                        {
+                            label: 'First element',
+                            data: [35, 23, 74, 21, 53],
+                            fill: true
+                        },
+                        {
+                            label: 'Second element',
+                            data: [142, 24, 86, 35, 3],
+                            fill: true
+                        }
+                    ]
+                };
+                return (
+                    <RadarChartComponent
+                        demoData={chartData}
+                        title={title}
+                        chart={{
+                            type: chartType
+                        }}
+                        chartIndex={1}
+                        isExample={true}
+                        options={chartOptions}
+                    />
+                );
             default:
                 chartData = {
                     labels: [
@@ -275,12 +310,6 @@ function FileUploadModal() {
                 chartOptions = {
                     maintainAspectRatio: false,
                     responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Example Bar Chart'
-                        }
-                    },
                     scales: {
                         x: {
                             stacked: true
@@ -474,7 +503,6 @@ function FileUploadModal() {
     };
 
     const renderSelectionElements = statTypes => {
-        // statTypes = type = chart, stat / statType / chartType = grouped bar
         return (
             <Box height="225px" width="100%">
                 <CustomScroll
@@ -544,97 +572,103 @@ function FileUploadModal() {
                             </FormControl>
                         </Tooltip>
 
-                        {statTypes.type === 'chart' && (
-                            <FormControl
-                                backgroundColor={
-                                    colorMode === 'light'
-                                        ? 'blackAlpha.200'
-                                        : 'whiteAlpha.200'
-                                }
-                                borderRadius="6px"
-                                padding="10px"
-                            >
-                                <Heading size="xs" marginBottom="6px">
-                                    Network elements:
-                                </Heading>
-                                <Tooltip label="Selecting nodes means that you would like to get the data from node properties while selecting edges means you would like to get the data from edges.">
-                                    <Select
-                                        size="sm"
-                                        defaultValue="nodes"
-                                        variant="filled"
-                                        onChange={value => {
-                                            store.track.trackEvent(
-                                                'Widget Modal',
-                                                'Select Element - Network Elements',
-                                                JSON.stringify({
-                                                    type: 'Change selection',
-                                                    value: value.target.value
-                                                })
-                                            );
+                        {statTypes.type === 'chart' &&
+                            statTypes.chartType !== 'radar' && (
+                                <FormControl
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="6px"
+                                    padding="10px"
+                                >
+                                    <Heading size="xs" marginBottom="6px">
+                                        Network elements:
+                                    </Heading>
+                                    <Tooltip label="Selecting nodes means that you would like to get the data from node properties while selecting edges means you would like to get the data from edges.">
+                                        <Select
+                                            size="sm"
+                                            defaultValue="nodes"
+                                            variant="filled"
+                                            onChange={value => {
+                                                store.track.trackEvent(
+                                                    'Widget Modal',
+                                                    'Select Element - Network Elements',
+                                                    JSON.stringify({
+                                                        type: 'Change selection',
+                                                        value: value.target
+                                                            .value
+                                                    })
+                                                );
 
-                                            store.stats.changeChartNetworkElements(
-                                                value.target.value
-                                            );
-                                        }}
-                                    >
-                                        <option value="nodes">Nodes</option>
-                                        {(statTypes.type === 'stat' ||
-                                            (statTypes.type === 'chart' &&
-                                                statTypes.chartType !==
-                                                    'grouped bar')) && (
-                                            <option value="edges">Edges</option>
-                                        )}
-                                    </Select>
-                                </Tooltip>
-                            </FormControl>
-                        )}
-
-                        {statTypes.type === 'chart' && (
-                            <FormControl
-                                backgroundColor={
-                                    colorMode === 'light'
-                                        ? 'blackAlpha.200'
-                                        : 'whiteAlpha.200'
-                                }
-                                borderRadius="6px"
-                                padding="10px"
-                            >
-                                <Heading size="xs" marginBottom="6px">
-                                    Element values:
-                                </Heading>
-                                <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
-                                    <Select
-                                        size="sm"
-                                        onChange={value => {
-                                            store.track.trackEvent(
-                                                'Widget Modal',
-                                                'Select Element - Element Values',
-                                                JSON.stringify({
-                                                    type: 'Change selection',
-                                                    value: value.target.value
-                                                })
-                                            );
-
-                                            store.stats.changeChartElementValue(
-                                                value.target.value
-                                            );
-                                        }}
-                                        variant="filled"
-                                    >
-                                        {store.stats
-                                            .getElementValues()
-                                            .map(entry => (
-                                                <option
-                                                    key={`chart_selection_element_${entry.value}`}
-                                                    value={entry.value}
-                                                >
-                                                    {entry.label}
+                                                store.stats.changeChartNetworkElements(
+                                                    value.target.value
+                                                );
+                                            }}
+                                        >
+                                            <option value="nodes">Nodes</option>
+                                            {(statTypes.type === 'stat' ||
+                                                (statTypes.type === 'chart' &&
+                                                    statTypes.chartType !==
+                                                        'grouped bar')) && (
+                                                <option value="edges">
+                                                    Edges
                                                 </option>
-                                            ))}
-                                    </Select>
-                                </Tooltip>
-                            </FormControl>
-                        )}
+                                            )}
+                                        </Select>
+                                    </Tooltip>
+                                </FormControl>
+                            )}
+
+                        {statTypes.type === 'chart' &&
+                            statTypes.chartType !== 'radar' && (
+                                <FormControl
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.200'
+                                            : 'whiteAlpha.200'
+                                    }
+                                    borderRadius="6px"
+                                    padding="10px"
+                                >
+                                    <Heading size="xs" marginBottom="6px">
+                                        Element values:
+                                    </Heading>
+                                    <Tooltip label="These values will be shown on the chart instead of 'First value', 'Second value' etc. and their frequencies will be shown as the percentage of the chart.">
+                                        <Select
+                                            size="sm"
+                                            onChange={value => {
+                                                store.track.trackEvent(
+                                                    'Widget Modal',
+                                                    'Select Element - Element Values',
+                                                    JSON.stringify({
+                                                        type: 'Change selection',
+                                                        value: value.target
+                                                            .value
+                                                    })
+                                                );
+
+                                                store.stats.changeChartElementValue(
+                                                    value.target.value
+                                                );
+                                            }}
+                                            variant="filled"
+                                        >
+                                            {store.stats
+                                                .getElementValues()
+                                                .map(entry => (
+                                                    <option
+                                                        key={`chart_selection_element_${entry.value}`}
+                                                        value={entry.value}
+                                                    >
+                                                        {entry.label}
+                                                    </option>
+                                                ))}
+                                        </Select>
+                                    </Tooltip>
+                                </FormControl>
+                            )}
 
                         {statTypes.type === 'chart' &&
                             statTypes.chartType === 'grouped bar' && (
@@ -686,6 +720,7 @@ function FileUploadModal() {
                             )}
 
                         {statTypes.type === 'chart' &&
+                            statTypes.chartType !== 'radar' &&
                             store.core.currentGraph === 'detail' &&
                             store.stats.newChartProps.elements === 'nodes' &&
                             store.stats.newChartProps.element_values !==
@@ -824,6 +859,11 @@ function FileUploadModal() {
                             {
                                 chartType: 'grouped bar',
                                 title: 'Example grouped bar chart',
+                                type: 'chart'
+                            },
+                            {
+                                chartType: 'radar',
+                                title: 'Example radar chart',
                                 type: 'chart'
                             },
                             {

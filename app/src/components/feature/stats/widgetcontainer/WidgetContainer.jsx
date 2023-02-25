@@ -28,6 +28,7 @@ function WidgetContainer(props) {
     const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
     const [connectionFeature, setConnectionFeature] = useState('all');
     const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
+    const [radarDisplayElement, setRadarDisplayElement] = useState('nodes');
     const [filterProperty, setFilterProperty] = useState('degree');
     const { colorMode } = useColorMode();
 
@@ -53,6 +54,7 @@ function WidgetContainer(props) {
             <Tooltip label={props.title}>
                 <Heading
                     size="xs"
+                    fontSize="xs"
                     whiteSpace="nowrap"
                     overflow="hidden"
                     textOverflow="ellipsis"
@@ -103,6 +105,42 @@ function WidgetContainer(props) {
                         </Select>
                     </Tooltip>
                 )}
+            {'radar' === props.chart.type.toLowerCase() && (
+                <Tooltip label="Change chart display element.">
+                    <Select
+                        size="xs"
+                        variant="filled"
+                        borderRadius="5px"
+                        opacity="0.5"
+                        minWidth="100px"
+                        width="100px"
+                        textAlign="right"
+                        backgroundColor="transparent"
+                        _hover={{
+                            opacity: '1',
+                            backgroundColor: 'whiteAlpha.200'
+                        }}
+                        icon={<></>}
+                        style={{ paddingRight: '8px' }}
+                        defaultValue={radarDisplayElement}
+                        onChange={e => {
+                            store.track.trackEvent(
+                                `Details Panel - Widget Container - ${props.chart.id}`,
+                                'Select Element - Radar display element',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
+                            );
+
+                            setRadarDisplayElement(e.target.value);
+                        }}
+                    >
+                        <option value="nodes">Nodes</option>
+                        <option value="components">Components</option>
+                    </Select>
+                </Tooltip>
+            )}
             {['node filter'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Change filter property.">
                     <Select
@@ -260,7 +298,7 @@ function WidgetContainer(props) {
                         </Select>
                     </Tooltip>
                 )}
-            {!['connections', 'node filter'].includes(
+            {!['connections', 'node filter', 'radar'].includes(
                 props.chart.type.toLowerCase()
             ) && (
                 <Tooltip label="Change displayed elements">
@@ -307,8 +345,8 @@ function WidgetContainer(props) {
                 (props.chart.colSpan === 1 ? (
                     <Tooltip label="Expand">
                         <IconButton
-                            icon={<ArrowsH />}
-                            size="sm"
+                            icon={<ArrowsH style={{ '--ggs': 0.7 }} />}
+                            size="xs"
                             variant="ghost"
                             opacity={0.5}
                             backgroundColor="transparent"
@@ -333,8 +371,8 @@ function WidgetContainer(props) {
                 ) : (
                     <Tooltip label="Shrink">
                         <IconButton
-                            icon={<ArrowsMergeAltH />}
-                            size="sm"
+                            icon={<ArrowsMergeAltH style={{ '--ggs': 0.7 }} />}
+                            size="xs"
                             variant="ghost"
                             opacity={0.5}
                             _hover={{
@@ -359,8 +397,8 @@ function WidgetContainer(props) {
 
             <Tooltip label="Remove widget">
                 <IconButton
-                    icon={<Close />}
-                    size="sm"
+                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    size="xs"
                     variant="ghost"
                     opacity={0.5}
                     _hover={{
@@ -384,22 +422,6 @@ function WidgetContainer(props) {
 
     const renderChartContainerBottomControls = () => (
         <HStack position="absolute" bottom="6px" right="6px">
-            {/* <Tooltip label="Toggle legend">
-                <IconButton
-                    icon={<ToolbarTop />}
-                    size="sm"
-                    variant="ghost"
-                    opacity={0.5}
-                    _hover={{
-                        opacity: 1
-                    }}
-                    onClick={() => {
-                        console.log(props.chart.legend);
-
-                        store.stats.toggleLegend(props.chart.id);
-                    }}
-                />
-            </Tooltip> */}
             {![
                 'doughnut',
                 'bar',
@@ -479,7 +501,8 @@ function WidgetContainer(props) {
                 elementDisplayLimit,
                 connectionFeature,
                 maxConnectionDegree,
-                filterProperty
+                filterProperty,
+                radarDisplayElement
             });
         }
         return child;
@@ -508,7 +531,8 @@ function WidgetContainer(props) {
                     'connections',
                     'components',
                     'nodes',
-                    'node filter'
+                    'node filter',
+                    'radar'
                 ].includes(props.chart.type.toLowerCase()) &&
                 renderChartContainerBottomControls(props.chart)}
         </GridItem>

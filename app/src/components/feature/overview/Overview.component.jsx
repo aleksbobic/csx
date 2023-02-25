@@ -24,6 +24,7 @@ import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
 import DoughnutChart from '../stats/chart/DoughnutChart.component';
 import BarChart from '../stats/chart/BarChart.component';
+import RadarChartComponent from '../stats/chart/RadarChart.component';
 
 function Overview(props) {
     const store = useContext(RootStoreContext);
@@ -121,6 +122,14 @@ function Overview(props) {
             case 'doughnut':
                 return (
                     <DoughnutChart
+                        title={title}
+                        chart={chart}
+                        chartIndex={index}
+                    />
+                );
+            case 'radar':
+                return (
+                    <RadarChartComponent
                         title={title}
                         chart={chart}
                         chartIndex={index}

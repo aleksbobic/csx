@@ -15,7 +15,9 @@ import {
     LineController,
     BarController,
     Filler,
-    Tooltip as ChartJSTooltip
+    Tooltip as ChartJSTooltip,
+    RadarController,
+    RadialLinearScale
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
@@ -27,6 +29,7 @@ export class StatsStore {
         'Line',
         'Vertical Bar',
         'Grouped Bar',
+        'Radar',
         'Nodes',
         'Components',
         'Graph stats',
@@ -73,6 +76,8 @@ export class StatsStore {
         makeAutoObservable(this);
 
         ChartJS.register(
+            RadarController,
+            RadialLinearScale,
             ArcElement,
             ChartJSTooltip,
             CategoryScale,
@@ -478,6 +483,152 @@ export class StatsStore {
             labels: groups,
             datasets: datasets
         };
+    };
+
+    getRadarComponents = () => {
+        if (!this.store.graph.currentGraphData.selectedComponents.length) {
+            return null;
+        }
+
+        const labels = [
+            'Node count',
+            'Edge count',
+            'Entries',
+            'Largest node entry count'
+        ];
+
+        const datasets =
+            this.store.graph.currentGraphData.selectedComponents.map(
+                componentID => {
+                    const component =
+                        this.store.graph.currentGraphData.components.find(
+                            component => component.id === componentID
+                        );
+
+                    const componentLinkCount =
+                        this.store.graph.currentGraphData.links.filter(link =>
+                            component.nodes.includes(link.source.id)
+                        ).length;
+
+                    return {
+                        label: `Component ${component.id}`,
+                        data: [
+                            component.nodes.length,
+                            componentLinkCount,
+                            component.entries.length,
+                            component.largest_nodes.length
+                                ? component.largest_nodes[0].length
+                                : 0
+                        ]
+                    };
+                }
+            );
+
+        return { labels: labels, datasets: datasets };
+    };
+
+    getRadarNodes = () => {
+        if (!this.store.graph.currentGraphData.selectedNodes.length) {
+            return null;
+        }
+
+        if (this.store.core.currentGraph === 'detail') {
+            const neighbourLabels = this.store.core.visibleDimensions[
+                'detail'
+            ].map(feature => `${feature} neighbours`);
+
+            const labels = ['Neighbours', 'Documents', ...neighbourLabels];
+
+            const datasets =
+                this.store.graph.currentGraphData.selectedNodes.map(node => {
+                    return {
+                        label:
+                            node.label.length > 20
+                                ? `${node.label.substring(0, 20)}...`
+                                : node.label,
+                        data: [
+                            node.neighbours.size,
+                            node.entries.length,
+                            ...this.store.core.visibleDimensions['detail'].map(
+                                neighbourType => {
+                                    return node.neighbourObjects.reduce(
+                                        (counts, neighbour) => {
+                                            return neighbour.feature ===
+                                                neighbourType
+                                                ? counts + 1
+                                                : counts;
+                                        },
+                                        0
+                                    );
+                                }
+                            )
+                        ]
+                    };
+                });
+
+            return { labels: labels, datasets: datasets };
+        }
+
+        const labels = [
+            'Neighbours',
+            'Documents',
+            ...this.store.overviewSchema.links.map(
+                linkType => `${linkType} links`
+            )
+        ];
+        let nodeProperties = [];
+
+        if (this.store.graph.currentGraphData.selectedNodes[0].properties) {
+            // filter for numeric values
+            nodeProperties = Object.keys(
+                this.store.graph.currentGraphData.selectedNodes[0].properties
+            ).filter(prop =>
+                ['integer', 'float'].includes(
+                    this.store.overviewSchema.featureTypes[prop]
+                )
+            );
+        }
+
+        // if detail then get count for neighbours of different types
+        // if overview get node properties
+
+        const datasets = this.store.graph.currentGraphData.selectedNodes.map(
+            node => {
+                const nodeLinks =
+                    this.store.graph.currentGraphData.links.filter(
+                        link =>
+                            link.source.id === node.id ||
+                            link.target.id === node.id
+                    );
+
+                return {
+                    label:
+                        node.label.length > 20
+                            ? `${node.label.substring(0, 20)}...`
+                            : node.label,
+                    data: [
+                        node.neighbours.size,
+                        node.entries.length,
+                        ...this.store.overviewSchema.links.map(linkType => {
+                            return nodeLinks.reduce((counts, link) => {
+                                link.connections.forEach(connection => {
+                                    counts =
+                                        connection.feature === linkType
+                                            ? counts + 1
+                                            : counts;
+                                });
+                                return counts;
+                            }, 0);
+                        }),
+                        ...nodeProperties.map(prop =>
+                            parseFloat(node.properties[prop])
+                        )
+                    ]
+                };
+            }
+        );
+
+        return { labels: [...labels, ...nodeProperties], datasets: datasets };
     };
 
     getLineChartData = (labels, data, label) => {
