@@ -113,11 +113,13 @@ function ControlPanel() {
         );
 
         if (
-            ['integer', 'float'].includes(
+            (['integer', 'float'].includes(
                 store.search.nodeTypes[
                     store.graphInstance.nodeColorScheme[store.core.currentGraph]
                 ]
-            ) &&
+            ) ||
+                store.graphInstance.nodeColorScheme[store.core.currentGraph] ===
+                    'degree') &&
             legendItems.length > 10
         ) {
             return (

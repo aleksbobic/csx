@@ -341,6 +341,15 @@ export class GraphStore {
                     );
                 }
                 break;
+            case 'degree':
+                for (let i = 0; i < data.meta.nodeCount; i++) {
+                    data.nodes[i].material.color.set(
+                        this.store.graphInstance.nodeColorSchemeColors[
+                            this.store.core.currentGraph
+                        ]['degree'][data.nodes[i].neighbours.size]
+                    );
+                }
+                break;
             case 'component':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
                     const nodeColor =
@@ -873,6 +882,11 @@ export class GraphStore {
                     'overview'
                 );
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    nodes.map(node => node.neighbours.size),
+                    'degree'
+                );
+
                 this.graphData = {
                     ...this.graphData,
                     links: response.edges.map(edge => {
@@ -956,6 +970,11 @@ export class GraphStore {
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'detail'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    nodes.map(node => node.neighbours.size),
+                    'degree'
                 );
 
                 this.detailGraphData = {

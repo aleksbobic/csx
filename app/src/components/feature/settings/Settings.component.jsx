@@ -91,6 +91,12 @@ function Settings() {
                 value: 'component',
                 label: 'Node component',
                 tooltip: 'Color nodes based on their components'
+            },
+            {
+                value: 'degree',
+                label: 'Neighbour count',
+                tooltip:
+                    'Color nodes based on the number of neighbours they have'
             }
         ];
 
