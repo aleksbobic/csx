@@ -42,6 +42,9 @@ function DoughnutChart(props) {
                             ? { type: 'basic', prop: 'feature' }
                             : { type: 'advanced', prop: 'feature' };
                     break;
+                case 'degree':
+                    elementProperty = { type: 'basic', prop: 'degree' };
+                    break;
                 default:
                     elementProperty =
                         props.chart.elements === 'nodes'

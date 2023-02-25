@@ -205,8 +205,13 @@ export class StatsStore {
             let elementValues = [];
             if (!group) {
                 elementValues.push({ value: 'values', label: 'Node values' });
-                elementValues.push({ value: 'types', label: 'Node types' });
             }
+
+            elementValues.push({ value: 'types', label: 'Node types' });
+            elementValues.push({
+                value: 'degree',
+                label: 'Neighbour count'
+            });
 
             if (this.store.core.currentGraph !== 'detail') {
                 elementValues = elementValues.concat(
@@ -771,6 +776,11 @@ export class StatsStore {
         return [valuesSorted, countsSorted];
     };
 
+    getNodeNeighbourCount = node =>
+        node.neighbours.size === 1
+            ? `${node.neighbours.size} neighbour`
+            : `${node.neighbours.size} neighbours`;
+
     getNodeBasicProp = (node, prop) => node[prop];
 
     getNodeFeature = node => node.feature;
@@ -779,11 +789,15 @@ export class StatsStore {
 
     getNodeGroups = (groupBy, data) => {
         const groups = {};
+        let getNodeProp;
 
-        let getNodeProp =
-            groupBy.type === 'basic'
-                ? this.getNodeBasicProp
-                : this.getNodeAdvancedProp;
+        if (groupBy.prop === 'degree') {
+            getNodeProp = this.getNodeNeighbourCount;
+        } else if (groupBy.type === 'basic') {
+            getNodeProp = this.getNodeBasicProp;
+        } else {
+            getNodeProp = this.getNodeAdvancedProp;
+        }
 
         data.forEach(node => {
             const group = getNodeProp(node, groupBy.prop);
@@ -810,10 +824,16 @@ export class StatsStore {
             network_data,
             show_only
         );
-        let getNodeProp =
-            nodeProperty.type === 'basic'
-                ? this.getNodeBasicProp
-                : this.getNodeAdvancedProp;
+
+        let getNodeProp;
+
+        if (nodeProperty.prop === 'degree') {
+            getNodeProp = this.getNodeNeighbourCount;
+        } else if (nodeProperty.type === 'basic') {
+            getNodeProp = this.getNodeBasicProp;
+        } else {
+            getNodeProp = this.getNodeAdvancedProp;
+        }
 
         if (groupBy) {
             let groupedByCounts = {};

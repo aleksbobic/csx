@@ -38,6 +38,9 @@ function BarChart(props) {
                         case 'types':
                             groupBy = { type: 'basic', prop: 'feature' };
                             break;
+                        case 'degree':
+                            groupBy = { type: 'basic', prop: 'degree' };
+                            break;
                         default:
                             groupBy = {
                                 type: 'advanced',
@@ -75,6 +78,9 @@ function BarChart(props) {
                         props.chart.elements === 'nodes'
                             ? { type: 'basic', prop: 'feature' }
                             : { type: 'advanced', prop: 'feature' };
+                    break;
+                case 'degree':
+                    elementProperty = { type: 'basic', prop: 'degree' };
                     break;
                 default:
                     elementProperty =

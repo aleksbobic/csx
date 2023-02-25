@@ -901,10 +901,22 @@ export class GraphInstanceStore {
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;
 
-        const getNodeProp =
-            property.type === 'basic'
-                ? this.store.stats.getNodeBasicProp
-                : this.store.stats.getNodeAdvancedProp;
+        let getNodeProp;
+        let getGroupNodeProp;
+
+        if (groupProperty === 'degree') {
+            getGroupNodeProp = this.store.stats.getNodeNeighbourCount;
+        } else {
+            getGroupNodeProp = this.store.stats.getNodeAdvancedProp;
+        }
+
+        if (property.prop === 'degree') {
+            getNodeProp = this.store.stats.getNodeNeighbourCount;
+        } else if (property.type === 'basic') {
+            getNodeProp = this.store.stats.getNodeBasicProp;
+        } else {
+            getNodeProp = this.store.stats.getNodeAdvancedProp;
+        }
 
         const visibleIds = [];
 
@@ -915,7 +927,7 @@ export class GraphInstanceStore {
                         this.store.graph.currentGraphData.nodes[i],
                         property.prop
                     ) === value &&
-                    this.store.stats.getNodeAdvancedProp(
+                    getGroupNodeProp(
                         this.store.graph.currentGraphData.nodes[i],
                         groupProperty
                     ) === groupValue;

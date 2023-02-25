@@ -5,11 +5,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
-import {
-    Chart as ChartReactCharts,
-    getElementAtEvent,
-    Line
-} from 'react-chartjs-2';
+import { getElementAtEvent, Line } from 'react-chartjs-2';
 
 function LineChart(props) {
     const store = useContext(RootStoreContext);
@@ -61,34 +57,6 @@ function LineChart(props) {
             let elementProperty;
             let groupBy;
 
-            if (props.chart.type.toLowerCase() === 'grouped bar') {
-                if (props.chart.elements === 'nodes') {
-                    switch (props.chart.group_by) {
-                        case 'values':
-                            groupBy = { type: 'basic', prop: 'label' };
-                            break;
-                        case 'types':
-                            groupBy = { type: 'basic', prop: 'feature' };
-                            break;
-                        default:
-                            groupBy = { type: 'advanced', prop: groupBy };
-                            break;
-                    }
-                } else {
-                    switch (props.chart.group_by) {
-                        case 'values':
-                            groupBy = { type: 'advanced', prop: 'label' };
-                            break;
-                        case 'types':
-                            groupBy = { type: 'advanced', prop: 'feature' };
-                            break;
-                        default:
-                            groupBy = { type: 'basic', prop: groupBy };
-                            break;
-                    }
-                }
-            }
-
             switch (props.chart.element_values) {
                 case 'values':
                     elementProperty =
@@ -101,6 +69,9 @@ function LineChart(props) {
                         props.chart.elements === 'nodes'
                             ? { type: 'basic', prop: 'feature' }
                             : { type: 'advanced', prop: 'feature' };
+                    break;
+                case 'degree':
+                    elementProperty = { type: 'basic', prop: 'degree' };
                     break;
                 default:
                     elementProperty =
@@ -377,7 +348,6 @@ function LineChart(props) {
             redraw
             onClick={event => {
                 if (!props.isExample) {
-                    console.log(event);
                     let dataIndex;
 
                     try {
