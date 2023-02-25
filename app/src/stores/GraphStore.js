@@ -246,8 +246,11 @@ export class GraphStore {
             );
 
             if (!nodes[i].x || !nodes[i].y) {
-                nodes[i].x = Math.floor(Math.random() * (300 - -300) + -300);
-                nodes[i].y = Math.floor(Math.random() * (300 - -300) + -300);
+                const angle = Math.floor(Math.random() * 360);
+                const radius = Math.floor(Math.random() * 600 - 300);
+
+                nodes[i].x = Math.cos(angle) * radius;
+                nodes[i].y = Math.sin(angle) * radius;
             }
 
             nodes[i].initialx = nodes[i].x;
