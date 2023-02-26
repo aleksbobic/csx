@@ -4,15 +4,17 @@ import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
-import { getElementAtEvent, Radar } from 'react-chartjs-2';
 import { schemeTableau10 } from 'd3-scale-chromatic';
+import { useEffect, useRef, useState } from 'react';
+import { Radar } from 'react-chartjs-2';
 
 function RadarChart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
+    const [tooManySelectedElements, setTooManySelectedElements] =
+        useState(false);
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -44,6 +46,17 @@ function RadarChart(props) {
                 })
             });
         } else {
+            if (
+                store.graph.currentGraphData.selectedNodes.length > 8 ||
+                store.graph.currentGraphData.selectedComponents.length > 8
+            ) {
+                setTooManySelectedElements(true);
+                setData(null);
+                return;
+            }
+
+            setTooManySelectedElements(false);
+
             let data;
             if (props.radarDisplayElement === 'nodes') {
                 data = store.stats.getRadarNodes();
@@ -95,7 +108,8 @@ function RadarChart(props) {
         store.core.currentGraph,
         store.overviewSchema.anchorProperties,
         props.isExpanded,
-        props.radarDisplayElement
+        props.radarDisplayElement,
+        tooManySelectedElements
     ]);
 
     const getPluginOptions = () => {
@@ -194,7 +208,7 @@ function RadarChart(props) {
         }
     };
 
-    if (!data || data.labels.length === 0) {
+    if ((!data || data.labels.length === 0) && !tooManySelectedElements) {
         return (
             <VStack
                 height="100%"
@@ -218,6 +232,37 @@ function RadarChart(props) {
                         opacity="0.5"
                     >
                         Select some nodes to see details here! 😉
+                    </Text>
+                )}
+            </VStack>
+        );
+    }
+
+    if (tooManySelectedElements) {
+        return (
+            <VStack
+                height="100%"
+                width="100%"
+                spacing={1}
+                backgroundColor={
+                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
+                }
+                borderRadius="6px"
+                justifyContent="center"
+                padding="20%"
+            >
+                <Heading size="md" opacity="0.5">
+                    TOO MANY DATAPOINTS
+                </Heading>
+                {props.isExpanded && (
+                    <Text
+                        textAlign="center"
+                        fontSize="sm"
+                        fontWeight="bold"
+                        opacity="0.5"
+                    >
+                        Please select fever elements to get useful insights from
+                        this chart! 😉
                     </Text>
                 )}
             </VStack>

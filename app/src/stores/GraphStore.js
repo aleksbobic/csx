@@ -151,6 +151,13 @@ export class GraphStore {
                     ]['node type'][node.feature]
                 );
                 break;
+            case 'degree':
+                material.color.set(
+                    this.store.graphInstance.nodeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['degree'][node.neighbours.size]
+                );
+                break;
             case 'component':
                 const nodeColor =
                     this.store.graphInstance.nodeColorSchemeColors[
@@ -827,6 +834,7 @@ export class GraphStore {
             this.store.search.setSearchIsEmpty(true);
         } else {
             this.store.search.newNodeTypes = response.meta.new_dimensions;
+            this.store.graphInstance.resetLabelFeatures();
 
             if (graphType === 'overview') {
                 // Handle overview graph data
@@ -880,14 +888,14 @@ export class GraphStore {
                     this.store.graphInstance.setNodeColorScheme('component');
                 }
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.nodes.map(node => node.neighbours.length),
+                    'degree'
+                );
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'overview'
-                );
-
-                this.store.graphInstance.generateNumericColorSchema(
-                    nodes.map(node => node.neighbours.size),
-                    'degree'
                 );
 
                 this.graphData = {
@@ -970,14 +978,14 @@ export class GraphStore {
                     'component'
                 );
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.nodes.map(node => node.neighbours.length),
+                    'degree'
+                );
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'detail'
-                );
-
-                this.store.graphInstance.generateNumericColorSchema(
-                    nodes.map(node => node.neighbours.size),
-                    'degree'
                 );
 
                 this.detailGraphData = {

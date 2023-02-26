@@ -304,7 +304,7 @@ function AdvancedSearch(props) {
                     nodesConnectable={true}
                     snapToGrid={true}
                 >
-                    <Background gap={12} size={1} style={{ opacity: 0.5 }} />
+                    <Background gap={12} size={1} style={{ opacity: 0.2 }} />
                 </ReactFlow>
             </Box>
             <Box

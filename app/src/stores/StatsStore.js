@@ -486,7 +486,10 @@ export class StatsStore {
     };
 
     getRadarComponents = () => {
-        if (!this.store.graph.currentGraphData.selectedComponents.length) {
+        if (
+            !this.store.graph.currentGraphData.selectedComponents.length ||
+            this.store.graph.currentGraphData.selectedComponents.length > 8
+        ) {
             return null;
         }
 
@@ -528,7 +531,10 @@ export class StatsStore {
     };
 
     getRadarNodes = () => {
-        if (!this.store.graph.currentGraphData.selectedNodes.length) {
+        if (
+            !this.store.graph.currentGraphData.selectedNodes.length ||
+            this.store.graph.currentGraphData.selectedNodes.length > 8
+        ) {
             return null;
         }
 

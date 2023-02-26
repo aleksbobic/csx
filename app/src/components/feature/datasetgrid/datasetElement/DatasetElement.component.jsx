@@ -12,6 +12,7 @@ import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { isEnvFalse } from 'general.utils';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 function DatasetElement(props) {
     const store = useContext(RootStoreContext);
@@ -125,9 +126,10 @@ function DatasetElement(props) {
                             store.search.getConifg(props.dataset);
                         }}
                         icon={
-                            <Toolbox
+                            <Cog6ToothIcon
                                 style={{
-                                    '--ggs': '0.7'
+                                    width: '18px',
+                                    height: '18px'
                                 }}
                             />
                         }

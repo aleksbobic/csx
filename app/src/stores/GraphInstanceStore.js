@@ -58,6 +58,7 @@ export class GraphInstanceStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    resetLabelFeatures = () => (this.labels.labelFeatures = []);
     addLabelFeature = feature => this.labels.labelFeatures.push(feature);
     removeLabelFeature = feature =>
         (this.labels.labelFeatures = this.labels.labelFeatures.filter(

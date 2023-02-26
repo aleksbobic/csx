@@ -109,10 +109,10 @@ export class SchemaStore {
 
     generateLink = link => {
         const relationMap = {
-            oneToOne: '1:1',
-            oneToMany: '1:M',
-            manyToMany: 'M:N',
-            manyToOne: 'M:1'
+            onetoone: '1:1',
+            onetomany: '1:M',
+            manytomany: 'M:N',
+            manytoone: 'M:1'
         };
 
         const source = this.nodeLabelToID[link.src];
@@ -132,7 +132,7 @@ export class SchemaStore {
             data: {
                 possibleRelationships: possibleRelations,
                 relationship: link?.relationship
-                    ? relationMap[link?.relationship]
+                    ? relationMap[link?.relationship.toLowerCase()]
                     : possibleRelations[0],
                 changeRelationship: this.toggleRelationship,
                 removeEdge: this.removeSchemaConnection
