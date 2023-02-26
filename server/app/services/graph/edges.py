@@ -241,8 +241,9 @@ def get_shortest_schema_paths(
 
     graph = nx.DiGraph()
     graph.add_nodes_from(features)
+
     for edge_data in schema:
-        if edge_data["dest"] != "":
+        if edge_data["dest"] != "" and "relationship" in edge_data:
             graph.add_edge(
                 edge_data["src"],
                 edge_data["dest"],
