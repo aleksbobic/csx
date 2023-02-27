@@ -47,8 +47,10 @@ function RadarChart(props) {
             });
         } else {
             if (
-                store.graph.currentGraphData.selectedNodes.length > 8 ||
-                store.graph.currentGraphData.selectedComponents.length > 8
+                (props.radarDisplayElement === 'nodes' &&
+                    store.graph.currentGraphData.selectedNodes.length > 8) ||
+                (props.radarDisplayElement === 'components' &&
+                    store.graph.currentGraphData.selectedComponents.length > 8)
             ) {
                 setTooManySelectedElements(true);
                 setData(null);

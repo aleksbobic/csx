@@ -1,13 +1,17 @@
 import {
+    Box,
     Button,
     GridItem,
     Heading,
     HStack,
     IconButton,
+    Menu,
+    MenuButton,
     Select,
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { ArrowsH, ArrowsMergeAltH, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -105,41 +109,72 @@ function WidgetContainer(props) {
                         </Select>
                     </Tooltip>
                 )}
-            {'radar' === props.chart.type.toLowerCase() && (
-                <Tooltip label="Change chart display element.">
-                    <Select
-                        size="xs"
-                        variant="filled"
-                        borderRadius="5px"
-                        opacity="0.5"
-                        minWidth="100px"
-                        width="100px"
-                        textAlign="right"
-                        backgroundColor="transparent"
-                        _hover={{
-                            opacity: '1',
-                            backgroundColor: 'whiteAlpha.200'
-                        }}
-                        icon={<></>}
-                        style={{ paddingRight: '8px' }}
-                        defaultValue={radarDisplayElement}
-                        onChange={e => {
-                            store.track.trackEvent(
-                                `Details Panel - Widget Container - ${props.chart.id}`,
-                                'Select Element - Radar display element',
-                                JSON.stringify({
-                                    type: 'Change selection',
-                                    value: e.target.value
-                                })
-                            );
+            {'radar' === props.chart.type.toLowerCase() && isExpanded && (
+                <>
+                    <Tooltip label="Change chart display element.">
+                        <Select
+                            size="xs"
+                            variant="filled"
+                            borderRadius="5px"
+                            opacity="0.5"
+                            minWidth="100px"
+                            width="100px"
+                            textAlign="right"
+                            backgroundColor="transparent"
+                            _hover={{
+                                opacity: '1',
+                                backgroundColor: 'whiteAlpha.200'
+                            }}
+                            icon={<></>}
+                            style={{ paddingRight: '8px' }}
+                            defaultValue={radarDisplayElement}
+                            onChange={e => {
+                                store.track.trackEvent(
+                                    `Details Panel - Widget Container - ${props.chart.id}`,
+                                    'Select Element - Radar display element',
+                                    JSON.stringify({
+                                        type: 'Change selection',
+                                        value: e.target.value
+                                    })
+                                );
 
-                            setRadarDisplayElement(e.target.value);
-                        }}
-                    >
-                        <option value="nodes">Nodes</option>
-                        <option value="components">Components</option>
-                    </Select>
-                </Tooltip>
+                                setRadarDisplayElement(e.target.value);
+                            }}
+                        >
+                            <option value="nodes">Nodes</option>
+                            <option value="components">Components</option>
+                        </Select>
+                    </Tooltip>
+
+                    <Tooltip label="Toggle settings mode.">
+                        <IconButton
+                            width="100%"
+                            size="xs"
+                            variant="ghost"
+                            opacity="0.5"
+                            icon={
+                                <Cog6ToothIcon
+                                    style={{ width: '18px', height: '18px' }}
+                                />
+                            }
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Side panel - Node Settings',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Open label types'
+                                    })
+                                );
+                            }}
+                            zIndex="3"
+                            _hover={{
+                                opacity: 1,
+                                backgroundColor: 'transparent'
+                            }}
+                        />
+                    </Tooltip>
+                </>
             )}
             {['node filter'].includes(props.chart.type.toLowerCase()) && (
                 <Tooltip label="Change filter property.">
