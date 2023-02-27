@@ -41,6 +41,7 @@ import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
 import { isEnvFalse } from 'general.utils';
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
+import { useCallback } from 'react';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
@@ -93,28 +94,40 @@ function NavigationPanelComponent() {
         store.graph.modifyStudy(store.core.currentGraph);
     };
 
-    const toggleDataPanel = panel => {
-        if (panelType === panel || panelType === '' || !isOpen) {
-            onToggle();
-        }
+    const toggleDataPanel = useCallback(
+        panel => {
+            if (panelType === panel || panelType === '' || !isOpen) {
+                onToggle();
+            }
 
-        if (panelType === panel) {
-            setPanelType('');
-            store.core.setIsRightSidePanelOpen(false);
-        } else {
-            setPanelType(panel);
-            store.core.setIsRightSidePanelOpen(true);
-        }
+            if (panelType === panel) {
+                setPanelType('');
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(false);
+            } else {
+                setPanelType(panel);
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(true);
+            }
 
-        store.track.trackEvent(
-            'Navbar',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
-            })
-        );
-    };
+            store.track.trackEvent(
+                'Navbar',
+                'Button',
+                JSON.stringify({
+                    type: 'Click',
+                    value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+                })
+            );
+        },
+        [isOpen, onToggle, panelType, store.core, store.track]
+    );
+
+    useEffect(() => {
+        if (store.core.rightPanelTypeToOpen) {
+            toggleDataPanel(store.core.rightPanelTypeToOpen);
+            store.core.setRightPanelTypeToOpen(null);
+        }
+    }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
     const toggleColor = () => {
         store.track.trackEvent(

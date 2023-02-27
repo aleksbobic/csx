@@ -464,6 +464,14 @@ function CommentTextArea(props) {
                         opacity={1}
                         zIndex="2"
                         borderRadius="4px"
+                        onClick={() => {
+                            if (
+                                !store.core.isRightSidePanelOpen ||
+                                store.core.rightPanelType !== 'details'
+                            ) {
+                                store.core.setRightPanelTypeToOpen('details');
+                            }
+                        }}
                         transition="0.2s all ease-in-out"
                         backgroundColor={
                             store.comment.chart ? 'blue.500' : 'auto'

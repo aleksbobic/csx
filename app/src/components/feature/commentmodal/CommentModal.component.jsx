@@ -204,6 +204,14 @@ function CommentModal() {
                         isDisabled={store.comment.chart}
                         size="sm"
                         opacity={1}
+                        onClick={() => {
+                            if (
+                                !store.core.isRightSidePanelOpen ||
+                                store.core.rightPanelType !== 'details'
+                            ) {
+                                store.core.setRightPanelTypeToOpen('details');
+                            }
+                        }}
                         zIndex="2"
                         borderRadius="4px"
                         transition="0.2s all ease-in-out"

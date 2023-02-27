@@ -31,6 +31,8 @@ export class CoreStore {
     isSchemaNodeTypeBound = true;
     isLeftSidePanelOpen = true;
     isRightSidePanelOpen = false;
+    rightPanelType = '';
+    rightPanelTypeToOpen = null;
     rightPanelWidth = 0;
     surveyHidden = false;
     surveyHistoryDepthTrigger = 3;
@@ -70,6 +72,8 @@ export class CoreStore {
     };
 
     setStudyIsEmpty = val => (this.studyIsEmpty = val);
+
+    setRightPanelTypeToOpen = val => (this.rightPanelTypeToOpen = val);
 
     toggleIsStudyPublic = async () => {
         this.isStudyPublic = !this.isStudyPublic;
@@ -112,6 +116,7 @@ export class CoreStore {
     setStudyPublicURL = val => (this.studyPublicURL = val);
     setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
     setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
+    setRightPanelType = val => (this.rightPanelType = val);
 
     setIsSchemaNodeTypeBound = val => {
         this.isSchemaNodeTypeBound = val;
