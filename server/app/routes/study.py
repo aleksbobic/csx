@@ -73,7 +73,7 @@ def get_study_history(study_uuid: str, user_uuid: str):
         history = csx_study.extract_history_items(study)
         return {
             "name": study["study_name"],
-            "author": study["study_author"],
+            "author": study["study_author"] if "study_author" in study else "",
             "description": study["study_description"],
             "history": history,
             "empty": False,
@@ -89,7 +89,7 @@ def get_public_study_history(public_study_uuid: str):
         history = csx_study.extract_history_items(study)
         return {
             "name": study["study_name"],
-            "author": study["study_author"],
+            "author": study["study_author"] if "study_author" in study else "",
             "description": study["study_description"],
             "history": history,
             "empty": False,
@@ -158,7 +158,7 @@ def get_study(data: GetStudyData):
                 "graph": pickle.loads(history_item)[graph_type],
                 "name": study["study_name"],
                 "description": study["study_description"],
-                "author": study["study_author"],
+                "author": study["study_author"] if "study_author" in study else "",
                 "history": history,
                 "index": study["index"],
                 "charts": charts,
@@ -171,7 +171,7 @@ def get_study(data: GetStudyData):
             "graph": {},
             "name": study["study_name"],
             "description": study["study_description"],
-            "author": study["study_author"],
+            "author": study["study_author"] if "study_author" in study else "",
             "history": [],
             "index": study["index"],
             "empty": False,
