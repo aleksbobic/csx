@@ -53,6 +53,8 @@ function HomePage() {
     useEffect(() => {
         store.core.isStudyPublic = false;
         store.core.setStudyPublicURL('');
+        store.graphInstance.setEdgeColorScheme('auto');
+        store.graphInstance.setNodeColorScheme('component');
         store.overviewSchema.resetProperties();
     }, []);
 

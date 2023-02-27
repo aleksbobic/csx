@@ -35,6 +35,8 @@ export class GraphInstanceStore {
     useCurvedEdges = false;
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
+    edgeColorScheme = { overview: 'auto', detail: 'auto' };
+    edgeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
     visibleComponents = [];
     hoverData = [];
@@ -752,40 +754,78 @@ export class GraphInstanceStore {
         this.nodeColorScheme = { ...this.nodeColorScheme };
     };
 
-    generateSchemeColorsFromArray = (values, feature) => {
+    setEdgeColorScheme = val => {
+        this.edgeColorScheme[this.store.core.currentGraph] = val;
+        this.edgeColorScheme = { ...this.edgeColorScheme };
+    };
+
+    generateSchemeColorsFromArray = (values, feature, schemeType = 'node') => {
         const skipfactor =
             values && values.length > 10 ? 1 / values.length : null;
 
-        this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
+        if (schemeType === 'node') {
+            this.nodeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
 
-        for (let i = 0; i < values.length; i++) {
-            this.nodeColorSchemeColors[this.store.core.currentGraph][feature][
-                values[i]
-            ] = skipfactor
-                ? interpolateRainbow(i * skipfactor)
-                : schemeTableau10[i];
+            for (let i = 0; i < values.length; i++) {
+                this.nodeColorSchemeColors[this.store.core.currentGraph][
+                    feature
+                ][values[i]] = skipfactor
+                    ? interpolateRainbow(i * skipfactor)
+                    : schemeTableau10[i];
+            }
+        } else {
+            this.edgeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
+
+            for (let i = 0; i < values.length; i++) {
+                this.edgeColorSchemeColors[this.store.core.currentGraph][
+                    feature
+                ][values[i]] = skipfactor
+                    ? interpolateRainbow(i * skipfactor)
+                    : schemeTableau10[i];
+            }
         }
     };
 
-    generateNumericColorSchema = (values, feature) => {
+    generateNumericColorSchema = (values, feature, schemeType = 'node') => {
         const min = Math.min(...values);
         const max = Math.max(...values);
 
         const norm_values = values.map(value => (value - min) / (max - min));
 
-        this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
+        if (schemeType === 'node') {
+            this.nodeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
 
-        if (min === max) {
-            for (let i = 0; i < values.length; i++) {
-                this.nodeColorSchemeColors[this.store.core.currentGraph][
-                    feature
-                ][values[i]] = interpolateYlOrRd(1);
+            if (min === max) {
+                for (let i = 0; i < values.length; i++) {
+                    this.nodeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = interpolateYlOrRd(1);
+                }
+            } else {
+                for (let i = 0; i < values.length; i++) {
+                    this.nodeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = interpolateYlOrRd(norm_values[i]);
+                }
             }
         } else {
-            for (let i = 0; i < values.length; i++) {
-                this.nodeColorSchemeColors[this.store.core.currentGraph][
-                    feature
-                ][values[i]] = interpolateYlOrRd(norm_values[i]);
+            this.edgeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
+            if (min === max) {
+                for (let i = 0; i < values.length; i++) {
+                    this.edgeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = interpolateYlOrRd(1);
+                }
+            } else {
+                for (let i = 0; i < values.length; i++) {
+                    this.edgeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = interpolateYlOrRd(norm_values[i]);
+                }
             }
         }
     };
@@ -893,6 +933,10 @@ export class GraphInstanceStore {
 
     get selectedColorSchema() {
         return this.nodeColorScheme[this.store.core.currentGraph];
+    }
+
+    get selectedEdgeColorSchema() {
+        return this.edgeColorScheme[this.store.core.currentGraph];
     }
 
     filterNodesWithValue = (property, value, groupValue, groupProperty) => {

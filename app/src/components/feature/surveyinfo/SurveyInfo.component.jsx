@@ -67,6 +67,7 @@ export function SurveyInfoModal(props) {
                         backgroundColor="green.500"
                         transform="all 0.2s ease-in"
                         target="_blank"
+                        onClick={() => props.onClose()}
                         href={getSurveyLink()}
                         _hover={{
                             textDecoration: 'none',

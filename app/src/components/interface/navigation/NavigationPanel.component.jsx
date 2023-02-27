@@ -184,6 +184,8 @@ function NavigationPanelComponent() {
                                 })
                             );
 
+                            store.graphInstance.setEdgeColorScheme('auto');
+
                             store.graph.modifyStudy(
                                 store.core.currentGraph === 'detail'
                                     ? 'overview'

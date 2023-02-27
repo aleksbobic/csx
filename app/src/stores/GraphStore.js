@@ -402,30 +402,68 @@ export class GraphStore {
             ? this.graphData
             : this.detailGraphData;
 
-        switch (
-            this.store.graphInstance.nodeColorScheme[
+        if (
+            this.store.graphInstance.edgeColorScheme[
                 this.store.core.currentGraph
-            ]
+            ] === 'auto'
         ) {
-            case 'component':
-                for (let i = 0; i < data.meta.linkCount; i++) {
-                    data.links[i].color =
-                        this.store.graphInstance.nodeColorSchemeColors[
-                            this.store.core.currentGraph
-                        ]['component'][data.links[i].component];
-                }
-                break;
-            default:
-                for (let i = 0; i < data.meta.linkCount; i++) {
-                    data.links[i].color =
-                        colorMode === 'light'
-                            ? 'rgb(0,0,0)'
-                            : 'rgb(255,255,255)';
-                    data.links[i].target.material.color.set(
-                        colorMode === 'light' ? 'black' : 'white'
-                    );
-                }
-                break;
+            switch (
+                this.store.graphInstance.nodeColorScheme[
+                    this.store.core.currentGraph
+                ]
+            ) {
+                case 'component':
+                    for (let i = 0; i < data.meta.linkCount; i++) {
+                        data.links[i].color =
+                            this.store.graphInstance.nodeColorSchemeColors[
+                                this.store.core.currentGraph
+                            ]['component'][data.links[i].component];
+                    }
+                    break;
+                default:
+                    for (let i = 0; i < data.meta.linkCount; i++) {
+                        data.links[i].color =
+                            colorMode === 'light'
+                                ? 'rgb(0,0,0)'
+                                : 'rgb(255,255,255)';
+                        data.links[i].target.material.color.set(
+                            colorMode === 'light' ? 'black' : 'white'
+                        );
+                    }
+                    break;
+            }
+        } else if (
+            this.store.graphInstance.edgeColorScheme[
+                this.store.core.currentGraph
+            ] === 'weight'
+        ) {
+            for (let i = 0; i < data.meta.linkCount; i++) {
+                data.links[i].color =
+                    this.store.graphInstance.edgeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['weight'][data.links[i].weight];
+            }
+        } else if (
+            this.store.graphInstance.edgeColorScheme[
+                this.store.core.currentGraph
+            ] === 'feature types'
+        ) {
+            for (let i = 0; i < data.meta.linkCount; i++) {
+                data.links[i].color =
+                    this.store.graphInstance.edgeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['feature types'][
+                        data.links[i].connections.reduce(
+                            (features, connection) => {
+                                if (!features.includes(connection.feature)) {
+                                    features.push(connection.feature);
+                                }
+                                return features;
+                            },
+                            []
+                        ).length
+                    ];
+            }
         }
 
         data.links.push({});
@@ -828,6 +866,39 @@ export class GraphStore {
             );
     };
 
+    getLinkColor = edge => {
+        if (this.store.graphInstance.selectedEdgeColorSchema === 'auto') {
+            return this.store.graphInstance.nodeColorScheme[
+                this.store.core.currentGraph
+            ] !== 'component'
+                ? '#ffffff'
+                : this.store.graphInstance.nodeColorSchemeColors[
+                      this.store.core.currentGraph
+                  ][
+                      this.store.graphInstance.nodeColorScheme[
+                          this.store.core.currentGraph
+                      ]
+                  ][edge.component];
+        }
+
+        if (this.store.graphInstance.selectedEdgeColorSchema === 'weight') {
+            return this.store.graphInstance.edgeColorSchemeColors[
+                this.store.core.currentGraph
+            ]['weight'][edge.weight];
+        }
+
+        return this.store.graphInstance.edgeColorSchemeColors[
+            this.store.core.currentGraph
+        ]['feature types'][
+            edge.connections.reduce((features, connection) => {
+                if (!features.includes(connection.feature)) {
+                    features.push(connection.feature);
+                }
+                return features;
+            }, []).length
+        ];
+    };
+
     handleRetrievedGraph = (response, graphType, query) => {
         if (!response['nodes'].length) {
             this.graphData['isEmpty'] = true;
@@ -893,6 +964,26 @@ export class GraphStore {
                     'degree'
                 );
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(edge => edge.weight),
+                    'weight',
+                    'edge'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(
+                        edge =>
+                            edge.connections.reduce((features, connection) => {
+                                if (!features.includes(connection.feature)) {
+                                    features.push(connection.feature);
+                                }
+                                return features;
+                            }, []).length
+                    ),
+                    'feature types',
+                    'edge'
+                );
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'overview'
@@ -901,18 +992,7 @@ export class GraphStore {
                 this.graphData = {
                     ...this.graphData,
                     links: response.edges.map(edge => {
-                        edge.color =
-                            this.store.graphInstance.nodeColorScheme[
-                                this.store.core.currentGraph
-                            ] !== 'component'
-                                ? '#ffffff'
-                                : this.store.graphInstance
-                                      .nodeColorSchemeColors[
-                                      this.store.core.currentGraph
-                                  ][
-                                      this.store.graphInstance.nodeColorScheme
-                                          .overview
-                                  ][edge.component];
+                        edge.color = this.getLinkColor(edge);
                         return edge;
                     }),
                     nodes,
@@ -983,6 +1063,12 @@ export class GraphStore {
                     'degree'
                 );
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(edge => edge.weight),
+                    'weight',
+                    'edge'
+                );
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'detail'
@@ -991,12 +1077,7 @@ export class GraphStore {
                 this.detailGraphData = {
                     ...this.detailGraphData,
                     links: response.edges.map(edge => {
-                        edge.color =
-                            this.store.graphInstance.nodeColorSchemeColors[
-                                this.store.core.currentGraph
-                            ][this.store.graphInstance.nodeColorScheme.detail][
-                                edge.component
-                            ];
+                        edge.color = this.getLinkColor(edge);
                         return edge;
                     }),
                     nodes,

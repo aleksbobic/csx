@@ -68,6 +68,21 @@ function Settings() {
         );
     };
 
+    const updateEdgeColorScheme = value => {
+        store.graphInstance.setEdgeColorScheme(value);
+
+        store.graph.updateLinkColor(colorMode);
+
+        store.track.trackEvent(
+            'Side panel - View Settings',
+            'Radio Element - Edge Color Schema',
+            JSON.stringify({
+                type: 'Change Selection',
+                value: value.toLowerCase()
+            })
+        );
+    };
+
     const updateLabelDistance = value => {
         store.graphInstance.changeShowLabelDistance(
             value,
@@ -125,10 +140,7 @@ function Settings() {
         }
 
         return colorSchemas.map(entry => (
-            <option
-                value={entry.value}
-                key={`node_cololr_schema${entry.value}`}
-            >
+            <option value={entry.value} key={`node_color_schema${entry.value}`}>
                 {entry.label}
             </option>
         ));
@@ -376,6 +388,64 @@ function Settings() {
         );
     };
 
+    const renderEdgeColorSchemeOptionElements = () => {
+        const colorSchemas = [
+            {
+                value: 'auto',
+                label: 'Automatic',
+                tooltip:
+                    'Edges are colored based on the selected node color schema.'
+            },
+            {
+                value: 'weight',
+                label: 'Edge weight',
+                tooltip: 'Color edges based on their weight'
+            }
+        ];
+
+        if (store.core.isOverview) {
+            colorSchemas.push({
+                value: 'feature types',
+                label: 'Edge types',
+                tooltip:
+                    'Color edges based on the number of feature types on them.'
+            });
+        }
+
+        return colorSchemas.map(entry => (
+            <option value={entry.value} key={`edge_color_schema${entry.value}`}>
+                {entry.label}
+            </option>
+        ));
+    };
+
+    const renderEdgeColorOptions = () => {
+        return (
+            <HStack justifyContent="space-between" width="100%">
+                <Text fontSize="sm">Color: </Text>
+                <Tooltip label="Select property used for edge colors.">
+                    <Select
+                        size="sm"
+                        value={
+                            store.graphInstance.edgeColorScheme[
+                                store.core.currentGraph
+                            ]
+                        }
+                        onChange={e => updateEdgeColorScheme(e.target.value)}
+                        variant="filled"
+                        borderRadius="6px"
+                        width="100px"
+                        overflow="hidden"
+                        whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                    >
+                        {renderEdgeColorSchemeOptionElements()}
+                    </Select>
+                </Tooltip>
+            </HStack>
+        );
+    };
+
     const renderVisibilityOptions = () => {
         return (
             <>
@@ -505,6 +575,7 @@ function Settings() {
                             </HStack>
                         </Tooltip>
                     )}
+                    {renderEdgeColorOptions()}
                 </VStack>
                 <VStack
                     width="100%"

@@ -17,6 +17,7 @@ function Graph(props) {
     const backgroundColor = useColorModeValue('#ffffff', '#1A202C');
     const [timer, setTimer] = useState(null);
     const { width, height } = useResizeDetector({ containerRef });
+    const [linkOpacity, setLinkOpacity] = useState(0.3);
 
     const [windowSize, setWindowSize] = useState({
         width: window.innerWidth,
@@ -128,6 +129,7 @@ function Graph(props) {
         store.graphInstance.selfCentricType,
         store.graph.showLabelDistance,
         store.graphInstance.useCurvedEdges,
+        linkOpacity,
         store.graph
     ]);
 
@@ -198,6 +200,27 @@ function Graph(props) {
         }
     };
 
+    useEffect(() => {
+        if (store.core.colorMode === 'light') {
+            setLinkOpacity(0.7);
+        } else {
+            if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
+                if (store.graphInstance.selectedColorSchema === 'component') {
+                    setLinkOpacity(0.3);
+                } else {
+                    setLinkOpacity(0.1);
+                }
+            } else {
+                setLinkOpacity(0.7);
+            }
+        }
+    }, [
+        linkOpacity,
+        store.core.colorMode,
+        store.graphInstance.selectedColorSchema,
+        store.graphInstance.selectedEdgeColorSchema
+    ]);
+
     return (
         <ForceGraph3D
             ref={containerRef}
@@ -211,13 +234,7 @@ function Graph(props) {
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
             cooldownTime={store.graphInstance.forceCooldownTime}
-            linkOpacity={
-                store.core.colorMode === 'light'
-                    ? 0.7
-                    : store.graphInstance.selectedColorSchema === 'component'
-                    ? 0.3
-                    : 0.1
-            }
+            linkOpacity={linkOpacity}
             onEngineStop={() => {
                 if (store.graphInstance.forceEngine) {
                     store.graphInstance.stopForce();

@@ -3,6 +3,7 @@ import {
     Button,
     Divider,
     Flex,
+    Heading,
     HStack,
     IconButton,
     Menu,
@@ -120,49 +121,65 @@ function ControlPanel() {
             ) ||
                 store.graphInstance.nodeColorScheme[store.core.currentGraph] ===
                     'degree') &&
-            legendItems.length > 10
+            legendItems.length > 8
         ) {
             return (
-                <Flex
-                    id="colorscheme"
-                    position="absolute"
-                    bottom="70px"
-                    left="320px"
-                    maxWidth="300px"
-                    zIndex={2}
-                    backgroundColor={legendBackgroundColor}
-                    padding="10px"
-                    borderRadius="4px"
-                    maxHeight="300px"
-                >
-                    <CustomScroll>
-                        <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            position="absolute"
-                            left="15px"
-                            color="blackAlpha.700"
-                        >
-                            {legendItems[0]}
-                        </Text>
-                        <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            position="absolute"
-                            right="15px"
-                        >
-                            {legendItems[legendItems.length - 1]}
-                        </Text>
-                        <Box
-                            width="300px"
-                            height="20px"
-                            borderRadius="2px"
-                            bgGradient={`linear(to-r, ${String(
-                                schemeYlOrRd[9]
-                            )})`}
-                        />
-                    </CustomScroll>
-                </Flex>
+                <VStack width="90px" alignItems="flex-start">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Node colors
+                    </Heading>
+
+                    <Flex maxWidth="300px" maxHeight="300px">
+                        <CustomScroll>
+                            <Tooltip label={`Min value: ${legendItems[0]}`}>
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    color="blackAlpha.700"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[0]}
+                                </Text>
+                            </Tooltip>
+                            <Tooltip
+                                label={`Max value: ${
+                                    legendItems[legendItems.length - 1]
+                                }`}
+                            >
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    bottom="5px"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[legendItems.length - 1]}
+                                </Text>
+                            </Tooltip>
+                            <Box
+                                width="90px"
+                                height="300px"
+                                borderRadius="2px"
+                                bgGradient={`linear(to-b, ${String(
+                                    schemeYlOrRd[9]
+                                )})`}
+                            />
+                        </CustomScroll>
+                    </Flex>
+                </VStack>
             );
         }
 
@@ -203,21 +220,140 @@ function ControlPanel() {
 
         return (
             <Flex
-                id="colorscheme"
-                position="absolute"
-                bottom="70px"
-                left="320px"
+                width="150px"
                 maxWidth="200px"
-                zIndex={2}
-                backgroundColor={legendBackgroundColor}
-                padding="10px"
-                borderRadius="10px"
-                border="1px solid"
-                borderColor={legendBorderColor}
+                minWidth="50px"
                 maxHeight="300px"
                 overflowY="scroll"
             >
                 <VStack width="100%" paddingBottom="10px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Node colors
+                    </Heading>
+                    {legend}
+                </VStack>
+            </Flex>
+        );
+    };
+
+    const renderEdgeColorLegend = () => {
+        const selectedColorScheme =
+            store.graphInstance.edgeColorScheme[store.core.currentGraph];
+
+        let legendItems = Object.keys(
+            store.graphInstance.edgeColorSchemeColors[store.core.currentGraph][
+                selectedColorScheme
+            ]
+        );
+
+        if (legendItems.length > 8) {
+            return (
+                <VStack width="90px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Edge colors
+                    </Heading>
+
+                    <Flex maxWidth="300px" maxHeight="300px">
+                        <CustomScroll>
+                            <Tooltip label={`Min value: ${legendItems[0]}`}>
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    color="blackAlpha.700"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[0]}
+                                </Text>
+                            </Tooltip>
+                            <Tooltip
+                                label={`Max value: ${
+                                    legendItems[legendItems.length - 1]
+                                }`}
+                            >
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    bottom="5px"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[legendItems.length - 1]}
+                                </Text>
+                            </Tooltip>
+                            <Box
+                                width="90px"
+                                height="300px"
+                                borderRadius="2px"
+                                bgGradient={`linear(to-b, ${String(
+                                    schemeYlOrRd[9]
+                                )})`}
+                            />
+                        </CustomScroll>
+                    </Flex>
+                </VStack>
+            );
+        }
+
+        const legend = legendItems.map(key => {
+            return (
+                <HStack key={key} width="100%">
+                    <Tag
+                        size="sm"
+                        borderRadius="full"
+                        variant="solid"
+                        backgroundColor={
+                            store.graphInstance.edgeColorSchemeColors[
+                                store.core.currentGraph
+                            ][selectedColorScheme][key]
+                        }
+                    />
+                    <Text
+                        size="sm"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                    >
+                        {selectedColorScheme === 'weight' ? 'Weight ' : ''}
+                        {key}
+                        {selectedColorScheme === 'feature types'
+                            ? key === '1'
+                                ? ' feature'
+                                : ' features'
+                            : ''}
+                    </Text>
+                </HStack>
+            );
+        });
+
+        if (legend.length === 0) {
+            return null;
+        }
+
+        return (
+            <Flex
+                maxWidth="200px"
+                minWidth="50px"
+                width="150px"
+                maxHeight="300px"
+                overflowY="scroll"
+            >
+                <VStack width="100%" paddingBottom="10px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Edge colors
+                    </Heading>
                     {legend}
                 </VStack>
             </Flex>
@@ -853,10 +989,38 @@ function ControlPanel() {
                     {renderNetworkModificationMenu()}
 
                     {store.core.currentGraph &&
-                        !['none', 'component'].includes(
+                        (!['none', 'component'].includes(
                             store.graphInstance.selectedColorSchema
-                        ) &&
-                        renderColorLegend()}
+                        ) ||
+                            !['auto'].includes(
+                                store.graphInstance.selectedEdgeColorSchema
+                            )) && (
+                            <HStack
+                                position="absolute"
+                                bottom="70px"
+                                left="320px"
+                                id="colorscheme"
+                                backgroundColor={legendBackgroundColor}
+                                padding="20px"
+                                borderRadius="10px"
+                                spacing="20px"
+                                alignItems="flex-start"
+                                zIndex={2}
+                                borderColor={legendBorderColor}
+                            >
+                                {store.core.currentGraph &&
+                                    !['none', 'component'].includes(
+                                        store.graphInstance.selectedColorSchema
+                                    ) &&
+                                    renderColorLegend()}
+                                {store.core.currentGraph &&
+                                    !['auto'].includes(
+                                        store.graphInstance
+                                            .selectedEdgeColorSchema
+                                    ) &&
+                                    renderEdgeColorLegend()}
+                            </HStack>
+                        )}
                 </Slide>
             </Tabs>
         </Box>
