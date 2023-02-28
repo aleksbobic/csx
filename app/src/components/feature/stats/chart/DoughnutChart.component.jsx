@@ -455,7 +455,6 @@ function DoughnutChart(props) {
                                     onChange={e => {
                                         setDispalyLimit(e.target.value);
 
-                                        console.log(dispalyLimit);
                                         store.stats.setWidgetProperty(
                                             props.chart.id,
                                             'display_limit',

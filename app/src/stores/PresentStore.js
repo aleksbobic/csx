@@ -359,7 +359,6 @@ export class PresentStore {
         if ((index || slide.align) && slide.screenshot) {
             if (slide.align) {
                 if (slide.align === 'left') {
-                    console.log('left: ', slide);
                     xOffset = '0%';
                     textXOffset = `${
                         3.5 * (slide.screenshotWidth / slide.screenshotHeight)
@@ -379,7 +378,6 @@ export class PresentStore {
                     textWidthBasedOnOffset = xOffset;
                 }
             } else {
-                console.log('right: ', index % 2, slide);
                 xOffset =
                     index % 2
                         ? '0%'
