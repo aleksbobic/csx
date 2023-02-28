@@ -206,6 +206,31 @@ export class StatsStore {
         this.newChartProps.show_only = val;
     };
 
+    getNodeSortValues = () => {
+        let sortValues = [
+            { value: 'frequency', label: 'frequency' },
+            { value: 'neighbours', label: 'Neighbour count' }
+        ];
+
+        if (this.store.core.isDetail) {
+            return sortValues;
+        }
+
+        return [
+            ...sortValues,
+            ...this.store.graph.currentGraphData.meta.anchorProperties
+                .map(entry => entry.property)
+                .filter(property =>
+                    ['integer', 'float'].includes(
+                        this.store.overviewSchema.featureTypes[property]
+                    )
+                )
+                .map(property => {
+                    return { value: property, label: property };
+                })
+        ];
+    };
+
     getWidgetNodeProperties = (group = false) => {
         let elementValues = [];
         if (!group) {
@@ -1123,7 +1148,8 @@ export class StatsStore {
         display_limit,
         network_data,
         groupBy,
-        show_only
+        show_only,
+        sortBy = 'frequency'
     ) => {
         let data = this.getNodeDataBasedOnNetworkSelection(
             network_data,
@@ -1238,17 +1264,35 @@ export class StatsStore {
                     getNodeProp(node, nodeProperty.prop)
                 );
 
-                if (labelLocation >= 0) {
-                    counts[labelLocation] += node.entries.filter(entryID =>
-                        visibleEntries.includes(entryID)
-                    ).length;
-                } else {
-                    values.push(getNodeProp(node, nodeProperty.prop));
-                    counts.push(
-                        node.entries.filter(entryID =>
+                if (sortBy === 'frequency') {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += node.entries.filter(entryID =>
                             visibleEntries.includes(entryID)
-                        ).length
-                    );
+                        ).length;
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(
+                            node.entries.filter(entryID =>
+                                visibleEntries.includes(entryID)
+                            ).length
+                        );
+                    }
+                } else if (sortBy === 'neighbours') {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += node.neighbours.size;
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(node.neighbours.size);
+                    }
+                } else {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += parseFloat(
+                            node.properties[sortBy]
+                        );
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(parseFloat(node.properties[sortBy]));
+                    }
                 }
             });
 

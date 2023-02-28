@@ -34,6 +34,14 @@ function LineChart(props) {
     const [chartElementSelectedValue, setChartElementSelectedValue] = useState(
         props.chart.element_values
     );
+    const [chartElementSortValues, setChartElementSortValues] = useState(
+        store.stats.getNodeSortValues()
+    );
+    const [chartElementSortValue, setChartElementSortValue] = useState(
+        props?.chart?.element_sort_values
+            ? props?.chart?.element_sort_values
+            : 'frequency'
+    );
     const [chartNetworkData, setChartNetworkData] = useState(
         props.chart.network_data
     );
@@ -45,11 +53,18 @@ function LineChart(props) {
         if (!props.isExample) {
             if (chartElement === 'nodes') {
                 setChartElementValues(store.stats.getWidgetNodeProperties());
+                setChartElementSortValues(store.stats.getNodeSortValues());
             } else {
                 setChartElementValues(store.stats.getWidgetEdgeProperties());
             }
         }
-    }, [chartElement, props.chart.id, props.isExample, store.stats]);
+    }, [
+        chartElement,
+        props.chart.id,
+        props.isExample,
+        store.stats,
+        props.settingsMode
+    ]);
 
     useEffect(() => {
         if (!props.isExample) {
@@ -64,13 +79,39 @@ function LineChart(props) {
     }, [chartElementValues, props.chart.id, props.isExample, store.stats]);
 
     useEffect(() => {
+        if (!props.isExample) {
+            if (
+                !props?.chart?.element_sort_values ||
+                !chartElementSortValues.find(
+                    entry => entry.value === props?.chart?.element_sort_values
+                )
+            ) {
+                setChartElementSortValue(chartElementSortValues[0].value);
+
+                store.stats.setWidgetProperty(
+                    props.chart.id,
+                    'element_sort_values',
+                    chartElementSortValues[0].value
+                );
+            }
+        }
+    }, [
+        chartElementSortValues,
+        props.chart?.element_sort_values,
+        props.chart.id,
+        props.isExample,
+        store.stats,
+        props.isExpanded
+    ]);
+
+    useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment.chartToAttach]);
+    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
 
     useEffect(() => {
         if (props.demoData) {
@@ -151,7 +192,8 @@ function LineChart(props) {
                         dispalyLimit,
                         chartNetworkData,
                         groupBy,
-                        props.chart.show_only
+                        props.chart.show_only,
+                        chartElementSortValue
                     );
 
                     if (nodeData.labels.length > 0) {
@@ -261,7 +303,8 @@ function LineChart(props) {
         store.overviewSchema.anchorProperties,
         props.isExpanded,
         dispalyLimit,
-        chartNetworkData
+        chartNetworkData,
+        chartElementSortValue
     ]);
 
     const getPluginOptions = () => {
@@ -301,7 +344,7 @@ function LineChart(props) {
                     }${tooltipItem[0].label}`;
                 },
                 label: tooltipItem => {
-                    return `Frequency: ${tooltipItem.formattedValue}`;
+                    return `${chartElementSortValue}: ${tooltipItem.formattedValue}`;
                 }
             }
         };
@@ -510,6 +553,55 @@ function LineChart(props) {
                             </HStack>
                             <HStack width="100%">
                                 <Heading size="xs" opacity="0.5" width="100%">
+                                    Y Axis Props
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    isDisabled={chartElement === 'edges'}
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartElementSortValue}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartElementSortValue(
+                                            e.target.value
+                                        );
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'element_sort_values',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {chartElementSortValues.map(entry => (
+                                        <option
+                                            key={`${
+                                                chartElement === 'nodes'
+                                                    ? 'Node'
+                                                    : 'Edge'
+                                            }_sort_property_${entry.value}`}
+                                            value={entry.value}
+                                        >
+                                            {entry.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
                                     Element Types
                                 </Heading>
                                 <Select
@@ -564,7 +656,6 @@ function LineChart(props) {
                                     onChange={e => {
                                         setDispalyLimit(e.target.value);
 
-                                        console.log(dispalyLimit);
                                         store.stats.setWidgetProperty(
                                             props.chart.id,
                                             'display_limit',
@@ -695,7 +786,7 @@ function LineChart(props) {
                         title: {
                             display: true,
                             color: 'white',
-                            text: 'Frequency'
+                            text: chartElementSortValue
                         },
                         display: props.isExpanded,
                         beginAtZero: true,
@@ -770,7 +861,7 @@ function LineChart(props) {
                         display: false
                     },
                     legend: {
-                        display: props.chart.legend
+                        display: false
                     },
                     datalabels: {
                         display: false
