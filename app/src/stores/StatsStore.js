@@ -246,19 +246,6 @@ export class StatsStore {
         ];
     };
 
-    changeWidgetTitle = (widgetID, title) => {
-        const dataset = this.store.search.currentDataset;
-        this.charts[dataset].find(chart => chart.id === widgetID).title = title;
-        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
-    };
-
-    changeWidgetElements = (widgetID, elements) => {
-        const dataset = this.store.search.currentDataset;
-        this.charts[dataset].find(chart => chart.id === widgetID).elements =
-            elements;
-        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
-    };
-
     setWidgetProperty = (widgetID, property, value) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset].find(chart => chart.id === widgetID)[property] =

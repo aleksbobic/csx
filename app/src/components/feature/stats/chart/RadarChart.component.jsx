@@ -32,11 +32,11 @@ function RadarChart(props) {
     const [properties, setProperties] = useState([]);
     const [categoricalProperties, setCategoricalProperties] = useState({});
 
-    const [visibleNodeProperties, setVisibleNodeProperties] = useState([
-        'Neighbours',
-        'Documents',
-        'Links'
-    ]);
+    const [visibleNodeProperties, setVisibleNodeProperties] = useState(
+        props.chart.visible_node_properties
+            ? props.chart.visible_node_properties
+            : ['Neighbours', 'Documents', 'Links']
+    );
 
     useEffect(() => {
         if (store.core.isDetail) {
@@ -298,8 +298,10 @@ function RadarChart(props) {
                                 borderRadius="5px"
                                 onChange={e => {
                                     setChartElement(e.target.value);
-                                    store.stats.changeWidgetElements(
+
+                                    store.stats.setWidgetProperty(
                                         props.chart.id,
+                                        'elements',
                                         e.target.value
                                     );
                                 }}
@@ -355,6 +357,14 @@ function RadarChart(props) {
                                                     ...visibleNodeProperties,
                                                     entry
                                                 ]);
+                                                store.stats.setWidgetProperty(
+                                                    props.chart.id,
+                                                    'visible_node_properties',
+                                                    [
+                                                        ...visibleNodeProperties,
+                                                        entry
+                                                    ]
+                                                );
                                             } else {
                                                 visibleNodeProperties.splice(
                                                     visibleNodeProperties.indexOf(
@@ -365,6 +375,11 @@ function RadarChart(props) {
                                                 setVisibleNodeProperties([
                                                     ...visibleNodeProperties
                                                 ]);
+                                                store.stats.setWidgetProperty(
+                                                    props.chart.id,
+                                                    'visible_node_properties',
+                                                    [...visibleNodeProperties]
+                                                );
                                             }
                                         }}
                                     >
