@@ -6,6 +6,7 @@ import { RootStoreContext } from 'stores/RootStore';
 import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
+import ChartAlertComponent from './ChartAlert.component';
 
 function BarChart(props) {
     const store = useContext(RootStoreContext);
@@ -210,33 +211,7 @@ function BarChart(props) {
     };
 
     if (!data || data.labels.length === 0) {
-        return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData === 'selected' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
-        );
+        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     const getPadding = () => {

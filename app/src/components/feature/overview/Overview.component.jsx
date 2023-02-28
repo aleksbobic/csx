@@ -230,7 +230,7 @@ function Overview(props) {
                 templateColumns={templateColumn}
                 gap={5}
                 margin="0"
-                padding="0"
+                padding="10px 0 0 0"
             >
                 {renderWidgets()}
                 {renderAddWidgetButton()}

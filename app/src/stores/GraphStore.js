@@ -503,13 +503,8 @@ export class GraphStore {
     selectComponent = componentId => {
         if (this.currentGraphData.nodes) {
             if (
-                !this.currentGraphData.selectedComponents.includes(componentId)
+                this.currentGraphData.selectedComponents.includes(componentId)
             ) {
-                const nodesToSelect = this.currentGraphData.nodes.filter(
-                    node => node.component === componentId
-                );
-                this.selectNode(nodesToSelect);
-            } else {
                 const nodesToDeselect = this.currentGraphData.nodes.filter(
                     node => node.component === componentId && node.selected
                 );
@@ -520,6 +515,11 @@ export class GraphStore {
                     );
                     this.deselectNode(node, index);
                 });
+            } else {
+                const nodesToSelect = this.currentGraphData.nodes.filter(
+                    node => node.component === componentId && !node.selected
+                );
+                this.selectNode(nodesToSelect);
             }
         }
     };

@@ -3,18 +3,60 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
+import {
+    Center,
+    Checkbox,
+    Editable,
+    EditableInput,
+    EditablePreview,
+    Heading,
+    Select,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { schemeTableau10 } from 'd3-scale-chromatic';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Radar } from 'react-chartjs-2';
+import ChartAlertComponent from './ChartAlert.component';
 
 function RadarChart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
+    const [chartElement, setChartElement] = useState(props.chart.elements);
     const [data, setData] = useState(null);
+    const [title, setTitle] = useState(props.title);
     const [tooManySelectedElements, setTooManySelectedElements] =
         useState(false);
+    const [properties, setProperties] = useState([]);
+    const [categoricalProperties, setCategoricalProperties] = useState({});
+
+    const [visibleNodeProperties, setVisibleNodeProperties] = useState([
+        'Neighbours',
+        'Documents',
+        'Links'
+    ]);
+
+    useEffect(() => {
+        if (store.core.isDetail) {
+            setCategoricalProperties(
+                store.stats.getRadarDetailNodeProperties()
+            );
+        } else {
+            setCategoricalProperties(
+                store.stats.getRadarOverviewNodeProperties()
+            );
+        }
+    }, [store.core.isDetail, store.stats, store.graph.currentGraphData]);
+
+    useEffect(() => {
+        setProperties(
+            Object.keys(categoricalProperties)
+                .map(key => categoricalProperties[key])
+                .flat()
+        );
+    }, [categoricalProperties]);
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -23,7 +65,19 @@ function RadarChart(props) {
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment.chartToAttach]);
+    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+
+    const getVisibleCategoricalProperties = useCallback(() => {
+        const visibleCategoricalProperties = {};
+
+        Object.keys(categoricalProperties).forEach(key => {
+            visibleCategoricalProperties[key] = categoricalProperties[
+                key
+            ].filter(property => visibleNodeProperties.includes(property));
+        });
+
+        return visibleCategoricalProperties;
+    }, [categoricalProperties, visibleNodeProperties]);
 
     useEffect(() => {
         if (props.demoData) {
@@ -47,9 +101,9 @@ function RadarChart(props) {
             });
         } else {
             if (
-                (props.radarDisplayElement === 'nodes' &&
+                (chartElement === 'nodes' &&
                     store.graph.currentGraphData.selectedNodes.length > 8) ||
-                (props.radarDisplayElement === 'components' &&
+                (chartElement === 'components' &&
                     store.graph.currentGraphData.selectedComponents.length > 8)
             ) {
                 setTooManySelectedElements(true);
@@ -60,10 +114,20 @@ function RadarChart(props) {
             setTooManySelectedElements(false);
 
             let data;
-            if (props.radarDisplayElement === 'nodes') {
-                data = store.stats.getRadarNodes();
+            const visibleProperties = getVisibleCategoricalProperties();
+
+            if (chartElement === 'nodes') {
+                if (store.core.isDetail) {
+                    data = store.stats.getRadarDetailNodes(visibleProperties);
+                } else {
+                    data = store.stats.getRadarOverviewNodes(visibleProperties);
+                }
             } else {
-                data = store.stats.getRadarComponents();
+                if (store.core.isDetail) {
+                    data = store.stats.getRadarDetailComponents();
+                } else {
+                    data = store.stats.getRadarOverviewComponents();
+                }
             }
 
             if (!data) {
@@ -90,28 +154,13 @@ function RadarChart(props) {
             }
         }
     }, [
-        props.chart.element_values,
-        props.chart.elements,
-        props.chart.groupBy,
-        props.chart.network_data,
-        props.chart.onlyVisible,
-        props.chart.show_only,
-        props.chart.type,
+        chartElement,
+        getVisibleCategoricalProperties,
         props.demoData,
-        store.stats,
-        store.graph.currentGraphData.nodes,
-        store.graph.currentGraphData.selectedNodes,
+        store.core.isDetail,
+        store.graph.currentGraphData.selectedComponents.length,
         store.graph.currentGraphData.selectedNodes.length,
-        store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponents,
-        props.elementDisplayLimit,
-        props.networkData,
-        props.chart.group_by,
-        store.core.currentGraph,
-        store.overviewSchema.anchorProperties,
-        props.isExpanded,
-        props.radarDisplayElement,
-        tooManySelectedElements
+        store.stats
     ]);
 
     const getPluginOptions = () => {
@@ -165,109 +214,182 @@ function RadarChart(props) {
         return pluginOptions;
     };
 
-    const getChartType = () => {
-        switch (props.chart.type.toLowerCase()) {
-            case 'vertical bar':
-            case 'grouped bar':
-            case 'histogram':
-                return 'bar';
-            default:
-                return props.chart.type.toLowerCase();
-        }
-    };
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <Center height="100%" width="100%">
+                <VStack
+                    height="100%"
+                    width="100%"
+                    alignItems="flex-start"
+                    spacing={1}
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'blackAlpha.800'
+                    }
+                    borderRadius="6px"
+                    justifyContent="center"
+                    padding="10% 20%"
+                >
+                    <CustomScroll
+                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                    >
+                        <VStack height="100%" width="100%">
+                            <Heading size="xs" opacity="0.5" width="100%">
+                                Chart title
+                            </Heading>
 
-    const getAxisTitle = () => {
-        if (props.chart.elements === 'edges') {
-            if (props.demoData) {
-                return 'Edge property';
-            }
-            switch (props.chart.element_values) {
-                case 'values':
-                    return 'Edge values';
-                case 'types':
-                    return 'Edge types';
-                default:
-                    return 'Edge weights';
-            }
-        }
+                            <Editable
+                                size="xs"
+                                width="100%"
+                                value={title}
+                                backgroundColor={
+                                    colorMode === 'light'
+                                        ? 'blackAlpha.100'
+                                        : 'blackAlpha.300'
+                                }
+                                borderRadius="5px"
+                                onChange={val => setTitle(val)}
+                                onSubmit={val => {
+                                    if (val.trim()) {
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'title',
+                                            val.trim()
+                                        );
+                                        setTitle(val.trim());
+                                    } else {
+                                        setTitle(props.title);
+                                    }
+                                }}
+                                onFocus={() =>
+                                    store.comment.setCommentTrigger(false)
+                                }
+                                onBlur={() =>
+                                    store.comment.setCommentTrigger(true)
+                                }
+                            >
+                                <EditablePreview
+                                    padding="5px 10px"
+                                    fontSize="xs"
+                                    color="#FFFFFFBB"
+                                    backgroundColor="whiteAlpha.200"
+                                    width="100%"
+                                    size="xs"
+                                />
+                                <EditableInput
+                                    backgroundColor="whiteAlpha.200"
+                                    padding="5px 10px"
+                                    fontSize="xs"
+                                    width="100%"
+                                    size="xs"
+                                />
+                            </Editable>
+                            <Heading size="xs" opacity="0.5" width="100%">
+                                Chart Elements
+                            </Heading>
+                            <Select
+                                className="nodrag"
+                                margin="0px"
+                                variant="filled"
+                                size="xs"
+                                width="100%"
+                                defaultValue={chartElement}
+                                borderRadius="5px"
+                                onChange={e => {
+                                    setChartElement(e.target.value);
+                                    store.stats.changeWidgetElements(
+                                        props.chart.id,
+                                        e.target.value
+                                    );
+                                }}
+                                background="whiteAlpha.200"
+                                opacity="0.8"
+                                _hover={{
+                                    opacity: 1,
+                                    cursor: 'pointer'
+                                }}
+                                _focus={{
+                                    opacity: 1,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <option value="nodes">Nodes</option>
+                                <option value="components">Components</option>
+                            </Select>
+                            <Heading
+                                size="xs"
+                                opacity="0.5"
+                                width="100%"
+                                style={{ marginTop: '10px' }}
+                            >
+                                Visible Node Properties
+                            </Heading>
 
-        if (props.demoData) {
-            return 'Node property';
-        }
-
-        switch (props.chart.element_values) {
-            case 'values':
-                return props.chart.show_only
-                    ? props.chart.show_only
-                    : 'Node values';
-            case 'types':
-                return 'Node types';
-            default:
-                return (
-                    props.chart.element_values.charAt(0).toUpperCase() +
-                    props.chart.element_values.slice(1).toLowerCase()
-                );
-        }
-    };
+                            <VStack
+                                alignItems="flex-start"
+                                spacing="5px"
+                                width="100%"
+                                backgroundColor="whiteAlpha.100"
+                                borderRadius="4px"
+                                padding="16px"
+                            >
+                                {properties.map(entry => (
+                                    <Checkbox
+                                        defaultChecked={visibleNodeProperties.includes(
+                                            entry
+                                        )}
+                                        isDisabled={
+                                            (visibleNodeProperties.includes(
+                                                entry
+                                            ) &&
+                                                visibleNodeProperties.length ===
+                                                    3) ||
+                                            chartElement === 'components'
+                                        }
+                                        size="sm"
+                                        key={`radar_node_${entry}`}
+                                        onChange={event => {
+                                            if (event.target.checked) {
+                                                setVisibleNodeProperties([
+                                                    ...visibleNodeProperties,
+                                                    entry
+                                                ]);
+                                            } else {
+                                                visibleNodeProperties.splice(
+                                                    visibleNodeProperties.indexOf(
+                                                        entry
+                                                    ),
+                                                    1
+                                                );
+                                                setVisibleNodeProperties([
+                                                    ...visibleNodeProperties
+                                                ]);
+                                            }
+                                        }}
+                                    >
+                                        {entry}
+                                    </Checkbox>
+                                ))}
+                            </VStack>
+                        </VStack>
+                    </CustomScroll>
+                </VStack>
+            </Center>
+        );
+    }
 
     if ((!data || data.labels.length === 0) && !tooManySelectedElements) {
-        return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData === 'selected' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
-        );
+        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     if (tooManySelectedElements) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    TOO MANY DATAPOINTS
-                </Heading>
-                {props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Please select fever elements to get useful insights from
-                        this chart! 😉
-                    </Text>
-                )}
-            </VStack>
+            <ChartAlertComponent
+                title="TOO MANY DATAPOINTS"
+                message="Please select fever elements to get useful insights from this chart! 😉"
+                size={props.isExpanded ? 'md' : 'sm'}
+            />
         );
     }
 
@@ -312,7 +434,7 @@ function RadarChart(props) {
                             color: '#FFFFFF33'
                         },
                         grid: {
-                            display: props.isExpanded || props.isExample,
+                            display: true,
                             color: '#FFFFFF33',
                             circular: true
                         }
@@ -355,14 +477,15 @@ RadarChart.propTypes = {
     isExample: PropTypes.bool,
     networkData: PropTypes.string,
     elementDisplayLimit: PropTypes.number,
-    radarDisplayElement: PropTypes.string
+    settingsMode: PropTypes.bool
 };
 
 RadarChart.defaultProps = {
     isExpanded: false,
     isExample: false,
     networkData: 'all',
-    elementDisplayLimit: 10
+    elementDisplayLimit: 10,
+    settingsMode: false
 };
 
 export default observer(RadarChart);

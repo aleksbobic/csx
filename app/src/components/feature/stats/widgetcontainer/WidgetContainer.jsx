@@ -1,12 +1,9 @@
 import {
-    Box,
     Button,
     GridItem,
     Heading,
     HStack,
     IconButton,
-    Menu,
-    MenuButton,
     Select,
     Tooltip,
     useColorMode
@@ -32,8 +29,8 @@ function WidgetContainer(props) {
     const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
     const [connectionFeature, setConnectionFeature] = useState('all');
     const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
-    const [radarDisplayElement, setRadarDisplayElement] = useState('nodes');
     const [filterProperty, setFilterProperty] = useState('degree');
+    const [settingsMode, setSettingsMode] = useState(false);
     const { colorMode } = useColorMode();
 
     useEffect(() => {
@@ -63,6 +60,7 @@ function WidgetContainer(props) {
                     overflow="hidden"
                     textOverflow="ellipsis"
                     flexGrow="1"
+                    opacity="0.5"
                 >
                     {props.title}
                 </Heading>
@@ -111,44 +109,8 @@ function WidgetContainer(props) {
                 )}
             {'radar' === props.chart.type.toLowerCase() && isExpanded && (
                 <>
-                    <Tooltip label="Change chart display element.">
-                        <Select
-                            size="xs"
-                            variant="filled"
-                            borderRadius="5px"
-                            opacity="0.5"
-                            minWidth="100px"
-                            width="100px"
-                            textAlign="right"
-                            backgroundColor="transparent"
-                            _hover={{
-                                opacity: '1',
-                                backgroundColor: 'whiteAlpha.200'
-                            }}
-                            icon={<></>}
-                            style={{ paddingRight: '8px' }}
-                            defaultValue={radarDisplayElement}
-                            onChange={e => {
-                                store.track.trackEvent(
-                                    `Details Panel - Widget Container - ${props.chart.id}`,
-                                    'Select Element - Radar display element',
-                                    JSON.stringify({
-                                        type: 'Change selection',
-                                        value: e.target.value
-                                    })
-                                );
-
-                                setRadarDisplayElement(e.target.value);
-                            }}
-                        >
-                            <option value="nodes">Nodes</option>
-                            <option value="components">Components</option>
-                        </Select>
-                    </Tooltip>
-
                     <Tooltip label="Toggle settings mode.">
                         <IconButton
-                            width="100%"
                             size="xs"
                             variant="ghost"
                             opacity="0.5"
@@ -163,9 +125,13 @@ function WidgetContainer(props) {
                                     'Button',
                                     JSON.stringify({
                                         type: 'Click',
-                                        value: 'Open label types'
+                                        value: settingsMode
+                                            ? 'Turn off settings mode'
+                                            : 'Turn on settings mode'
                                     })
                                 );
+
+                                setSettingsMode(!settingsMode);
                             }}
                             zIndex="3"
                             _hover={{
@@ -397,7 +363,7 @@ function WidgetContainer(props) {
                                         value: 'Expand widget'
                                     })
                                 );
-
+                                setSettingsMode(false);
                                 setIsExpanded(true);
                                 store.stats.expandChart(props.chart.id);
                             }}
@@ -423,6 +389,7 @@ function WidgetContainer(props) {
                                     })
                                 );
 
+                                setSettingsMode(false);
                                 setIsExpanded(false);
                                 store.stats.shrinkChart(props.chart.id);
                             }}
@@ -537,7 +504,8 @@ function WidgetContainer(props) {
                 connectionFeature,
                 maxConnectionDegree,
                 filterProperty,
-                radarDisplayElement
+                settingsMode,
+                title: props.title
             });
         }
         return child;
