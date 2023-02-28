@@ -387,6 +387,10 @@ export class GraphInstanceStore {
     zoomToFit = (x = 0, y = 0, z = 2000) => {
         const graphBoundingBox = this.graphInstance.getGraphBbox();
 
+        if (!graphBoundingBox) {
+            return;
+        }
+
         const cameraX = Math.round(
             (graphBoundingBox.x[0] + graphBoundingBox.x[1]) / 2,
             2

@@ -20,6 +20,7 @@ import {
     RadialLinearScale
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { capitaliseFirstLetter } from 'general.utils';
 
 export class StatsStore {
     isStatsModalVisible = false;
@@ -48,7 +49,7 @@ export class StatsStore {
         elements: 'nodes',
         show_only: 'all',
         element_values: 'values',
-        display_limit: 'all',
+        display_limit: '10',
         group_by: 'types',
         colSpan: 1,
         height: '200px',
@@ -205,6 +206,48 @@ export class StatsStore {
         this.newChartProps.show_only = val;
     };
 
+    getWidgetNodeProperties = (group = false) => {
+        let elementValues = [];
+        if (!group) {
+            elementValues.push({ value: 'values', label: 'Node values' });
+        }
+
+        elementValues = [
+            ...elementValues,
+            { value: 'types', label: 'Node types' },
+            {
+                value: 'degree',
+                label: 'Neighbour count'
+            }
+        ];
+
+        if (this.store.core.isDetail) {
+            return elementValues;
+        }
+
+        return [
+            ...elementValues,
+            ...this.store.overviewSchema.anchorProperties.map(entry => {
+                return {
+                    value: entry,
+                    label: capitaliseFirstLetter(entry)
+                };
+            })
+        ];
+    };
+
+    getWidgetEdgeProperties = () => {
+        if (this.store.core.isDetail) {
+            return [{ value: 'weight', label: 'Edge weights' }];
+        }
+
+        return [
+            { value: 'values', label: 'Edge values' },
+            { value: 'types', label: 'Edge types' },
+            { value: 'weight', label: 'Edge weights' }
+        ];
+    };
+
     getElementValues = (group = false) => {
         if (this.newChartProps.elements === 'nodes') {
             let elementValues = [];
@@ -223,8 +266,7 @@ export class StatsStore {
                     this.store.overviewSchema.anchorProperties.map(entry => {
                         return {
                             value: entry,
-                            label:
-                                entry.charAt(0).toUpperCase() + entry.slice(1)
+                            label: capitaliseFirstLetter(entry)
                         };
                     })
                 );

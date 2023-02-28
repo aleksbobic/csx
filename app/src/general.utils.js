@@ -10,6 +10,10 @@ export function isEnvSet(name) {
     return process?.env[name];
 }
 
+export function capitaliseFirstLetter(value) {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export async function safeRequest(promise) {
     try {
         const results = await promise;

@@ -4,7 +4,6 @@ import {
     Heading,
     HStack,
     IconButton,
-    Select,
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
@@ -25,11 +24,6 @@ import { RootStoreContext } from 'stores/RootStore';
 function WidgetContainer(props) {
     const store = useContext(RootStoreContext);
     const [isExpanded, setIsExpanded] = useState(props.chart.colSpan === 2);
-    const [networkData, setNetworkData] = useState(props.chart.network_data);
-    const [elementDisplayLimit, setElementDisplayLimit] = useState(10);
-    const [connectionFeature, setConnectionFeature] = useState('all');
-    const [maxConnectionDegree, setMaxConnectionDegree] = useState(2);
-    const [filterProperty, setFilterProperty] = useState('degree');
     const [settingsMode, setSettingsMode] = useState(false);
     const { colorMode } = useColorMode();
 
@@ -65,49 +59,7 @@ function WidgetContainer(props) {
                     {props.title}
                 </Heading>
             </Tooltip>
-            {['connections'].includes(props.chart.type.toLowerCase()) &&
-                isExpanded && (
-                    <Tooltip label="Change max degree.">
-                        <Select
-                            size="xs"
-                            variant="filled"
-                            borderRadius="5px"
-                            opacity="0.5"
-                            minWidth="40px"
-                            width="40px"
-                            textAlign="right"
-                            backgroundColor="transparent"
-                            _hover={{
-                                opacity: '1',
-                                backgroundColor: 'whiteAlpha.200'
-                            }}
-                            icon={<></>}
-                            style={{ paddingRight: '8px' }}
-                            defaultValue={maxConnectionDegree}
-                            onChange={e => {
-                                store.track.trackEvent(
-                                    `Details Panel - Widget Container - ${props.chart.id}`,
-                                    'Select Element - Max Connection Degree in Widget',
-                                    JSON.stringify({
-                                        type: 'Change selection',
-                                        value: e.target.value
-                                    })
-                                );
-
-                                setMaxConnectionDegree(
-                                    parseInt(e.target.value)
-                                );
-                            }}
-                        >
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </Select>
-                    </Tooltip>
-                )}
-            {'radar' === props.chart.type.toLowerCase() && isExpanded && (
+            {isExpanded && (
                 <>
                     <Tooltip label="Toggle settings mode.">
                         <IconButton
@@ -116,7 +68,10 @@ function WidgetContainer(props) {
                             opacity="0.5"
                             icon={
                                 <Cog6ToothIcon
-                                    style={{ width: '18px', height: '18px' }}
+                                    style={{
+                                        width: '18px',
+                                        height: '18px'
+                                    }}
                                 />
                             }
                             onClick={() => {
@@ -141,206 +96,6 @@ function WidgetContainer(props) {
                         />
                     </Tooltip>
                 </>
-            )}
-            {['node filter'].includes(props.chart.type.toLowerCase()) && (
-                <Tooltip label="Change filter property.">
-                    <Select
-                        size="xs"
-                        variant="filled"
-                        borderRadius="5px"
-                        opacity="0.5"
-                        minWidth="70px"
-                        width="70px"
-                        textAlign="right"
-                        backgroundColor="transparent"
-                        _hover={{
-                            opacity: '1',
-                            backgroundColor: 'whiteAlpha.200'
-                        }}
-                        icon={<></>}
-                        style={{ paddingRight: '8px' }}
-                        defaultValue={filterProperty}
-                        onChange={e => {
-                            store.track.trackEvent(
-                                `Details Panel - Widget Container - ${props.chart.id}`,
-                                'Select Element - Filter Property',
-                                JSON.stringify({
-                                    type: 'Change selection',
-                                    value: e.target.value
-                                })
-                            );
-
-                            setFilterProperty(e.target.value);
-                        }}
-                    >
-                        <option value="degree">degree</option>
-                        {Object.keys(store.search.nodeTypes)
-                            .map(feature => {
-                                return {
-                                    feature: feature,
-                                    type: store.search.nodeTypes[feature]
-                                };
-                            })
-                            .filter(
-                                entry =>
-                                    ['integer', 'float'].includes(
-                                        entry['type']
-                                    ) &&
-                                    store.core.isOverview &&
-                                    store.graph.currentGraphData.meta.anchorProperties
-                                        .map(entry => entry['property'])
-                                        .includes(entry['feature'])
-                            )
-                            .map(entry => (
-                                <option
-                                    key={`filter_prop_${entry['feature']}`}
-                                    value={entry['feature']}
-                                >
-                                    {entry['feature']}
-                                </option>
-                            ))}
-                    </Select>
-                </Tooltip>
-            )}
-            {['connections'].includes(props.chart.type.toLowerCase()) && (
-                <Tooltip label="Show only features of selected type.">
-                    <Select
-                        size="xs"
-                        variant="filled"
-                        borderRadius="5px"
-                        opacity="0.5"
-                        minWidth="70px"
-                        width="70px"
-                        textAlign="right"
-                        backgroundColor="transparent"
-                        _hover={{
-                            opacity: '1',
-                            backgroundColor: 'whiteAlpha.200'
-                        }}
-                        icon={<></>}
-                        style={{ paddingRight: '8px' }}
-                        defaultValue={connectionFeature}
-                        onChange={e => {
-                            store.track.trackEvent(
-                                `Details Panel - Widget Container - ${props.chart.id}`,
-                                'Select Element - Connection Feature',
-                                JSON.stringify({
-                                    type: 'Change selection',
-                                    value: e.target.value
-                                })
-                            );
-
-                            setConnectionFeature(e.target.value);
-                        }}
-                    >
-                        <option value="all">all</option>
-                        {store.graph.currentGraphData.perspectivesInGraph.map(
-                            feature => (
-                                <option
-                                    key={`connection_feature_${feature}`}
-                                    value={feature}
-                                >
-                                    {feature}
-                                </option>
-                            )
-                        )}
-                    </Select>
-                </Tooltip>
-            )}
-            {[
-                'nodes',
-                'bar',
-                'vertical bar',
-                'doughnut',
-                'line',
-                'grouped bar'
-            ].includes(props.chart.type.toLowerCase()) &&
-                networkData !== 'selected' &&
-                isExpanded && (
-                    <Tooltip label="Limit element display by neighbour frequency.">
-                        <Select
-                            size="xs"
-                            variant="filled"
-                            borderRadius="5px"
-                            opacity="0.5"
-                            width="70px"
-                            minWidth="70px"
-                            textAlign="right"
-                            backgroundColor="transparent"
-                            _hover={{
-                                opacity: '1',
-                                backgroundColor: 'whiteAlpha.200'
-                            }}
-                            icon={<></>}
-                            style={{ paddingRight: '8px' }}
-                            defaultValue={elementDisplayLimit}
-                            onChange={e => {
-                                store.track.trackEvent(
-                                    `Details Panel - Widget Container - ${props.chart.id}`,
-                                    'Select Element - Element Display Limit',
-                                    JSON.stringify({
-                                        type: 'Change selection',
-                                        value: e.target.value
-                                    })
-                                );
-
-                                setElementDisplayLimit(
-                                    parseInt(e.target.value)
-                                );
-                            }}
-                        >
-                            <option value={10}>First 10</option>
-                            <option value={50}>First 50</option>
-                            <option value={100}>First 100</option>
-                            <option value={-10}>Last 10</option>
-                            <option value={-50}>Last 50</option>
-                            <option value={-100}>Last 100</option>
-                            <option value={0}>All</option>
-                        </Select>
-                    </Tooltip>
-                )}
-            {!['connections', 'node filter', 'radar'].includes(
-                props.chart.type.toLowerCase()
-            ) && (
-                <Tooltip label="Change displayed elements">
-                    <Select
-                        size="xs"
-                        variant="filled"
-                        borderRadius="5px"
-                        opacity="0.5"
-                        minWidth="70px"
-                        width="70px"
-                        textAlign="right"
-                        backgroundColor="transparent"
-                        _hover={{
-                            opacity: '1',
-                            backgroundColor: 'whiteAlpha.200'
-                        }}
-                        icon={<></>}
-                        style={{ paddingRight: '8px' }}
-                        defaultValue={props.chart.show_only}
-                        onChange={e => {
-                            store.track.trackEvent(
-                                `Details Panel - Widget Container - ${props.chart.id}`,
-                                'Select Element - Network Data',
-                                JSON.stringify({
-                                    type: 'Change selection',
-                                    value: e.target.value
-                                })
-                            );
-
-                            setNetworkData(e.target.value);
-                        }}
-                    >
-                        {props.chart.elements !== 'edges' && (
-                            <option value="selected">selected</option>
-                        )}
-                        {props.chart.type.toLowerCase() !== 'components' && (
-                            <option value="visible">visible</option>
-                        )}
-                        <option value="all">all</option>
-                    </Select>
-                </Tooltip>
             )}
             {props.maxColSize > 1 &&
                 (props.chart.colSpan === 1 ? (
@@ -499,11 +254,6 @@ function WidgetContainer(props) {
         if (isValidElement(child)) {
             return cloneElement(child, {
                 isExpanded,
-                networkData,
-                elementDisplayLimit,
-                connectionFeature,
-                maxConnectionDegree,
-                filterProperty,
                 settingsMode,
                 title: props.title
             });

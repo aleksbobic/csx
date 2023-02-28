@@ -10,6 +10,7 @@ import {
     EditableInput,
     EditablePreview,
     Heading,
+    HStack,
     Select,
     useColorMode,
     VStack
@@ -235,90 +236,96 @@ function RadarChart(props) {
                         style={{ paddingLeft: '10px', paddingRight: '10px' }}
                     >
                         <VStack height="100%" width="100%">
-                            <Heading size="xs" opacity="0.5" width="100%">
-                                Chart title
-                            </Heading>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Title
+                                </Heading>
 
-                            <Editable
-                                size="xs"
-                                width="100%"
-                                value={title}
-                                backgroundColor={
-                                    colorMode === 'light'
-                                        ? 'blackAlpha.100'
-                                        : 'blackAlpha.300'
-                                }
-                                borderRadius="5px"
-                                onChange={val => setTitle(val)}
-                                onSubmit={val => {
-                                    if (val.trim()) {
+                                <Editable
+                                    size="xs"
+                                    width="100%"
+                                    value={title}
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.100'
+                                            : 'blackAlpha.300'
+                                    }
+                                    borderRadius="5px"
+                                    onChange={val => setTitle(val)}
+                                    onSubmit={val => {
+                                        if (val.trim()) {
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'title',
+                                                val.trim()
+                                            );
+                                            setTitle(val.trim());
+                                        } else {
+                                            setTitle(props.title);
+                                        }
+                                    }}
+                                    onFocus={() =>
+                                        store.comment.setCommentTrigger(false)
+                                    }
+                                    onBlur={() =>
+                                        store.comment.setCommentTrigger(true)
+                                    }
+                                >
+                                    <EditablePreview
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        color="#FFFFFFBB"
+                                        backgroundColor="whiteAlpha.200"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                    <EditableInput
+                                        backgroundColor="whiteAlpha.200"
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                </Editable>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Elements
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartElement}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartElement(e.target.value);
+
                                         store.stats.setWidgetProperty(
                                             props.chart.id,
-                                            'title',
-                                            val.trim()
+                                            'elements',
+                                            e.target.value
                                         );
-                                        setTitle(val.trim());
-                                    } else {
-                                        setTitle(props.title);
-                                    }
-                                }}
-                                onFocus={() =>
-                                    store.comment.setCommentTrigger(false)
-                                }
-                                onBlur={() =>
-                                    store.comment.setCommentTrigger(true)
-                                }
-                            >
-                                <EditablePreview
-                                    padding="5px 10px"
-                                    fontSize="xs"
-                                    color="#FFFFFFBB"
-                                    backgroundColor="whiteAlpha.200"
-                                    width="100%"
-                                    size="xs"
-                                />
-                                <EditableInput
-                                    backgroundColor="whiteAlpha.200"
-                                    padding="5px 10px"
-                                    fontSize="xs"
-                                    width="100%"
-                                    size="xs"
-                                />
-                            </Editable>
-                            <Heading size="xs" opacity="0.5" width="100%">
-                                Chart Elements
-                            </Heading>
-                            <Select
-                                className="nodrag"
-                                margin="0px"
-                                variant="filled"
-                                size="xs"
-                                width="100%"
-                                defaultValue={chartElement}
-                                borderRadius="5px"
-                                onChange={e => {
-                                    setChartElement(e.target.value);
-
-                                    store.stats.setWidgetProperty(
-                                        props.chart.id,
-                                        'elements',
-                                        e.target.value
-                                    );
-                                }}
-                                background="whiteAlpha.200"
-                                opacity="0.8"
-                                _hover={{
-                                    opacity: 1,
-                                    cursor: 'pointer'
-                                }}
-                                _focus={{
-                                    opacity: 1,
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <option value="nodes">Nodes</option>
-                                <option value="components">Components</option>
-                            </Select>
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="nodes">Nodes</option>
+                                    <option value="components">
+                                        Components
+                                    </option>
+                                </Select>
+                            </HStack>
                             <Heading
                                 size="xs"
                                 opacity="0.5"

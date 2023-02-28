@@ -1,7 +1,12 @@
 import {
     Box,
+    Center,
+    Editable,
+    EditableInput,
+    EditablePreview,
     Flex,
     FormLabel,
+    Heading,
     HStack,
     NumberInput,
     NumberInputField,
@@ -9,8 +14,12 @@ import {
     RangeSliderFilledTrack,
     RangeSliderThumb,
     RangeSliderTrack,
-    Text
+    Select,
+    Text,
+    useColorMode,
+    VStack
 } from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
@@ -20,13 +29,19 @@ function NodeFilter(props) {
     const store = useContext(RootStoreContext);
 
     const [isDemo, setIsDemo] = useState(false);
+    const [title, setTitle] = useState(props.title);
+
+    const { colorMode } = useColorMode();
+    const [filterProperty, setFilterProperty] = useState(
+        props?.chart?.filter_property ? props?.chart?.filter_property : 'degree'
+    );
 
     useEffect(() => {
         if (props.demoData.length > 0) {
             setIsDemo(true);
             setSliderMaxTooltipValue(props.demoData[0].max);
             setSliderMaxValue(props.demoData[0].max);
-        } else if (props.filterProperty === 'degree') {
+        } else if (filterProperty === 'degree') {
             setIsDemo(false);
             setSliderMinTooltipValue(0);
             setSliderMaxTooltipValue(
@@ -36,16 +51,15 @@ function NodeFilter(props) {
         } else {
             setIsDemo(false);
             setSliderMinTooltipValue(
-                store.search.searchHints[props.filterProperty].min
+                store.search.searchHints[filterProperty].min
             );
             setSliderMaxTooltipValue(
-                store.search.searchHints[props.filterProperty].max
+                store.search.searchHints[filterProperty].max
             );
-            setSliderMaxValue(
-                store.search.searchHints[props.filterProperty].max
-            );
+            setSliderMaxValue(store.search.searchHints[filterProperty].max);
         }
     }, [
+        filterProperty,
         props.demoData,
         props.demoData.length,
         props.filterProperty,
@@ -72,11 +86,7 @@ function NodeFilter(props) {
     }, [props.demoData.length, store.graph.currentGraphData.meta.maxDegree]);
 
     const filterNodes = (min, max) => {
-        store.graphInstance.filterNodesByNumericProp(
-            min,
-            max,
-            props.filterProperty
-        );
+        store.graphInstance.filterNodesByNumericProp(min, max, filterProperty);
     };
 
     const onSliderChange = val => {
@@ -87,13 +97,160 @@ function NodeFilter(props) {
                 type: 'Slide',
                 min: val[0],
                 max: val[1],
-                property: props.filterProperty
+                property: filterProperty
             })
         );
 
         setSliderMinTooltipValue(val[0]);
         setSliderMaxTooltipValue(val[1]);
     };
+
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <Center height="100%" width="100%">
+                <VStack
+                    height="100%"
+                    width="100%"
+                    alignItems="flex-start"
+                    spacing={1}
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'blackAlpha.800'
+                    }
+                    borderRadius="6px"
+                    justifyContent="center"
+                    padding="10% 20%"
+                >
+                    <CustomScroll
+                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                    >
+                        <VStack height="100%" width="100%">
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Title
+                                </Heading>
+
+                                <Editable
+                                    size="xs"
+                                    width="100%"
+                                    value={title}
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.100'
+                                            : 'blackAlpha.300'
+                                    }
+                                    borderRadius="5px"
+                                    onChange={val => setTitle(val)}
+                                    onSubmit={val => {
+                                        if (val.trim()) {
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'title',
+                                                val.trim()
+                                            );
+                                            setTitle(val.trim());
+                                        } else {
+                                            setTitle(props.title);
+                                        }
+                                    }}
+                                    onFocus={() =>
+                                        store.comment.setCommentTrigger(false)
+                                    }
+                                    onBlur={() =>
+                                        store.comment.setCommentTrigger(true)
+                                    }
+                                >
+                                    <EditablePreview
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        color="#FFFFFFBB"
+                                        backgroundColor="whiteAlpha.200"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                    <EditableInput
+                                        backgroundColor="whiteAlpha.200"
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                </Editable>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Filtering Feature
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={filterProperty}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setFilterProperty(e.target.value);
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'filter_property',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="degree">
+                                        Neighbour count
+                                    </option>
+                                    {Object.keys(store.search.nodeTypes)
+                                        .map(feature => {
+                                            return {
+                                                feature: feature,
+                                                type: store.search.nodeTypes[
+                                                    feature
+                                                ]
+                                            };
+                                        })
+                                        .filter(
+                                            entry =>
+                                                ['integer', 'float'].includes(
+                                                    entry['type']
+                                                ) &&
+                                                store.core.isOverview &&
+                                                store.graph.currentGraphData.meta.anchorProperties
+                                                    .map(
+                                                        entry =>
+                                                            entry['property']
+                                                    )
+                                                    .includes(entry['feature'])
+                                        )
+                                        .map(entry => (
+                                            <option
+                                                key={`filter_prop_${entry['feature']}`}
+                                                value={entry['feature']}
+                                            >
+                                                {entry['feature']}
+                                            </option>
+                                        ))}
+                                </Select>
+                            </HStack>
+                        </VStack>
+                    </CustomScroll>
+                </VStack>
+            </Center>
+        );
+    }
 
     return (
         <Box height="100%" width="100%" position="relative" padding="20px">
@@ -105,7 +262,7 @@ function NodeFilter(props) {
                 alignItems="center"
             >
                 <HStack
-                    spacing={10}
+                    spacing={props.isExpanded ? 10 : '10px'}
                     style={{ marginBottom: '10px' }}
                     justifyContent="space-between"
                     width="100%"
@@ -125,7 +282,7 @@ function NodeFilter(props) {
                                 JSON.stringify({
                                     type: 'Write',
                                     value: val,
-                                    property: props.filterProperty
+                                    property: filterProperty
                                 })
                             );
 
@@ -156,7 +313,7 @@ function NodeFilter(props) {
                             height={props.isExpanded ? '100px' : '50px'}
                             width="84px"
                             fontWeight="bold"
-                            backgroundColor="blackAlpha.400"
+                            backgroundColor="whiteAlpha.100"
                             fontSize="md"
                             textAlign="center"
                             padding="5px"
@@ -164,12 +321,18 @@ function NodeFilter(props) {
                     </NumberInput>
 
                     {(props.isExpanded || isDemo) && (
-                        <FormLabel paddingBottom="10px" paddingTop="10px">
+                        <FormLabel
+                            paddingBottom="10px"
+                            paddingTop="10px"
+                            textAlign="center"
+                        >
                             Filtering by{' '}
                             <span>
                                 {isDemo
                                     ? props.demoData[0].prop
-                                    : props.filterProperty}
+                                    : filterProperty === 'degree'
+                                    ? 'neighbour count'
+                                    : filterProperty}
                             </span>
                         </FormLabel>
                     )}
@@ -186,7 +349,7 @@ function NodeFilter(props) {
                                 JSON.stringify({
                                     type: 'Write',
                                     value: val,
-                                    property: props.filterProperty
+                                    property: filterProperty
                                 })
                             );
 
@@ -216,7 +379,7 @@ function NodeFilter(props) {
                             borderRadius="10px"
                             height={props.isExpanded ? '100px' : '50px'}
                             width="84px"
-                            backgroundColor="blackAlpha.400"
+                            backgroundColor="whiteAlpha.100"
                             fontSize="md"
                             fontWeight="bold"
                             textAlign="center"

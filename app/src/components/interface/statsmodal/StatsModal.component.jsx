@@ -20,6 +20,7 @@ import {
     TabPanel,
     TabPanels,
     Tabs,
+    Text,
     Tooltip,
     useColorMode,
     useDisclosure,
@@ -573,7 +574,8 @@ function FileUploadModal() {
                         </Tooltip>
 
                         {statTypes.type === 'chart' &&
-                            statTypes.chartType !== 'radar' && (
+                            statTypes.chartType !== 'radar' &&
+                            statTypes.chartType !== 'grouped bar' && (
                                 <FormControl
                                     backgroundColor={
                                         colorMode === 'light'
@@ -830,7 +832,9 @@ function FileUploadModal() {
                                     );
                                 }}
                             >
-                                {entry}
+                                <Text width="100%" textAlign="left">
+                                    {entry}
+                                </Text>
                             </Tab>
                         ))}
                     </TabList>
@@ -899,9 +903,6 @@ function FileUploadModal() {
                                         height="100%"
                                         justifyContent="space-between"
                                     >
-                                        <Heading size="sm" opacity="0.7">
-                                            Example widget
-                                        </Heading>
                                         <Box
                                             height="250px"
                                             width="100%"

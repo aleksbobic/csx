@@ -3,7 +3,18 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
+import {
+    Center,
+    Editable,
+    EditableInput,
+    EditablePreview,
+    Heading,
+    HStack,
+    Select,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
+import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
 import ChartAlertComponent from './ChartAlert.component';
@@ -13,6 +24,50 @@ function BarChart(props) {
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
+    const [title, setTitle] = useState(props.title);
+    const [chartElement, setChartElement] = useState(props.chart.elements);
+    const [chartElementValues, setChartElementValues] = useState(
+        props.chart.elements === 'nodes'
+            ? store.stats.getWidgetNodeProperties()
+            : store.stats.getWidgetEdgeProperties()
+    );
+    const [chartElementSelectedValue, setChartElementSelectedValue] = useState(
+        props.chart.element_values
+    );
+    const [chartNetworkData, setChartNetworkData] = useState(
+        props.chart.network_data
+    );
+    const [dispalyLimit, setDispalyLimit] = useState(
+        props.chart.display_limit ? props.chart.display_limit : 10
+    );
+    const [chartGroupByValues, setChartGroupByValues] = useState(
+        store.stats.getWidgetNodeProperties(true)
+    );
+    const [chartGroupBySelectedValue, setChartGroupBySelectedValue] = useState(
+        props.chart.group_by
+    );
+
+    useEffect(() => {
+        if (!props.isExample) {
+            if (chartElement === 'nodes') {
+                setChartElementValues(store.stats.getWidgetNodeProperties());
+            } else {
+                setChartElementValues(store.stats.getWidgetEdgeProperties());
+            }
+        }
+    }, [chartElement, props.chart.id, props.isExample, store.stats]);
+
+    useEffect(() => {
+        if (!props.isExample) {
+            setChartElementSelectedValue(chartElementValues[0].value);
+
+            store.stats.setWidgetProperty(
+                props.chart.id,
+                'element_values',
+                chartElementValues[0].value
+            );
+        }
+    }, [chartElementValues, props.chart.id, props.isExample, store.stats]);
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -110,8 +165,8 @@ function BarChart(props) {
                         store.stats.getNodeCounts(
                             elementProperty,
                             props.chart.type,
-                            props.elementDisplayLimit,
-                            props.networkData,
+                            dispalyLimit,
+                            chartNetworkData,
                             groupBy,
                             props.chart.show_only
                         )
@@ -122,9 +177,9 @@ function BarChart(props) {
                     store.stats.getEdgeCounts(
                         elementProperty,
                         props.chart.type,
-                        props.elementDisplayLimit,
+                        dispalyLimit,
                         groupBy,
-                        props.networkData
+                        chartNetworkData
                     )
                 );
             }
@@ -148,7 +203,9 @@ function BarChart(props) {
         props.networkData,
         props.chart.group_by,
         store.core.currentGraph,
-        store.overviewSchema.anchorProperties
+        store.overviewSchema.anchorProperties,
+        dispalyLimit,
+        chartNetworkData
     ]);
 
     const getPluginOptions = () => {
@@ -209,6 +266,314 @@ function BarChart(props) {
 
         return pluginOptions;
     };
+
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <Center height="100%" width="100%">
+                <VStack
+                    height="100%"
+                    width="100%"
+                    alignItems="flex-start"
+                    spacing={1}
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'blackAlpha.800'
+                    }
+                    borderRadius="6px"
+                    justifyContent="center"
+                    padding="10% 20%"
+                >
+                    <CustomScroll
+                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                    >
+                        <VStack height="100%" width="100%">
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Title
+                                </Heading>
+
+                                <Editable
+                                    size="xs"
+                                    width="100%"
+                                    value={title}
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.100'
+                                            : 'blackAlpha.300'
+                                    }
+                                    borderRadius="5px"
+                                    onChange={val => setTitle(val)}
+                                    onSubmit={val => {
+                                        if (val.trim()) {
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'title',
+                                                val.trim()
+                                            );
+                                            setTitle(val.trim());
+                                        } else {
+                                            setTitle(props.title);
+                                        }
+                                    }}
+                                    onFocus={() =>
+                                        store.comment.setCommentTrigger(false)
+                                    }
+                                    onBlur={() =>
+                                        store.comment.setCommentTrigger(true)
+                                    }
+                                >
+                                    <EditablePreview
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        color="#FFFFFFBB"
+                                        backgroundColor="whiteAlpha.200"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                    <EditableInput
+                                        backgroundColor="whiteAlpha.200"
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                </Editable>
+                            </HStack>
+                            {props.chart.type.toLowerCase() !==
+                                'grouped bar' && (
+                                <HStack width="100%">
+                                    <Heading
+                                        size="xs"
+                                        opacity="0.5"
+                                        width="100%"
+                                    >
+                                        Elements
+                                    </Heading>
+                                    <Select
+                                        className="nodrag"
+                                        margin="0px"
+                                        variant="filled"
+                                        size="xs"
+                                        width="100%"
+                                        defaultValue={chartElement}
+                                        borderRadius="5px"
+                                        onChange={e => {
+                                            setChartElement(e.target.value);
+
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'elements',
+                                                e.target.value
+                                            );
+                                        }}
+                                        background="whiteAlpha.200"
+                                        opacity="0.8"
+                                        _hover={{
+                                            opacity: 1,
+                                            cursor: 'pointer'
+                                        }}
+                                        _focus={{
+                                            opacity: 1,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <option value="nodes">Nodes</option>
+                                        <option value="edges">Edges</option>
+                                    </Select>
+                                </HStack>
+                            )}
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    {props.chart.type.toLowerCase() === 'bar'
+                                        ? 'Y'
+                                        : 'X'}{' '}
+                                    Axis Props
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartElementSelectedValue}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartElementSelectedValue(
+                                            e.target.value
+                                        );
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'element_values',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {chartElementValues.map(entry => (
+                                        <option
+                                            key={`${
+                                                chartElement === 'nodes'
+                                                    ? 'Node'
+                                                    : 'Edge'
+                                            }_property_${entry.value}`}
+                                            value={entry.value}
+                                        >
+                                            {entry.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </HStack>
+                            {props.chart.type.toLowerCase() ===
+                                'grouped bar' && (
+                                <HStack width="100%">
+                                    <Heading
+                                        size="xs"
+                                        opacity="0.5"
+                                        width="100%"
+                                    >
+                                        Group By
+                                    </Heading>
+                                    <Select
+                                        className="nodrag"
+                                        margin="0px"
+                                        variant="filled"
+                                        size="xs"
+                                        width="100%"
+                                        defaultValue={chartGroupBySelectedValue}
+                                        borderRadius="5px"
+                                        onChange={e => {
+                                            setChartGroupBySelectedValue(
+                                                e.target.value
+                                            );
+
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'group_by',
+                                                e.target.value
+                                            );
+                                        }}
+                                        background="whiteAlpha.200"
+                                        opacity="0.8"
+                                        _hover={{
+                                            opacity: 1,
+                                            cursor: 'pointer'
+                                        }}
+                                        _focus={{
+                                            opacity: 1,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {chartGroupByValues.map(entry => (
+                                            <option
+                                                key={`Node_group_by_property_${entry.value}`}
+                                                value={entry.value}
+                                            >
+                                                {entry.label}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </HStack>
+                            )}
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Element Types
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartNetworkData}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartNetworkData(e.target.value);
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'network_data',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="visible">Visible</option>
+                                    {chartElement !== 'edges' && (
+                                        <option value="selected">
+                                            Selected
+                                        </option>
+                                    )}
+                                    <option value="all">All</option>
+                                </Select>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Display Limit
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={dispalyLimit}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setDispalyLimit(e.target.value);
+
+                                        console.log(dispalyLimit);
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'display_limit',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value={10}>First 10</option>
+                                    <option value={50}>First 50</option>
+                                    <option value={100}>First 100</option>
+                                    <option value={-10}>Last 10</option>
+                                    <option value={-50}>Last 50</option>
+                                    <option value={-100}>Last 100</option>
+                                    <option value={0}>All</option>
+                                </Select>
+                            </HStack>
+                        </VStack>
+                    </CustomScroll>
+                </VStack>
+            </Center>
+        );
+    }
 
     if (!data || data.labels.length === 0) {
         return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
@@ -485,7 +850,23 @@ function BarChart(props) {
                             data.datasets.length <= 10,
                         labels: {
                             usePointStyle: true,
-                            pointStyle: 'rectRounded'
+                            generateLabels: chart => {
+                                const datasets = chart.data.datasets;
+                                return datasets.map((data, i) => {
+                                    let label = data.label;
+
+                                    if (data.label.length > 25) {
+                                        label = `${data.label.slice(0, 25)}...`;
+                                    }
+
+                                    return {
+                                        text: label,
+                                        fillStyle: data.backgroundColor,
+                                        index: i,
+                                        pointStyle: 'rectRounded'
+                                    };
+                                });
+                            }
                         }
                     },
                     ...getPluginOptions(),

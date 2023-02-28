@@ -1,8 +1,13 @@
 import {
     Box,
+    Center,
+    Editable,
+    EditableInput,
+    EditablePreview,
     Heading,
     HStack,
     IconButton,
+    Select,
     Stat,
     Tag,
     TagLabel,
@@ -19,11 +24,19 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import ChartAlertComponent from '../chart/ChartAlert.component';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
+    const [title, setTitle] = useState(props.title);
+    const [chartNetworkData, setChartNetworkData] = useState(
+        props?.chart?.network_data ? props.chart.network_data : 'all'
+    );
+    const [dispalyLimit, setDispalyLimit] = useState(
+        props?.chart?.display_limit ? props.chart.display_limit : 10
+    );
 
     useEffect(() => {
         if (props.demoData.length) {
@@ -31,7 +44,7 @@ function SelectedNodeList(props) {
         } else {
             let data;
 
-            switch (props.networkData) {
+            switch (chartNetworkData) {
                 case 'selected':
                     data = store.graph.currentGraphData.selectedNodes;
                     break;
@@ -57,18 +70,17 @@ function SelectedNodeList(props) {
                 return 0;
             });
 
-            if (
-                props.networkData === 'selected' ||
-                props.elementDisplayLimit === 0
-            ) {
+            if (chartNetworkData === 'selected' || dispalyLimit === 0) {
                 setData(data);
-            } else if (props.elementDisplayLimit > 0) {
-                setData(data.slice(0, props.elementDisplayLimit));
+            } else if (dispalyLimit > 0) {
+                setData(data.slice(0, dispalyLimit));
             } else {
-                setData(data.slice(props.elementDisplayLimit, data.length));
+                setData(data.slice(dispalyLimit, data.length));
             }
         }
     }, [
+        chartNetworkData,
+        dispalyLimit,
         props.demoData,
         props.elementDisplayLimit,
         props.networkData,
@@ -119,34 +131,167 @@ function SelectedNodeList(props) {
         );
     };
 
-    if (data.length === 0) {
+    if (props.settingsMode && props.isExpanded) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData !== 'all' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
+            <Center height="100%" width="100%">
+                <VStack
+                    height="100%"
+                    width="100%"
+                    alignItems="flex-start"
+                    spacing={1}
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'blackAlpha.800'
+                    }
+                    borderRadius="6px"
+                    justifyContent="center"
+                    padding="10% 20%"
+                >
+                    <CustomScroll
+                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
                     >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
+                        <VStack height="100%" width="100%">
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Title
+                                </Heading>
+
+                                <Editable
+                                    size="xs"
+                                    width="100%"
+                                    value={title}
+                                    backgroundColor={
+                                        colorMode === 'light'
+                                            ? 'blackAlpha.100'
+                                            : 'blackAlpha.300'
+                                    }
+                                    borderRadius="5px"
+                                    onChange={val => setTitle(val)}
+                                    onSubmit={val => {
+                                        if (val.trim()) {
+                                            store.stats.setWidgetProperty(
+                                                props.chart.id,
+                                                'title',
+                                                val.trim()
+                                            );
+                                            setTitle(val.trim());
+                                        } else {
+                                            setTitle(props.title);
+                                        }
+                                    }}
+                                    onFocus={() =>
+                                        store.comment.setCommentTrigger(false)
+                                    }
+                                    onBlur={() =>
+                                        store.comment.setCommentTrigger(true)
+                                    }
+                                >
+                                    <EditablePreview
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        color="#FFFFFFBB"
+                                        backgroundColor="whiteAlpha.200"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                    <EditableInput
+                                        backgroundColor="whiteAlpha.200"
+                                        padding="5px 10px"
+                                        fontSize="xs"
+                                        width="100%"
+                                        size="xs"
+                                    />
+                                </Editable>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Element Types
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartNetworkData}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartNetworkData(e.target.value);
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'network_data',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="visible">Visible</option>
+                                    <option value="selected">Selected</option>
+                                    <option value="all">All</option>
+                                </Select>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Display Limit
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={dispalyLimit}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setDispalyLimit(e.target.value);
+
+                                        console.log(dispalyLimit);
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'display_limit',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value={10}>First 10</option>
+                                    <option value={50}>First 50</option>
+                                    <option value={100}>First 100</option>
+                                    <option value={-10}>Last 10</option>
+                                    <option value={-50}>Last 50</option>
+                                    <option value={-100}>Last 100</option>
+                                    <option value={0}>All</option>
+                                </Select>
+                            </HStack>
+                        </VStack>
+                    </CustomScroll>
+                </VStack>
+            </Center>
         );
+    }
+
+    if (data.length === 0) {
+        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -167,7 +312,7 @@ function SelectedNodeList(props) {
                                 backgroundColor={
                                     colorMode === 'light'
                                         ? 'blackAlpha.200'
-                                        : 'blackAlpha.800'
+                                        : 'whiteAlpha.100'
                                 }
                                 padding="10px"
                                 width="100%"
