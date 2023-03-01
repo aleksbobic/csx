@@ -806,7 +806,7 @@ export class GraphInstanceStore {
                 for (let i = 0; i < values.length; i++) {
                     this.nodeColorSchemeColors[this.store.core.currentGraph][
                         feature
-                    ][values[i]] = interpolateYlOrRd(1);
+                    ][values[i]] = interpolateYlOrRd(0.5);
                 }
             } else {
                 for (let i = 0; i < values.length; i++) {
@@ -819,16 +819,38 @@ export class GraphInstanceStore {
             this.edgeColorSchemeColors[this.store.core.currentGraph][feature] =
                 {};
             if (min === max) {
+                const interpolated = interpolateYlOrRd(0.5).match(/[0-9]+/g);
+
                 for (let i = 0; i < values.length; i++) {
                     this.edgeColorSchemeColors[this.store.core.currentGraph][
                         feature
-                    ][values[i]] = interpolateYlOrRd(1);
+                    ][
+                        values[i]
+                    ] = `rgba(${interpolated[0]}, ${interpolated[1]}, ${interpolated[2]}, 0.5)`;
                 }
             } else {
                 for (let i = 0; i < values.length; i++) {
+                    let interpolated;
+
+                    if (norm_values[i] > 0.9) {
+                        interpolated = interpolateYlOrRd(0.9).match(/[0-9]+/g);
+                    } else {
+                        interpolated = interpolateYlOrRd(norm_values[i]).match(
+                            /[0-9]+/g
+                        );
+                    }
+
                     this.edgeColorSchemeColors[this.store.core.currentGraph][
                         feature
-                    ][values[i]] = interpolateYlOrRd(norm_values[i]);
+                    ][values[i]] = `rgba(${interpolated[0]}, ${
+                        interpolated[1]
+                    }, ${interpolated[2]}, ${
+                        norm_values[i] < 0.1
+                            ? 0.1
+                            : norm_values[i] > 0.9
+                            ? 1
+                            : norm_values[i].toFixed(2)
+                    })`;
                 }
             }
         }
