@@ -812,7 +812,10 @@ export class GraphInstanceStore {
                 for (let i = 0; i < values.length; i++) {
                     this.nodeColorSchemeColors[this.store.core.currentGraph][
                         feature
-                    ][values[i]] = interpolateYlOrRd(norm_values[i]);
+                    ][values[i]] =
+                        norm_values[i] > 0.9
+                            ? interpolateYlOrRd(0.9)
+                            : interpolateYlOrRd(norm_values[i]);
                 }
             }
         } else {
