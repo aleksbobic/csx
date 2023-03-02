@@ -644,8 +644,8 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
 
-            this.store.workflow.nodes = [];
-            this.store.workflow.edges = [];
+            this.store.workflow.updateNodes([]);
+            this.store.workflow.updateEdges([]);
 
             try {
                 this.store.workflow.addNodesFromJSONQuery(
@@ -723,8 +723,8 @@ export class GraphStore {
                 this.store.core.studyHistoryItemIndex
             ].schema;
 
-        this.store.workflow.nodes = [];
-        this.store.workflow.edges = [];
+        this.store.workflow.updateNodes([]);
+        this.store.workflow.updateEdges([]);
 
         try {
             this.store.workflow.addNodesFromJSONQuery(
@@ -826,8 +826,8 @@ export class GraphStore {
                 this.store.core.studyHistoryItemIndex
             ].schema;
 
-        this.store.workflow.nodes = [];
-        this.store.workflow.edges = [];
+        this.store.workflow.updateNodes([]);
+        this.store.workflow.updateEdges([]);
 
         try {
             this.store.workflow.addNodesFromJSONQuery(

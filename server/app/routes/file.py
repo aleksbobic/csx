@@ -144,13 +144,13 @@ def set_defaults(data: SettingsData):
     csx_es.create_index(data.name, mapping)
     csx_es.set_result_window(data.name)
 
+    es_entries = generate_entries_from_dataframe(
+        dataset, columns, data.name, config["dimension_types"]
+    )
+
     try:
         print("***** Populating elastic")
-        csx_es.bulk_populate(
-            generate_entries_from_dataframe(
-                dataset, columns, data.name, config["dimension_types"]
-            )
-        )
+        csx_es.bulk_populate(es_entries)
     except Exception as exception:
         os.remove(f"./app/data/files/{data.original_name}.csv")
         delete_dataset(data.name)

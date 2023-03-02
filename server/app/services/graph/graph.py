@@ -217,33 +217,36 @@ def get_overview_graph(
             list_links + [anchor] if is_anchor_list else list_links,
         )
 
-        unique_entry_set = set(search_results_df.entry.tolist())
-        unique_mongo_anchor_node_entry_set = set(
-            [
-                item
-                for sublist in [
-                    node["entries"] for node in mongo_nodes if node["feature"] == anchor
+        if is_anchor_list:
+            unique_entry_set = set(search_results_df.entry.tolist())
+            unique_mongo_anchor_node_entry_set = set(
+                [
+                    item
+                    for sublist in [
+                        node["entries"]
+                        for node in mongo_nodes
+                        if node["feature"] == anchor
+                    ]
+                    for item in sublist
                 ]
-                for item in sublist
-            ]
-        )
-
-        entries_with_no_anchor_value = list(
-            unique_entry_set - unique_mongo_anchor_node_entry_set
-        )
-
-        if len(entries_with_no_anchor_value) > 0:
-            mongo_nodes.append(
-                {
-                    "entries": entries_with_no_anchor_value,
-                    "id": uuid.uuid4().hex,
-                    "label": f"CSX_No_{anchor}",
-                    "feature": anchor,
-                    "community": 0,
-                    "component": 0,
-                    "size": len(entries_with_no_anchor_value) + 5,
-                }
             )
+
+            entries_with_no_anchor_value = list(
+                unique_entry_set - unique_mongo_anchor_node_entry_set
+            )
+
+            if len(entries_with_no_anchor_value) > 0:
+                mongo_nodes.append(
+                    {
+                        "entries": entries_with_no_anchor_value,
+                        "id": uuid.uuid4().hex,
+                        "label": f"CSX_No_{anchor}",
+                        "feature": anchor,
+                        "community": 0,
+                        "component": 0,
+                        "size": len(entries_with_no_anchor_value) + 5,
+                    }
+                )
 
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
             entries_with_nodes, mongo_nodes
