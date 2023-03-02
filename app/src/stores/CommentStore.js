@@ -104,9 +104,7 @@ export class CommentStore {
             newComment.screenshot_height = null;
         }
 
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments.push(newComment);
+        this.store.core.addCommentToCurrentHistoryItem(newComment);
 
         this.store.history.generateHistoryNodes();
 
@@ -132,10 +130,7 @@ export class CommentStore {
             return;
         }
 
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments.splice(index, 1);
-
+        this.store.core.deleteCommentFromCurrentHistoryItem(index);
         this.store.history.generateHistoryNodes();
     };
 
@@ -172,44 +167,19 @@ export class CommentStore {
             return;
         }
 
-        if (params.screenshot) {
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot = params.screenshot;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_width = params.screenshot_width;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_height = params.screenshot_height;
-        } else {
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot = null;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_width = null;
-            this.store.core.studyHistory[
-                this.store.core.studyHistoryItemIndex
-            ].comments[index].screenshot_height = null;
-        }
-
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments[index].chart = params.chart ? params.chart : null;
-
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments[index].comment = comment;
-
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments[index].time = comment_time;
-
-        this.store.core.studyHistory[
-            this.store.core.studyHistoryItemIndex
-        ].comments[index]['edited'] = true;
-
+        this.store.core.editCommentFromCurrentHistoryItem(index, {
+            screenshot: params.screenshot ? params.screenshot : null,
+            screenshot_width: params.screenshot
+                ? params.screenshot_width
+                : null,
+            screenshot_height: params.screenshot
+                ? params.screenshot_height
+                : null,
+            chart: params.chart ? params.chart : null,
+            comment: comment,
+            time: comment_time,
+            edited: true
+        });
         this.store.history.generateHistoryNodes();
     };
 }

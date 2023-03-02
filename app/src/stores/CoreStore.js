@@ -66,6 +66,19 @@ export class CoreStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    addCommentToCurrentHistoryItem = comment => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
+    };
+
+    deleteCommentFromCurrentHistoryItem = index => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.splice(index, 1);
+    };
+
+    editCommentFromCurrentHistoryItem = (index, newComment) => {
+        this.studyHistory[this.studyHistoryItemIndex].comments[index] =
+            newComment;
+    };
+
     setSurveyHidden = val => {
         this.surveyHidden = val;
         localStorage.setItem('surveyhidden', val);
@@ -75,8 +88,10 @@ export class CoreStore {
 
     setRightPanelTypeToOpen = val => (this.rightPanelTypeToOpen = val);
 
+    setIsStudyPublic = val => (this.isStudyPublic = val);
+
     toggleIsStudyPublic = async () => {
-        this.isStudyPublic = !this.isStudyPublic;
+        this.setIsStudyPublic(!this.isStudyPublic);
 
         if (this.isStudyPublic) {
             const params = {

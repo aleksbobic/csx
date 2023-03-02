@@ -777,7 +777,7 @@ export class GraphStore {
         }
 
         if (response.data.public) {
-            this.store.core.isStudyPublic = true;
+            this.store.core.setIsStudyPublic(true);
             this.store.core.setStudyPublicURL(response.data.public_url);
         }
 
