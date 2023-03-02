@@ -130,7 +130,7 @@ export class GraphStore {
         ).translateY(size + 5);
 
     generateNodeMaterial = (meshBasicMaterialTemplate, node) => {
-        const material = meshBasicMaterialTemplate.clone();
+        const material = meshBasicMaterialTemplate.clone(false);
 
         const currentGraphColorSchemas = Object.keys(
             this.store.graphInstance.nodeColorSchemeColors[
@@ -205,12 +205,12 @@ export class GraphStore {
     };
 
     generatePointObject = (meshTemplate, material, size) => {
-        const mesh = meshTemplate.clone();
+        const mesh = meshTemplate.clone(false);
         mesh.material = material;
         mesh.scale.x = size;
         mesh.scale.y = size;
         mesh.scale.z = size;
-        return [mesh, mesh.clone(), mesh.clone()];
+        return [mesh, mesh.clone(false), mesh.clone(false)];
     };
 
     generateNodeObjects = (nodes, graphType) => {
@@ -817,8 +817,9 @@ export class GraphStore {
                 this.store.core.studyHistoryItemIndex
             ].anchor_properties;
 
-        this.store.overviewSchema.anchorProperties =
-            this.store.search.anchorProperties;
+        this.store.overviewSchema.setAnchorProperties(
+            this.store.search.anchorProperties
+        );
 
         this.store.search.schema =
             this.store.core.studyHistory[

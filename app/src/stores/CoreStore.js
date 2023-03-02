@@ -308,7 +308,8 @@ export class CoreStore {
         }
 
         localStorage.setItem('studyuuid', response.data);
-        this.studyUuid = response.data;
+        this.setStudyUuid(response.data);
+
         this.setStudyHistory([]);
         this.setStudyHistoryItemIndex(0);
     };

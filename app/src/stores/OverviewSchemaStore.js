@@ -320,7 +320,7 @@ export class OverviewSchemaStore {
     };
 
     resetProperties = () => {
-        this.anchorProperties = [];
+        this.setAnchorProperties([]);
         this.nodes = this.nodes.map(node => {
             node.data = { ...node.data };
             return node;

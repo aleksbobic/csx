@@ -217,15 +217,19 @@ def get_overview_graph(
             list_links + [anchor] if is_anchor_list else list_links,
         )
 
-        entries_with_no_anchor_value = list(
-            set(search_results_df.entry.tolist())
-            - set(
-                [
-                    item
-                    for sublist in [node["entries"] for node in mongo_nodes]
-                    for item in sublist
+        unique_entry_set = set(search_results_df.entry.tolist())
+        unique_mongo_anchor_node_entry_set = set(
+            [
+                item
+                for sublist in [
+                    node["entries"] for node in mongo_nodes if node["feature"] == anchor
                 ]
-            )
+                for item in sublist
+            ]
+        )
+
+        entries_with_no_anchor_value = list(
+            unique_entry_set - unique_mongo_anchor_node_entry_set
         )
 
         if len(entries_with_no_anchor_value) > 0:
@@ -244,11 +248,13 @@ def get_overview_graph(
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
             entries_with_nodes, mongo_nodes
         )
+
         mongo_nodes = csx_nodes.adjust_node_size(
             mongo_nodes,
             search_results_df,
             list_links + [anchor] if is_anchor_list else list_links,
         )
+
         nodes = nodes + mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
