@@ -16,42 +16,42 @@ from elasticsearch_dsl import Q
 from fastapi import APIRouter, UploadFile
 import base64
 import random
-
+from typing import Union
 
 router = APIRouter()
 
 
 @router.post("/upload")
 def uploadfile(file: UploadFile):
-    if os.getenv("DISABLE_UPLOAD") == "true":
+    if os.getenv("DISABLE_UPLOAD") == "true" or not file.filename:
         return {}
 
     data = pl.read_csv(file.file)
-    df_columns = data.schema
-    columns = {}
 
-    for column in list(df_columns.keys()):
-        if df_columns[column] == pl.Utf8:
-            if data[column][0][0] == "[" and data[column][0][-1] == "]":
-                columns[column] = "list"
-            elif (
-                data.shape[0] > 20
-                and data.select([pl.col(column).n_unique()])[0, 0] < 10
-            ):
-                columns[column] = "category"
-            else:
-                columns[column] = "string"
-        elif df_columns[column] in [pl.Float32, pl.Float64]:
-            columns[column] = "float"
-        else:
-            columns[column] = "integer"
+    column_types = {column: getColumnType(data[column]) for column in data.schema}
 
     if not os.path.exists("./app/data/files"):
         os.makedirs("./app/data/files")
 
     data.write_csv(f'./app/data/files/{file.filename.rpartition(".")[0]}.csv')
 
-    return {"name": file.filename.rpartition(".")[0], "columns": columns}
+    return {"name": file.filename.rpartition(".")[0], "columns": column_types}
+
+
+def getColumnType(column: pl.Series):
+    not_null_rows = column.filter(~column.is_null())
+
+    if column.dtype == pl.Utf8:
+        if not_null_rows[0][0] == "[" and not_null_rows[0][-1] == "]":
+            return "list"
+        if column.n_unique() < 10:
+            return "category"
+        return "string"
+
+    if column.dtype in [pl.Float32, pl.Float64]:
+        return "float"
+
+    return "integer"
 
 
 @router.get("/randomimage", responses={200: {"content": {"image/png": {}}}})
@@ -74,6 +74,174 @@ def get_random_image():
     with open(f"./app/data/images/{image_number}.png", "rb") as f:
         base64image = base64.b64encode(f.read())
     return {"image": base64image, "animal": num_to_animal[image_number]}
+
+
+class SettingsData(BaseModel):
+    original_name: str
+    name: str
+    anchor: str
+    defaults: dict
+    default_schemas: dict
+
+
+@router.post("/save")
+def set_defaults(data: SettingsData):
+    defaults = data.defaults
+
+    # Generate default config
+    config = {
+        "default_visible_dimensions": get_default_visible_dimensions(defaults),
+        "anchor": defaults[data.anchor]["name"],
+        "links": get_default_link_dimensions(defaults),
+        "dimension_types": get_dimension_types(defaults),
+        "default_search_fields": get_default_searchable_dimensions(defaults),
+        "schemas": [{"name": "default", "relations": []}],
+        "default_schemas": data.default_schemas,
+    }
+
+    dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]
+    src_type = config["dimension_types"][defaults[data.anchor]["name"]]
+
+    initial_relationship = {
+        "dest": get_default_link_dimensions(defaults)[0],
+        "src": defaults[data.anchor]["name"],
+        "relationship": generate_initial_detail_relationship(src_type, dest_type),
+    }
+
+    config["schemas"][0]["relations"].append(initial_relationship)
+
+    if not os.path.exists("./app/data/config"):
+        os.makedirs("./app/data/config")
+
+    dataset = pd.read_csv(
+        f"./app/data/files/{data.original_name}.csv", lineterminator="\n"
+    )
+
+    rename_mapping = get_renamed_dimensions(defaults)
+    if bool(rename_mapping):
+        dataset.rename(columns=rename_mapping, inplace=True)
+
+    columns = get_dimensions(defaults)
+
+    mapping = {
+        "mappings": {
+            "properties": {
+                dim: {"type": get_elastic_type(config["dimension_types"][dim])}
+                for dim in config["dimension_types"]
+            }
+        },
+    }
+
+    config["search_hints"] = {
+        feature: get_dimension_search_hints(dataset, feature, feature_type)
+        for feature, feature_type in config["dimension_types"].items()
+        if feature_type != "string"
+    }
+
+    with open(f"./app/data/config/{data.name}.json", "w") as f:
+        json.dump(config, f)
+
+    csx_es.create_index(data.name, mapping)
+    csx_es.set_result_window(data.name)
+
+    try:
+        print("***** Populating elastic")
+        csx_es.bulk_populate(
+            generate_entries_from_dataframe(
+                dataset, columns, data.name, config["dimension_types"]
+            )
+        )
+    except Exception as exception:
+        os.remove(f"./app/data/files/{data.original_name}.csv")
+        delete_dataset(data.name)
+        print("\n\n\n\n", exception)
+        return exception
+
+    list_properties = [
+        key for key, value in config["dimension_types"].items() if value == "list"
+    ]
+
+    if len(list_properties) > 0:
+        print("***** Retrieving elastic")
+        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), data.name, False)
+        print("***** Generating nodes")
+        nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
+
+        print("***** Generating mongo nodes")
+
+        mongo_nodes = [node for node in nodes if node["feature"] in list_properties]
+
+        print("***** Populating mongo")
+        csx_data.insert_documents(data.name, mongo_nodes)
+    else:
+        print("***** Skipped populating mongo")
+
+    string_properties = [
+        key for key, value in config["dimension_types"].items() if value == "string"
+    ]
+
+    for prop in string_properties:
+        csx_auto.generate_auto_index(
+            data.name, prop, dataset[prop].astype(str).to_list()
+        )
+
+    for prop in list_properties:
+        unique_entries = list(
+            set(
+                itertools.chain.from_iterable(
+                    [
+                        entry.lstrip("[").rstrip("]").replace("'", "").split(", ")
+                        for entry in dataset[prop].astype(str).to_list()
+                    ]
+                )
+            )
+        )
+
+        csx_auto.generate_list_auto_index(data.name, prop, unique_entries)
+
+    string_search_fields = []
+    other_search_fields = []
+
+    for search_field in config["default_search_fields"]:
+        if config["dimension_types"][search_field] == "string":
+            string_search_fields.append(search_field)
+        else:
+            other_search_fields.append(search_field)
+
+    csx_auto.generate_main_auto_index(
+        data.name, other_search_fields, string_search_fields, dataset
+    )
+
+    os.remove(f"./app/data/files/{data.original_name}.csv")
+
+    return {"status": "success"}
+
+
+def get_dimension_search_hints(dataset, feature, feature_type):
+    if feature_type == "integer":
+        return {
+            "min": int(dataset[feature].min()),
+            "max": int(dataset[feature].max()),
+        }
+    if feature_type == "float":
+        return {
+            "min": float(dataset[feature].min()),
+            "max": float(dataset[feature].max()),
+        }
+    if feature_type == "category":
+        return {"values": list(dataset[feature].dropna().unique())}
+    if feature_type == "list":
+        return {
+            "values": sorted(
+                list(
+                    set(
+                        itertools.chain.from_iterable(
+                            dataset[feature].apply(transform_to_list).tolist()
+                        )
+                    )
+                )
+            )
+        }
 
 
 def get_default_visible_dimensions(defaults):
@@ -167,192 +335,28 @@ def get_elastic_type(dim_type):
     return "text"
 
 
-def transform_to_list(raw_entry):
+def transform_to_list(raw_entry: Union[str, None]) -> list:
+    if not isinstance(raw_entry, str):
+        return []
+
     return [
         entry.lstrip("'").rstrip("'")
         for entry in raw_entry.lstrip("[").rstrip("]").split("', '")
     ]
 
 
-class SettingsData(BaseModel):
-    original_name: str
-    name: str
-    anchor: str
-    defaults: dict
-    default_schemas: dict
-
-
-@router.post("/settings")
-def set_defaults(data: SettingsData):
-    defaults = data.defaults
-
-    # Generate default config
-    config = {
-        "default_visible_dimensions": get_default_visible_dimensions(defaults),
-        "anchor": defaults[data.anchor]["name"],
-        "links": get_default_link_dimensions(defaults),
-        "dimension_types": get_dimension_types(defaults),
-        "default_search_fields": get_default_searchable_dimensions(defaults),
-        "schemas": [{"name": "default", "relations": []}],
-        "default_schemas": data.default_schemas,
-    }
-
-    dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]
-    src_type = config["dimension_types"][defaults[data.anchor]["name"]]
-
-    initial_relationship = {
-        "dest": get_default_link_dimensions(defaults)[0],
-        "src": defaults[data.anchor]["name"],
-        "relationship": "",
-    }
-
+def generate_initial_detail_relationship(src_type: str, dest_type: str):
+    # Generates initial detail schema relationship based on source and destination type
     if src_type == "list" and dest_type == "list":
-        initial_relationship["relationship"] = "manyToMany"
-    elif src_type == "list" and dest_type != "list":
-        initial_relationship["relationship"] = "ManyToOne"
-    elif src_type != "list" and dest_type == "list":
-        initial_relationship["relationship"] = "oneToMany"
-    else:
-        initial_relationship["relationship"] = "oneToOne"
+        return "manyToMany"
 
-    config["schemas"][0]["relations"].append(initial_relationship)
+    if src_type == "list" and dest_type != "list":
+        return "ManyToOne"
 
-    if not os.path.exists("./app/data/config"):
-        os.makedirs("./app/data/config")
+    if src_type != "list" and dest_type == "list":
+        return "oneToMany"
 
-    dataset = pd.read_csv(
-        f"./app/data/files/{data.original_name}.csv", lineterminator="\n"
-    )
-
-    rename_mapping = get_renamed_dimensions(defaults)
-    if bool(rename_mapping):
-        dataset.rename(columns=rename_mapping, inplace=True)
-
-    null_dimensions = get_remove_row_if_null_dimensions(defaults)
-    if len(null_dimensions) != 0:
-        dataset.dropna(axis=0, subset=null_dimensions, inplace=True)
-
-    for null_dim in null_dimensions:
-        dataset = dataset[dataset[null_dim] != ""]
-
-    columns = get_dimensions(defaults)
-
-    mapping = {
-        "mappings": {
-            "properties": {
-                dim: {"type": get_elastic_type(config["dimension_types"][dim])}
-                for dim in config["dimension_types"]
-            }
-        },
-    }
-
-    dimension_search_hints = {}
-
-    for key in config["dimension_types"]:
-        if config["dimension_types"][key] == "integer":
-            dimension_search_hints[key] = {
-                "min": int(dataset[key].min()),
-                "max": int(dataset[key].max()),
-            }
-        elif config["dimension_types"][key] == "float":
-            dimension_search_hints[key] = {
-                "min": float(dataset[key].min()),
-                "max": float(dataset[key].max()),
-            }
-        elif config["dimension_types"][key] == "category":
-            dimension_search_hints[key] = {"values": list(dataset[key].unique())}
-        elif config["dimension_types"][key] == "list":
-            dimension_search_hints[key] = {
-                "values": sorted(
-                    list(
-                        set(
-                            itertools.chain.from_iterable(
-                                dataset[key].apply(transform_to_list).tolist()
-                            )
-                        )
-                    )
-                )
-            }
-
-    config["search_hints"] = dimension_search_hints
-
-    with open(f"./app/data/config/{data.name}.json", "w") as f:
-        json.dump(config, f)
-
-    csx_es.create_index(data.name, mapping)
-    csx_es.set_result_window(data.name)
-
-    try:
-        print("***** Populating elastic")
-        csx_es.bulk_populate(
-            generate_entries_from_dataframe(
-                dataset, columns, data.name, config["dimension_types"]
-            )
-        )
-    except Exception as exception:
-        os.remove(f"./app/data/files/{data.original_name}.csv")
-        delete_dataset(data.name)
-        print("\n\n\n\n", exception)
-        return exception
-
-    list_properties = [
-        key for key, value in config["dimension_types"].items() if value == "list"
-    ]
-
-    if len(list_properties) > 0:
-        print("***** Retrieving elastic")
-        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), data.name, False)
-        print("***** Generating nodes")
-        nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
-
-        print("***** Generating mongo nodes")
-
-        mongo_nodes = [node for node in nodes if node["feature"] in list_properties]
-
-        print("***** Populating mongo")
-        csx_data.insert_documents(data.name, mongo_nodes)
-    else:
-        print("***** Skipped populating mongo")
-
-    string_properties = [
-        key for key, value in config["dimension_types"].items() if value == "string"
-    ]
-
-    for prop in string_properties:
-        csx_auto.generate_auto_index(
-            data.name, prop, dataset[prop].astype(str).to_list()
-        )
-
-    for prop in list_properties:
-        unique_entries = list(
-            set(
-                itertools.chain.from_iterable(
-                    [
-                        entry.lstrip("[").rstrip("]").replace("'", "").split(", ")
-                        for entry in dataset[prop].astype(str).to_list()
-                    ]
-                )
-            )
-        )
-
-        csx_auto.generate_list_auto_index(data.name, prop, unique_entries)
-
-    string_search_fields = []
-    other_search_fields = []
-
-    for search_field in config["default_search_fields"]:
-        if config["dimension_types"][search_field] == "string":
-            string_search_fields.append(search_field)
-        else:
-            other_search_fields.append(search_field)
-
-    csx_auto.generate_main_auto_index(
-        data.name, other_search_fields, string_search_fields, dataset
-    )
-
-    os.remove(f"./app/data/files/{data.original_name}.csv")
-
-    return {"status": "success"}
+    return "oneToOne"
 
 
 def convert_entry_with_nodes_to_mongo(entry, key, list_props):
@@ -405,7 +409,7 @@ class UpdateSettingsData(BaseModel):
     defaults: dict
 
 
-@router.patch("/settingsupdate")
+@router.patch("/update")
 def update_settings(data: UpdateSettingsData):
     defaults = data.defaults
     schemas = []
