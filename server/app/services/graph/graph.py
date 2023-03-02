@@ -438,11 +438,6 @@ def get_graph_with_new_anchor_props(
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
 
-    print(
-        "\n\n\n after processing anchor props: ",
-        graph_data["meta"]["anchor_properties"],
-    )
-
     csx_study.new_history_entry(
         study_id,
         user_id,
