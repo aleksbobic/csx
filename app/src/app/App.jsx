@@ -90,7 +90,7 @@ function CSX() {
                 }
             });
         };
-    }, []);
+    }, [store.track]);
 
     const renderErrorToast = useCallback(() => {
         errorToastRef.current = errorToast({

@@ -556,15 +556,32 @@ def save_study(
 
 
 @router.get("/delete")
-def delete_study(study_uuid: str, user_uuid: str):
+def delete_study(study_uuid: str, user_uuid: str, user_trigger: bool):
 
-    study_entry = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies",
-            {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
-            {"_id": 0},
+    if user_trigger:
+        ## If study deletion is user triggered then delete study no matter if it is saved or not
+        study_entry = list(
+            csx_data.get_all_documents_by_conditions(
+                "studies",
+                {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
+                {"_id": 0},
+            )
         )
-    )
+    else:
+        ## If study deletion is automatic then first check that the study is actually not saved
+        study_entry = list(
+            csx_data.get_all_documents_by_conditions(
+                "studies",
+                {
+                    "$and": [
+                        {"study_uuid": study_uuid},
+                        {"user_uuid": user_uuid},
+                        {"saved": False},
+                    ]
+                },
+                {"_id": 0},
+            )
+        )
 
     if len(study_entry) > 0:
         history_ids = [item["item_id"] for item in study_entry[0]["history"]]

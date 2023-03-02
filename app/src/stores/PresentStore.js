@@ -18,6 +18,8 @@ export class PresentStore {
         makeAutoObservable(this);
     }
 
+    setSlides = slides => (this.slides = slides);
+
     addIntroSlide = (pptxSlide, slide) => {
         pptxSlide
             .addText(slide.title.toUpperCase(), {
@@ -1002,7 +1004,7 @@ export class PresentStore {
             text: 'Made with Collaboration Spotting X'
         });
 
-        this.slides = tempSlides;
+        this.setSlides(tempSlides);
     };
 
     getStudyDetails = async studyID => {

@@ -6,7 +6,6 @@ import {
     HStack,
     IconButton,
     Image,
-    Kbd,
     Link,
     Spinner,
     Text,
@@ -19,20 +18,19 @@ import {
     ChevronUpIcon
 } from '@heroicons/react/20/solid';
 
+import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
-import { useState } from 'react';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import { useHistory, useLocation } from 'react-router';
 import { withRouter } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
 import { RootStoreContext } from 'stores/RootStore';
-import logo from 'images/logo.png';
 import './Present.scss';
-import { Helmet } from 'react-helmet-async';
 
 function PresentPage() {
     const { colorMode } = useColorMode();
@@ -47,7 +45,7 @@ function PresentPage() {
         const publicStudyID = queryString.parse(location.search).pstudy;
         const activeItem = queryString.parse(location.search).active_item;
         store.present.generateSlides(studyID, publicStudyID, activeItem);
-    }, []);
+    }, [location.search, store.present]);
 
     useEffect(() => {
         if (store.present.slides.length > 0) {

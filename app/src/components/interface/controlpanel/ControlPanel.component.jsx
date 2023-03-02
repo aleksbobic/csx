@@ -26,8 +26,6 @@ import {
 } from '@chakra-ui/react';
 import {
     ArrowsPointingOutIcon,
-    Cog6ToothIcon,
-    DocumentIcon,
     FolderOpenIcon,
     PaintBrushIcon,
     ScissorsIcon
@@ -39,9 +37,7 @@ import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
     DisplayFullwidth,
-    Eye,
     FormatSeparator,
-    Info,
     LayoutPin,
     LivePhoto,
     MediaLive,

@@ -50,14 +50,6 @@ function HomePage() {
         }
     }, [store.core.trackingEnabled]);
 
-    useEffect(() => {
-        store.core.isStudyPublic = false;
-        store.core.setStudyPublicURL('');
-        store.graphInstance.setEdgeColorScheme('auto');
-        store.graphInstance.setNodeColorScheme('component');
-        store.overviewSchema.resetProperties();
-    }, []);
-
     const renderDarkCookie = useCallback(
         () => (
             <Box
@@ -139,11 +131,11 @@ function HomePage() {
                 </HStack>
             </Box>
         ),
-        [cookieToast, store.core, store.search]
+        [cookieToast, store.core, store.search, store.track]
     );
 
-    const renderLightCookie = useCallback(
-        () => (
+    const renderLightCookie = useCallback(() => {
+        return (
             <Box
                 backgroundColor="white"
                 borderRadius="12px"
@@ -216,9 +208,8 @@ function HomePage() {
                     </Button>
                 </HStack>
             </Box>
-        ),
-        [cookieToast, store.core]
-    );
+        );
+    }, [cookieToast, store.core]);
 
     useEffect(() => {
         if (store.core.hideCookieBanner) {
@@ -249,6 +240,7 @@ function HomePage() {
     useEffect(() => {
         if (!store.core.hideCookieBanner && !cookieToastVisible) {
             setCookieToastVisible(true);
+
             if (colorMode === 'light') {
                 cookieToast.closeAll();
                 cookieToast({
@@ -278,13 +270,25 @@ function HomePage() {
     });
 
     useEffect(() => {
+        store.core.isStudyPublic = false;
+        store.core.setStudyPublicURL('');
+        store.graphInstance.setEdgeColorScheme('auto');
+        store.graphInstance.setNodeColorScheme('component');
+        store.overviewSchema.resetProperties();
         store.track.trackPageChange();
         store.graph.resetDetailGraphData();
         store.graph.resetGraphData();
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
         store.search.setAdvancedSearchQuery(null);
-    }, []);
+    }, [
+        store.core,
+        store.graph,
+        store.graphInstance,
+        store.overviewSchema,
+        store.search,
+        store.track
+    ]);
 
     useEffect(() => {
         if (store.core.toastInfo.message !== '') {

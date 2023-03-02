@@ -106,7 +106,6 @@ export class StatsStore {
     };
 
     getGraphColors = (labels, data) => {
-        const skipfactor = labels.length > 10 ? 1 / labels.length : null;
         let uniqueValues;
 
         if (data) {

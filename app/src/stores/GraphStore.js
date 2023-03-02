@@ -931,12 +931,24 @@ export class GraphStore {
                         entry.values.length <= 10
                     ) {
                         this.store.graphInstance.generateSchemeColorsFromArray(
-                            entry.values,
+                            [
+                                ...new Set(
+                                    response.nodes.map(
+                                        node => node.properties[entry.property]
+                                    )
+                                )
+                            ],
                             entry.property
                         );
                     } else {
                         this.store.graphInstance.generateNumericColorSchema(
-                            entry.values,
+                            [
+                                ...new Set(
+                                    response.nodes.map(
+                                        node => node.properties[entry.property]
+                                    )
+                                )
+                            ],
                             entry.property
                         );
                     }

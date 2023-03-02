@@ -46,7 +46,7 @@ function SearchBar(props) {
 
     useEffect(() => {
         store.core.generateStudyUUID();
-    }, []);
+    }, [store.core]);
 
     useEffect(() => {
         setSelectedDataset(store.search.currentDatasetIndex);

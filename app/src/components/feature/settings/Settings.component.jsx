@@ -1,15 +1,5 @@
 import { Button } from '@chakra-ui/button';
-import { FormControl, FormLabel } from '@chakra-ui/form-control';
-import {
-    Box,
-    Divider,
-    Heading,
-    HStack,
-    Stack,
-    Text,
-    VStack
-} from '@chakra-ui/layout';
-import { Radio, RadioGroup } from '@chakra-ui/radio';
+import { Box, Heading, HStack, Stack, Text, VStack } from '@chakra-ui/layout';
 import {
     Checkbox,
     IconButton,

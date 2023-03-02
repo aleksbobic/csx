@@ -5,14 +5,14 @@ import {
     Tooltip,
     useColorModeValue
 } from '@chakra-ui/react';
-import { ArrowRight, Toolbox, TrashEmpty } from 'css.gg';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { ArrowRight, TrashEmpty } from 'css.gg';
+import { isEnvFalse } from 'general.utils';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse } from 'general.utils';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 function DatasetElement(props) {
     const store = useContext(RootStoreContext);

@@ -302,7 +302,8 @@ export class CoreStore {
         if (!this.studyIsSaved || studyUuid) {
             const params = {
                 study_uuid: studyUuid ? studyUuid : this.studyUuid,
-                user_uuid: this.userUuid
+                user_uuid: this.userUuid,
+                user_trigger: !!studyUuid
             };
 
             if (params.study_uuid) {

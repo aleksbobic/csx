@@ -56,7 +56,15 @@ function GraphPage() {
         } else {
             history.push('/');
         }
-    }, []);
+    }, [
+        history,
+        location.search,
+        store.core,
+        store.graph,
+        store.graphInstance,
+        store.track,
+        store.workflow.shouldRunWorkflow
+    ]);
 
     useEffect(() => {
         if (store.search.searchIsEmpty || store.core.studyIsEmpty) {
@@ -83,7 +91,7 @@ function GraphPage() {
             duration: null,
             isClosable: true
         });
-    }, [surveyToast]);
+    }, [store.core, surveyToast]);
 
     useEffect(() => {
         if (

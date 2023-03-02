@@ -23,29 +23,25 @@ import {
     Carousel,
     ChevronRight,
     List,
-    Moon,
-    Presentation,
     RadioCheck,
     Ratio,
     Ring,
-    Sun,
     Sync
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 
+import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 import { CameraIcon } from '@heroicons/react/24/solid';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { isEnvFalse } from 'general.utils';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
-import { isEnvFalse } from 'general.utils';
-import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
-import { useCallback } from 'react';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
-    const { colorMode, toggleColorMode } = useColorMode();
+    const { colorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
     const [panelType, setPanelType] = useState('');
     const location = useLocation();
@@ -69,7 +65,7 @@ function NavigationPanelComponent() {
         if (containerRef.current) {
             store.core.setRightPanelWidth(containerRef.current.offsetWidth);
         }
-    }, []);
+    }, [store.core]);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -129,23 +125,23 @@ function NavigationPanelComponent() {
         }
     }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
-    const toggleColor = () => {
-        store.track.trackEvent(
-            'Navbar',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: `Change color mode to ${
-                    colorMode === 'light' ? 'dark' : 'light'
-                }`
-            })
-        );
+    // const toggleColor = () => {
+    //     store.track.trackEvent(
+    //         'Navbar',
+    //         'Button',
+    //         JSON.stringify({
+    //             type: 'Click',
+    //             value: `Change color mode to ${
+    //                 colorMode === 'light' ? 'dark' : 'light'
+    //             }`
+    //         })
+    //     );
 
-        toggleColorMode();
-        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
-        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
-        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
-    };
+    //     toggleColorMode();
+    //     store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
+    // };
 
     const renderGraphUtils = () => (
         <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">

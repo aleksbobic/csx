@@ -62,6 +62,9 @@ function BarChart(props) {
             if (chartElement === 'nodes') {
                 setChartElementValues(store.stats.getWidgetNodeProperties());
                 setChartElementSortValues(store.stats.getNodeSortValues());
+                setChartGroupByValues(
+                    store.stats.getWidgetNodeProperties(true)
+                );
             } else {
                 setChartElementValues(store.stats.getWidgetEdgeProperties());
             }

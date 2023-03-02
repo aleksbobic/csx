@@ -1,6 +1,5 @@
 import { Box, Text, useColorModeValue } from '@chakra-ui/react';
 import { DocumentArrowUpIcon } from '@heroicons/react/20/solid';
-import { FileAdd } from 'css.gg';
 import { useContext } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { RootStoreContext } from 'stores/RootStore';

@@ -30,7 +30,7 @@ import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { Chart, ChevronDown, ChevronUp, Close } from 'css.gg';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 import { useContext, useEffect, useRef, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -111,7 +111,14 @@ function CommentTextArea(props) {
                 setComment('');
             }
         }
-    }, [comment, props, store.comment, store.history, submitCommentKey]);
+    }, [
+        comment,
+        props,
+        store.comment,
+        store.history,
+        store.track,
+        submitCommentKey
+    ]);
 
     const renderMarkdownCheatSheet = () => {
         const content = [

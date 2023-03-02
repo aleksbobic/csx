@@ -43,7 +43,9 @@ export class SearchStore {
 
     getSearchHintsByFeature = feature => this.searchHints[feature];
 
-    setLinks = val => (this.links = val);
+    setLinks = val => {
+        this.links = val;
+    };
 
     useDataset = index => {
         if (!this.datasets.length) {
