@@ -20,7 +20,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function GraphStats(props) {
     const store = useContext(RootStoreContext);
@@ -344,7 +344,7 @@ function GraphStats(props) {
     }
 
     if (nodeData.length === 0 && props.networkData !== 'all') {
-        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (

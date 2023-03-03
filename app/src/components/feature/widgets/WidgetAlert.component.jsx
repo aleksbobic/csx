@@ -1,19 +1,19 @@
-import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
-import { Heading, Text, useColorMode, VStack } from '@chakra-ui/react';
+import { Heading, Text, useColorModeValue, VStack } from '@chakra-ui/react';
 
-function ChartAlert(props) {
-    const { colorMode } = useColorMode();
+function WidgetAlert(props) {
+    const alertBackground = useColorModeValue(
+        'blackAlpha.200',
+        'blackAlpha.800'
+    );
 
     return (
         <VStack
             height="100%"
             width="100%"
             spacing={1}
-            backgroundColor={
-                colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-            }
+            backgroundColor={alertBackground}
             borderRadius="6px"
             justifyContent="center"
             padding="20%"
@@ -41,17 +41,17 @@ function ChartAlert(props) {
     );
 }
 
-ChartAlert.propTypes = {
+WidgetAlert.propTypes = {
     title: PropTypes.string,
     message: PropTypes.string,
     size: PropTypes.oneOf(['sm', 'md'])
 };
 
-ChartAlert.defaultProps = {
+WidgetAlert.defaultProps = {
     title: 'NO DATA',
     message:
         'Please select some elements to get useful insights from this chart! 😉',
     size: 'sm'
 };
 
-export default observer(ChartAlert);
+export default WidgetAlert;

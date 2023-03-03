@@ -22,7 +22,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function ConnectionStats(props) {
     const store = useContext(RootStoreContext);
@@ -460,7 +460,7 @@ function ConnectionStats(props) {
 
     if (data.length === 0) {
         return (
-            <ChartAlertComponent
+            <WidgetAlert
                 size={props.isExpanded ? 'md' : 'sm'}
                 message="Explore direct connections of nodes to see details here! 😉"
             />

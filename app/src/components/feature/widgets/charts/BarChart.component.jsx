@@ -17,7 +17,7 @@ import {
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function BarChart(props) {
     const store = useContext(RootStoreContext);
@@ -687,7 +687,7 @@ function BarChart(props) {
     }
 
     if (!data || data.labels.length === 0) {
-        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     const getPadding = () => {

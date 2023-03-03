@@ -17,7 +17,7 @@ import {
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
 import { getElementAtEvent, Line } from 'react-chartjs-2';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function LineChart(props) {
     const store = useContext(RootStoreContext);
@@ -690,7 +690,7 @@ function LineChart(props) {
     }
 
     if (!data || data.labels.length === 0) {
-        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (

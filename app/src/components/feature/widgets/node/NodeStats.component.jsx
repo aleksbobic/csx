@@ -24,7 +24,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
@@ -290,7 +290,7 @@ function SelectedNodeList(props) {
     }
 
     if (data.length === 0) {
-        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (

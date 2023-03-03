@@ -19,7 +19,7 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import { schemeTableau10 } from 'd3-scale-chromatic';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Radar } from 'react-chartjs-2';
-import ChartAlertComponent from '../WidgetAlert.component';
+import WidgetAlert from '../WidgetAlert.component';
 
 function RadarChart(props) {
     const store = useContext(RootStoreContext);
@@ -402,12 +402,12 @@ function RadarChart(props) {
     }
 
     if ((!data || data.labels.length === 0) && !tooManySelectedElements) {
-        return <ChartAlertComponent size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     if (tooManySelectedElements) {
         return (
-            <ChartAlertComponent
+            <WidgetAlert
                 title="TOO MANY DATAPOINTS"
                 message="Please select fever elements to get useful insights from this chart! 😉"
                 size={props.isExpanded ? 'md' : 'sm'}
