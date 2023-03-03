@@ -140,12 +140,12 @@ export class StatsStore {
             groupHoverLabel: '',
             network: 'overview',
             type: 'doughnut',
-            onlyVisible: false,
             network_data: 'all',
+            onlyVisible: false,
             elements: 'nodes',
             show_only: 'all',
             element_values: 'values',
-            display_limit: 'all',
+            display_limit: '10',
             group_by: 'types',
             colSpan: 1,
             height: '200px',
@@ -207,7 +207,7 @@ export class StatsStore {
 
     getNodeSortValues = () => {
         let sortValues = [
-            { value: 'frequency', label: 'frequency' },
+            { value: 'frequency', label: 'Frequency' },
             { value: 'neighbours', label: 'Neighbour count' }
         ];
 
@@ -313,11 +313,74 @@ export class StatsStore {
     };
 
     setWidgetProperty = (widgetID, property, value) => {
-        const dataset = this.store.search.currentDataset;
-        this.charts[dataset].find(chart => chart.id === widgetID)[property] =
+        this.activeWidgets.find(chart => chart.id === widgetID)[property] =
             value;
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
+
+    setWidgetProperties = (widgetID, properties) => {
+        const dataset = this.store.search.currentDataset;
+        const widgetIdenx = this.charts[dataset].findIndex(
+            chart => chart.id === widgetID
+        );
+        this.charts[dataset][widgetIdenx] = {
+            ...this.charts[dataset][widgetIdenx],
+            ...properties
+        };
+
+        this.charts[dataset] = [...this.charts[dataset]];
+
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+    };
+
+    getNewWidgetTitle = () => {
+        if (this.newChartProps.title) {
+            return this.newChartProps.title;
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'nodes') {
+            return 'Graph nodes';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'components') {
+            return 'Graph components';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'graph stats') {
+            return 'Graph properties';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'node filter') {
+            return 'Node filter';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'connections') {
+            return 'Node connections';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'radar') {
+            return 'Element comparison';
+        }
+
+        switch (this.newChartProps.element_values) {
+            case 'values':
+                return this.newChartProps.elements === 'nodes'
+                    ? 'node values'
+                    : 'edge values';
+            case 'types':
+                return this.newChartProps.elements === 'nodes'
+                    ? 'node types'
+                    : 'edge types';
+            default:
+                return this.newChartProps.elements === 'nodes'
+                    ? `property ${this.newChartProps.element_values} values`
+                    : 'edge weights';
+        }
+    };
+
+    get activeWidgets() {
+        return this.charts[this.store.search.currentDataset];
+    }
 
     addChart = () => {
         const dataset = this.store.search.currentDataset;
@@ -346,7 +409,9 @@ export class StatsStore {
                 id: newChartId,
                 colSpan: 1,
                 height: '200px',
-                network: this.store.core.currentGraph
+                network: this.store.core.currentGraph,
+                title: this.getNewWidgetTitle(),
+                element_sort_values: 'frequency'
             });
         } else {
             this.charts[dataset] = [
@@ -355,7 +420,9 @@ export class StatsStore {
                     id: newChartId,
                     colSpan: 1,
                     height: '200px',
-                    network: this.store.core.currentGraph
+                    network: this.store.core.currentGraph,
+                    title: this.getNewWidgetTitle(),
+                    element_sort_values: 'frequency'
                 }
             ];
         }
@@ -386,6 +453,51 @@ export class StatsStore {
         this.charts = { ...this.charts };
         this.store.history.updateStudyCharts(charts);
     };
+
+    getWidgetTitle = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.title;
+
+    getWidgetItemType = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.elements;
+
+    getWidgetSelectedItemprop = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.element_values;
+
+    getWidgetShowOnly = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.show_only;
+
+    getWidgetGroupBy = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.group_by;
+
+    getWidgetItemProps = id => {
+        if (
+            this.activeWidgets.find(widget => widget.id === id).elements ===
+            'nodes'
+        ) {
+            return this.getWidgetNodeProperties();
+        }
+
+        return this.getWidgetEdgeProperties();
+    };
+
+    getWidgetSecondaryAxis = id => {
+        const secondaryAxisValue = this.activeWidgets.find(
+            widget => widget.id === id
+        )?.element_sort_values;
+
+        if (secondaryAxisValue) {
+            return secondaryAxisValue;
+        }
+
+        return 'frequency';
+    };
+
+    getWidgetItemState = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.network_data;
+
+    getWidgetItemCount = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.display_limit ||
+        10;
 
     expandChart = (id, makeHistoryEntry = true) => {
         const dataset = this.store.search.currentDataset;

@@ -1,108 +1,24 @@
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import {
-    Center,
-    Editable,
-    EditableInput,
-    EditablePreview,
-    Heading,
-    HStack,
-    Select,
-    useColorMode,
-    VStack
-} from '@chakra-ui/react';
-import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
 import { getElementAtEvent, Line } from 'react-chartjs-2';
 import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function LineChart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
-    const { colorMode } = useColorMode();
+
     const [data, setData] = useState(null);
-    const [title, setTitle] = useState(props.title);
-    const [chartElement, setChartElement] = useState(props.chart.elements);
-    const [chartElementValues, setChartElementValues] = useState(
-        props.chart.elements === 'nodes'
-            ? store.stats.getWidgetNodeProperties()
-            : store.stats.getWidgetEdgeProperties()
-    );
-    const [chartElementSelectedValue, setChartElementSelectedValue] = useState(
-        props.chart.element_values
-    );
-    const [chartElementSortValues, setChartElementSortValues] = useState(
-        store.stats.getNodeSortValues()
-    );
-    const [chartElementSortValue, setChartElementSortValue] = useState(
-        props?.chart?.element_sort_values
-            ? props?.chart?.element_sort_values
-            : 'frequency'
-    );
-    const [chartNetworkData, setChartNetworkData] = useState(
-        props.chart.network_data
-    );
-    const [dispalyLimit, setDispalyLimit] = useState(
-        props.chart.display_limit ? props.chart.display_limit : 10
-    );
 
-    useEffect(() => {
-        if (!props.isExample) {
-            if (chartElement === 'nodes') {
-                setChartElementValues(store.stats.getWidgetNodeProperties());
-                setChartElementSortValues(store.stats.getNodeSortValues());
-            } else {
-                setChartElementValues(store.stats.getWidgetEdgeProperties());
-            }
-        }
-    }, [
-        chartElement,
-        props.chart.id,
-        props.isExample,
-        store.stats,
-        props.settingsMode
-    ]);
-
-    useEffect(() => {
-        if (!props.isExample) {
-            setChartElementSelectedValue(chartElementValues[0].value);
-
-            store.stats.setWidgetProperty(
-                props.chart.id,
-                'element_values',
-                chartElementValues[0].value
-            );
-        }
-    }, [chartElementValues, props.chart.id, props.isExample, store.stats]);
-
-    useEffect(() => {
-        if (!props.isExample) {
-            if (
-                !props?.chart?.element_sort_values ||
-                !chartElementSortValues.find(
-                    entry => entry.value === props?.chart?.element_sort_values
-                )
-            ) {
-                setChartElementSortValue(chartElementSortValues[0].value);
-
-                store.stats.setWidgetProperty(
-                    props.chart.id,
-                    'element_sort_values',
-                    chartElementSortValues[0].value
-                );
-            }
-        }
-    }, [
-        chartElementSortValues,
-        props.chart?.element_sort_values,
-        props.chart.id,
-        props.isExample,
-        store.stats,
-        props.isExpanded
-    ]);
+    const [chartConfig, setChartConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart.id
+        ) || {}
+    );
 
     useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
@@ -112,6 +28,154 @@ function LineChart(props) {
             store.comment.setChartToAttach(null);
         }
     }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+
+    const getElementProperties = useCallback(chart => {
+        switch (chart.element_values) {
+            case 'values':
+                return chart.elements === 'nodes'
+                    ? { type: 'basic', prop: 'label' }
+                    : { type: 'advanced', prop: 'label' };
+
+            case 'types':
+                return chart.elements === 'nodes'
+                    ? { type: 'basic', prop: 'feature' }
+                    : { type: 'advanced', prop: 'feature' };
+
+            case 'degree':
+                return { type: 'basic', prop: 'degree' };
+
+            default:
+                return chart.elements === 'nodes'
+                    ? {
+                          type: 'advanced',
+                          prop: chart.element_values
+                      }
+                    : { type: 'basic', prop: 'weight' };
+        }
+    }, []);
+
+    const getChartData = useCallback(
+        chart => {
+            if (!chart) {
+                return null;
+            }
+
+            let data = null;
+            const elementProperty = getElementProperties(chart);
+            const anchor_properties = store.core.isOverview
+                ? store.overviewSchema.anchorProperties
+                : [];
+
+            if (chart.elements === 'nodes') {
+                if (
+                    elementProperty.type === 'advanced' &&
+                    !anchor_properties.includes(elementProperty.prop)
+                ) {
+                    return data;
+                }
+
+                data = store.stats.getNodeCounts(
+                    elementProperty,
+                    chart.type,
+                    chart.display_limit,
+                    chart.network_data,
+                    null,
+                    chart.show_only,
+                    chart.element_sort_values
+                );
+
+                if (!data.labels.length) {
+                    return data;
+                }
+
+                return {
+                    ...data,
+                    datasets: [
+                        {
+                            ...data.datasets[0],
+                            fill: true,
+                            backgroundColor: function (context) {
+                                if (!context.chart.chartArea) {
+                                    return 'transparent';
+                                }
+                                const gradient =
+                                    context.chart.ctx.createLinearGradient(
+                                        0,
+                                        context.chart.chartArea.top,
+                                        0,
+                                        context.chart.chartArea.bottom
+                                    );
+
+                                gradient.addColorStop(0, '#3182CE99');
+                                gradient.addColorStop(1, '#3182CE01');
+                                return gradient;
+                            },
+                            borderColor: '#3182CE',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#3182CE',
+                            pointRadius: props.isExpanded ? 3 : 0
+                        }
+                    ]
+                };
+            }
+
+            data = store.stats.getEdgeCounts(
+                elementProperty,
+                chart.type,
+                chart.display_limit,
+                null,
+                chart.network_data
+            );
+
+            if (!data.labels.length) {
+                return data;
+            }
+
+            return {
+                ...data,
+                datasets: [
+                    {
+                        ...data.datasets[0],
+                        fill: true,
+                        backgroundColor: function (context) {
+                            if (!context.chart.chartArea) {
+                                return 'transparent';
+                            }
+                            const gradient =
+                                context.chart.ctx.createLinearGradient(
+                                    0,
+                                    context.chart.chartArea.top,
+                                    0,
+                                    context.chart.chartArea.bottom
+                                );
+
+                            gradient.addColorStop(0, '#3182CE99');
+                            gradient.addColorStop(1, '#3182CE01');
+                            return gradient;
+                        },
+                        borderColor: '#3182CE',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3182CE',
+                        pointRadius: props.isExpanded
+                            ? function () {
+                                  if (data.labels.length > 10) {
+                                      return 2;
+                                  }
+                                  return 3;
+                              }
+                            : 0
+                    }
+                ]
+            };
+        },
+        [
+            getElementProperties,
+            props.isExpanded,
+            store.core.isOverview,
+            store.overviewSchema.anchorProperties,
+            store.stats
+        ]
+    );
 
     useEffect(() => {
         if (props.demoData) {
@@ -140,171 +204,33 @@ function LineChart(props) {
                         borderColor: '#3182CE',
                         borderWidth: 2,
                         pointBackgroundColor: '#3182CE',
-                        pointRadius: props.isExpanded ? 4 : 0
+                        pointRadius: props.isExpanded ? 3 : 0
                     }
                 ]
             });
         } else {
-            let elementProperty;
-            let groupBy;
+            const chart = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
 
-            switch (props.chart.element_values) {
-                case 'values':
-                    elementProperty =
-                        props.chart.elements === 'nodes'
-                            ? { type: 'basic', prop: 'label' }
-                            : { type: 'advanced', prop: 'label' };
-                    break;
-                case 'types':
-                    elementProperty =
-                        props.chart.elements === 'nodes'
-                            ? { type: 'basic', prop: 'feature' }
-                            : { type: 'advanced', prop: 'feature' };
-                    break;
-                case 'degree':
-                    elementProperty = { type: 'basic', prop: 'degree' };
-                    break;
-                default:
-                    elementProperty =
-                        props.chart.elements === 'nodes'
-                            ? {
-                                  type: 'advanced',
-                                  prop: props.chart.element_values
-                              }
-                            : { type: 'basic', prop: 'weight' };
-                    break;
-            }
-            const anchor_properties =
-                store.core.currentGraph === 'overview'
-                    ? store.overviewSchema.anchorProperties
-                    : [];
-
-            if (props.chart.elements === 'nodes') {
-                if (
-                    elementProperty.type === 'advanced' &&
-                    !anchor_properties.includes(elementProperty.prop)
-                ) {
-                    setData(null);
-                } else {
-                    const nodeData = store.stats.getNodeCounts(
-                        elementProperty,
-                        props.chart.type,
-                        dispalyLimit,
-                        chartNetworkData,
-                        groupBy,
-                        props.chart.show_only,
-                        chartElementSortValue
-                    );
-
-                    if (nodeData.labels.length > 0) {
-                        setData({
-                            ...nodeData,
-                            datasets: [
-                                {
-                                    ...nodeData.datasets[0],
-                                    fill: true,
-                                    backgroundColor: function (context) {
-                                        if (!context.chart.chartArea) {
-                                            return 'transparent';
-                                        }
-                                        const gradient =
-                                            context.chart.ctx.createLinearGradient(
-                                                0,
-                                                context.chart.chartArea.top,
-                                                0,
-                                                context.chart.chartArea.bottom
-                                            );
-
-                                        gradient.addColorStop(0, '#3182CE99');
-                                        gradient.addColorStop(1, '#3182CE01');
-                                        return gradient;
-                                    },
-                                    borderColor: '#3182CE',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#3182CE',
-                                    pointRadius: props.isExpanded ? 3 : 0
-                                }
-                            ]
-                        });
-                    } else {
-                        setData(nodeData);
-                    }
-                }
-            } else {
-                const edgeData = store.stats.getEdgeCounts(
-                    elementProperty,
-                    props.chart.type,
-                    dispalyLimit,
-                    groupBy,
-                    chartNetworkData
-                );
-
-                if (edgeData.labels.length > 0) {
-                    setData({
-                        ...edgeData,
-                        datasets: [
-                            {
-                                ...edgeData.datasets[0],
-                                fill: true,
-                                backgroundColor: function (context) {
-                                    if (!context.chart.chartArea) {
-                                        return 'transparent';
-                                    }
-                                    const gradient =
-                                        context.chart.ctx.createLinearGradient(
-                                            0,
-                                            context.chart.chartArea.top,
-                                            0,
-                                            context.chart.chartArea.bottom
-                                        );
-
-                                    gradient.addColorStop(0, '#3182CE99');
-                                    gradient.addColorStop(1, '#3182CE01');
-                                    return gradient;
-                                },
-                                borderColor: '#3182CE',
-                                borderWidth: 2,
-                                pointBackgroundColor: '#3182CE',
-                                pointRadius: props.isExpanded
-                                    ? function (context) {
-                                          if (edgeData.labels.length > 10) {
-                                              return 2;
-                                          }
-                                          return 3;
-                                      }
-                                    : 0
-                            }
-                        ]
-                    });
-                } else {
-                    setData(edgeData);
-                }
-            }
+            setChartConfig(chart);
+            setData(getChartData(chart));
         }
     }, [
-        props.chart.element_values,
-        props.chart.elements,
-        props.chart.groupBy,
-        props.chart.network_data,
-        props.chart.onlyVisible,
-        props.chart.show_only,
-        props.chart.type,
+        props.chart.id,
         props.demoData,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
         store.stats,
+        store.stats.activeWidgets,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
         store.graphInstance.selfCentricType,
         store.graphInstance.visibleComponents,
-        props.elementDisplayLimit,
-        props.networkData,
-        props.chart.group_by,
-        store.core.currentGraph,
-        store.overviewSchema.anchorProperties,
-        props.isExpanded,
-        dispalyLimit,
-        chartNetworkData,
-        chartElementSortValue
+        getChartData,
+        props.isExpanded
     ]);
 
     const getPluginOptions = () => {
@@ -344,7 +270,7 @@ function LineChart(props) {
                     }${tooltipItem[0].label}`;
                 },
                 label: tooltipItem => {
-                    return `${chartElementSortValue}: ${tooltipItem.formattedValue}`;
+                    return `${chartConfig.element_sort_values}: ${tooltipItem.formattedValue}`;
                 }
             }
         };
@@ -394,298 +320,11 @@ function LineChart(props) {
 
     if (props.settingsMode && props.isExpanded) {
         return (
-            <Center height="100%" width="100%">
-                <VStack
-                    height="100%"
-                    width="100%"
-                    alignItems="flex-start"
-                    spacing={1}
-                    backgroundColor={
-                        colorMode === 'light'
-                            ? 'blackAlpha.200'
-                            : 'blackAlpha.800'
-                    }
-                    borderRadius="6px"
-                    justifyContent="center"
-                    padding="10% 20%"
-                >
-                    <CustomScroll
-                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
-                    >
-                        <VStack height="100%" width="100%">
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Title
-                                </Heading>
-
-                                <Editable
-                                    size="xs"
-                                    width="100%"
-                                    value={title}
-                                    backgroundColor={
-                                        colorMode === 'light'
-                                            ? 'blackAlpha.100'
-                                            : 'blackAlpha.300'
-                                    }
-                                    borderRadius="5px"
-                                    onChange={val => setTitle(val)}
-                                    onSubmit={val => {
-                                        if (val.trim()) {
-                                            store.stats.setWidgetProperty(
-                                                props.chart.id,
-                                                'title',
-                                                val.trim()
-                                            );
-                                            setTitle(val.trim());
-                                        } else {
-                                            setTitle(props.title);
-                                        }
-                                    }}
-                                    onFocus={() =>
-                                        store.comment.setCommentTrigger(false)
-                                    }
-                                    onBlur={() =>
-                                        store.comment.setCommentTrigger(true)
-                                    }
-                                >
-                                    <EditablePreview
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        color="#FFFFFFBB"
-                                        backgroundColor="whiteAlpha.200"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                    <EditableInput
-                                        backgroundColor="whiteAlpha.200"
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                </Editable>
-                            </HStack>
-
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Elements
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={chartElement}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setChartElement(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'elements',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value="nodes">Nodes</option>
-                                    <option value="edges">Edges</option>
-                                </Select>
-                            </HStack>
-
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    X Axis Props
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={chartElementSelectedValue}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setChartElementSelectedValue(
-                                            e.target.value
-                                        );
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'element_values',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {chartElementValues.map(entry => (
-                                        <option
-                                            key={`${
-                                                chartElement === 'nodes'
-                                                    ? 'Node'
-                                                    : 'Edge'
-                                            }_property_${entry.value}`}
-                                            value={entry.value}
-                                        >
-                                            {entry.label}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Y Axis Props
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    isDisabled={chartElement === 'edges'}
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={chartElementSortValue}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setChartElementSortValue(
-                                            e.target.value
-                                        );
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'element_sort_values',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    {chartElementSortValues.map(entry => (
-                                        <option
-                                            key={`${
-                                                chartElement === 'nodes'
-                                                    ? 'Node'
-                                                    : 'Edge'
-                                            }_sort_property_${entry.value}`}
-                                            value={entry.value}
-                                        >
-                                            {entry.label}
-                                        </option>
-                                    ))}
-                                </Select>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Element Types
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={chartNetworkData}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setChartNetworkData(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'network_data',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value="visible">Visible</option>
-                                    {chartElement !== 'edges' && (
-                                        <option value="selected">
-                                            Selected
-                                        </option>
-                                    )}
-                                    <option value="all">All</option>
-                                </Select>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Display Limit
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={dispalyLimit}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setDispalyLimit(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'display_limit',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value={10}>First 10</option>
-                                    <option value={50}>First 50</option>
-                                    <option value={100}>First 100</option>
-                                    <option value={-10}>Last 10</option>
-                                    <option value={-50}>Last 50</option>
-                                    <option value={-100}>Last 100</option>
-                                    <option value={0}>All</option>
-                                </Select>
-                            </HStack>
-                        </VStack>
-                    </CustomScroll>
-                </VStack>
-            </Center>
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['item type', 'second axis']}
+                mainAxis={'X'}
+            />
         );
     }
 
@@ -786,7 +425,7 @@ function LineChart(props) {
                         title: {
                             display: true,
                             color: 'white',
-                            text: chartElementSortValue
+                            text: chartConfig.element_sort_values
                         },
                         display: props.isExpanded,
                         beginAtZero: true,
@@ -875,21 +514,15 @@ function LineChart(props) {
 
 LineChart.propTypes = {
     demoData: PropTypes.any,
-    title: PropTypes.string,
     chart: PropTypes.object,
     chartIndex: PropTypes.number,
-    options: PropTypes.object,
     isExpanded: PropTypes.bool,
-    isExample: PropTypes.bool,
-    networkData: PropTypes.string,
-    elementDisplayLimit: PropTypes.number
+    isExample: PropTypes.bool
 };
 
 LineChart.defaultProps = {
     isExpanded: false,
-    isExample: false,
-    networkData: 'all',
-    elementDisplayLimit: 10
+    isExample: false
 };
 
 export default observer(LineChart);

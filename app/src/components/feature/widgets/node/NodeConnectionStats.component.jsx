@@ -29,7 +29,7 @@ function ConnectionStats(props) {
     const [visiblity, setVisiblity] = useState(false);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
     const [maxDistance, setMaxDistance] = useState(
         props?.chart?.max_distance ? props?.chart?.max_distance : 2
     );
@@ -338,7 +338,7 @@ function ConnectionStats(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>

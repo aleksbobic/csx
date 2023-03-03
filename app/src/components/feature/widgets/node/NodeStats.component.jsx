@@ -30,7 +30,7 @@ function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
     const [chartNetworkData, setChartNetworkData] = useState(
         props?.chart?.network_data ? props.chart.network_data : 'all'
     );
@@ -177,7 +177,7 @@ function SelectedNodeList(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>

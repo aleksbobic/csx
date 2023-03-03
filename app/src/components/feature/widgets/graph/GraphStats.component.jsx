@@ -27,7 +27,7 @@ function GraphStats(props) {
     const [graphData, setGraphData] = useState([]);
     const [nodeData, setNodeData] = useState([]);
     const { colorMode } = useColorMode();
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
     const [chartNetworkData, setChartNetworkData] = useState(
         props?.chart?.network_data ? props.chart.network_data : 'all'
     );
@@ -272,7 +272,7 @@ function GraphStats(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>

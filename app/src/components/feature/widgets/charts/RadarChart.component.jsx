@@ -27,7 +27,7 @@ function RadarChart(props) {
     const { colorMode } = useColorMode();
     const [chartElement, setChartElement] = useState(props.chart.elements);
     const [data, setData] = useState(null);
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
     const [tooManySelectedElements, setTooManySelectedElements] =
         useState(false);
     const [properties, setProperties] = useState([]);
@@ -261,7 +261,7 @@ function RadarChart(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>
@@ -491,7 +491,6 @@ function RadarChart(props) {
 
 RadarChart.propTypes = {
     demoData: PropTypes.any,
-    title: PropTypes.string,
     chart: PropTypes.object,
     chartIndex: PropTypes.number,
     options: PropTypes.object,

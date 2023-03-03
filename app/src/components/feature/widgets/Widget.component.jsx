@@ -30,11 +30,10 @@ function WidgetContainer(props) {
     );
 
     useEffect(() => {
+        setIsExpanded(props.maxColSize === 1);
         if (props.maxColSize === 1) {
-            setIsExpanded(true);
             store.stats.expandChart(props.chart.id, false);
         } else {
-            setIsExpanded(false);
             store.stats.shrinkChart(props.chart.id, false);
         }
     }, [props.chart.id, props.maxColSize, store.stats]);
@@ -150,7 +149,7 @@ function WidgetContainer(props) {
             right="0px"
             justifyContent="end"
         >
-            <Tooltip label={props.title}>
+            <Tooltip label={props.chart.title}>
                 <Heading
                     size="xs"
                     fontSize="xs"
@@ -160,7 +159,7 @@ function WidgetContainer(props) {
                     flexGrow="1"
                     opacity="0.5"
                 >
-                    {props.title}
+                    {props.chart.title}
                 </Heading>
             </Tooltip>
             {isExpanded && renderWidgetSettingsButton()}
@@ -174,7 +173,7 @@ function WidgetContainer(props) {
             return cloneElement(child, {
                 isExpanded,
                 settingsMode,
-                title: props.title
+                title: props.chart.title
             });
         }
         return child;
@@ -190,6 +189,7 @@ function WidgetContainer(props) {
             colSpan={props.chart.colSpan}
             backgroundColor={widgetBackground}
             borderRadius={8}
+            overflowY="overlay"
             position="relative"
         >
             {renderWidgetHeader(props.chart)}
@@ -201,7 +201,6 @@ WidgetContainer.propTypes = {
     statObject: PropTypes.object,
     chart: PropTypes.object,
     index: PropTypes.number,
-    title: PropTypes.string,
     maxColSize: PropTypes.number
 };
 

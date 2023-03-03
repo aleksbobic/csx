@@ -29,7 +29,7 @@ function NodeFilter(props) {
     const store = useContext(RootStoreContext);
 
     const [isDemo, setIsDemo] = useState(false);
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
 
     const { colorMode } = useColorMode();
     const [filterProperty, setFilterProperty] = useState(
@@ -151,7 +151,7 @@ function NodeFilter(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>

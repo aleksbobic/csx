@@ -24,7 +24,7 @@ function DoughnutChart(props) {
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
     const [data, setData] = useState(null);
-    const [title, setTitle] = useState(props.title);
+    const [title, setTitle] = useState(props.chart.title);
     const [chartElement, setChartElement] = useState(props.chart.elements);
     const [chartElementValues, setChartElementValues] = useState(
         props.chart.elements === 'nodes'
@@ -287,7 +287,7 @@ function DoughnutChart(props) {
                                             );
                                             setTitle(val.trim());
                                         } else {
-                                            setTitle(props.title);
+                                            setTitle(props.chart.title);
                                         }
                                     }}
                                     onFocus={() =>
@@ -618,7 +618,6 @@ function DoughnutChart(props) {
 }
 DoughnutChart.propTypes = {
     demoData: PropTypes.any,
-    title: PropTypes.string,
     chart: PropTypes.object,
     chartIndex: PropTypes.number,
     options: PropTypes.object,
