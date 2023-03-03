@@ -16,10 +16,10 @@ import {
 } from '@chakra-ui/react';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
-import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
-import ChartAlertComponent from './ChartAlert.component';
+import { getElementAtEvent, Line } from 'react-chartjs-2';
+import ChartAlertComponent from '../WidgetAlert.component';
 
-function DoughnutChart(props) {
+function LineChart(props) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const { colorMode } = useColorMode();
@@ -34,6 +34,14 @@ function DoughnutChart(props) {
     const [chartElementSelectedValue, setChartElementSelectedValue] = useState(
         props.chart.element_values
     );
+    const [chartElementSortValues, setChartElementSortValues] = useState(
+        store.stats.getNodeSortValues()
+    );
+    const [chartElementSortValue, setChartElementSortValue] = useState(
+        props?.chart?.element_sort_values
+            ? props?.chart?.element_sort_values
+            : 'frequency'
+    );
     const [chartNetworkData, setChartNetworkData] = useState(
         props.chart.network_data
     );
@@ -45,11 +53,18 @@ function DoughnutChart(props) {
         if (!props.isExample) {
             if (chartElement === 'nodes') {
                 setChartElementValues(store.stats.getWidgetNodeProperties());
+                setChartElementSortValues(store.stats.getNodeSortValues());
             } else {
                 setChartElementValues(store.stats.getWidgetEdgeProperties());
             }
         }
-    }, [chartElement, props.chart.id, props.isExample, store.stats]);
+    }, [
+        chartElement,
+        props.chart.id,
+        props.isExample,
+        store.stats,
+        props.settingsMode
+    ]);
 
     useEffect(() => {
         if (!props.isExample) {
@@ -64,6 +79,32 @@ function DoughnutChart(props) {
     }, [chartElementValues, props.chart.id, props.isExample, store.stats]);
 
     useEffect(() => {
+        if (!props.isExample) {
+            if (
+                !props?.chart?.element_sort_values ||
+                !chartElementSortValues.find(
+                    entry => entry.value === props?.chart?.element_sort_values
+                )
+            ) {
+                setChartElementSortValue(chartElementSortValues[0].value);
+
+                store.stats.setWidgetProperty(
+                    props.chart.id,
+                    'element_sort_values',
+                    chartElementSortValues[0].value
+                );
+            }
+        }
+    }, [
+        chartElementSortValues,
+        props.chart?.element_sort_values,
+        props.chart.id,
+        props.isExample,
+        store.stats,
+        props.isExpanded
+    ]);
+
+    useEffect(() => {
         if (store.comment.chartToAttach === props.chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
@@ -74,7 +115,35 @@ function DoughnutChart(props) {
 
     useEffect(() => {
         if (props.demoData) {
-            setData(props.demoData);
+            setData({
+                ...props.demoData,
+                datasets: [
+                    {
+                        ...props.demoData.datasets[0],
+                        fill: true,
+                        backgroundColor: function (context) {
+                            if (!context.chart.chartArea) {
+                                return 'transparent';
+                            }
+                            const gradient =
+                                context.chart.ctx.createLinearGradient(
+                                    0,
+                                    context.chart.chartArea.top,
+                                    0,
+                                    context.chart.chartArea.bottom
+                                );
+
+                            gradient.addColorStop(0, '#3182CE99');
+                            gradient.addColorStop(1, '#3182CE01');
+                            return gradient;
+                        },
+                        borderColor: '#3182CE',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3182CE',
+                        pointRadius: props.isExpanded ? 4 : 0
+                    }
+                ]
+            });
         } else {
             let elementProperty;
             let groupBy;
@@ -117,27 +186,99 @@ function DoughnutChart(props) {
                 ) {
                     setData(null);
                 } else {
-                    setData(
-                        store.stats.getNodeCounts(
-                            elementProperty,
-                            props.chart.type,
-                            dispalyLimit,
-                            chartNetworkData,
-                            groupBy,
-                            props.chart.show_only
-                        )
-                    );
-                }
-            } else {
-                setData(
-                    store.stats.getEdgeCounts(
+                    const nodeData = store.stats.getNodeCounts(
                         elementProperty,
                         props.chart.type,
                         dispalyLimit,
+                        chartNetworkData,
                         groupBy,
-                        chartNetworkData
-                    )
+                        props.chart.show_only,
+                        chartElementSortValue
+                    );
+
+                    if (nodeData.labels.length > 0) {
+                        setData({
+                            ...nodeData,
+                            datasets: [
+                                {
+                                    ...nodeData.datasets[0],
+                                    fill: true,
+                                    backgroundColor: function (context) {
+                                        if (!context.chart.chartArea) {
+                                            return 'transparent';
+                                        }
+                                        const gradient =
+                                            context.chart.ctx.createLinearGradient(
+                                                0,
+                                                context.chart.chartArea.top,
+                                                0,
+                                                context.chart.chartArea.bottom
+                                            );
+
+                                        gradient.addColorStop(0, '#3182CE99');
+                                        gradient.addColorStop(1, '#3182CE01');
+                                        return gradient;
+                                    },
+                                    borderColor: '#3182CE',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#3182CE',
+                                    pointRadius: props.isExpanded ? 3 : 0
+                                }
+                            ]
+                        });
+                    } else {
+                        setData(nodeData);
+                    }
+                }
+            } else {
+                const edgeData = store.stats.getEdgeCounts(
+                    elementProperty,
+                    props.chart.type,
+                    dispalyLimit,
+                    groupBy,
+                    chartNetworkData
                 );
+
+                if (edgeData.labels.length > 0) {
+                    setData({
+                        ...edgeData,
+                        datasets: [
+                            {
+                                ...edgeData.datasets[0],
+                                fill: true,
+                                backgroundColor: function (context) {
+                                    if (!context.chart.chartArea) {
+                                        return 'transparent';
+                                    }
+                                    const gradient =
+                                        context.chart.ctx.createLinearGradient(
+                                            0,
+                                            context.chart.chartArea.top,
+                                            0,
+                                            context.chart.chartArea.bottom
+                                        );
+
+                                    gradient.addColorStop(0, '#3182CE99');
+                                    gradient.addColorStop(1, '#3182CE01');
+                                    return gradient;
+                                },
+                                borderColor: '#3182CE',
+                                borderWidth: 2,
+                                pointBackgroundColor: '#3182CE',
+                                pointRadius: props.isExpanded
+                                    ? function (context) {
+                                          if (edgeData.labels.length > 10) {
+                                              return 2;
+                                          }
+                                          return 3;
+                                      }
+                                    : 0
+                            }
+                        ]
+                    });
+                } else {
+                    setData(edgeData);
+                }
             }
         }
     }, [
@@ -160,9 +301,10 @@ function DoughnutChart(props) {
         props.chart.group_by,
         store.core.currentGraph,
         store.overviewSchema.anchorProperties,
-        props.chart,
+        props.isExpanded,
+        dispalyLimit,
         chartNetworkData,
-        dispalyLimit
+        chartElementSortValue
     ]);
 
     const getPluginOptions = () => {
@@ -202,43 +344,52 @@ function DoughnutChart(props) {
                     }${tooltipItem[0].label}`;
                 },
                 label: tooltipItem => {
-                    return `Frequency: ${tooltipItem.formattedValue}`;
+                    return `${chartElementSortValue}: ${tooltipItem.formattedValue}`;
                 }
             }
         };
 
-        pluginOptions.datalabels = {
-            display: props.isExpanded ? 'auto' : false,
-            color: 'white',
-            anchor: 'center',
-            align: 'end',
-            offset: store.core.rightPanelWidth === 600 ? -10 : -46,
-            clamp: true,
-            font: {
-                weight: 'bold'
-            },
-            formatter: (value, context) => {
-                let name = context.chart.data.labels[context.dataIndex];
-                if (name?.length > 18) {
-                    return `${
-                        propsInChart === 'Edge weight' ? 'Edge weight: ' : ''
-                    }${name.slice(0, 15)}... \nFrequency: ${value}`;
-                } else {
-                    return `${
-                        propsInChart === 'Edge weight' ? 'Edge weight: ' : ''
-                    }${name}\nFrequency: ${value}`;
-                }
-            },
-            labels: {
-                value: {
-                    color: 'black',
-                    backgroundColor: 'white',
-                    borderRadius: 4
-                }
-            }
-        };
+        if (props.chart.groupHoverLabel) {
+            pluginOptions.tooltip.callbacks.title = tooltipItems => {
+                return `${props.chart.hoverLabel}: ${tooltipItems[0].label}`;
+            };
+        }
 
         return pluginOptions;
+    };
+
+    const getAxisTitle = () => {
+        if (props.chart.elements === 'edges') {
+            if (props.demoData) {
+                return 'Edge property';
+            }
+            switch (props.chart.element_values) {
+                case 'values':
+                    return 'Edge values';
+                case 'types':
+                    return 'Edge types';
+                default:
+                    return 'Edge weights';
+            }
+        }
+
+        if (props.demoData) {
+            return 'Node property';
+        }
+
+        switch (props.chart.element_values) {
+            case 'values':
+                return props.chart.show_only
+                    ? props.chart.show_only
+                    : 'Node values';
+            case 'types':
+                return 'Node types';
+            default:
+                return (
+                    props.chart.element_values.charAt(0).toUpperCase() +
+                    props.chart.element_values.slice(1).toLowerCase()
+                );
+        }
     };
 
     if (props.settingsMode && props.isExpanded) {
@@ -314,6 +465,7 @@ function DoughnutChart(props) {
                                     />
                                 </Editable>
                             </HStack>
+
                             <HStack width="100%">
                                 <Heading size="xs" opacity="0.5" width="100%">
                                     Elements
@@ -350,10 +502,10 @@ function DoughnutChart(props) {
                                     <option value="edges">Edges</option>
                                 </Select>
                             </HStack>
+
                             <HStack width="100%">
                                 <Heading size="xs" opacity="0.5" width="100%">
-                                    {chartElement === 'nodes' ? 'Node' : 'Edge'}{' '}
-                                    Properties
+                                    X Axis Props
                                 </Heading>
                                 <Select
                                     className="nodrag"
@@ -392,6 +544,55 @@ function DoughnutChart(props) {
                                                     ? 'Node'
                                                     : 'Edge'
                                             }_property_${entry.value}`}
+                                            value={entry.value}
+                                        >
+                                            {entry.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </HStack>
+                            <HStack width="100%">
+                                <Heading size="xs" opacity="0.5" width="100%">
+                                    Y Axis Props
+                                </Heading>
+                                <Select
+                                    className="nodrag"
+                                    isDisabled={chartElement === 'edges'}
+                                    margin="0px"
+                                    variant="filled"
+                                    size="xs"
+                                    width="100%"
+                                    defaultValue={chartElementSortValue}
+                                    borderRadius="5px"
+                                    onChange={e => {
+                                        setChartElementSortValue(
+                                            e.target.value
+                                        );
+
+                                        store.stats.setWidgetProperty(
+                                            props.chart.id,
+                                            'element_sort_values',
+                                            e.target.value
+                                        );
+                                    }}
+                                    background="whiteAlpha.200"
+                                    opacity="0.8"
+                                    _hover={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                    _focus={{
+                                        opacity: 1,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {chartElementSortValues.map(entry => (
+                                        <option
+                                            key={`${
+                                                chartElement === 'nodes'
+                                                    ? 'Node'
+                                                    : 'Edge'
+                                            }_sort_property_${entry.value}`}
                                             value={entry.value}
                                         >
                                             {entry.label}
@@ -493,14 +694,13 @@ function DoughnutChart(props) {
     }
 
     return (
-        <ChartReactCharts
+        <Line
             style={{ maxWidth: '100%' }}
             ref={chartRef}
-            type={props.chart.type.toLowerCase()}
+            data={{ ...data }}
             height="250px"
             key={`chart_instance_${props.chartIndex}_${Math.random()}`}
             redraw
-            data={{ ...data }}
             onClick={event => {
                 if (!props.isExample) {
                     let dataIndex;
@@ -565,17 +765,15 @@ function DoughnutChart(props) {
                 maintainAspectRatio: false,
                 responsive: true,
                 animation: false,
-                borderColor: '#fff',
+                devicePixelRatio: 2,
                 layout: {
                     padding: {
-                        right: props.isExpanded ? 30 : 0,
-                        top: props.isExpanded ? 30 : 0,
-                        bottom: props.isExpanded ? 30 : 0,
-                        left: props.isExpanded ? 30 : 0
+                        right: props.isExpanded ? 5 : 0,
+                        top: props.isExpanded ? 5 : 0,
+                        bottom: props.isExpanded ? 5 : 0,
+                        left: props.isExpanded ? 5 : 0
                     }
                 },
-                devicePixelRatio: 2,
-                indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
                 onHover: (event, elements) => {
                     if (elements.length) {
                         event.native.target.style.cursor = 'pointer';
@@ -585,21 +783,76 @@ function DoughnutChart(props) {
                 },
                 scales: {
                     y: {
-                        display: props.chart.labels.y.display,
-                        ticks: {
-                            diplay: props.chart.labels.y.display
+                        title: {
+                            display: true,
+                            color: 'white',
+                            text: chartElementSortValue
                         },
-                        gridLines: {
-                            display: false
+                        display: props.isExpanded,
+                        beginAtZero: true,
+                        ticks: {
+                            color: 'white',
+                            diplay: props.isExpanded,
+
+                            callback: function (value, index, ticks) {
+                                const stringValue =
+                                    this.getLabelForValue(value);
+                                if (stringValue.length > 17) {
+                                    return `${stringValue.slice(0, 17)}...`;
+                                } else {
+                                    return stringValue;
+                                }
+                            }
+                        },
+                        grid: {
+                            color: context => {
+                                if (
+                                    props.chart.type.toLowerCase() === 'bar' ||
+                                    context.index === 0
+                                ) {
+                                    return 'transparent';
+                                }
+                                return '#FFFFFF55';
+                            },
+                            drawBorder: false,
+                            borderDash: [2, 8]
                         }
                     },
                     x: {
-                        display: props.chart.labels.x.display,
-                        ticks: {
-                            diplay: props.chart.labels.x.display
+                        title: {
+                            display: true,
+                            color: 'white',
+                            text: getAxisTitle()
                         },
-                        gridLines: {
-                            display: false
+                        display: props.isExpanded,
+                        ticks: {
+                            color: 'white',
+                            diplay: props.isExpanded,
+                            beginAtZero: true,
+                            callback: function (value, index, ticks) {
+                                const stringValue =
+                                    this.getLabelForValue(value);
+                                if (stringValue.length > 17) {
+                                    return `${stringValue.slice(0, 17)}...`;
+                                } else {
+                                    return stringValue;
+                                }
+                            }
+                        },
+                        grid: {
+                            display: false,
+                            color: context => {
+                                if (
+                                    props.chart.type.toLowerCase() ===
+                                        'vertical bar' ||
+                                    context.index === 0
+                                ) {
+                                    return 'transparent';
+                                }
+                                return '#FFFFFF55';
+                            },
+                            drawBorder: false,
+                            borderDash: [2, 8]
                         }
                     }
                 },
@@ -608,7 +861,10 @@ function DoughnutChart(props) {
                         display: false
                     },
                     legend: {
-                        display: props.chart.legend
+                        display: false
+                    },
+                    datalabels: {
+                        display: false
                     },
                     ...getPluginOptions()
                 }
@@ -616,7 +872,8 @@ function DoughnutChart(props) {
         />
     );
 }
-DoughnutChart.propTypes = {
+
+LineChart.propTypes = {
     demoData: PropTypes.any,
     title: PropTypes.string,
     chart: PropTypes.object,
@@ -628,11 +885,11 @@ DoughnutChart.propTypes = {
     elementDisplayLimit: PropTypes.number
 };
 
-DoughnutChart.defaultProps = {
+LineChart.defaultProps = {
     isExpanded: false,
     isExample: false,
     networkData: 'all',
     elementDisplayLimit: 10
 };
 
-export default observer(DoughnutChart);
+export default observer(LineChart);

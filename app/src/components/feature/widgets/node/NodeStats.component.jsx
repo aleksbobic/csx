@@ -24,7 +24,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import ChartAlertComponent from '../chart/ChartAlert.component';
+import ChartAlertComponent from '../WidgetAlert.component';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);

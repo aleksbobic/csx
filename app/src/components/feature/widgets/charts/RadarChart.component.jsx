@@ -19,7 +19,7 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import { schemeTableau10 } from 'd3-scale-chromatic';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Radar } from 'react-chartjs-2';
-import ChartAlertComponent from './ChartAlert.component';
+import ChartAlertComponent from '../WidgetAlert.component';
 
 function RadarChart(props) {
     const store = useContext(RootStoreContext);

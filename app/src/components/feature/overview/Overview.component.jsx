@@ -12,19 +12,19 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import LineChart from '../widgets/chart/LineChart.component';
-import WidgetContainer from '../widgets/widgetcontainer/WidgetContainer';
+import LineChart from '../widgets/charts/LineChart.component';
+import WidgetContainer from '../widgets/Widget.component';
 import SelectedComponentListComponent from '../widgets/component/ComponentStats.component';
 import SelectedNodeListComponent from '../widgets/node/NodeStats.component';
 import GraphStatsComponent from '../widgets/graph/GraphStats.component';
-import ConnectionStatsComponent from '../widgets/connections/ConnectionStats.component';
-import NodeFilterComponent from '../widgets/nodefilter/NodeFilter.component';
+import ConnectionStatsComponent from '../widgets/node/NodeConnectionStats.component';
+import NodeFilterComponent from '../widgets/node/NodeFilter.component';
 import { useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
-import DoughnutChart from '../widgets/chart/DoughnutChart.component';
-import BarChart from '../widgets/chart/BarChart.component';
-import RadarChartComponent from '../widgets/chart/RadarChart.component';
+import DoughnutChart from '../widgets/charts/DoughnutChart.component';
+import BarChart from '../widgets/charts/BarChart.component';
+import RadarChartComponent from '../widgets/charts/RadarChart.component';
 
 function Overview(props) {
     const store = useContext(RootStoreContext);

@@ -24,7 +24,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import ChartAlertComponent from '../chart/ChartAlert.component';
+import ChartAlertComponent from '../WidgetAlert.component';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);

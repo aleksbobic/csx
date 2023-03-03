@@ -17,7 +17,7 @@ import {
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { useEffect, useRef, useState } from 'react';
 import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
-import ChartAlertComponent from './ChartAlert.component';
+import ChartAlertComponent from '../WidgetAlert.component';
 
 function BarChart(props) {
     const store = useContext(RootStoreContext);

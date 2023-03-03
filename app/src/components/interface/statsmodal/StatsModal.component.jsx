@@ -42,20 +42,20 @@ import {
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import BarChart from 'components/feature/widgets/chart/BarChart.component';
-import LineChart from 'components/feature/widgets/chart/LineChart.component';
-import DoughnutChart from 'components/feature/widgets/chart/DoughnutChart.component';
+import BarChart from 'components/feature/widgets/charts/BarChart.component';
+import LineChart from 'components/feature/widgets/charts/LineChart.component';
+import DoughnutChart from 'components/feature/widgets/charts/DoughnutChart.component';
 import ComponentStatsComponent from 'components/feature/widgets/component/ComponentStats.component';
-import ConnectionStatsComponent from 'components/feature/widgets/connections/ConnectionStats.component';
+import ConnectionStatsComponent from 'components/feature/widgets/node/NodeConnectionStats.component';
 import GraphStatsComponent from 'components/feature/widgets/graph/GraphStats.component';
 import NodeStatsComponent from 'components/feature/widgets/node/NodeStats.component';
-import NodeFilterComponent from 'components/feature/widgets/nodefilter/NodeFilter.component';
+import NodeFilterComponent from 'components/feature/widgets/node/NodeFilter.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import RadarChartComponent from 'components/feature/widgets/chart/RadarChart.component';
+import RadarChartComponent from 'components/feature/widgets/charts/RadarChart.component';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
