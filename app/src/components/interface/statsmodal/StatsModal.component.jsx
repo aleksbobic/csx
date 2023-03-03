@@ -42,20 +42,20 @@ import {
     Tooltip as ChartJSTooltip
 } from 'chart.js';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import BarChart from 'components/feature/stats/chart/BarChart.component';
-import LineChart from 'components/feature/stats/chart/LineChart.component';
-import DoughnutChart from 'components/feature/stats/chart/DoughnutChart.component';
-import ComponentStatsComponent from 'components/feature/stats/component/ComponentStats.component';
-import ConnectionStatsComponent from 'components/feature/stats/connections/ConnectionStats.component';
-import GraphStatsComponent from 'components/feature/stats/graph/GraphStats.component';
-import NodeStatsComponent from 'components/feature/stats/node/NodeStats.component';
-import NodeFilterComponent from 'components/feature/stats/nodefilter/NodeFilter.component';
+import BarChart from 'components/feature/widgets/chart/BarChart.component';
+import LineChart from 'components/feature/widgets/chart/LineChart.component';
+import DoughnutChart from 'components/feature/widgets/chart/DoughnutChart.component';
+import ComponentStatsComponent from 'components/feature/widgets/component/ComponentStats.component';
+import ConnectionStatsComponent from 'components/feature/widgets/connections/ConnectionStats.component';
+import GraphStatsComponent from 'components/feature/widgets/graph/GraphStats.component';
+import NodeStatsComponent from 'components/feature/widgets/node/NodeStats.component';
+import NodeFilterComponent from 'components/feature/widgets/nodefilter/NodeFilter.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import RadarChartComponent from 'components/feature/stats/chart/RadarChart.component';
+import RadarChartComponent from 'components/feature/widgets/chart/RadarChart.component';
 
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
