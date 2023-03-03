@@ -471,7 +471,7 @@ export class StatsStore {
 
     getWidgetItemProps = id => {
         if (
-            this.activeWidgets.find(widget => widget.id === id).elements ===
+            this.activeWidgets.find(widget => widget.id === id)?.elements ===
             'nodes'
         ) {
             return this.getWidgetNodeProperties();

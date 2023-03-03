@@ -169,7 +169,9 @@ function WidgetSettings(props) {
     const renderMainAxisItemSwitch = () => (
         <HStack width="100%">
             <Heading size="xs" opacity="0.5" width="100%">
-                {props.mainAxis} Axis Props
+                {props.mainAxis
+                    ? `${props.mainAxis} Axis Props`
+                    : 'Widget Props'}
             </Heading>
             <Select
                 className="nodrag"
@@ -339,9 +341,11 @@ function WidgetSettings(props) {
                         cursor: 'pointer'
                     }}
                 >
-                    <option value="visible">Visible</option>
+                    <option value="visible">Visible graph elements</option>
                     {itemType !== 'edges' && (
-                        <option value="selected">Selected</option>
+                        <option value="selected">
+                            Selected graph elements
+                        </option>
                     )}
                     <option value="all">All graph elements</option>
                 </Select>
