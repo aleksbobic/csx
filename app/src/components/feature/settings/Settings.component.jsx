@@ -62,6 +62,7 @@ function Settings() {
         store.graphInstance.setEdgeColorScheme(value);
 
         store.graph.updateLinkColor(colorMode);
+        store.graph.updateNodeColor(colorMode);
 
         store.track.trackEvent(
             'Side panel - View Settings',

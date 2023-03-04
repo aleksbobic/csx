@@ -270,7 +270,7 @@ function HomePage() {
     });
 
     useEffect(() => {
-        store.core.isStudyPublic = false;
+        store.core.setIsStudyPublic(false);
         store.core.setStudyPublicURL('');
         store.graphInstance.setEdgeColorScheme('auto');
         store.graphInstance.setNodeColorScheme('component');
