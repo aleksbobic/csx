@@ -14,12 +14,14 @@ import {
 } from 'react-router-dom';
 import './App.scss';
 
+import CommentModal from 'components/feature/commentmodal/CommentModal.component';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import PresentPage from 'pages/present/Present.page';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse, isEnvTrue } from 'general.utils';
 
 function CSX() {
     const { colorMode } = useColorMode();
@@ -88,7 +90,7 @@ function CSX() {
                 }
             });
         };
-    }, []);
+    }, [store.track]);
 
     const renderErrorToast = useCallback(() => {
         errorToastRef.current = errorToast({
@@ -129,8 +131,6 @@ function CSX() {
                 )}
                 <CustomScroll
                     style={{
-                        paddingLeft: '10px',
-                        paddingRight: '10px',
                         backgroundColor:
                             colorMode === 'light' ? 'white' : '#171A23'
                     }}
@@ -149,12 +149,17 @@ function CSX() {
                                 <HomePage />
                             </Route>
                             <Route path="/graph/detail" label="graphdetail">
+                                <CommentModal />
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
                             </Route>
                             <Route path="/graph" label="graph">
+                                <CommentModal />
                                 <ControlPanelComponent />
                                 <OverviewGraphPage />
+                            </Route>
+                            <Route exact path="/present" label="present">
+                                <PresentPage />
                             </Route>
                             {isEnvFalse(
                                 'REACT_APP_DISABLE_ADVANCED_SEARCH'

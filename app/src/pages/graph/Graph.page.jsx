@@ -1,31 +1,28 @@
-import {
-    Box,
-    Button,
-    Center,
-    IconButton,
-    Textarea,
-    useColorMode
-} from '@chakra-ui/react';
+import { Box, Center, useColorMode, useToast } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
-import { Close, Spinner } from 'css.gg';
-import { useKeyPress } from 'hooks/useKeyPress.hook';
+import { Spinner } from 'css.gg';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvSet } from 'general.utils';
+import { useCallback } from 'react';
+import { useRef } from 'react';
+import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 
 function GraphPage() {
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const { colorMode } = useColorMode();
     const history = useHistory();
+    const surveyToastRef = useRef();
+    const surveyToast = useToast();
 
-    const [comment, setComment] = useState('');
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
 
     useEffect(() => {
@@ -59,179 +56,63 @@ function GraphPage() {
         } else {
             history.push('/');
         }
-    }, []);
+    }, [
+        history,
+        location.search,
+        store.core,
+        store.graph,
+        store.graphInstance,
+        store.track,
+        store.workflow.shouldRunWorkflow
+    ]);
 
     useEffect(() => {
-        if (store.search.searchIsEmpty) {
+        if (store.search.searchIsEmpty || store.core.studyIsEmpty) {
             history.push('/');
         }
-    }, [history, store.search.searchIsEmpty]);
+    }, [history, store.core.studyIsEmpty, store.search.searchIsEmpty]);
 
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);
     }, [store.workflow]);
 
-    const openCommentModalKey = useKeyPress('c', 'shift');
-    const closeCommentModalKey = useKeyPress('escape');
-    const submitCommentModalKey = useKeyPress('enter', 'shift');
+    const renderSurveyToast = useCallback(() => {
+        surveyToastRef.current = surveyToast({
+            render: () => (
+                <SurveyInfoModal
+                    onClose={() => {
+                        surveyToast.close(surveyToastRef.current);
+                        store.core.setSurveyHidden(true);
+                    }}
+                />
+            ),
+            position: 'bottom-left',
+            status: 'error',
+            duration: null,
+            isClosable: true
+        });
+    }, [store.core, surveyToast]);
 
     useEffect(() => {
         if (
-            openCommentModalKey &&
-            !store.core.showCommentModal &&
-            store.comment.commentTrigger
+            isEnvSet('REACT_APP_SURVEY_LINK') &&
+            store.core.studyHistory.length >
+                store.core.surveyHistoryDepthTrigger &&
+            !store.core.surveyHidden
         ) {
-            store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
-                JSON.stringify({
-                    type: 'C + Shift',
-                    value: 'Open comment modal'
-                })
-            );
-            store.core.setShowCommentModal(true);
-        }
-
-        if (closeCommentModalKey && store.core.showCommentModal) {
-            store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
-                JSON.stringify({
-                    type: 'Esc',
-                    value: 'Close comment modal'
-                })
-            );
-            setComment('');
-            store.core.setShowCommentModal(false);
+            renderSurveyToast();
         }
     }, [
-        closeCommentModalKey,
-        openCommentModalKey,
-        store.comment.commentTrigger,
-        store.core,
-        store.track,
-        submitCommentModalKey
+        renderSurveyToast,
+        store.core.studyHistory.length,
+        store.core.surveyHidden,
+        store.core.surveyHistoryDepthTrigger
     ]);
-
-    const closeCommentModal = useCallback(() => {
-        setComment('');
-        store.core.setShowCommentModal(false);
-    }, [store.core]);
-
-    useEffect(() => {
-        if (
-            submitCommentModalKey &&
-            comment !== '' &&
-            store.comment.commentTrigger
-        ) {
-            store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
-                JSON.stringify({
-                    type: 'Enter + Shift',
-                    value: `Submit comment: ${comment}`
-                })
-            );
-
-            store.comment.addComment(comment);
-            closeCommentModal();
-        }
-    }, [
-        closeCommentModal,
-        comment,
-        store.comment,
-        store.comment.commentTrigger,
-        store.history,
-        store.track,
-        submitCommentModalKey
-    ]);
-
-    const submitComment = () => {
-        if (comment !== '') {
-            store.comment.addComment(comment);
-            setComment('');
-            closeCommentModal();
-        }
-    };
-
-    const renderCommentModal = () => (
-        <Box
-            width="500px"
-            height="120px"
-            position="fixed"
-            bottom="80px"
-            left="50%"
-            transform="translate(-50%, 0)"
-            zIndex="20"
-            backgroundColor={
-                colorMode === 'light' ? 'whiteAlpha.800' : 'blackAlpha.800'
-            }
-            borderRadius="12px"
-            border="1px solid"
-            borderColor={colorMode === 'light' ? 'blackAlpha.400' : 'gray.900'}
-        >
-            <Textarea
-                width="100%"
-                height="100%"
-                borderRadius="12px"
-                padding="20px"
-                paddingRight="40px"
-                border="none"
-                resize="none"
-                placeholder="Enter your observations here ..."
-                fontSize="sm"
-                autoFocus={true}
-                value={comment}
-                onChange={e => setComment(e.target.value)}
-            />
-            <Button
-                size="xs"
-                position="absolute"
-                right="16px"
-                bottom="16px"
-                zIndex="2"
-                onClick={() => {
-                    store.track.trackEvent(
-                        'Graph Area - Comment Modal',
-                        'Button',
-                        JSON.stringify({
-                            type: 'Click',
-                            value: `Submit comment: ${comment}`
-                        })
-                    );
-                    submitComment();
-                }}
-            >
-                Comment
-            </Button>
-            <IconButton
-                size="xs"
-                icon={<Close style={{ '--ggs': 0.7 }} />}
-                position="absolute"
-                right="12px"
-                top="12px"
-                variant="ghost"
-                zIndex="2"
-                onClick={() => {
-                    store.track.trackEvent(
-                        'Graph Area - Comment Modal',
-                        'Button',
-                        JSON.stringify({
-                            type: 'Click',
-                            value: 'Close comment modal'
-                        })
-                    );
-                    closeCommentModal();
-                }}
-            />
-        </Box>
-    );
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
-            {store.core.showCommentModal && renderCommentModal()}
 
             {showLoader && (
                 <Center

@@ -17,6 +17,7 @@ function Graph(props) {
     const backgroundColor = useColorModeValue('#ffffff', '#1A202C');
     const [timer, setTimer] = useState(null);
     const { width, height } = useResizeDetector({ containerRef });
+    const [linkOpacity, setLinkOpacity] = useState(0.3);
 
     const [windowSize, setWindowSize] = useState({
         width: window.innerWidth,
@@ -119,6 +120,8 @@ function Graph(props) {
         store.graphInstance.orphanNodeVisibility,
         store.graphInstance.linkVisibility,
         store.graphInstance.labels.visibilityDistance,
+        store.graphInstance.labels.isVisible,
+        store.graphInstance.labels.labelFeatures.length,
         store.graphInstance.forceEngine,
         store.graphInstance.visibleComponents,
         store.graph.currentGraphData.selectedNodes,
@@ -126,6 +129,7 @@ function Graph(props) {
         store.graphInstance.selfCentricType,
         store.graph.showLabelDistance,
         store.graphInstance.useCurvedEdges,
+        linkOpacity,
         store.graph
     ]);
 
@@ -152,11 +156,22 @@ function Graph(props) {
     const generateNode = useCallback(
         node => {
             const nodeLevels = new THREE.LOD();
-            nodeLevels.addLevel(node.nodeWithLabel, 0);
-            nodeLevels.addLevel(
-                node.nodeWithoutLabel,
-                store.graphInstance.labels.visibilityDistance
-            );
+
+            if (
+                store.graphInstance.labels.isVisible &&
+                (store.graphInstance.labels.labelFeatures.length === 0 ||
+                    store.graphInstance.labels.labelFeatures.includes(
+                        node.feature
+                    ))
+            ) {
+                nodeLevels.addLevel(node.nodeWithLabel, 0);
+                nodeLevels.addLevel(
+                    node.nodeWithoutLabel,
+                    store.graphInstance.labels.visibilityDistance
+                );
+            } else {
+                nodeLevels.addLevel(node.nodeWithoutLabelSolo, 0);
+            }
 
             nodeLevels.nodeid = node.id;
 
@@ -170,7 +185,7 @@ function Graph(props) {
     );
 
     const handleLinkHover = link => {
-        if (link) {
+        if (link && link.connections) {
             store.graphInstance.setHoverData(
                 link.connections.map(connection => {
                     return {
@@ -185,6 +200,27 @@ function Graph(props) {
         }
     };
 
+    useEffect(() => {
+        if (store.core.colorMode === 'light') {
+            setLinkOpacity(0.7);
+        } else {
+            if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
+                if (store.graphInstance.selectedColorSchema === 'component') {
+                    setLinkOpacity(0.3);
+                } else {
+                    setLinkOpacity(0.1);
+                }
+            } else {
+                setLinkOpacity(0.7);
+            }
+        }
+    }, [
+        linkOpacity,
+        store.core.colorMode,
+        store.graphInstance.selectedColorSchema,
+        store.graphInstance.selectedEdgeColorSchema
+    ]);
+
     return (
         <ForceGraph3D
             ref={containerRef}
@@ -198,13 +234,7 @@ function Graph(props) {
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
             cooldownTime={store.graphInstance.forceCooldownTime}
-            linkOpacity={
-                store.core.colorMode === 'light'
-                    ? 0.7
-                    : store.graphInstance.selectedColorSchema === 'component'
-                    ? 0.3
-                    : 0.1
-            }
+            linkOpacity={linkOpacity}
             onEngineStop={() => {
                 if (store.graphInstance.forceEngine) {
                     store.graphInstance.stopForce();

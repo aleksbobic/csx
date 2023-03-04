@@ -12,9 +12,11 @@ import { withRouter } from 'react-router-dom';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
 import CustomScroll from '../customscroll/CustomScroll.component';
 import { FileUploadArea } from '../fileupload/FileUploadArea.component';
+import { DocumentTextIcon } from '@heroicons/react/20/solid';
 
 function DatasetGrid(props) {
     const gridBGColor = useColorModeValue('blackAlpha.100', 'blackAlpha.300');
+    const textColor = useColorModeValue('black', 'white');
 
     const renderDatasets = () => (
         <Box width="100%" padding="0 10px" style={{ margin: 0 }}>
@@ -51,7 +53,17 @@ function DatasetGrid(props) {
                     width="100%"
                     textAlign="center"
                     lineHeight="50px"
+                    color={textColor}
                 >
+                    <DocumentTextIcon
+                        width="18px"
+                        height="18px"
+                        style={{
+                            display: 'inline',
+                            marginBottom: '-2px',
+                            marginRight: '10px'
+                        }}
+                    />
                     Datasets
                 </Heading>
                 {isEnvFalse('REACT_APP_DISABLE_DATASET_LIST') &&

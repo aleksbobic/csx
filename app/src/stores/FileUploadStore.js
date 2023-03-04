@@ -191,10 +191,7 @@ export class FileUploadStore {
             default_schemas: this.fileUploadData.schemas
         };
 
-        const { error } = await safeRequest(
-            // axios.get('file/settings', { params })
-            axios.post('file/settings', params)
-        );
+        const { error } = await safeRequest(axios.post('file/save', params));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -251,9 +248,7 @@ export class FileUploadStore {
             defaults: this.fileUploadData.defaults
         };
 
-        const { error } = await safeRequest(
-            axios.patch('file/settingsupdate', params)
-        );
+        const { error } = await safeRequest(axios.patch('file/update', params));
 
         if (error) {
             this.store.core.handleRequestError(error);

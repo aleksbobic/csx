@@ -67,7 +67,7 @@ function EmptySearch() {
                 Back
             </Button>
             <Heading textAlign="center" size="md">
-                No results
+                No Search Results
             </Heading>
             <Text
                 textAlign="center"

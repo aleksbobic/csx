@@ -35,6 +35,8 @@ export class GraphInstanceStore {
     useCurvedEdges = false;
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
+    edgeColorScheme = { overview: 'auto', detail: 'auto' };
+    edgeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
     visibleComponents = [];
     hoverData = [];
@@ -49,13 +51,21 @@ export class GraphInstanceStore {
             3300: 'x large',
             4200: '2x large'
         },
-        textHeight: 4.5
+        textHeight: 4.5,
+        labelFeatures: []
     };
 
     constructor(store) {
         this.store = store;
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    resetLabelFeatures = () => (this.labels.labelFeatures = []);
+    addLabelFeature = feature => this.labels.labelFeatures.push(feature);
+    removeLabelFeature = feature =>
+        (this.labels.labelFeatures = this.labels.labelFeatures.filter(
+            entry => entry !== feature
+        ));
 
     setHoverData = hoverData => (this.hoverData = hoverData);
 
@@ -278,7 +288,10 @@ export class GraphInstanceStore {
     };
 
     applyForce = () => {
-        this.toggleLinkVisibility(false);
+        if (this.linkVisibility) {
+            this.toggleLinkVisibility(false);
+        }
+
         this.forceCooldownTicks = Infinity;
         this.forceCooldownTime = 15000;
         this.forceEngine = true;
@@ -372,24 +385,50 @@ export class GraphInstanceStore {
     };
 
     zoomToFit = (x = 0, y = 0, z = 2000) => {
+        const graphBoundingBox = this.graphInstance.getGraphBbox();
+
+        if (!graphBoundingBox) {
+            return;
+        }
+
+        const cameraX = Math.round(
+            (graphBoundingBox.x[0] + graphBoundingBox.x[1]) / 2,
+            2
+        );
+        const cameraY = Math.round(
+            (graphBoundingBox.y[0] + graphBoundingBox.y[1]) / 2,
+            2
+        );
+
+        const xDistance =
+            Math.abs(graphBoundingBox.x[1]) + Math.abs(graphBoundingBox.x[0]);
+        const yDistance =
+            Math.abs(graphBoundingBox.y[1]) + Math.abs(graphBoundingBox.y[0]);
+
+        const largestDinstance = xDistance > yDistance ? xDistance : yDistance;
+
         this.graphInstance.cameraPosition(
-            { x, y, z },
-            new THREE.Vector3(x, y, -1),
-            x !== 0 ? 0 : 500
+            {
+                x: cameraX,
+                y: cameraY,
+                z: largestDinstance + largestDinstance * 0.3
+            },
+            new THREE.Vector3(cameraX, cameraY, -1),
+            200
         );
     };
 
-    takeScreenshot = () => {
+    retireveScreenshot = () => {
         const renderer = this.graphInstance.renderer();
         const scene = this.graphInstance.scene();
         const camera = this.graphInstance.camera();
 
         renderer.render(scene, camera);
+        return renderer.domElement.toDataURL('image/octet-stream', 1.0);
+    };
 
-        const screenshot = renderer.domElement.toDataURL(
-            'image/octet-stream',
-            1.0
-        );
+    takeScreenshot = () => {
+        const screenshot = this.retireveScreenshot();
 
         const element = document.createElement('a');
         element.setAttribute('href', screenshot);
@@ -397,6 +436,7 @@ export class GraphInstanceStore {
 
         element.click();
     };
+
     resetSelfCentric = () => {
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;
@@ -718,47 +758,109 @@ export class GraphInstanceStore {
         this.nodeColorScheme = { ...this.nodeColorScheme };
     };
 
-    generateSchemeColorsFromArray = (values, feature) => {
+    setEdgeColorScheme = val => {
+        this.edgeColorScheme[this.store.core.currentGraph] = val;
+        this.edgeColorScheme = { ...this.edgeColorScheme };
+    };
+
+    generateSchemeColorsFromArray = (values, feature, schemeType = 'node') => {
         const skipfactor =
             values && values.length > 10 ? 1 / values.length : null;
 
-        this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
+        if (schemeType === 'node') {
+            this.nodeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
 
-        for (let i = 0; i < values.length; i++) {
-            this.nodeColorSchemeColors[this.store.core.currentGraph][feature][
-                values[i]
-            ] = skipfactor
-                ? interpolateRainbow(i * skipfactor)
-                : schemeTableau10[i];
+            for (let i = 0; i < values.length; i++) {
+                this.nodeColorSchemeColors[this.store.core.currentGraph][
+                    feature
+                ][values[i]] = skipfactor
+                    ? interpolateRainbow(i * skipfactor)
+                    : schemeTableau10[i];
+            }
+        } else {
+            this.edgeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
+
+            for (let i = 0; i < values.length; i++) {
+                this.edgeColorSchemeColors[this.store.core.currentGraph][
+                    feature
+                ][values[i]] = skipfactor
+                    ? interpolateRainbow(i * skipfactor)
+                    : schemeTableau10[i];
+            }
         }
     };
 
-    generateNumericColorSchema = (values, feature) => {
+    generateNumericColorSchema = (values, feature, schemeType = 'node') => {
         const min = Math.min(...values);
         const max = Math.max(...values);
 
         const norm_values = values.map(value => (value - min) / (max - min));
 
-        this.nodeColorSchemeColors[this.store.core.currentGraph][feature] = {};
+        if (schemeType === 'node') {
+            this.nodeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
 
-        if (min === max) {
-            for (let i = 0; i < values.length; i++) {
-                this.nodeColorSchemeColors[this.store.core.currentGraph][
-                    feature
-                ][values[i]] = interpolateYlOrRd(1);
+            if (min === max) {
+                for (let i = 0; i < values.length; i++) {
+                    this.nodeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = interpolateYlOrRd(0.5);
+                }
+            } else {
+                for (let i = 0; i < values.length; i++) {
+                    this.nodeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] =
+                        norm_values[i] > 0.9
+                            ? interpolateYlOrRd(0.9)
+                            : interpolateYlOrRd(norm_values[i]);
+                }
             }
         } else {
-            for (let i = 0; i < values.length; i++) {
-                this.nodeColorSchemeColors[this.store.core.currentGraph][
-                    feature
-                ][values[i]] = interpolateYlOrRd(norm_values[i]);
+            this.edgeColorSchemeColors[this.store.core.currentGraph][feature] =
+                {};
+            if (min === max) {
+                const interpolated = interpolateYlOrRd(0.5).match(/[0-9]+/g);
+
+                for (let i = 0; i < values.length; i++) {
+                    this.edgeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][
+                        values[i]
+                    ] = `rgba(${interpolated[0]}, ${interpolated[1]}, ${interpolated[2]}, 0.5)`;
+                }
+            } else {
+                for (let i = 0; i < values.length; i++) {
+                    let interpolated;
+
+                    if (norm_values[i] > 0.9) {
+                        interpolated = interpolateYlOrRd(0.9).match(/[0-9]+/g);
+                    } else {
+                        interpolated = interpolateYlOrRd(norm_values[i]).match(
+                            /[0-9]+/g
+                        );
+                    }
+
+                    this.edgeColorSchemeColors[this.store.core.currentGraph][
+                        feature
+                    ][values[i]] = `rgba(${interpolated[0]}, ${
+                        interpolated[1]
+                    }, ${interpolated[2]}, ${
+                        norm_values[i] < 0.1
+                            ? 0.1
+                            : norm_values[i] > 0.9
+                            ? 1
+                            : norm_values[i].toFixed(2)
+                    })`;
+                }
             }
         }
     };
 
     toggleLabelVisibility = () => {
         this.labels.isVisible = !this.labels.isVisible;
-        this.store.graph.setLabelVisibility(this.labels.isVisible);
     };
 
     setOrphanNodeVisiblity = val => {
@@ -774,9 +876,9 @@ export class GraphInstanceStore {
         this.store.graph.setOrphanNodeVisiblity(this.orphanNodeVisibility);
     };
 
-    changeShowLabelDistance = val => {
-        this.labels.visibilityDistance = val;
-        this.labels.textHeight = 2 + (4 * val) / 900;
+    changeShowLabelDistance = (visibilityDistance, textHeight) => {
+        this.labels.visibilityDistance = visibilityDistance;
+        this.labels.textHeight = textHeight;
         this.store.graph.setLabelTextHeight(this.labels.textHeight);
     };
 
@@ -862,31 +964,71 @@ export class GraphInstanceStore {
         return this.nodeColorScheme[this.store.core.currentGraph];
     }
 
-    filterNodesWithValue = (property, value) => {
+    get selectedEdgeColorSchema() {
+        return this.edgeColorScheme[this.store.core.currentGraph];
+    }
+
+    filterNodesWithValue = (property, value, groupValue, groupProperty) => {
         this.toggleVisibleComponents(-1);
         this.resetSelfCentric();
 
         const nodeCount = this.store.graph.currentGraphData.nodes.length;
         const linkCount = this.store.graph.currentGraphData.links.length;
 
-        const getNodeProp =
-            property.type === 'basic'
-                ? this.store.stats.getNodeBasicProp
-                : this.store.stats.getNodeAdvancedProp;
+        let getNodeProp;
+        let getGroupNodeProp;
+
+        if (groupProperty === 'degree') {
+            getGroupNodeProp = this.store.stats.getNodeNeighbourCount;
+        } else {
+            getGroupNodeProp = this.store.stats.getNodeAdvancedProp;
+        }
+
+        if (property.prop === 'degree') {
+            getNodeProp = this.store.stats.getNodeNeighbourCount;
+        } else if (property.type === 'basic') {
+            getNodeProp = this.store.stats.getNodeBasicProp;
+        } else {
+            getNodeProp = this.store.stats.getNodeAdvancedProp;
+        }
 
         const visibleIds = [];
 
-        for (let i = 0; i < nodeCount; i++) {
-            const isVisible =
-                getNodeProp(
-                    this.store.graph.currentGraphData.nodes[i],
-                    property.prop
-                ) === value;
+        if (groupProperty) {
+            for (let i = 0; i < nodeCount; i++) {
+                const isVisible =
+                    getNodeProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        property.prop
+                    ) === value &&
+                    getGroupNodeProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        groupProperty
+                    ) === groupValue;
 
-            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+                this.store.graph.currentGraphData.nodes[i].visible = isVisible;
 
-            if (isVisible) {
-                visibleIds.push(this.store.graph.currentGraphData.nodes[i].id);
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.nodes[i].id
+                    );
+                }
+            }
+        } else {
+            for (let i = 0; i < nodeCount; i++) {
+                const isVisible =
+                    getNodeProp(
+                        this.store.graph.currentGraphData.nodes[i],
+                        property.prop
+                    ) === value;
+
+                this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+
+                if (isVisible) {
+                    visibleIds.push(
+                        this.store.graph.currentGraphData.nodes[i].id
+                    );
+                }
             }
         }
 

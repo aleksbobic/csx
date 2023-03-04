@@ -1,0 +1,82 @@
+@import 'reveal.js/dist/reset.css';
+@import 'reveal.js/dist/reveal.css';
+@import 'reveal.js/dist/theme/moon.css';
+
+blockquote {
+    margin: 20px 0 20px !important;
+    width: 100% !important;
+}
+
+.mkdslide {
+    font-size: small;
+    display: inline-block;
+    width: 100%;
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: bold;
+    }
+
+    h1 {
+        font-size: xx-large;
+    }
+
+    h2 {
+        font-size: x-large;
+    }
+
+    h3 {
+        font-size: large;
+    }
+
+    h4,
+    h5,
+    h6 {
+        font-size: medium;
+    }
+
+    ul,
+    ol {
+        margin-left: 20px;
+        width: 100%;
+    }
+
+    blockquote {
+        padding-left: 10px;
+        border-left: 2px solid #83c4f2;
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }
+
+    a,
+    a:visited {
+        color: #83c4f2;
+        text-decoration: underline;
+    }
+
+    code {
+        background-color: #0000002b;
+
+        &.dark {
+            background-color: #00000077;
+        }
+
+        padding: 4px 6px;
+        border-radius: 4px;
+        display: inline;
+    }
+
+    .code-container {
+        &.light code {
+            background-color: #00000060;
+        }
+
+        &.dark code {
+            background-color: #00000077;
+        }
+    }
+}

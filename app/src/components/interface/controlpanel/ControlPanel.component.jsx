@@ -3,6 +3,7 @@ import {
     Button,
     Divider,
     Flex,
+    Heading,
     HStack,
     IconButton,
     Menu,
@@ -23,7 +24,12 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
-import { ArrowsPointingOutIcon, ScissorsIcon } from '@heroicons/react/20/solid';
+import {
+    ArrowsPointingOutIcon,
+    FolderOpenIcon,
+    PaintBrushIcon,
+    ScissorsIcon
+} from '@heroicons/react/20/solid';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
@@ -31,9 +37,7 @@ import {
     ChevronDoubleLeft,
     ChevronDoubleRight,
     DisplayFullwidth,
-    Eye,
     FormatSeparator,
-    Info,
     LayoutPin,
     LivePhoto,
     MediaLive,
@@ -51,7 +55,7 @@ import { RootStoreContext } from 'stores/RootStore';
 function ControlPanel() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onToggle } = useDisclosure();
-    const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
+    const bgColor = useColorModeValue('white', 'black');
     const tabListbgColor = useColorModeValue('white', 'black');
     const tabInactiveColors = useColorModeValue('black', 'white');
     const tabBorderColor = useColorModeValue('white', 'black');
@@ -83,6 +87,12 @@ function ControlPanel() {
         );
     };
 
+    useEffect(() => {
+        if (isOpen !== store.core.isLeftSidePanelOpen) {
+            store.core.setIsLeftSidePanelOpen(isOpen);
+        }
+    }, [isOpen, store.core]);
+
     const openSliderIfClosed = () => {
         if (!isOpen) {
             onOpen();
@@ -100,57 +110,76 @@ function ControlPanel() {
         );
 
         if (
-            ['integer', 'float'].includes(
+            (['integer', 'float'].includes(
                 store.search.nodeTypes[
                     store.graphInstance.nodeColorScheme[store.core.currentGraph]
                 ]
-            )
+            ) ||
+                store.graphInstance.nodeColorScheme[store.core.currentGraph] ===
+                    'degree') &&
+            legendItems.length > 8
         ) {
             return (
-                <Flex
-                    id="colorscheme"
-                    position="absolute"
-                    bottom="70px"
-                    left="320px"
-                    maxWidth="300px"
-                    zIndex={2}
-                    backgroundColor={legendBackgroundColor}
-                    padding="10px"
-                    borderRadius="4px"
-                    maxHeight="300px"
-                >
-                    <CustomScroll>
-                        <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            position="absolute"
-                            left="15px"
-                            color="blackAlpha.700"
-                        >
-                            {legendItems[0]}
-                        </Text>
-                        <Text
-                            fontSize="xs"
-                            fontWeight="bold"
-                            position="absolute"
-                            right="15px"
-                        >
-                            {legendItems[legendItems.length - 1]}
-                        </Text>
-                        <Box
-                            width="300px"
-                            height="20px"
-                            borderRadius="2px"
-                            bgGradient={`linear(to-r, ${String(
-                                schemeYlOrRd[9]
-                            )})`}
-                        />
-                    </CustomScroll>
-                </Flex>
+                <VStack width="90px" alignItems="flex-start">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Node colors
+                    </Heading>
+
+                    <Flex maxWidth="300px" maxHeight="300px">
+                        <CustomScroll>
+                            <Tooltip label={`Min value: ${legendItems[0]}`}>
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    color="blackAlpha.700"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[0]}
+                                </Text>
+                            </Tooltip>
+                            <Tooltip
+                                label={`Max value: ${
+                                    legendItems[legendItems.length - 1]
+                                }`}
+                            >
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    bottom="5px"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[legendItems.length - 1]}
+                                </Text>
+                            </Tooltip>
+                            <Box
+                                width="90px"
+                                height="300px"
+                                borderRadius="2px"
+                                bgGradient={`linear(to-b, ${String(
+                                    schemeYlOrRd[9]
+                                )})`}
+                            />
+                        </CustomScroll>
+                    </Flex>
+                </VStack>
             );
         }
 
-        if (selectedColorScheme === 'type') {
+        if (selectedColorScheme === 'node type') {
             legendItems = legendItems.filter(key =>
                 store.graph.detailGraphData.perspectivesInGraph.includes(key)
             );
@@ -187,21 +216,140 @@ function ControlPanel() {
 
         return (
             <Flex
-                id="colorscheme"
-                position="absolute"
-                bottom="70px"
-                left="320px"
+                width="150px"
                 maxWidth="200px"
-                zIndex={2}
-                backgroundColor={legendBackgroundColor}
-                padding="10px"
-                borderRadius="10px"
-                border="1px solid"
-                borderColor={legendBorderColor}
+                minWidth="50px"
                 maxHeight="300px"
                 overflowY="scroll"
             >
                 <VStack width="100%" paddingBottom="10px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Node colors
+                    </Heading>
+                    {legend}
+                </VStack>
+            </Flex>
+        );
+    };
+
+    const renderEdgeColorLegend = () => {
+        const selectedColorScheme =
+            store.graphInstance.edgeColorScheme[store.core.currentGraph];
+
+        let legendItems = Object.keys(
+            store.graphInstance.edgeColorSchemeColors[store.core.currentGraph][
+                selectedColorScheme
+            ]
+        );
+
+        if (legendItems.length > 8) {
+            return (
+                <VStack width="90px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Edge colors
+                    </Heading>
+
+                    <Flex maxWidth="300px" maxHeight="300px">
+                        <CustomScroll>
+                            <Tooltip label={`Min value: ${legendItems[0]}`}>
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    color="blackAlpha.700"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[0]}
+                                </Text>
+                            </Tooltip>
+                            <Tooltip
+                                label={`Max value: ${
+                                    legendItems[legendItems.length - 1]
+                                }`}
+                            >
+                                <Text
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    width="90px"
+                                    display="inline-block"
+                                    position="absolute"
+                                    textAlign="center"
+                                    left="0"
+                                    bottom="5px"
+                                    overflow="hidden"
+                                    whiteSpace="nowrap"
+                                    textOverflow="ellipsis"
+                                >
+                                    {legendItems[legendItems.length - 1]}
+                                </Text>
+                            </Tooltip>
+                            <Box
+                                width="90px"
+                                height="300px"
+                                borderRadius="2px"
+                                bgGradient={`linear(to-b, ${String(
+                                    schemeYlOrRd[9]
+                                )})`}
+                            />
+                        </CustomScroll>
+                    </Flex>
+                </VStack>
+            );
+        }
+
+        const legend = legendItems.map(key => {
+            return (
+                <HStack key={key} width="100%">
+                    <Tag
+                        size="sm"
+                        borderRadius="full"
+                        variant="solid"
+                        backgroundColor={
+                            store.graphInstance.edgeColorSchemeColors[
+                                store.core.currentGraph
+                            ][selectedColorScheme][key]
+                        }
+                    />
+                    <Text
+                        size="sm"
+                        whiteSpace="nowrap"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                    >
+                        {selectedColorScheme === 'weight' ? 'Weight ' : ''}
+                        {key}
+                        {selectedColorScheme === 'feature types'
+                            ? key === '1'
+                                ? ' feature'
+                                : ' features'
+                            : ''}
+                    </Text>
+                </HStack>
+            );
+        });
+
+        if (legend.length === 0) {
+            return null;
+        }
+
+        return (
+            <Flex
+                maxWidth="200px"
+                minWidth="50px"
+                width="150px"
+                maxHeight="300px"
+                overflowY="scroll"
+            >
+                <VStack width="100%" paddingBottom="10px">
+                    <Heading size="xs" width="100%" textAlign="left">
+                        Edge colors
+                    </Heading>
                     {legend}
                 </VStack>
             </Flex>
@@ -281,7 +429,7 @@ function ControlPanel() {
                                 'Button',
                                 JSON.stringify({
                                     type: 'Click',
-                                    value: 'Remove selection'
+                                    value: 'Remove selection from graph'
                                 })
                             );
                             store.graph.removeSelection();
@@ -575,7 +723,8 @@ function ControlPanel() {
                 orientation="vertical"
                 style={{
                     height: '26px',
-                    width: '1px'
+                    width: '1px',
+                    opacity: 0.2
                 }}
             />
             <HStack spacing="1">
@@ -653,6 +802,151 @@ function ControlPanel() {
             </HStack>
         </HStack>
     );
+
+    const renderTabs = () => (
+        <TabList
+            position="absolute"
+            top="0"
+            width="50px"
+            height="100%"
+            zIndex="2"
+            bgColor={tabListbgColor}
+        >
+            <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
+                <IconButton
+                    variant="link"
+                    width="50px"
+                    height="50px"
+                    borderRadius="6px"
+                    color={tabInactiveColors}
+                    onClick={() => {
+                        toggleControlPanel();
+                    }}
+                    icon={
+                        isOpen ? (
+                            <ChevronDoubleLeft style={{ '--ggs': 0.8 }} />
+                        ) : (
+                            <ChevronDoubleRight style={{ '--ggs': 0.8 }} />
+                        )
+                    }
+                />
+            </Tooltip>
+            <Tab
+                width="50px"
+                height="50px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open study info'
+                        })
+                    );
+                }}
+                padding="8px"
+                style={
+                    isOpen
+                        ? { borderRadius: '6px', borderColor: 'transparent' }
+                        : {
+                              color: tabInactiveColors,
+                              borderColor: 'transparent',
+                              borderRadius: '6px'
+                          }
+                }
+            >
+                <Tooltip label="Study Settings">
+                    <Box
+                        id="viewsettingstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <FolderOpenIcon width="20px" height="20px" />
+                    </Box>
+                </Tooltip>
+            </Tab>
+            <Tab
+                width="50px"
+                height="50px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open view settings'
+                        })
+                    );
+                }}
+                padding="8px"
+                style={
+                    isOpen
+                        ? { borderRadius: '6px', borderColor: 'transparent' }
+                        : {
+                              color: tabInactiveColors,
+                              borderRadius: '6px',
+                              borderColor: 'transparent'
+                          }
+                }
+            >
+                <Tooltip label="View settings">
+                    <Box
+                        id="viewsettingstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <PaintBrushIcon width="18px" height="18px" />
+                    </Box>
+                </Tooltip>
+            </Tab>
+        </TabList>
+    );
+
+    const renderTabPanels = () => (
+        <TabPanels
+            width="250px"
+            height="100%"
+            marginLeft="50px"
+            bgColor={bgColor}
+            borderRight="1px solid"
+            borderColor={edgeColor}
+            position="relative"
+            style={{ overflowX: 'hidden' }}
+        >
+            <TabPanel width="250px" height="100%" style={{ paddingLeft: 0 }}>
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '10px'
+                    }}
+                >
+                    <StudyInfoComponent />
+                </CustomScroll>
+            </TabPanel>
+            <TabPanel
+                width="250px"
+                height="100%"
+                style={{ overflowX: 'hidden', paddingLeft: 0 }}
+            >
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '10px'
+                    }}
+                >
+                    <SettingsComponent />
+                </CustomScroll>
+            </TabPanel>
+        </TabPanels>
+    );
     return (
         <Box
             minW="50px"
@@ -674,112 +968,7 @@ function ControlPanel() {
                 borderColor={tabBorderColor}
                 isLazy
             >
-                <TabList
-                    position="absolute"
-                    top="0"
-                    width="50px"
-                    height="100%"
-                    zIndex="2"
-                    bgColor={tabListbgColor}
-                >
-                    <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
-                        <IconButton
-                            borderRadius="0"
-                            variant="link"
-                            width="50px"
-                            height="50px"
-                            color={tabInactiveColors}
-                            onClick={() => {
-                                toggleControlPanel();
-                            }}
-                            icon={
-                                isOpen ? (
-                                    <ChevronDoubleLeft
-                                        style={{ '--ggs': 0.8 }}
-                                    />
-                                ) : (
-                                    <ChevronDoubleRight
-                                        style={{ '--ggs': 0.8 }}
-                                    />
-                                )
-                            }
-                        />
-                    </Tooltip>
-                    <Tab
-                        width="50px"
-                        height="50px"
-                        onClick={() => {
-                            openSliderIfClosed();
-                            store.track.trackEvent(
-                                'Side Panel',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open study info'
-                                })
-                            );
-                        }}
-                        padding="8px"
-                        style={
-                            isOpen
-                                ? {}
-                                : {
-                                      color: tabInactiveColors,
-                                      borderColor: 'transparent'
-                                  }
-                        }
-                    >
-                        <Tooltip label="Study info">
-                            <Box
-                                id="viewsettingstab"
-                                width="100%"
-                                height="100%"
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Info style={{ '--ggs': 0.8 }} />
-                            </Box>
-                        </Tooltip>
-                    </Tab>
-                    <Tab
-                        width="50px"
-                        height="50px"
-                        onClick={() => {
-                            openSliderIfClosed();
-                            store.track.trackEvent(
-                                'Side Panel',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open view settings'
-                                })
-                            );
-                        }}
-                        padding="8px"
-                        style={
-                            isOpen
-                                ? {}
-                                : {
-                                      color: tabInactiveColors,
-                                      borderColor: 'transparent'
-                                  }
-                        }
-                    >
-                        <Tooltip label="View settings">
-                            <Box
-                                id="viewsettingstab"
-                                width="100%"
-                                height="100%"
-                                display="flex"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Eye style={{ '--ggs': 0.8 }} />
-                            </Box>
-                        </Tooltip>
-                    </Tab>
-                </TabList>
+                {renderTabs()}
                 <Slide
                     direction="left"
                     id="controlpanelslide"
@@ -793,45 +982,43 @@ function ControlPanel() {
                         marginTop: '50px'
                     }}
                 >
-                    <TabPanels
-                        width="250px"
-                        height="100%"
-                        marginLeft="50px"
-                        bgColor={bgColor}
-                        borderRight="1px solid"
-                        borderColor={edgeColor}
-                        position="relative"
-                    >
-                        <TabPanel width="250px" height="100%">
-                            <CustomScroll
-                                style={{
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
-                            >
-                                <StudyInfoComponent />
-                            </CustomScroll>
-                        </TabPanel>
-                        <TabPanel width="250px" height="100%">
-                            <CustomScroll
-                                style={{
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
-                            >
-                                <SettingsComponent />
-                            </CustomScroll>
-                        </TabPanel>
-                    </TabPanels>
-
+                    {renderTabPanels()}
                     {renderDirectConnectionsMenu()}
                     {renderNetworkModificationMenu()}
 
                     {store.core.currentGraph &&
-                        !['none', 'component'].includes(
+                        (!['none', 'component'].includes(
                             store.graphInstance.selectedColorSchema
-                        ) &&
-                        renderColorLegend()}
+                        ) ||
+                            !['auto'].includes(
+                                store.graphInstance.selectedEdgeColorSchema
+                            )) && (
+                            <HStack
+                                position="absolute"
+                                bottom="70px"
+                                left="320px"
+                                id="colorscheme"
+                                backgroundColor={legendBackgroundColor}
+                                padding="20px"
+                                borderRadius="10px"
+                                spacing="20px"
+                                alignItems="flex-start"
+                                zIndex={2}
+                                borderColor={legendBorderColor}
+                            >
+                                {store.core.currentGraph &&
+                                    !['none', 'component'].includes(
+                                        store.graphInstance.selectedColorSchema
+                                    ) &&
+                                    renderColorLegend()}
+                                {store.core.currentGraph &&
+                                    !['auto'].includes(
+                                        store.graphInstance
+                                            .selectedEdgeColorSchema
+                                    ) &&
+                                    renderEdgeColorLegend()}
+                            </HStack>
+                        )}
                 </Slide>
             </Tabs>
         </Box>

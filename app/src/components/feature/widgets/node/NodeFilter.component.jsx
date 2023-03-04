@@ -15,40 +15,75 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import WidgetSettings from '../WidgetSettings.component';
 
 function NodeFilter(props) {
     const store = useContext(RootStoreContext);
 
     const [isDemo, setIsDemo] = useState(false);
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
+    );
 
     useEffect(() => {
         if (props.demoData.length > 0) {
             setIsDemo(true);
             setSliderMaxTooltipValue(props.demoData[0].max);
             setSliderMaxValue(props.demoData[0].max);
-        } else if (props.filterProperty === 'degree') {
-            setIsDemo(false);
-            setSliderMinTooltipValue(0);
-            setSliderMaxTooltipValue(
-                store.graph.currentGraphData.meta.maxDegree
-            );
-            setSliderMaxValue(store.graph.currentGraphData.meta.maxDegree);
         } else {
-            setIsDemo(false);
-            setSliderMinTooltipValue(
-                store.search.searchHints[props.filterProperty].min
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
             );
-            setSliderMaxTooltipValue(
-                store.search.searchHints[props.filterProperty].max
-            );
-            setSliderMaxValue(
-                store.search.searchHints[props.filterProperty].max
-            );
+
+            setWidgetConfig(widget);
+
+            if (!widget) {
+                setIsDemo(false);
+                setSliderMinTooltipValue(0);
+                setSliderMaxTooltipValue(0);
+                setSliderMaxValue(0);
+            } else {
+                if (widget.filter_property === 'degree') {
+                    setIsDemo(false);
+                    setSliderMinTooltipValue(0);
+                    setSliderMaxTooltipValue(
+                        store.graph.currentGraphData.meta.maxDegree
+                    );
+                    setSliderMaxValue(
+                        store.graph.currentGraphData.meta.maxDegree
+                    );
+                } else {
+                    setIsDemo(false);
+
+                    setSliderMinTooltipValue(
+                        store.search.searchHints[widget.filter_property].min
+                    );
+                    setSliderMaxTooltipValue(
+                        store.search.searchHints[widget.filter_property].max
+                    );
+                    setSliderMaxValue(
+                        store.search.searchHints[widget.filter_property].max
+                    );
+                }
+            }
         }
     }, [
+        props.chart?.id,
         props.demoData,
-        props.demoData.length,
-        props.filterProperty,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponents,
         store.graph.currentGraphData.meta.maxDegree,
         store.search.searchHints
     ]);
@@ -75,7 +110,7 @@ function NodeFilter(props) {
         store.graphInstance.filterNodesByNumericProp(
             min,
             max,
-            props.filterProperty
+            widgetConfig.filter_property
         );
     };
 
@@ -87,13 +122,22 @@ function NodeFilter(props) {
                 type: 'Slide',
                 min: val[0],
                 max: val[1],
-                property: props.filterProperty
+                property: widgetConfig.filter_property
             })
         );
 
         setSliderMinTooltipValue(val[0]);
         setSliderMaxTooltipValue(val[1]);
     };
+
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['node filtering']}
+            />
+        );
+    }
 
     return (
         <Box height="100%" width="100%" position="relative" padding="20px">
@@ -105,7 +149,7 @@ function NodeFilter(props) {
                 alignItems="center"
             >
                 <HStack
-                    spacing={10}
+                    spacing={props.isExpanded ? 10 : '10px'}
                     style={{ marginBottom: '10px' }}
                     justifyContent="space-between"
                     width="100%"
@@ -125,7 +169,7 @@ function NodeFilter(props) {
                                 JSON.stringify({
                                     type: 'Write',
                                     value: val,
-                                    property: props.filterProperty
+                                    property: widgetConfig.filter_property
                                 })
                             );
 
@@ -156,7 +200,7 @@ function NodeFilter(props) {
                             height={props.isExpanded ? '100px' : '50px'}
                             width="84px"
                             fontWeight="bold"
-                            backgroundColor="blackAlpha.400"
+                            backgroundColor="whiteAlpha.100"
                             fontSize="md"
                             textAlign="center"
                             padding="5px"
@@ -164,12 +208,18 @@ function NodeFilter(props) {
                     </NumberInput>
 
                     {(props.isExpanded || isDemo) && (
-                        <FormLabel paddingBottom="10px" paddingTop="10px">
+                        <FormLabel
+                            paddingBottom="10px"
+                            paddingTop="10px"
+                            textAlign="center"
+                        >
                             Filtering by{' '}
                             <span>
                                 {isDemo
                                     ? props.demoData[0].prop
-                                    : props.filterProperty}
+                                    : widgetConfig.filter_property === 'degree'
+                                    ? 'neighbour count'
+                                    : widgetConfig.filter_property}
                             </span>
                         </FormLabel>
                     )}
@@ -186,7 +236,7 @@ function NodeFilter(props) {
                                 JSON.stringify({
                                     type: 'Write',
                                     value: val,
-                                    property: props.filterProperty
+                                    property: widgetConfig.filter_property
                                 })
                             );
 
@@ -216,7 +266,7 @@ function NodeFilter(props) {
                             borderRadius="10px"
                             height={props.isExpanded ? '100px' : '50px'}
                             width="84px"
-                            backgroundColor="blackAlpha.400"
+                            backgroundColor="whiteAlpha.100"
                             fontSize="md"
                             fontWeight="bold"
                             textAlign="center"
@@ -250,14 +300,12 @@ function NodeFilter(props) {
 }
 NodeFilter.propTypes = {
     isExpanded: PropTypes.bool,
-    demoData: PropTypes.array,
-    filterProperty: PropTypes.string
+    demoData: PropTypes.array
 };
 
 NodeFilter.defaultProps = {
     isExpanded: false,
-    demoData: [],
-    filterProperty: 'degree'
+    demoData: []
 };
 
 export default observer(NodeFilter);

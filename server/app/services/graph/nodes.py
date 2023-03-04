@@ -104,11 +104,17 @@ def adjust_node_size(
         node_label_frequencies[feature] = get_labels(df, feature)
 
     for node in nodes:
-        calculated_size = np.log2(
-            node_label_frequencies[node["feature"]][node["label"]]
-        )
+        if (
+            node["feature"] in node_label_frequencies
+            and node["label"] in node_label_frequencies[node["feature"]]
+        ):
+            calculated_size = np.log2(
+                node_label_frequencies[node["feature"]][node["label"]]
+            )
 
-        if calculated_size == -inf:
+            if calculated_size == -inf:
+                calculated_size = 0
+        else:
             calculated_size = 0
 
         node["size"] = math.ceil(calculated_size + 5)

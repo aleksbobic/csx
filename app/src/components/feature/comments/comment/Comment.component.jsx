@@ -1,15 +1,16 @@
 import {
     Box,
     Flex,
+    HStack,
     IconButton,
     Text,
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
+import { Chart, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 
-import { PencilIcon } from '@heroicons/react/20/solid';
+import { PencilIcon, PhotoIcon } from '@heroicons/react/20/solid';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -27,11 +28,23 @@ function CommentComponent(props) {
     const editComment = index => {
         store.comment.setEditMode(true);
         store.comment.setEditCommentIndex(index);
-        store.comment.setEditedCommentContent(
-            store.core.studyHistory[store.core.studyHistoryItemIndex].comments[
-                index
-            ].comment
-        );
+
+        store.comment.setEditedCommentContent({
+            screenshot:
+                store.core.studyHistory[store.core.studyHistoryItemIndex]
+                    .comments[index].screenshot,
+            chart: store.core.studyHistory[store.core.studyHistoryItemIndex]
+                .comments[index].chart,
+            comment:
+                store.core.studyHistory[store.core.studyHistoryItemIndex]
+                    .comments[index].comment,
+            screenshot_width:
+                store.core.studyHistory[store.core.studyHistoryItemIndex]
+                    .comments[index].screenshot_width,
+            screenshot_height:
+                store.core.studyHistory[store.core.studyHistoryItemIndex]
+                    .comments[index].screenshot_height
+        });
     };
 
     const renderMarkdownContent = () => (
@@ -200,11 +213,31 @@ function CommentComponent(props) {
         >
             {renderMarkdownContent(props.comment)}
 
-            <Text fontSize="11px" opacity="0.5" marginTop="6px">
-                {props.comment.edited && 'Edited: '}
-                {props.comment.time}
-            </Text>
-
+            <HStack width="100%">
+                <Text fontSize="11px" opacity="0.5" marginTop="6px">
+                    {props.comment.edited && 'Edited: '}
+                    {props.comment.time}
+                </Text>
+                <HStack spacing="10px" paddingLeft="20px">
+                    {props.comment.screenshot && (
+                        <PhotoIcon
+                            width="16px"
+                            height="16px"
+                            opacity="0.5"
+                            style={{ marginBottom: '-5px' }}
+                        />
+                    )}
+                    {props.comment.chart && (
+                        <Chart
+                            style={{
+                                '--ggs': '0.7',
+                                opacity: 0.5,
+                                marginBottom: '2px'
+                            }}
+                        />
+                    )}
+                </HStack>
+            </HStack>
             {renderCommentButtons(props.commentIndex)}
         </Box>
     );

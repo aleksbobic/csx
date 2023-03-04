@@ -1,11 +1,12 @@
-import { Box, Text } from '@chakra-ui/react';
-import { FileAdd } from 'css.gg';
+import { Box, Text, useColorModeValue } from '@chakra-ui/react';
+import { DocumentArrowUpIcon } from '@heroicons/react/20/solid';
 import { useContext } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { RootStoreContext } from 'stores/RootStore';
 
 export function FileUploadArea() {
     const store = useContext(RootStoreContext);
+    const textColor = useColorModeValue('black', 'white');
 
     const onDrop = async files => {
         store.track.trackEvent(
@@ -47,16 +48,15 @@ export function FileUploadArea() {
                     background: 'rgba(100,100,100,0.05)'
                 }}
             >
-                <FileAdd
-                    style={{
-                        '--ggs': '1.2',
-                        marginBottom: '10px',
-                        opacity: 0.5
-                    }}
+                <DocumentArrowUpIcon
+                    width="22px"
+                    height="22px"
+                    opacity="0.5"
+                    style={{ marginBottom: '10px' }}
                 />
                 <input {...getInputProps()} width="100%" height="100%" />
                 {isDragActive ? (
-                    <Text style={{ opacity: 0.5 }}>
+                    <Text style={{ opacity: 0.5, color: textColor }}>
                         Drop your dataset files here ...
                     </Text>
                 ) : (
@@ -64,7 +64,8 @@ export function FileUploadArea() {
                         style={{
                             opacity: 0.5,
                             paddingLeft: '50px',
-                            paddingRight: '50px'
+                            paddingRight: '50px',
+                            color: textColor
                         }}
                     >
                         Drop your dataset files here, or click to select files.

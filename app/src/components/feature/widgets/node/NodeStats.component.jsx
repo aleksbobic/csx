@@ -14,64 +14,103 @@ import {
 import { Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
+    );
+
+    const sortWidgetData = data => {
+        return data.slice().sort((node1, node2) => {
+            if (node1.neighbours.size > node2.neighbours.size) {
+                return -1;
+            }
+
+            if (node1.neighbours.size < node2.neighbours.size) {
+                return 1;
+            }
+
+            return 0;
+        });
+    };
+
+    const getWidgetDataBasedOnNetworkData = useCallback(
+        widget => {
+            switch (widget.network_data) {
+                case 'selected':
+                    return store.graph.currentGraphData.selectedNodes;
+                case 'visible':
+                    return store.graph.currentGraphData.nodes.filter(
+                        node => node.visible
+                    );
+                default:
+                    return store.graph.currentGraphData.nodes;
+            }
+        },
+        [
+            store.graph.currentGraphData.nodes,
+            store.graph.currentGraphData.selectedNodes
+        ]
+    );
+
+    const getWidgetData = useCallback(
+        widget => {
+            if (!widget) {
+                return null;
+            }
+
+            let data = getWidgetDataBasedOnNetworkData(widget);
+
+            data = sortWidgetData(data);
+
+            if (
+                widget.network_data === 'selected' ||
+                widget.display_limit === 0
+            ) {
+                return data;
+            }
+
+            if (widget.display_limit > 0) {
+                return data.slice(0, widget.display_limit);
+            }
+
+            return data.slice(widget.display_limit, data.length);
+        },
+        [getWidgetDataBasedOnNetworkData]
+    );
 
     useEffect(() => {
         if (props.demoData.length) {
             setData(props.demoData);
         } else {
-            let data;
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
 
-            switch (props.networkData) {
-                case 'selected':
-                    data = store.graph.currentGraphData.selectedNodes;
-                    break;
-                case 'visible':
-                    data = store.graph.currentGraphData.nodes.filter(
-                        node => node.visible
-                    );
-                    break;
-                default:
-                    data = store.graph.currentGraphData.nodes;
-                    break;
-            }
-
-            data = data.slice().sort((node1, node2) => {
-                if (node1.neighbours.size > node2.neighbours.size) {
-                    return -1;
-                }
-
-                if (node1.neighbours.size < node2.neighbours.size) {
-                    return 1;
-                }
-
-                return 0;
-            });
-
-            if (
-                props.networkData === 'selected' ||
-                props.elementDisplayLimit === 0
-            ) {
-                setData(data);
-            } else if (props.elementDisplayLimit > 0) {
-                setData(data.slice(0, props.elementDisplayLimit));
-            } else {
-                setData(data.slice(props.elementDisplayLimit, data.length));
-            }
+            setWidgetConfig(widget);
+            setData(getWidgetData(widget));
         }
     }, [
+        getWidgetData,
+        props.chart?.id,
         props.demoData,
-        props.elementDisplayLimit,
-        props.networkData,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
@@ -119,34 +158,17 @@ function SelectedNodeList(props) {
         );
     };
 
-    if (data.length === 0) {
+    if (props.settingsMode && props.isExpanded) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData !== 'all' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['item state', 'item count']}
+            />
         );
+    }
+
+    if (data.length === 0) {
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -167,7 +189,7 @@ function SelectedNodeList(props) {
                                 backgroundColor={
                                     colorMode === 'light'
                                         ? 'blackAlpha.200'
-                                        : 'blackAlpha.800'
+                                        : 'whiteAlpha.100'
                                 }
                                 padding="10px"
                                 width="100%"
@@ -184,7 +206,7 @@ function SelectedNodeList(props) {
                                     opacity={colorMode === 'light' && 0.8}
                                     width="100%"
                                     paddingRight={
-                                        props.networkData === 'selected'
+                                        widgetConfig.network_data === 'selected'
                                             ? '30px'
                                             : '0'
                                     }
@@ -220,7 +242,7 @@ function SelectedNodeList(props) {
 
                                 {props.isExpanded && renderNodeDetails(node)}
 
-                                {props.networkData === 'selected' && (
+                                {widgetConfig.network_data === 'selected' && (
                                     <Box
                                         position="absolute"
                                         top="4px"
@@ -279,16 +301,12 @@ function SelectedNodeList(props) {
 }
 SelectedNodeList.propTypes = {
     isExpanded: PropTypes.bool,
-    networkData: PropTypes.string,
-    demoData: PropTypes.array,
-    elementDisplayLimit: PropTypes.number
+    demoData: PropTypes.array
 };
 
 SelectedNodeList.defaultProps = {
     isExpanded: false,
-    networkData: 'all',
-    demoData: [],
-    elementDisplayLimit: 10
+    demoData: []
 };
 
 export default observer(SelectedNodeList);

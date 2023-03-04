@@ -40,28 +40,31 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import { HistoryFlow } from 'components/feature/historyflow/HistoryFlow.component';
 import SchemaFlow from 'components/feature/schemaflow/SchemaFlow.component';
 import { SchemaList } from 'components/feature/schemalist/SchemaList.component';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { isEnvFalse } from 'general.utils';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
     const [panelWidth, setPanelWidth] = useState(0);
+    const [activeTab, setActiveTab] = useState(0);
 
-    const onResize = useCallback(width => {
-        if (activeTab === 0) {
-            store.contextMenu.setXOffset(0);
-            setPanelWidth(width);
-        } else {
-            store.contextMenu.setXOffset(width + 50);
-            setPanelWidth(width);
-        }
-    }, []);
+    const onResize = useCallback(
+        width => {
+            if (activeTab === 0) {
+                store.contextMenu.setXOffset(0);
+                setPanelWidth(width);
+            } else {
+                store.contextMenu.setXOffset(width + 50);
+                setPanelWidth(width);
+            }
+        },
+        [activeTab, store.contextMenu]
+    );
 
     const { ref } = useResizeDetector({ onResize });
     const bgColor = useColorModeValue('whiteAlpha.900', 'blackAlpha.900');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
     const [useList, setUseList] = useState(false);
-    const [activeTab, setActiveTab] = useState(0);
     const [visibleProperties, setVisibleProperties] = useState([]);
     const [csvData, setCsvData] = useState([]);
     const [csvHeaders, setCsvHeaders] = useState([]);
@@ -95,7 +98,7 @@ function DataPanel(props) {
                 setActiveTab(0);
                 break;
         }
-    }, [props.panelType]);
+    }, [panelWidth, props.panelType, store.contextMenu]);
 
     const getCsvHeaders = data => {
         if (!data || !data.length) {
@@ -439,7 +442,7 @@ function DataPanel(props) {
                     size="sm"
                     variant="soft-rounded"
                     colorScheme="blue"
-                    height={store.comment.isCommentListVisible ? '67%' : '100%'}
+                    height={store.comment.isCommentListVisible ? '50%' : '100%'}
                     paddingBottom={
                         store.comment.isCommentListVisible ? 0 : '80px'
                     }
@@ -458,7 +461,7 @@ function DataPanel(props) {
                     bottom={!store.comment.isCommentListVisible && 0}
                     spacing="10px"
                     width="100%"
-                    height={store.comment.isCommentListVisible ? '33%' : '80px'}
+                    height={store.comment.isCommentListVisible ? '50%' : '80px'}
                     padding="20px"
                     paddingTop="0"
                     paddingRight={!store.comment.isCommentListVisible && 22}

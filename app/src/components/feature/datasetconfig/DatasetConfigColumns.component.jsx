@@ -221,6 +221,7 @@ function DatasetConfigColumns(props) {
                                 alignItems="center"
                             >
                                 <Radio
+                                    opacity="0.5"
                                     isDisabled={
                                         isEnvTrue('REACT_APP_DISABLE_UPLOAD') ||
                                         store.fileUpload.fileUploadData.link ===
@@ -248,6 +249,11 @@ function DatasetConfigColumns(props) {
                                             column
                                         );
                                     }}
+                                    _checked={{
+                                        opacity: 1,
+                                        borderColor: 'blue.300',
+                                        borderWidth: '5px'
+                                    }}
                                     _disabled={{
                                         cursor: 'not-allowed',
                                         backgroundColor:
@@ -267,6 +273,7 @@ function DatasetConfigColumns(props) {
                                 alignItems="center"
                             >
                                 <Radio
+                                    opacity="0.5"
                                     isDisabled={
                                         isEnvTrue('REACT_APP_DISABLE_UPLOAD') ||
                                         store.fileUpload.fileUploadData
@@ -294,6 +301,11 @@ function DatasetConfigColumns(props) {
                                             column
                                         );
                                     }}
+                                    _checked={{
+                                        opacity: 1,
+                                        borderColor: 'blue.300',
+                                        borderWidth: '5px'
+                                    }}
                                     _disabled={{
                                         cursor: 'not-allowed',
                                         backgroundColor:
@@ -313,6 +325,7 @@ function DatasetConfigColumns(props) {
                                 alignItems="center"
                             >
                                 <Radio
+                                    opacity="0.5"
                                     isDisabled={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].dataType ===
@@ -340,6 +353,11 @@ function DatasetConfigColumns(props) {
                                         store.fileUpload.changeDefaultSearch(
                                             column
                                         );
+                                    }}
+                                    _checked={{
+                                        opacity: 1,
+                                        borderColor: 'blue.300',
+                                        borderWidth: '5px'
                                     }}
                                     _disabled={{
                                         cursor: 'not-allowed',

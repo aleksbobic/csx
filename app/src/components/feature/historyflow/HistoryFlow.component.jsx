@@ -1,8 +1,15 @@
-import { Box, IconButton, Tooltip, useColorMode } from '@chakra-ui/react';
+import {
+    Box,
+    HStack,
+    IconButton,
+    Link,
+    Tooltip,
+    useColorMode
+} from '@chakra-ui/react';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign } from 'css.gg';
+import { Assign, Presentation } from 'css.gg';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -154,37 +161,73 @@ export function HistoryFlow() {
                 )}
             </AutoSizer>
 
-            <Tooltip label="Navigate to current history node">
-                <IconButton
-                    size="sm"
-                    zIndex="20"
-                    position="absolute"
-                    bottom="20px"
-                    left="20px"
-                    opacity="0.6"
-                    transition="0.2s all ease-in-out"
-                    _hover={{ opacity: 1 }}
-                    icon={
-                        <Assign
-                            style={{
-                                '--ggs': '0.8'
-                            }}
-                        />
-                    }
-                    onClick={() => {
-                        store.track.trackEvent(
-                            'History Panel',
-                            'Button',
-                            JSON.stringify({
-                                type: 'Click',
-                                value: 'Navigate to active history node'
-                            })
-                        );
+            <HStack position="absolute" bottom="20px" left="20px" zIndex="20">
+                <Tooltip label="Navigate to current history node">
+                    <IconButton
+                        size="sm"
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        _hover={{ opacity: 1 }}
+                        icon={
+                            <Assign
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        }
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'History Panel',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Navigate to active history node'
+                                })
+                            );
 
-                        zoomToActiveHistoryNode();
-                    }}
-                />
-            </Tooltip>
+                            zoomToActiveHistoryNode();
+                        }}
+                    />
+                </Tooltip>
+
+                <Tooltip label="Open presentation up to active history item.">
+                    <IconButton
+                        size="sm"
+                        as={Link}
+                        opacity="0.6"
+                        transition="0.2s all ease-in-out"
+                        isDisabled={!store.core.studyIsSaved}
+                        _hover={{ opacity: 1 }}
+                        icon={
+                            <Presentation
+                                style={{
+                                    '--ggs': '0.8'
+                                }}
+                            />
+                        }
+                        onClick={e => {
+                            if (!store.core.studyIsSaved) {
+                                e.preventDefault();
+                            }
+
+                            store.track.trackEvent(
+                                'History Panel',
+                                'Link',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open study in presentation mode up to history item'
+                                })
+                            );
+                        }}
+                        href={
+                            store.core.studyIsSaved
+                                ? `http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`
+                                : ''
+                        }
+                        isExternal
+                    />
+                </Tooltip>
+            </HStack>
         </Box>
     );
 }

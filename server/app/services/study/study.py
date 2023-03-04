@@ -7,6 +7,7 @@ from app.types import ComparisonResults
 import pandas as pd
 import networkx as nx
 import app.services.graph.graph as csx_graph
+from typing import Union
 
 
 def store_history_entry(entry):
@@ -65,13 +66,33 @@ def load_last_history_item(study_id, user_id):
 
 
 def get_study(user_id, study_id):
-    return list(
+    studies = list(
         csx_data.get_all_documents_by_conditions(
             "studies",
             {"$and": [{"user_uuid": user_id}, {"study_uuid": study_id}]},
             {"_id": 0},
         )
-    )[0]
+    )
+
+    if len(studies) == 0:
+        return None
+
+    return studies[0]
+
+
+def get_public_study(public_study_id):
+    studies = list(
+        csx_data.get_all_documents_by_conditions(
+            "studies",
+            {"$and": [{"public_url": public_study_id}]},
+            {"_id": 0},
+        )
+    )
+
+    if len(studies) == 0:
+        return None
+
+    return studies[0]
 
 
 def add_index(study_uuid: str, user_uuid: str, index: str):
@@ -89,6 +110,10 @@ def add_comment(
     history_item_index: int,
     comment: str,
     comment_time: str,
+    screenshot: Union[str, None],
+    screenshot_width: Union[int, None],
+    screenshot_height: Union[int, None],
+    chart: Union[str, None],
 ):
 
     csx_data.update_document(
@@ -99,6 +124,10 @@ def add_comment(
                 f"history.{history_item_index}.comments": {
                     "comment": comment,
                     "time": comment_time,
+                    "screenshot": screenshot,
+                    "screenshot_width": screenshot_width,
+                    "screenshot_height": screenshot_height,
+                    "chart": chart,
                 }
             }
         },
@@ -123,12 +152,20 @@ def edit_comment(
     comment_index: int,
     comment: str,
     comment_time: str,
+    screenshot: Union[str, None],
+    screenshot_width: Union[int, None],
+    screenshot_height: Union[int, None],
+    chart: Union[str, None],
 ):
     csx_data.edit_array(
         "studies",
         {"study_uuid": study_id, "user_uuid": user_id},
         {
             f"history.{history_item_index}.comments.{comment_index}.comment": comment,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot": screenshot,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot_width": screenshot_width,
+            f"history.{history_item_index}.comments.{comment_index}.screenshot_height": screenshot_height,
+            f"history.{history_item_index}.comments.{comment_index}.chart": chart,
             f"history.{history_item_index}.comments.{comment_index}.time": comment_time,
             f"history.{history_item_index}.comments.{comment_index}.edited": True,
         },
@@ -249,6 +286,9 @@ def enrich_cache_with_ng_graph(
 
 
 def extract_history_items(study) -> List[dict]:
+    if "history" not in study or len(study["history"]) == 0:
+        return []
+
     return [
         {
             "id": str(item["item_id"]),

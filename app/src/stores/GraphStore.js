@@ -125,12 +125,12 @@ export class GraphStore {
     generateNodeLabelSprite = (label, size) =>
         new SpriteText(
             label,
-            6,
+            10,
             this.store.core.colorMode === 'light' ? 'black' : 'white'
         ).translateY(size + 5);
 
     generateNodeMaterial = (meshBasicMaterialTemplate, node) => {
-        const material = meshBasicMaterialTemplate.clone();
+        const material = meshBasicMaterialTemplate.clone(false);
 
         const currentGraphColorSchemas = Object.keys(
             this.store.graphInstance.nodeColorSchemeColors[
@@ -144,11 +144,18 @@ export class GraphStore {
             ];
 
         switch (selectedColorSchemaAttribute) {
-            case 'type':
+            case 'node type':
                 material.color.set(
                     this.store.graphInstance.nodeColorSchemeColors[
                         this.store.core.currentGraph
-                    ]['type'][node.feature]
+                    ]['node type'][node.feature]
+                );
+                break;
+            case 'degree':
+                material.color.set(
+                    this.store.graphInstance.nodeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['degree'][node.neighbours.size]
                 );
                 break;
             case 'component':
@@ -198,12 +205,12 @@ export class GraphStore {
     };
 
     generatePointObject = (meshTemplate, material, size) => {
-        const mesh = meshTemplate.clone();
+        const mesh = meshTemplate.clone(false);
         mesh.material = material;
         mesh.scale.x = size;
         mesh.scale.y = size;
         mesh.scale.z = size;
-        return [mesh, mesh.clone()];
+        return [mesh, mesh.clone(false), mesh.clone(false)];
     };
 
     generateNodeObjects = (nodes, graphType) => {
@@ -246,8 +253,11 @@ export class GraphStore {
             );
 
             if (!nodes[i].x || !nodes[i].y) {
-                nodes[i].x = Math.floor(Math.random() * (300 - -300) + -300);
-                nodes[i].y = Math.floor(Math.random() * (300 - -300) + -300);
+                const angle = Math.floor(Math.random() * 360);
+                const radius = Math.floor(Math.random() * 600 - 300);
+
+                nodes[i].x = Math.cos(angle) * radius;
+                nodes[i].y = Math.sin(angle) * radius;
             }
 
             nodes[i].initialx = nodes[i].x;
@@ -260,6 +270,8 @@ export class GraphStore {
 
             nodes[i].nodeWithoutLabel = new THREE.Group();
             nodes[i].nodeWithoutLabel.add(point[1]);
+            nodes[i].nodeWithoutLabelSolo = new THREE.Group();
+            nodes[i].nodeWithoutLabelSolo.add(point[2]);
 
             if (graphType === 'overview') {
                 if (this.graphData.types[nodes[i].feature]) {
@@ -330,12 +342,21 @@ export class GraphStore {
             ];
 
         switch (selectedSchema) {
-            case 'type':
+            case 'node type':
                 for (let i = 0; i < data.meta.nodeCount; i++) {
                     data.nodes[i].material.color.set(
                         this.store.graphInstance.nodeColorSchemeColors[
                             this.store.core.currentGraph
-                        ]['type'][data.nodes[i].feature]
+                        ]['node type'][data.nodes[i].feature]
+                    );
+                }
+                break;
+            case 'degree':
+                for (let i = 0; i < data.meta.nodeCount; i++) {
+                    data.nodes[i].material.color.set(
+                        this.store.graphInstance.nodeColorSchemeColors[
+                            this.store.core.currentGraph
+                        ]['degree'][data.nodes[i].neighbours.size]
                     );
                 }
                 break;
@@ -381,30 +402,68 @@ export class GraphStore {
             ? this.graphData
             : this.detailGraphData;
 
-        switch (
-            this.store.graphInstance.nodeColorScheme[
+        if (
+            this.store.graphInstance.edgeColorScheme[
                 this.store.core.currentGraph
-            ]
+            ] === 'auto'
         ) {
-            case 'component':
-                for (let i = 0; i < data.meta.linkCount; i++) {
-                    data.links[i].color =
-                        this.store.graphInstance.nodeColorSchemeColors[
-                            this.store.core.currentGraph
-                        ]['component'][data.links[i].component];
-                }
-                break;
-            default:
-                for (let i = 0; i < data.meta.linkCount; i++) {
-                    data.links[i].color =
-                        colorMode === 'light'
-                            ? 'rgb(0,0,0)'
-                            : 'rgb(255,255,255)';
-                    data.links[i].target.material.color.set(
-                        colorMode === 'light' ? 'black' : 'white'
-                    );
-                }
-                break;
+            switch (
+                this.store.graphInstance.nodeColorScheme[
+                    this.store.core.currentGraph
+                ]
+            ) {
+                case 'component':
+                    for (let i = 0; i < data.meta.linkCount; i++) {
+                        data.links[i].color =
+                            this.store.graphInstance.nodeColorSchemeColors[
+                                this.store.core.currentGraph
+                            ]['component'][data.links[i].component];
+                    }
+                    break;
+                default:
+                    for (let i = 0; i < data.meta.linkCount; i++) {
+                        data.links[i].color =
+                            colorMode === 'light'
+                                ? 'rgb(0,0,0)'
+                                : 'rgb(255,255,255)';
+                        data.links[i].target.material.color.set(
+                            colorMode === 'light' ? 'black' : 'white'
+                        );
+                    }
+                    break;
+            }
+        } else if (
+            this.store.graphInstance.edgeColorScheme[
+                this.store.core.currentGraph
+            ] === 'weight'
+        ) {
+            for (let i = 0; i < data.meta.linkCount; i++) {
+                data.links[i].color =
+                    this.store.graphInstance.edgeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['weight'][data.links[i].weight];
+            }
+        } else if (
+            this.store.graphInstance.edgeColorScheme[
+                this.store.core.currentGraph
+            ] === 'feature types'
+        ) {
+            for (let i = 0; i < data.meta.linkCount; i++) {
+                data.links[i].color =
+                    this.store.graphInstance.edgeColorSchemeColors[
+                        this.store.core.currentGraph
+                    ]['feature types'][
+                        data.links[i].connections.reduce(
+                            (features, connection) => {
+                                if (!features.includes(connection.feature)) {
+                                    features.push(connection.feature);
+                                }
+                                return features;
+                            },
+                            []
+                        ).length
+                    ];
+            }
         }
 
         data.links.push({});
@@ -444,13 +503,8 @@ export class GraphStore {
     selectComponent = componentId => {
         if (this.currentGraphData.nodes) {
             if (
-                !this.currentGraphData.selectedComponents.includes(componentId)
+                this.currentGraphData.selectedComponents.includes(componentId)
             ) {
-                const nodesToSelect = this.currentGraphData.nodes.filter(
-                    node => node.component === componentId
-                );
-                this.selectNode(nodesToSelect);
-            } else {
                 const nodesToDeselect = this.currentGraphData.nodes.filter(
                     node => node.component === componentId && node.selected
                 );
@@ -461,6 +515,11 @@ export class GraphStore {
                     );
                     this.deselectNode(node, index);
                 });
+            } else {
+                const nodesToSelect = this.currentGraphData.nodes.filter(
+                    node => node.component === componentId && !node.selected
+                );
+                this.selectNode(nodesToSelect);
             }
         }
     };
@@ -585,8 +644,8 @@ export class GraphStore {
 
             this.store.history.generateHistoryNodes();
 
-            this.store.workflow.nodes = [];
-            this.store.workflow.edges = [];
+            this.store.workflow.updateNodes([]);
+            this.store.workflow.updateEdges([]);
 
             try {
                 this.store.workflow.addNodesFromJSONQuery(
@@ -664,8 +723,8 @@ export class GraphStore {
                 this.store.core.studyHistoryItemIndex
             ].schema;
 
-        this.store.workflow.nodes = [];
-        this.store.workflow.edges = [];
+        this.store.workflow.updateNodes([]);
+        this.store.workflow.updateEdges([]);
 
         try {
             this.store.workflow.addNodesFromJSONQuery(
@@ -707,13 +766,24 @@ export class GraphStore {
             return;
         }
 
+        if (response.data.empty) {
+            this.store.core.setStudyIsEmpty(true);
+            return;
+        }
+
         if (response.data.history.length === 0) {
             this.modifyStudy('overview');
             return;
         }
 
+        if (response.data.public) {
+            this.store.core.setIsStudyPublic(true);
+            this.store.core.setStudyPublicURL(response.data.public_url);
+        }
+
         this.store.core.updateIsStudySaved(true);
         this.store.core.setStudyName(response.data.name);
+        this.store.core.setStudyAuthor(response.data.author);
         this.store.core.setStudyDescription(response.data.description);
         this.store.core.setStudyHistory(response.data.history);
         this.store.core.setStudyHistoryItemIndex(
@@ -746,16 +816,18 @@ export class GraphStore {
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].anchor_properties;
-        this.store.schema.overviewDataNodeProperties =
-            this.store.search.anchorProperties;
+
+        this.store.overviewSchema.setAnchorProperties(
+            this.store.search.anchorProperties
+        );
 
         this.store.search.schema =
             this.store.core.studyHistory[
                 this.store.core.studyHistoryItemIndex
             ].schema;
 
-        this.store.workflow.nodes = [];
-        this.store.workflow.edges = [];
+        this.store.workflow.updateNodes([]);
+        this.store.workflow.updateEdges([]);
 
         try {
             this.store.workflow.addNodesFromJSONQuery(
@@ -795,12 +867,46 @@ export class GraphStore {
             );
     };
 
+    getLinkColor = edge => {
+        if (this.store.graphInstance.selectedEdgeColorSchema === 'auto') {
+            return this.store.graphInstance.nodeColorScheme[
+                this.store.core.currentGraph
+            ] !== 'component'
+                ? '#ffffff'
+                : this.store.graphInstance.nodeColorSchemeColors[
+                      this.store.core.currentGraph
+                  ][
+                      this.store.graphInstance.nodeColorScheme[
+                          this.store.core.currentGraph
+                      ]
+                  ][edge.component];
+        }
+
+        if (this.store.graphInstance.selectedEdgeColorSchema === 'weight') {
+            return this.store.graphInstance.edgeColorSchemeColors[
+                this.store.core.currentGraph
+            ]['weight'][edge.weight];
+        }
+
+        return this.store.graphInstance.edgeColorSchemeColors[
+            this.store.core.currentGraph
+        ]['feature types'][
+            edge.connections.reduce((features, connection) => {
+                if (!features.includes(connection.feature)) {
+                    features.push(connection.feature);
+                }
+                return features;
+            }, []).length
+        ];
+    };
+
     handleRetrievedGraph = (response, graphType, query) => {
         if (!response['nodes'].length) {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);
         } else {
             this.store.search.newNodeTypes = response.meta.new_dimensions;
+            this.store.graphInstance.resetLabelFeatures();
 
             if (graphType === 'overview') {
                 // Handle overview graph data
@@ -822,15 +928,28 @@ export class GraphStore {
                 response.meta.anchor_property_values.forEach(entry => {
                     if (
                         this.store.search.nodeTypes[entry.property] ===
-                        'category'
+                            'category' ||
+                        entry.values.length <= 10
                     ) {
                         this.store.graphInstance.generateSchemeColorsFromArray(
-                            entry.values,
+                            [
+                                ...new Set(
+                                    response.nodes.map(
+                                        node => node.properties[entry.property]
+                                    )
+                                )
+                            ],
                             entry.property
                         );
                     } else {
                         this.store.graphInstance.generateNumericColorSchema(
-                            entry.values,
+                            [
+                                ...new Set(
+                                    response.nodes.map(
+                                        node => node.properties[entry.property]
+                                    )
+                                )
+                            ],
                             entry.property
                         );
                     }
@@ -853,6 +972,31 @@ export class GraphStore {
                     this.store.graphInstance.setNodeColorScheme('component');
                 }
 
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.nodes.map(node => node.neighbours.length),
+                    'degree'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(edge => edge.weight),
+                    'weight',
+                    'edge'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(
+                        edge =>
+                            edge.connections.reduce((features, connection) => {
+                                if (!features.includes(connection.feature)) {
+                                    features.push(connection.feature);
+                                }
+                                return features;
+                            }, []).length
+                    ),
+                    'feature types',
+                    'edge'
+                );
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'overview'
@@ -861,18 +1005,7 @@ export class GraphStore {
                 this.graphData = {
                     ...this.graphData,
                     links: response.edges.map(edge => {
-                        edge.color =
-                            this.store.graphInstance.nodeColorScheme[
-                                this.store.core.currentGraph
-                            ] !== 'component'
-                                ? '#ffffff'
-                                : this.store.graphInstance
-                                      .nodeColorSchemeColors[
-                                      this.store.core.currentGraph
-                                  ][
-                                      this.store.graphInstance.nodeColorScheme
-                                          .overview
-                                  ][edge.component];
+                        edge.color = this.getLinkColor(edge);
                         return edge;
                     }),
                     nodes,
@@ -930,12 +1063,23 @@ export class GraphStore {
                         ...Object.keys(this.store.search.nodeTypes),
                         ...Object.keys(this.store.search.newNodeTypes)
                     ],
-                    'type'
+                    'node type'
                 );
 
                 this.store.graphInstance.generateSchemeColorsFromArray(
                     response.components.map(c => c.id),
                     'component'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.nodes.map(node => node.neighbours.length),
+                    'degree'
+                );
+
+                this.store.graphInstance.generateNumericColorSchema(
+                    response.edges.map(edge => edge.weight),
+                    'weight',
+                    'edge'
                 );
 
                 const nodes = this.generateNodeObjects(
@@ -946,12 +1090,7 @@ export class GraphStore {
                 this.detailGraphData = {
                     ...this.detailGraphData,
                     links: response.edges.map(edge => {
-                        edge.color =
-                            this.store.graphInstance.nodeColorSchemeColors[
-                                this.store.core.currentGraph
-                            ][this.store.graphInstance.nodeColorScheme.detail][
-                                edge.component
-                            ];
+                        edge.color = this.getLinkColor(edge);
                         return edge;
                     }),
                     nodes,
@@ -987,6 +1126,8 @@ export class GraphStore {
                     this.generateNodeKeyValueStore(this.detailGraphData.nodes);
 
                 this.addNeighbourObjectsToNodes();
+                this.store.core.updateVisibleDimensionsBasedOnSchema();
+                // this.store.schema.populateStoreData();
             }
             this.store.core.setDataIsLoading(false);
         }

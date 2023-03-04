@@ -5,16 +5,18 @@ import {
     Tooltip,
     useColorModeValue
 } from '@chakra-ui/react';
-import { ArrowRight, Toolbox, TrashEmpty } from 'css.gg';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { ArrowRight, TrashEmpty } from 'css.gg';
+import { isEnvFalse } from 'general.utils';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvFalse } from 'general.utils';
 
 function DatasetElement(props) {
     const store = useContext(RootStoreContext);
+    const textColor = useColorModeValue('black', 'white');
 
     const elementBackground = useColorModeValue(
         'blackAlpha.100',
@@ -59,6 +61,7 @@ function DatasetElement(props) {
                 whiteSpace="nowrap"
                 overflow="hidden"
                 textOverflow="ellipsis"
+                color={textColor}
             >
                 {props.dataset}
             </Heading>
@@ -70,6 +73,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="ghost"
                         opacity="0"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}
@@ -105,6 +109,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="ghost"
                         opacity="0"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}
@@ -121,9 +126,10 @@ function DatasetElement(props) {
                             store.search.getConifg(props.dataset);
                         }}
                         icon={
-                            <Toolbox
+                            <Cog6ToothIcon
                                 style={{
-                                    '--ggs': '0.7'
+                                    width: '18px',
+                                    height: '18px'
                                 }}
                             />
                         }
@@ -137,6 +143,7 @@ function DatasetElement(props) {
                         size="sm"
                         variant="solid"
                         opacity="0.5"
+                        color={textColor}
                         _groupHover={{
                             opacity: '1'
                         }}

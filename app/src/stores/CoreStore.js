@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
 import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
-import { safeRequest } from 'general.utils';
+import { isEnvSet, safeRequest } from 'general.utils';
 
 export class CoreStore {
     availableDatasets = [];
@@ -14,9 +14,13 @@ export class CoreStore {
     studyUuid = null;
     studyName = '';
     studyDescription = '';
+    studyAuthor = '';
     studyHistory = [];
+    studyIsEmpty = false;
     studyHistoryItemIndex = 0;
     studyIsSaved = false;
+    isStudyPublic = false;
+    studyPublicURL = '';
     showCommentModal = false;
     studies = [];
     dataIsLoading = false;
@@ -25,6 +29,13 @@ export class CoreStore {
     colorMode = null;
     showCookieInfo = false;
     isSchemaNodeTypeBound = true;
+    isLeftSidePanelOpen = true;
+    isRightSidePanelOpen = false;
+    rightPanelType = '';
+    rightPanelTypeToOpen = null;
+    rightPanelWidth = 0;
+    surveyHidden = false;
+    surveyHistoryDepthTrigger = 3;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -43,10 +54,84 @@ export class CoreStore {
         this.hideCookieBanner = this.getCookieBanner();
         this.trackingEnabled =
             localStorage.getItem('trackingenabled') === 'true';
+        this.surveyHidden = localStorage.getItem('surveyhidden') === 'true';
+        if (isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')) {
+            this.surveyHistoryDepthTrigger = parseInt(
+                isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')
+            );
+        }
+
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    addCommentToCurrentHistoryItem = comment => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
+    };
+
+    deleteCommentFromCurrentHistoryItem = index => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.splice(index, 1);
+    };
+
+    editCommentFromCurrentHistoryItem = (index, newComment) => {
+        this.studyHistory[this.studyHistoryItemIndex].comments[index] =
+            newComment;
+    };
+
+    setSurveyHidden = val => {
+        this.surveyHidden = val;
+        localStorage.setItem('surveyhidden', val);
+    };
+
+    setStudyIsEmpty = val => (this.studyIsEmpty = val);
+
+    setRightPanelTypeToOpen = val => (this.rightPanelTypeToOpen = val);
+
+    setIsStudyPublic = val => (this.isStudyPublic = val);
+
+    toggleIsStudyPublic = async () => {
+        this.setIsStudyPublic(!this.isStudyPublic);
+
+        if (this.isStudyPublic) {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { response, error } = await safeRequest(
+                axios.post('study/public', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL(response.data);
+        } else {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { error } = await safeRequest(
+                axios.post('study/private', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL('');
+        }
+    };
+
+    setStudyPublicURL = val => (this.studyPublicURL = val);
+    setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
+    setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
+    setRightPanelType = val => (this.rightPanelType = val);
 
     setIsSchemaNodeTypeBound = val => {
         this.isSchemaNodeTypeBound = val;
@@ -54,6 +139,8 @@ export class CoreStore {
             this.updateVisibleDimensionsBasedOnSchema();
         }
     };
+
+    setRightPanelWidth = val => (this.rightPanelWidth = val);
 
     setShowCookieInfo = val => (this.showCookieInfo = val);
 
@@ -66,6 +153,8 @@ export class CoreStore {
     updateStudies = val => (this.studies = val);
 
     setStudyName = name => (this.studyName = name);
+
+    setStudyAuthor = author => (this.studyAuthor = author);
 
     setColorMode = val => (this.colorMode = val);
 
@@ -103,7 +192,32 @@ export class CoreStore {
             user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
             study_name: this.studyName,
-            study_description: this.studyDescription
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
+    };
+
+    updateStudyAuthor = async author => {
+        this.studyAuthor = author;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(
@@ -126,7 +240,8 @@ export class CoreStore {
             user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
             study_name: this.studyName,
-            study_description: this.studyDescription
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(
@@ -193,7 +308,8 @@ export class CoreStore {
         }
 
         localStorage.setItem('studyuuid', response.data);
-        this.studyUuid = response.data;
+        this.setStudyUuid(response.data);
+
         this.setStudyHistory([]);
         this.setStudyHistoryItemIndex(0);
     };
@@ -202,7 +318,8 @@ export class CoreStore {
         if (!this.studyIsSaved || studyUuid) {
             const params = {
                 study_uuid: studyUuid ? studyUuid : this.studyUuid,
-                user_uuid: this.userUuid
+                user_uuid: this.userUuid,
+                user_trigger: !!studyUuid
             };
 
             if (params.study_uuid) {
@@ -224,8 +341,11 @@ export class CoreStore {
 
     saveStudy = async () => {
         const params = {
+            user_uuid: this.userUuid,
             study_uuid: this.studyUuid,
-            user_uuid: this.userUuid
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(

@@ -25,6 +25,10 @@ def get_index(index: str) -> Dict[str, Any]:
     return es.indices.get(index=index)
 
 
+def set_result_window(index: str):
+    es.indices.put_settings(index=index, body={"index": {"max_result_window": 500000}})
+
+
 def get_all_indices() -> Dict[str, Any]:
     """Retrieve all elastic indices"""
     return es.indices.get(index="*")

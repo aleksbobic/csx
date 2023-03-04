@@ -66,6 +66,38 @@ def get_new_features(query):
     )
 
 
+@router.get("/history")
+def get_study_history(study_uuid: str, user_uuid: str):
+    study = csx_study.get_study(user_uuid, study_uuid)
+    if study:
+        history = csx_study.extract_history_items(study)
+        return {
+            "name": study["study_name"],
+            "author": study["study_author"] if "study_author" in study else "",
+            "description": study["study_description"],
+            "history": history,
+            "empty": False,
+        }
+    else:
+        return {"empty": True}
+
+
+@router.get("/history/public")
+def get_public_study_history(public_study_uuid: str):
+    study = csx_study.get_public_study(public_study_uuid)
+    if study:
+        history = csx_study.extract_history_items(study)
+        return {
+            "name": study["study_name"],
+            "author": study["study_author"] if "study_author" in study else "",
+            "description": study["study_description"],
+            "history": history,
+            "empty": False,
+        }
+    else:
+        return {"empty": True}
+
+
 class GetStudyData(BaseModel):
     study_uuid: str
     user_uuid: str
@@ -92,51 +124,62 @@ def get_study(data: GetStudyData):
 
     study = csx_study.get_study(user_uuid, study_uuid)
 
-    if len(study["history"]) > 0:
-        if history_entry_id:
-            history_id = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["item_id"]
-            charts = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["charts"]
-        else:
-            history_id = study["history"][-1]["item_id"]
-            charts = study["history"][-1]["charts"]
+    if study:
+        if len(study["history"]) > 0:
+            if history_entry_id:
+                history_id = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["item_id"]
+                charts = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["charts"]
+            else:
+                history_id = study["history"][-1]["item_id"]
+                charts = study["history"][-1]["charts"]
 
-        history_item = csx_data.get_large_document(history_id)
+            history_item = csx_data.get_large_document(history_id)
 
-        history = csx_study.extract_history_items(study)
+            history = csx_study.extract_history_items(study)
 
-        if history_entry_id:
-            graph_type = [
-                entry
-                for entry in study["history"]
-                if entry["item_id"] == ObjectId(history_entry_id)
-            ][0]["graph_type"]
-        else:
-            graph_type = history[len(history) - 1]["graph_type"]
+            if history_entry_id:
+                graph_type = [
+                    entry
+                    for entry in study["history"]
+                    if entry["item_id"] == ObjectId(history_entry_id)
+                ][0]["graph_type"]
+            else:
+                graph_type = history[len(history) - 1]["graph_type"]
+
+            return {
+                "graph": pickle.loads(history_item)[graph_type],
+                "name": study["study_name"],
+                "description": study["study_description"],
+                "author": study["study_author"] if "study_author" in study else "",
+                "history": history,
+                "index": study["index"],
+                "charts": charts,
+                "empty": False,
+                "public": study["public"],
+                "public_url": study["public_url"],
+            }
 
         return {
-            "graph": pickle.loads(history_item)[graph_type],
+            "graph": {},
             "name": study["study_name"],
             "description": study["study_description"],
-            "history": history,
+            "author": study["study_author"] if "study_author" in study else "",
+            "history": [],
             "index": study["index"],
-            "charts": charts,
+            "empty": False,
+            "public": study["public"],
+            "public_url": study["public_url"],
         }
-
-    return {
-        "graph": {},
-        "name": study["study_name"],
-        "description": study["study_description"],
-        "history": [],
-        "index": study["index"],
-    }
+    else:
+        return {"empty": True}
 
 
 class ModifyStudyData(BaseModel):
@@ -395,6 +438,8 @@ def generate_study(user_uuid: str, study_name: str) -> str:
             "study_name": study_name,
             "study_description": "",
             "saved": False,
+            "public": False,
+            "public_url": "",
             "index": "",
             "history": [],
         },
@@ -402,9 +447,53 @@ def generate_study(user_uuid: str, study_name: str) -> str:
     return study_uuid
 
 
+class StudyData(BaseModel):
+    study_uuid: str
+    user_uuid: str
+
+
+@router.post("/public")
+def make_study_public(data: StudyData) -> str:
+    public_url = uuid.uuid4().hex
+
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
+        {
+            "$set": {
+                "public": True,
+                "public_url": public_url,
+                "saved": True,
+            }
+        },
+    )
+
+    return public_url
+
+
+@router.post("/private")
+def make_study_private(data: StudyData):
+    csx_data.update_document(
+        "studies",
+        {"study_uuid": data.study_uuid, "user_uuid": data.user_uuid},
+        {
+            "$set": {
+                "public": False,
+                "public_url": "",
+                "saved": True,
+            }
+        },
+    )
+    return
+
+
 @router.get("/update")
 def update_study(
-    study_uuid: str, user_uuid: str, study_name: str, study_description: str
+    study_uuid: str,
+    user_uuid: str,
+    study_name: str,
+    study_description: str,
+    study_author: Union[str, None],
 ):
     csx_data.update_document(
         "studies",
@@ -413,6 +502,7 @@ def update_study(
             "$set": {
                 "study_name": study_name,
                 "study_description": study_description,
+                "study_author": study_author,
                 "saved": True,
             }
         },
@@ -443,25 +533,55 @@ def update_study_charts(data: UpdateChartsData):
 
 
 @router.get("/save")
-def save_study(study_uuid: str, user_uuid: str):
+def save_study(
+    study_uuid: str,
+    user_uuid: str,
+    study_name: str,
+    study_description: str,
+    study_author: str,
+):
     csx_data.update_document(
         "studies",
         {"study_uuid": study_uuid, "user_uuid": user_uuid},
-        {"$set": {"saved": True}},
+        {
+            "$set": {
+                "study_name": study_name,
+                "study_description": study_description,
+                "study_author": study_author,
+                "saved": True,
+            }
+        },
     )
     return
 
 
 @router.get("/delete")
-def delete_study(study_uuid: str, user_uuid: str):
+def delete_study(study_uuid: str, user_uuid: str, user_trigger: bool):
 
-    study_entry = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies",
-            {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
-            {"_id": 0},
+    if user_trigger:
+        ## If study deletion is user triggered then delete study no matter if it is saved or not
+        study_entry = list(
+            csx_data.get_all_documents_by_conditions(
+                "studies",
+                {"$and": [{"study_uuid": study_uuid}, {"user_uuid": user_uuid}]},
+                {"_id": 0},
+            )
         )
-    )
+    else:
+        ## If study deletion is automatic then first check that the study is actually not saved
+        study_entry = list(
+            csx_data.get_all_documents_by_conditions(
+                "studies",
+                {
+                    "$and": [
+                        {"study_uuid": study_uuid},
+                        {"user_uuid": user_uuid},
+                        {"saved": False},
+                    ]
+                },
+                {"_id": 0},
+            )
+        )
 
     if len(study_entry) > 0:
         history_ids = [item["item_id"] for item in study_entry[0]["history"]]

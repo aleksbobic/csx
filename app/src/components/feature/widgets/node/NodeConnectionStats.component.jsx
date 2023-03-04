@@ -17,12 +17,19 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function ConnectionStats(props) {
     const store = useContext(RootStoreContext);
     const [visiblity, setVisiblity] = useState(false);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
+    );
 
     useEffect(() => {
         if (store.graphInstance.selfCentricType) {
@@ -37,11 +44,38 @@ function ConnectionStats(props) {
         if (props.demoData.length) {
             setData(props.demoData);
         } else if (visiblity) {
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+
+            setWidgetConfig(widget);
+
             setData(store.graph.currentGraphData.selectedNodes);
         } else {
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+
+            setWidgetConfig(widget);
             setData([]);
         }
-    }, [props.demoData, store.graph.currentGraphData.selectedNodes, visiblity]);
+    }, [
+        props.chart?.id,
+        props.demoData,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponents,
+        visiblity
+    ]);
 
     const getNeighbours = (node_list, visited_node_ids) => {
         const neighbours = [];
@@ -71,8 +105,8 @@ function ConnectionStats(props) {
         return Object.keys(neighbour_counts)
             .filter(
                 feature =>
-                    props.connectionFeature === 'all' ||
-                    feature === props.connectionFeature
+                    widgetConfig.direct_connection_features === 'all' ||
+                    feature === widgetConfig.direct_connection_features
             )
             .map((feature, index) => (
                 <Tag
@@ -83,7 +117,7 @@ function ConnectionStats(props) {
                         store.core.currentGraph === 'detail'
                             ? store.graphInstance.nodeColorSchemeColors[
                                   [store.core.currentGraph]
-                              ]['type'][feature]
+                              ]['node type'][feature]
                             : 'blue.600'
                     }
                 >
@@ -126,7 +160,7 @@ function ConnectionStats(props) {
             >
                 {props.isExpanded && (
                     <HStack width="100%">
-                        <Divider />
+                        <Divider style={{ opacity: 0.2 }} />
                         <Tooltip
                             label={`Show all nodes with selected feature ${
                                 level + 1
@@ -156,7 +190,7 @@ function ConnectionStats(props) {
                                         origin,
                                         neighbours,
                                         level,
-                                        props.connectionFeature
+                                        widgetConfig.direct_connection_features
                                     );
                                 }}
                                 _hover={{ cursor: 'pointer', opacity: 1 }}
@@ -164,7 +198,7 @@ function ConnectionStats(props) {
                                 {neighbours[level].title}
                             </Heading>
                         </Tooltip>
-                        <Divider />
+                        <Divider style={{ opacity: 0.5 }} />
                     </HStack>
                 )}
 
@@ -248,7 +282,7 @@ function ConnectionStats(props) {
 
         for (
             let degreeLevel = 2;
-            degreeLevel <= props.maxConnectionDegree;
+            degreeLevel <= widgetConfig.max_distance;
             degreeLevel++
         ) {
             const results = getNextNeighborArray(
@@ -281,34 +315,21 @@ function ConnectionStats(props) {
         );
     };
 
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['max distance', 'direct connection feature']}
+            />
+        );
+    }
+
     if (data.length === 0) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Explore direct connections of nodes to see details here!
-                        😉
-                    </Text>
-                )}
-            </VStack>
+            <WidgetAlert
+                size={props.isExpanded ? 'md' : 'sm'}
+                message="Explore direct connections of nodes to see details here! 😉"
+            />
         );
     }
 
@@ -343,7 +364,7 @@ function ConnectionStats(props) {
                                     backgroundColor={
                                         colorMode === 'light'
                                             ? 'blackAlpha.200'
-                                            : 'blackAlpha.800'
+                                            : 'whiteAlpha.100'
                                     }
                                     padding="10px"
                                     width="100%"

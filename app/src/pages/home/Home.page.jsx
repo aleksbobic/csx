@@ -10,6 +10,7 @@ import {
     Image,
     Text,
     useColorMode,
+    useColorModeValue,
     useToast
 } from '@chakra-ui/react';
 import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
@@ -32,23 +33,22 @@ import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
+import EmptyStudy from 'components/emptystudy/EmptyStudy.component';
+import TutorialGrid from 'components/feature/tutorialgrid/TutorialGrid.component';
 
 function HomePage() {
     const toast = useToast();
     const cookieToast = useToast();
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
-    const [cookieToastVisible, setCookieToastVisible] = useState(false);
+    const [cookieToastVisible, setCookieToastVisible] = useState('dark');
 
     useEffect(() => {
         if (store.core.trackingEnabled) {
             setCookieToastVisible(false);
         }
     }, [store.core.trackingEnabled]);
-
-    useEffect(() => {
-        store.overviewSchema.resetProperties();
-    }, []);
 
     const renderDarkCookie = useCallback(
         () => (
@@ -119,6 +119,7 @@ function HomePage() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         onClick={() => {
+                            store.core.setStudyIsEmpty(false);
                             store.search.setSearchIsEmpty(false);
                             store.core.setShowCookieInfo(true);
                             store.core.setHideCookieBanner();
@@ -130,11 +131,11 @@ function HomePage() {
                 </HStack>
             </Box>
         ),
-        [cookieToast, store.core, store.search]
+        [cookieToast, store.core, store.search, store.track]
     );
 
-    const renderLightCookie = useCallback(
-        () => (
+    const renderLightCookie = useCallback(() => {
+        return (
             <Box
                 backgroundColor="white"
                 borderRadius="12px"
@@ -207,20 +208,13 @@ function HomePage() {
                     </Button>
                 </HStack>
             </Box>
-        ),
-        [cookieToast, store.core]
-    );
+        );
+    }, [cookieToast, store.core]);
 
     useEffect(() => {
-        if (store.core.hideCookieBanner) {
-            cookieToast.closeAll();
-        } else {
-            if (colorMode === 'light') {
+        setTimeout(() => {
+            if (store.core.hideCookieBanner) {
                 cookieToast.closeAll();
-                cookieToast({
-                    duration: null,
-                    render: () => renderLightCookie()
-                });
             } else {
                 cookieToast.closeAll();
                 cookieToast({
@@ -228,18 +222,40 @@ function HomePage() {
                     render: () => renderDarkCookie()
                 });
             }
-        }
-    }, [
-        colorMode,
-        cookieToast,
-        renderDarkCookie,
-        renderLightCookie,
-        store.core.hideCookieBanner
-    ]);
+        }, 500);
+    }, [cookieToast, renderDarkCookie, store.core.hideCookieBanner]);
+
+    // useEffect(() => {
+    //     if (store.core.hideCookieBanner) {
+    //         cookieToast.closeAll();
+    //     } else {
+    //         if (colorMode === 'light') {
+    //             cookieToast.closeAll();
+    //             cookieToast({
+    //                 duration: null,
+    //                 render: () => renderLightCookie()
+    //             });
+    //         } else {
+    //             cookieToast.closeAll();
+    //             cookieToast({
+    //                 duration: null,
+    //                 render: () => renderDarkCookie()
+    //             });
+    //         }
+    //     }
+    // }, [
+    //     colorMode,
+    //     cookieToast,
+    //     renderDarkCookie,
+    //     renderLightCookie,
+    //     store.core.hideCookieBanner
+    // ]);
 
     useEffect(() => {
+        // console.log(store.core.hideCookieBanner, cookieToastVisible);
         if (!store.core.hideCookieBanner && !cookieToastVisible) {
-            setCookieToastVisible(true);
+            setCookieToastVisible(colorMode);
+
             if (colorMode === 'light') {
                 cookieToast.closeAll();
                 cookieToast({
@@ -269,13 +285,25 @@ function HomePage() {
     });
 
     useEffect(() => {
+        store.core.setIsStudyPublic(false);
+        store.core.setStudyPublicURL('');
+        store.graphInstance.setEdgeColorScheme('auto');
+        store.graphInstance.setNodeColorScheme('component');
+        store.overviewSchema.resetProperties();
         store.track.trackPageChange();
         store.graph.resetDetailGraphData();
         store.graph.resetGraphData();
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
         store.search.setAdvancedSearchQuery(null);
-    }, []);
+    }, [
+        store.core,
+        store.graph,
+        store.graphInstance,
+        store.overviewSchema,
+        store.search,
+        store.track
+    ]);
 
     useEffect(() => {
         if (store.core.toastInfo.message !== '') {
@@ -312,6 +340,7 @@ function HomePage() {
                     fontWeight="extrabold"
                     marginBottom="20px"
                     textAlign="center"
+                    color={textColor}
                 >
                     COLLABORATION SPOTTING X
                 </Heading>
@@ -328,9 +357,10 @@ function HomePage() {
                     />
                 )}
 
+                {store.core.studyIsEmpty && <EmptyStudy />}
                 {store.search.searchIsEmpty && <EmptySearch />}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade in={!store.core.showCookieInfo}>
                         {!store.core.showCookieInfo && (
                             <DatasetGrid>
@@ -348,7 +378,7 @@ function HomePage() {
                     </Fade>
                 )}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade
                         in={
                             store.core.showCookieInfo &&
@@ -359,7 +389,7 @@ function HomePage() {
                     </Fade>
                 )}
 
-                {!store.search.searchIsEmpty && (
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
                     <Fade in={!store.core.showCookieInfo}>
                         {store.core.studies.length > 0 &&
                             !store.core.showCookieInfo && (
@@ -367,6 +397,12 @@ function HomePage() {
                                     onOpenStudy={() => cookieToast.closeAll()}
                                 />
                             )}
+                    </Fade>
+                )}
+
+                {!store.search.searchIsEmpty && !store.core.studyIsEmpty && (
+                    <Fade in={!store.core.showCookieInfo}>
+                        {!store.core.showCookieInfo && <TutorialGrid />}
                     </Fade>
                 )}
             </Container>

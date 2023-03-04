@@ -12,16 +12,20 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import ChartComponent from '../stats/chart/Chart.component';
-import WidgetContainer from '../stats/widgetcontainer/WidgetContainer';
-import SelectedComponentListComponent from '../stats/component/ComponentStats.component';
-import SelectedNodeListComponent from '../stats/node/NodeStats.component';
-import GraphStatsComponent from '../stats/graph/GraphStats.component';
-import ConnectionStatsComponent from '../stats/connections/ConnectionStats.component';
-import NodeFilterComponent from '../stats/nodefilter/NodeFilter.component';
+import LineChart from '../widgets/charts/LineChart.component';
+import Widget from '../widgets/Widget.component';
+import SelectedComponentListComponent from '../widgets/component/ComponentStats.component';
+import SelectedNodeListComponent from '../widgets/node/NodeStats.component';
+import GraphStatsComponent from '../widgets/graph/GraphStats.component';
+import ConnectionStatsComponent from '../widgets/node/NodeConnectionStats.component';
+import NodeFilterComponent from '../widgets/node/NodeFilter.component';
 import { useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
+import DoughnutChart from '../widgets/charts/DoughnutChart.component';
+import BarChart from '../widgets/charts/BarChart.component';
+import RadarChartComponent from '../widgets/charts/RadarChart.component';
+
 function Overview(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
@@ -58,59 +62,20 @@ function Overview(props) {
         );
     }, [store.core.currentGraph, store.stats, store.stats.charts]);
 
-    const getChartTitle = chart => {
-        if (chart.title) {
-            return chart.title;
-        }
-
-        if (chart.type.toLowerCase() === 'nodes') {
-            return 'Graph nodes';
-        }
-
-        if (chart.type.toLowerCase() === 'components') {
-            return 'Graph components';
-        }
-
-        if (chart.type.toLowerCase() === 'graph stats') {
-            return 'Graph properties';
-        }
-
-        if (chart.type.toLowerCase() === 'node filter') {
-            return 'Node property filters';
-        }
-
-        if (chart.type.toLowerCase() === 'connections') {
-            return 'Node connections';
-        }
-
-        switch (chart.element_values) {
-            case 'values':
-                return chart.elements === 'nodes'
-                    ? 'node values'
-                    : 'edge values';
-            case 'types':
-                return chart.elements === 'nodes' ? 'node types' : 'edge types';
-            default:
-                return chart.elements === 'nodes'
-                    ? `property ${chart.element_values} values`
-                    : 'edge weights';
-        }
-    };
-
-    const getChartData = (chart, index, title) => {
+    const getChartData = (chart, index) => {
         switch (chart.type.toLowerCase()) {
             case 'bar':
+                return <BarChart chart={chart} chartIndex={index} />;
             case 'vertical bar':
+                return <BarChart chart={chart} chartIndex={index} />;
             case 'grouped bar':
+                return <BarChart chart={chart} chartIndex={index} />;
             case 'line':
+                return <LineChart chart={chart} chartIndex={index} />;
             case 'doughnut':
-                return (
-                    <ChartComponent
-                        title={title}
-                        chart={chart}
-                        chartIndex={index}
-                    />
-                );
+                return <DoughnutChart chart={chart} chartIndex={index} />;
+            case 'radar':
+                return <RadarChartComponent chart={chart} chartIndex={index} />;
             case 'nodes':
                 return <SelectedNodeListComponent chart={chart} />;
             case 'components':
@@ -182,19 +147,17 @@ function Overview(props) {
 
     const renderWidgets = () =>
         visibleCharts.map((chart, index) => {
-            const title = getChartTitle(chart);
-            const chartObject = getChartData(chart, index, title);
+            const chartObject = getChartData(chart, index);
 
             return (
-                <WidgetContainer
+                <Widget
                     key={`Stat_${index}`}
                     chart={chart}
                     index={index}
-                    title={title}
                     maxColSize={maxColSize}
                 >
                     {chartObject}
-                </WidgetContainer>
+                </Widget>
             );
         });
 
@@ -206,7 +169,7 @@ function Overview(props) {
                 templateColumns={templateColumn}
                 gap={5}
                 margin="0"
-                padding="0"
+                padding="10px 0 0 0"
             >
                 {renderWidgets()}
                 {renderAddWidgetButton()}

@@ -6,7 +6,8 @@ import {
     Select,
     Tag,
     Text,
-    useColorMode
+    useColorMode,
+    useColorModeValue
 } from '@chakra-ui/react';
 import { LightBulbIcon } from '@heroicons/react/20/solid';
 import { Database, Search } from 'css.gg';
@@ -22,6 +23,7 @@ import AutoCompleteInputComponent from '../autocompleteinput/AutoCompleteInput.c
 function SearchBar(props) {
     const history = useHistory();
     const { colorMode } = useColorMode();
+    const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
     const [selectedDataset, setSelectedDataset] = useState(0);
 
@@ -44,7 +46,7 @@ function SearchBar(props) {
 
     useEffect(() => {
         store.core.generateStudyUUID();
-    }, []);
+    }, [store.core]);
 
     useEffect(() => {
         setSelectedDataset(store.search.currentDatasetIndex);
@@ -105,6 +107,7 @@ function SearchBar(props) {
                         })
                     );
 
+                    store.core.setStudyIsEmpty(false);
                     store.search.setSearchIsEmpty(false);
                     props.onSubmit();
                     store.core.setCurrentGraph('overview');
@@ -125,16 +128,12 @@ function SearchBar(props) {
                         <InputGroup alignItems="center">
                             {!props.datasetSelectorDisabled && (
                                 <Database
-                                    color={
-                                        colorMode === 'light'
-                                            ? 'black'
-                                            : 'white'
-                                    }
                                     style={{
                                         position: 'absolute',
                                         marginLeft: '12px',
                                         '--ggs': '0.8',
-                                        zIndex: 2
+                                        zIndex: 2,
+                                        color: textColor
                                     }}
                                 />
                             )}
@@ -143,6 +142,7 @@ function SearchBar(props) {
                                     onChange={selectedDatasetChange}
                                     variant="filled"
                                     width="200px"
+                                    color={textColor}
                                     borderEndRadius="0"
                                     value={selectedDataset}
                                     style={{
@@ -163,6 +163,7 @@ function SearchBar(props) {
                                 style={{
                                     height: '40px',
                                     borderRadius: '6px',
+                                    color: textColor,
                                     borderEndStartRadius:
                                         props.datasetSelectorDisabled
                                             ? '4px'
@@ -199,6 +200,7 @@ function SearchBar(props) {
                                         width="40px"
                                         height="40px"
                                         borderLeftRadius="0"
+                                        color={textColor}
                                         backgroundColor={
                                             colorMode === 'light'
                                                 ? 'blackAlpha.50'
@@ -234,7 +236,7 @@ SearchBar.propTypes = {
 
 SearchBar.defaultProps = {
     datasetSelectorDisabled: false,
-    placeholder: 'Search through the dataset ...',
+    placeholder: 'Search through the selected dataset ...',
     onSubmit: () => {}
 };
 

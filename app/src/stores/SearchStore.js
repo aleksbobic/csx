@@ -43,40 +43,54 @@ export class SearchStore {
 
     getSearchHintsByFeature = feature => this.searchHints[feature];
 
-    setLinks = val => (this.links = val);
+    setLinks = val => {
+        this.links = val;
+    };
 
     useDataset = index => {
         if (!this.datasets.length) {
             return;
         }
-        this.currentDataset = this.datasets[index];
-        this.currentDatasetIndex = index;
 
-        localStorage.setItem('currentDataset', this.currentDataset);
-        localStorage.setItem('currentDatasetIndex', this.currentDatasetIndex);
+        try {
+            this.currentDataset = this.datasets[index];
+            this.currentDatasetIndex = index;
 
-        const dataset_config = JSON.parse(
-            this.getLocalStorageDataset(this.datasets[index])
-        );
+            localStorage.setItem('currentDataset', this.currentDataset);
+            localStorage.setItem(
+                'currentDatasetIndex',
+                this.currentDatasetIndex
+            );
 
-        this.links = dataset_config.links;
+            const dataset_config = JSON.parse(
+                this.getLocalStorageDataset(this.datasets[index])
+            );
 
-        this.schema = dataset_config.schemas[0]['relations'];
+            this.links = dataset_config.links;
 
-        this.schemas = dataset_config.schemas;
+            this.schema = dataset_config.schemas[0]['relations'];
 
-        this.default_schemas = dataset_config.default_schemas;
-        this.searchHints = dataset_config.search_hints;
-        this.default_search_features = dataset_config.default_search_fields;
+            this.schemas = dataset_config.schemas;
 
-        Object.keys(this.searchHints).forEach(key => {
-            this.searchHints[key] = JSON.parse(this.searchHints[key]);
-        });
+            this.default_schemas = dataset_config.default_schemas;
+            this.searchHints = dataset_config.search_hints;
+            this.default_search_features = dataset_config.default_search_fields;
 
-        this.nodeTypes = dataset_config.types;
-        this.anchor = dataset_config.anchor;
-        this.store.schema.populateStoreData();
-        this.store.overviewSchema.populateStoreData();
+            Object.keys(this.searchHints).forEach(key => {
+                this.searchHints[key] = JSON.parse(this.searchHints[key]);
+            });
+
+            this.nodeTypes = dataset_config.types;
+            this.anchor = dataset_config.anchor;
+            this.store.schema.populateStoreData();
+            this.store.overviewSchema.populateStoreData();
+        } catch (error) {
+            this.store.core.setErrorDetails(
+                `There seems to be an issue loading the dataset ${
+                    this.datasets[index]
+                }. The following error was returned: ${error.toString()}`
+            );
+        }
     };
 
     changeSelectedSchema = selectedSchema => {
@@ -91,8 +105,9 @@ export class SearchStore {
     getLocalStorageDataset = dataset_name =>
         localStorage.getItem(`index_${dataset_name}`);
 
-    setLocalStorageDataset = (dataset_name, dataset) =>
+    setLocalStorageDataset = (dataset_name, dataset) => {
         localStorage.setItem(`index_${dataset_name}`, JSON.stringify(dataset));
+    };
 
     initDatasets = datasets => {
         this.datasets = [];

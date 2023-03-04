@@ -24,9 +24,17 @@ function TableBody(props) {
                     store.search.anchor.toLowerCase()
             );
 
-            full_selector = Array.isArray(cell_with_values.value)
-                ? `${selector}_${cell_with_values.value[index ? index : 0]}_id`
-                : `${selector}_${cell_with_values.value}_id`;
+            if (Array.isArray(cell_with_values.value)) {
+                if (cell_with_values.value.length) {
+                    full_selector = `${selector}_${
+                        cell_with_values.value[index ? index : 0]
+                    }_id`;
+                } else {
+                    full_selector = `${selector}_CSX_No_${selector}_id`;
+                }
+            } else {
+                full_selector = `${selector}_${cell_with_values.value}_id`;
+            }
 
             key = Object.keys(hidden_cols).find(
                 entry => entry.toLowerCase() === full_selector.toLowerCase()

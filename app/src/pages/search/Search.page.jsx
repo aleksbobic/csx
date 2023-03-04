@@ -18,7 +18,7 @@ function SearchPage(props) {
 
     useEffect(() => {
         store.track.trackPageChange();
-    }, []);
+    }, [store.track]);
 
     useEffect(() => {
         if (

@@ -12,55 +12,81 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function GraphStats(props) {
     const store = useContext(RootStoreContext);
     const [graphData, setGraphData] = useState([]);
     const [nodeData, setNodeData] = useState([]);
     const { colorMode } = useColorMode();
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
+    );
+
+    const getGraphData = useCallback(
+        widget => {
+            switch (widget?.network_data) {
+                case 'visible':
+                    return Object.entries(store.graph.graphVisibleObjectCount);
+                case 'selected':
+                    return Object.entries(store.graph.graphSelectedObjectCount);
+                default:
+                    return Object.entries(store.graph.graphObjectCount);
+            }
+        },
+        [
+            store.graph.graphObjectCount,
+            store.graph.graphSelectedObjectCount,
+            store.graph.graphVisibleObjectCount
+        ]
+    );
 
     useEffect(() => {
         if (props.demoData) {
             setGraphData(Object.entries(props.demoData.graphData));
         } else {
-            switch (props.networkData) {
-                case 'visible':
-                    setGraphData(
-                        Object.entries(store.graph.graphVisibleObjectCount)
-                    );
-                    break;
-                case 'selected':
-                    setGraphData(
-                        Object.entries(store.graph.graphSelectedObjectCount)
-                    );
-                    break;
-                default:
-                    setGraphData(Object.entries(store.graph.graphObjectCount));
-                    break;
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+            setWidgetConfig(widget);
+
+            if (!widget) {
+                setGraphData(null);
             }
+
+            setGraphData(getGraphData(widget));
         }
     }, [
+        props.chart?.id,
         props.demoData,
-        props.networkData,
-        store.graph.graphObjectCount,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponents,
+        store.graph.graphVisibleObjectCount,
         store.graph.graphSelectedObjectCount,
-        store.graph.graphVisibleObjectCount
+        store.graph.graphObjectCount,
+        getGraphData
     ]);
 
-    useEffect(() => {
-        if (props.demoData) {
-            setNodeData(
-                Object.entries(props.demoData.nodeData).map(entry => [
-                    entry[0],
-                    { count: entry[1].count, label: entry[0] }
-                ])
-            );
-        } else {
+    const getNodeData = useCallback(
+        widget => {
             let node_counts;
 
-            switch (props.networkData) {
+            switch (widget?.network_data) {
                 case 'visible':
                     node_counts = store.graph.currentGraphData.nodes
                         .filter(node => node.visible)
@@ -74,13 +100,11 @@ function GraphStats(props) {
                             return counts;
                         }, {});
 
-                    setNodeData(
-                        Object.entries(node_counts).map(entry => [
-                            entry[0],
-                            { count: entry[1], label: entry[0] }
-                        ])
-                    );
-                    break;
+                    return Object.entries(node_counts).map(entry => [
+                        entry[0],
+                        { count: entry[1], label: entry[0] }
+                    ]);
+
                 case 'selected':
                     node_counts =
                         store.graph.currentGraphData.selectedNodes.reduce(
@@ -98,34 +122,64 @@ function GraphStats(props) {
                             {}
                         );
 
-                    setNodeData(
-                        Object.entries(node_counts).map(entry => [
-                            entry[0],
-                            { count: entry[1], label: entry[0] }
-                        ])
-                    );
-                    break;
+                    return Object.entries(node_counts).map(entry => [
+                        entry[0],
+                        { count: entry[1], label: entry[0] }
+                    ]);
+
                 default:
-                    setNodeData(
-                        Object.entries(store.graph.currentGraphData.types).map(
-                            entry => [
-                                entry[0],
-                                { count: entry[1].count, label: entry[0] }
-                            ]
-                        )
-                    );
-                    break;
+                    return Object.entries(
+                        store.graph.currentGraphData.types
+                    ).map(entry => [
+                        entry[0],
+                        { count: entry[1].count, label: entry[0] }
+                    ]);
             }
+        },
+        [
+            store.graph.currentGraphData.nodes,
+            store.graph.currentGraphData.selectedNodes,
+            store.graph.currentGraphData.types
+        ]
+    );
+
+    useEffect(() => {
+        if (props.demoData) {
+            setNodeData(
+                Object.entries(props.demoData.nodeData).map(entry => [
+                    entry[0],
+                    { count: entry[1].count, label: entry[0] }
+                ])
+            );
+        } else {
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+            setWidgetConfig(widget);
+
+            if (!widget) {
+                setNodeData(null);
+            }
+
+            setNodeData(getNodeData(widget));
         }
     }, [
+        props.chart?.id,
         props.demoData,
-        props.networkData,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
-        store.graph.currentGraphData.types,
         store.graphInstance.selfCentricType,
-        store.graphInstance.visibleComponents
+        store.graphInstance.visibleComponents,
+        store.graph.currentGraphData.types,
+        getNodeData
     ]);
 
     const renderGraphStats = (title, data) =>
@@ -142,7 +196,7 @@ function GraphStats(props) {
                         backgroundColor={
                             colorMode === 'light'
                                 ? 'blackAlpha.300'
-                                : 'blackAlpha.900'
+                                : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
                         width="100%"
@@ -213,34 +267,21 @@ function GraphStats(props) {
         </VStack>
     );
 
-    if (nodeData.length === 0 && props.networkData !== 'all') {
+    if (props.settingsMode && props.isExpanded) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some nodes to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['item state']}
+            />
         );
+    }
+
+    if (
+        nodeData.length === 0 &&
+        widgetConfig &&
+        widgetConfig.network_data !== 'all'
+    ) {
+        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -254,10 +295,7 @@ function GraphStats(props) {
 }
 GraphStats.propTypes = {
     isExpanded: PropTypes.bool,
-    demoData: PropTypes.object,
-    networkData: PropTypes.string
+    demoData: PropTypes.object
 };
-
-GraphStats.defaultProps = { networkData: 'all' };
 
 export default observer(GraphStats);

@@ -38,6 +38,15 @@ export function SchemaList() {
                                             schema.id
                                         );
                                     }
+
+                                    store.track.trackEvent(
+                                        'Default Schema List',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: `Load default schema ${schema.id} - ${schema.name}`
+                                        })
+                                    );
                                 }}
                             >
                                 {schema.name.slice(0, 2).toUpperCase()}

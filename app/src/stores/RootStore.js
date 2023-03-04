@@ -15,6 +15,7 @@ import { StatsStore } from './StatsStore';
 import { HistoryStore } from './HistoryStore';
 import { CommentStore } from './CommentStore';
 import { OverviewSchemaStore } from './OverviewSchemaStore';
+import { PresentStore } from './PresentStore';
 import { isEnvSet } from 'general.utils';
 
 export class RootStore {
@@ -35,6 +36,7 @@ export class RootStore {
         this.history = new HistoryStore(this);
         this.comment = new CommentStore(this);
         this.overviewSchema = new OverviewSchemaStore(this);
+        this.present = new PresentStore(this);
     }
 
     initAxios = () => {

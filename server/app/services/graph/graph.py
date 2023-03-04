@@ -11,6 +11,7 @@ import pandas as pd
 import pickle
 from app.types import SchemaElement, Node
 from app.utils.timer import use_timing
+import uuid
 
 
 def get_graph(
@@ -215,14 +216,48 @@ def get_overview_graph(
             search_results_df.entry.tolist(),
             list_links + [anchor] if is_anchor_list else list_links,
         )
+
+        if is_anchor_list:
+            unique_entry_set = set(search_results_df.entry.tolist())
+            unique_mongo_anchor_node_entry_set = set(
+                [
+                    item
+                    for sublist in [
+                        node["entries"]
+                        for node in mongo_nodes
+                        if node["feature"] == anchor
+                    ]
+                    for item in sublist
+                ]
+            )
+
+            entries_with_no_anchor_value = list(
+                unique_entry_set - unique_mongo_anchor_node_entry_set
+            )
+
+            if len(entries_with_no_anchor_value) > 0:
+                mongo_nodes.append(
+                    {
+                        "entries": entries_with_no_anchor_value,
+                        "id": uuid.uuid4().hex,
+                        "label": f"CSX_No_{anchor}",
+                        "feature": anchor,
+                        "community": 0,
+                        "component": 0,
+                        "size": len(entries_with_no_anchor_value) + 5,
+                    }
+                )
+
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
             entries_with_nodes, mongo_nodes
         )
+
         mongo_nodes = csx_nodes.adjust_node_size(
             mongo_nodes,
             search_results_df,
             list_links + [anchor] if is_anchor_list else list_links,
         )
+
         nodes = nodes + mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
@@ -405,11 +440,6 @@ def get_graph_with_new_anchor_props(
         "anchor_property_values"
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
-
-    print(
-        "\n\n\n after processing anchor props: ",
-        graph_data["meta"]["anchor_properties"],
-    )
 
     csx_study.new_history_entry(
         study_id,

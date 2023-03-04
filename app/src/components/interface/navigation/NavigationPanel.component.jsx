@@ -23,30 +23,31 @@ import {
     Carousel,
     ChevronRight,
     List,
-    Moon,
     RadioCheck,
     Ratio,
     Ring,
-    Sun,
     Sync
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 
+import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 import { CameraIcon } from '@heroicons/react/24/solid';
-import { useContext, useState } from 'react';
+import { isEnvFalse } from 'general.utils';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
-import { isEnvFalse } from 'general.utils';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
-    const { colorMode, toggleColorMode } = useColorMode();
+    const { colorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
     const [panelType, setPanelType] = useState('');
     const location = useLocation();
     const bgColor = useColorModeValue('white', 'black');
+    const containerRef = useRef();
+    const [timer, setTimer] = useState(null);
 
     const edgeColorDark =
         location.pathname !== '/' ? 'gray.900' : 'transparent';
@@ -60,48 +61,87 @@ function NavigationPanelComponent() {
         'blackAlpha.700'
     );
 
+    useEffect(() => {
+        if (containerRef.current) {
+            store.core.setRightPanelWidth(containerRef.current.offsetWidth);
+        }
+    }, [store.core]);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            const setNewContainerSize = () => {
+                store.core.setRightPanelWidth(containerRef.current.offsetWidth);
+            };
+
+            const handleResize = () => {
+                clearTimeout(timer);
+                setTimer(setTimeout(setNewContainerSize, 100));
+            };
+
+            window.addEventListener('resize', handleResize);
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    });
+
     const regenerateGraph = () => {
         store.graph.modifyStudy(store.core.currentGraph);
     };
 
-    const toggleDataPanel = panel => {
-        if (panelType === panel || panelType === '' || !isOpen) {
-            onToggle();
+    const toggleDataPanel = useCallback(
+        panel => {
+            if (panelType === panel || panelType === '' || !isOpen) {
+                onToggle();
+            }
+
+            if (panelType === panel) {
+                setPanelType('');
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(false);
+            } else {
+                setPanelType(panel);
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(true);
+            }
+
+            store.track.trackEvent(
+                'Navbar',
+                'Button',
+                JSON.stringify({
+                    type: 'Click',
+                    value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+                })
+            );
+        },
+        [isOpen, onToggle, panelType, store.core, store.track]
+    );
+
+    useEffect(() => {
+        if (store.core.rightPanelTypeToOpen) {
+            toggleDataPanel(store.core.rightPanelTypeToOpen);
+            store.core.setRightPanelTypeToOpen(null);
         }
+    }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
-        if (panelType === panel) {
-            setPanelType('');
-        } else {
-            setPanelType(panel);
-        }
+    // const toggleColor = () => {
+    //     store.track.trackEvent(
+    //         'Navbar',
+    //         'Button',
+    //         JSON.stringify({
+    //             type: 'Click',
+    //             value: `Change color mode to ${
+    //                 colorMode === 'light' ? 'dark' : 'light'
+    //             }`
+    //         })
+    //     );
 
-        store.track.trackEvent(
-            'Navbar',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
-            })
-        );
-    };
-
-    const toggleColor = () => {
-        store.track.trackEvent(
-            'Navbar',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: `Change color mode to ${
-                    colorMode === 'light' ? 'dark' : 'light'
-                }`
-            })
-        );
-
-        toggleColorMode();
-        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
-        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
-        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
-    };
+    //     toggleColorMode();
+    //     store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
+    // };
 
     const renderGraphUtils = () => (
         <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
@@ -139,6 +179,8 @@ function NavigationPanelComponent() {
                                     } graph`
                                 })
                             );
+
+                            store.graphInstance.setEdgeColorScheme('auto');
 
                             store.graph.modifyStudy(
                                 store.core.currentGraph === 'detail'
@@ -277,6 +319,7 @@ function NavigationPanelComponent() {
                                     value: 'Zoom to fit'
                                 })
                             );
+
                             store.graphInstance.zoomToFit();
                         }}
                     />
@@ -333,7 +376,9 @@ function NavigationPanelComponent() {
             height="100%"
             borderLeft="1px solid"
             paddingLeft="10px"
-            borderColor={edgeColor}
+            borderColor={
+                location.pathname !== '/present' ? edgeColor : 'transparent'
+            }
         >
             {location.pathname.startsWith('/graph') && (
                 <ButtonGroup
@@ -447,28 +492,30 @@ function NavigationPanelComponent() {
                 </ButtonGroup>
             )}
 
-            <Tooltip label="Toggle color mode">
-                <IconButton
-                    border="none"
-                    aria-label="Color mode"
-                    icon={
-                        colorMode === 'light' ? (
-                            <Moon
-                                style={{
-                                    '--ggs': '0.8'
-                                }}
-                            />
-                        ) : (
-                            <Sun
-                                style={{
-                                    '--ggs': '0.8'
-                                }}
-                            />
-                        )
-                    }
-                    onClick={toggleColor}
-                />
-            </Tooltip>
+            {/* {location.pathname !== '/present' && (
+                <Tooltip label="Toggle color mode">
+                    <IconButton
+                        border="none"
+                        aria-label="Color mode"
+                        icon={
+                            colorMode === 'light' ? (
+                                <Moon
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            ) : (
+                                <Sun
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            )
+                        }
+                        onClick={toggleColor}
+                    />
+                </Tooltip>
+            )} */}
         </ButtonGroup>
     );
 
@@ -480,7 +527,10 @@ function NavigationPanelComponent() {
                 zIndex="20"
                 height="50px"
                 backgroundColor={
-                    location.pathname !== '/' ? bgColor : 'transparent'
+                    location.pathname !== '/' &&
+                    location.pathname !== '/present'
+                        ? bgColor
+                        : 'transparent'
                 }
                 right="0px"
                 width="100%"
@@ -489,133 +539,203 @@ function NavigationPanelComponent() {
                 alignItems="center"
                 justifyContent="space-between"
                 borderBottom="1px solid"
-                borderColor={edgeColor}
+                borderColor={
+                    location.pathname !== '/present' ? edgeColor : 'transparent'
+                }
             >
                 <HStack spacing="10px">
-                    <Link
-                        as={NavLink}
-                        to="/"
-                        paddingRight="5px"
-                        paddingLeft="5px"
-                        borderRight="1px solid"
-                        borderColor={edgeColor}
-                        id="homelink"
-                        onClick={() => {
-                            store.core.deleteStudy();
+                    {location.pathname !== '/present' && (
+                        <Link
+                            as={NavLink}
+                            to="/"
+                            paddingRight="5px"
+                            paddingLeft="5px"
+                            borderRight="1px solid"
+                            borderColor={
+                                location.pathname !== '/present'
+                                    ? edgeColor
+                                    : 'transparent'
+                            }
+                            id="homelink"
+                            onClick={() => {
+                                store.core.deleteStudy();
+                                store.core.setStudyIsEmpty(false);
+                                store.search.setSearchIsEmpty(false);
+                                store.core.setShowCookieInfo(false);
 
-                            store.track.trackEvent(
-                                'Navbar',
-                                'Button - Logo',
-                                JSON.stringify({
-                                    type: 'Click'
-                                })
-                            );
-                        }}
-                    >
-                        <Image
-                            src={logo}
-                            alt="Collaboration spotting logo"
-                            height="40px"
-                            padding="10px"
-                        />
-                    </Link>
+                                store.track.trackEvent(
+                                    'Navbar',
+                                    'Button - Logo',
+                                    JSON.stringify({
+                                        type: 'Click'
+                                    })
+                                );
+                            }}
+                        >
+                            <Image
+                                src={logo}
+                                alt="Collaboration spotting logo"
+                                height="40px"
+                                padding="10px"
+                            />
+                        </Link>
+                    )}
 
                     {location.pathname !== '/' &&
+                        location.pathname !== '/present' &&
                         isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') &&
                         renderWorkspaceSwitch()}
-                    {location.pathname !== '/' && (
-                        <HStack
-                            height="40px"
-                            style={{
-                                marginLeft: isEnvFalse(
-                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                )
-                                    ? '125px'
-                                    : '0'
-                            }}
-                            spacing="20px"
-                        >
-                            {isEnvFalse(
-                                'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                            ) && (
-                                <Divider
-                                    opacity="0.4"
-                                    orientation="vertical"
-                                    height="100%"
-                                    backgroundColor="gray.900"
-                                />
-                            )}
-                            <Breadcrumb
-                                marginLeft="20px"
-                                spacing="2px"
-                                separator={
-                                    <ChevronRight style={{ '--ggs': '0.5' }} />
-                                }
+                    {location.pathname !== '/' &&
+                        location.pathname !== '/present' && (
+                            <HStack
+                                height="40px"
+                                style={{
+                                    marginLeft: isEnvFalse(
+                                        'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                                    )
+                                        ? '125px'
+                                        : '0'
+                                }}
+                                spacing="20px"
                             >
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink
-                                        as={NavLink}
-                                        to="/"
-                                        fontSize="xs"
-                                        fontWeight="regular"
-                                    >
-                                        {store?.search?.currentDataset?.toUpperCase()}
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink
-                                        as={Button}
-                                        onClick={() => {
-                                            store.graph.modifyStudy('overview');
-                                        }}
-                                        disabled={
-                                            store.core.currentGraph ===
-                                            'overview'
-                                        }
-                                        size="xs"
-                                        variant="ghost"
-                                        _hover={{
-                                            backgroundColor: 'transparent',
-                                            textDecoration:
-                                                store.core.currentGraph ===
-                                                'detail'
-                                                    ? 'underline'
-                                                    : 'none',
-                                            cursor:
-                                                store.core.currentGraph ===
-                                                'detail'
-                                                    ? 'pointer'
-                                                    : 'default'
-                                        }}
-                                        _disabled={{ opacity: '1' }}
-                                    >
-                                        Graph
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                {store.core.currentGraph === 'detail' && (
+                                {isEnvFalse(
+                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                                ) && (
+                                    <Divider
+                                        opacity="0.2"
+                                        orientation="vertical"
+                                        height="100%"
+                                        backgroundColor="gray.900"
+                                    />
+                                )}
+                                <Breadcrumb
+                                    marginLeft="20px"
+                                    spacing="2px"
+                                    separator={
+                                        <ChevronRight
+                                            style={{ '--ggs': '0.5' }}
+                                        />
+                                    }
+                                >
                                     <BreadcrumbItem>
                                         <BreadcrumbLink
-                                            as={Text}
+                                            as={NavLink}
+                                            to="/"
                                             fontSize="xs"
-                                            fontWeight="bold"
-                                            _hover={{ cursor: 'default' }}
+                                            fontWeight="regular"
                                         >
-                                            Detail
+                                            {store?.search?.currentDataset?.toUpperCase()}
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
-                                )}
-                            </Breadcrumb>
-                        </HStack>
-                    )}
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink
+                                            as={Button}
+                                            onClick={() => {
+                                                store.graph.modifyStudy(
+                                                    'overview'
+                                                );
+                                            }}
+                                            disabled={
+                                                store.core.currentGraph ===
+                                                'overview'
+                                            }
+                                            size="xs"
+                                            variant="ghost"
+                                            _hover={{
+                                                backgroundColor: 'transparent',
+                                                textDecoration:
+                                                    store.core.currentGraph ===
+                                                    'detail'
+                                                        ? 'underline'
+                                                        : 'none',
+                                                cursor:
+                                                    store.core.currentGraph ===
+                                                    'detail'
+                                                        ? 'pointer'
+                                                        : 'default'
+                                            }}
+                                            _disabled={{ opacity: '1' }}
+                                        >
+                                            Graph
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                    {store.core.currentGraph === 'detail' && (
+                                        <BreadcrumbItem>
+                                            <BreadcrumbLink
+                                                as={Text}
+                                                fontSize="xs"
+                                                fontWeight="bold"
+                                                _hover={{ cursor: 'default' }}
+                                            >
+                                                Detail
+                                            </BreadcrumbLink>
+                                        </BreadcrumbItem>
+                                    )}
+                                </Breadcrumb>
+                            </HStack>
+                        )}
                 </HStack>
-                {renderToggles()}
+                <HStack spacing="20px">
+                    {location.pathname.startsWith('/graph') && (
+                        <Tooltip label="Open presentation mode in new tab">
+                            <Button
+                                size="sm"
+                                as={Link}
+                                isDisabled={!store.core.studyIsSaved}
+                                variant="ghost"
+                                borderRadius="6px"
+                                leftIcon={
+                                    <PresentationChartLineIcon
+                                        width="16px"
+                                        height="16px"
+                                        display="inline"
+                                    />
+                                }
+                                onClick={e => {
+                                    if (!store.core.studyIsSaved) {
+                                        e.preventDefault();
+                                    }
+
+                                    store.track.trackEvent(
+                                        'Navbar',
+                                        'Link',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Open study in presentation mode'
+                                        })
+                                    );
+                                }}
+                                transition="0.2s all ease-in-out"
+                                href={
+                                    store.core.studyIsSaved
+                                        ? `http://localhost:8882/present?study=${store.core.studyUuid}`
+                                        : ''
+                                }
+                                isExternal
+                                _hover={{
+                                    textDecoration: 'none',
+                                    backgroundColor: 'blue.500'
+                                }}
+                            >
+                                Present
+                            </Button>
+                        </Tooltip>
+                    )}
+                    {renderToggles()}
+                </HStack>
             </Box>
             {location.pathname.startsWith('/graph') && (
                 <Box
+                    ref={containerRef}
+                    width={{ base: '500px', lg: '500px', xl: '600px' }}
+                    right={{
+                        base: isOpen ? '0px' : '-500px',
+                        lg: isOpen ? '0px' : '-500px',
+                        xl: isOpen ? '0px' : '-600px'
+                    }}
                     style={{
                         zIndex: 10,
-                        right: isOpen ? '0px' : '-35%',
-                        width: '35%',
+
                         position: 'fixed',
                         top: 0,
                         height: '100%',

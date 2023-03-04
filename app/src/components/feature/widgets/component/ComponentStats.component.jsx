@@ -19,34 +19,61 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
+import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
+    );
 
     useEffect(() => {
-        const components = store.graph.currentGraphData.components;
-
         if (props.demoData.length) {
             setData(props.demoData);
-        } else if (props.networkData === 'all') {
-            setData(components);
         } else {
-            setData(
-                components.filter(c =>
-                    store.graph.currentGraphData.selectedComponents.includes(
-                        c.id
-                    )
-                )
+            const components = store.graph.currentGraphData.components;
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
             );
+
+            setWidgetConfig(widget);
+
+            if (!widget) {
+                setData(null);
+            }
+
+            if (widget?.network_data === 'all') {
+                setData(components);
+            } else {
+                setData(
+                    components.filter(component =>
+                        store.graph.currentGraphData.selectedComponents.includes(
+                            component.id
+                        )
+                    )
+                );
+            }
         }
     }, [
+        props.chart?.id,
         props.demoData,
-        props.networkData,
         store.graph.currentGraphData.components,
         store.graph.currentGraphData.selectedComponents,
-        store.graph.currentGraphData.selectedNodes.length
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponents
     ]);
 
     const getLargestNodes = nodes => {
@@ -64,7 +91,7 @@ function SelectedComponentList(props) {
                 background={
                     store.graphInstance.nodeColorSchemeColors[
                         [store.core.currentGraph]
-                    ]['type'][node.feature]
+                    ]['node type'][node.feature]
                 }
             >
                 <Tooltip
@@ -181,33 +208,28 @@ function SelectedComponentList(props) {
         </Wrap>
     );
 
+    if (props.settingsMode && props.isExpanded) {
+        return (
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['item state', 'item count']}
+                customItemStates={[
+                    {
+                        value: 'selected',
+                        label: 'Selected graph elements'
+                    },
+                    { value: 'all', label: 'All graph elements' }
+                ]}
+            />
+        );
+    }
+
     if (data.length === 0) {
         return (
-            <VStack
-                height="100%"
-                width="100%"
-                spacing={1}
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'blackAlpha.800'
-                }
-                borderRadius="6px"
-                justifyContent="center"
-                padding="20%"
-            >
-                <Heading size="md" opacity="0.5">
-                    NO DATA
-                </Heading>
-                {props.networkData !== 'all' && props.isExpanded && (
-                    <Text
-                        textAlign="center"
-                        fontSize="sm"
-                        fontWeight="bold"
-                        opacity="0.5"
-                    >
-                        Select some components to see details here! 😉
-                    </Text>
-                )}
-            </VStack>
+            <WidgetAlert
+                size={props.isExpanded ? 'md' : 'sm'}
+                message="Select some components to see details here! 😉"
+            />
         );
     }
 
@@ -219,13 +241,13 @@ function SelectedComponentList(props) {
                     .sort((component1, component2) => {
                         if (component1.node_count > component2.node_count) {
                             return -1;
-                        } else if (
-                            component1.node_count < component2.node_count
-                        ) {
-                            return 1;
-                        } else {
-                            return 0;
                         }
+
+                        if (component1.node_count < component2.node_count) {
+                            return 1;
+                        }
+
+                        return 0;
                     })
                     .map(component => {
                         return (
@@ -235,7 +257,7 @@ function SelectedComponentList(props) {
                                 backgroundColor={
                                     colorMode === 'light'
                                         ? 'blackAlpha.200'
-                                        : 'blackAlpha.800'
+                                        : 'whiteAlpha.100'
                                 }
                                 padding="10px"
                                 width="100%"
@@ -259,87 +281,97 @@ function SelectedComponentList(props) {
                                     >
                                         Component {component.id}
                                     </Heading>
-                                    <Tooltip label="Toggle component visibility">
-                                        <IconButton
-                                            variant="ghost"
-                                            size="xs"
-                                            opacity={
-                                                store.graphInstance.visibleComponents.includes(
-                                                    component.id
-                                                )
-                                                    ? '1'
-                                                    : '0.3'
-                                            }
-                                            _hover={{ opacity: 1 }}
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    `Details Panel - Widget - ${props.chart.id}`,
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: `${
-                                                            store.graphInstance.visibleComponents.includes(
-                                                                component.id
-                                                            )
-                                                                ? 'Hide'
-                                                                : 'Show'
-                                                        } ${component.id}`
-                                                    })
-                                                );
-
-                                                store.graphInstance.toggleVisibleComponents(
-                                                    component.id
-                                                );
-                                            }}
-                                            icon={
-                                                <Eye
-                                                    style={{ '--ggs': '0.7' }}
-                                                />
-                                            }
-                                        />
-                                    </Tooltip>
-                                </HStack>
-                                {props.networkData !== 'all' && (
-                                    <Box
-                                        position="absolute"
-                                        top="4px"
-                                        right="8px"
-                                    >
-                                        <Tooltip label="Deselect component">
-                                            <IconButton
-                                                size="xs"
-                                                border="none"
-                                                variant="ghost"
-                                                aria-label="Remove from list"
-                                                icon={
-                                                    <Remove
-                                                        style={{
-                                                            '--ggs': '0.8'
-                                                        }}
-                                                    />
-                                                }
-                                                onClick={() => {
-                                                    if (
-                                                        !props.demoData.length
-                                                    ) {
+                                    {widgetConfig.network_data &&
+                                        widgetConfig.network_data === 'all' && (
+                                            <Tooltip label="Toggle component visibility">
+                                                <IconButton
+                                                    variant="ghost"
+                                                    size="xs"
+                                                    opacity={
+                                                        store.graphInstance.visibleComponents.includes(
+                                                            component.id
+                                                        )
+                                                            ? '1'
+                                                            : '0.3'
+                                                    }
+                                                    _hover={{ opacity: 1 }}
+                                                    onClick={() => {
                                                         store.track.trackEvent(
                                                             `Details Panel - Widget - ${props.chart.id}`,
                                                             'Button',
                                                             JSON.stringify({
                                                                 type: 'Click',
-                                                                value: `Deselect ${component.id}`
+                                                                value: `${
+                                                                    store.graphInstance.visibleComponents.includes(
+                                                                        component.id
+                                                                    )
+                                                                        ? 'Hide'
+                                                                        : 'Show'
+                                                                } ${
+                                                                    component.id
+                                                                }`
                                                             })
                                                         );
 
-                                                        store.graph.selectComponent(
+                                                        store.graphInstance.toggleVisibleComponents(
                                                             component.id
                                                         );
+                                                    }}
+                                                    icon={
+                                                        <Eye
+                                                            style={{
+                                                                '--ggs': '0.7'
+                                                            }}
+                                                        />
                                                     }
-                                                }}
-                                            />
-                                        </Tooltip>
-                                    </Box>
-                                )}
+                                                />
+                                            </Tooltip>
+                                        )}
+                                </HStack>
+                                {widgetConfig.network_data &&
+                                    widgetConfig.network_data ===
+                                        'selected' && (
+                                        <Box
+                                            position="absolute"
+                                            top="4px"
+                                            right="8px"
+                                        >
+                                            <Tooltip label="Deselect component">
+                                                <IconButton
+                                                    size="xs"
+                                                    border="none"
+                                                    variant="ghost"
+                                                    aria-label="Remove from list"
+                                                    icon={
+                                                        <Remove
+                                                            style={{
+                                                                '--ggs': '0.8'
+                                                            }}
+                                                        />
+                                                    }
+                                                    onClick={() => {
+                                                        if (
+                                                            !props.demoData
+                                                                .length
+                                                        ) {
+                                                            store.track.trackEvent(
+                                                                `Details Panel - Widget - ${props.chart.id}`,
+                                                                'Button',
+                                                                JSON.stringify({
+                                                                    type: 'Click',
+                                                                    value: `Deselect ${component.id}`
+                                                                })
+                                                            );
+
+                                                            store.graph.selectComponent(
+                                                                component.id
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                            </Tooltip>
+                                        </Box>
+                                    )}
                                 {props.isExpanded &&
                                     renderComponentDetails(component)}
                             </Stat>
@@ -351,13 +383,11 @@ function SelectedComponentList(props) {
 }
 SelectedComponentList.propTypes = {
     isExpanded: PropTypes.bool,
-    networkData: PropTypes.string,
     demoData: PropTypes.array
 };
 
 SelectedComponentList.defaultProps = {
     isExpanded: false,
-    networkData: 'all',
     demoData: []
 };
 
