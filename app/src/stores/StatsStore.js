@@ -404,7 +404,9 @@ export class StatsStore {
                         'Neighbours',
                         'Documents',
                         'Links'
-                    ]
+                    ],
+                    max_distance: 2,
+                    direct_connection_features: 'all'
                 }
             })
         );
@@ -418,7 +420,9 @@ export class StatsStore {
                 network: this.store.core.currentGraph,
                 title: this.getNewWidgetTitle(),
                 element_sort_values: 'frequency',
-                visible_node_properties: ['Neighbours', 'Documents', 'Links']
+                visible_node_properties: ['Neighbours', 'Documents', 'Links'],
+                max_distance: 2,
+                direct_connection_features: 'all'
             });
         } else {
             this.charts[dataset] = [
@@ -434,7 +438,9 @@ export class StatsStore {
                         'Neighbours',
                         'Documents',
                         'Links'
-                    ]
+                    ],
+                    max_distance: 2,
+                    direct_connection_features: 'all'
                 }
             ];
         }
@@ -477,6 +483,13 @@ export class StatsStore {
 
     getWidgetShowOnly = id =>
         this.activeWidgets.find(widget => widget.id === id)?.show_only;
+
+    getWidgetMaxDistance = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.max_distance || 2;
+
+    getWdigetVisibleDirectConnectionFeature = id =>
+        this.activeWidgets.find(widget => widget.id === id)
+            ?.direct_connection_features || 'all';
 
     getWidgetGroupBy = id =>
         this.activeWidgets.find(widget => widget.id === id)?.group_by;

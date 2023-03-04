@@ -208,7 +208,7 @@ function DoughnutChart(props) {
                     'main axis',
                     'item state',
                     'item count',
-                    'visible types'
+                    store.core.isDetail && 'visible types'
                 ]}
             />
         );

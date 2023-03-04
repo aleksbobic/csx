@@ -1,13 +1,8 @@
 import {
     Box,
-    Center,
     Divider,
-    Editable,
-    EditableInput,
-    EditablePreview,
     Heading,
     HStack,
-    Select,
     Stat,
     Tag,
     Text,
@@ -23,20 +18,17 @@ import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function ConnectionStats(props) {
     const store = useContext(RootStoreContext);
     const [visiblity, setVisiblity] = useState(false);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
-    const [title, setTitle] = useState(props.chart.title);
-    const [maxDistance, setMaxDistance] = useState(
-        props?.chart?.max_distance ? props?.chart?.max_distance : 2
-    );
-    const [directConnectionFeatures, setDirectConnectionFeatures] = useState(
-        props?.chart?.direct_connection_features
-            ? props?.chart?.direct_connection_features
-            : 'all'
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart?.id
+        ) || {}
     );
 
     useEffect(() => {
@@ -52,11 +44,38 @@ function ConnectionStats(props) {
         if (props.demoData.length) {
             setData(props.demoData);
         } else if (visiblity) {
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+
+            setWidgetConfig(widget);
+
             setData(store.graph.currentGraphData.selectedNodes);
         } else {
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+
+            setWidgetConfig(widget);
             setData([]);
         }
-    }, [props.demoData, store.graph.currentGraphData.selectedNodes, visiblity]);
+    }, [
+        props.chart?.id,
+        props.demoData,
+        store.graph.currentGraphData.components,
+        store.graph.currentGraphData.selectedComponents,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
+        store.graph.currentGraphData.nodes,
+        store.graph.currentGraphData.selectedNodes,
+        store.graph.currentGraphData.selectedNodes.length,
+        store.graphInstance.selfCentricType,
+        store.graphInstance.visibleComponents,
+        visiblity
+    ]);
 
     const getNeighbours = (node_list, visited_node_ids) => {
         const neighbours = [];
@@ -86,8 +105,8 @@ function ConnectionStats(props) {
         return Object.keys(neighbour_counts)
             .filter(
                 feature =>
-                    directConnectionFeatures === 'all' ||
-                    feature === directConnectionFeatures
+                    widgetConfig.direct_connection_features === 'all' ||
+                    feature === widgetConfig.direct_connection_features
             )
             .map((feature, index) => (
                 <Tag
@@ -171,7 +190,7 @@ function ConnectionStats(props) {
                                         origin,
                                         neighbours,
                                         level,
-                                        directConnectionFeatures
+                                        widgetConfig.direct_connection_features
                                     );
                                 }}
                                 _hover={{ cursor: 'pointer', opacity: 1 }}
@@ -261,7 +280,11 @@ function ConnectionStats(props) {
             }
         ];
 
-        for (let degreeLevel = 2; degreeLevel <= maxDistance; degreeLevel++) {
+        for (
+            let degreeLevel = 2;
+            degreeLevel <= widgetConfig.max_distance;
+            degreeLevel++
+        ) {
             const results = getNextNeighborArray(
                 neighborDegreeLevels[degreeLevel - 2].neighbours,
                 visited_node_ids
@@ -294,167 +317,10 @@ function ConnectionStats(props) {
 
     if (props.settingsMode && props.isExpanded) {
         return (
-            <Center height="100%" width="100%">
-                <VStack
-                    height="100%"
-                    width="100%"
-                    alignItems="flex-start"
-                    spacing={1}
-                    backgroundColor={
-                        colorMode === 'light'
-                            ? 'blackAlpha.200'
-                            : 'blackAlpha.800'
-                    }
-                    borderRadius="6px"
-                    justifyContent="center"
-                    padding="10% 20%"
-                >
-                    <CustomScroll
-                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
-                    >
-                        <VStack height="100%" width="100%">
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Title
-                                </Heading>
-
-                                <Editable
-                                    size="xs"
-                                    width="100%"
-                                    value={title}
-                                    backgroundColor={
-                                        colorMode === 'light'
-                                            ? 'blackAlpha.100'
-                                            : 'blackAlpha.300'
-                                    }
-                                    borderRadius="5px"
-                                    onChange={val => setTitle(val)}
-                                    onSubmit={val => {
-                                        if (val.trim()) {
-                                            store.stats.setWidgetProperty(
-                                                props.chart.id,
-                                                'title',
-                                                val.trim()
-                                            );
-                                            setTitle(val.trim());
-                                        } else {
-                                            setTitle(props.chart.title);
-                                        }
-                                    }}
-                                    onFocus={() =>
-                                        store.comment.setCommentTrigger(false)
-                                    }
-                                    onBlur={() =>
-                                        store.comment.setCommentTrigger(true)
-                                    }
-                                >
-                                    <EditablePreview
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        color="#FFFFFFBB"
-                                        backgroundColor="whiteAlpha.200"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                    <EditableInput
-                                        backgroundColor="whiteAlpha.200"
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                </Editable>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Max Distance
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={maxDistance}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setMaxDistance(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'max_distance',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </Select>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Visible Features
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={directConnectionFeatures}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setDirectConnectionFeatures(
-                                            e.target.value
-                                        );
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'direct_connection_features',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value="all">all</option>
-                                    {store.graph.currentGraphData.perspectivesInGraph.map(
-                                        feature => (
-                                            <option
-                                                key={`connection_feature_${feature}`}
-                                                value={feature}
-                                            >
-                                                {feature}
-                                            </option>
-                                        )
-                                    )}
-                                </Select>
-                            </HStack>
-                        </VStack>
-                    </CustomScroll>
-                </VStack>
-            </Center>
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['max distance', 'direct connection feature']}
+            />
         );
     }
 

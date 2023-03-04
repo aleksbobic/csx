@@ -72,14 +72,23 @@ function WidgetSettings(props) {
         store.stats.getWidgetVisibleNodeProperties(props.widgetID)
     );
 
+    const [maxDistance, setMaxDistance] = useState(
+        store.stats.getWidgetMaxDistance(props.widgetID)
+    );
+
+    const [visibleDirectConnectionFeature, setVisibleDirectConnectionFeature] =
+        useState(
+            store.stats.getWdigetVisibleDirectConnectionFeature(props.widgetID)
+        );
+
     useEffect(() => {
         setAvailableNodeProperties(
             store.stats.getWidgetAvailabelNodeProperties()
         );
     }, [store.stats, store.core.currentGraph, store.graph.currentGraphData]);
 
-    const renderTitle = () => (
-        <HStack width="100%">
+    const renderTitle = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
             <Heading size="xs" opacity="0.5" width="100%">
                 Title:
             </Heading>
@@ -133,7 +142,7 @@ function WidgetSettings(props) {
         </HStack>
     );
 
-    const renderItemTypeSwitch = () => {
+    const renderItemTypeSwitch = index => {
         let availableTypes = [
             { value: 'nodes', label: 'Nodes' },
             { value: 'edges', label: 'Edges' }
@@ -144,7 +153,10 @@ function WidgetSettings(props) {
         }
 
         return (
-            <HStack width="100%">
+            <HStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Item Type:
                 </Heading>
@@ -204,8 +216,8 @@ function WidgetSettings(props) {
         );
     };
 
-    const renderMainAxisItemSwitch = () => (
-        <HStack width="100%">
+    const renderMainAxisItemSwitch = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
             <Heading size="xs" opacity="0.5" width="100%">
                 {props.mainAxis
                     ? `${props.mainAxis} Axis Props`
@@ -254,8 +266,8 @@ function WidgetSettings(props) {
         </HStack>
     );
 
-    const renderSecondaryAxisItemSwitch = () => (
-        <HStack width="100%">
+    const renderSecondaryAxisItemSwitch = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
             <Heading size="xs" opacity="0.5" width="100%">
                 {props.mainAxis === 'X' ? 'Y' : 'X'} Axis Props
             </Heading>
@@ -302,9 +314,12 @@ function WidgetSettings(props) {
         </HStack>
     );
 
-    const renderGroupBySwitch = () => {
+    const renderGroupBySwitch = index => {
         return (
-            <HStack width="100%">
+            <HStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Group By
                 </Heading>
@@ -347,7 +362,7 @@ function WidgetSettings(props) {
         );
     };
 
-    const renderItemStateSwitch = () => {
+    const renderItemStateSwitch = index => {
         let itemStates;
 
         if (props.customItemStates) {
@@ -366,7 +381,10 @@ function WidgetSettings(props) {
         }
 
         return (
-            <HStack width="100%">
+            <HStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Element Types
                 </Heading>
@@ -409,9 +427,12 @@ function WidgetSettings(props) {
         );
     };
 
-    const renderItemCountSwitch = () => {
+    const renderItemCountSwitch = index => {
         return (
-            <HStack width="100%">
+            <HStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Display Limit
                 </Heading>
@@ -453,9 +474,12 @@ function WidgetSettings(props) {
         );
     };
 
-    const renderNodeTypesToShowSwitch = () => {
+    const renderNodeTypesToShowSwitch = index => {
         return (
-            <HStack width="100%">
+            <HStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Show Only:
                 </Heading>
@@ -502,9 +526,12 @@ function WidgetSettings(props) {
         );
     };
 
-    const renderVisibleNodeProperties = () => {
+    const renderVisibleNodeProperties = index => {
         return (
-            <VStack width="100%">
+            <VStack
+                width="100%"
+                key={`${props.widgetID}_settings_widget_${index}`}
+            >
                 <Heading size="xs" opacity="0.5" width="100%">
                     Visible Node Props:
                 </Heading>
@@ -564,6 +591,121 @@ function WidgetSettings(props) {
         );
     };
 
+    const renderMaxDistanceSwitch = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
+            <Heading size="xs" opacity="0.5" width="100%">
+                Max distance:
+            </Heading>
+            <Select
+                className="nodrag"
+                margin="0px"
+                variant="filled"
+                size="xs"
+                width="100%"
+                defaultValue={maxDistance}
+                borderRadius="5px"
+                onChange={e => {
+                    setMaxDistance(e.target.value);
+
+                    store.stats.setWidgetProperties(props.widgetID, {
+                        max_distance: e.target.value
+                    });
+                }}
+                background="whiteAlpha.200"
+                opacity="0.8"
+                _hover={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+                _focus={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+            >
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </Select>
+        </HStack>
+    );
+
+    const renderDirectConnectionFeatureSwitch = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
+            <Heading size="xs" opacity="0.5" width="100%">
+                Visible Features:
+            </Heading>
+            <Select
+                className="nodrag"
+                margin="0px"
+                variant="filled"
+                size="xs"
+                width="100%"
+                defaultValue={visibleDirectConnectionFeature}
+                borderRadius="5px"
+                onChange={e => {
+                    setVisibleDirectConnectionFeature(e.target.value);
+
+                    store.stats.setWidgetProperties(props.widgetID, {
+                        direct_connection_features: e.target.value
+                    });
+                }}
+                background="whiteAlpha.200"
+                opacity="0.8"
+                _hover={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+                _focus={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+            >
+                <option value="all">all</option>
+                {store.graph.currentGraphData.perspectivesInGraph.map(
+                    feature => (
+                        <option
+                            key={`connection_feature_${feature}`}
+                            value={feature}
+                        >
+                            {feature}
+                        </option>
+                    )
+                )}
+            </Select>
+        </HStack>
+    );
+
+    const renderSwitches = () => {
+        return ['title', ...props.settings].map((value, index) => {
+            switch (value) {
+                case 'item type':
+                    return renderItemTypeSwitch(index);
+                case 'main axis':
+                    return renderMainAxisItemSwitch(index);
+                case 'second axis':
+                    return renderSecondaryAxisItemSwitch(index);
+                case 'group':
+                    return renderGroupBySwitch(index);
+                case 'item state':
+                    return renderItemStateSwitch(index);
+                case 'item count':
+                    return renderItemCountSwitch(index);
+                case 'visible types':
+                    return renderNodeTypesToShowSwitch(index);
+                case 'visible node props':
+                    return renderVisibleNodeProperties(index);
+                case 'max distance':
+                    return renderMaxDistanceSwitch(index);
+                case 'direct connection feature':
+                    return renderDirectConnectionFeatureSwitch(index);
+                default:
+                    return renderTitle(index);
+            }
+        });
+    };
+
     return (
         <Center height="100%" width="100%">
             <VStack
@@ -580,24 +722,7 @@ function WidgetSettings(props) {
                     style={{ paddingLeft: '10px', paddingRight: '10px' }}
                 >
                     <VStack height="100%" width="100%" paddingTop="10px">
-                        {renderTitle()}
-                        {props.settings.includes('item type') &&
-                            renderItemTypeSwitch()}
-                        {props.settings.includes('main axis') &&
-                            renderMainAxisItemSwitch()}
-                        {props.settings.includes('second axis') &&
-                            renderSecondaryAxisItemSwitch()}
-                        {props.settings.includes('group') &&
-                            renderGroupBySwitch()}
-                        {props.settings.includes('item state') &&
-                            renderItemStateSwitch()}
-                        {props.settings.includes('item count') &&
-                            renderItemCountSwitch()}
-                        {props.settings.includes('visible types') &&
-                            store.core.isDetail &&
-                            renderNodeTypesToShowSwitch()}
-                        {props.settings.includes('visible node props') &&
-                            renderVisibleNodeProperties()}
+                        {renderSwitches()}
                     </VStack>
                 </CustomScroll>
             </VStack>

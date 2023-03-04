@@ -328,7 +328,7 @@ function LineChart(props) {
                     'main axis',
                     'item state',
                     'item count',
-                    'visible types'
+                    store.core.isDetail && 'visible types'
                 ]}
                 mainAxis={'X'}
             />
