@@ -286,6 +286,9 @@ def enrich_cache_with_ng_graph(
 
 
 def extract_history_items(study) -> List[dict]:
+    if len(study["history"]) == 0:
+        return []
+
     return [
         {
             "id": str(item["item_id"]),

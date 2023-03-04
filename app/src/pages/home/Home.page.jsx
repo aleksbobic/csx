@@ -42,7 +42,7 @@ function HomePage() {
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
-    const [cookieToastVisible, setCookieToastVisible] = useState(false);
+    const [cookieToastVisible, setCookieToastVisible] = useState('dark');
 
     useEffect(() => {
         if (store.core.trackingEnabled) {
@@ -212,15 +212,9 @@ function HomePage() {
     }, [cookieToast, store.core]);
 
     useEffect(() => {
-        if (store.core.hideCookieBanner) {
-            cookieToast.closeAll();
-        } else {
-            if (colorMode === 'light') {
+        setTimeout(() => {
+            if (store.core.hideCookieBanner) {
                 cookieToast.closeAll();
-                cookieToast({
-                    duration: null,
-                    render: () => renderLightCookie()
-                });
             } else {
                 cookieToast.closeAll();
                 cookieToast({
@@ -228,18 +222,39 @@ function HomePage() {
                     render: () => renderDarkCookie()
                 });
             }
-        }
-    }, [
-        colorMode,
-        cookieToast,
-        renderDarkCookie,
-        renderLightCookie,
-        store.core.hideCookieBanner
-    ]);
+        }, 500);
+    }, []);
+
+    // useEffect(() => {
+    //     if (store.core.hideCookieBanner) {
+    //         cookieToast.closeAll();
+    //     } else {
+    //         if (colorMode === 'light') {
+    //             cookieToast.closeAll();
+    //             cookieToast({
+    //                 duration: null,
+    //                 render: () => renderLightCookie()
+    //             });
+    //         } else {
+    //             cookieToast.closeAll();
+    //             cookieToast({
+    //                 duration: null,
+    //                 render: () => renderDarkCookie()
+    //             });
+    //         }
+    //     }
+    // }, [
+    //     colorMode,
+    //     cookieToast,
+    //     renderDarkCookie,
+    //     renderLightCookie,
+    //     store.core.hideCookieBanner
+    // ]);
 
     useEffect(() => {
+        // console.log(store.core.hideCookieBanner, cookieToastVisible);
         if (!store.core.hideCookieBanner && !cookieToastVisible) {
-            setCookieToastVisible(true);
+            setCookieToastVisible(colorMode);
 
             if (colorMode === 'light') {
                 cookieToast.closeAll();
