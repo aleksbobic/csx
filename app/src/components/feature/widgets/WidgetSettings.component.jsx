@@ -357,12 +357,12 @@ function WidgetSettings(props) {
                 { value: 'visible', label: 'Visible graph elements' }
             ];
             if (itemType !== 'edges') {
-                itemState.push({
+                itemStates.push({
                     value: 'selected',
                     label: 'Selected graph elements'
                 });
             }
-            itemState.push({ value: 'all', label: 'All graph elements' });
+            itemStates.push({ value: 'all', label: 'All graph elements' });
         }
 
         return (
