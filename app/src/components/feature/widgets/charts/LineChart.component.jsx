@@ -322,7 +322,14 @@ function LineChart(props) {
         return (
             <WidgetSettings
                 widgetID={props.chart.id}
-                settings={['item type', 'second axis']}
+                settings={[
+                    'item type',
+                    'second axis',
+                    'main axis',
+                    'item state',
+                    'item count',
+                    'visible types'
+                ]}
                 mainAxis={'X'}
             />
         );

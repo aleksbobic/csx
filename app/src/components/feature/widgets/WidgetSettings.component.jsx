@@ -5,6 +5,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import {
     Center,
+    Checkbox,
     Editable,
     EditableInput,
     EditablePreview,
@@ -63,6 +64,14 @@ function WidgetSettings(props) {
         store.stats.getWidgetShowOnly(props.widgetID)
     );
 
+    const [availableNodeProperties, setAvailableNodeProperties] = useState(
+        store.stats.getWidgetAvailabelNodeProperties()
+    );
+
+    const [visibleNodeProperties, setVisibleNodeProperties] = useState(
+        store.stats.getWidgetVisibleNodeProperties(props.widgetID)
+    );
+
     const renderTitle = () => (
         <HStack width="100%">
             <Heading size="xs" opacity="0.5" width="100%">
@@ -73,6 +82,7 @@ function WidgetSettings(props) {
                 size="xs"
                 width="100%"
                 value={title}
+                maxWidth="133px"
                 backgroundColor={
                     colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
                 }
@@ -96,15 +106,20 @@ function WidgetSettings(props) {
                 <EditablePreview
                     padding="5px 10px"
                     fontSize="xs"
+                    maxWidth="133px"
                     color="#FFFFFFBB"
                     backgroundColor="whiteAlpha.200"
                     width="100%"
                     size="xs"
+                    overflow="hidden"
+                    whiteSpace="nowrap"
+                    textOverflow="ellipsis"
                 />
                 <EditableInput
                     backgroundColor="whiteAlpha.200"
                     padding="5px 10px"
                     fontSize="xs"
+                    maxWidth="133px"
                     width="100%"
                     size="xs"
                 />
@@ -112,59 +127,76 @@ function WidgetSettings(props) {
         </HStack>
     );
 
-    const renderItemTypeSwitch = () => (
-        <HStack width="100%">
-            <Heading size="xs" opacity="0.5" width="100%">
-                Item Type:
-            </Heading>
-            <Select
-                className="nodrag"
-                margin="0px"
-                variant="filled"
-                size="xs"
-                width="100%"
-                defaultValue={itemType}
-                borderRadius="5px"
-                onChange={e => {
-                    const newItemType = e.target.value;
-                    const newItemProperties =
-                        newItemType === 'nodes'
-                            ? store.stats.getWidgetNodeProperties()
-                            : store.stats.getWidgetEdgeProperties();
+    const renderItemTypeSwitch = () => {
+        let availableTypes = [
+            { value: 'nodes', label: 'Nodes' },
+            { value: 'edges', label: 'Edges' }
+        ];
 
-                    store.stats.setWidgetProperties(props.widgetID, {
-                        elements: newItemType,
-                        element_values: newItemProperties[0].value,
-                        element_sort_values:
-                            newItemType !== 'nodes'
-                                ? 'frequency'
-                                : secondaryAxisValue
-                    });
+        if (props.customAvailableTypes) {
+            availableTypes = props.customAvailableTypes;
+        }
 
-                    if (newItemType !== 'nodes') {
-                        setSecondaryAxisValue('frequency');
-                    }
+        return (
+            <HStack width="100%">
+                <Heading size="xs" opacity="0.5" width="100%">
+                    Item Type:
+                </Heading>
+                <Select
+                    className="nodrag"
+                    margin="0px"
+                    variant="filled"
+                    size="xs"
+                    width="100%"
+                    defaultValue={itemType}
+                    borderRadius="5px"
+                    onChange={e => {
+                        const newItemType = e.target.value;
+                        const newItemProperties =
+                            newItemType === 'nodes'
+                                ? store.stats.getWidgetNodeProperties()
+                                : store.stats.getWidgetEdgeProperties();
 
-                    setItemType(newItemType);
-                    setItemProperties(newItemProperties);
-                    setSelectedItemProp(newItemProperties[0].value);
-                }}
-                background="whiteAlpha.200"
-                opacity="0.8"
-                _hover={{
-                    opacity: 1,
-                    cursor: 'pointer'
-                }}
-                _focus={{
-                    opacity: 1,
-                    cursor: 'pointer'
-                }}
-            >
-                <option value="nodes">Nodes</option>
-                <option value="edges">Edges</option>
-            </Select>
-        </HStack>
-    );
+                        store.stats.setWidgetProperties(props.widgetID, {
+                            elements: newItemType,
+                            element_values: newItemProperties[0].value,
+                            element_sort_values:
+                                newItemType !== 'nodes'
+                                    ? 'frequency'
+                                    : secondaryAxisValue
+                        });
+
+                        if (newItemType !== 'nodes') {
+                            setSecondaryAxisValue('frequency');
+                        }
+
+                        setItemType(newItemType);
+                        setItemProperties(newItemProperties);
+                        setSelectedItemProp(newItemProperties[0].value);
+                    }}
+                    background="whiteAlpha.200"
+                    opacity="0.8"
+                    _hover={{
+                        opacity: 1,
+                        cursor: 'pointer'
+                    }}
+                    _focus={{
+                        opacity: 1,
+                        cursor: 'pointer'
+                    }}
+                >
+                    {availableTypes.map(entry => (
+                        <option
+                            key={`item_type_${entry.value}`}
+                            value={entry.value}
+                        >
+                            {entry.label}
+                        </option>
+                    ))}
+                </Select>
+            </HStack>
+        );
+    };
 
     const renderMainAxisItemSwitch = () => (
         <HStack width="100%">
@@ -446,6 +478,68 @@ function WidgetSettings(props) {
         );
     };
 
+    const renderVisibleNodeProperties = () => {
+        return (
+            <VStack width="100%">
+                <Heading size="xs" opacity="0.5" width="100%">
+                    Visible Node Props:
+                </Heading>
+                <VStack
+                    alignItems="flex-start"
+                    spacing="5px"
+                    width="100%"
+                    backgroundColor="whiteAlpha.100"
+                    borderRadius="4px"
+                    padding="16px"
+                >
+                    {availableNodeProperties.map(entry => (
+                        <Checkbox
+                            defaultChecked={visibleNodeProperties.includes(
+                                entry
+                            )}
+                            isDisabled={
+                                (visibleNodeProperties.includes(entry) &&
+                                    visibleNodeProperties.length === 3) ||
+                                itemType === 'components'
+                            }
+                            size="sm"
+                            key={`radar_node_${entry}`}
+                            onChange={event => {
+                                if (event.target.checked) {
+                                    setVisibleNodeProperties([
+                                        ...visibleNodeProperties,
+                                        entry
+                                    ]);
+
+                                    store.stats.setWidgetProperty(
+                                        props.widgetID,
+                                        'visible_node_properties',
+                                        [...visibleNodeProperties, entry]
+                                    );
+                                } else {
+                                    visibleNodeProperties.splice(
+                                        visibleNodeProperties.indexOf(entry),
+                                        1
+                                    );
+                                    setVisibleNodeProperties([
+                                        ...visibleNodeProperties
+                                    ]);
+                                    store.stats.setWidgetProperties(
+                                        props.widgetID,
+                                        'visible_node_properties',
+                                        [...visibleNodeProperties]
+                                    );
+                                }
+                            }}
+                        >
+                            {entry}
+                        </Checkbox>
+                    ))}
+                </VStack>
+            </VStack>
+        );
+    };
+
     return (
         <Center height="100%" width="100%">
             <VStack
@@ -465,14 +559,21 @@ function WidgetSettings(props) {
                         {renderTitle()}
                         {props.settings.includes('item type') &&
                             renderItemTypeSwitch()}
-                        {renderMainAxisItemSwitch()}
+                        {props.settings.includes('main axis') &&
+                            renderMainAxisItemSwitch()}
                         {props.settings.includes('second axis') &&
                             renderSecondaryAxisItemSwitch()}
                         {props.settings.includes('group') &&
                             renderGroupBySwitch()}
-                        {renderItemStateSwitch()}
-                        {renderItemCountSwitch()}
-                        {store.core.isDetail && renderNodeTypesToShowSwitch()}
+                        {props.settings.includes('item state') &&
+                            renderItemStateSwitch()}
+                        {props.settings.includes('item count') &&
+                            renderItemCountSwitch()}
+                        {props.settings.includes('visible types') &&
+                            store.core.isDetail &&
+                            renderNodeTypesToShowSwitch()}
+                        {props.settings.includes('visible node props') &&
+                            renderVisibleNodeProperties()}
                     </VStack>
                 </CustomScroll>
             </VStack>
@@ -483,7 +584,8 @@ WidgetSettings.propTypes = {
     title: PropTypes.string,
     widgetID: PropTypes.string,
     settings: PropTypes.array,
-    mainAxis: PropTypes.string
+    mainAxis: PropTypes.string,
+    customAvailableTypes: PropTypes.array
 };
 
 export default observer(WidgetSettings);

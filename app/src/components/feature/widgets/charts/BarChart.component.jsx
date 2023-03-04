@@ -229,7 +229,11 @@ function BarChart(props) {
                         'item type',
                     props.chart.type.toLowerCase() !== 'grouped bar' &&
                         'second axis',
-                    props.chart.type.toLowerCase() === 'grouped bar' && 'group'
+                    props.chart.type.toLowerCase() === 'grouped bar' && 'group',
+                    'main axis',
+                    'item state',
+                    'item count',
+                    'visible types'
                 ]}
                 mainAxis={props.chart.type.toLowerCase() === 'bar' ? 'Y' : 'X'}
             />

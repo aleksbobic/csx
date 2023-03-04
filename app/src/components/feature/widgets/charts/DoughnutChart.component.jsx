@@ -203,7 +203,13 @@ function DoughnutChart(props) {
         return (
             <WidgetSettings
                 widgetID={props.chart.id}
-                settings={['item type']}
+                settings={[
+                    'item type',
+                    'main axis',
+                    'item state',
+                    'item count',
+                    'visible types'
+                ]}
             />
         );
     }
