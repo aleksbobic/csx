@@ -209,6 +209,15 @@ export function HistoryFlow() {
                             if (!store.core.studyIsSaved) {
                                 e.preventDefault();
                             }
+
+                            store.track.trackEvent(
+                                'History Panel',
+                                'Link',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open study in presentation mode up to history item'
+                                })
+                            );
                         }}
                         href={
                             store.core.studyIsSaved

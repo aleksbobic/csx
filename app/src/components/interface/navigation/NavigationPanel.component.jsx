@@ -695,6 +695,15 @@ function NavigationPanelComponent() {
                                     if (!store.core.studyIsSaved) {
                                         e.preventDefault();
                                     }
+
+                                    store.track.trackEvent(
+                                        'Navbar',
+                                        'Link',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Open study in presentation mode'
+                                        })
+                                    );
                                 }}
                                 transition="0.2s all ease-in-out"
                                 href={

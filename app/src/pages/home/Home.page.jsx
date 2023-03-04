@@ -223,7 +223,7 @@ function HomePage() {
                 });
             }
         }, 500);
-    }, []);
+    }, [cookieToast, renderDarkCookie, store.core.hideCookieBanner]);
 
     // useEffect(() => {
     //     if (store.core.hideCookieBanner) {

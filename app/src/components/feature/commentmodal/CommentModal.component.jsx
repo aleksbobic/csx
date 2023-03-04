@@ -142,6 +142,15 @@ function CommentModal() {
                     key={`available_chart_${chart.id}`}
                     onClick={() => {
                         store.comment.setChartToAttach(chart.id);
+
+                        store.track.trackEvent(
+                            'Graph Area - Comment Modal',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Attach chart ${chart.id}`
+                            })
+                        );
                     }}
                     _hover={{ textDecoration: 'none', opacity: 1 }}
                 >
@@ -211,6 +220,15 @@ function CommentModal() {
                             ) {
                                 store.core.setRightPanelTypeToOpen('details');
                             }
+
+                            store.track.trackEvent(
+                                'Comment Area - Comment Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open chart attach menu'
+                                })
+                            );
                         }}
                         zIndex="2"
                         borderRadius="4px"
@@ -268,7 +286,17 @@ function CommentModal() {
                             _hover={{
                                 opacity: 1
                             }}
-                            onClick={() => store.comment.removeChart()}
+                            onClick={() => {
+                                store.comment.removeChart();
+                                store.track.trackEvent(
+                                    'Graph Area - Comment Modal',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Remove chart'
+                                    })
+                                );
+                            }}
                             icon={
                                 <Close
                                     style={{
@@ -303,7 +331,17 @@ function CommentModal() {
                             _hover={{
                                 opacity: 1
                             }}
-                            onClick={() => store.comment.removeScreenshot()}
+                            onClick={() => {
+                                store.comment.removeScreenshot();
+                                store.track.trackEvent(
+                                    'Graph Area - Comment Modal',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Remove graph screenshot'
+                                    })
+                                );
+                            }}
                             icon={
                                 <Close
                                     style={{
@@ -337,6 +375,15 @@ function CommentModal() {
                             store.comment.attachScreenshot(
                                 window.innerWidth,
                                 window.innerHeight
+                            );
+
+                            store.track.trackEvent(
+                                'Graph Area - Comment Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Attach graph screenshot'
+                                })
                             );
                         }}
                         backgroundColor={

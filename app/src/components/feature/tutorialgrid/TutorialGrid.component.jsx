@@ -13,12 +13,15 @@ import { AcademicCapIcon } from '@heroicons/react/20/solid';
 
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import CustomScroll from '../customscroll/CustomScroll.component';
+import { RootStoreContext } from 'stores/RootStore';
 
 function TutorialGrid(props) {
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue('black', 'white');
+    const store = useContext(RootStoreContext);
 
     const tutorialList = [
         {
@@ -117,6 +120,16 @@ function TutorialGrid(props) {
                                     padding="0"
                                     zIndex="2"
                                     height="100%"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Home Page - Tutorial Grid',
+                                            'Link',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: tutorial.title
+                                            })
+                                        );
+                                    }}
                                     width="100%"
                                     _hover={{ textDecoration: 'none' }}
                                 >

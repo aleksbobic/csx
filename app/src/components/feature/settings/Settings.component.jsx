@@ -47,15 +47,6 @@ function Settings() {
 
         store.graph.updateLinkColor(colorMode);
         store.graph.updateNodeColor(colorMode);
-
-        store.track.trackEvent(
-            'Side panel - View Settings',
-            'Radio Element - Color Schema',
-            JSON.stringify({
-                type: 'Change Selection',
-                value: value.toLowerCase()
-            })
-        );
     };
 
     const updateEdgeColorScheme = value => {
@@ -63,15 +54,6 @@ function Settings() {
 
         store.graph.updateLinkColor(colorMode);
         store.graph.updateNodeColor(colorMode);
-
-        store.track.trackEvent(
-            'Side panel - View Settings',
-            'Radio Element - Edge Color Schema',
-            JSON.stringify({
-                type: 'Change Selection',
-                value: value.toLowerCase()
-            })
-        );
     };
 
     const updateLabelDistance = value => {
@@ -149,7 +131,18 @@ function Settings() {
                                 store.core.currentGraph
                             ]
                         }
-                        onChange={e => updateColorScheme(e.target.value)}
+                        onChange={e => {
+                            updateColorScheme(e.target.value);
+
+                            store.track.trackEvent(
+                                'Side panel - View Settings',
+                                'Select Element - Node Color',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
+                            );
+                        }}
                         variant="filled"
                         borderRadius="6px"
                         width="100px"
@@ -204,7 +197,7 @@ function Settings() {
                                     'Button',
                                     JSON.stringify({
                                         type: 'Click',
-                                        value: 'Open label types'
+                                        value: 'Open node types with labels menu'
                                     })
                                 );
                             }}
@@ -242,7 +235,7 @@ function Settings() {
                                     onChange={e => {
                                         if (!e.target.checked) {
                                             store.track.trackEvent(
-                                                'Side panel - Node Settings',
+                                                'Side panel - View Settings',
                                                 'Checkbox',
                                                 JSON.stringify({
                                                     type: 'Check',
@@ -254,7 +247,7 @@ function Settings() {
                                             );
                                         } else {
                                             store.track.trackEvent(
-                                                'Side panel - Node Settings',
+                                                'Side panel - View Settings',
                                                 'Checkbox',
                                                 JSON.stringify({
                                                     type: 'Check',
@@ -422,7 +415,17 @@ function Settings() {
                                 store.core.currentGraph
                             ]
                         }
-                        onChange={e => updateEdgeColorScheme(e.target.value)}
+                        onChange={e => {
+                            updateEdgeColorScheme(e.target.value);
+                            store.track.trackEvent(
+                                'Side panel - View Settings',
+                                'Select Element - Link Color',
+                                JSON.stringify({
+                                    type: 'Change selection',
+                                    value: e.target.value
+                                })
+                            );
+                        }}
                         variant="filled"
                         borderRadius="6px"
                         width="100px"
@@ -513,8 +516,8 @@ function Settings() {
                                             value: `${
                                                 store.graphInstance
                                                     .useCurvedEdges
-                                                    ? 'Use curved edges'
-                                                    : 'Use straight edges'
+                                                    ? 'Use curved links'
+                                                    : 'Use straight links'
                                             }`
                                         })
                                     );
@@ -555,8 +558,8 @@ function Settings() {
                                                 value: `${
                                                     store.graphInstance
                                                         .edgeDirectionVisiblity
-                                                        ? 'Use directed edges'
-                                                        : 'Use undirected edges'
+                                                        ? 'Use directed links'
+                                                        : 'Use undirected links'
                                                 }`
                                             })
                                         );

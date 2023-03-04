@@ -429,7 +429,7 @@ function ControlPanel() {
                                 'Button',
                                 JSON.stringify({
                                     type: 'Click',
-                                    value: 'Remove selection'
+                                    value: 'Remove selection from graph'
                                 })
                             );
                             store.graph.removeSelection();

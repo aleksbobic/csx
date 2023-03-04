@@ -41,11 +41,12 @@ function PresentPage() {
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
+        store.track.trackPageChange();
         const studyID = queryString.parse(location.search).study;
         const publicStudyID = queryString.parse(location.search).pstudy;
         const activeItem = queryString.parse(location.search).active_item;
         store.present.generateSlides(studyID, publicStudyID, activeItem);
-    }, [location.search, store.present]);
+    }, [location.search, store.present, store.track]);
 
     useEffect(() => {
         if (store.present.slides.length > 0) {
@@ -57,9 +58,18 @@ function PresentPage() {
                 controls: false,
                 maxScale: 2.5
             });
-            deck.on('slidechanged', e => setCurrentSlide(e.indexv));
+            deck.on('slidechanged', e => {
+                setCurrentSlide(e.indexv);
+                store.track.trackEvent(
+                    'Presentation Page',
+                    'Event',
+                    JSON.stringify({
+                        value: `Navigate to slide ${e.indexv}`
+                    })
+                );
+            });
         }
-    }, [store.present.slides]);
+    }, [store.present.slides, store.track]);
 
     useEffect(() => {
         if (store.core.studyIsEmpty) {
@@ -286,21 +296,53 @@ function PresentPage() {
                         opacity="0.5"
                         variant="ghost"
                         _hover={{ opacity: 1 }}
-                        onClick={() => store.present.generatePPT()}
+                        onClick={() => {
+                            store.present.generatePPT();
+                            store.track.trackEvent(
+                                'Presentation Page',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Generate presentation file for study ${
+                                        queryString.parse(location.search).study
+                                    }`
+                                })
+                            );
+                        }}
                         icon={<ArrowDownTrayIcon width="20px" height="20px" />}
                     />
                     <IconButton
                         opacity="0.5"
                         variant="ghost"
                         _hover={{ opacity: 1 }}
-                        onClick={() => revealInstance.next()}
+                        onClick={() => {
+                            revealInstance.next();
+                            store.track.trackEvent(
+                                'Presentation Page',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Next slide'
+                                })
+                            );
+                        }}
                         icon={<ChevronDownIcon width="20px" height="20px" />}
                     />
                     <IconButton
                         opacity="0.5"
                         variant="ghost"
                         _hover={{ opacity: 1 }}
-                        onClick={() => revealInstance.prev()}
+                        onClick={() => {
+                            revealInstance.prev();
+                            store.track.trackEvent(
+                                'Presentation Page',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Prev slide'
+                                })
+                            );
+                        }}
                         icon={<ChevronUpIcon width="20px" height="20px" />}
                     />
                 </HStack>

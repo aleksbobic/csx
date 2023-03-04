@@ -293,7 +293,7 @@ function StudyInfo() {
                                 store.core.toggleIsStudyPublic();
 
                                 store.track.trackEvent(
-                                    'Side panel - View Settings',
+                                    'Side Panel - Study Info',
                                     'Switch',
                                     JSON.stringify({
                                         type: 'Toggle',

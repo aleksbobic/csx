@@ -67,7 +67,17 @@ export function SurveyInfoModal(props) {
                         backgroundColor="green.500"
                         transform="all 0.2s ease-in"
                         target="_blank"
-                        onClick={() => props.onClose()}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Graph Area - Survey Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Open survey Link'
+                                })
+                            );
+                            props.onClose();
+                        }}
                         href={getSurveyLink()}
                         _hover={{
                             textDecoration: 'none',
@@ -78,7 +88,17 @@ export function SurveyInfoModal(props) {
                         Open the Survey! 🥳
                     </Link>
                     <Button
-                        onClick={() => props.onClose()}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Graph Area - Survey Modal',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Close survey modal'
+                                })
+                            );
+                            props.onClose();
+                        }}
                         size="xs"
                         opacity="0.5"
                         variant="ghost"
