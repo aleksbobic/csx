@@ -307,19 +307,14 @@ RadarChart.propTypes = {
     demoData: PropTypes.any,
     chart: PropTypes.object,
     chartIndex: PropTypes.number,
-    options: PropTypes.object,
     isExpanded: PropTypes.bool,
     isExample: PropTypes.bool,
-    networkData: PropTypes.string,
-    elementDisplayLimit: PropTypes.number,
     settingsMode: PropTypes.bool
 };
 
 RadarChart.defaultProps = {
     isExpanded: false,
     isExample: false,
-    networkData: 'all',
-    elementDisplayLimit: 10,
     settingsMode: false
 };
 

@@ -1,13 +1,8 @@
 import {
     Box,
-    Center,
-    Editable,
-    EditableInput,
-    EditablePreview,
     Heading,
     HStack,
     IconButton,
-    Select,
     Stat,
     Tag,
     TagLabel,
@@ -19,71 +14,98 @@ import {
 import { Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import WidgetAlert from '../WidgetAlert.component';
+import WidgetSettings from '../WidgetSettings.component';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
-    const [title, setTitle] = useState(props.chart.title);
-    const [chartNetworkData, setChartNetworkData] = useState(
-        props?.chart?.network_data ? props.chart.network_data : 'all'
+    const [widgetConfig, setWidgetConfig] = useState(
+        store.stats.activeWidgets.find(
+            widget => widget.id === props.chart.id
+        ) || {}
     );
-    const [dispalyLimit, setDispalyLimit] = useState(
-        props?.chart?.display_limit ? props.chart.display_limit : 10
+
+    const sortWidgetData = data => {
+        return data.slice().sort((node1, node2) => {
+            if (node1.neighbours.size > node2.neighbours.size) {
+                return -1;
+            }
+
+            if (node1.neighbours.size < node2.neighbours.size) {
+                return 1;
+            }
+
+            return 0;
+        });
+    };
+
+    const getWidgetDataBasedOnNetworkData = useCallback(
+        widget => {
+            switch (widget.network_data) {
+                case 'selected':
+                    return store.graph.currentGraphData.selectedNodes;
+                case 'visible':
+                    return store.graph.currentGraphData.nodes.filter(
+                        node => node.visible
+                    );
+                default:
+                    return store.graph.currentGraphData.nodes;
+            }
+        },
+        [
+            store.graph.currentGraphData.nodes,
+            store.graph.currentGraphData.selectedNodes
+        ]
+    );
+
+    const getWidgetData = useCallback(
+        widget => {
+            let data = getWidgetDataBasedOnNetworkData(widget);
+
+            data = sortWidgetData(data);
+
+            if (
+                widget.network_data === 'selected' ||
+                widget.display_limit === 0
+            ) {
+                return data;
+            }
+
+            if (widget.display_limit > 0) {
+                return data.slice(0, widget.display_limit);
+            }
+
+            return data.slice(widget.display_limit, data.length);
+        },
+        [getWidgetDataBasedOnNetworkData]
     );
 
     useEffect(() => {
         if (props.demoData.length) {
             setData(props.demoData);
         } else {
-            let data;
-
-            switch (chartNetworkData) {
-                case 'selected':
-                    data = store.graph.currentGraphData.selectedNodes;
-                    break;
-                case 'visible':
-                    data = store.graph.currentGraphData.nodes.filter(
-                        node => node.visible
-                    );
-                    break;
-                default:
-                    data = store.graph.currentGraphData.nodes;
-                    break;
-            }
-
-            data = data.slice().sort((node1, node2) => {
-                if (node1.neighbours.size > node2.neighbours.size) {
-                    return -1;
-                }
-
-                if (node1.neighbours.size < node2.neighbours.size) {
-                    return 1;
-                }
-
-                return 0;
-            });
-
-            if (chartNetworkData === 'selected' || dispalyLimit === 0) {
-                setData(data);
-            } else if (dispalyLimit > 0) {
-                setData(data.slice(0, dispalyLimit));
-            } else {
-                setData(data.slice(dispalyLimit, data.length));
-            }
+            const widget = store.stats.activeWidgets.find(
+                widget => widget.id === props.chart.id
+            );
+            setWidgetConfig(widget);
+            setData(getWidgetData(widget));
         }
     }, [
-        chartNetworkData,
-        dispalyLimit,
+        getWidgetData,
+        props.chart?.id,
         props.demoData,
-        props.elementDisplayLimit,
-        props.networkData,
+        store.stats.activeWidgets,
+        store.core.currentGraph,
+        store.core.isOverview,
+        store.overviewSchema.anchorProperties,
+        store.stats,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
         store.graph.currentGraphData.selectedNodes.length,
@@ -133,159 +155,10 @@ function SelectedNodeList(props) {
 
     if (props.settingsMode && props.isExpanded) {
         return (
-            <Center height="100%" width="100%">
-                <VStack
-                    height="100%"
-                    width="100%"
-                    alignItems="flex-start"
-                    spacing={1}
-                    backgroundColor={
-                        colorMode === 'light'
-                            ? 'blackAlpha.200'
-                            : 'blackAlpha.800'
-                    }
-                    borderRadius="6px"
-                    justifyContent="center"
-                    padding="10% 20%"
-                >
-                    <CustomScroll
-                        style={{ paddingLeft: '10px', paddingRight: '10px' }}
-                    >
-                        <VStack height="100%" width="100%">
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Title
-                                </Heading>
-
-                                <Editable
-                                    size="xs"
-                                    width="100%"
-                                    value={title}
-                                    backgroundColor={
-                                        colorMode === 'light'
-                                            ? 'blackAlpha.100'
-                                            : 'blackAlpha.300'
-                                    }
-                                    borderRadius="5px"
-                                    onChange={val => setTitle(val)}
-                                    onSubmit={val => {
-                                        if (val.trim()) {
-                                            store.stats.setWidgetProperty(
-                                                props.chart.id,
-                                                'title',
-                                                val.trim()
-                                            );
-                                            setTitle(val.trim());
-                                        } else {
-                                            setTitle(props.chart.title);
-                                        }
-                                    }}
-                                    onFocus={() =>
-                                        store.comment.setCommentTrigger(false)
-                                    }
-                                    onBlur={() =>
-                                        store.comment.setCommentTrigger(true)
-                                    }
-                                >
-                                    <EditablePreview
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        color="#FFFFFFBB"
-                                        backgroundColor="whiteAlpha.200"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                    <EditableInput
-                                        backgroundColor="whiteAlpha.200"
-                                        padding="5px 10px"
-                                        fontSize="xs"
-                                        width="100%"
-                                        size="xs"
-                                    />
-                                </Editable>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Element Types
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={chartNetworkData}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setChartNetworkData(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'network_data',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value="visible">Visible</option>
-                                    <option value="selected">Selected</option>
-                                    <option value="all">All</option>
-                                </Select>
-                            </HStack>
-                            <HStack width="100%">
-                                <Heading size="xs" opacity="0.5" width="100%">
-                                    Display Limit
-                                </Heading>
-                                <Select
-                                    className="nodrag"
-                                    margin="0px"
-                                    variant="filled"
-                                    size="xs"
-                                    width="100%"
-                                    defaultValue={dispalyLimit}
-                                    borderRadius="5px"
-                                    onChange={e => {
-                                        setDispalyLimit(e.target.value);
-
-                                        store.stats.setWidgetProperty(
-                                            props.chart.id,
-                                            'display_limit',
-                                            e.target.value
-                                        );
-                                    }}
-                                    background="whiteAlpha.200"
-                                    opacity="0.8"
-                                    _hover={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                    _focus={{
-                                        opacity: 1,
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    <option value={10}>First 10</option>
-                                    <option value={50}>First 50</option>
-                                    <option value={100}>First 100</option>
-                                    <option value={-10}>Last 10</option>
-                                    <option value={-50}>Last 50</option>
-                                    <option value={-100}>Last 100</option>
-                                    <option value={0}>All</option>
-                                </Select>
-                            </HStack>
-                        </VStack>
-                    </CustomScroll>
-                </VStack>
-            </Center>
+            <WidgetSettings
+                widgetID={props.chart.id}
+                settings={['item state', 'item count']}
+            />
         );
     }
 
@@ -328,7 +201,7 @@ function SelectedNodeList(props) {
                                     opacity={colorMode === 'light' && 0.8}
                                     width="100%"
                                     paddingRight={
-                                        props.networkData === 'selected'
+                                        widgetConfig.network_data === 'selected'
                                             ? '30px'
                                             : '0'
                                     }
@@ -364,7 +237,7 @@ function SelectedNodeList(props) {
 
                                 {props.isExpanded && renderNodeDetails(node)}
 
-                                {props.networkData === 'selected' && (
+                                {widgetConfig.network_data === 'selected' && (
                                     <Box
                                         position="absolute"
                                         top="4px"
@@ -423,16 +296,12 @@ function SelectedNodeList(props) {
 }
 SelectedNodeList.propTypes = {
     isExpanded: PropTypes.bool,
-    networkData: PropTypes.string,
-    demoData: PropTypes.array,
-    elementDisplayLimit: PropTypes.number
+    demoData: PropTypes.array
 };
 
 SelectedNodeList.defaultProps = {
     isExpanded: false,
-    networkData: 'all',
-    demoData: [],
-    elementDisplayLimit: 10
+    demoData: []
 };
 
 export default observer(SelectedNodeList);
