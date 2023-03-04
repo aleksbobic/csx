@@ -398,7 +398,13 @@ export class StatsStore {
                     type: this.newChartProps.type,
                     elements: this.newChartProps.elements,
                     element_values: this.newChartProps.element_values,
-                    network: this.newChartProps.network
+                    network: this.newChartProps.network,
+                    element_sort_values: 'frequency',
+                    visible_node_properties: [
+                        'Neighbours',
+                        'Documents',
+                        'Links'
+                    ]
                 }
             })
         );
@@ -411,7 +417,8 @@ export class StatsStore {
                 height: '200px',
                 network: this.store.core.currentGraph,
                 title: this.getNewWidgetTitle(),
-                element_sort_values: 'frequency'
+                element_sort_values: 'frequency',
+                visible_node_properties: ['Neighbours', 'Documents', 'Links']
             });
         } else {
             this.charts[dataset] = [
@@ -422,7 +429,12 @@ export class StatsStore {
                     height: '200px',
                     network: this.store.core.currentGraph,
                     title: this.getNewWidgetTitle(),
-                    element_sort_values: 'frequency'
+                    element_sort_values: 'frequency',
+                    visible_node_properties: [
+                        'Neighbours',
+                        'Documents',
+                        'Links'
+                    ]
                 }
             ];
         }
@@ -468,6 +480,24 @@ export class StatsStore {
 
     getWidgetGroupBy = id =>
         this.activeWidgets.find(widget => widget.id === id)?.group_by;
+
+    getWidgetVisibleNodeProperties = id =>
+        this.activeWidgets.find(widget => widget.id === id)
+            ?.visible_node_properties;
+
+    getWidgetAvailabelNodeProperties = () => {
+        let nodeProperties;
+
+        if (this.store.core.isDetail) {
+            nodeProperties = this.getRadarDetailNodeProperties();
+        } else {
+            nodeProperties = this.getRadarOverviewNodeProperties();
+        }
+
+        return Object.keys(nodeProperties)
+            .map(key => nodeProperties[key])
+            .flat();
+    };
 
     getWidgetItemProps = id => {
         if (
@@ -760,6 +790,23 @@ export class StatsStore {
         };
     };
 
+    getRadarDetailVisibleNodeProperties = chartID => {
+        const radarProps = this.getRadarDetailNodeProperties();
+        const visible_node_props = this.activeWidgets.filter(
+            widget => widget.id === chartID
+        )[0].visible_node_properties;
+
+        const visibleRadarProps = {};
+
+        for (const [key, value] of Object.entries(radarProps)) {
+            visibleRadarProps[key] = value.filter(entry =>
+                visible_node_props.includes(entry)
+            );
+        }
+
+        return visibleRadarProps;
+    };
+
     getRadarOverviewNodeProperties = () => {
         const linkTypes = this.store.overviewSchema.links.map(
             linkType => linkType
@@ -779,6 +826,23 @@ export class StatsStore {
             linkTypes: linkTypes,
             anchorProperties: anchorProperties
         };
+    };
+
+    getRadarOverviewVisibleNodeProperties = chartID => {
+        const radarProps = this.getRadarOverviewNodeProperties();
+        const visible_node_props = this.activeWidgets.filter(
+            widget => widget.id === chartID
+        )[0].visible_node_properties;
+
+        const visibleRadarProps = {};
+
+        for (const [key, value] of Object.entries(radarProps)) {
+            visibleRadarProps[key] = value.filter(entry =>
+                visible_node_props.includes(entry)
+            );
+        }
+
+        return visibleRadarProps;
     };
 
     getNodeLinks = node =>

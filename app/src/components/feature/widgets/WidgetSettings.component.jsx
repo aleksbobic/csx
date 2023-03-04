@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import {
@@ -71,6 +71,12 @@ function WidgetSettings(props) {
     const [visibleNodeProperties, setVisibleNodeProperties] = useState(
         store.stats.getWidgetVisibleNodeProperties(props.widgetID)
     );
+
+    useEffect(() => {
+        setAvailableNodeProperties(
+            store.stats.getWidgetAvailabelNodeProperties()
+        );
+    }, [store.stats, store.core.currentGraph, store.graph.currentGraphData]);
 
     const renderTitle = () => (
         <HStack width="100%">

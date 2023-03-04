@@ -814,10 +814,10 @@ function ControlPanel() {
         >
             <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
                 <IconButton
-                    borderRadius="0"
                     variant="link"
                     width="50px"
                     height="50px"
+                    borderRadius="6px"
                     color={tabInactiveColors}
                     onClick={() => {
                         toggleControlPanel();
@@ -848,10 +848,11 @@ function ControlPanel() {
                 padding="8px"
                 style={
                     isOpen
-                        ? {}
+                        ? { borderRadius: '6px', borderColor: 'transparent' }
                         : {
                               color: tabInactiveColors,
-                              borderColor: 'transparent'
+                              borderColor: 'transparent',
+                              borderRadius: '6px'
                           }
                 }
             >
@@ -885,9 +886,10 @@ function ControlPanel() {
                 padding="8px"
                 style={
                     isOpen
-                        ? {}
+                        ? { borderRadius: '6px', borderColor: 'transparent' }
                         : {
                               color: tabInactiveColors,
+                              borderRadius: '6px',
                               borderColor: 'transparent'
                           }
                 }
@@ -919,7 +921,7 @@ function ControlPanel() {
             position="relative"
             style={{ overflowX: 'hidden' }}
         >
-            <TabPanel width="250px" height="100%">
+            <TabPanel width="250px" height="100%" style={{ paddingLeft: 0 }}>
                 <CustomScroll
                     style={{
                         paddingLeft: '10px',
@@ -932,7 +934,7 @@ function ControlPanel() {
             <TabPanel
                 width="250px"
                 height="100%"
-                style={{ overflowX: 'hidden' }}
+                style={{ overflowX: 'hidden', paddingLeft: 0 }}
             >
                 <CustomScroll
                     style={{
