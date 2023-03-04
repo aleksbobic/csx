@@ -406,7 +406,8 @@ export class StatsStore {
                         'Links'
                     ],
                     max_distance: 2,
-                    direct_connection_features: 'all'
+                    direct_connection_features: 'all',
+                    filter_property: 'degree'
                 }
             })
         );
@@ -422,7 +423,8 @@ export class StatsStore {
                 element_sort_values: 'frequency',
                 visible_node_properties: ['Neighbours', 'Documents', 'Links'],
                 max_distance: 2,
-                direct_connection_features: 'all'
+                direct_connection_features: 'all',
+                filter_property: 'degree'
             });
         } else {
             this.charts[dataset] = [
@@ -440,7 +442,8 @@ export class StatsStore {
                         'Links'
                     ],
                     max_distance: 2,
-                    direct_connection_features: 'all'
+                    direct_connection_features: 'all',
+                    filter_property: 'degree'
                 }
             ];
         }
@@ -490,6 +493,10 @@ export class StatsStore {
     getWdigetVisibleDirectConnectionFeature = id =>
         this.activeWidgets.find(widget => widget.id === id)
             ?.direct_connection_features || 'all';
+
+    getWdigetNodeFilteringFeature = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.filter_property ||
+        'degree';
 
     getWidgetGroupBy = id =>
         this.activeWidgets.find(widget => widget.id === id)?.group_by;

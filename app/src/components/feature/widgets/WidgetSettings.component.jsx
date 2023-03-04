@@ -81,6 +81,10 @@ function WidgetSettings(props) {
             store.stats.getWdigetVisibleDirectConnectionFeature(props.widgetID)
         );
 
+    const [nodeFilteringProperty, setNodeFilteringProperty] = useState(
+        store.stats.getWdigetNodeFilteringFeature(props.widgetID)
+    );
+
     useEffect(() => {
         setAvailableNodeProperties(
             store.stats.getWidgetAvailabelNodeProperties()
@@ -122,6 +126,7 @@ function WidgetSettings(props) {
                     padding="5px 10px"
                     fontSize="xs"
                     maxWidth="133px"
+                    marginBottom="-6px"
                     color="#FFFFFFBB"
                     backgroundColor="whiteAlpha.200"
                     width="100%"
@@ -677,6 +682,65 @@ function WidgetSettings(props) {
         </HStack>
     );
 
+    const renderNodeFilteringSwitch = index => (
+        <HStack width="100%" key={`${props.widgetID}_settings_widget_${index}`}>
+            <Heading size="xs" opacity="0.5" width="100%">
+                Filtering Feature:
+            </Heading>
+            <Select
+                className="nodrag"
+                margin="0px"
+                variant="filled"
+                size="xs"
+                width="100%"
+                defaultValue={nodeFilteringProperty}
+                borderRadius="5px"
+                onChange={e => {
+                    setNodeFilteringProperty(e.target.value);
+
+                    store.stats.setWidgetProperties(props.widgetID, {
+                        filter_property: e.target.value
+                    });
+                }}
+                background="whiteAlpha.200"
+                opacity="0.8"
+                _hover={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+                _focus={{
+                    opacity: 1,
+                    cursor: 'pointer'
+                }}
+            >
+                <option value="degree">Neighbour count</option>
+                {Object.keys(store.search.nodeTypes)
+                    .map(feature => {
+                        return {
+                            feature: feature,
+                            type: store.search.nodeTypes[feature]
+                        };
+                    })
+                    .filter(
+                        entry =>
+                            ['integer', 'float'].includes(entry['type']) &&
+                            store.core.isOverview &&
+                            store.graph.currentGraphData.meta.anchorProperties
+                                .map(entry => entry['property'])
+                                .includes(entry['feature'])
+                    )
+                    .map(entry => (
+                        <option
+                            key={`filter_prop_${entry['feature']}`}
+                            value={entry['feature']}
+                        >
+                            {entry['feature']}
+                        </option>
+                    ))}
+            </Select>
+        </HStack>
+    );
+
     const renderSwitches = () => {
         return ['title', ...props.settings].map((value, index) => {
             switch (value) {
@@ -700,6 +764,8 @@ function WidgetSettings(props) {
                     return renderMaxDistanceSwitch(index);
                 case 'direct connection feature':
                     return renderDirectConnectionFeatureSwitch(index);
+                case 'node filtering':
+                    return renderNodeFilteringSwitch(index);
                 default:
                     return renderTitle(index);
             }
