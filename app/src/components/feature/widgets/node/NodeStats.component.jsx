@@ -28,7 +28,7 @@ function SelectedNodeList(props) {
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
         store.stats.activeWidgets.find(
-            widget => widget.id === props.chart.id
+            widget => widget.id === props.chart?.id
         ) || {}
     );
 
@@ -67,6 +67,10 @@ function SelectedNodeList(props) {
 
     const getWidgetData = useCallback(
         widget => {
+            if (!widget) {
+                return null;
+            }
+
             let data = getWidgetDataBasedOnNetworkData(widget);
 
             data = sortWidgetData(data);
@@ -94,6 +98,7 @@ function SelectedNodeList(props) {
             const widget = store.stats.activeWidgets.find(
                 widget => widget.id === props.chart.id
             );
+
             setWidgetConfig(widget);
             setData(getWidgetData(widget));
         }

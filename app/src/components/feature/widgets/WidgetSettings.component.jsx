@@ -348,6 +348,23 @@ function WidgetSettings(props) {
     };
 
     const renderItemStateSwitch = () => {
+        let itemStates;
+
+        if (props.customItemStates) {
+            itemStates = props.customItemStates;
+        } else {
+            itemStates = [
+                { value: 'visible', label: 'Visible graph elements' }
+            ];
+            if (itemType !== 'edges') {
+                itemState.push({
+                    value: 'selected',
+                    label: 'Selected graph elements'
+                });
+            }
+            itemState.push({ value: 'all', label: 'All graph elements' });
+        }
+
         return (
             <HStack width="100%">
                 <Heading size="xs" opacity="0.5" width="100%">
@@ -379,13 +396,14 @@ function WidgetSettings(props) {
                         cursor: 'pointer'
                     }}
                 >
-                    <option value="visible">Visible graph elements</option>
-                    {itemType !== 'edges' && (
-                        <option value="selected">
-                            Selected graph elements
+                    {itemStates.map(state => (
+                        <option
+                            key={`item_state_${state.value}`}
+                            value={state.value}
+                        >
+                            {state.label}
                         </option>
-                    )}
-                    <option value="all">All graph elements</option>
+                    ))}
                 </Select>
             </HStack>
         );
@@ -591,7 +609,8 @@ WidgetSettings.propTypes = {
     widgetID: PropTypes.string,
     settings: PropTypes.array,
     mainAxis: PropTypes.string,
-    customAvailableTypes: PropTypes.array
+    customAvailableTypes: PropTypes.array,
+    customItemStates: PropTypes.array
 };
 
 export default observer(WidgetSettings);
