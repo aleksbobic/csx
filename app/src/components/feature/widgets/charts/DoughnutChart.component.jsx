@@ -14,7 +14,7 @@ function DoughnutChart(props) {
     const [data, setData] = useState(null);
 
     const [chartConfig, setChartConfig] = useState(
-        store.stats.activeWidgets.find(
+        store.stats?.activeWidgets?.find(
             widget => widget.id === props.chart.id
         ) || {}
     );

@@ -27,7 +27,7 @@ function SelectedComponentList(props) {
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats.activeWidgets.find(
+        store.stats?.activeWidgets?.find(
             widget => widget.id === props.chart?.id
         ) || {}
     );
