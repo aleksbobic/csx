@@ -742,34 +742,38 @@ function WidgetSettings(props) {
     );
 
     const renderSwitches = () => {
-        return ['title', ...props.settings].map((value, index) => {
-            switch (value) {
-                case 'item type':
-                    return renderItemTypeSwitch(index);
-                case 'main axis':
-                    return renderMainAxisItemSwitch(index);
-                case 'second axis':
-                    return renderSecondaryAxisItemSwitch(index);
-                case 'group':
-                    return renderGroupBySwitch(index);
-                case 'item state':
-                    return renderItemStateSwitch(index);
-                case 'item count':
-                    return renderItemCountSwitch(index);
-                case 'visible types':
-                    return renderNodeTypesToShowSwitch(index);
-                case 'visible node props':
-                    return renderVisibleNodeProperties(index);
-                case 'max distance':
-                    return renderMaxDistanceSwitch(index);
-                case 'direct connection feature':
-                    return renderDirectConnectionFeatureSwitch(index);
-                case 'node filtering':
-                    return renderNodeFilteringSwitch(index);
-                default:
-                    return renderTitle(index);
-            }
-        });
+        return ['title', ...props.settings]
+            .filter(
+                value => typeof value === 'string' || value instanceof String
+            )
+            .map((value, index) => {
+                switch (value) {
+                    case 'item type':
+                        return renderItemTypeSwitch(index);
+                    case 'main axis':
+                        return renderMainAxisItemSwitch(index);
+                    case 'second axis':
+                        return renderSecondaryAxisItemSwitch(index);
+                    case 'group':
+                        return renderGroupBySwitch(index);
+                    case 'item state':
+                        return renderItemStateSwitch(index);
+                    case 'item count':
+                        return renderItemCountSwitch(index);
+                    case 'visible types':
+                        return renderNodeTypesToShowSwitch(index);
+                    case 'visible node props':
+                        return renderVisibleNodeProperties(index);
+                    case 'max distance':
+                        return renderMaxDistanceSwitch(index);
+                    case 'direct connection feature':
+                        return renderDirectConnectionFeatureSwitch(index);
+                    case 'node filtering':
+                        return renderNodeFilteringSwitch(index);
+                    default:
+                        return renderTitle(index);
+                }
+            });
     };
 
     return (
