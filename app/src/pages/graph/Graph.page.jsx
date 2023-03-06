@@ -42,10 +42,7 @@ function GraphPage() {
 
         if (studyId) {
             if (store.core.studyUuid === studyId) {
-                if (
-                    store.graph.graphData.nodes.length === 0 ||
-                    store.workflow.shouldRunWorkflow
-                ) {
+                if (store.graph.graphData.nodes.length === 0) {
                     store.graph.modifyStudy(store.core.currentGraph);
                 }
             } else {
@@ -62,8 +59,7 @@ function GraphPage() {
         store.core,
         store.graph,
         store.graphInstance,
-        store.track,
-        store.workflow.shouldRunWorkflow
+        store.track
     ]);
 
     useEffect(() => {
