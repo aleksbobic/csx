@@ -1479,7 +1479,7 @@ export class StatsStore {
                         values.push(getNodeProp(node, nodeProperty.prop));
                         counts.push(node.neighbours.size);
                     }
-                } else {
+                } else if (node.properties) {
                     if (labelLocation >= 0) {
                         counts[labelLocation] += parseFloat(
                             node.properties[sortBy]
