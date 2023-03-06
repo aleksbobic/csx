@@ -199,6 +199,7 @@ function PresentPage() {
                                     textAlign={textAlign}
                                     width="30%"
                                     height="auto"
+                                    zIndex="5"
                                 >
                                     <ReactMarkdown
                                         className="mkdslide"
