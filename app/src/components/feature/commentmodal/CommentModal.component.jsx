@@ -213,6 +213,24 @@ function CommentModal() {
                         isDisabled={store.comment.chart}
                         size="sm"
                         opacity={1}
+                        onKeyDown={e => {
+                            if (
+                                e.key === 'Enter' &&
+                                (!store.core.isRightSidePanelOpen ||
+                                    store.core.rightPanelType !== 'details')
+                            ) {
+                                store.core.setRightPanelTypeToOpen('details');
+                            }
+
+                            store.track.trackEvent(
+                                'Comment Area - Comment Modal',
+                                'Key',
+                                JSON.stringify({
+                                    type: 'Enter',
+                                    value: 'Open chart attach menu'
+                                })
+                            );
+                        }}
                         onClick={() => {
                             if (
                                 !store.core.isRightSidePanelOpen ||
