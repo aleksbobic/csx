@@ -224,7 +224,7 @@ function SelectedComponentList(props) {
         );
     }
 
-    if (data && data.length === 0) {
+    if (!data || data.length === 0) {
         return (
             <WidgetAlert
                 size={props.isExpanded ? 'md' : 'sm'}
