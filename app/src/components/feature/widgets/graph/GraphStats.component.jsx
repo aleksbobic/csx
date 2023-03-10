@@ -277,6 +277,7 @@ function GraphStats(props) {
     }
 
     if (
+        nodeData &&
         nodeData.length === 0 &&
         widgetConfig &&
         widgetConfig.network_data !== 'all'
