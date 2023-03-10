@@ -115,8 +115,30 @@ function WidgetSettings(props) {
                             val.trim()
                         );
                         setTitle(val.trim());
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Editable Element - Title',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Write',
+                                value: val.trim()
+                            })
+                        );
                     } else {
                         setTitle(store.stats.getWidgetTitle(props.widgetID));
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Editable Element - Title',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Write',
+                                value: store.stats.getWidgetTitle(
+                                    props.widgetID
+                                )
+                            })
+                        );
                     }
                 }}
                 onFocus={() => store.comment.setCommentTrigger(false)}
@@ -175,6 +197,17 @@ function WidgetSettings(props) {
                     borderRadius="5px"
                     onChange={e => {
                         const newItemType = e.target.value;
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Select Element - Item Type',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Change selection',
+                                value: newItemType
+                            })
+                        );
+
                         const newItemProperties =
                             newItemType === 'nodes'
                                 ? store.stats.getWidgetNodeProperties()
@@ -243,6 +276,16 @@ function WidgetSettings(props) {
                         setSecondaryAxisValue('frequency');
                     }
 
+                    store.track.trackEvent(
+                        'Widget Settings',
+                        'Select Element - Primary Axis Prop',
+                        JSON.stringify({
+                            widgetID: props.widgetID,
+                            type: 'Change selection',
+                            value: e.target.value
+                        })
+                    );
+
                     store.stats.setWidgetProperties(props.widgetID, {
                         element_values: e.target.value,
                         element_sort_values: 'frequency'
@@ -293,6 +336,16 @@ function WidgetSettings(props) {
                     store.stats.setWidgetProperties(props.widgetID, {
                         element_sort_values: e.target.value
                     });
+
+                    store.track.trackEvent(
+                        'Widget Settings',
+                        'Select Element - Secondary Axis prop',
+                        JSON.stringify({
+                            widgetID: props.widgetID,
+                            type: 'Change selection',
+                            value: e.target.value
+                        })
+                    );
                 }}
                 background="whiteAlpha.200"
                 opacity="0.8"
@@ -342,6 +395,16 @@ function WidgetSettings(props) {
                         store.stats.setWidgetProperties(props.widgetID, {
                             group_by: e.target.value
                         });
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Select Element - Group By Value',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Change selection',
+                                value: e.target.value
+                            })
+                        );
                     }}
                     background="whiteAlpha.200"
                     opacity="0.8"
@@ -407,6 +470,16 @@ function WidgetSettings(props) {
                         store.stats.setWidgetProperties(props.widgetID, {
                             network_data: e.target.value
                         });
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Select Element - Element Types',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Change selection',
+                                value: e.target.value
+                            })
+                        );
                     }}
                     background="whiteAlpha.200"
                     opacity="0.8"
@@ -455,6 +528,16 @@ function WidgetSettings(props) {
                         store.stats.setWidgetProperties(props.widgetID, {
                             display_limit: e.target.value
                         });
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Select Element - Display Limit',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Change selection',
+                                value: e.target.value
+                            })
+                        );
                     }}
                     background="whiteAlpha.200"
                     opacity="0.8"
@@ -503,6 +586,16 @@ function WidgetSettings(props) {
                         store.stats.setWidgetProperties(props.widgetID, {
                             show_only: e.target.value
                         });
+
+                        store.track.trackEvent(
+                            'Widget Settings',
+                            'Select Element - Show Only',
+                            JSON.stringify({
+                                widgetID: props.widgetID,
+                                type: 'Change selection',
+                                value: e.target.value
+                            })
+                        );
                     }}
                     background="whiteAlpha.200"
                     opacity="0.8"
@@ -572,6 +665,16 @@ function WidgetSettings(props) {
                                         'visible_node_properties',
                                         [...visibleNodeProperties, entry]
                                     );
+
+                                    store.track.trackEvent(
+                                        'Widget Settings',
+                                        'Checkbox - Visible Node Props',
+                                        JSON.stringify({
+                                            widgetID: props.widgetID,
+                                            type: 'Check',
+                                            value: `Show property ${entry}`
+                                        })
+                                    );
                                 } else {
                                     visibleNodeProperties.splice(
                                         visibleNodeProperties.indexOf(entry),
@@ -584,6 +687,16 @@ function WidgetSettings(props) {
                                         props.widgetID,
                                         'visible_node_properties',
                                         [...visibleNodeProperties]
+                                    );
+
+                                    store.track.trackEvent(
+                                        'Widget Settings',
+                                        'Checkbox - Visible Node Props',
+                                        JSON.stringify({
+                                            widgetID: props.widgetID,
+                                            type: 'Check',
+                                            value: `Hide property ${entry}`
+                                        })
                                     );
                                 }
                             }}
@@ -615,6 +728,16 @@ function WidgetSettings(props) {
                     store.stats.setWidgetProperties(props.widgetID, {
                         max_distance: e.target.value
                     });
+
+                    store.track.trackEvent(
+                        'Widget Settings',
+                        'Select Element - Max Distance',
+                        JSON.stringify({
+                            widgetID: props.widgetID,
+                            type: 'Change selection',
+                            value: e.target.value
+                        })
+                    );
                 }}
                 background="whiteAlpha.200"
                 opacity="0.8"
@@ -655,6 +778,16 @@ function WidgetSettings(props) {
                     store.stats.setWidgetProperties(props.widgetID, {
                         direct_connection_features: e.target.value
                     });
+
+                    store.track.trackEvent(
+                        'Widget Settings',
+                        'Select Element - Visible Features',
+                        JSON.stringify({
+                            widgetID: props.widgetID,
+                            type: 'Change selection',
+                            value: e.target.value
+                        })
+                    );
                 }}
                 background="whiteAlpha.200"
                 opacity="0.8"
@@ -701,6 +834,16 @@ function WidgetSettings(props) {
                     store.stats.setWidgetProperties(props.widgetID, {
                         filter_property: e.target.value
                     });
+
+                    store.track.trackEvent(
+                        'Widget Settings',
+                        'Select Element - Filtering Features',
+                        JSON.stringify({
+                            widgetID: props.widgetID,
+                            type: 'Change selection',
+                            value: e.target.value
+                        })
+                    );
                 }}
                 background="whiteAlpha.200"
                 opacity="0.8"
