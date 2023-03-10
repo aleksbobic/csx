@@ -1310,7 +1310,11 @@ export class StatsStore {
 
     getNodeFeature = node => node.feature;
 
-    getNodeAdvancedProp = (node, prop) => node.properties[prop];
+    getNodeAdvancedProp = (node, prop) =>
+        Object.hasOwn(node, 'properties') &&
+        Object.hasOwn(node.properties, prop)
+            ? node.properties[prop]
+            : null;
 
     getNodeGroups = (groupBy, data) => {
         const groups = {};
