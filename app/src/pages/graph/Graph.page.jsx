@@ -33,6 +33,51 @@ function GraphPage() {
         store.core.deleteStudy();
     });
 
+    const queryIsJSON = useCallback(() => {
+        try {
+            JSON.parse(
+                store.core.studyHistory[store.core.studyHistoryItemIndex].query
+            );
+
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }, [store.core.studyHistory, store.core.studyHistoryItemIndex]);
+
+    const shouldReload = useCallback(() => {
+        let queryHasChanged = false;
+        if (
+            store.core.studyHistory.length > 0 &&
+            store.search.advancedSearchQuery
+        ) {
+            if (queryIsJSON()) {
+                queryHasChanged =
+                    JSON.stringify(store.search.advancedSearchQuery) !==
+                    store.core.studyHistory[store.core.studyHistoryItemIndex]
+                        .query;
+            } else {
+                queryHasChanged =
+                    store.search.advancedSearchQuery.query.action !==
+                        'search' ||
+                    store.search.advancedSearchQuery.query.feature !==
+                        store.search.default_search_features.join(', ') ||
+                    store.search.advancedSearchQuery.query.keyphrase !==
+                        store.core.studyHistory[
+                            store.core.studyHistoryItemIndex
+                        ].query;
+            }
+        }
+
+        return queryHasChanged;
+    }, [
+        queryIsJSON,
+        store.core.studyHistory,
+        store.core.studyHistoryItemIndex,
+        store.search.advancedSearchQuery,
+        store.search.default_search_features
+    ]);
+
     useEffect(() => {
         store.track.trackPageChange();
 
@@ -42,7 +87,10 @@ function GraphPage() {
 
         if (studyId) {
             if (store.core.studyUuid === studyId) {
-                if (store.graph.graphData.nodes.length === 0) {
+                if (
+                    !store.core.dataIsLoading &&
+                    (store.graph.graphData.nodes.length === 0 || shouldReload())
+                ) {
                     store.graph.modifyStudy(store.core.currentGraph);
                 }
             } else {
@@ -56,6 +104,8 @@ function GraphPage() {
     }, [
         history,
         location.search,
+        location.state,
+        shouldReload,
         store.core,
         store.graph,
         store.graphInstance,
