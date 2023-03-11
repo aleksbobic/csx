@@ -12,10 +12,13 @@ import { CoreStore } from './CoreStore';
 import { WorkflowStore } from './WorkflowStore';
 import { FileUploadStore } from './FileUploadStore';
 import { StatsStore } from './StatsStore';
+import { HistoryStore } from './HistoryStore';
+import { CommentStore } from './CommentStore';
+import { OverviewSchemaStore } from './OverviewSchemaStore';
+import { PresentStore } from './PresentStore';
+import { isEnvSet } from 'general.utils';
 
 export class RootStore {
-    surveyLink = null;
-
     constructor() {
         this.initAxios();
         this.graphInstance = new GraphInstanceStore(this);
@@ -30,24 +33,18 @@ export class RootStore {
         this.workflow = new WorkflowStore(this);
         this.fileUpload = new FileUploadStore(this);
         this.stats = new StatsStore(this);
-        this.getSurveyLink();
+        this.history = new HistoryStore(this);
+        this.comment = new CommentStore(this);
+        this.overviewSchema = new OverviewSchemaStore(this);
+        this.present = new PresentStore(this);
     }
 
     initAxios = () => {
-        if (process.env.REACT_APP_SERVER_PORT) {
-            axios.defaults.baseURL = `http://localhost:${process.env.REACT_APP_SERVER_PORT}`;
+        if (isEnvSet('REACT_APP_SERVER_PORT')) {
+            axios.defaults.baseURL = `http://localhost:${process?.env.REACT_APP_SERVER_PORT}`;
         } else {
             axios.defaults.baseURL = `${window.location.origin}/api`;
         }
-    };
-
-    getSurveyLink = () => {
-        axios.get('util/uuid').then(response => {
-            this.surveyLink =
-                'https://survey.tugraz.at/index.php/555429?lang=en&uuid=' +
-                response.data;
-            this.track.trackEvent('init', 'uuid', response.data);
-        });
     };
 }
 

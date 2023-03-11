@@ -1,9 +1,7 @@
 import {
-    Button,
     Modal,
     ModalBody,
     ModalContent,
-    ModalFooter,
     ModalHeader,
     ModalOverlay,
     useDisclosure
@@ -25,15 +23,6 @@ function DatasetConfigModal() {
         }
     }, [isOpen, onClose, onOpen, store.fileUpload.showConfigChangeModal]);
 
-    const updateConfig = () => {
-        store.fileUpload.updateConfig();
-    };
-
-    const cancelSettingsEdit = () => {
-        store.fileUpload.changeConfigChangeModalVisiblity(false);
-        store.fileUpload.resetFileUploadData();
-    };
-
     return (
         <Modal
             isOpen={isOpen}
@@ -50,21 +39,6 @@ function DatasetConfigModal() {
                     <ModalBody overflowY="scroll" width="748px">
                         <DatasetConfigComponent formType="modify" />
                     </ModalBody>
-                )}
-
-                {store.fileUpload.fileUploadData.name !== '' && (
-                    <ModalFooter>
-                        <Button
-                            variant="outline"
-                            mr={3}
-                            onClick={cancelSettingsEdit}
-                        >
-                            Cancel
-                        </Button>
-                        <Button variant="solid" onClick={() => updateConfig()}>
-                            Update config
-                        </Button>
-                    </ModalFooter>
                 )}
             </ModalContent>
         </Modal>

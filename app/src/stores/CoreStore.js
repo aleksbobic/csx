@@ -1,15 +1,41 @@
 import axios from 'axios';
 import { makeAutoObservable } from 'mobx';
+import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
+import { isEnvSet, safeRequest } from 'general.utils';
 
 export class CoreStore {
     availableDatasets = [];
     demoMode = false;
     demoNavigationData = [];
     activeDemoIndex = 1;
-    errorMessage = null;
     errorDetails = null;
     currentGraph = '';
     userUuid = null;
+    studyUuid = null;
+    studyName = '';
+    studyDescription = '';
+    studyAuthor = '';
+    studyHistory = [];
+    studyIsEmpty = false;
+    studyHistoryItemIndex = 0;
+    studyIsSaved = false;
+    isStudyPublic = false;
+    studyPublicURL = '';
+    showCommentModal = false;
+    studies = [];
+    dataIsLoading = false;
+    hideCookieBanner = false;
+    trackingEnabled = false;
+    colorMode = null;
+    showCookieInfo = false;
+    isSchemaNodeTypeBound = true;
+    isLeftSidePanelOpen = true;
+    isRightSidePanelOpen = false;
+    rightPanelType = '';
+    rightPanelTypeToOpen = null;
+    rightPanelWidth = 0;
+    surveyHidden = false;
+    surveyHistoryDepthTrigger = 3;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -22,15 +48,332 @@ export class CoreStore {
         this.userUuid = localStorage.getItem('useruuid');
 
         if (!this.userUuid) {
-            localStorage.setItem('useruuid', this.generateUUID());
+            this.generateUUID();
         }
+        this.getSavedStudies();
+        this.hideCookieBanner = this.getCookieBanner();
+        this.trackingEnabled =
+            localStorage.getItem('trackingenabled') === 'true';
+        this.surveyHidden = localStorage.getItem('surveyhidden') === 'true';
+        if (isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')) {
+            this.surveyHistoryDepthTrigger = parseInt(
+                isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')
+            );
+        }
+
+        this.colorMode = localStorage.getItem('chakra-ui-color-mode');
 
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    addCommentToCurrentHistoryItem = comment => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
+    };
+
+    deleteCommentFromCurrentHistoryItem = index => {
+        this.studyHistory[this.studyHistoryItemIndex].comments.splice(index, 1);
+    };
+
+    editCommentFromCurrentHistoryItem = (index, newComment) => {
+        this.studyHistory[this.studyHistoryItemIndex].comments[index] =
+            newComment;
+    };
+
+    setSurveyHidden = val => {
+        this.surveyHidden = val;
+        localStorage.setItem('surveyhidden', val);
+    };
+
+    setStudyIsEmpty = val => (this.studyIsEmpty = val);
+
+    setRightPanelTypeToOpen = val => (this.rightPanelTypeToOpen = val);
+
+    setIsStudyPublic = val => (this.isStudyPublic = val);
+
+    toggleIsStudyPublic = async () => {
+        this.setIsStudyPublic(!this.isStudyPublic);
+
+        if (this.isStudyPublic) {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { response, error } = await safeRequest(
+                axios.post('study/public', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL(response.data);
+        } else {
+            const params = {
+                user_uuid: this.userUuid,
+                study_uuid: this.studyUuid
+            };
+
+            const { error } = await safeRequest(
+                axios.post('study/private', params)
+            );
+
+            if (error) {
+                this.handleRequestError(error);
+                return;
+            }
+
+            this.setStudyPublicURL('');
+        }
+    };
+
+    setStudyPublicURL = val => (this.studyPublicURL = val);
+    setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
+    setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
+    setRightPanelType = val => (this.rightPanelType = val);
+
+    setIsSchemaNodeTypeBound = val => {
+        this.isSchemaNodeTypeBound = val;
+        if (val) {
+            this.updateVisibleDimensionsBasedOnSchema();
+        }
+    };
+
+    setRightPanelWidth = val => (this.rightPanelWidth = val);
+
+    setShowCookieInfo = val => (this.showCookieInfo = val);
+
+    setDataIsLoading = val => (this.dataIsLoading = val);
+
+    setShowCommentModal = val => (this.showCommentModal = val);
+
+    updateIsStudySaved = val => (this.studyIsSaved = val);
+
+    updateStudies = val => (this.studies = val);
+
+    setStudyName = name => (this.studyName = name);
+
+    setStudyAuthor = author => (this.studyAuthor = author);
+
+    setColorMode = val => (this.colorMode = val);
+
+    setErrorDetails = val => (this.errorDetails = val);
+
+    setStudyDescription = description => (this.studyDescription = description);
+    setStudyUuid = id => {
+        this.studyUuid = id;
+        localStorage.setItem('studyuuid', id);
+    };
+
+    setStudyQuery = () => {
+        this.store.search.setSearchQuery(
+            this.studyHistory[this.studyHistoryItemIndex].query
+        );
+    };
+
+    setStudyHistory = history => (this.studyHistory = history);
+
+    setStudyHistoryItemIndex = index => (this.studyHistoryItemIndex = index);
+
+    setStudyHistoryItemIndexById = id => {
+        for (let i = 0; i < this.studyHistory.length; i++) {
+            if (this.studyHistory[i].id === id) {
+                this.setStudyHistoryItemIndex(i);
+                break;
+            }
+        }
+    };
+
+    updateStudyName = async name => {
+        this.studyName = name;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
+    };
+
+    updateStudyAuthor = async author => {
+        this.studyAuthor = author;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
+    };
+
+    updateStudyDescription = async description => {
+        this.studyDescription = description;
+
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/update', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+        this.getSavedStudies();
+    };
+
+    setTrackingEnabled = val => {
+        this.trackingEnabled = val;
+        localStorage.setItem('trackingenabled', val);
+        if (val) {
+            this.store.track.initTracking();
+        }
+    };
+
+    setHideCookieBanner = () => {
+        this.hideCookieBanner = true;
+        localStorage.setItem('hidecookiebanner', true);
+    };
+
+    getCookieBanner = () => {
+        return localStorage.getItem('hidecookiebanner');
+    };
+
     generateUUID = async () => {
-        const response = await axios.get('util/uuid');
-        return response.data;
+        const { response, error } = await safeRequest(axios.get('util/uuid'));
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('useruuid', response.data);
+        this.userUuid = response.data;
+    };
+
+    generateStudyUUID = async () => {
+        this.studyName = uniqueNamesGenerator({
+            dictionaries: [colors, animals],
+            separator: ' ',
+            length: 2,
+            seed: this.studyUuid
+        });
+
+        this.studyDescription = '';
+
+        const params = { user_uuid: this.userUuid, study_name: this.studyName };
+
+        const { response, error } = await safeRequest(
+            axios.get('study/generate', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        localStorage.setItem('studyuuid', response.data);
+        this.setStudyUuid(response.data);
+
+        this.setStudyHistory([]);
+        this.setStudyHistoryItemIndex(0);
+    };
+
+    deleteStudy = async studyUuid => {
+        if (!this.studyIsSaved || studyUuid) {
+            const params = {
+                study_uuid: studyUuid ? studyUuid : this.studyUuid,
+                user_uuid: this.userUuid,
+                user_trigger: !!studyUuid
+            };
+
+            if (params.study_uuid) {
+                const { error } = await safeRequest(
+                    axios.get('study/delete', { params })
+                );
+
+                if (error) {
+                    this.store.core.handleRequestError(error);
+                    return;
+                }
+
+                if (studyUuid) {
+                    this.getSavedStudies();
+                }
+            }
+        }
+    };
+
+    saveStudy = async () => {
+        const params = {
+            user_uuid: this.userUuid,
+            study_uuid: this.studyUuid,
+            study_name: this.studyName,
+            study_description: this.studyDescription,
+            study_author: this.studyAuthor
+        };
+
+        const { error } = await safeRequest(
+            axios.get('study/save', { params })
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.updateIsStudySaved(true);
+    };
+
+    getSavedStudies = async () => {
+        const params = { user_uuid: this.userUuid };
+        if (params.user_uuid) {
+            const { response, error } = await safeRequest(
+                axios.get('study/saved', { params })
+            );
+
+            if (error) {
+                this.store.core.handleRequestError(error);
+                return;
+            }
+
+            this.updateStudies(response.data);
+        }
     };
 
     setToastMessage = message => (this.toastInfo.message = message);
@@ -47,10 +390,6 @@ export class CoreStore {
 
     resetVisibleDimensions = () => {
         this.visibleDimensions = { overview: [], detail: [] };
-    };
-
-    setErrorMessage = message => {
-        this.errorMessage = message;
     };
 
     setDemoMode = val => {
@@ -76,6 +415,21 @@ export class CoreStore {
         }
     };
 
+    updateVisibleDimensionsBasedOnSchema = () => {
+        if (this.isSchemaNodeTypeBound) {
+            const connectedNodes = this.store.schema.getConnectedNodes();
+
+            if (!connectedNodes.length) {
+                this.visibleDimensions['detail'] = [
+                    this.store.search.links,
+                    this.store.search.anchor
+                ].flat();
+            } else {
+                this.visibleDimensions['detail'] = connectedNodes;
+            }
+        }
+    };
+
     get isOverview() {
         return this.currentGraph === 'overview';
     }
@@ -83,15 +437,48 @@ export class CoreStore {
         return this.currentGraph === 'detail';
     }
 
-    handleError = error => {
-        console.log(error);
-        this.errorMessage = error;
+    handleRequestError = error => {
+        this.setErrorDetails(error);
 
-        if (error.response) {
-            this.errorDetails = `${error.response.data} ${error.response.status} ${error.response.headers}`;
-            console.log('data ', error.response.data);
-            console.log('status ', error.response.status);
-            console.log('headers ', error.response.headers);
+        switch (error['type']) {
+            case 'response':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Response Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        message: error.data.detail[0].msg
+                    })
+                );
+
+                break;
+            case 'request':
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request Error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        statusCode: error.status,
+                        state: error.state
+                    })
+                );
+
+                break;
+            default:
+                this.store.track.trackEvent(
+                    'Global',
+                    'Request setup error',
+                    JSON.stringify({
+                        url: error.url,
+                        method: error.method,
+                        message: error.message
+                    })
+                );
+
+                break;
         }
     };
 }

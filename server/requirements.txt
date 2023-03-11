@@ -1,3 +1,11 @@
+cython
+cymem
+murmurhash
+preshed
+numpy
+blis
+thinc
+
 fastapi
 uvicorn
 pydantic
@@ -12,6 +20,7 @@ wheel
 spacy==3.0.7
 pytextrank
 python-multipart
-redis
 pymongo
 marisa-trie
+palettable
+polars==0.16.4

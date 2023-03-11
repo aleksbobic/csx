@@ -9,6 +9,11 @@ services:
       dockerfile: docker/Dockerfile.server
     ports:
       - 8881:80
+    environment:
+      DISABLE_UPLOAD: 'false'
+      ELASTIC_PASSWORD: ${ELASTIC_PASS}
+    depends_on:
+      - elastic
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
   app:
     container_name: csxp_app
@@ -18,34 +23,59 @@ services:
       context: ./
       dockerfile: docker/Dockerfile.prod.app
     ports:
-      - 8880:8880
+      - 8882:8880
     depends_on:
-      - mysql
       - server
-      - analytics
+      - elastic
   mysql:
     image: "mysql:5.7"
+    profiles:
+      - "analytics"
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: test
-      MYSQL_DATABASE: test
+      MYSQL_ROOT_PASSWORD: ${MATOMO_PASS}
+      MYSQL_DATABASE: analytics
     command: --max_allowed_packet=128000000 #Bytes
-    # ports:
-    #     - "3316:3306"
     volumes:
       - ./mysql:/var/lib/mysql
     container_name: csxp_analytics_db
   analytics:
     image: matomo:latest
+    profiles:
+      - "analytics"
     container_name: csxp_analytics
     restart: unless-stopped
     volumes:
       - ./analytics:/var/www/html
     environment:
       MATOMO_DATABASE_HOST: csxp_analytics_db
-      MATOMO_DATABASE_USERNAME: test
-      MATOMO_DATABASE_PASSWORD: test
+      MATOMO_DATABASE_USERNAME: root
+      MATOMO_DATABASE_PASSWORD: ${MATOMO_PASS}
       MATOMO_DATABASE_DBNAME: analytics
     ports:
       - 8883:80
     links: [mysql]
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASS}
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      # - ./elasticsearch:/var/lib/elasticsearch/data
+      - ./elasticsearch:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    container_name: csx_elastic
+  mongo:
+    image: mongo:4
+    volumes:
+      - mongo-volume:/data/db
+    restart: unless-stopped
+    container_name: csx_mongo
+
+volumes:
+  mongo-volume:
+    external: false

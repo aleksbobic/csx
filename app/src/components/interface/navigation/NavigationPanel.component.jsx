@@ -10,7 +10,6 @@ import {
     IconButton,
     Image,
     Link,
-    Slide,
     Text,
     Tooltip,
     useColorMode,
@@ -19,30 +18,36 @@ import {
     VStack
 } from '@chakra-ui/react';
 import {
-    Assign,
-    BorderRight,
+    AlignBottom,
+    Attribution,
+    Carousel,
     ChevronRight,
-    Moon,
+    List,
     RadioCheck,
     Ratio,
     Ring,
-    Sun,
     Sync
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
-import queryString from 'query-string';
-import { useContext } from 'react';
+
+import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
+import { CameraIcon } from '@heroicons/react/24/solid';
+import { isEnvFalse } from 'general.utils';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import DataPanelComponent from '../datapanel/DataPanel.component';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
-    const { colorMode, toggleColorMode } = useColorMode();
+    const { colorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
+    const [panelType, setPanelType] = useState('');
     const location = useLocation();
     const bgColor = useColorModeValue('white', 'black');
+    const containerRef = useRef();
+    const [timer, setTimer] = useState(null);
 
     const edgeColorDark =
         location.pathname !== '/' ? 'gray.900' : 'transparent';
@@ -56,74 +61,135 @@ function NavigationPanelComponent() {
         'blackAlpha.700'
     );
 
+    useEffect(() => {
+        if (containerRef.current) {
+            store.core.setRightPanelWidth(containerRef.current.offsetWidth);
+        }
+    }, [store.core]);
+
+    useEffect(() => {
+        if (containerRef.current) {
+            const setNewContainerSize = () => {
+                store.core.setRightPanelWidth(containerRef.current.offsetWidth);
+            };
+
+            const handleResize = () => {
+                clearTimeout(timer);
+                setTimer(setTimeout(setNewContainerSize, 100));
+            };
+
+            window.addEventListener('resize', handleResize);
+
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    });
+
     const regenerateGraph = () => {
-        store.graph.getSearchGraph(
-            store.graph.currentGraphData.meta.query,
-            location.pathname.startsWith('/graph/detail')
-                ? 'detail'
-                : 'overview',
-            queryString.parse(location.search).suuid
-        );
+        store.graph.modifyStudy(store.core.currentGraph);
     };
 
-    const toggleDataPanel = () => {
-        onToggle();
-        store.track.trackEvent(
-            'navbar',
-            'button click',
-            `data panel ${isOpen ? 'off' : 'on'}`
-        );
-    };
+    const toggleDataPanel = useCallback(
+        panel => {
+            if (panelType === panel || panelType === '' || !isOpen) {
+                onToggle();
+            }
 
-    const toggleColor = () => {
-        store.track.trackEvent(
-            'navbar',
-            'button click',
-            `color mode ${colorMode === 'light' ? 'dark' : 'light'}`
-        );
-        toggleColorMode();
-    };
+            if (panelType === panel) {
+                setPanelType('');
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(false);
+            } else {
+                setPanelType(panel);
+                store.core.setRightPanelType(panel);
+                store.core.setIsRightSidePanelOpen(true);
+            }
+
+            store.track.trackEvent(
+                'Navbar',
+                'Button',
+                JSON.stringify({
+                    type: 'Click',
+                    value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+                })
+            );
+        },
+        [isOpen, onToggle, panelType, store.core, store.track]
+    );
+
+    useEffect(() => {
+        if (store.core.rightPanelTypeToOpen) {
+            toggleDataPanel(store.core.rightPanelTypeToOpen);
+            store.core.setRightPanelTypeToOpen(null);
+        }
+    }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
+
+    // const toggleColor = () => {
+    //     store.track.trackEvent(
+    //         'Navbar',
+    //         'Button',
+    //         JSON.stringify({
+    //             type: 'Click',
+    //             value: `Change color mode to ${
+    //                 colorMode === 'light' ? 'dark' : 'light'
+    //             }`
+    //         })
+    //     );
+
+    //     toggleColorMode();
+    //     store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+    //     store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
+    // };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-105px" top="20px" id="graphutils">
+        <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
             <HStack
                 spacing="10px"
-                backgroundColor={graphUtilsMenuBackground}
+                backgroundColor={
+                    colorMode === 'light' ? '#ffffff' : graphUtilsMenuBackground
+                }
                 padding="5px 6px"
                 borderRadius="8px"
-                style={{ backdropFilter: 'blur(2px)' }}
+                border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
             >
                 <Tooltip
                     label={
-                        location.pathname.startsWith('/graph/detail')
+                        store.core.currentGraph === 'detail'
                             ? 'View overview graph'
                             : 'View detail graph'
                     }
                 >
                     <IconButton
-                        as={NavLink}
-                        to={
-                            location.pathname.startsWith('/graph/detail')
-                                ? `/graph?query=${getQueryString(
-                                      'query'
-                                  )}&dataset=${getQueryString(
-                                      'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
-                                : `/graph/detail?query=${getQueryString(
-                                      'query'
-                                  )}&dataset=${getQueryString(
-                                      'dataset'
-                                  )}&suuid=${getQueryString('suuid')}`
-                        }
                         id="switchgraphviewbutton"
                         size="sm"
                         border="none"
                         aria-label="Switch graph view"
-                        style={{
-                            backdropFilter: 'blur(2px)'
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Graph Area - Graph Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Switch to ${
+                                        store.core.currentGraph === 'detail'
+                                            ? 'overview'
+                                            : 'detail'
+                                    } graph`
+                                })
+                            );
+
+                            store.graphInstance.setEdgeColorScheme('auto');
+
+                            store.graph.modifyStudy(
+                                store.core.currentGraph === 'detail'
+                                    ? 'overview'
+                                    : 'detail'
+                            );
                         }}
                         icon={
-                            location.pathname.startsWith('/graph/detail') ? (
+                            store.core.currentGraph === 'detail' ? (
                                 <RadioCheck
                                     style={{
                                         '--ggs': '0.68'
@@ -140,16 +206,17 @@ function NavigationPanelComponent() {
                         id="regenerategraphbutton"
                         size="sm"
                         border="none"
+                        disabled={store.search.links.length === 0}
                         aria-label="Regenerate graph"
-                        style={{
-                            backdropFilter: 'blur(2px)'
-                        }}
                         icon={<Sync style={{ '--ggs': '0.7' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'graph utils',
-                                'button click',
-                                'regenerate graph'
+                                'Graph Area - Graph Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Regenerate graph'
+                                })
                             );
                             regenerateGraph();
                         }}
@@ -167,15 +234,23 @@ function NavigationPanelComponent() {
             right="0px"
             width="200px"
             spacing="5px"
-            backgroundColor="blackAlpha.600"
+            backgroundColor={
+                colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.600'
+            }
             borderRadius="10px"
+            border="1px solid"
+            borderColor={colorMode === 'light' ? 'gray.300' : 'transparent'}
             padding="10px"
         >
             {store.graphInstance.hoverData.map((entry, index) => (
                 <Box width="100%" key={`hover_data_${index}`}>
                     <Text
                         fontSize="xs"
-                        color="gray.400"
+                        color={
+                            colorMode === 'light'
+                                ? 'blackAlpha.800'
+                                : 'gray.400'
+                        }
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"
@@ -185,7 +260,7 @@ function NavigationPanelComponent() {
                     </Text>
                     <Text
                         fontSize="sm"
-                        color="gray.200"
+                        color={colorMode === 'light' ? 'gray.700' : 'gray.200'}
                         fontWeight="bold"
                         overflow="hidden"
                         whiteSpace="nowrap"
@@ -202,7 +277,7 @@ function NavigationPanelComponent() {
         <Box
             position="absolute"
             marginLeft="-100px"
-            bottom="75px"
+            bottom="20px"
             id="viewutils"
         >
             {store.graphInstance.hoverData.length > 0 &&
@@ -214,12 +289,15 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Make Screenshot"
-                        icon={<Ratio />}
+                        icon={<CameraIcon style={{ width: '16px' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'view utils',
-                                'button click',
-                                'take screenshot'
+                                'Graph Area - View Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Take screenshot'
+                                })
                             );
                             store.graphInstance.takeScreenshot();
                         }}
@@ -231,13 +309,17 @@ function NavigationPanelComponent() {
                         size="sm"
                         border="none"
                         aria-label="Zoom to fit"
-                        icon={<Assign />}
+                        icon={<Ratio style={{ '--ggs': '0.8' }} />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'view utils',
-                                'button click',
-                                'zoom to fit'
+                                'Graph Area - View Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Zoom to fit'
+                                })
                             );
+
                             store.graphInstance.zoomToFit();
                         }}
                     />
@@ -246,19 +328,15 @@ function NavigationPanelComponent() {
         </Box>
     );
 
-    const getQueryString = param => queryString.parse(location.search)[param];
-
     const renderWorkspaceSwitch = () => (
         <ButtonGroup size="xs" isAttached>
-            <Tooltip label="Retrieval workspace">
+            <Tooltip label="Search workspace">
                 <Button
                     variant={
                         location.pathname === '/search' ? 'solid' : 'outline'
                     }
                     as={NavLink}
-                    to={`/search?query=${getQueryString(
-                        'query'
-                    )}&dataset=${getQueryString('dataset')}`}
+                    to={`/search?study=${store.core.studyUuid}`}
                     border="1px solid transparent"
                     opacity={location.pathname === '/search' ? '1' : '0.5'}
                 >
@@ -272,9 +350,7 @@ function NavigationPanelComponent() {
                     }
                     border="1px solid transparent"
                     as={NavLink}
-                    to={`/graph?query=${getQueryString(
-                        'query'
-                    )}&dataset=${getQueryString('dataset')}`}
+                    to={`/graph?study=${store.core.studyUuid}`}
                     opacity={
                         location.pathname.startsWith('/graph') ? '1' : '0.5'
                     }
@@ -300,27 +376,146 @@ function NavigationPanelComponent() {
             height="100%"
             borderLeft="1px solid"
             paddingLeft="10px"
-            borderColor={edgeColor}
+            borderColor={
+                location.pathname !== '/present' ? edgeColor : 'transparent'
+            }
         >
             {location.pathname.startsWith('/graph') && (
-                <Tooltip label="Toggle data panel">
+                <ButtonGroup
+                    variant="outline"
+                    size="md"
+                    display="flex"
+                    alignItems="center"
+                    height="100%"
+                    borderRight="1px solid"
+                    paddingRight="10px"
+                    borderColor={edgeColor}
+                >
+                    <Tooltip label="Toggle details panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Details panel toggle"
+                            id="detailspnaletoggle"
+                            color={
+                                panelType === 'details'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => {
+                                toggleDataPanel('details');
+                            }}
+                            icon={
+                                <AlignBottom
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle results panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Results panel toggle"
+                            id="resultspnaletoggle"
+                            color={
+                                panelType === 'results'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => {
+                                toggleDataPanel('results');
+                            }}
+                            icon={
+                                <List
+                                    style={{
+                                        '--ggs': '0.7'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle schema panel">
+                        <IconButton
+                            border="none"
+                            aria-label="Schema panel toggle"
+                            id="schemapnaletoggle"
+                            color={
+                                panelType === 'schema'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => {
+                                toggleDataPanel('schema');
+                            }}
+                            icon={
+                                <Attribution
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                    <Tooltip label="Toggle history panel">
+                        <IconButton
+                            border="none"
+                            aria-label="History panel toggle"
+                            id="historypnaletoggle"
+                            color={
+                                panelType === 'history'
+                                    ? 'blue.400'
+                                    : colorMode === 'light'
+                                    ? 'black'
+                                    : 'white'
+                            }
+                            onClick={() => {
+                                toggleDataPanel('history');
+                            }}
+                            icon={
+                                <Carousel
+                                    style={{
+                                        '--ggs': '0.7',
+                                        transform:
+                                            'rotate(180deg) scale(0.7, 0.8)'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                </ButtonGroup>
+            )}
+
+            {/* {location.pathname !== '/present' && (
+                <Tooltip label="Toggle color mode">
                     <IconButton
                         border="none"
-                        aria-label="Data panel toggle"
-                        id="datapnaletoggle"
-                        onClick={toggleDataPanel}
-                        icon={<BorderRight />}
+                        aria-label="Color mode"
+                        icon={
+                            colorMode === 'light' ? (
+                                <Moon
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            ) : (
+                                <Sun
+                                    style={{
+                                        '--ggs': '0.8'
+                                    }}
+                                />
+                            )
+                        }
+                        onClick={toggleColor}
                     />
                 </Tooltip>
-            )}
-            <Tooltip label="Toggle color mode">
-                <IconButton
-                    border="none"
-                    aria-label="Color mode"
-                    icon={colorMode === 'light' ? <Moon /> : <Sun />}
-                    onClick={toggleColor}
-                />
-            </Tooltip>
+            )} */}
         </ButtonGroup>
     );
 
@@ -329,10 +524,13 @@ function NavigationPanelComponent() {
             <Box
                 id="navigation"
                 pos="fixed"
-                zIndex="5"
+                zIndex="20"
                 height="50px"
                 backgroundColor={
-                    location.pathname !== '/' ? bgColor : 'transparent'
+                    location.pathname !== '/' &&
+                    location.pathname !== '/present'
+                        ? bgColor
+                        : 'transparent'
                 }
                 right="0px"
                 width="100%"
@@ -341,118 +539,213 @@ function NavigationPanelComponent() {
                 alignItems="center"
                 justifyContent="space-between"
                 borderBottom="1px solid"
-                borderColor={edgeColor}
-                style={{ backdropFilter: 'blur(2px)' }}
+                borderColor={
+                    location.pathname !== '/present' ? edgeColor : 'transparent'
+                }
             >
                 <HStack spacing="10px">
-                    <Link
-                        as={NavLink}
-                        to="/"
-                        paddingRight="5px"
-                        paddingLeft="5px"
-                        borderRight="1px solid"
-                        borderColor={edgeColor}
-                        id="homelink"
-                        onClick={() =>
-                            store.track.trackEvent(
-                                'navbar',
-                                'button click',
-                                'logo'
-                            )
-                        }
-                    >
-                        <Image
-                            src={logo}
-                            alt="Collaboration spotting logo"
-                            height="40px"
-                            padding="10px"
-                        />
-                    </Link>
+                    {location.pathname !== '/present' && (
+                        <Link
+                            as={NavLink}
+                            to="/"
+                            paddingRight="5px"
+                            paddingLeft="5px"
+                            borderRight="1px solid"
+                            borderColor={
+                                location.pathname !== '/present'
+                                    ? edgeColor
+                                    : 'transparent'
+                            }
+                            id="homelink"
+                            onClick={() => {
+                                store.core.deleteStudy();
+                                store.core.setStudyIsEmpty(false);
+                                store.search.setSearchIsEmpty(false);
+                                store.core.setShowCookieInfo(false);
 
-                    {location.pathname !== '/' && renderWorkspaceSwitch()}
-                    {location.pathname !== '/' && (
-                        <Box style={{ marginLeft: '125px' }}>
-                            <Divider
-                                opacity="0.4"
-                                orientation="vertical"
-                                height="80%"
-                                top="6px"
-                                position="absolute"
-                                backgroundColor="gray.900"
+                                store.track.trackEvent(
+                                    'Navbar',
+                                    'Button - Logo',
+                                    JSON.stringify({
+                                        type: 'Click'
+                                    })
+                                );
+                            }}
+                        >
+                            <Image
+                                src={logo}
+                                alt="Collaboration spotting logo"
+                                height="40px"
+                                padding="10px"
                             />
-                            <Breadcrumb
-                                marginLeft="20px"
-                                spacing="2px"
-                                separator={
-                                    <ChevronRight style={{ '--ggs': '0.5' }} />
-                                }
+                        </Link>
+                    )}
+
+                    {location.pathname !== '/' &&
+                        location.pathname !== '/present' &&
+                        isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') &&
+                        renderWorkspaceSwitch()}
+                    {location.pathname !== '/' &&
+                        location.pathname !== '/present' && (
+                            <HStack
+                                height="40px"
+                                style={{
+                                    marginLeft: isEnvFalse(
+                                        'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                                    )
+                                        ? '125px'
+                                        : '0'
+                                }}
+                                spacing="20px"
                             >
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink
-                                        as={NavLink}
-                                        to="/"
-                                        fontSize="xs"
-                                        fontWeight="regular"
-                                    >
-                                        {store?.search?.currentDataset?.toUpperCase()}
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink
-                                        as={NavLink}
-                                        to={`/graph?query=${getQueryString(
-                                            'query'
-                                        )}&dataset=${getQueryString(
-                                            'dataset'
-                                        )}`}
-                                        fontSize="xs"
-                                        fontWeight="regular"
-                                    >
-                                        {location.pathname
-                                            .split('/')[1]
-                                            .charAt(0)
-                                            .toUpperCase() +
-                                            location.pathname
-                                                .split('/')[1]
-                                                .slice(1)}
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                {location.pathname.split('/')[2] ===
-                                    'detail' && (
+                                {isEnvFalse(
+                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                                ) && (
+                                    <Divider
+                                        opacity="0.2"
+                                        orientation="vertical"
+                                        height="100%"
+                                        backgroundColor="gray.900"
+                                    />
+                                )}
+                                <Breadcrumb
+                                    marginLeft="20px"
+                                    spacing="2px"
+                                    separator={
+                                        <ChevronRight
+                                            style={{ '--ggs': '0.5' }}
+                                        />
+                                    }
+                                >
                                     <BreadcrumbItem>
                                         <BreadcrumbLink
-                                            as={Text}
+                                            as={NavLink}
+                                            to="/"
                                             fontSize="xs"
-                                            fontWeight="bold"
-                                            _hover={{ cursor: 'default' }}
+                                            fontWeight="regular"
                                         >
-                                            Detail
+                                            {store?.search?.currentDataset?.toUpperCase()}
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
-                                )}
-                            </Breadcrumb>
-                        </Box>
-                    )}
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink
+                                            as={Button}
+                                            onClick={() => {
+                                                store.graph.modifyStudy(
+                                                    'overview'
+                                                );
+                                            }}
+                                            disabled={
+                                                store.core.currentGraph ===
+                                                'overview'
+                                            }
+                                            size="xs"
+                                            variant="ghost"
+                                            _hover={{
+                                                backgroundColor: 'transparent',
+                                                textDecoration:
+                                                    store.core.currentGraph ===
+                                                    'detail'
+                                                        ? 'underline'
+                                                        : 'none',
+                                                cursor:
+                                                    store.core.currentGraph ===
+                                                    'detail'
+                                                        ? 'pointer'
+                                                        : 'default'
+                                            }}
+                                            _disabled={{ opacity: '1' }}
+                                        >
+                                            Graph
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
+                                    {store.core.currentGraph === 'detail' && (
+                                        <BreadcrumbItem>
+                                            <BreadcrumbLink
+                                                as={Text}
+                                                fontSize="xs"
+                                                fontWeight="bold"
+                                                _hover={{ cursor: 'default' }}
+                                            >
+                                                Detail
+                                            </BreadcrumbLink>
+                                        </BreadcrumbItem>
+                                    )}
+                                </Breadcrumb>
+                            </HStack>
+                        )}
                 </HStack>
-                {renderToggles()}
+                <HStack spacing="20px">
+                    {location.pathname.startsWith('/graph') && (
+                        <Tooltip label="Open presentation mode in new tab">
+                            <Button
+                                size="sm"
+                                as={Link}
+                                isDisabled={!store.core.studyIsSaved}
+                                variant="ghost"
+                                borderRadius="6px"
+                                leftIcon={
+                                    <PresentationChartLineIcon
+                                        width="16px"
+                                        height="16px"
+                                        display="inline"
+                                    />
+                                }
+                                onClick={e => {
+                                    if (!store.core.studyIsSaved) {
+                                        e.preventDefault();
+                                    }
+
+                                    store.track.trackEvent(
+                                        'Navbar',
+                                        'Link',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Open study in presentation mode'
+                                        })
+                                    );
+                                }}
+                                transition="0.2s all ease-in-out"
+                                href={
+                                    store.core.studyIsSaved
+                                        ? `http://localhost:8882/present?study=${store.core.studyUuid}`
+                                        : ''
+                                }
+                                isExternal
+                                _hover={{
+                                    textDecoration: 'none',
+                                    backgroundColor: 'blue.500'
+                                }}
+                            >
+                                Present
+                            </Button>
+                        </Tooltip>
+                    )}
+                    {renderToggles()}
+                </HStack>
             </Box>
             {location.pathname.startsWith('/graph') && (
-                <Slide
-                    direction="right"
-                    in={isOpen}
+                <Box
+                    ref={containerRef}
+                    width={{ base: '500px', lg: '500px', xl: '600px' }}
+                    right={{
+                        base: isOpen ? '0px' : '-500px',
+                        lg: isOpen ? '0px' : '-500px',
+                        xl: isOpen ? '0px' : '-600px'
+                    }}
                     style={{
                         zIndex: 10,
-                        right: '0px',
-                        width: '35%',
+
                         position: 'fixed',
-                        top: '50px',
-                        height: '100%'
+                        top: 0,
+                        height: '100%',
+                        paddingTop: '50px'
                     }}
                 >
                     {renderGraphUtils()}
                     {renderViewUtils()}
-                    <DataPanelComponent />
-                </Slide>
+                    <DataPanelComponent panelType={panelType} />
+                </Box>
             )}
         </>
     );

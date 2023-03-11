@@ -25,7 +25,11 @@ const searchNode = ({ id, data, isConnectable }) => {
             case 'category':
                 return data.featureHints[data.feature].values.includes(value);
             default:
-                return typeof value === 'number';
+                return (
+                    typeof value === 'number' &&
+                    data.featureHints[data.feature].min <= value &&
+                    data.featureHints[data.feature].max >= value
+                );
         }
     };
 
@@ -39,11 +43,29 @@ const searchNode = ({ id, data, isConnectable }) => {
         } else {
             data.keyphrase = value;
         }
+
+        data.trackNodeAction(
+            `Node - ${id} - Input Element - Keyphrase`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${data.keyphrase}`
+            })
+        );
     };
 
     const modifyFeature = value => {
         data.feature = value.target.value;
-        data.updateActions();
+        data.keyphrase = data.getDefaultValue(value.target.value);
+        data.updateActions(id);
+
+        data.trackNodeAction(
+            `Node - ${id} - Select Element - Feature`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${data.feature}`
+            })
+        );
     };
 
     const renderTextInput = () => {
@@ -58,7 +80,16 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.getSuggestions(data.feature, value)
                 }
                 getValue={value => {
-                    modifyKeyphrase(value);
+                    data.updateSearchNodeData(id, value);
+
+                    data.trackNodeAction(
+                        `Node - ${id} - Input Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Write',
+                            feature: data.feature,
+                            value: `${value}`
+                        })
+                    );
                 }}
                 style={{ borderRadius: '5px' }}
                 suggestionStyle={{
@@ -67,24 +98,40 @@ const searchNode = ({ id, data, isConnectable }) => {
                     position: 'fixed'
                 }}
                 initialValue={data.keyphrase}
+                trackingLocation="Advanced Search - Search Canvas"
+                trackingEventTarget={`Node - ${id} - Autocomplete Select Element - Keyphrase`}
+                trackingEventFeature={data.feature}
             />
         );
     };
 
     const renderSelectInput = () => {
-        if (!isFeatureValue(data.keyphrase)) {
-            modifyKeyphrase(data.featureHints[data.feature].values[0]);
-        }
-
         return (
             <Select
+                className="nodrag"
                 size="sm"
                 variant="filled"
                 margin="0px"
                 borderRadius="5px"
-                onChange={modifyKeyphrase}
+                onChange={event => {
+                    data.updateSearchNodeData(id, event.target.value);
+
+                    data.trackNodeAction(
+                        `Node - ${id} - Select Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Change selection',
+                            feature: data.feature,
+                            value: `${event.target.value}`
+                        })
+                    );
+                }}
                 opacity="0.8"
-                background="whiteAlpha.200"
+                background={
+                    data.colorMode === 'light'
+                        ? 'whiteAlpha.800'
+                        : 'whiteAlpha.200'
+                }
+                value={data.keyphrase}
                 _hover={{
                     opacity: 1
                 }}
@@ -100,10 +147,6 @@ const searchNode = ({ id, data, isConnectable }) => {
     };
 
     const renderNumberInput = () => {
-        if (!isFeatureValue(data.keyphrase)) {
-            modifyKeyphrase(data.featureHints[data.feature].min);
-        }
-
         return (
             <NumberInput
                 width="100%"
@@ -111,14 +154,25 @@ const searchNode = ({ id, data, isConnectable }) => {
                 variant="filled"
                 margin="0px"
                 borderRadius="5px"
-                onChange={modifyKeyphrase}
+                onChange={value => {
+                    data.updateSearchNodeData(id, value);
+
+                    data.trackNodeAction(
+                        `Node - ${id} - Number Input Element - Keyphrase`,
+                        JSON.stringify({
+                            type: 'Write',
+                            feature: data.feature,
+                            value: `${value}`
+                        })
+                    );
+                }}
                 opacity="0.8"
                 background="whiteAlpha.200"
                 _hover={{
                     opacity: 1
                 }}
                 _focus={{ opacity: 1 }}
-                defaultValue={data.featureHints[data.feature].min}
+                value={data.keyphrase}
                 min={data.featureHints[data.feature].min}
                 max={data.featureHints[data.feature].max}
             >
@@ -163,13 +217,18 @@ const searchNode = ({ id, data, isConnectable }) => {
                     </HStack>
                     <Tooltip label="Dataset property">
                         <Select
+                            className="nodrag"
                             margin="0px"
                             variant="filled"
                             size="sm"
                             borderRadius="5px"
                             defaultValue={data.feature}
                             onChange={modifyFeature}
-                            background="whiteAlpha.200"
+                            background={
+                                data.colorMode === 'light'
+                                    ? 'whiteAlpha.800'
+                                    : 'whiteAlpha.200'
+                            }
                             opacity="0.8"
                             _hover={{
                                 opacity: 1,

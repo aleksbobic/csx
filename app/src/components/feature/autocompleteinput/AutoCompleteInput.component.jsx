@@ -1,14 +1,26 @@
-import { Box, Input, Text, Tooltip, VStack } from '@chakra-ui/react';
+import {
+    Box,
+    Input,
+    Text,
+    Tooltip,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
+import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { RootStoreContext } from 'stores/RootStore';
+import CustomScroll from '../customscroll/CustomScroll.component';
 
 function AutoCompleteInput(props) {
+    const store = useContext(RootStoreContext);
+    const { colorMode } = useColorMode();
     const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-    const [activeSuggestion, setActiveSuggestion] = useState(0);
+    const [activeSuggestion, setActiveSuggestion] = useState(-1);
 
     const handleValueChange = e => {
         setInput(e.target.value);
@@ -32,17 +44,54 @@ function AutoCompleteInput(props) {
     };
 
     const clickSuggestion = clickedVal => {
+        store.track.trackEvent(
+            props.trackingLocation,
+            props.trackingEventTarget,
+            props.trackingEventFeature
+                ? JSON.stringify({
+                      type: 'Change selection',
+                      feature: props.trackingEventFeature,
+                      value: `${clickedVal}`
+                  })
+                : JSON.stringify({
+                      type: 'Change selection',
+                      dataset: props.trackingEventDataset,
+                      value: `${clickedVal}`
+                  })
+        );
+
         setInput(clickedVal);
         props.getValue(clickedVal);
         setSuggestionsVisible(false);
         setSuggestions([]);
-        setActiveSuggestion(0);
+        setActiveSuggestion(-1);
     };
 
     const handleKeyDown = e => {
         if (e.keyCode === 13) {
-            if (suggestionsVisible && suggestions.length > 0) {
+            if (
+                suggestionsVisible &&
+                suggestions.length > 0 &&
+                activeSuggestion > -1
+            ) {
                 e.preventDefault();
+
+                store.track.trackEvent(
+                    props.trackingLocation,
+                    props.trackingEventTarget,
+                    props.trackingEventFeature
+                        ? JSON.stringify({
+                              type: 'Change selection through key press',
+                              feature: props.trackingEventFeature,
+                              value: `${suggestions[activeSuggestion]}`
+                          })
+                        : JSON.stringify({
+                              type: 'Change selection through key press',
+                              dataset: props.trackingEventDataset,
+                              value: `${suggestions[activeSuggestion]}`
+                          })
+                );
+
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
 
@@ -56,11 +105,14 @@ function AutoCompleteInput(props) {
 
                 const element =
                     document.getElementsByClassName('activeSuggestion')[0];
-                element.scrollIntoView({
-                    behavior: 'auto',
-                    block: 'center',
-                    inline: 'start'
-                });
+
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center',
+                        inline: 'start'
+                    });
+                }
             }
         }
         // User pressed the down arrow, increment the index
@@ -73,17 +125,24 @@ function AutoCompleteInput(props) {
 
                 const element =
                     document.getElementsByClassName('activeSuggestion')[0];
-                element.scrollIntoView({
-                    behavior: 'auto',
-                    block: 'center',
-                    inline: 'start'
-                });
+
+                if (element) {
+                    element.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center',
+                        inline: 'start'
+                    });
+                }
             }
+        } else if (e.keyCode === 27) {
+            setActiveSuggestion(-1);
+            setSuggestionsVisible(false);
+            setSuggestions([]);
         }
     };
 
     const handleBlur = () => {
-        setActiveSuggestion(0);
+        setActiveSuggestion(-1);
         setSuggestionsVisible(false);
         setSuggestions([]);
     };
@@ -106,12 +165,19 @@ function AutoCompleteInput(props) {
                     width="100%"
                     key={`${entry}_${index}`}
                     fontWeight="bold"
-                    className={classNames({
+                    className={classNames('nodrag', {
                         activeSuggestion: index === activeSuggestion,
                         suggestionItem: true
                     })}
                     backgroundColor={
                         index === activeSuggestion ? 'blue.400' : 'trnasparent'
+                    }
+                    color={
+                        colorMode === 'light'
+                            ? index === activeSuggestion
+                                ? 'white'
+                                : 'black'
+                            : 'white'
                     }
                     onMouseDown={() => clickSuggestion(entry)}
                     _hover={{
@@ -150,12 +216,13 @@ function AutoCompleteInput(props) {
                 <Box
                     width="auto"
                     maxHeight="200px"
-                    overflowX="scroll"
                     borderRadius="5px"
                     className="suggestionContainer"
                     style={{ ...props.suggestionStyle }}
                 >
-                    {getSuggestionList()}
+                    <CustomScroll style={{ maxHeight: '200px' }}>
+                        {getSuggestionList()}
+                    </CustomScroll>
                 </Box>
             )}
         </>
@@ -171,7 +238,11 @@ AutoCompleteInput.propTypes = {
     style: PropTypes.object,
     suggestionStyle: PropTypes.object,
     externalChangeHandler: PropTypes.func,
-    initialValue: PropTypes.string
+    initialValue: PropTypes.string,
+    trackingLocation: PropTypes.string,
+    trackingEventTarget: PropTypes.string,
+    trackingEventFeature: PropTypes.string,
+    trackingEventDataset: PropTypes.string
 };
 
 AutoCompleteInput.defaultProps = {
@@ -179,7 +250,11 @@ AutoCompleteInput.defaultProps = {
     size: 'sm',
     style: {},
     suggestionStyle: {},
-    initialValue: ''
+    initialValue: '',
+    trackingLocation: '',
+    trackingEventTarget: '',
+    trackingEventFeature: '',
+    trackingEventDataset: ''
 };
 
 export default observer(AutoCompleteInput);

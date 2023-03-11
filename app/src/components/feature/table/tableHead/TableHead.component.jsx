@@ -1,4 +1,11 @@
-import { Text, useColorMode, useColorModeValue } from '@chakra-ui/react';
+import {
+    Text,
+    useColorMode,
+    useColorModeValue,
+    Thead,
+    Tr,
+    Th
+} from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -28,17 +35,6 @@ function TableHead(props) {
             return <></>;
         }
 
-        const { canSort, isSorted, isSortedDesc, Header: columnType } = column;
-
-        const eventData = !isSorted
-            ? `sort ascending by ${columnType}`
-            : isSortedDesc
-            ? 'reset sort'
-            : `sort descending by ${columnType}`;
-
-        const showLeftArrow = isSorted && columnType !== 'Node';
-        const showRightArrow = isSorted && columnType === 'Node';
-
         return (
             <Text
                 textTransform="uppercase"
@@ -47,24 +43,43 @@ function TableHead(props) {
                 display="inline-block"
                 color={headerTextColor}
                 onClick={() => {
+                    const {
+                        isSorted,
+                        isSortedDesc,
+                        Header: columnType
+                    } = column;
+
+                    const eventData = !isSorted
+                        ? `Sort ascending by ${columnType}`
+                        : isSortedDesc
+                        ? `Reset sort for ${columnType}`
+                        : `Sort descending by ${columnType}`;
+
                     store.track.trackEvent(
-                        'data panel nodes tab',
-                        'header click',
-                        eventData
+                        'Results Panel - Table',
+                        'Header',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: eventData
+                        })
                     );
                 }}
-                _hover={{ cursor: canSort ? 'pointer' : 'normal' }}
+                _hover={{ cursor: column.canSort ? 'pointer' : 'normal' }}
             >
-                {showLeftArrow && renderSortArrow('left', isSortedDesc)}
+                {column.isSorted &&
+                    column.Header !== 'Node' &&
+                    renderSortArrow('left', column.isSortedDesc)}
                 {column.Header}
-                {showRightArrow && renderSortArrow('right', isSortedDesc)}
+                {column.isSorted &&
+                    column.Header !== 'Node' &&
+                    renderSortArrow('right', column.isSortedDesc)}
             </Text>
         );
     };
 
-    const renderHeader = header => {
+    const renderHeader = (header, index, endIndex) => {
         return (
-            <th
+            <Th
                 {...header.getHeaderProps(header.getSortByToggleProps())}
                 style={{
                     color: 'white',
@@ -75,23 +90,33 @@ function TableHead(props) {
                     padding: '5px 10px',
                     position: 'sticky',
                     top: '0px',
-                    zIndex: 10,
-                    background: colorMode === 'light' ? '#f3f3f3' : '#161616'
+                    zIndex: 1,
+                    background: colorMode === 'light' ? '#f3f3f3' : '#161616',
+                    borderTopLeftRadius: index === 0 && '5px',
+                    borderBottomLeftRadius: index === 0 && '5px',
+                    borderTopRightRadius: index === endIndex && '5px',
+                    borderBottomRightRadius: index === endIndex && '5px'
                 }}
             >
                 {header.render(renderHeaderCellContent)}
-            </th>
+            </Th>
         );
     };
 
     return (
-        <thead>
+        <Thead>
             {props.headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                    {headerGroup.headers.map(renderHeader)}
-                </tr>
+                <Tr {...headerGroup.getHeaderGroupProps()}>
+                    {headerGroup.headers.map((header, index) =>
+                        renderHeader(
+                            header,
+                            index,
+                            headerGroup.headers.length - 1
+                        )
+                    )}
+                </Tr>
             ))}
-        </thead>
+        </Thead>
     );
 }
 

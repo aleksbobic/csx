@@ -7,9 +7,12 @@ import {
 import { Search } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import { RootStoreContext } from 'stores/RootStore';
 
 function GlobalFilter(props) {
+    const store = useContext(RootStoreContext);
+
     const [globalFilterValue, setGlobalFilterValue] = useState(
         props.globalFilter
     );
@@ -33,13 +36,27 @@ function GlobalFilter(props) {
                     }
                 }}
                 placeholder={`${props.preGlobalFilteredRows.length} entries to search through...`}
+                onFocus={() => store.comment.setCommentTrigger(false)}
+                onBlur={() => store.comment.setCommentTrigger(true)}
+                borderRadius="6px"
             />
             <InputRightElement>
                 <IconButton
                     variant="ghost"
                     size="sm"
                     icon={<Search style={{ '--ggs': '0.7' }} />}
-                    onClick={onChange}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            'Results Panel - Table - Search Bar',
+                            'Button',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Search for ${globalFilterValue}`
+                            })
+                        );
+
+                        onChange();
+                    }}
                 />
             </InputRightElement>
         </InputGroup>

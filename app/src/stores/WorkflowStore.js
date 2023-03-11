@@ -29,18 +29,6 @@ export class WorkflowStore {
                 'Serves as an advanced search node which enables more elaborate filtering of values.'
         },
         {
-            nodeType: 'countsNode',
-            label: 'Counts',
-            tooltip:
-                'Serves as a node for counting the occurance of array values in a feature.'
-        },
-        {
-            nodeType: 'keywordExtractionNode',
-            label: 'Keyword Extraction',
-            tooltip:
-                'Serves as a keyword extraction node which enables extracting keywords from longer texts and adding them to a new column.'
-        },
-        {
             nodeType: 'resultsNode',
             label: 'Results',
             tooltip:
@@ -49,31 +37,44 @@ export class WorkflowStore {
     ];
 
     actionNodeColors = {
-        searchNode: '#3182ce',
-        datasetNode: '#3182ce',
-        filterNode: '#ce8631',
-        countsNode: '#ce8631',
-        connectorNode: '#323232',
-        resultsNode: '#3cd824',
-        keywordExtractionNode: '#ce8631',
-        background: '#161616'
+        dark: {
+            searchNode: '#3182ce',
+            datasetNode: '#3182ce',
+            filterNode: '#ce8631',
+            countsNode: '#ce8631',
+            connectorNode: '#323232',
+            resultsNode: '#3cd824',
+            keywordExtractionNode: '#ce8631',
+            background: '#161616'
+        },
+        light: {
+            searchNode: '#3182ce',
+            datasetNode: '#3182ce',
+            filterNode: '#ce8631',
+            countsNode: '#ce8631',
+            connectorNode: '#323232',
+            resultsNode: '#3cd824',
+            keywordExtractionNode: '#ce8631',
+            background: '#eeeeee'
+        }
     };
 
     actions = [];
+    nodes = [];
+    edges = [];
+
+    updateNodes = nodes => (this.nodes = nodes);
+    updateEdges = edges => (this.edges = edges);
 
     setNewWorkflowName = val => (this.newWorkflowName = val);
 
     saveNewWorkflow = () => {
-        console.log(
-            `Saving ${this.newWorkflowName} for ${this.store.search.currentDataset} with ${this.actions.length} actions`
-        );
-
         if (!this.workflows[this.store.search.currentDataset]) {
             this.workflows[this.store.search.currentDataset] = {};
         }
 
         this.workflows[this.store.search.currentDataset][this.newWorkflowName] =
-            this.actions;
+            { edges: this.edges, nodes: this.nodes };
 
         localStorage.setItem('workflows', JSON.stringify(this.workflows));
         this.newWorkflowName = '';
@@ -86,26 +87,57 @@ export class WorkflowStore {
     };
 
     loadWorkflow = name => {
-        const loadedActions =
-            this.workflows[this.store.search.currentDataset][name];
+        const loadedEdges =
+            this.workflows[this.store.search.currentDataset][name]['edges'];
 
-        const resultsNodes = loadedActions
+        const loadedNodes =
+            this.workflows[this.store.search.currentDataset][name]['nodes'];
+
+        const resultsNodes = loadedNodes
             .filter(node => node.type === 'resultsNode')
             .map(node => {
                 node.data.runWorkflow = this.runWorkFlow;
+                node.data.deleteNode = this.deleteNode;
+                node.data.trackNodeAction = this.trackNodeAction;
                 return node;
             });
 
-        const otherNodes = loadedActions.filter(
-            node => node.type !== 'resultsNode'
-        );
+        this.edges = loadedEdges
+            .filter(entry => entry.type === 'searchEdge')
+            .map(edge => {
+                edge.data.removeEdge = this.removeEdge;
+                return edge;
+            });
 
-        this.actions = [...otherNodes, ...resultsNodes];
+        const searchNodes = loadedNodes
+            .filter(node => node.type === 'searchNode')
+            .map(node => {
+                node.data.deleteNode = this.deleteNode;
+                node.data.updateSearchNodeData = this.updateSearchNodeData;
+                node.data.trackNodeAction = this.trackNodeAction;
+                return node;
+            });
 
-        this.actions = this.actions.map(node => {
+        const otherNodes = loadedNodes
+            .filter(
+                node =>
+                    !['resultsNode', 'searchNode', 'searchEdge'].includes(
+                        node.type
+                    )
+            )
+            .map(node => {
+                node.data.deleteNode = this.deleteNode;
+                node.data.trackNodeAction = this.trackNodeAction;
+                return node;
+            });
+
+        this.nodes = [...otherNodes, ...resultsNodes, ...searchNodes];
+
+        this.nodes = this.nodes.map(node => {
             if (node.type === 'searchNode') {
                 node.data.updateActions = this.updateActions;
                 node.data.getSuggestions = this.store.search.suggest;
+                node.data.trackNodeAction = this.trackNodeAction;
             }
             return node;
         });
@@ -127,7 +159,8 @@ export class WorkflowStore {
     }
 
     resetWorkflow = () => {
-        this.actions = [];
+        this.edges = [];
+        this.nodes = [];
     };
 
     getNodeTypesOfType = nodeTypes => {
@@ -139,19 +172,41 @@ export class WorkflowStore {
     };
 
     deleteNode = nodeID => {
-        this.actions = [
-            ...this.actions.filter(
+        this.store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            `Node - ${nodeID} - Button`,
+            JSON.stringify({
+                type: 'Click',
+                value: 'Delete'
+            })
+        );
+
+        this.nodes = [
+            ...this.nodes
+                .filter(node => node.id !== nodeID)
+                .map(node => {
+                    node.data.parents = node.data.parents.filter(
+                        parentID => parentID !== nodeID
+                    );
+                    node.data.children = node.data.children.filter(
+                        childID => childID !== nodeID
+                    );
+                    return node;
+                })
+        ];
+
+        this.edges = [
+            ...this.edges.filter(
                 node =>
-                    (node.type !== 'searchEdge' && node.id !== nodeID) ||
-                    (node.type === 'searchEdge' &&
-                        node.source !== nodeID &&
-                        node.target !== nodeID)
+                    node.type === 'searchEdge' &&
+                    node.source !== nodeID &&
+                    node.target !== nodeID
             )
         ];
     };
 
     updateFilterNodeValues = (nodeID, feature) => {
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
                 node = {
                     ...node,
@@ -179,8 +234,16 @@ export class WorkflowStore {
         });
     };
 
+    trackNodeAction = (element, value) => {
+        this.store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            element,
+            value
+        );
+    };
+
     updateFilterNodeData = (nodeID, dataKey, dataValue) => {
-        this.actions = this.actions.map(node => {
+        this.nodes = this.nodes.map(node => {
             if (node.id === nodeID) {
                 node.data = {
                     ...node.data
@@ -192,7 +255,362 @@ export class WorkflowStore {
         });
     };
 
-    updateActions = () => (this.actions = [...this.actions]);
+    updateSearchNodeData = (nodeID, dataValue) => {
+        this.nodes = this.nodes.map(node => {
+            if (node.id === nodeID) {
+                node.data['keyphrase'] = dataValue;
+            }
+
+            return node;
+        });
+        this.updateActions(nodeID);
+    };
+
+    updateNodeStyles = () => {
+        this.nodes = this.nodes.map(node => {
+            node.data.colorMode = this.store.core.colorMode || 'dark';
+            node.style = {
+                ...node.style,
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        node.type
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'background'
+                    ]
+            };
+            return node;
+        });
+    };
+
+    updateActions = id => {
+        if (id) {
+            this.nodes = this.nodes.map(node => {
+                if (node.id === id) {
+                    node.data = { ...node.data };
+                }
+                return node;
+            });
+        } else {
+            this.nodes = [...this.nodes];
+        }
+
+        this.edges = [...this.edges];
+    };
+
+    getDefaultValue = feature => {
+        switch (this.store.search.nodeTypes[feature]) {
+            case 'string':
+            case 'list':
+                return '';
+            case 'category':
+                return this.store.search.searchHints[feature].values[0];
+            default:
+                return this.store.search.searchHints[feature].min;
+        }
+    };
+
+    addNodesFromQuery = query => {
+        const searchNode = {
+            id: uuidv4(),
+            type: 'searchNode',
+            position: { x: 200, y: 200 },
+            data: {
+                children: [],
+                parents: [],
+                features: Object.keys(this.store.search.nodeTypes),
+                feature: this.store.search.default_search_features[0],
+                featureHints: this.store.search.searchHints,
+                featureTypes: this.store.search.nodeTypes,
+                updateActions: this.updateActions,
+                getSuggestions: this.store.search.suggest,
+                updateSearchNodeData: this.updateSearchNodeData,
+                keyphrase: query,
+                getDefaultValue: this.getDefaultValue,
+                deleteNode: this.deleteNode,
+                colorMode: this.store.core.colorMode || 'dark',
+                trackNodeAction: this.trackNodeAction
+            },
+            style: {
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'searchNode'
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'background'
+                    ],
+                borderRadius: '10px',
+                padding: '3px'
+            }
+        };
+
+        const resultsNode = {
+            id: uuidv4(),
+            type: 'resultsNode',
+            position: { x: 200, y: 400 },
+            data: {
+                children: [],
+                parents: [],
+                runWorkflow: this.runWorkFlow,
+                colorMode: this.store.core.colorMode || 'dark',
+                trackNodeAction: this.trackNodeAction
+            },
+            style: {
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'resultsNode'
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'background'
+                    ],
+                borderRadius: '10px',
+                padding: '3px'
+            }
+        };
+
+        searchNode.data.children.push(resultsNode.id);
+        resultsNode.data.parents.push(searchNode.id);
+
+        const newConnection = {
+            id: `e${searchNode.id}-${resultsNode.id}`,
+            source: searchNode.id,
+            target: resultsNode.id,
+            type: 'searchEdge',
+            data: {
+                removeEdge: this.removeEdge
+            }
+        };
+
+        this.nodes.push(searchNode);
+        this.nodes.push(resultsNode);
+        this.nodes = [...this.nodes];
+        this.edges = [...this.edges, newConnection];
+    };
+
+    addNodesFromJSONQuery = query => {
+        switch (query.action) {
+            case 'search':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'searchNode',
+                    position: { x: 200, y: 200 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        features: Object.keys(this.store.search.nodeTypes),
+                        feature: query.feature,
+                        featureHints: this.store.search.searchHints,
+                        featureTypes: this.store.search.nodeTypes,
+                        updateActions: this.updateActions,
+                        getSuggestions: this.store.search.suggest,
+                        updateSearchNodeData: this.updateSearchNodeData,
+                        keyphrase: query.keyphrase,
+                        getDefaultValue: this.getDefaultValue,
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
+                    },
+                    style: {
+                        border: `1px solid ${
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['searchNode']
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'get dataset':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'datasetNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        dataset: this.store.search.currentDataset,
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
+                    },
+                    style: {
+                        border: `1px solid ${
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['datasetNode']
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'filter':
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'filterNode',
+                    position: { x: 200, y: 200 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        features: this.getNodeTypesOfType(['integer', 'float']),
+                        feature: query.feature,
+                        updateFilterNodeValues: this.updateFilterNodeValues,
+                        updateFilterNodeData: this.updateFilterNodeData,
+                        min: query.min,
+                        max: query.max,
+                        min_value: this.store.search.getSearchHintsByFeature(
+                            query.feature
+                        )['min'],
+                        max_value: this.store.search.getSearchHintsByFeature(
+                            query.feature
+                        )['max'],
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
+                    },
+                    style: {
+                        border: `1px solid ${
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['filterNode']
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                return true;
+            case 'connect':
+                query.queries.forEach(subQuery => {
+                    this.addNodesFromJSONQuery(subQuery);
+                });
+
+                // add also the connector node and connect to as many children as it has
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'connectorNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        connector: query.connector,
+                        deleteNode: this.deleteNode,
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
+                    },
+                    style: {
+                        border: `1px solid ${
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['connectorNode']
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+
+                for (let i = 0; i < query.queries.length; i++) {
+                    const newConnection = {
+                        id: `e${this.nodes[this.nodes.length - (i + 2)].id}-${
+                            this.nodes[this.nodes.length - 1].id
+                        }`,
+                        source: this.nodes[this.nodes.length - (i + 2)].id,
+                        target: this.nodes[this.nodes.length - 1].id,
+                        type: 'searchEdge',
+                        data: {
+                            removeEdge: this.removeEdge
+                        }
+                    };
+
+                    this.nodes[this.nodes.length - (i + 2)].data.children.push(
+                        this.nodes[this.nodes.length - 1].id
+                    );
+
+                    this.nodes[this.nodes.length - 1].data.parents.push(
+                        this.nodes[this.nodes.length - (i + 2)].id
+                    );
+
+                    this.edges = [...this.edges, newConnection];
+                }
+
+                return true;
+            default:
+                // visualise
+                this.addNodesFromJSONQuery(query.query);
+                this.nodes.push({
+                    id: uuidv4(),
+                    type: 'resultsNode',
+                    position: { x: 200, y: 400 },
+                    data: {
+                        children: [],
+                        parents: [],
+                        runWorkflow: this.runWorkFlow,
+                        colorMode: this.store.core.colorMode || 'dark',
+                        trackNodeAction: this.trackNodeAction
+                    },
+                    style: {
+                        border: `1px solid ${
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['resultsNode']
+                        }`,
+                        backgroundColor:
+                            this.actionNodeColors[
+                                this.store.core.colorMode || 'dark'
+                            ]['background'],
+                        borderRadius: '10px',
+                        padding: '3px'
+                    }
+                });
+                // add result node and conenct to last node
+
+                const newConnection = {
+                    id: `e${this.nodes[this.nodes.length - 2].id}-${
+                        this.nodes[this.nodes.length - 1].id
+                    }`,
+                    source: this.nodes[this.nodes.length - 2].id,
+                    target: this.nodes[this.nodes.length - 1].id,
+                    type: 'searchEdge',
+                    data: {
+                        removeEdge: this.removeEdge
+                    }
+                };
+
+                this.nodes[this.nodes.length - 2].data.children.push(
+                    this.nodes[this.nodes.length - 1].id
+                );
+
+                this.nodes[this.nodes.length - 1].data.parents.push(
+                    this.nodes[this.nodes.length - 2].id
+                );
+
+                this.edges = [...this.edges, newConnection];
+
+                break;
+        }
+    };
 
     addNewAction = (nodeType, position) => {
         const data = { children: [], parents: [] };
@@ -204,7 +622,10 @@ export class WorkflowStore {
             data.featureTypes = this.store.search.nodeTypes;
             data.updateActions = this.updateActions;
             data.getSuggestions = this.store.search.suggest;
-            data.keyphrase = '';
+            data.updateSearchNodeData = this.updateSearchNodeData;
+            data.keyphrase = this.getDefaultValue(data.feature);
+            data.getDefaultValue = this.getDefaultValue;
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'datasetNode') {
@@ -228,12 +649,14 @@ export class WorkflowStore {
             data.max_value = this.store.search.getSearchHintsByFeature(
                 data.feature
             )['max'];
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'countsNode') {
             data.features = this.getNodeTypesOfType(['list']);
             data.feature = this.getNodeTypesOfType(['list'])[0];
             data.newFeatureName = '';
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'keywordExtractionNode') {
@@ -244,6 +667,7 @@ export class WorkflowStore {
 
         if (nodeType === 'connectorNode') {
             data.connector = 'or';
+            data.trackNodeAction = this.trackNodeAction;
         }
 
         if (nodeType === 'resultsNode') {
@@ -251,6 +675,7 @@ export class WorkflowStore {
         }
 
         data.deleteNode = this.deleteNode;
+        data.colorMode = this.store.core.colorMode || 'dark';
 
         const newNode = {
             id: uuidv4(),
@@ -258,17 +683,31 @@ export class WorkflowStore {
             position,
             data,
             style: {
-                border: `1px solid ${this.actionNodeColors[nodeType]}`,
-                backgroundColor: this.actionNodeColors['background'],
+                border: `1px solid ${
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        nodeType
+                    ]
+                }`,
+                backgroundColor:
+                    this.actionNodeColors[this.store.core.colorMode || 'dark'][
+                        'background'
+                    ],
                 borderRadius: '10px',
                 padding: '3px'
             }
         };
-        this.actions.push(newNode);
-        this.actions = [...this.actions];
+        this.nodes.push(newNode);
+        this.nodes = [...this.nodes];
+        return newNode.id;
     };
 
     onConnect = connection => {
+        this.store.track.trackEvent(
+            'Advanced search - Search Canvas',
+            `Edge - e${connection.source}-${connection.target}`,
+            JSON.stringify({ type: 'Create' })
+        );
+
         const newConnection = {
             id: `e${connection.source}-${connection.target}`,
             source: connection.source,
@@ -279,52 +718,83 @@ export class WorkflowStore {
             }
         };
 
-        this.actions
+        this.nodes
             .find(node => node.id === connection.target)
             .data.parents.push(connection.source);
 
-        this.actions
+        this.nodes
             .find(node => node.id === connection.source)
             .data.children.push(connection.target);
 
-        this.actions = [...this.actions, newConnection];
+        this.nodes = [
+            ...this.nodes.map(node => {
+                if (
+                    node.type === 'connectorNode' &&
+                    node.data.parents.length > 1 &&
+                    node.data.connector === 'not'
+                ) {
+                    node.data.connector = 'or';
+                }
+
+                node.data = { ...node.data };
+
+                return node;
+            })
+        ];
+        this.edges = [...this.edges, newConnection];
     };
 
     removeEdge = id => {
-        const connection = this.actions.find(element => element.id === id);
+        this.store.track.trackEvent(
+            'Advanced search - Search Canvas',
+            `Edge - ${id}`,
+            JSON.stringify({ type: 'Remove' })
+        );
 
-        const source = this.actions.find(
+        const connection = this.edges.find(element => element.id === id);
+
+        const source = this.nodes.find(
             element => element.id === connection.source
         );
-        const target = this.actions.find(
+        const target = this.nodes.find(
             element => element.id === connection.target
         );
 
         // Remove child from source
-        this.actions.find(node => node.id === source.id).data.children =
-            this.actions
+        this.nodes.find(node => node.id === source.id).data.children =
+            this.nodes
                 .find(node => node.id === source.id)
                 .data.children.filter(id => id !== target.id);
 
         // Remove parent from target
-        this.actions.find(node => node.id === target.id).data.parents =
-            this.actions
-                .find(node => node.id === target.id)
-                .data.parents.filter(id => id !== source.id);
+        this.nodes.find(node => node.id === target.id).data.parents = this.nodes
+            .find(node => node.id === target.id)
+            .data.parents.filter(id => id !== source.id);
 
-        this.actions = this.actions.filter(element => element.id !== id);
+        this.nodes = [...this.nodes];
+        this.edges = this.edges.filter(element => element.id !== id);
     };
 
     runWorkFlow = resultsNodeId => {
-        this.actions = [...this.actions];
-        const generatedQuery = this.getQuery(resultsNodeId, this.actions);
+        this.store.track.trackEvent(
+            'Advanced Search - Search Canvas',
+            `Node - ${resultsNodeId} - Button`,
+            JSON.stringify({
+                type: 'Click',
+                value: 'Run Search'
+            })
+        );
+
+        this.nodes = [...this.nodes];
+
+        const generatedQuery = this.getQuery(resultsNodeId, this.nodes);
 
         this.store.search.setAdvancedSearchQuery(generatedQuery);
-        this.shouldRunWorkflow = true;
+        this.setShouldRunWorkflow(true);
     };
 
-    getQuery = (id, actions) => {
-        const node = actions.find(element => element.id === id);
+    getQuery = (id, nodes) => {
+        const node = nodes.find(element => element.id === id);
 
         if (node.data.parents.length === 0) {
             switch (node.type) {
@@ -354,7 +824,7 @@ export class WorkflowStore {
                 action: 'connect',
                 connector: node.data.connector,
                 queries: node.data.parents.map(parent =>
-                    this.getQuery(parent, actions)
+                    this.getQuery(parent, nodes)
                 )
             };
         }
@@ -362,7 +832,7 @@ export class WorkflowStore {
         if (node.type === 'resultsNode') {
             return {
                 action: 'visualise',
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 
@@ -371,7 +841,7 @@ export class WorkflowStore {
                 action: 'count array',
                 feature: node.data.feature,
                 newFeatureName: node.data.newFeatureName,
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 
@@ -380,7 +850,7 @@ export class WorkflowStore {
                 action: 'extract keywords',
                 feature: node.data.feature,
                 newFeatureName: node.data.newFeatureName,
-                query: this.getQuery(node.data.parents[0], actions)
+                query: this.getQuery(node.data.parents[0], nodes)
             };
         }
 

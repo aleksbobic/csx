@@ -1,10 +1,42 @@
+import { schemeTableau10 } from 'd3-scale-chromatic';
 import { makeAutoObservable } from 'mobx';
-import { interpolateRainbow, schemeTableau10 } from 'd3-scale-chromatic';
 import { v4 as uuidv4 } from 'uuid';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Title,
+    DoughnutController,
+    LineController,
+    BarController,
+    Filler,
+    Tooltip as ChartJSTooltip,
+    RadarController,
+    RadialLinearScale
+} from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { capitaliseFirstLetter } from 'general.utils';
 
 export class StatsStore {
     isStatsModalVisible = false;
-    chartTypes = ['Doughnut', 'Bar', 'Line', 'Vertical Bar', 'Grouped Bar'];
+    chartTypes = [
+        'Doughnut',
+        'Bar',
+        'Line',
+        'Vertical Bar',
+        'Grouped Bar',
+        'Radar',
+        'Nodes',
+        'Components',
+        'Graph stats',
+        'Connections',
+        'Node Filter'
+    ];
     availableTypes = ['all'];
     newChartProps = {
         title: '',
@@ -17,7 +49,7 @@ export class StatsStore {
         elements: 'nodes',
         show_only: 'all',
         element_values: 'values',
-        display_limit: 'all',
+        display_limit: '10',
         group_by: 'types',
         colSpan: 1,
         height: '200px',
@@ -43,6 +75,25 @@ export class StatsStore {
         }
 
         makeAutoObservable(this);
+
+        ChartJS.register(
+            RadarController,
+            RadialLinearScale,
+            ArcElement,
+            ChartJSTooltip,
+            CategoryScale,
+            LinearScale,
+            BarElement,
+            Title,
+            Legend,
+            PointElement,
+            LineElement,
+            DoughnutController,
+            LineController,
+            BarController,
+            ChartDataLabels,
+            Filler
+        );
     }
 
     toggleStatsModalVisiblity = (val, types) => {
@@ -54,17 +105,29 @@ export class StatsStore {
         this.isStatsModalVisible = val;
     };
 
-    getGraphColors = labels => {
-        const skipfactor = labels.length > 10 ? 1 / labels.length : null;
+    getGraphColors = (labels, data) => {
+        let uniqueValues;
+
+        if (data) {
+            uniqueValues = [...new Set(data)];
+        }
 
         const graphColors = [];
 
-        for (let i = 0; i < labels.length; i++) {
-            graphColors.push(
-                skipfactor
-                    ? interpolateRainbow(i * skipfactor)
-                    : schemeTableau10[i]
-            );
+        if (data && uniqueValues && uniqueValues?.length <= 10) {
+            for (let i = 0; i < labels.length; i++) {
+                graphColors.push(
+                    schemeTableau10[uniqueValues.indexOf(data[i])]
+                );
+            }
+        } else {
+            for (let i = 0; i < labels.length; i++) {
+                if (labels.length <= 10) {
+                    graphColors.push(schemeTableau10[i]);
+                } else {
+                    graphColors.push('#3182CE');
+                }
+            }
         }
 
         return graphColors;
@@ -77,12 +140,12 @@ export class StatsStore {
             groupHoverLabel: '',
             network: 'overview',
             type: 'doughnut',
-            onlyVisible: false,
             network_data: 'all',
+            onlyVisible: false,
             elements: 'nodes',
             show_only: 'all',
             element_values: 'values',
-            display_limit: 'all',
+            display_limit: '10',
             group_by: 'types',
             colSpan: 1,
             height: '200px',
@@ -142,20 +205,92 @@ export class StatsStore {
         this.newChartProps.show_only = val;
     };
 
-    getElementValues = () => {
+    getNodeSortValues = () => {
+        let sortValues = [
+            { value: 'frequency', label: 'Frequency' },
+            { value: 'neighbours', label: 'Neighbour count' }
+        ];
+
+        if (this.store.core.isDetail) {
+            return sortValues;
+        }
+
+        return [
+            ...sortValues,
+            ...this.store.graph.currentGraphData.meta.anchorProperties
+                .map(entry => entry.property)
+                .filter(property =>
+                    ['integer', 'float'].includes(
+                        this.store.overviewSchema.featureTypes[property]
+                    )
+                )
+                .map(property => {
+                    return { value: property, label: property };
+                })
+        ];
+    };
+
+    getWidgetNodeProperties = (group = false) => {
+        let elementValues = [];
+        if (!group) {
+            elementValues.push({ value: 'values', label: 'Node values' });
+        }
+
+        elementValues = [
+            ...elementValues,
+            { value: 'types', label: 'Node types' },
+            {
+                value: 'degree',
+                label: 'Neighbour count'
+            }
+        ];
+
+        if (this.store.core.isDetail) {
+            return elementValues;
+        }
+
+        return [
+            ...elementValues,
+            ...this.store.overviewSchema.anchorProperties.map(entry => {
+                return {
+                    value: entry,
+                    label: capitaliseFirstLetter(entry)
+                };
+            })
+        ];
+    };
+
+    getWidgetEdgeProperties = () => {
+        if (this.store.core.isDetail) {
+            return [{ value: 'weight', label: 'Edge weights' }];
+        }
+
+        return [
+            { value: 'values', label: 'Edge values' },
+            { value: 'types', label: 'Edge types' },
+            { value: 'weight', label: 'Edge weights' }
+        ];
+    };
+
+    getElementValues = (group = false) => {
         if (this.newChartProps.elements === 'nodes') {
-            let elementValues = [
-                { value: 'values', label: 'Node values' },
-                { value: 'types', label: 'Node types' }
-            ];
+            let elementValues = [];
+            if (!group) {
+                elementValues.push({ value: 'values', label: 'Node values' });
+            }
+
+            elementValues.push({ value: 'types', label: 'Node types' });
+            elementValues.push({
+                value: 'degree',
+                label: 'Neighbour count'
+            });
 
             if (this.store.core.currentGraph !== 'detail') {
                 elementValues = elementValues.concat(
-                    this.store.schema.overviewDataNodeProperties.map(entry => {
+                    this.store.overviewSchema.anchorProperties.map(entry => {
                         return {
                             value: entry,
-                            label:
-                                entry.charAt(0).toUpperCase() + entry.slice(1)
+                            label: capitaliseFirstLetter(entry)
                         };
                     })
                 );
@@ -177,31 +312,152 @@ export class StatsStore {
         ];
     };
 
+    setWidgetProperty = (widgetID, property, value) => {
+        this.activeWidgets.find(chart => chart.id === widgetID)[property] =
+            value;
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+    };
+
+    setWidgetProperties = (widgetID, properties) => {
+        const dataset = this.store.search.currentDataset;
+        const widgetIdenx = this.charts[dataset].findIndex(
+            chart => chart.id === widgetID
+        );
+        this.charts[dataset][widgetIdenx] = {
+            ...this.charts[dataset][widgetIdenx],
+            ...properties
+        };
+
+        this.charts[dataset] = [...this.charts[dataset]];
+
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+    };
+
+    getNewWidgetTitle = () => {
+        if (this.newChartProps.title) {
+            return this.newChartProps.title;
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'nodes') {
+            return 'Graph nodes';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'components') {
+            return 'Graph components';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'graph stats') {
+            return 'Graph properties';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'node filter') {
+            return 'Node filter';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'connections') {
+            return 'Node connections';
+        }
+
+        if (this.newChartProps.type.toLowerCase() === 'radar') {
+            return 'Element comparison';
+        }
+
+        switch (this.newChartProps.element_values) {
+            case 'values':
+                return this.newChartProps.elements === 'nodes'
+                    ? 'node values'
+                    : 'edge values';
+            case 'types':
+                return this.newChartProps.elements === 'nodes'
+                    ? 'node types'
+                    : 'edge types';
+            default:
+                return this.newChartProps.elements === 'nodes'
+                    ? `property ${this.newChartProps.element_values} values`
+                    : 'edge weights';
+        }
+    };
+
+    get activeWidgets() {
+        return this.charts[this.store.search.currentDataset];
+    }
+
     addChart = () => {
         const dataset = this.store.search.currentDataset;
+
+        const newChartId = uuidv4();
+
+        this.store.track.trackEvent(
+            'Widget Modal',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Add new chart',
+                properties: {
+                    id: newChartId,
+                    type: this.newChartProps.type,
+                    elements: this.newChartProps.elements,
+                    element_values: this.newChartProps.element_values,
+                    network: this.newChartProps.network,
+                    element_sort_values: 'frequency',
+                    visible_node_properties: [
+                        'Neighbours',
+                        'Documents',
+                        'Links'
+                    ],
+                    max_distance: 2,
+                    direct_connection_features: 'all',
+                    filter_property: 'degree'
+                }
+            })
+        );
 
         if (Object.keys(this.charts).includes(dataset)) {
             this.charts[dataset].push({
                 ...this.newChartProps,
-                id: uuidv4(),
+                id: newChartId,
                 colSpan: 1,
                 height: '200px',
-                network: this.store.core.currentGraph
+                network: this.store.core.currentGraph,
+                title: this.getNewWidgetTitle(),
+                element_sort_values: 'frequency',
+                visible_node_properties: ['Neighbours', 'Documents', 'Links'],
+                max_distance: 2,
+                direct_connection_features: 'all',
+                filter_property: 'degree'
             });
         } else {
             this.charts[dataset] = [
                 {
                     ...this.newChartProps,
-                    id: uuidv4(),
+                    id: newChartId,
                     colSpan: 1,
                     height: '200px',
-                    network: this.store.core.currentGraph
+                    network: this.store.core.currentGraph,
+                    title: this.getNewWidgetTitle(),
+                    element_sort_values: 'frequency',
+                    visible_node_properties: [
+                        'Neighbours',
+                        'Documents',
+                        'Links'
+                    ],
+                    max_distance: 2,
+                    direct_connection_features: 'all',
+                    filter_property: 'degree'
                 }
             ];
         }
 
         this.toggleStatsModalVisiblity(false);
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        //TODO: Send info to backend and update current history item
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+
+        this.store.history.updateStudyCharts(charts);
     };
 
     removeChart = id => {
@@ -211,9 +467,89 @@ export class StatsStore {
         );
 
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+        this.store.history.updateStudyCharts(charts);
     };
 
-    expandChart = id => {
+    getWidgetTitle = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.title;
+
+    getWidgetItemType = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.elements;
+
+    getWidgetSelectedItemprop = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.element_values;
+
+    getWidgetShowOnly = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.show_only;
+
+    getWidgetMaxDistance = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.max_distance || 2;
+
+    getWdigetVisibleDirectConnectionFeature = id =>
+        this.activeWidgets.find(widget => widget.id === id)
+            ?.direct_connection_features || 'all';
+
+    getWdigetNodeFilteringFeature = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.filter_property ||
+        'degree';
+
+    getWidgetGroupBy = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.group_by;
+
+    getWidgetVisibleNodeProperties = id =>
+        this.activeWidgets.find(widget => widget.id === id)
+            ?.visible_node_properties;
+
+    getWidgetAvailabelNodeProperties = () => {
+        let nodeProperties;
+
+        if (this.store.core.isDetail) {
+            nodeProperties = this.getRadarDetailNodeProperties();
+        } else {
+            nodeProperties = this.getRadarOverviewNodeProperties();
+        }
+
+        return Object.keys(nodeProperties)
+            .map(key => nodeProperties[key])
+            .flat();
+    };
+
+    getWidgetItemProps = id => {
+        if (
+            this.activeWidgets.find(widget => widget.id === id)?.elements ===
+            'nodes'
+        ) {
+            return this.getWidgetNodeProperties();
+        }
+
+        return this.getWidgetEdgeProperties();
+    };
+
+    getWidgetSecondaryAxis = id => {
+        const secondaryAxisValue = this.activeWidgets.find(
+            widget => widget.id === id
+        )?.element_sort_values;
+
+        if (secondaryAxisValue) {
+            return secondaryAxisValue;
+        }
+
+        return 'frequency';
+    };
+
+    getWidgetItemState = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.network_data;
+
+    getWidgetItemCount = id =>
+        this.activeWidgets.find(widget => widget.id === id)?.display_limit ||
+        10;
+
+    expandChart = (id, makeHistoryEntry = true) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
@@ -227,9 +563,18 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.charts = { ...this.charts };
+
+        if (makeHistoryEntry) {
+            this.store.history.updateStudyCharts(charts);
+        }
     };
 
-    shrinkChart = id => {
+    shrinkChart = (id, makeHistoryEntry = true) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
@@ -252,6 +597,14 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+        this.charts = { ...this.charts };
+
+        if (makeHistoryEntry) {
+            this.store.history.updateStudyCharts(charts);
+        }
     };
 
     toggleLegend = id => {
@@ -267,27 +620,55 @@ export class StatsStore {
             };
         });
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+
+        this.store.history.updateStudyCharts(charts);
     };
 
-    toggleAxisLabels = id => {
+    toggleAxisLabels = (id, axis) => {
         const dataset = this.store.search.currentDataset;
         this.charts[dataset] = this.charts[dataset].map(chart => {
             if (chart.id !== id) {
                 return chart;
             }
 
-            return {
-                ...chart,
-                labels: {
-                    x: {
-                        display: !chart.labels.x.display
-                    },
-                    y: {
-                        display: !chart.labels.y.display
+            if (axis === 'x') {
+                return {
+                    ...chart,
+                    labels: {
+                        ...chart.labels,
+                        x: {
+                            display: !chart.labels.x.display
+                        }
                     }
-                }
-            };
+                };
+            } else {
+                return {
+                    ...chart,
+                    labels: {
+                        ...chart.labels,
+                        y: {
+                            display: !chart.labels.y.display
+                        }
+                    }
+                };
+            }
         });
+        localStorage.setItem('chartConfig', JSON.stringify(this.charts));
+
+        const charts =
+            this.store.stats.charts[this.store.search.currentDataset];
+        this.charts = { ...this.charts };
+
+        this.store.history.updateStudyCharts(charts);
+    };
+
+    setChartListForDataset = charts => {
+        const dataset = this.store.search.currentDataset;
+        this.charts[dataset] = charts;
+        this.charts = { ...this.charts };
         localStorage.setItem('chartConfig', JSON.stringify(this.charts));
     };
 
@@ -306,7 +687,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgb(0,0,0)'
                 }
             ]
@@ -316,21 +697,314 @@ export class StatsStore {
     getGroupedBarChartData = (labels, data, label) => {
         const datasets = [];
 
-        const groupColors = this.getGraphColors(Object.keys(data));
+        const groupColors = this.getGraphColors(labels);
+
+        const groups = [];
 
         Object.keys(data).forEach((group, index) => {
+            groups.push(group);
+        });
+
+        labels.forEach((label, index) => {
             datasets.push({
-                label: group,
-                data: data[group],
+                label: label,
+                data: groups.map(group => data[group][index]),
                 backgroundColor: groupColors[index],
-                borderColor: 'rgb(0,0,0)'
+                borderColor: 'transparent'
             });
         });
 
         return {
-            labels: labels,
+            labels: groups,
             datasets: datasets
         };
+    };
+
+    getComponentByID = componentID => {
+        return this.store.graph.currentGraphData.components.find(
+            component => component.id === componentID
+        );
+    };
+
+    getComponentLinkCount = component =>
+        this.store.graph.currentGraphData.links.filter(link =>
+            component.nodes.includes(link.source.id)
+        ).length;
+
+    getComponentNodeCount = component => component.nodes.length;
+
+    getComponentEntryCount = component => component.entries.length;
+
+    getComponentLargestEntryCount = component => {
+        return component.largest_nodes.length
+            ? component.largest_nodes[0].entries.length
+            : 0;
+    };
+
+    getRadarDetailComponents = () => {
+        const labels = [
+            'Node count',
+            'Edge count',
+            'Entry count',
+            'Largest node entry count'
+        ];
+
+        const datasets =
+            this.store.graph.currentGraphData.selectedComponents.map(
+                componentID => {
+                    const component = this.getComponentByID(componentID);
+
+                    return {
+                        label: `Component ${component.id}`,
+                        data: [
+                            this.getComponentNodeCount(component),
+                            this.getComponentLinkCount(component),
+                            this.getComponentEntryCount(component),
+                            this.getComponentLargestEntryCount(component)
+                        ]
+                    };
+                }
+            );
+
+        if (!datasets.length) {
+            return null;
+        }
+
+        return { labels: labels, datasets: datasets };
+    };
+
+    getRadarOverviewComponents = () => {
+        const labels = ['Node count', 'Edge count', 'Entry count'];
+
+        const datasets =
+            this.store.graph.currentGraphData.selectedComponents.map(
+                componentID => {
+                    const component = this.getComponentByID(componentID);
+
+                    return {
+                        label: `Component ${component.id}`,
+                        data: [
+                            this.getComponentNodeCount(component),
+                            this.getComponentLinkCount(component),
+                            this.getComponentEntryCount(component)
+                        ]
+                    };
+                }
+            );
+
+        if (!datasets.length) {
+            return null;
+        }
+
+        return { labels: labels, datasets: datasets };
+    };
+
+    getRadarDetailNodeProperties = () => {
+        const neighbourTypes = this.store.core.visibleDimensions['detail'].map(
+            feature => `${feature} neighbours`
+        );
+
+        return {
+            basic: ['Neighbours', 'Documents', 'Links'],
+            neighbourTypes: neighbourTypes
+        };
+    };
+
+    getRadarDetailVisibleNodeProperties = chartID => {
+        const radarProps = this.getRadarDetailNodeProperties();
+        const visible_node_props = this.activeWidgets.filter(
+            widget => widget.id === chartID
+        )[0].visible_node_properties;
+
+        const visibleRadarProps = {};
+
+        for (const [key, value] of Object.entries(radarProps)) {
+            visibleRadarProps[key] = value.filter(entry =>
+                visible_node_props.includes(entry)
+            );
+        }
+
+        return visibleRadarProps;
+    };
+
+    getRadarOverviewNodeProperties = () => {
+        const linkTypes = this.store.overviewSchema.links.map(
+            linkType => linkType
+        );
+
+        const anchorProperties =
+            this.store.graph.currentGraphData.meta.anchorProperties
+                .filter(entry =>
+                    ['integer', 'float'].includes(
+                        this.store.overviewSchema.featureTypes[entry.property]
+                    )
+                )
+                .map(entry => entry.property);
+
+        return {
+            basic: ['Neighbours', 'Documents', 'Links'],
+            linkTypes: linkTypes,
+            anchorProperties: anchorProperties
+        };
+    };
+
+    getRadarOverviewVisibleNodeProperties = chartID => {
+        const radarProps = this.getRadarOverviewNodeProperties();
+        const visible_node_props = this.activeWidgets.filter(
+            widget => widget.id === chartID
+        )[0].visible_node_properties;
+
+        const visibleRadarProps = {};
+
+        for (const [key, value] of Object.entries(radarProps)) {
+            visibleRadarProps[key] = value.filter(entry =>
+                visible_node_props.includes(entry)
+            );
+        }
+
+        return visibleRadarProps;
+    };
+
+    getNodeLinks = node =>
+        this.store.graph.currentGraphData.links.filter(
+            link => link.source.id === node.id || link.target.id === node.id
+        );
+
+    getNodeNeighbourCountProperty = node => node.neighbours.size;
+    getNodeEntryCountProperty = node => node.entries.length;
+    getNodeLinkCountProperty = nodeLinks =>
+        nodeLinks.reduce((counts, link) => {
+            return counts + link.weight;
+        }, 0);
+
+    getBasicNodeProperties = (node, nodeLinks, properties) => {
+        return properties.map(property => {
+            switch (property) {
+                case 'Neighbours':
+                    return this.getNodeNeighbourCountProperty(node);
+                case 'Documents':
+                    return this.getNodeEntryCountProperty(node);
+                default:
+                    return this.getNodeLinkCountProperty(nodeLinks);
+            }
+        });
+    };
+
+    getLinkTypeProperties = (nodeLinks, properties) => {
+        return properties.map(linkType => {
+            return nodeLinks.reduce((counts, link) => {
+                link.connections.forEach(connection => {
+                    counts =
+                        connection.feature === linkType ? counts + 1 : counts;
+                });
+                return counts;
+            }, 0);
+        });
+    };
+
+    getAnchorProperties = (node, properties) => {
+        return properties.map(prop => parseFloat(node.properties[prop]));
+    };
+
+    getRadarOverviewNodes = visibleProperties => {
+        let labels = Object.keys(visibleProperties)
+            .map(key => visibleProperties[key])
+            .flat();
+
+        const datasets = this.store.graph.currentGraphData.selectedNodes.map(
+            node => {
+                const nodeLinks = this.getNodeLinks(node);
+
+                return {
+                    label: `${node.label.substring(0, 20)}${
+                        node.label.length > 20 ? '...' : ''
+                    }`,
+                    data: [
+                        ...Object.keys(visibleProperties)
+                            .map(key => {
+                                if (key === 'basic') {
+                                    return this.getBasicNodeProperties(
+                                        node,
+                                        nodeLinks,
+                                        visibleProperties[key]
+                                    );
+                                }
+
+                                if (key === 'linkTypes') {
+                                    return this.getLinkTypeProperties(
+                                        nodeLinks,
+                                        visibleProperties[key]
+                                    );
+                                }
+
+                                return this.getAnchorProperties(
+                                    node,
+                                    visibleProperties[key]
+                                );
+                            })
+                            .flat()
+                    ]
+                };
+            }
+        );
+
+        if (!datasets.length) {
+            return null;
+        }
+
+        return { labels: labels, datasets: datasets };
+    };
+
+    getNeighbourTypeProperties = (node, properties) => {
+        return properties.map(neighbourType => {
+            return node.neighbourObjects.reduce((counts, neighbour) => {
+                return neighbour.feature === neighbourType.split(' ')[0]
+                    ? counts + 1
+                    : counts;
+            }, 0);
+        });
+    };
+
+    getRadarDetailNodes = visibleProperties => {
+        let labels = Object.keys(visibleProperties)
+            .map(key => visibleProperties[key])
+            .flat();
+
+        const datasets = this.store.graph.currentGraphData.selectedNodes.map(
+            node => {
+                const nodeLinks = this.getNodeLinks(node);
+
+                return {
+                    label: `${node.label.substring(0, 20)}${
+                        node.label.length > 20 ? '...' : ''
+                    }`,
+                    data: [
+                        ...Object.keys(visibleProperties)
+                            .map(key => {
+                                if (key === 'basic') {
+                                    return this.getBasicNodeProperties(
+                                        node,
+                                        nodeLinks,
+                                        visibleProperties[key]
+                                    );
+                                }
+
+                                return this.getNeighbourTypeProperties(
+                                    node,
+                                    visibleProperties[key]
+                                );
+                            })
+                            .flat()
+                    ]
+                };
+            }
+        );
+
+        if (!datasets.length) {
+            return null;
+        }
+
+        return { labels: labels, datasets: datasets };
     };
 
     getLineChartData = (labels, data, label) => {
@@ -340,7 +1014,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgba(255,255,255,0.25)'
                 }
             ]
@@ -354,7 +1028,7 @@ export class StatsStore {
                 {
                     label: label,
                     data: data,
-                    backgroundColor: this.getGraphColors(labels),
+                    backgroundColor: this.getGraphColors(labels, data),
                     borderColor: 'rgb(0,0,0)'
                 }
             ]
@@ -362,8 +1036,6 @@ export class StatsStore {
     };
 
     getEdgeGroups = (groupBy, data) => {
-        console.log(groupBy);
-        console.log(data);
         const groups = {};
 
         if (groupBy.type === 'basic') {
@@ -440,13 +1112,13 @@ export class StatsStore {
         chartType,
         display_limit,
         groupBy,
-        onlyVisible
+        network_data
     ) => {
         let values = [];
         let counts = [];
         let data = this.store.graph.currentGraphData.links;
 
-        if (onlyVisible) {
+        if (network_data === 'visible') {
             data = data.filter(link => link.visible);
         }
 
@@ -526,18 +1198,20 @@ export class StatsStore {
             });
         } else {
             data.forEach(link => {
-                link.connections.forEach(connection => {
-                    const labelLocation = values.indexOf(
-                        connection[edgeProperty.prop]
-                    );
+                if (link.connections) {
+                    link.connections.forEach(connection => {
+                        const labelLocation = values.indexOf(
+                            connection[edgeProperty.prop]
+                        );
 
-                    if (labelLocation >= 0) {
-                        counts[labelLocation] += 1;
-                    } else {
-                        values.push(connection[edgeProperty.prop]);
-                        counts.push(1);
-                    }
-                });
+                        if (labelLocation >= 0) {
+                            counts[labelLocation] += 1;
+                        } else {
+                            values.push(connection[edgeProperty.prop]);
+                            counts.push(1);
+                        }
+                    });
+                }
             });
         }
 
@@ -557,20 +1231,20 @@ export class StatsStore {
         };
     };
 
-    getNodeDataBasedOnNetworkSelection = (
-        network_data,
-        onlyVisible,
-        showOnly
-    ) => {
+    getNodeDataBasedOnNetworkSelection = (network_data, showOnly) => {
         let nodes;
-        if (network_data === 'selection') {
-            nodes = this.store.graph.currentGraphData.selectedNodes;
-        } else {
-            nodes = this.store.graph.currentGraphData.nodes;
-        }
-
-        if (onlyVisible) {
-            nodes = nodes.filter(node => node.visible);
+        switch (network_data) {
+            case 'selected':
+                nodes = this.store.graph.currentGraphData.selectedNodes;
+                break;
+            case 'visible':
+                nodes = this.store.graph.currentGraphData.nodes.filter(
+                    node => node.visible
+                );
+                break;
+            default:
+                nodes = this.store.graph.currentGraphData.nodes;
+                break;
         }
 
         if (showOnly !== 'all') {
@@ -627,17 +1301,32 @@ export class StatsStore {
         return [valuesSorted, countsSorted];
     };
 
+    getNodeNeighbourCount = node =>
+        node.neighbours.size === 1
+            ? `${node.neighbours.size} neighbour`
+            : `${node.neighbours.size} neighbours`;
+
     getNodeBasicProp = (node, prop) => node[prop];
 
-    getNodeAdvancedProp = (node, prop) => node.properties[prop];
+    getNodeFeature = node => node.feature;
+
+    getNodeAdvancedProp = (node, prop) =>
+        Object.hasOwn(node, 'properties') &&
+        Object.hasOwn(node.properties, prop)
+            ? node.properties[prop]
+            : null;
 
     getNodeGroups = (groupBy, data) => {
         const groups = {};
+        let getNodeProp;
 
-        let getNodeProp =
-            groupBy.type === 'basic'
-                ? this.getNodeBasicProp
-                : this.getNodeAdvancedProp;
+        if (groupBy.prop === 'degree') {
+            getNodeProp = this.getNodeNeighbourCount;
+        } else if (groupBy.type === 'basic') {
+            getNodeProp = this.getNodeBasicProp;
+        } else {
+            getNodeProp = this.getNodeAdvancedProp;
+        }
 
         data.forEach(node => {
             const group = getNodeProp(node, groupBy.prop);
@@ -658,52 +1347,81 @@ export class StatsStore {
         display_limit,
         network_data,
         groupBy,
-        onlyVisible,
-        show_only
+        show_only,
+        sortBy = 'frequency'
     ) => {
         let data = this.getNodeDataBasedOnNetworkSelection(
             network_data,
-            onlyVisible,
             show_only
         );
-        let getNodeProp =
-            nodeProperty.type === 'basic'
-                ? this.getNodeBasicProp
-                : this.getNodeAdvancedProp;
+
+        let getNodeProp;
+
+        if (nodeProperty.prop === 'degree') {
+            getNodeProp = this.getNodeNeighbourCount;
+        } else if (nodeProperty.type === 'basic') {
+            getNodeProp = this.getNodeBasicProp;
+        } else {
+            getNodeProp = this.getNodeAdvancedProp;
+        }
 
         if (groupBy) {
             let groupedByCounts = {};
 
+            // Nodes grouped in the groupBy groups
             const groups = this.getNodeGroups(groupBy, data);
 
+            // Unique node values
             const uniqueValues = [
                 ...new Set(
                     data.map(node => getNodeProp(node, nodeProperty.prop))
                 )
             ];
 
+            // Unique node value counts (so the frequnecy for each entry in uniqueValues)
             const allValueCounts = new Array(uniqueValues.length).fill(0);
+
+            // Get all visible nodes
+            const visibleEntries =
+                network_data === 'visible'
+                    ? this.store.graph.currentGraphData.activeTableData.map(
+                          row => row.entry
+                      )
+                    : this.store.graph.currentGraphData.tableData.map(
+                          row => row.entry
+                      );
 
             data.map(node => {
                 return {
                     value: getNodeProp(node, nodeProperty.prop),
-                    weight: node.entries.length
+                    weight: node.entries.filter(entryID =>
+                        visibleEntries.includes(entryID)
+                    ).length
                 };
             }).forEach(entry => {
                 allValueCounts[uniqueValues.indexOf(entry.value)] +=
                     entry.weight;
             });
 
+            // For each group form groups the counts for each of the values in unique node values
             Object.keys(groups).forEach(group => {
                 groupedByCounts[group] = new Array(uniqueValues.length).fill(0);
             });
 
+            // node vlaues but ordered based on frequency
             const [valuesSorted] = this.getSortedValues(
                 allValueCounts,
                 uniqueValues,
                 display_limit
             );
 
+            // generate data for groupedByCounts
+            // The format is:
+            // {
+            //     groupName1: [val1freq1, val2freq1],
+            //     groupName2: [val1freq2, val2freq2],
+            //     groupName3: [val1freq3, val2freq3]
+            // }
             Object.keys(groups).forEach(group => {
                 data = groups[group];
 
@@ -713,7 +1431,9 @@ export class StatsStore {
                     );
 
                     groupedByCounts[group][labelLocation] +=
-                        node.entries.length;
+                        node.entries.filter(entryID =>
+                            visibleEntries.includes(entryID)
+                        ).length;
                 });
             });
 
@@ -729,16 +1449,49 @@ export class StatsStore {
             let values = [];
             let counts = [];
 
+            const visibleEntries =
+                network_data === 'visible'
+                    ? this.store.graph.currentGraphData.activeTableData.map(
+                          row => row.entry
+                      )
+                    : this.store.graph.currentGraphData.tableData.map(
+                          row => row.entry
+                      );
+
             data.forEach(node => {
                 const labelLocation = values.indexOf(
                     getNodeProp(node, nodeProperty.prop)
                 );
 
-                if (labelLocation >= 0) {
-                    counts[labelLocation] += node.entries.length;
-                } else {
-                    values.push(getNodeProp(node, nodeProperty.prop));
-                    counts.push(node.entries.length);
+                if (sortBy === 'frequency') {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += node.entries.filter(entryID =>
+                            visibleEntries.includes(entryID)
+                        ).length;
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(
+                            node.entries.filter(entryID =>
+                                visibleEntries.includes(entryID)
+                            ).length
+                        );
+                    }
+                } else if (sortBy === 'neighbours') {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += node.neighbours.size;
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(node.neighbours.size);
+                    }
+                } else if (node.properties) {
+                    if (labelLocation >= 0) {
+                        counts[labelLocation] += parseFloat(
+                            node.properties[sortBy]
+                        );
+                    } else {
+                        values.push(getNodeProp(node, nodeProperty.prop));
+                        counts.push(parseFloat(node.properties[sortBy]));
+                    }
                 }
             });
 

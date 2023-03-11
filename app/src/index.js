@@ -7,7 +7,8 @@ import { ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 
 ReactDOM.render(
     <React.StrictMode>
-        {localStorage.setItem('chakra-ui-color-mode', 'dark')}
+        {!localStorage.getItem('chakra-ui-color-mode') &&
+            localStorage.setItem('chakra-ui-color-mode', 'dark')}
         <ChakraProvider>
             <ColorModeScript />
             <App />

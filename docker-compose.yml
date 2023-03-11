@@ -10,6 +10,9 @@ services:
       - ./server:/cs
     ports:
       - 8881:80
+    environment:
+      DISABLE_UPLOAD: 'false'
+      ELASTIC_PASSWORD: 'elasticroot'
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
   app:
     container_name: csx_app
@@ -25,47 +28,46 @@ services:
       - server
       # - analytics
     command: bash -c "npm install && npm start"
-  # mysql:
-  #   image: "mysql:5.7"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #     MYSQL_DATABASE: analytics
-  #   command: --max_allowed_packet=128000000 #Bytes
-  #   ports:
-  #     - "3316:3306"
-  #   volumes:
-  #     - ./mysql:/var/lib/mysql
-  #   container_name: csx_analytics_db
-  # analytics:
-  #   image: matomo:latest
-  #   container_name: csx_analytics
-  #   volumes:
-  #     - ./analytics:/var/www/html
-  #   environment:
-  #     MATOMO_DATABASE_HOST: csx_analytics_db
-  #     MATOMO_DATABASE_USERNAME: root
-  #     MATOMO_DATABASE_PASSWORD: root
-  #     MATOMO_DATABASE_DBNAME: analytics
-  #   ports:
-  #     - 8883:80
-  #   links: [mysql]
+  mysql:
+    image: "mysql:5.7"
+    profiles:
+      - "analytics"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: analytics
+    command: --max_allowed_packet=128000000 #Bytes
+    ports:
+      - "3316:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    container_name: csx_analytics_db
+  analytics:
+    image: matomo:4.13.0
+    profiles:
+      - "analytics"
+    container_name: csx_analytics
+    volumes:
+      - ./analytics:/var/www/html
+    environment:
+      MATOMO_DATABASE_HOST: csx_analytics_db
+      MATOMO_DATABASE_USERNAME: root
+      MATOMO_DATABASE_PASSWORD: root
+      MATOMO_DATABASE_DBNAME: analytics
+    ports:
+      - 8883:80
+    links: [mysql]
   elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
     environment:
       - discovery.type=single-node
+      - ELASTIC_PASSWORD=elasticroot
+      - xpack.security.enabled=true
     ports:
       - "9200:9200"
       - "9300:9300"
     volumes:
       - ./elasticsearch:/usr/share/elasticsearch/data
     container_name: csx_elastic
-  redis:
-    image: redis:7.0.4
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis:/data
-    container_name: csx_redis
   mongo:
     image: mongo:4
     ports:

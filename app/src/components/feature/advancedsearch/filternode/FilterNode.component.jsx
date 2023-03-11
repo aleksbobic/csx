@@ -15,15 +15,38 @@ import { Handle } from 'react-flow-renderer';
 const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
         data.updateFilterNodeData(id, 'min', value);
+        data.trackNodeAction(
+            `Node - ${id} - Input Element - Min`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${value}`
+            })
+        );
     };
 
     const modifyMax = value => {
         data.updateFilterNodeData(id, 'max', value);
+        data.trackNodeAction(
+            `Node - ${id} - Input Element - Max`,
+            JSON.stringify({
+                type: 'Write',
+                feature: data.feature,
+                value: `${value}`
+            })
+        );
     };
 
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.updateFilterNodeValues(id, value.target.value);
+        data.trackNodeAction(
+            `Node - ${id} - Select Element - Feature`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${value.target.value}`
+            })
+        );
     };
 
     return (
@@ -46,12 +69,17 @@ const filterNode = ({ id, data, isConnectable }) => {
                     </HStack>
                     <Tooltip label="Filter this property">
                         <Select
+                            className="nodrag"
                             margin="0px"
                             variant="filled"
                             size="sm"
                             borderRadius="5px"
                             value={data.feature}
-                            background="whiteAlpha.200"
+                            background={
+                                data.colorMode === 'light'
+                                    ? 'whiteAlpha.800'
+                                    : 'whiteAlpha.200'
+                            }
                             opacity="0.8"
                             _hover={{
                                 opacity: 1,
@@ -90,7 +118,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             min={data.min_value}
                             max={data.max}
                         >
-                            <NumberInputField />
+                            <NumberInputField borderRadius="5px" />
                         </NumberInput>
                     </Tooltip>
                     <Tooltip label="To">
@@ -110,7 +138,7 @@ const filterNode = ({ id, data, isConnectable }) => {
                             min={data.min}
                             max={data.max_value}
                         >
-                            <NumberInputField />
+                            <NumberInputField borderRadius="5px" />
                         </NumberInput>
                     </Tooltip>
                 </VStack>

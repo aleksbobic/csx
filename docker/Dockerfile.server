@@ -8,7 +8,7 @@ ENV PYTHONBUFFERED 1
 # Install system dependencies
 # Installing openjdk 8 instead of 11 to avoid some warnings
 RUN apt-get update \
-    && apt-get -y install netcat gcc postgresql openjdk-11-jdk\
+    && apt-get -y install netcat gcc g++ postgresql openjdk-11-jdk\
     && apt-get clean
 
 # Setup JAVA_HOME

@@ -1,92 +1,102 @@
-import {
-    Box,
-    Center,
-    Code,
-    Heading,
-    HStack,
-    IconButton,
-    Text,
-    useColorMode,
-    useToast,
-    VStack
-} from '@chakra-ui/react';
+import { Box, Center, useColorMode, useToast } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
-import { Close, Spinner } from 'css.gg';
+import { Spinner } from 'css.gg';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import { isEnvSet } from 'general.utils';
+import { useCallback } from 'react';
+import { useRef } from 'react';
+import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 
 function GraphPage() {
     const store = useContext(RootStoreContext);
-    const toast = useToast();
     const location = useLocation();
     const { colorMode } = useColorMode();
-    const toastRef = useRef();
     const history = useHistory();
+    const surveyToastRef = useRef();
+    const surveyToast = useToast();
+
+    const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
+
+    useEffect(() => {
+        setShowLoader(store.core.dataIsLoading);
+    }, [store.core.dataIsLoading]);
+
+    useBeforeunload(() => {
+        store.core.deleteStudy();
+    });
+
+    const queryIsJSON = useCallback(() => {
+        try {
+            JSON.parse(
+                store.core.studyHistory[store.core.studyHistoryItemIndex].query
+            );
+
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }, [store.core.studyHistory, store.core.studyHistoryItemIndex]);
+
+    const shouldReload = useCallback(() => {
+        let queryHasChanged = false;
+        if (
+            store.core.studyHistory.length > 0 &&
+            store.search.advancedSearchQuery
+        ) {
+            if (queryIsJSON()) {
+                queryHasChanged =
+                    JSON.stringify(store.search.advancedSearchQuery) !==
+                    store.core.studyHistory[store.core.studyHistoryItemIndex]
+                        .query;
+            } else {
+                queryHasChanged =
+                    store.search.advancedSearchQuery.query.action !==
+                        'search' ||
+                    store.search.advancedSearchQuery.query.feature !==
+                        store.search.default_search_features.join(', ') ||
+                    store.search.advancedSearchQuery.query.keyphrase !==
+                        store.core.studyHistory[
+                            store.core.studyHistoryItemIndex
+                        ].query;
+            }
+        }
+
+        return queryHasChanged;
+    }, [
+        queryIsJSON,
+        store.core.studyHistory,
+        store.core.studyHistoryItemIndex,
+        store.search.advancedSearchQuery,
+        store.search.default_search_features
+    ]);
 
     useEffect(() => {
         store.track.trackPageChange();
 
-        store.core.setCurrentGraph(
-            location.pathname.startsWith('/graph/detail')
-                ? 'detail'
-                : 'overview'
-        );
-
-        const query = queryString.parse(location.search).query;
-        const dataset = queryString.parse(location.search).dataset;
-        const suuid = queryString.parse(location.search).suuid;
+        const studyId = queryString.parse(location.search).study;
 
         store.graphInstance.toggleVisibleComponents(-1);
 
-        if (query) {
-            if (location.pathname.startsWith('/graph/detail')) {
-                let visible_entries = [];
-
-                if (store.graph.currentGraphData.selectedComponents.length) {
-                    const entryArray = store.graph.currentGraphData.components
-                        .filter(component =>
-                            store.graph.currentGraphData.selectedComponents.includes(
-                                component.id
-                            )
-                        )
-                        .reduce(
-                            (entries, component) =>
-                                entries.concat(component.entries),
-                            []
-                        );
-
-                    visible_entries = JSON.stringify([...new Set(entryArray)]);
-                }
-
-                let same_components =
-                    visible_entries.length ===
-                    store.graph.detailGraphData.meta.visible_entries.length;
-
+        if (studyId) {
+            if (store.core.studyUuid === studyId) {
                 if (
-                    visible_entries.length ===
-                    store.graph.detailGraphData.meta.visible_entries.length
+                    !store.core.dataIsLoading &&
+                    (store.graph.graphData.nodes.length === 0 || shouldReload())
                 ) {
-                    for (let entry in visible_entries) {
-                        if (
-                            store.graph.detailGraphData.meta.visible_entries.includes(
-                                entry
-                            )
-                        ) {
-                            same_components = false;
-                            break;
-                        }
-                    }
+                    store.graph.modifyStudy(store.core.currentGraph);
                 }
-
-                store.graph.getSearchGraph(query, 'detail', suuid);
             } else {
-                store.graph.getSearchGraph(query, 'overview', suuid);
+                store.core.deleteStudy();
+                store.core.setStudyUuid(studyId);
+                store.graph.getStudy(studyId);
             }
         } else {
             history.push('/');
@@ -94,96 +104,63 @@ function GraphPage() {
     }, [
         history,
         location.search,
-        store.graph,
-        store.track,
-        location.pathname,
+        location.state,
+        shouldReload,
         store.core,
-        store.graphInstance
+        store.graph,
+        store.graphInstance,
+        store.track
     ]);
 
     useEffect(() => {
-        if (store.search.searchIsEmpty) {
+        if (store.search.searchIsEmpty || store.core.studyIsEmpty) {
             history.push('/');
         }
-    }, [history, store.search.searchIsEmpty]);
-
-    const renderToast = useCallback(() => {
-        toastRef.current = toast({
-            render: () => {
-                return (
-                    <Box
-                        backgroundColor="red.500"
-                        borderRadius="10px"
-                        padding="10px"
-                        key="id"
-                    >
-                        <VStack
-                            width="400px"
-                            position="relative"
-                            alignItems="flex-start"
-                        >
-                            <HStack justifyContent="space-between" width="100%">
-                                <Heading size="md">Server error :(</Heading>
-                                <IconButton
-                                    variant="ghost"
-                                    size="md"
-                                    icon={<Close />}
-                                    onClick={() => {
-                                        toast.close(toastRef.current);
-                                    }}
-                                />
-                            </HStack>
-                            <Text>
-                                There seems to be some issues with our server.
-                                Sorry for that, we&#39;ll fix it as soon as
-                                possible. If you see one of our devs please
-                                share the following code with them:
-                            </Text>
-                            <Code
-                                colorScheme="black"
-                                maxHeight="100px"
-                                overflow="scroll"
-                                width="100%"
-                                padding="5px"
-                                borderRadius="10px"
-                            >
-                                {store.core.errorMessage.toString()}
-                                {store.core.errorDetails}
-                            </Code>
-                        </VStack>
-                    </Box>
-                );
-            },
-            status: 'error',
-            duration: 100000,
-            isClosable: true,
-            onCloseComplete: function () {
-                store.core.errorMessage = false;
-            }
-        });
-    }, [store.core, toast]);
+    }, [history, store.core.studyIsEmpty, store.search.searchIsEmpty]);
 
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);
+    }, [store.workflow]);
 
-        if (store.core.errorMessage) {
-            renderToast();
+    const renderSurveyToast = useCallback(() => {
+        surveyToastRef.current = surveyToast({
+            render: () => (
+                <SurveyInfoModal
+                    onClose={() => {
+                        surveyToast.close(surveyToastRef.current);
+                        store.core.setSurveyHidden(true);
+                    }}
+                />
+            ),
+            position: 'bottom-left',
+            status: 'error',
+            duration: null,
+            isClosable: true
+        });
+    }, [store.core, surveyToast]);
+
+    useEffect(() => {
+        if (
+            isEnvSet('REACT_APP_SURVEY_LINK') &&
+            store.core.studyHistory.length >
+                store.core.surveyHistoryDepthTrigger &&
+            !store.core.surveyHidden
+        ) {
+            renderSurveyToast();
         }
-    }, [store.core.errorMessage, renderToast, store.workflow]);
+    }, [
+        renderSurveyToast,
+        store.core.studyHistory.length,
+        store.core.surveyHidden,
+        store.core.surveyHistoryDepthTrigger
+    ]);
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
-            <GraphComponent
-                graphData={
-                    store.core.isDetail
-                        ? store.graph.detailGraphData
-                        : store.graph.graphData
-                }
-            />
 
-            {!store.graph.currentGraphData.nodes.length && (
+            {showLoader && (
                 <Center
                     width="100%"
                     height="100%"
@@ -193,6 +170,7 @@ function GraphPage() {
                     position="fixed"
                     top="0"
                     left="0"
+                    zIndex="2"
                 >
                     <Spinner
                         thickness="4px"
@@ -204,6 +182,14 @@ function GraphPage() {
                     />
                 </Center>
             )}
+
+            <GraphComponent
+                graphData={
+                    store.core.isDetail
+                        ? store.graph.detailGraphData
+                        : store.graph.graphData
+                }
+            />
         </Box>
     );
 }

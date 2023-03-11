@@ -14,6 +14,13 @@ import { Handle } from 'react-flow-renderer';
 const connectorNode = ({ id, data, isConnectable }) => {
     const modifyConnector = value => {
         data.connector = value.target.value;
+        data.trackNodeAction(
+            `Node - ${id} - Select Element`,
+            JSON.stringify({
+                type: 'Change selection',
+                value: `${value.target.value}`
+            })
+        );
     };
 
     return (
@@ -47,13 +54,18 @@ const connectorNode = ({ id, data, isConnectable }) => {
                         </Tooltip>
                     </HStack>
                     <Select
+                        className="nodrag"
                         margin="0px"
                         variant="filled"
                         size="sm"
                         defaultValue={data.connector}
                         borderRadius="5px"
                         onChange={modifyConnector}
-                        background="whiteAlpha.200"
+                        background={
+                            data.colorMode === 'light'
+                                ? 'whiteAlpha.800'
+                                : 'whiteAlpha.200'
+                        }
                         opacity="0.8"
                         _hover={{
                             opacity: 1,
@@ -64,9 +76,11 @@ const connectorNode = ({ id, data, isConnectable }) => {
                             cursor: 'pointer'
                         }}
                     >
-                        <option value="and">and</option>
                         <option value="or">or</option>
-                        <option value="not">not</option>
+                        <option value="and">and</option>
+                        {data.parents.length < 2 && (
+                            <option value="not">not</option>
+                        )}
                     </Select>
                 </VStack>
                 <Handle

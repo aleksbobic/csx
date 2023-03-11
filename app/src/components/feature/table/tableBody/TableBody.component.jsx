@@ -1,4 +1,4 @@
-import { Tag, Text, useColorMode, Wrap } from '@chakra-ui/react';
+import { Tag, Tbody, Td, Text, Tr, useColorMode, Wrap } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
@@ -24,17 +24,25 @@ function TableBody(props) {
                     store.search.anchor.toLowerCase()
             );
 
-            full_selector = Array.isArray(cell_with_values.value)
-                ? `${selector}_${cell_with_values.value[0]}_id`
-                : `${selector}_${cell_with_values.value}_id`;
+            if (Array.isArray(cell_with_values.value)) {
+                if (cell_with_values.value.length) {
+                    full_selector = `${selector}_${
+                        cell_with_values.value[index ? index : 0]
+                    }_id`;
+                } else {
+                    full_selector = `${selector}_CSX_No_${selector}_id`;
+                }
+            } else {
+                full_selector = `${selector}_${cell_with_values.value}_id`;
+            }
 
             key = Object.keys(hidden_cols).find(
                 entry => entry.toLowerCase() === full_selector.toLowerCase()
             );
         } else if (typeof index === 'number') {
             // Based on the type of content in the cell the id can be located in different areas
-            full_selector = `${selector}_${cell.value[index]}_id`;
 
+            full_selector = `${selector}_${cell.value[index]}_id`;
             key = Object.keys(hidden_cols).find(
                 entry => entry.toLowerCase() === full_selector.toLowerCase()
             );
@@ -67,16 +75,46 @@ function TableBody(props) {
                     maxWidth="150px"
                     onClick={() => {
                         store.track.trackEvent(
-                            'data panel nodes tab',
-                            'item click',
-                            `focus on node: ${cell.value}}`
+                            'Results Panel - Table',
+                            'Cell',
+                            JSON.stringify({
+                                type: 'Click',
+                                value: `Zoom to fit ${cell.value}`
+                            })
                         );
 
-                        store.graphInstance.zoomToFitByNodeId(
-                            Array.isArray(cell.value)
+                        if (
+                            store.core.isDetail ||
+                            store.search.nodeTypes[store.search.anchor] !==
+                                'list' ||
+                            cell.column.Header.toLowerCase() ===
+                                store.search.anchor.toLowerCase()
+                        ) {
+                            store.graphInstance.zoomToFitByNodeId(
+                                Array.isArray(cell.value)
+                                    ? findID(cell, 0)
+                                    : findID(cell)
+                            );
+                        } else {
+                            const id = Array.isArray(cell.value)
                                 ? findID(cell, 0)
-                                : findID(cell)
-                        );
+                                : findID(cell);
+
+                            const entries =
+                                store.graph.currentGraphData.nodes.find(
+                                    node => node.id === id
+                                ).entries;
+
+                            const ids = store.graph.currentGraphData.nodes
+                                .filter(node =>
+                                    node.entries.some(entry =>
+                                        entries.includes(entry)
+                                    )
+                                )
+                                .map(node => node.id);
+
+                            store.graphInstance.zoomToFitByNodeIds(ids);
+                        }
                     }}
                     _hover={{
                         cursor: 'pointer',
@@ -113,16 +151,46 @@ function TableBody(props) {
                         maxWidth="150px"
                         onClick={() => {
                             store.track.trackEvent(
-                                'data panel nodes tab',
-                                'item click',
-                                `focus on node: ${cell.value}}`
+                                'Results Panel - Table',
+                                'Cell',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: `Zoom to fit ${cell.value}`
+                                })
                             );
 
-                            store.graphInstance.zoomToFitByNodeId(
-                                Array.isArray(cell.value)
+                            if (
+                                store.core.isDetail ||
+                                store.search.nodeTypes[store.search.anchor] !==
+                                    'list' ||
+                                cell.column.Header.toLowerCase() ===
+                                    store.search.anchor.toLowerCase()
+                            ) {
+                                store.graphInstance.zoomToFitByNodeId(
+                                    Array.isArray(cell.value)
+                                        ? findID(cell, index)
+                                        : findID(cell)
+                                );
+                            } else {
+                                const id = Array.isArray(cell.value)
                                     ? findID(cell, index)
-                                    : findID(cell)
-                            );
+                                    : findID(cell);
+
+                                const entries =
+                                    store.graph.currentGraphData.nodes.find(
+                                        node => node.id === id
+                                    ).entries;
+
+                                const ids = store.graph.currentGraphData.nodes
+                                    .filter(node =>
+                                        node.entries.some(entry =>
+                                            entries.includes(entry)
+                                        )
+                                    )
+                                    .map(node => node.id);
+
+                                store.graphInstance.zoomToFitByNodeIds(ids);
+                            }
                         }}
                     >
                         {value}
@@ -138,45 +206,38 @@ function TableBody(props) {
             textAlign: 'left'
         };
 
-        if (
-            cell.column.Header !==
-            cell.row.cells[cell.row.cells.length - 1].column.Header
-        ) {
-            styles.borderRight = '1px solid';
-            styles.borderRightColor = 'rgba(255,255,255,0.25)';
-        }
-
         return (
-            <td key="1" {...cell.getCellProps()} style={styles}>
+            <Td key="1" {...cell.getCellProps()} style={styles}>
                 <Wrap padding="20px 10px">
                     {cell.render(({ cell }) => renderCellContent(cell))}
                 </Wrap>
-            </td>
+            </Td>
         );
     };
 
     return (
-        <tbody {...props.getTableBodyProps()} id="nodelistbody">
+        <Tbody {...props.getTableBodyProps()} id="nodelistbody">
             {props.rows.map(row => {
                 props.prepareRow(row);
                 return (
-                    <tr
+                    <Tr
                         {...row.getRowProps()}
                         className={
                             colorMode === 'light'
                                 ? 'table-row-light'
                                 : 'table-row'
                         }
-                        style={{
-                            borderBottom: '1px solid',
-                            borderBottomColor: 'rgba(255,255,255,0.25)'
+                        borderBottom="1px solid rgba(255,255,255,0.10)"
+                        _last={{
+                            borderBottom: '0px solid',
+                            borderBottomColor: 'transparent'
                         }}
                     >
                         {row.cells.map(renderCell)}
-                    </tr>
+                    </Tr>
                 );
             })}
-        </tbody>
+        </Tbody>
     );
 }
 

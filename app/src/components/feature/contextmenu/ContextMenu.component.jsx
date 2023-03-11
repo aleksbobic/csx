@@ -8,6 +8,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 function ContextMenu() {
     const contextMenuRef = useRef();
+
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
@@ -15,7 +16,15 @@ function ContextMenu() {
         ref: contextMenuRef,
         handler: () => {
             if (store.contextMenu.isVisible) {
-                store.track.trackEvent('graph', 'click', 'hide context menu');
+                store.track.trackEvent(
+                    'Graph Area - Context Menu',
+                    'Outside',
+                    JSON.stringify({
+                        type: 'Click',
+                        value: 'Close context menu'
+                    })
+                );
+
                 store.contextMenu.hideContextMenu();
             }
         }
@@ -27,12 +36,14 @@ function ContextMenu() {
         );
 
         store.track.trackEvent(
-            'context menu',
-            'button click',
-            `${nodeIndex !== -1 ? 'deselect' : 'select'} node: {label: ${
-                store.contextMenu.originNode.label
-            }, id: ${store.contextMenu.originNode.id}}`
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${nodeIndex !== -1 ? 'Deselect' : 'Select'} node`
+            })
         );
+
         store.graph.toggleNodeSelection(
             store.contextMenu.originNode.id,
             nodeIndex
@@ -40,17 +51,68 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
+    const removeSelection = () => {
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Remove node: ${store.contextMenu.originNode.id}`
+            })
+        );
+
+        store.graph.removeSelection(store.contextMenu.originNode);
+        store.contextMenu.hideContextMenu();
+    };
+
+    const expandGraph = () => {
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Expand graph through node ${store.contextMenu.originNode.id}`
+            })
+        );
+
+        const node = store.graph.currentGraphData.nodes.filter(
+            node => node.id === store.contextMenu.originNode.id
+        )[0];
+
+        store.graph.expandNetwork([node]);
+        store.contextMenu.hideContextMenu();
+    };
+
     const selectComponent = () => {
         const componentId = store.contextMenu.originNode.component;
+
+        store.track.trackEvent(
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `${
+                    !store.graph.currentGraphData.selectedComponents.includes(
+                        componentId
+                    )
+                        ? 'Deselect'
+                        : 'Select'
+                } component ${componentId}`
+            })
+        );
+
         store.graph.selectComponent(componentId);
         store.contextMenu.hideContextMenu();
     };
 
-    const selfCentric = () => {
+    const triggerSelfCentric = () => {
         store.track.trackEvent(
-            'context menu',
-            'button click',
-            `view direct connections of node: {label: ${store.contextMenu.originNode.label}, id: ${store.contextMenu.originNode.id}}`
+            'Graph Area - Context Menu',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: 'Show direct connections'
+            })
         );
         store.graphInstance.triggerSelfCentric();
     };
@@ -62,7 +124,7 @@ function ContextMenu() {
             buttons.push(
                 <Button
                     justifyContent="left"
-                    onClick={selfCentric}
+                    onClick={triggerSelfCentric}
                     key="selfCentricButton"
                 >
                     Show direct connections
@@ -85,6 +147,10 @@ function ContextMenu() {
             padding="5px"
             borderRadius="10px"
             width="200px"
+            border="1px solid"
+            borderColor={
+                colorMode === 'light' ? 'blackAlpha.200' : 'transparent'
+            }
         >
             <ButtonGroup variant="ghost" size="xs" width="100%">
                 <VStack align="stretch" spacing="0" width="100%">
@@ -93,21 +159,23 @@ function ContextMenu() {
                             ? 'Deselect node'
                             : 'Select node'}
                     </Button>
-                    {!store.graphInstance.isSelfCentric &&
-                        store.core.isOverview && (
-                            <Button
-                                justifyContent="left"
-                                onClick={selectComponent}
-                            >
-                                {store.graph.currentGraphData.selectedComponents.includes(
-                                    store.contextMenu.originNode?.component
-                                )
-                                    ? 'Deselect component'
-                                    : 'Select component'}
-                            </Button>
-                        )}
+                    {!store.graphInstance.isSelfCentric && (
+                        <Button justifyContent="left" onClick={selectComponent}>
+                            {store.graph.currentGraphData.selectedComponents.includes(
+                                store.contextMenu.originNode?.component
+                            )
+                                ? 'Deselect component'
+                                : 'Select component'}
+                        </Button>
+                    )}
                     {!store.graphInstance.isSelfCentric &&
                         renderAdvcancedButtons()}
+                    <Button justifyContent="left" onClick={expandGraph}>
+                        Expand graph through node
+                    </Button>
+                    <Button justifyContent="left" onClick={removeSelection}>
+                        Remove node
+                    </Button>
                 </VStack>
             </ButtonGroup>
         </Box>
