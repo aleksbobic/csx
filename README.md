@@ -22,6 +22,11 @@ Contributors from the following institutions were involved in the development of
 ## CITATION ✍️
 If you happen to mention or use this project as part of one of your scientific works, please cite the following paper: Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021.
 
+## CONTRIBUTORS 🙌🥳🙌🥳🙌🥳
+A big thank you to all contributiors of this project:
+
+@LorenaEgger
+
 ## TUTORIALS 📖
 ![Collaboration Spotting X - Preview](https://github.com/aleksbobic/csx/blob/master/cover.gif?raw=true)
 * [Introduction](https://youtu.be/io-_aeOemwA)
