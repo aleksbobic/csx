@@ -1310,7 +1310,11 @@ export class StatsStore {
 
     getNodeFeature = node => node.feature;
 
-    getNodeAdvancedProp = (node, prop) => node.properties[prop];
+    getNodeAdvancedProp = (node, prop) =>
+        Object.hasOwn(node, 'properties') &&
+        Object.hasOwn(node.properties, prop)
+            ? node.properties[prop]
+            : null;
 
     getNodeGroups = (groupBy, data) => {
         const groups = {};
@@ -1479,7 +1483,7 @@ export class StatsStore {
                         values.push(getNodeProp(node, nodeProperty.prop));
                         counts.push(node.neighbours.size);
                     }
-                } else {
+                } else if (node.properties) {
                     if (labelLocation >= 0) {
                         counts[labelLocation] += parseFloat(
                             node.properties[sortBy]

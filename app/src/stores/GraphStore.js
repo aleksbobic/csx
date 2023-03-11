@@ -929,7 +929,7 @@ export class GraphStore {
                     if (
                         this.store.search.nodeTypes[entry.property] ===
                             'category' ||
-                        entry.values.length <= 10
+                        entry.values.length <= 8
                     ) {
                         this.store.graphInstance.generateSchemeColorsFromArray(
                             [

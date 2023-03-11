@@ -22,7 +22,7 @@ function NodeFilter(props) {
 
     const [isDemo, setIsDemo] = useState(false);
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats.activeWidgets.find(
+        store.stats?.activeWidgets?.find(
             widget => widget.id === props.chart?.id
         ) || {}
     );

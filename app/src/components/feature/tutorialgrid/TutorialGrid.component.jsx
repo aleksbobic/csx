@@ -59,6 +59,12 @@ function TutorialGrid(props) {
             url: 'https://youtu.be/YZiKM0YyD08',
             description:
                 'Introduces the basic concepts of Collaboration Spotting X.'
+        },
+        {
+            title: 'Studies & Presentations',
+            url: 'https://youtu.be/M7NGHK86SBM',
+            description:
+                'Demonstrated how to analyse a dataset and create a presentation.'
         }
     ];
 

@@ -27,7 +27,7 @@ function SelectedComponentList(props) {
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats.activeWidgets.find(
+        store.stats?.activeWidgets?.find(
             widget => widget.id === props.chart?.id
         ) || {}
     );
@@ -224,7 +224,7 @@ function SelectedComponentList(props) {
         );
     }
 
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
         return (
             <WidgetAlert
                 size={props.isExpanded ? 'md' : 'sm'}

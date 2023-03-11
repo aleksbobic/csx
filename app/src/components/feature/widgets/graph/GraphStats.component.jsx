@@ -23,7 +23,7 @@ function GraphStats(props) {
     const [nodeData, setNodeData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats.activeWidgets.find(
+        store.stats?.activeWidgets?.find(
             widget => widget.id === props.chart?.id
         ) || {}
     );
@@ -277,6 +277,7 @@ function GraphStats(props) {
     }
 
     if (
+        nodeData &&
         nodeData.length === 0 &&
         widgetConfig &&
         widgetConfig.network_data !== 'all'

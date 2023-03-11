@@ -1,6 +1,6 @@
 # COLLABORATION SPOTTING X
 
-Collaboration spotting X (CSX) is a network-based visual-analytics application for exploring tabular data through network visualizations, interactions, and advanced network analytics. The core idea of CSX is to enable users to retrieve a subset of their dataset and provide tools for visual and interactive exploration and filtering of their retrieved data. You can also view a presentation video on Collaboration spotting on the following [link](https://zenodo.org/record/5877309).
+Collaboration spotting X (CSX) is a network-based visual-analytics application for exploring tabular data through network visualizations, interactions, and advanced network analytics. The main aim of CSX is to enable users to retrieve a subset of their dataset and provide tools for visual and interactive exploration and filtering of their retrieved data in a network format. You can read more about the project on [csxp.me](https://csxp.me/).
 
 ![Collaboration Spotting X - Screenshot](https://github.com/aleksbobic/csx/blob/master/cover.png?raw=true)
 
@@ -12,16 +12,26 @@ This project was developed by **Aleksandar Bobić** as part of his PhD research 
 This project was inspired by concepts introduced in the previous [Collaboration Spotting project](https://ercim-news.ercim.eu/en111/r-i/collaboration-spotting-a-visual-analytics-platform-to-assist-knowledge-discovery). We would like to thank the previous Collaboration Spotting team for their contributions.
 
 ### Contact ✉️
-If you would like to collaborate or contribute to the project or have any questions feel free to send me an email to aleksandar.bobic@cern.ch.
+If you would like to collaborate or contribute to the project or have any questions feel free to send me an email to contact@abobic.com.
 
 ## Involved institutions 🏫
 Contributors from the following institutions were involved in the development of this project:
 * [CERN](https://home.cern/)
 * [Graz University of Technology](https://www.tugraz.at/home/)
 
-
 ## CITATION ✍️
 If you happen to mention or use this project as part of one of your scientific works, please cite the following paper: Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021.
+
+## TUTORIALS 📖
+![Collaboration Spotting X - Preview](https://github.com/aleksbobic/csx/blob/master/cover.gif?raw=true)
+* [Introduction](https://youtu.be/io-_aeOemwA)
+* [Overview Graph](https://youtu.be/io-_aeOemwA)
+* [Detail Graph](https://youtu.be/-Dj19hOWTTU)
+* [Direct Connections](https://youtu.be/1gAXxWAasVs)
+* [History & Comments](https://youtu.be/Zuzxy2619Rk)
+* [Advanced Search](https://youtu.be/YZiKM0YyD08)
+* [Studies & Presentations](https://youtu.be/M7NGHK86SBM)
+
 
 ## Selected publications 📚
 * Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Towards supporting complex retrieval tasks through graph-based information retrieval and visual analytics. In CEUR Workshop Proceedings (Vol. 2950, pp. 30-37). RWTH Aachen. [Presentation Video](https://youtu.be/Xf-JHparbRA)
@@ -31,29 +41,13 @@ If you happen to mention or use this project as part of one of your scientific w
 ## Getting started 🏁
 To start developing this project, please complete the following steps:
 
-1. Install docker on your local machine
-2. Clone the CSX project to your machine
+1. Install docker
+2. Clone the CSX project
 3. Start docker
 4. In a terminal, navigate to the project directory and run `docker-compose up`, which will start the app in development mode.
 5. Once the project is running, it will be accessible on [http://localhost:8882](http://localhost:8882)
-6. Before you can start exploring the example dataset, open `datasets_example` folder and drag and drop the example file `just_sm.csv` into the csx drop zone.
-7. Rename the dataset name to jucssm
-8. Set `Title` as the anchor and default search column (click on the radio button in the first column and the checkbox in the third column)
-9. Set `Authors` as the link (click on the radio button in the second column)
-10. Click set defaults
-11. After a short period the dataset should be ready for exploration
+6. Upload the example file `just_sm.csv` from the `datasets_example` folder.
 
-## Usage 🤔
-Here is an example video showing how to use CSX once the example data has been loaded. It can be roughly divided into the following sections:
-
-1. Performing an initial search on your dataset
-2. Expressing a complex information need through the workflow designer
-3. Exploring the overview network
-4. Modifying the network schema
-5. Exploring the detail network
-
-
-![Collaboration Spotting X - Preview](https://github.com/aleksbobic/csx/blob/master/cover.gif?raw=true)
 
 ## Contributing 🧑‍💻
 If you want to contribute to this project, pick an open issue you find interesting and create your branch (from the develop branch) with the issue number as the branch name. If there is no open issue for your feature, please open a new issue with a detailed description of the feature first.
@@ -68,7 +62,6 @@ Run `docker-compose up`, which will start the app in development mode on [http:/
 
 Navigate to the `dataset_examples` folder and drag and drop the example file `just_sm.csv` into the csx drop zone to populate the running elastic instance with sample data collected from the [Journal of Universal Computer Science](https://lib.jucs.org/).
 
-
 To add a custom dataset simply prepare a CSV file with the following format (make sure there are no single quotation marks in the text since that might interfere with the automatic processing of list values):
 
 | String feature name   | Category feature name                   | Number feature name | List feature name       |
@@ -82,12 +75,24 @@ When the dataset is uploaded a config file is created in the `server/app/data/co
 > 🚨 **Config files should never be manually modified. If you want to modify the config of a dataset either click on the change default settings for dataset button next to each of the datasets on the homepage or delete the dataset and upload it again with different settings.**:
 
 ### Running development with analytics enabled
-n additiona to making sure the flag `REACT_APP_DISABLE_TRACKING` in `./app/.env.development` is set to `false` you must run the docker-compose command with particular parameters: `docker-compose --profile analytics up`
+In additiona to making sure the flag `REACT_APP_DISABLE_TRACKING` in `./app/.env.development` is set to `false` you must run the docker-compose command with particular parameters: `docker-compose --profile analytics up`
 
 On the **first run** make sure to visit `localhost:8883` and go through the matomo setup process.
 
-### Disabling app features on start
-To disable various app features visit the  `./app/.env.{development/production}` file and set the feature flag to `true` or `false`.
+### Feature Flags
+To configure, disable or enable various csx features visit the `./app/.env.{development/production}` file and set the desired value. The following feature flags are available:
+| Flag name | What it does | Values |
+|-----------|--------------|--------|
+|REACT_APP_DISABLE_UPLOAD| Disable or enable the file upload features | true / false |
+|REACT_APP_DISABLE_DATASET_LIST| Disable or enable the dataset list component | true / false |
+|REACT_APP_DISABLE_UPLOAD| Disable or enable the file upload features | true / false |
+|REACT_APP_DISABLE_DATASET_DOWNLOAD| Disable or enable the file download feature | true / false |
+|REACT_APP_DISABLE_ADVANCED_SEARCH| Disable or enable the advanced search feature | true / false |
+|REACT_APP_DISABLE_TRACKING| Disable or enable tracking | true / false |
+|REACT_APP_SURVEY_LINK| Link to your survey | string (including https) |
+|REACT_APP_SURVEY_LINK_USER_ID| The link variable used for unique IDs.  | string |
+|REACT_APP_SURVEY_MESSAGE| The message that should show up when the survey popup displays.  | string |
+|REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH| Dispaly the survey popup after a user performs a particular number of actions on a graph | number (int) |
 
 
 ### Starting the project in production mode 🚀

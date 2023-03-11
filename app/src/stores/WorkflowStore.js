@@ -790,7 +790,7 @@ export class WorkflowStore {
         const generatedQuery = this.getQuery(resultsNodeId, this.nodes);
 
         this.store.search.setAdvancedSearchQuery(generatedQuery);
-        this.shouldRunWorkflow = true;
+        this.setShouldRunWorkflow(true);
     };
 
     getQuery = (id, nodes) => {

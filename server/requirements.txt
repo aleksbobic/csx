@@ -1,3 +1,11 @@
+cython
+cymem
+murmurhash
+preshed
+numpy
+blis
+thinc
+
 fastapi
 uvicorn
 pydantic
