@@ -58,6 +58,10 @@ export function SchemaList() {
         );
     };
 
+    if (store.search.default_schemas[store.core.currentGraph].length === 0) {
+        return <></>;
+    }
+
     return (
         <Box
             height="110px"

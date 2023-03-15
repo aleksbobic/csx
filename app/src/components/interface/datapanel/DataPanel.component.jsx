@@ -446,7 +446,12 @@ function DataPanel(props) {
                     paddingBottom={
                         store.comment.isCommentListVisible ? 0 : '80px'
                     }
-                    paddingTop={activeTab === 2 && '110px'}
+                    paddingTop={
+                        activeTab === 2 &&
+                        store.search.default_schemas[store.core.currentGraph]
+                            .length > 0 &&
+                        '110px'
+                    }
                     index={activeTab}
                 >
                     {activeTab === 1 && renderTabButtons()}
