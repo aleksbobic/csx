@@ -5,7 +5,6 @@ import {
     BreadcrumbLink,
     Button,
     ButtonGroup,
-    Divider,
     HStack,
     IconButton,
     Image,
@@ -23,17 +22,20 @@ import {
     Carousel,
     ChevronRight,
     List,
+    Moon,
     RadioCheck,
     Ratio,
     Ring,
+    Search,
+    Sun,
     Sync
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
+import { isEnvFalse } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 import { CameraIcon } from '@heroicons/react/24/solid';
-import { isEnvFalse } from 'general.utils';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -41,7 +43,7 @@ import DataPanelComponent from '../datapanel/DataPanel.component';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
-    const { colorMode } = useColorMode();
+    const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
     const [panelType, setPanelType] = useState('');
     const location = useLocation();
@@ -125,23 +127,23 @@ function NavigationPanelComponent() {
         }
     }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
-    // const toggleColor = () => {
-    //     store.track.trackEvent(
-    //         'Navbar',
-    //         'Button',
-    //         JSON.stringify({
-    //             type: 'Click',
-    //             value: `Change color mode to ${
-    //                 colorMode === 'light' ? 'dark' : 'light'
-    //             }`
-    //         })
-    //     );
+    const toggleColor = () => {
+        store.track.trackEvent(
+            'Navbar',
+            'Button',
+            JSON.stringify({
+                type: 'Click',
+                value: `Change color mode to ${
+                    colorMode === 'light' ? 'dark' : 'light'
+                }`
+            })
+        );
 
-    //     toggleColorMode();
-    //     store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
-    //     store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
-    //     store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
-    // };
+        toggleColorMode();
+        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
+    };
 
     const renderGraphUtils = () => (
         <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
@@ -328,45 +330,6 @@ function NavigationPanelComponent() {
         </Box>
     );
 
-    const renderWorkspaceSwitch = () => (
-        <ButtonGroup size="xs" isAttached>
-            <Tooltip label="Search workspace">
-                <Button
-                    variant={
-                        location.pathname === '/search' ? 'solid' : 'outline'
-                    }
-                    as={NavLink}
-                    to={`/search?study=${store.core.studyUuid}`}
-                    border="1px solid transparent"
-                    opacity={location.pathname === '/search' ? '1' : '0.5'}
-                >
-                    Search
-                </Button>
-            </Tooltip>
-            <Tooltip label="Graph analysis workspace">
-                <Button
-                    variant={
-                        location.pathname === '/graph' ? 'solid' : 'outline'
-                    }
-                    border="1px solid transparent"
-                    as={NavLink}
-                    to={`/graph?study=${store.core.studyUuid}`}
-                    opacity={
-                        location.pathname.startsWith('/graph') ? '1' : '0.5'
-                    }
-                    style={{
-                        pointerEvents: !store.graph.currentGraphData.nodes
-                            .length
-                            ? 'none'
-                            : 'auto'
-                    }}
-                >
-                    Graph
-                </Button>
-            </Tooltip>
-        </ButtonGroup>
-    );
-
     const renderToggles = () => (
         <ButtonGroup
             variant="outline"
@@ -391,6 +354,33 @@ function NavigationPanelComponent() {
                     paddingRight="10px"
                     borderColor={edgeColor}
                 >
+                    {isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') && (
+                        <Tooltip label="Toggle search panel">
+                            <IconButton
+                                border="none"
+                                aria-label="Search panel toggle"
+                                id="searchpnaletoggle"
+                                color={
+                                    panelType === 'search'
+                                        ? 'blue.400'
+                                        : colorMode === 'light'
+                                        ? 'black'
+                                        : 'white'
+                                }
+                                onClick={() => {
+                                    toggleDataPanel('search');
+                                }}
+                                icon={
+                                    <Search
+                                        style={{
+                                            '--ggs': '0.7',
+                                            marginBottom: '-2px'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                    )}
                     <Tooltip label="Toggle details panel">
                         <IconButton
                             border="none"
@@ -492,7 +482,7 @@ function NavigationPanelComponent() {
                 </ButtonGroup>
             )}
 
-            {/* {location.pathname !== '/present' && (
+            {location.pathname === '/doesnotexist' && (
                 <Tooltip label="Toggle color mode">
                     <IconButton
                         border="none"
@@ -515,7 +505,7 @@ function NavigationPanelComponent() {
                         onClick={toggleColor}
                     />
                 </Tooltip>
-            )} */}
+            )}
         </ButtonGroup>
     );
 
@@ -582,34 +572,15 @@ function NavigationPanelComponent() {
                     )}
 
                     {location.pathname !== '/' &&
-                        location.pathname !== '/present' &&
-                        isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') &&
-                        renderWorkspaceSwitch()}
-                    {location.pathname !== '/' &&
                         location.pathname !== '/present' && (
                             <HStack
                                 height="40px"
                                 style={{
-                                    marginLeft: isEnvFalse(
-                                        'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                    )
-                                        ? '125px'
-                                        : '0'
+                                    marginLeft: '20px'
                                 }}
                                 spacing="20px"
                             >
-                                {isEnvFalse(
-                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                ) && (
-                                    <Divider
-                                        opacity="0.2"
-                                        orientation="vertical"
-                                        height="100%"
-                                        backgroundColor="gray.900"
-                                    />
-                                )}
                                 <Breadcrumb
-                                    marginLeft="20px"
                                     spacing="2px"
                                     separator={
                                         <ChevronRight

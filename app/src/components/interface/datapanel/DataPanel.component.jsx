@@ -42,6 +42,7 @@ import SchemaFlow from 'components/feature/schemaflow/SchemaFlow.component';
 import { SchemaList } from 'components/feature/schemalist/SchemaList.component';
 import { isEnvFalse } from 'general.utils';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
+import AdvancedSearch from 'components/feature/advancedsearch/AdvancedSearch.component';
 
 function DataPanel(props) {
     const store = useContext(RootStoreContext);
@@ -50,7 +51,7 @@ function DataPanel(props) {
 
     const onResize = useCallback(
         width => {
-            if (activeTab === 0) {
+            if (activeTab === 1) {
                 store.contextMenu.setXOffset(0);
                 setPanelWidth(width);
             } else {
@@ -79,23 +80,26 @@ function DataPanel(props) {
         }
 
         switch (props.panelType) {
-            case 'details':
+            case 'search':
                 setActiveTab(0);
                 break;
-            case 'results':
+            case 'details':
                 setActiveTab(1);
                 break;
-            case 'schema':
+            case 'results':
                 setActiveTab(2);
                 break;
-            case 'history':
+            case 'schema':
                 setActiveTab(3);
                 break;
-            case 'comment':
+            case 'history':
                 setActiveTab(4);
                 break;
+            case 'comment':
+                setActiveTab(5);
+                break;
             default:
-                setActiveTab(0);
+                setActiveTab(1);
                 break;
         }
     }, [panelWidth, props.panelType, store.contextMenu]);
@@ -176,6 +180,21 @@ function DataPanel(props) {
                         }
                         borderRadius="10px"
                     >
+                        <AdvancedSearch isPanel={true} />
+                    </Box>
+                </TabPanel>
+                <TabPanel padding="10px" height="100%">
+                    <Box
+                        height="100%"
+                        width="100%"
+                        padding="14px"
+                        backgroundColor={
+                            colorMode === 'light'
+                                ? 'blackAlpha.200'
+                                : 'whiteAlpha.100'
+                        }
+                        borderRadius="10px"
+                    >
                         <CustomScroll
                             style={{
                                 paddingLeft: '10px',
@@ -197,7 +216,7 @@ function DataPanel(props) {
                                 : 'whiteAlpha.100'
                         }
                         borderRadius="10px"
-                        paddingTop={activeTab === 1 && '30px'}
+                        paddingTop={activeTab === 2 && '30px'}
                     >
                         {renderResultsTabContent()}
                     </Box>
@@ -437,7 +456,7 @@ function DataPanel(props) {
                 borderLeft="1px solid"
                 borderColor={edgeColor}
             >
-                {activeTab === 2 && <SchemaList />}
+                {activeTab === 3 && <SchemaList />}
                 <Tabs
                     size="sm"
                     variant="soft-rounded"
@@ -447,14 +466,14 @@ function DataPanel(props) {
                         store.comment.isCommentListVisible ? 0 : '80px'
                     }
                     paddingTop={
-                        activeTab === 2 &&
+                        activeTab === 3 &&
                         store.search.default_schemas[store.core.currentGraph]
                             .length > 0 &&
                         '110px'
                     }
                     index={activeTab}
                 >
-                    {activeTab === 1 && renderTabButtons()}
+                    {activeTab === 2 && renderTabButtons()}
                     {renderTabPanels()}
                 </Tabs>
                 <Flex

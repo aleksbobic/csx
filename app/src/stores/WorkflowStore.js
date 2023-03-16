@@ -10,29 +10,27 @@ export class WorkflowStore {
         {
             nodeType: 'datasetNode',
             label: 'Dataset',
-            tooltip: 'Retrieve an entire dataset'
+            tooltip: 'Dataset node'
         },
         {
             nodeType: 'searchNode',
             label: 'Search',
-            tooltip: 'Represents a single search keyword.'
+            tooltip: 'Search node'
         },
         {
             nodeType: 'connectorNode',
             label: 'Connector',
-            tooltip: 'Serves as a connection between differnt keywords.'
+            tooltip: 'Connector node'
         },
         {
             nodeType: 'filterNode',
             label: 'Filter',
-            tooltip:
-                'Serves as an advanced search node which enables more elaborate filtering of values.'
+            tooltip: 'Filter node'
         },
         {
             nodeType: 'resultsNode',
             label: 'Results',
-            tooltip:
-                'Serves as an exit node which indicates that everything connected to it should be executed and visualised as a network.'
+            tooltip: 'Results node'
         }
     ];
 
