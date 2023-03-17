@@ -20,7 +20,7 @@ Contributors from the following institutions were involved in the development of
 * [Graz University of Technology](https://www.tugraz.at/home/)
 
 ## CITATION ✍️
-If you happen to mention or use this project as part of one of your scientific works, please cite the following paper: Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021.
+If you happen to mention or use this project as part of one of your scientific works, please cite the following paper: Bobic, A., Le Goff, JM., Gütl, C. (2023). Exploring Tabular Data Through Networks. In: , et al. Advances in Information Retrieval. ECIR 2023. Lecture Notes in Computer Science, vol 13982. Springer, Cham. https://doi.org/10.1007/978-3-031-28241-6_13
 
 ## CONTRIBUTORS 🙌🥳🙌🥳🙌🥳
 A big thank you to all contributiors of this project:
@@ -39,6 +39,7 @@ A big thank you to all contributiors of this project:
 
 
 ## Selected publications 📚
+* Bobic, A., Le Goff, JM., Gütl, C. (2023). Exploring Tabular Data Through Networks. In: , et al. Advances in Information Retrieval. ECIR 2023. Lecture Notes in Computer Science, vol 13982. Springer, Cham. https://doi.org/10.1007/978-3-031-28241-6_13
 * Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Towards supporting complex retrieval tasks through graph-based information retrieval and visual analytics. In CEUR Workshop Proceedings (Vol. 2950, pp. 30-37). RWTH Aachen. [Presentation Video](https://youtu.be/Xf-JHparbRA)
 * Bobic, A., Le Goff, J. M., & Gütl, C. (2021). Collaboration Spotting X-A Visual Network Exploration Tool. In in Proceedings of the The Eighth International Conference on Social Networks Analysis, Management and Security: SNAMS 2021. [Presentation Video](https://zenodo.org/record/5877309)
 
