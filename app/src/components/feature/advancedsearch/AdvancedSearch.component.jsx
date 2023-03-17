@@ -277,7 +277,7 @@ function AdvancedSearch(props) {
                               bottom: '15px',
                               borderRadius: '10px',
                               left: '50%',
-                              ttransform: 'translateX(-50%)'
+                              transform: 'translateX(-50%)'
                           }
                 }
             >

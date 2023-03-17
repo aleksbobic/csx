@@ -44,7 +44,7 @@ function SearchPage(props) {
             paddingTop="55px"
             backgroundColor="blackAlpha.300"
         >
-            <AdvancedSearchComponent marginTop="100px" />
+            <AdvancedSearchComponent marginTop="100px" isPanel={false} />
         </Flex>
     );
 }
