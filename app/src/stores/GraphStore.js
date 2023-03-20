@@ -611,7 +611,7 @@ export class GraphStore {
         }
 
         const { response, error } = await safeRequest(
-            axios.post('study/modify', params)
+            axios.post('studies/modify', params)
         );
 
         if (error) {
@@ -674,7 +674,7 @@ export class GraphStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.post('study/', params)
+            axios.post('studies', params)
         );
 
         if (error) {
@@ -756,7 +756,7 @@ export class GraphStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.post('study/', params)
+            axios.post('studies', params)
         );
 
         if (error) {
@@ -1316,7 +1316,7 @@ export class GraphStore {
                 ].id;
 
             const { response, error } = await safeRequest(
-                axios.post('graph/remove', {
+                axios.post('graphs/remove', {
                     nodes: graph_data_copy.nodes,
                     user_id: this.store.core.userUuid,
                     history_item_id: currentStudyHistoryItem,
@@ -1386,7 +1386,7 @@ export class GraphStore {
                 .id;
 
         const { response, error } = await safeRequest(
-            axios.post('graph/trim', {
+            axios.post('graphs/trim', {
                 nodes: graph_data_copy.nodes,
                 user_id: this.store.core.userUuid,
                 history_item_id: currentStudyHistoryItem,
@@ -1483,7 +1483,7 @@ export class GraphStore {
                 .id;
 
         const { response, error } = await safeRequest(
-            axios.post('graph/expand', {
+            axios.post('graphs/expand', {
                 values: {
                     connector: connector,
                     nodes: nodes.map(node => {

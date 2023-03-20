@@ -1014,7 +1014,7 @@ export class PresentStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.get('study/history', { params })
+            axios.get('history', { params })
         );
 
         if (error) {
@@ -1031,7 +1031,7 @@ export class PresentStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.get('study/history/public', { params })
+            axios.get('history/public', { params })
         );
 
         if (error) {

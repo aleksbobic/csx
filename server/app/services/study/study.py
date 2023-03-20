@@ -159,7 +159,7 @@ def edit_comment(
 ):
     csx_data.edit_array(
         "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
+        {"study_uuid": study_uuid, "user_uuid": user_id},
         {
             f"history.{history_item_index}.comments.{comment_index}.comment": comment,
             f"history.{history_item_index}.comments.{comment_index}.screenshot": screenshot,

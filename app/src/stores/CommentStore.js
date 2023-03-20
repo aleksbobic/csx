@@ -79,9 +79,7 @@ export class CommentStore {
             this.removeChart();
         }
 
-        const { error } = await safeRequest(
-            axios.post('history/comment/', params)
-        );
+        const { error } = await safeRequest(axios.post('comments', params));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -122,7 +120,7 @@ export class CommentStore {
         };
 
         const { error } = await safeRequest(
-            axios.post('history/comment/delete', params)
+            axios.delete('comments', { data: params })
         );
 
         if (error) {
@@ -158,9 +156,7 @@ export class CommentStore {
             this.removeChart();
         }
 
-        const { error } = await safeRequest(
-            axios.post('history/comment/edit', params)
-        );
+        const { error } = await safeRequest(axios.put('comments', params));
 
         if (error) {
             this.store.core.handleRequestError(error);

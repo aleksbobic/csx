@@ -62,7 +62,7 @@ export class FileUploadStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.post('file/upload', formData, requestConfig)
+            axios.post('datasets', formData, requestConfig)
         );
 
         if (error) {
@@ -191,7 +191,9 @@ export class FileUploadStore {
             default_schemas: this.fileUploadData.schemas
         };
 
-        const { error } = await safeRequest(axios.post('file/save', params));
+        const { error } = await safeRequest(
+            axios.post('datasets/settings', params)
+        );
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -206,10 +208,13 @@ export class FileUploadStore {
     };
 
     cancelFileUpload = async () => {
-        const params = { name: this.fileUploadData.originalName };
+        // const params = { name: this.fileUploadData.originalName };
 
+        // const { error } = await safeRequest(
+        //     axios.get('file/cancel', { params })
+        // );
         const { error } = await safeRequest(
-            axios.get('file/cancel', { params })
+            axios.delete(`datasets/${this.fileUploadData.originalName}`)
         );
 
         if (error) {
@@ -248,7 +253,9 @@ export class FileUploadStore {
             defaults: this.fileUploadData.defaults
         };
 
-        const { error } = await safeRequest(axios.patch('file/update', params));
+        const { error } = await safeRequest(
+            axios.put('datasets/settings', params)
+        );
 
         if (error) {
             this.store.core.handleRequestError(error);

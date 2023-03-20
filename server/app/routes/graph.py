@@ -14,7 +14,7 @@ from fastapi import APIRouter
 import json
 import pickle
 
-router = APIRouter()
+router = APIRouter(prefix="/graphs", tags=["graphs"])
 
 from pydantic import BaseModel
 

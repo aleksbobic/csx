@@ -1,34 +1,85 @@
-import ast
 import itertools
 import json
 import os
-from os.path import exists
-
-import app.services.data.elastic as csx_es
-import app.services.data.mongo as csx_data
-import app.services.graph.nodes as csx_nodes
-import app.services.data.autocomplete as csx_auto
-from pydantic import BaseModel
+import ast
+from typing import List, Literal, Union
 
 import pandas as pd
-import polars as pl
-from elasticsearch_dsl import Q
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter, UploadFile
-import base64
-import random
-from typing import Union
+from pydantic import BaseModel
+from os.path import exists
+import polars as pl
 
-router = APIRouter()
+import app.services.graph.graph as csx_graph
+import app.services.data.elastic as csx_es
+import app.services.graph.graph as csx_graph
+import app.services.graph.nodes as csx_nodes
+import app.services.data.autocomplete as csx_auto
+import app.services.data.mongo as csx_data
+import app.services.study.study as csx_study
+from app.utils.typecheck import isJson, isNumber
+
+router = APIRouter(prefix="/datasets", tags=["datasets"])
+es = Elasticsearch(
+    "csx_elastic:9200",
+    retry_on_timeout=True,
+    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+)
 
 
-@router.post("/upload")
-def uploadfile(file: UploadFile):
+@router.get("/")
+def get_datasets() -> dict:
+    """Get list of all datasets and their schemas if they have one"""
+
+    datasets = {}
+
+    for index in csx_es.get_all_indices():
+        if "properties" not in csx_es.get_index(index)[index]["mappings"]:
+            continue
+
+        with open(f"./app/data/config/{index}.json") as f:
+            data = json.load(f)
+            datasets[index] = {"types": data["dimension_types"]}
+
+        try:
+            with open(f"./app/data/config/{index}.json") as config:
+                loaded_config = json.load(config)
+                datasets[index]["schemas"] = loaded_config["schemas"]
+                datasets[index]["default_schemas"] = loaded_config["default_schemas"]
+                datasets[index]["anchor"] = loaded_config["anchor"]
+                datasets[index]["links"] = loaded_config["links"]
+                datasets[index]["default_search_fields"] = loaded_config[
+                    "default_search_fields"
+                ]
+
+                datasets[index]["search_hints"] = {
+                    feature: json.dumps(loaded_config["search_hints"][feature])
+                    for feature in loaded_config["search_hints"]
+                    if data["dimension_types"][feature]
+                    in ["integer", "float", "category"]
+                }
+        except Exception as e:
+            datasets[index]["schemas"] = []
+            datasets[index]["default_schemas"] = []
+            datasets[index]["anchor"] = []
+            datasets[index]["links"] = []
+            datasets[index]["search_hints"] = []
+            datasets[index]["default_search_fields"] = []
+
+    return datasets
+
+
+@router.post("/")
+def upload_dataset(file: UploadFile):
+    """Upload a dataset to the server"""
     if os.getenv("DISABLE_UPLOAD") == "true" or not file.filename:
         return {}
 
     data = pl.read_csv(file.file)
 
-    column_types = {column: getColumnType(data[column]) for column in data.schema}
+    column_types = {column: get_column_type(data[column]) for column in data.schema}
 
     if not os.path.exists("./app/data/files"):
         os.makedirs("./app/data/files")
@@ -38,7 +89,7 @@ def uploadfile(file: UploadFile):
     return {"name": file.filename.rpartition(".")[0], "columns": column_types}
 
 
-def getColumnType(column: pl.Series):
+def get_column_type(column: pl.Series):
     not_null_rows = column.filter(~column.is_null())
 
     if column.dtype == pl.Utf8:
@@ -54,26 +105,27 @@ def getColumnType(column: pl.Series):
     return "integer"
 
 
-@router.get("/randomimage", responses={200: {"content": {"image/png": {}}}})
-def get_random_image():
-    image_number = random.randint(1, 10)
+@router.delete("/{name}")
+def delete_dataset(name: str):
+    if exists(f"./app/data/config/{name}.json"):
+        csx_es.delete_index(name)
+        csx_data.delete_collection(name)
 
-    num_to_animal = {
-        1: "parrot",
-        2: "dog",
-        3: "bird",
-        4: "dog",
-        5: "dog",
-        6: "bunny",
-        7: "dog",
-        8: "cat",
-        9: "dog",
-        10: "cat",
-    }
+        if exists(f"./app/data/autocomplete/auto_{name}"):
+            os.remove(f"./app/data/autocomplete/auto_{name}")
 
-    with open(f"./app/data/images/{image_number}.png", "rb") as f:
-        base64image = base64.b64encode(f.read())
-    return {"image": base64image, "animal": num_to_animal[image_number]}
+            with open(f"./app/data/config/{name}.json") as config:
+                config = json.load(config)
+                dimension_types = config["dimension_types"]
+                for dim in dimension_types:
+                    if exists(f"./app/data/autocomplete/auto_{name}_{dim}"):
+                        os.remove(f"./app/data/autocomplete/auto_{name}_{dim}")
+
+            os.remove(f"./app/data/config/{name}.json")
+    else:
+        os.remove(f"./app/data/files/{name}.csv")
+
+    return {"status": "success"}
 
 
 class SettingsData(BaseModel):
@@ -84,8 +136,17 @@ class SettingsData(BaseModel):
     default_schemas: dict
 
 
-@router.post("/save")
-def set_defaults(data: SettingsData):
+@router.get("/settings/{name}")
+def get_dataset_settings(name: str):
+    """Get settings for a dataset"""
+    with open(f"./app/data/config/{name}.json") as f:
+        data = json.load(f)
+        return {"config": data}
+
+
+@router.post("/settings")
+def save_dataset_settings(data: SettingsData):
+    """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
 
     # Generate default config
@@ -370,47 +431,14 @@ def convert_entry_with_nodes_to_mongo(entry, key, list_props):
     return new_entries
 
 
-@router.get("/cancel")
-def cancel_dataset_upload(name: str):
-    os.remove(f"./app/data/files/{name}.csv")
-    return {"status": "success"}
-
-
-@router.get("/delete")
-def delete_dataset(name: str):
-    csx_es.delete_index(name)
-    csx_data.delete_collection(name)
-
-    if exists(f"./app/data/autocomplete/auto_{name}"):
-        os.remove(f"./app/data/autocomplete/auto_{name}")
-
-    with open(f"./app/data/config/{name}.json") as config:
-        config = json.load(config)
-        dimension_types = config["dimension_types"]
-        for dim in dimension_types:
-            if exists(f"./app/data/autocomplete/auto_{name}_{dim}"):
-                os.remove(f"./app/data/autocomplete/auto_{name}_{dim}")
-
-    os.remove(f"./app/data/config/{name}.json")
-
-    return {"status": "success"}
-
-
-@router.get("/config")
-def get_dataset_config(name: str):
-    with open(f"./app/data/config/{name}.json") as f:
-        data = json.load(f)
-        return {"config": data}
-
-
 class UpdateSettingsData(BaseModel):
     name: str
     anchor: str
     defaults: dict
 
 
-@router.patch("/update")
-def update_settings(data: UpdateSettingsData):
+@router.put("/settings")
+def update_dataset_settings(data: UpdateSettingsData):
     defaults = data.defaults
     schemas = []
     search_hints = {}

@@ -198,7 +198,7 @@ export class HistoryStore {
         };
 
         const { error } = await safeRequest(
-            axios.post('history/delete', params)
+            axios.delete('history', { data: params })
         );
 
         if (error) {
@@ -227,14 +227,15 @@ export class HistoryStore {
 
     updateStudyCharts = async charts => {
         const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
             history_item_index: this.store.core.studyHistoryItemIndex,
             charts: charts
         };
 
         const { error } = await safeRequest(
-            axios.post('study/updatecharts', params)
+            axios.put(
+                `studies/${this.store.core.userUuid}/${this.store.core.studyUuid}/charts`,
+                params
+            )
         );
 
         if (error) {

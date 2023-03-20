@@ -132,9 +132,7 @@ export class SearchStore {
     };
 
     getDatasets = async () => {
-        const { response, error } = await safeRequest(
-            axios.get('search/datasets')
-        );
+        const { response, error } = await safeRequest(axios.get('datasets'));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -228,12 +226,8 @@ export class SearchStore {
     };
 
     deleteDataset = async dataset => {
-        const params = {
-            name: dataset
-        };
-
         const { error } = await safeRequest(
-            axios.get('file/delete', { params })
+            axios.delete(`datasets/${dataset}`)
         );
 
         if (error) {
@@ -252,12 +246,8 @@ export class SearchStore {
     };
 
     getConifg = async dataset => {
-        const params = {
-            name: dataset
-        };
-
         const { response, error } = await safeRequest(
-            axios.get('file/config', { params })
+            axios.get(`datasets/settings/${dataset}`)
         );
 
         if (error) {
@@ -289,9 +279,7 @@ export class SearchStore {
     };
 
     getRandomImage = async () => {
-        const { response, error } = await safeRequest(
-            axios.get('file/randomimage')
-        );
+        const { response, error } = await safeRequest(axios.get('utils/image'));
 
         if (error) {
             this.store.core.handleRequestError(error);

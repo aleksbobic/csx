@@ -5,10 +5,10 @@ import app.services.data.mongo as csx_data
 from bson import ObjectId
 from typing import Union
 
-router = APIRouter()
+router = APIRouter(prefix="/comments", tags=["comments"])
 
 
-class HistoryCommentData(BaseModel):
+class Comment(BaseModel):
     study_uuid: str
     user_uuid: str
     history_item_index: int
@@ -21,7 +21,7 @@ class HistoryCommentData(BaseModel):
 
 
 @router.post("/")
-def add_comment(data: HistoryCommentData):
+def add_comment(data: Comment):
     study_uuid = data.study_uuid
     user_uuid = data.user_uuid
     history_item_index = data.history_item_index
@@ -43,15 +43,15 @@ def add_comment(data: HistoryCommentData):
     return
 
 
-class HistoryDeleteCommentData(BaseModel):
+class DeleteComment(BaseModel):
     study_uuid: str
     user_uuid: str
     history_item_index: int
     comment_index: int
 
 
-@router.post("/delete")
-def delete_comment(data: HistoryDeleteCommentData):
+@router.delete("/")
+def delete_comment(data: DeleteComment):
     study_uuid = data.study_uuid
     user_uuid = data.user_uuid
     history_item_index = data.history_item_index
@@ -62,7 +62,7 @@ def delete_comment(data: HistoryDeleteCommentData):
     return
 
 
-class HistoryEditCommentData(BaseModel):
+class EditComment(BaseModel):
     study_uuid: str
     user_uuid: str
     history_item_index: int
@@ -75,8 +75,8 @@ class HistoryEditCommentData(BaseModel):
     chart: Union[str, None]
 
 
-@router.post("/edit")
-def edit_comment(data: HistoryEditCommentData):
+@router.put("/")
+def edit_comment(data: EditComment):
     study_uuid = data.study_uuid
     user_uuid = data.user_uuid
     history_item_index = data.history_item_index
