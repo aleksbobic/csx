@@ -558,8 +558,6 @@ export class GraphStore {
         }
 
         const params = {
-            study_uuid: studyId,
-            user_uuid: userId,
             search_uuid: this.store.search.searchID,
             history_item_id: currentStudyHistoryItem,
             graph_type: graphType,
@@ -611,7 +609,9 @@ export class GraphStore {
         }
 
         const { response, error } = await safeRequest(
-            axios.post('studies/modify', params)
+            axios.post(`studies/${studyId}/history`, params, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {
@@ -667,14 +667,10 @@ export class GraphStore {
         this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
-        const params = {
-            study_uuid: studyId,
-            user_uuid: userId,
-            history_id: historyID
-        };
-
         const { response, error } = await safeRequest(
-            axios.post('studies', params)
+            axios.get(`studies/${studyId}/history/${historyID}`, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {
@@ -750,13 +746,10 @@ export class GraphStore {
         this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
-        const params = {
-            study_uuid: studyId,
-            user_uuid: userId
-        };
-
         const { response, error } = await safeRequest(
-            axios.post('studies', params)
+            axios.get(`studies/${studyId}`, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {

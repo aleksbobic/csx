@@ -1008,13 +1008,10 @@ export class PresentStore {
     };
 
     getStudyDetails = async studyID => {
-        const params = {
-            study_uuid: studyID,
-            user_uuid: this.store.core.userUuid
-        };
-
         const { response, error } = await safeRequest(
-            axios.get('history', { params })
+            axios.get(`studies/${studyID}/history`, {
+                headers: { user_id: this.store.core.userUuid }
+            })
         );
 
         if (error) {
@@ -1026,12 +1023,8 @@ export class PresentStore {
     };
 
     getPublicStudyDetails = async studyID => {
-        const params = {
-            public_study_uuid: studyID
-        };
-
         const { response, error } = await safeRequest(
-            axios.get('history/public', { params })
+            axios.get(`studies/public/${studyID}/history`)
         );
 
         if (error) {

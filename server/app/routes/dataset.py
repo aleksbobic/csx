@@ -105,47 +105,46 @@ def get_column_type(column: pl.Series):
     return "integer"
 
 
-@router.delete("/{name}")
-def delete_dataset(name: str):
-    if exists(f"./app/data/config/{name}.json"):
-        csx_es.delete_index(name)
-        csx_data.delete_collection(name)
+@router.delete("/{dataset_name}")
+def delete_dataset(dataset_name: str):
+    if exists(f"./app/data/config/{dataset_name}.json"):
+        csx_es.delete_index(dataset_name)
+        csx_data.delete_collection(dataset_name)
 
-        if exists(f"./app/data/autocomplete/auto_{name}"):
-            os.remove(f"./app/data/autocomplete/auto_{name}")
+        if exists(f"./app/data/autocomplete/auto_{dataset_name}"):
+            os.remove(f"./app/data/autocomplete/auto_{dataset_name}")
 
-            with open(f"./app/data/config/{name}.json") as config:
+            with open(f"./app/data/config/{dataset_name}.json") as config:
                 config = json.load(config)
                 dimension_types = config["dimension_types"]
                 for dim in dimension_types:
-                    if exists(f"./app/data/autocomplete/auto_{name}_{dim}"):
-                        os.remove(f"./app/data/autocomplete/auto_{name}_{dim}")
+                    if exists(f"./app/data/autocomplete/auto_{dataset_name}_{dim}"):
+                        os.remove(f"./app/data/autocomplete/auto_{dataset_name}_{dim}")
 
-            os.remove(f"./app/data/config/{name}.json")
+            os.remove(f"./app/data/config/{dataset_name}.json")
     else:
-        os.remove(f"./app/data/files/{name}.csv")
+        os.remove(f"./app/data/files/{dataset_name}.csv")
 
     return {"status": "success"}
 
 
 class SettingsData(BaseModel):
-    original_name: str
     name: str
     anchor: str
     defaults: dict
     default_schemas: dict
 
 
-@router.get("/settings/{name}")
-def get_dataset_settings(name: str):
+@router.get("/{dataset_name}/settings")
+def get_dataset_settings(dataset_name: str):
     """Get settings for a dataset"""
-    with open(f"./app/data/config/{name}.json") as f:
+    with open(f"./app/data/config/{dataset_name}.json") as f:
         data = json.load(f)
         return {"config": data}
 
 
-@router.post("/settings")
-def save_dataset_settings(data: SettingsData):
+@router.post("/{dataset_name}/settings")
+def save_dataset_settings(dataset_name: str, data: SettingsData):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
 
@@ -174,9 +173,7 @@ def save_dataset_settings(data: SettingsData):
     if not os.path.exists("./app/data/config"):
         os.makedirs("./app/data/config")
 
-    dataset = pd.read_csv(
-        f"./app/data/files/{data.original_name}.csv", lineterminator="\n"
-    )
+    dataset = pd.read_csv(f"./app/data/files/{dataset_name}.csv", lineterminator="\n")
 
     rename_mapping = get_renamed_dimensions(defaults)
     if bool(rename_mapping):
@@ -213,7 +210,7 @@ def save_dataset_settings(data: SettingsData):
         print("***** Populating elastic")
         csx_es.bulk_populate(es_entries)
     except Exception as exception:
-        os.remove(f"./app/data/files/{data.original_name}.csv")
+        os.remove(f"./app/data/files/{dataset_name}.csv")
         delete_dataset(data.name)
         print("\n\n\n\n", exception)
         return exception
@@ -273,7 +270,7 @@ def save_dataset_settings(data: SettingsData):
         data.name, other_search_fields, string_search_fields, dataset
     )
 
-    os.remove(f"./app/data/files/{data.original_name}.csv")
+    os.remove(f"./app/data/files/{dataset_name}.csv")
 
     return {"status": "success"}
 
@@ -432,19 +429,18 @@ def convert_entry_with_nodes_to_mongo(entry, key, list_props):
 
 
 class UpdateSettingsData(BaseModel):
-    name: str
     anchor: str
     defaults: dict
 
 
-@router.put("/settings")
-def update_dataset_settings(data: UpdateSettingsData):
+@router.put("/{dataset_name}/settings")
+def update_dataset_settings(dataset_name: str, data: UpdateSettingsData):
     defaults = data.defaults
     schemas = []
     search_hints = {}
     initial_relationship = {}
 
-    with open(f"./app/data/config/{data.name}.json") as f:
+    with open(f"./app/data/config/{dataset_name}.json") as f:
         config_data = json.load(f)
         schemas = config_data["schemas"]
         search_hints = config_data["search_hints"]
@@ -482,7 +478,7 @@ def update_dataset_settings(data: UpdateSettingsData):
         "search_hints": search_hints,
     }
 
-    with open(f"./app/data/config/{data.name}.json", "w") as f:
+    with open(f"./app/data/config/{dataset_name}.json", "w") as f:
         json.dump(config, f)
 
     return {"status": "success"}

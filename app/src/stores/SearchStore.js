@@ -247,7 +247,7 @@ export class SearchStore {
 
     getConifg = async dataset => {
         const { response, error } = await safeRequest(
-            axios.get(`datasets/settings/${dataset}`)
+            axios.get(`datasets/${dataset}/settings`)
         );
 
         if (error) {

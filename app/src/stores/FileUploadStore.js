@@ -184,7 +184,6 @@ export class FileUploadStore {
         this.setIsPopulating(true);
 
         let params = {
-            original_name: this.fileUploadData.originalName,
             name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
             defaults: this.fileUploadData.defaults,
@@ -192,7 +191,10 @@ export class FileUploadStore {
         };
 
         const { error } = await safeRequest(
-            axios.post('datasets/settings', params)
+            axios.post(
+                `datasets/${this.fileUploadData.originalName}/settings`,
+                params
+            )
         );
 
         if (error) {
@@ -248,13 +250,12 @@ export class FileUploadStore {
 
     updateConfig = async () => {
         const params = {
-            name: this.fileUploadData.name,
             anchor: this.fileUploadData.anchor,
             defaults: this.fileUploadData.defaults
         };
 
         const { error } = await safeRequest(
-            axios.put('datasets/settings', params)
+            axios.put(`datasets/${this.fileUploadData.name}/settings`, params)
         );
 
         if (error) {

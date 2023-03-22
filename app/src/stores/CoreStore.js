@@ -98,7 +98,9 @@ export class CoreStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.patch(`studies/${this.userUuid}/${this.studyUuid}`, params)
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -174,7 +176,9 @@ export class CoreStore {
         };
 
         const { error } = await safeRequest(
-            axios.patch(`studies/${this.userUuid}/${this.studyUuid}`, params)
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -194,7 +198,9 @@ export class CoreStore {
         };
 
         const { error } = await safeRequest(
-            axios.patch(`studies/${this.userUuid}/${this.studyUuid}`, params)
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -214,7 +220,9 @@ export class CoreStore {
         };
 
         const { error } = await safeRequest(
-            axios.patch(`studies/${this.userUuid}/${this.studyUuid}`, params)
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -265,10 +273,14 @@ export class CoreStore {
 
         this.studyDescription = '';
 
-        const params = { user_uuid: this.userUuid, study_name: this.studyName };
-
         const { response, error } = await safeRequest(
-            axios.get('studies/generate', { params })
+            axios.post(
+                'studies',
+                { study_name: this.studyName },
+                {
+                    headers: { user_id: this.userUuid }
+                }
+            )
         );
 
         if (error) {
@@ -286,14 +298,16 @@ export class CoreStore {
     deleteStudy = async studyUuid => {
         if (!this.studyIsSaved || studyUuid) {
             const params = {
-                study_uuid: studyUuid ? studyUuid : this.studyUuid,
-                user_uuid: this.userUuid,
                 user_trigger: !!studyUuid
             };
+            const studyID = studyUuid ? studyUuid : this.studyUuid;
 
-            if (params.study_uuid) {
+            if (studyID) {
                 const { error } = await safeRequest(
-                    axios.delete('studies/', { data: params })
+                    axios.delete(`studies/${studyID}`, {
+                        data: params,
+                        headers: { user_id: this.userUuid }
+                    })
                 );
 
                 if (error) {
@@ -316,7 +330,9 @@ export class CoreStore {
         };
 
         const { error } = await safeRequest(
-            axios.patch(`studies/${this.userUuid}/${this.studyUuid}`, params)
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -330,7 +346,7 @@ export class CoreStore {
     getSavedStudies = async () => {
         if (this.userUuid) {
             const { response, error } = await safeRequest(
-                axios.get(`studies/${this.userUuid}`)
+                axios.get('studies', { headers: { user_id: this.userUuid } })
             );
 
             if (error) {

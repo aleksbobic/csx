@@ -191,14 +191,10 @@ export class HistoryStore {
 
         const deleteNodeIDs = this.getAllChildNodes(id);
 
-        const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_indexes: deleteNodeIDs
-        };
-
         const { error } = await safeRequest(
-            axios.delete('history', { data: params })
+            axios.delete(`studies/${this.store.core.studyUuid}/history/${id}`, {
+                headers: { user_id: this.store.core.userUuid }
+            })
         );
 
         if (error) {
@@ -227,14 +223,20 @@ export class HistoryStore {
 
     updateStudyCharts = async charts => {
         const params = {
-            history_item_index: this.store.core.studyHistoryItemIndex,
             charts: charts
         };
 
+        const historyItemId =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+
         const { error } = await safeRequest(
             axios.put(
-                `studies/${this.store.core.userUuid}/${this.store.core.studyUuid}/charts`,
-                params
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
             )
         );
 
