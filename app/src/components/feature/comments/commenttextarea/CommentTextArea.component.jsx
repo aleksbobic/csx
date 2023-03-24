@@ -44,7 +44,7 @@ function CommentTextArea(props) {
 
     const exitEditMode = useCallback(() => {
         store.comment.setEditMode(false);
-        store.comment.setEditCommentIndex(null);
+        store.comment.setEditCommentId(null);
         store.comment.removeScreenshot();
         store.comment.removeChart();
         setComment('');
@@ -70,7 +70,7 @@ function CommentTextArea(props) {
             if (store.comment.editMode) {
                 store.comment.editComment(
                     comment.trim(),
-                    store.comment.editCommentIndex
+                    store.comment.editCommentId
                 );
                 exitEditMode();
             } else {
@@ -100,10 +100,10 @@ function CommentTextArea(props) {
             if (store.comment.editMode) {
                 store.comment.editComment(
                     comment.trim(),
-                    store.comment.editCommentIndex
+                    store.comment.editCommentId
                 );
                 store.comment.setEditMode(false);
-                store.comment.setEditCommentIndex(null);
+                store.comment.setEditCommentId(null);
                 setComment('');
                 commentField.current.blur();
             } else {

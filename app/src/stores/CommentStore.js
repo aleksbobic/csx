@@ -5,7 +5,7 @@ import { makeAutoObservable } from 'mobx';
 
 export class CommentStore {
     editMode = false;
-    editCommentIndex = null;
+    editCommentId = null;
     editedCommentContent = null;
     isCommentListVisible = true;
     commentTrigger = true;
@@ -19,7 +19,7 @@ export class CommentStore {
     }
 
     setEditMode = val => (this.editMode = val);
-    setEditCommentIndex = val => (this.editCommentIndex = val);
+    setEditCommentId = val => (this.editCommentId = val);
     setEditedCommentContent = content => {
         this.editedCommentContent = content.comment;
         this.screenshot = {
@@ -60,9 +60,6 @@ export class CommentStore {
         const comment_time = format(new Date(), 'H:mm do MMM yyyy OOOO');
 
         const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_index: this.store.core.studyHistoryItemIndex,
             comment: comment,
             comment_time: comment_time
         };
@@ -78,8 +75,17 @@ export class CommentStore {
             params['chart'] = this.chart;
             this.removeChart();
         }
-
-        const { error } = await safeRequest(axios.post('comments', params));
+        const historyItemId =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+        const studyId = this.store.core.studyUuid;
+        const { error } = await safeRequest(
+            axios.post(
+                `studies/${studyId}/history/${historyItemId}/comments`,
+                params,
+                { headers: { user_id: this.store.core.userUuid } }
+            )
+        );
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -111,16 +117,16 @@ export class CommentStore {
         }
     };
 
-    deleteCommnet = async index => {
-        const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_index: this.store.core.studyHistoryItemIndex,
-            comment_index: index
-        };
-
+    deleteComment = async id => {
+        const historyItemId =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+        const studyId = this.store.core.studyUuid;
         const { error } = await safeRequest(
-            axios.delete('comments', { data: params })
+            axios.delete(
+                `studies/${studyId}/history/${historyItemId}/comments/${id}`,
+                { headers: { user_id: this.store.core.userUuid } }
+            )
         );
 
         if (error) {
@@ -128,18 +134,14 @@ export class CommentStore {
             return;
         }
 
-        this.store.core.deleteCommentFromCurrentHistoryItem(index);
+        this.store.core.deleteCommentFromCurrentHistoryItem(id);
         this.store.history.generateHistoryNodes();
     };
 
-    editComment = async (comment, index) => {
+    editComment = async (comment, id) => {
         const comment_time = format(new Date(), 'H:mm do MMM yyyy OOOO');
 
         const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_index: this.store.core.studyHistoryItemIndex,
-            comment_index: index,
             comment: comment,
             comment_time: comment_time
         };
@@ -156,14 +158,29 @@ export class CommentStore {
             this.removeChart();
         }
 
-        const { error } = await safeRequest(axios.put('comments', params));
+        const historyItemId =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+        const studyId = this.store.core.studyUuid;
+
+        const { error } = await safeRequest(
+            axios.put(
+                `studies/${studyId}/history/${historyItemId}/comments/${id}`,
+                params,
+                { headers: { user_id: this.store.core.userUuid } }
+            )
+        );
 
         if (error) {
             this.store.core.handleRequestError(error);
             return;
         }
 
-        this.store.core.editCommentFromCurrentHistoryItem(index, {
+        const commentIndex = this.store.core.studyHistory[
+            this.store.core.studyHistoryItemIndex
+        ].comments.findIndex(comment => comment.id === id);
+
+        this.store.core.editCommentFromCurrentHistoryItem(commentIndex, {
             screenshot: params.screenshot ? params.screenshot : null,
             screenshot_width: params.screenshot
                 ? params.screenshot_width

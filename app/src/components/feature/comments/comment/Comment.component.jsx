@@ -25,25 +25,20 @@ function CommentComponent(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
-    const editComment = index => {
+    const editComment = id => {
         store.comment.setEditMode(true);
-        store.comment.setEditCommentIndex(index);
+        store.comment.setEditCommentId(id);
+
+        const editedComment = store.core.studyHistory[
+            store.core.studyHistoryItemIndex
+        ].comments.find(comment => comment.id === id);
 
         store.comment.setEditedCommentContent({
-            screenshot:
-                store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].screenshot,
-            chart: store.core.studyHistory[store.core.studyHistoryItemIndex]
-                .comments[index].chart,
-            comment:
-                store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].comment,
-            screenshot_width:
-                store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].screenshot_width,
-            screenshot_height:
-                store.core.studyHistory[store.core.studyHistoryItemIndex]
-                    .comments[index].screenshot_height
+            screenshot: editedComment.screenshot,
+            chart: editedComment.chart,
+            comment: editedComment.comment,
+            screenshot_width: editedComment.screenshot_width,
+            screenshot_height: editedComment.screenshot_height
         });
     };
 
@@ -124,11 +119,11 @@ function CommentComponent(props) {
                             'Button',
                             JSON.stringify({
                                 type: 'Click',
-                                value: `Edit ${props.commentIndex}`
+                                value: `Edit ${props.comment.id}`
                             })
                         );
 
-                        editComment(props.commentIndex);
+                        editComment(props.comment.id);
                     }}
                     icon={
                         <PencilIcon
@@ -158,11 +153,11 @@ function CommentComponent(props) {
                             'Button',
                             JSON.stringify({
                                 type: 'Click',
-                                value: `Delete ${props.commentIndex}`
+                                value: `Delete ${props.comment.id}`
                             })
                         );
 
-                        store.comment.deleteCommnet(props.commentIndex);
+                        store.comment.deleteComment(props.comment.id);
                     }}
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     icon={
@@ -188,7 +183,7 @@ function CommentComponent(props) {
     return (
         <Box
             backgroundColor={
-                props.commentIndex === store.comment.editCommentIndex
+                props.commentIndex === store.comment.editCommentId
                     ? 'blue.400'
                     : colorMode === 'light'
                     ? 'blackAlpha.300'
@@ -197,7 +192,7 @@ function CommentComponent(props) {
             opacity={
                 !store.comment.editMode
                     ? 1
-                    : props.commentIndex === store.comment.editCommentIndex
+                    : props.commentIndex === store.comment.editCommentId
                     ? 1
                     : 0.3
             }

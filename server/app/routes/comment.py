@@ -1,17 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 import app.services.study.study as csx_study
 import app.services.data.mongo as csx_data
 from bson import ObjectId
 from typing import Union
+from .auth import verify_user_exists
 
-router = APIRouter(prefix="/comments", tags=["comments"])
+router = APIRouter(
+    prefix="/studies/{study_id}/history/{history_item_id}/comments", tags=["comments"]
+)
 
 
 class Comment(BaseModel):
-    study_uuid: str
-    user_uuid: str
-    history_item_index: int
     comment: str
     comment_time: str
     screenshot: Union[str, None]
@@ -21,52 +21,39 @@ class Comment(BaseModel):
 
 
 @router.post("/")
-def add_comment(data: Comment):
-    study_uuid = data.study_uuid
-    user_uuid = data.user_uuid
-    history_item_index = data.history_item_index
-    comment = data.comment
-    comment_time = data.comment_time
+def add_comment(
+    data: Comment,
+    study_id: str,
+    history_item_id: str,
+    user_id: str = Depends(verify_user_exists),
+):
+    study = csx_study.get_study(user_id, study_id)
 
-    csx_study.add_comment(
-        study_uuid,
-        user_uuid,
-        history_item_index,
-        comment,
-        comment_time,
-        data.screenshot,
-        data.screenshot_width,
-        data.screenshot_height,
-        data.chart,
-    )
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Study not found",
+        )
+
+    csx_study.add_comment(study_id, user_id, history_item_id, **data.dict())
 
     return
 
 
-class DeleteComment(BaseModel):
-    study_uuid: str
-    user_uuid: str
-    history_item_index: int
-    comment_index: int
+@router.delete("/{comment_id}")
+def delete_comment(
+    study_id: str,
+    history_item_id: str,
+    comment_id: str,
+    user_id: str = Depends(verify_user_exists),
+):
 
-
-@router.delete("/")
-def delete_comment(data: DeleteComment):
-    study_uuid = data.study_uuid
-    user_uuid = data.user_uuid
-    history_item_index = data.history_item_index
-    comment_index = data.comment_index
-
-    csx_study.delete_comment(study_uuid, user_uuid, history_item_index, comment_index)
+    csx_study.delete_comment(study_id, user_id, history_item_id, comment_id)
 
     return
 
 
 class EditComment(BaseModel):
-    study_uuid: str
-    user_uuid: str
-    history_item_index: int
-    comment_index: int
     comment: str
     comment_time: str
     screenshot: Union[str, None]
@@ -75,26 +62,17 @@ class EditComment(BaseModel):
     chart: Union[str, None]
 
 
-@router.put("/")
-def edit_comment(data: EditComment):
-    study_uuid = data.study_uuid
-    user_uuid = data.user_uuid
-    history_item_index = data.history_item_index
-    comment_index = data.comment_index
-    comment = data.comment
-    comment_time = data.comment_time
+@router.put("/{comment_id}")
+def edit_comment(
+    data: EditComment,
+    study_id: str,
+    history_item_id: str,
+    comment_id: str,
+    user_id: str = Depends(verify_user_exists),
+):
 
     csx_study.edit_comment(
-        study_uuid,
-        user_uuid,
-        history_item_index,
-        comment_index,
-        comment,
-        comment_time,
-        data.screenshot,
-        data.screenshot_width,
-        data.screenshot_height,
-        data.chart,
+        study_id, user_id, history_item_id, comment_id, **data.dict()
     )
 
     return

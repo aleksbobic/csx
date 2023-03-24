@@ -1,4 +1,5 @@
 from typing import Any, List
+from bson import ObjectId
 
 import pymongo
 from app.types import Node
@@ -38,36 +39,54 @@ def delete_large_document(item_id):
     return fs.delete(item_id)
 
 
-def update_document(collection_name: str, conditions: object, new_values) -> None:
+def update_document(collection_name: str, conditions: Any, new_values) -> None:
     """Update a single value in a collection"""
     database[collection_name].update_one(conditions, new_values)
 
 
-def delete_document(collection_name: str, conditions: object) -> None:
+def delete_document(collection_name: str, conditions: Any) -> None:
     """Delete a single value from a collection"""
     database[collection_name].delete_one(conditions)
 
 
-def delete_documents(collection_name: str, conditions: object) -> None:
+def delete_documents(collection_name: str, conditions: Any) -> None:
     """Delete a single value from a collection"""
     database[collection_name].delete_many(conditions)
 
 
-def delete_from_array(
-    collection_name: str, conditions: object, arr_name, index
-) -> None:
+def delete_from_array(collection_name: str, conditions: Any, arr_name, index) -> None:
     """Delete a value from an array"""
-    # database[collection_name].update_many(conditions, new_values)
+
     database[collection_name].update_one(
         conditions, {"$unset": {f"{arr_name}.{index}": 1}}
     )
     database[collection_name].update_one(conditions, {"$pull": {f"{arr_name}": None}})
 
 
-def edit_array(collection_name: str, conditions: object, value) -> None:
+def delete_from_array_by_id(
+    collection_name: str, conditions: Any, arr_name, item_id
+) -> None:
+    """Delete a value from an array"""
+
+    database[collection_name].update_one(
+        conditions, {"$pull": {f"{arr_name}": {"_id": ObjectId(item_id)}}}
+    )
+
+
+def edit_array(collection_name: str, conditions: Any, value) -> None:
     """Edit a value in an array"""
-    # database[collection_name].update_many(conditions, new_values)
+
     database[collection_name].update_one(conditions, {"$set": value})
+
+
+def edit_array_with_filters(
+    collection_name: str, conditions: Any, value, filters
+) -> None:
+    """Edit a value in an array"""
+
+    database[collection_name].update_one(
+        conditions, {"$set": value}, array_filters=filters
+    )
 
 
 def insert_documents(collection_name: str, values: List[Any]) -> None:

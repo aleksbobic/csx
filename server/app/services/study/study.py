@@ -107,7 +107,7 @@ def add_index(study_uuid: str, user_uuid: str, index: str):
 def add_comment(
     study_id: str,
     user_id: str,
-    history_item_index: int,
+    history_item_id: str,
     comment: str,
     comment_time: str,
     screenshot: Union[str, None],
@@ -115,13 +115,17 @@ def add_comment(
     screenshot_height: Union[int, None],
     chart: Union[str, None],
 ):
-
     csx_data.update_document(
         "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
+        {
+            "study_uuid": study_id,
+            "user_uuid": user_id,
+            "history.item_id": ObjectId(history_item_id),
+        },
         {
             "$push": {
-                f"history.{history_item_index}.comments": {
+                "history.$.comments": {
+                    "_id": ObjectId(),
                     "comment": comment,
                     "time": comment_time,
                     "screenshot": screenshot,
@@ -134,22 +138,25 @@ def add_comment(
     )
 
 
-def delete_comment(
-    study_id: str, user_id: str, history_item_index: int, comment_index: int
-):
-    csx_data.delete_from_array(
+def delete_comment(study_id: str, user_id: str, history_item_id: str, comment_id: str):
+    csx_data.delete_from_array_by_id(
         "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
-        f"history.{history_item_index}.comments",
-        comment_index,
+        {
+            "study_uuid": study_id,
+            "user_uuid": user_id,
+            "history.item_id": ObjectId(history_item_id),
+            "history.comments._id": ObjectId(comment_id),
+        },
+        "history.$.comments",
+        comment_id,
     )
 
 
 def edit_comment(
     study_id: str,
     user_id: str,
-    history_item_index: int,
-    comment_index: int,
+    history_item_id: str,
+    comment_id: str,
     comment: str,
     comment_time: str,
     screenshot: Union[str, None],
@@ -157,18 +164,19 @@ def edit_comment(
     screenshot_height: Union[int, None],
     chart: Union[str, None],
 ):
-    csx_data.edit_array(
+    csx_data.edit_array_with_filters(
         "studies",
-        {"study_uuid": study_uuid, "user_uuid": user_id},
+        {"study_uuid": study_id, "user_uuid": user_id},
         {
-            f"history.{history_item_index}.comments.{comment_index}.comment": comment,
-            f"history.{history_item_index}.comments.{comment_index}.screenshot": screenshot,
-            f"history.{history_item_index}.comments.{comment_index}.screenshot_width": screenshot_width,
-            f"history.{history_item_index}.comments.{comment_index}.screenshot_height": screenshot_height,
-            f"history.{history_item_index}.comments.{comment_index}.chart": chart,
-            f"history.{history_item_index}.comments.{comment_index}.time": comment_time,
-            f"history.{history_item_index}.comments.{comment_index}.edited": True,
+            f"history.$[i].comments.$[j].comment": comment,
+            f"history.$[i].comments.$[j].screenshot": screenshot,
+            f"history.$[i].comments.$[j].screenshot_width": screenshot_width,
+            f"history.$[i].comments.$[j].screenshot_height": screenshot_height,
+            f"history.$[i].comments.$[j].chart": chart,
+            f"history.$[i].comments.$[j].time": comment_time,
+            f"history.$[i].comments.$[j].edited": True,
         },
+        [{"i.item_id": ObjectId(history_item_id)}, {"j._id": ObjectId(comment_id)}],
     )
 
 
@@ -293,7 +301,18 @@ def extract_history_items(study) -> List[dict]:
         {
             "id": str(item["item_id"]),
             "action": item["action"],
-            "comments": item["comments"],
+            "comments": [
+                {
+                    "id": str(comment["_id"]),
+                    "comment": comment["comment"],
+                    "time": comment["time"],
+                    "screenshot": comment["screenshot"],
+                    "screenshot_width": comment["screenshot_width"],
+                    "screenshot_height": comment["screenshot_height"],
+                    "chart": comment["chart"],
+                }
+                for comment in item["comments"]
+            ],
             "parent": str(item["parent"]),
             "query": item["query"],
             "graph_type": item["graph_type"],

@@ -70,13 +70,24 @@ export class CoreStore {
         this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
     };
 
-    deleteCommentFromCurrentHistoryItem = index => {
-        this.studyHistory[this.studyHistoryItemIndex].comments.splice(index, 1);
+    deleteCommentFromCurrentHistoryItem = id => {
+        const commentIndex = this.studyHistory[
+            this.studyHistoryItemIndex
+        ].comments.findIndex(comment => comment.id === id);
+
+        this.studyHistory[this.studyHistoryItemIndex].comments.splice(
+            commentIndex,
+            1
+        );
     };
 
     editCommentFromCurrentHistoryItem = (index, newComment) => {
         this.studyHistory[this.studyHistoryItemIndex].comments[index] =
             newComment;
+
+        this.studyHistory[this.studyHistoryItemIndex].comments = [
+            ...this.studyHistory[this.studyHistoryItemIndex].comments
+        ];
     };
 
     setSurveyHidden = val => {
