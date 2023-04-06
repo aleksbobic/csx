@@ -1,14 +1,12 @@
-import uuid
-import pickle
 import os
-
-from pydantic import BaseModel
-from typing import Union, Optional
-from fastapi import APIRouter, HTTPException, status, Depends
+import pickle
+import uuid
 
 import app.services.data.mongo as csx_data
 import app.services.study.study as csx_study
-from app.routes.auth import verify_user_exists
+from app.api.dependencies import get_current_study, verify_user_exists
+from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from elasticsearch import Elasticsearch
 
@@ -21,60 +19,48 @@ es = Elasticsearch(
 router = APIRouter(prefix="/studies", tags=["studies"])
 
 
-@router.get("/{study_id}")
-def get_study(study_id: str, user_id: str = Depends(verify_user_exists)):
+@router.get("/{study_id}", response_model=Study)
+def get_study(study_id: str, study: dict = Depends(get_current_study)):
 
-    study = csx_study.get_study(user_id, study_id)
-
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
-    if len(study["history"]) > 0:
-
-        history_id = study["history"][-1]["item_id"]
-        charts = study["history"][-1]["charts"]
-
-        history_item = csx_data.get_large_document(history_id)
-
-        history = csx_study.extract_history_items(study)
-
-        graph_type = history[len(history) - 1]["graph_type"]
-
+    if len(study["history"]) == 0:
         return {
-            "graph": pickle.loads(history_item)[graph_type],
+            "graph": {},
             "name": study["study_name"],
             "description": study["study_description"],
             "author": study["study_author"] if "study_author" in study else "",
-            "history": history,
+            "history": [],
             "index": study["index"],
-            "charts": charts,
             "empty": False,
             "public": study["public"],
             "public_url": study["public_url"],
         }
 
+    history_id = study["history"][-1]["item_id"]
+
+    charts = study["history"][-1]["charts"]
+
+    history_item = csx_data.get_large_document(history_id)
+
+    history = csx_study.extract_history_items(study)
+
+    graph_type = history[len(history) - 1]["graph_type"]
+
     return {
-        "graph": {},
+        "graph": pickle.loads(history_item)[graph_type],
         "name": study["study_name"],
         "description": study["study_description"],
         "author": study["study_author"] if "study_author" in study else "",
-        "history": [],
+        "history": history,
         "index": study["index"],
+        "charts": charts,
         "empty": False,
         "public": study["public"],
         "public_url": study["public_url"],
     }
 
 
-class CreateStudy(BaseModel):
-    study_name: str
-
-
-@router.post("/")
-def create_study(data: CreateStudy, user_id: str = Depends(verify_user_exists)) -> str:
+@router.post("/", status_code=status.HTTP_201_CREATED)
+def create_study(data: StudyCreate, user_id: str = Depends(verify_user_exists)) -> str:
     study_uuid = uuid.uuid4().hex
 
     csx_data.insert_document(
@@ -91,6 +77,7 @@ def create_study(data: CreateStudy, user_id: str = Depends(verify_user_exists)) 
             "history": [],
         },
     )
+
     return study_uuid
 
 
@@ -114,24 +101,14 @@ def get_studies(user_id: str = Depends(verify_user_exists)):
     ]
 
 
-class StudyData(BaseModel):
-    public: Optional[bool]
-    study_name: Optional[str]
-    study_description: Optional[str]
-    study_author: Optional[Union[str, None]]
-
-
 @router.patch("/{study_id}")
 def update_study(
-    study_id: str, data: StudyData, user_id: str = Depends(verify_user_exists)
+    study_id: str,
+    data: StudyUpdate,
+    user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
 ) -> str:
     """Update study settings (public, name, description) and return public url if public is set to true for the first time"""
-    study = csx_study.get_study(user_id, study_id)
-
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
-        )
 
     updated_settings = {**data.dict(exclude_unset=True), "saved": True}
 
@@ -151,13 +128,9 @@ def update_study(
     return updated_settings["public_url"] if "public_url" in updated_settings else ""
 
 
-class DeleteStudyData(BaseModel):
-    user_trigger: bool
-
-
-@router.delete("/{study_id}")
+@router.delete("/{study_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_study(
-    study_id: str, data: DeleteStudyData, user_id: str = Depends(verify_user_exists)
+    study_id: str, data: StudyDelete, user_id: str = Depends(verify_user_exists)
 ):
 
     if data.user_trigger:
@@ -197,4 +170,4 @@ def delete_study(
 
     csx_data.delete_document("studies", {"study_uuid": study_id, "user_uuid": user_id})
 
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

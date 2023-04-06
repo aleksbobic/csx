@@ -1,31 +1,23 @@
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-import app.services.study.history as csx_history
-import app.services.study.study as csx_study
-from .auth import verify_user_exists
-
-import os
+import itertools
 import json
-from bson import ObjectId
-
-from elasticsearch import Elasticsearch
+import os
+import pickle
 from typing import List, Literal, Union
 
-from pydantic import BaseModel
-import app.services.graph.graph as csx_graph
-import app.services.data.mongo as csx_data
 import app.services.data.elastic as csx_es
+import app.services.data.mongo as csx_data
+import app.services.graph.graph as csx_graph
+import app.services.study.history as csx_history
 import app.services.study.study as csx_study
-
-from elasticsearch_dsl import Q, Search
-
-from fastapi import APIRouter, HTTPException, status, Depends
-from app.utils.typecheck import isJson, isNumber
-from .auth import verify_user_exists
-import itertools
 import pandas as pd
-import pickle
+from app.api.dependencies import verify_user_exists
+from app.utils.typecheck import isJson, isNumber
+from bson import ObjectId
+from elasticsearch_dsl import Q, Search
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
+from elasticsearch import Elasticsearch
 
 router = APIRouter(prefix="/studies/{study_id}/history", tags=["history"])
 

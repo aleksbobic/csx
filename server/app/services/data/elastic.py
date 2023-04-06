@@ -13,6 +13,19 @@ import os
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
 
+
+def get_es():
+    es = Elasticsearch(
+        "csx_elastic:9200",
+        retry_on_timeout=True,
+        http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+    )
+    try:
+        yield es
+    finally:
+        es.transport.close()
+
+
 es = Elasticsearch(
     "csx_elastic:9200",
     retry_on_timeout=True,

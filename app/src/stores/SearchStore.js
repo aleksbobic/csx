@@ -263,11 +263,9 @@ export class SearchStore {
 
     suggest = async (feature, input) => {
         const { response, error } = await safeRequest(
-            axios.post('search/suggest', {
-                index: this.currentDataset,
-                feature,
-                input
-            })
+            axios.get(
+                `datasets/${this.currentDataset}/search/suggest?feature=${feature}&value=${input}`
+            )
         );
 
         if (error) {

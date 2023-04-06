@@ -1,13 +1,12 @@
+from typing import Union
+
+import app.services.study.study as csx_study
+from app.api.dependencies import verify_user_exists
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-import app.services.study.study as csx_study
-import app.services.data.mongo as csx_data
-from bson import ObjectId
-from typing import Union
-from .auth import verify_user_exists
 
 router = APIRouter(
-    prefix="/studies/{study_id}/history/{history_item_id}/comments", tags=["comments"]
+    prefix=("/studies/{study_id}/history/{history_item_id}/comments"), tags=["comments"]
 )
 
 
@@ -48,6 +47,14 @@ def delete_comment(
     user_id: str = Depends(verify_user_exists),
 ):
 
+    study = csx_study.get_study(user_id, study_id)
+
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Study not found",
+        )
+
     csx_study.delete_comment(study_id, user_id, history_item_id, comment_id)
 
     return
@@ -70,6 +77,14 @@ def edit_comment(
     comment_id: str,
     user_id: str = Depends(verify_user_exists),
 ):
+
+    study = csx_study.get_study(user_id, study_id)
+
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Study not found",
+        )
 
     csx_study.edit_comment(
         study_id, user_id, history_item_id, comment_id, **data.dict()
