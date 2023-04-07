@@ -1,19 +1,18 @@
 import itertools
 import json
 import os
-import pickle
 from typing import List, Literal, Union
 
 import app.services.graph.graph as csx_graph
 import app.services.search.elastic as csx_es
-import app.services.study.history as csx_history
 import app.services.study.study as csx_study
 import pandas as pd
 from app.api.dependencies import get_storage_connector, verify_user_exists
+from app.services.storage.base import StorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from elasticsearch_dsl import Q, Search
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
 from elasticsearch import Elasticsearch
@@ -27,40 +26,16 @@ es = Elasticsearch(
 )
 
 
-def get_all_child_node_ids(nodes, id) -> List[str]:
-    currentNode = [node for node in nodes if node["item_id"] == ObjectId(id)][0]
-    currentNodeChildren = [node for node in nodes if str(node["parent"]) == str(id)]
-
-    if len(currentNodeChildren) > 0:
-        all_children = [str(currentNode["item_id"])]
-
-        for childNode in currentNodeChildren:
-            all_children = all_children + get_all_child_node_ids(
-                nodes, childNode["item_id"]
-            )
-
-        return all_children
-    else:
-        return [str(currentNode["item_id"])]
-
-
-@router.delete("/{history_item_id}")
+@router.delete("/{history_item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_history_items(
-    history_item_id: str, study_id: str, user_id: str = Depends(verify_user_exists)
+    history_item_id: str,
+    study_id: str,
+    user_id: str = Depends(verify_user_exists),
+    storage: StorageConnector = Depends(get_storage_connector),
 ):
-    study = csx_study.get_study(user_id, study_id)
+    storage.delete_history_item(study_id, user_id, history_item_id)
 
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
-    nodes_to_delete = get_all_child_node_ids(study["history"], history_item_id)
-
-    csx_history.delete_history_item(study_id, user_id, nodes_to_delete)
-
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/")
@@ -84,7 +59,7 @@ def get_history_item(
     history_item_id: str,
     study_id: str,
     user_id: str = Depends(verify_user_exists),
-    storage=Depends(get_storage_connector),
+    storage: StorageConnector = Depends(get_storage_connector),
 ):
     study = csx_study.get_study(user_id, study_id)
 
@@ -368,34 +343,11 @@ def update_history_item(
     history_item_id: str,
     data: UpdateCharts,
     user_id: str = Depends(verify_user_exists),
-    storage=Depends(get_storage_connector),
+    storage: StorageConnector = Depends(get_storage_connector),
 ):
-    study = csx_study.get_study(user_id, study_id)
+    storage.update_history_item_charts(study_id, user_id, history_item_id, data.charts)
 
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
-    item_index = None
-
-    for index, item in enumerate(study["history"]):
-        if item["item_id"] == ObjectId(history_item_id):
-            item_index = index
-            break
-
-    if item_index == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="History item not found",
-        )
-
-    storage.update_history_item_charts(
-        "studies", study_id, user_id, item_index, data.charts
-    )
-
-    return
+    return Response(status_code=status.HTTP_200_OK)
 
 
 def convert_filter_res_to_df(results):

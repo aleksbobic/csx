@@ -11,9 +11,10 @@ import app.services.search.elastic as csx_es
 import pandas as pd
 import polars as pl
 from app.api.dependencies import get_storage_connector
+from app.schemas.dataset import SettingsCreate, SettingsUpdate
+from app.services.storage.base import StorageConnector
 from elasticsearch_dsl import Q
-from fastapi import APIRouter, Depends, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -94,8 +95,10 @@ def get_column_type(column: pl.Series):
     return "integer"
 
 
-@router.delete("/{dataset_name}")
-def delete_dataset(dataset_name: str, storage=Depends(get_storage_connector)):
+@router.delete("/{dataset_name}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_dataset(
+    dataset_name: str, storage: StorageConnector = Depends(get_storage_connector)
+):
     if exists(f"./app/data/config/{dataset_name}.json"):
         csx_es.delete_index(dataset_name)
         storage.delete_dataset(dataset_name)
@@ -114,14 +117,7 @@ def delete_dataset(dataset_name: str, storage=Depends(get_storage_connector)):
     else:
         os.remove(f"./app/data/files/{dataset_name}.csv")
 
-    return {"status": "success"}
-
-
-class SettingsData(BaseModel):
-    name: str
-    anchor: str
-    defaults: dict
-    default_schemas: dict
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/{dataset_name}/settings")
@@ -134,7 +130,9 @@ def get_dataset_settings(dataset_name: str):
 
 @router.post("/{dataset_name}/settings")
 def save_dataset_settings(
-    dataset_name: str, data: SettingsData, storage=Depends(get_storage_connector)
+    dataset_name: str,
+    data: SettingsCreate,
+    storage: StorageConnector = Depends(get_storage_connector),
 ):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
@@ -419,13 +417,8 @@ def convert_entry_with_nodes_to_mongo(entry, key, list_props):
     return new_entries
 
 
-class UpdateSettingsData(BaseModel):
-    anchor: str
-    defaults: dict
-
-
 @router.put("/{dataset_name}/settings")
-def update_dataset_settings(dataset_name: str, data: UpdateSettingsData):
+def update_dataset_settings(dataset_name: str, data: SettingsUpdate):
     defaults = data.defaults
     schemas = []
     search_hints = {}

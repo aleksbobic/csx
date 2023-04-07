@@ -210,11 +210,6 @@ export class FileUploadStore {
     };
 
     cancelFileUpload = async () => {
-        // const params = { name: this.fileUploadData.originalName };
-
-        // const { error } = await safeRequest(
-        //     axios.get('file/cancel', { params })
-        // );
         const { error } = await safeRequest(
             axios.delete(`datasets/${this.fileUploadData.originalName}`)
         );

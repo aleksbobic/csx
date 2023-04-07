@@ -4,8 +4,13 @@ import uuid
 
 import app.services.storage.mongo as csx_data
 import app.services.study.study as csx_study
-from app.api.dependencies import get_current_study, verify_user_exists
+from app.api.dependencies import (
+    get_current_study,
+    get_storage_connector,
+    verify_user_exists,
+)
 from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
+from app.services.storage.base import StorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from elasticsearch import Elasticsearch
@@ -21,7 +26,6 @@ router = APIRouter(prefix="/studies", tags=["studies"])
 
 @router.get("/{study_id}", response_model=Study)
 def get_study(study_id: str, study: dict = Depends(get_current_study)):
-
     if len(study["history"]) == 0:
         return {
             "graph": {},
@@ -107,6 +111,7 @@ def update_study(
     data: StudyUpdate,
     user_id: str = Depends(verify_user_exists),
     study: dict = Depends(get_current_study),
+    storage: StorageConnector = Depends(get_storage_connector),
 ) -> str:
     """Update study settings (public, name, description) and return public url if public is set to true for the first time"""
 
@@ -117,13 +122,7 @@ def update_study(
     else:
         updated_settings["public_url"] = study["public_url"]
 
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
-        {
-            "$set": updated_settings,
-        },
-    )
+    storage.update_study_settings(study_id, user_id, updated_settings)
 
     return updated_settings["public_url"] if "public_url" in updated_settings else ""
 

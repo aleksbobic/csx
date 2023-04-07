@@ -2,7 +2,7 @@ from typing import Union
 
 import app.services.study.study as csx_study
 from app.api.dependencies import verify_user_exists
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
 router = APIRouter(
@@ -39,14 +39,13 @@ def add_comment(
     return
 
 
-@router.delete("/{comment_id}")
+@router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_comment(
     study_id: str,
     history_item_id: str,
     comment_id: str,
     user_id: str = Depends(verify_user_exists),
 ):
-
     study = csx_study.get_study(user_id, study_id)
 
     if not study:
@@ -57,7 +56,7 @@ def delete_comment(
 
     csx_study.delete_comment(study_id, user_id, history_item_id, comment_id)
 
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 class EditComment(BaseModel):
@@ -77,7 +76,6 @@ def edit_comment(
     comment_id: str,
     user_id: str = Depends(verify_user_exists),
 ):
-
     study = csx_study.get_study(user_id, study_id)
 
     if not study:
