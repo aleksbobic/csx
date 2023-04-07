@@ -1,4 +1,4 @@
-import app.services.data.mongo as csx_data
+import app.services.storage.mongo as csx_data
 from bson import ObjectId
 
 

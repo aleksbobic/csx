@@ -1,18 +1,16 @@
+import json
+import pickle
 from typing import List, cast
-
 
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
-import app.services.data.elastic as csx_es
+import app.services.search.elastic as csx_es
 import app.services.study.study as csx_study
-
 import networkx as nx
 import pandas as pd
 from fastapi import APIRouter
-import json
-import pickle
 
 router = APIRouter(prefix="/graphs", tags=["graphs"])
 
@@ -351,7 +349,6 @@ def calculate_global_cache_properties(cache_data, entries):
 
 
 def calculate_trimmed_graph(cache_data, entries, graph_type):
-
     df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
 
     # Filter graph nodes

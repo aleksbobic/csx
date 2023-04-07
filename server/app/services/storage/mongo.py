@@ -1,11 +1,11 @@
 from typing import Any, List
-from bson import ObjectId
 
+import gridfs
 import pymongo
 from app.types import Node
 from app.utils.timer import use_timing
+from bson import ObjectId
 from pymongo import MongoClient
-import gridfs
 
 client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx
@@ -15,11 +15,6 @@ fs = gridfs.GridFS(database)
 def list_collections() -> None:
     """Print out all collection names"""
     print("\n\n\n\n collection names: ", database.list_collection_names())
-
-
-def delete_collection(collection_name: str) -> None:
-    """Delete a collection"""
-    database[collection_name].drop()
 
 
 def insert_document(collection_name: str, value: Any) -> None:
@@ -87,11 +82,6 @@ def edit_array_with_filters(
     database[collection_name].update_one(
         conditions, {"$set": value}, array_filters=filters
     )
-
-
-def insert_documents(collection_name: str, values: List[Any]) -> None:
-    """Insert multiple values in a collection"""
-    database[collection_name].insert_many(values)
 
 
 def get_all_documents(collection_name: str):

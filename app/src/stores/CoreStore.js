@@ -307,17 +307,14 @@ export class CoreStore {
     };
 
     deleteStudy = async studyUuid => {
-        if (!this.studyIsSaved || studyUuid) {
-            const params = {
-                user_trigger: !!studyUuid
-            };
+        if ((!this.studyIsSaved && !studyUuid) || studyUuid) {
             const studyID = studyUuid ? studyUuid : this.studyUuid;
 
             if (studyID) {
                 const { error } = await safeRequest(
                     axios.delete(`studies/${studyID}`, {
-                        data: params,
-                        headers: { user_id: this.userUuid }
+                        headers: { user_id: this.userUuid },
+                        data: {}
                     })
                 );
 

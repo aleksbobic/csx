@@ -1,7 +1,5 @@
+import app.services.search.autocomplete as csx_auto
 from fastapi import APIRouter
-
-
-import app.services.data.autocomplete as csx_auto
 
 router = APIRouter(prefix="/datasets/{dataset}/search", tags=["search"])
 

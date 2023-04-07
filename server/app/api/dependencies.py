@@ -1,4 +1,8 @@
+from typing import Generator
+
 import app.services.study.study as csx_study
+from app.services.storage.base import StorageConnector
+from app.services.storage.mongo_connector import MongoConnector
 from fastapi import Depends, Header, HTTPException, status
 from typing_extensions import Annotated
 
@@ -32,3 +36,20 @@ def get_current_study(
         )
 
     return study
+
+
+def get_storage_connector() -> Generator[StorageConnector, None, None]:
+    """Get a connector to the storage backend"""
+
+    try:
+        connector = MongoConnector()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not connect to storage backend: {e}",
+        )
+
+    try:
+        yield connector
+    finally:
+        connector.disconnect()

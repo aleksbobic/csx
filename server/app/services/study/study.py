@@ -1,13 +1,12 @@
 import pickle
+from typing import Dict, List, Literal, Union
 
-import app.services.data.mongo as csx_data
-from bson import ObjectId
-from typing import Dict, Literal, List
-from app.types import ComparisonResults
-import pandas as pd
-import networkx as nx
 import app.services.graph.graph as csx_graph
-from typing import Union
+import app.services.storage.mongo as csx_data
+import networkx as nx
+import pandas as pd
+from app.types import ComparisonResults
+from bson import ObjectId
 
 
 def store_history_entry(entry):

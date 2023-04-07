@@ -4,13 +4,12 @@ import os
 import pickle
 from typing import List, Literal, Union
 
-import app.services.data.elastic as csx_es
-import app.services.data.mongo as csx_data
 import app.services.graph.graph as csx_graph
+import app.services.search.elastic as csx_es
 import app.services.study.history as csx_history
 import app.services.study.study as csx_study
 import pandas as pd
-from app.api.dependencies import verify_user_exists
+from app.api.dependencies import get_storage_connector, verify_user_exists
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from elasticsearch_dsl import Q, Search
@@ -82,7 +81,10 @@ def get_study_history(study_id: str, user_id: str = Depends(verify_user_exists))
 
 @router.get("/{history_item_id}")
 def get_history_item(
-    history_item_id: str, study_id: str, user_id: str = Depends(verify_user_exists)
+    history_item_id: str,
+    study_id: str,
+    user_id: str = Depends(verify_user_exists),
+    storage=Depends(get_storage_connector),
 ):
     study = csx_study.get_study(user_id, study_id)
 
@@ -103,7 +105,7 @@ def get_history_item(
         if entry["item_id"] == ObjectId(history_item_id)
     ][0]["charts"]
 
-    history_item = csx_data.get_large_document(history_id)
+    history_item = storage.get_history_item(history_id)
 
     history = csx_study.extract_history_items(study)
 
@@ -114,7 +116,7 @@ def get_history_item(
     ][0]["graph_type"]
 
     return {
-        "graph": pickle.loads(history_item)[graph_type],
+        "graph": history_item[graph_type],
         "name": study["study_name"],
         "description": study["study_description"],
         "author": study["study_author"] if "study_author" in study else "",
@@ -366,6 +368,7 @@ def update_history_item(
     history_item_id: str,
     data: UpdateCharts,
     user_id: str = Depends(verify_user_exists),
+    storage=Depends(get_storage_connector),
 ):
     study = csx_study.get_study(user_id, study_id)
 
@@ -388,14 +391,8 @@ def update_history_item(
             detail="History item not found",
         )
 
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
-        {
-            "$set": {
-                f"history.{item_index}.charts": data.charts,
-            }
-        },
+    storage.update_history_item_charts(
+        "studies", study_id, user_id, item_index, data.charts
     )
 
     return

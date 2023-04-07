@@ -23,4 +23,6 @@ python-multipart
 pymongo
 marisa-trie
 palettable
+uvicorn
 polars==0.16.4
+debugpy

@@ -1,25 +1,19 @@
+import ast
 import itertools
 import json
 import os
-import ast
-from typing import List, Literal, Union
-
-import pandas as pd
-from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Q, Search
-from fastapi import APIRouter, UploadFile
-from pydantic import BaseModel
 from os.path import exists
-import polars as pl
+from typing import Union
 
-import app.services.graph.graph as csx_graph
-import app.services.data.elastic as csx_es
-import app.services.graph.graph as csx_graph
 import app.services.graph.nodes as csx_nodes
-import app.services.data.autocomplete as csx_auto
-import app.services.data.mongo as csx_data
-import app.services.study.study as csx_study
-from app.utils.typecheck import isJson, isNumber
+import app.services.search.autocomplete as csx_auto
+import app.services.search.elastic as csx_es
+import pandas as pd
+import polars as pl
+from app.api.dependencies import get_storage_connector
+from elasticsearch_dsl import Q
+from fastapi import APIRouter, Depends, UploadFile
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -101,10 +95,10 @@ def get_column_type(column: pl.Series):
 
 
 @router.delete("/{dataset_name}")
-def delete_dataset(dataset_name: str):
+def delete_dataset(dataset_name: str, storage=Depends(get_storage_connector)):
     if exists(f"./app/data/config/{dataset_name}.json"):
         csx_es.delete_index(dataset_name)
-        csx_data.delete_collection(dataset_name)
+        storage.delete_dataset(dataset_name)
 
         if exists(f"./app/data/autocomplete/auto_{dataset_name}"):
             os.remove(f"./app/data/autocomplete/auto_{dataset_name}")
@@ -139,7 +133,9 @@ def get_dataset_settings(dataset_name: str):
 
 
 @router.post("/{dataset_name}/settings")
-def save_dataset_settings(dataset_name: str, data: SettingsData):
+def save_dataset_settings(
+    dataset_name: str, data: SettingsData, storage=Depends(get_storage_connector)
+):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
 
@@ -222,10 +218,10 @@ def save_dataset_settings(dataset_name: str, data: SettingsData):
 
         print("***** Generating mongo nodes")
 
-        mongo_nodes = [node for node in nodes if node["feature"] in list_properties]
+        list_nodes = [node for node in nodes if node["feature"] in list_properties]
 
         print("***** Populating mongo")
-        csx_data.insert_documents(data.name, mongo_nodes)
+        storage.insert_nodes(data.name, list_nodes)
     else:
         print("***** Skipped populating mongo")
 

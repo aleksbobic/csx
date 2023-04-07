@@ -2,7 +2,7 @@ import os
 import pickle
 import uuid
 
-import app.services.data.mongo as csx_data
+import app.services.storage.mongo as csx_data
 import app.services.study.study as csx_study
 from app.api.dependencies import get_current_study, verify_user_exists
 from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
@@ -129,39 +129,20 @@ def update_study(
 
 
 @router.delete("/{study_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_study(
-    study_id: str, data: StudyDelete, user_id: str = Depends(verify_user_exists)
-):
-
-    if data.user_trigger:
-        ## If study deletion is user triggered then delete study no matter if it is saved or not
-        study_entry = list(
-            csx_data.get_all_documents_by_conditions(
-                "studies",
-                {
-                    "$and": [
-                        {"study_uuid": study_id},
-                        {"user_uuid": user_id},
-                    ]
-                },
-                {"_id": 0},
-            )
+def delete_study(study_id: str, user_id: str = Depends(verify_user_exists)):
+    """Delete a study and all its history items from the database and search index"""
+    study_entry = list(
+        csx_data.get_all_documents_by_conditions(
+            "studies",
+            {
+                "$and": [
+                    {"study_uuid": study_id},
+                    {"user_uuid": user_id},
+                ]
+            },
+            {"_id": 0},
         )
-    else:
-        ## If study deletion is automatic then first check that the study is actually not saved
-        study_entry = list(
-            csx_data.get_all_documents_by_conditions(
-                "studies",
-                {
-                    "$and": [
-                        {"study_uuid": study_id},
-                        {"user_uuid": user_id},
-                        {"saved": False},
-                    ]
-                },
-                {"_id": 0},
-            )
-        )
+    )
 
     if len(study_entry) > 0:
         history_ids = [item["item_id"] for item in study_entry[0]["history"]]
