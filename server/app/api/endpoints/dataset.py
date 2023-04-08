@@ -12,7 +12,7 @@ import pandas as pd
 import polars as pl
 from app.api.dependencies import get_storage_connector
 from app.schemas.dataset import SettingsCreate, SettingsUpdate
-from app.services.storage.base import StorageConnector
+from app.services.storage.base import BaseStorageConnector
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, Depends, Response, UploadFile, status
 
@@ -61,7 +61,7 @@ def get_datasets() -> dict:
     return datasets
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def upload_dataset(file: UploadFile):
     """Upload a dataset to the server"""
     if os.getenv("DISABLE_UPLOAD") == "true" or not file.filename:
@@ -97,7 +97,7 @@ def get_column_type(column: pl.Series):
 
 @router.delete("/{dataset_name}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_dataset(
-    dataset_name: str, storage: StorageConnector = Depends(get_storage_connector)
+    dataset_name: str, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):
     if exists(f"./app/data/config/{dataset_name}.json"):
         csx_es.delete_index(dataset_name)
@@ -132,7 +132,7 @@ def get_dataset_settings(dataset_name: str):
 def save_dataset_settings(
     dataset_name: str,
     data: SettingsCreate,
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
@@ -465,4 +465,4 @@ def update_dataset_settings(dataset_name: str, data: SettingsUpdate):
     with open(f"./app/data/config/{dataset_name}.json", "w") as f:
         json.dump(config, f)
 
-    return {"status": "success"}
+    return Response(status_code=status.HTTP_200_OK)

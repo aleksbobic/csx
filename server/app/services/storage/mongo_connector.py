@@ -1,14 +1,14 @@
 import pickle
-from typing import List
+from typing import List, Union
 
 import gridfs
-from app.services.storage.base import StorageConnector
+from app.services.storage.base import BaseStorageConnector
 from bson import ObjectId
 from fastapi import HTTPException, status
 from pymongo import MongoClient
 
 
-class MongoConnector(StorageConnector):
+class MongoConnector(BaseStorageConnector):
     def __init__(self, hostname="mongo", port="27017", db="csx"):
         self.hostname = hostname
         self.port = port
@@ -43,25 +43,25 @@ class MongoConnector(StorageConnector):
 
         return pickle.loads(history_item)
 
-    def get_all_child_node_ids(self, nodes, id) -> List[str]:
+    def get_history_ids_from_parent(self, nodes, id) -> List[str]:
         currentNode = [node for node in nodes if node["item_id"] == ObjectId(id)][0]
         currentNodeChildren = [node for node in nodes if str(node["parent"]) == str(id)]
 
-        if len(currentNodeChildren) > 0:
-            all_children = [str(currentNode["item_id"])]
-
-            for childNode in currentNodeChildren:
-                all_children = all_children + self.get_all_child_node_ids(
-                    nodes, childNode["item_id"]
-                )
-
-            return all_children
-        else:
+        if len(currentNodeChildren) == 0:
             return [str(currentNode["item_id"])]
 
-    def delete_history_item(self, study_id, user_id, history_item_id):
+        all_children = [str(currentNode["item_id"])]
+
+        for childNode in currentNodeChildren:
+            all_children = all_children + self.get_history_ids_from_parent(
+                nodes, childNode["item_id"]
+            )
+
+        return all_children
+
+    def delete_history_item(self, study_id, user_id, item_id):
         study = self.get_study(user_id, study_id)
-        nodes_to_delete = self.get_all_child_node_ids(study["history"], history_item_id)
+        nodes_to_delete = self.get_history_ids_from_parent(study["history"], item_id)
 
         for item_id in nodes_to_delete:
             self.fs.delete(ObjectId(item_id))
@@ -99,6 +99,9 @@ class MongoConnector(StorageConnector):
             },
         )
 
+    def insert_study(self, study: dict):
+        self.database["studies"].insert_one(study)
+
     def get_study(self, user_id, study_id):
         studies = list(
             self.database["studies"].find(
@@ -118,4 +121,67 @@ class MongoConnector(StorageConnector):
         self.database["studies"].update_one(
             {"study_uuid": study_id, "user_uuid": user_id},
             {"$set": settings},
+        )
+
+    def delete_study(self, user_id: str, study_id: str):
+        study = self.get_study(user_id, study_id)
+
+        history_ids = [item["item_id"] for item in study["history"]]
+        for item_id in history_ids:
+            self.fs.delete(item_id)
+
+        self.database["studies"].delete_one(
+            {"study_uuid": study_id, "user_uuid": user_id}
+        )
+
+    def get_user_studies(self, user_id) -> List[dict]:
+        return list(
+            self.database["studies"].find(
+                {"$and": [{"user_uuid": user_id}, {"saved": True}]}, {"_id": 0}
+            )
+        )
+
+    def delete_comment(
+        self, user_id: str, study_id: str, history_id: str, comment_id: str
+    ):
+        self.database["studies"].update_one(
+            {
+                "study_uuid": study_id,
+                "user_uuid": user_id,
+                "history.item_id": ObjectId(history_id),
+                "history.comments._id": ObjectId(comment_id),
+            },
+            {"$pull": {"history.$.comments": {"_id": ObjectId(comment_id)}}},
+        )
+
+    def edit_comment(
+        self,
+        study_id: str,
+        user_id: str,
+        history_item_id: str,
+        comment_id: str,
+        comment: str,
+        comment_time: str,
+        screenshot: Union[str, None],
+        screenshot_width: Union[int, None],
+        screenshot_height: Union[int, None],
+        chart: Union[str, None],
+    ):
+        self.database["studies"].update_one(
+            {"study_uuid": study_id, "user_uuid": user_id},
+            {
+                "$set": {
+                    f"history.$[i].comments.$[j].comment": comment,
+                    f"history.$[i].comments.$[j].screenshot": screenshot,
+                    f"history.$[i].comments.$[j].screenshot_width": screenshot_width,
+                    f"history.$[i].comments.$[j].screenshot_height": screenshot_height,
+                    f"history.$[i].comments.$[j].chart": chart,
+                    f"history.$[i].comments.$[j].time": comment_time,
+                    f"history.$[i].comments.$[j].edited": True,
+                }
+            },
+            array_filters=[
+                {"i.item_id": ObjectId(history_item_id)},
+                {"j._id": ObjectId(comment_id)},
+            ],
         )

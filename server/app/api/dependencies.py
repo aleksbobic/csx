@@ -1,6 +1,6 @@
 from typing import Generator
 
-from app.services.storage.base import StorageConnector
+from app.services.storage.base import BaseStorageConnector
 from app.services.storage.mongo_connector import MongoConnector
 from fastapi import Depends, Header, HTTPException, status
 from typing_extensions import Annotated
@@ -16,7 +16,7 @@ def verify_user_exists(user_id: Annotated[str, Header(convert_underscores=False)
     return user_id
 
 
-def get_storage_connector() -> Generator[StorageConnector, None, None]:
+def get_storage_connector() -> Generator[BaseStorageConnector, None, None]:
     """Get a connector to the storage backend"""
 
     try:
@@ -36,7 +36,7 @@ def get_storage_connector() -> Generator[StorageConnector, None, None]:
 def get_current_study(
     study_id: str,
     user_id: str = Depends(verify_user_exists),
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ) -> dict:
     """Get the study_id from the request header and verify that the study exists."""
 

@@ -8,7 +8,7 @@ import app.services.search.elastic as csx_es
 import app.services.study.study as csx_study
 import pandas as pd
 from app.api.dependencies import get_storage_connector, verify_user_exists
-from app.services.storage.base import StorageConnector
+from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from elasticsearch_dsl import Q, Search
@@ -31,7 +31,7 @@ def delete_history_items(
     history_item_id: str,
     study_id: str,
     user_id: str = Depends(verify_user_exists),
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     storage.delete_history_item(study_id, user_id, history_item_id)
 
@@ -59,7 +59,7 @@ def get_history_item(
     history_item_id: str,
     study_id: str,
     user_id: str = Depends(verify_user_exists),
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     study = csx_study.get_study(user_id, study_id)
 
@@ -121,9 +121,12 @@ class ModifyStudyData(BaseModel):
     charts: List
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_history_item(
-    data: ModifyStudyData, study_id: str, user_id: str = Depends(verify_user_exists)
+    data: ModifyStudyData,
+    study_id: str,
+    user_id: str = Depends(verify_user_exists),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     history_item_id = data.history_item_id
     query = data.query
@@ -146,7 +149,7 @@ def create_history_item(
         csx_study.add_index(study_id, user_id, index)
         graph_type_changed = False
     else:
-        cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+        cache_data = storage.get_history_item(history_item_id)
         study = csx_study.get_study(user_id, study_id)
         if not study:
             raise HTTPException(
@@ -343,7 +346,7 @@ def update_history_item(
     history_item_id: str,
     data: UpdateCharts,
     user_id: str = Depends(verify_user_exists),
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     storage.update_history_item_charts(study_id, user_id, history_item_id, data.charts)
 

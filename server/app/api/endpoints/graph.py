@@ -10,7 +10,9 @@ import app.services.search.elastic as csx_es
 import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
-from fastapi import APIRouter
+from app.api.dependencies import get_storage_connector
+from app.services.storage.base import BaseStorageConnector
+from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/graphs", tags=["graphs"])
 
@@ -30,7 +32,7 @@ class TrimData(BaseModel):
 
 @router.post("/trim")
 def trim_network(
-    data: TrimData,
+    data: TrimData, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):
     provided_nodes = data.nodes
     user_id = data.user_id
@@ -41,7 +43,7 @@ def trim_network(
     history_parent_id = data.history_parent_id
     charts = data.charts
 
-    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+    cache_data = storage.get_history_item(history_item_id)
 
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
@@ -99,7 +101,7 @@ def trim_network(
 
 @router.post("/remove")
 def remove_network_nodes(
-    data: TrimData,
+    data: TrimData, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):
     provided_nodes = data.nodes
     user_id = data.user_id
@@ -110,7 +112,7 @@ def remove_network_nodes(
     history_parent_id = data.history_parent_id
     charts = data.charts
 
-    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
+    cache_data = storage.get_history_item(history_item_id)
 
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
@@ -185,7 +187,7 @@ class ExpandData(BaseModel):
 
 @router.post("/expand")
 def expand_network(
-    data: ExpandData,
+    data: ExpandData, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):
     values = data.values
     user_id = data.user_id
@@ -201,8 +203,7 @@ def expand_network(
     history_parent_id = data.history_parent_id
     charts = data.charts
 
-    cache_data = csx_study.load_cache_data_from_histroy(history_item_id)
-
+    cache_data = storage.get_history_item(history_item_id)
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
     if len(values["nodes"]) == 1:

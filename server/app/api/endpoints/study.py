@@ -1,5 +1,4 @@
 import os
-import pickle
 import uuid
 
 import app.services.storage.mongo as csx_data
@@ -10,7 +9,7 @@ from app.api.dependencies import (
     verify_user_exists,
 )
 from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
-from app.services.storage.base import StorageConnector
+from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from elasticsearch import Elasticsearch
@@ -25,7 +24,11 @@ router = APIRouter(prefix="/studies", tags=["studies"])
 
 
 @router.get("/{study_id}", response_model=Study)
-def get_study(study_id: str, study: dict = Depends(get_current_study)):
+def get_study(
+    study_id: str,
+    study: dict = Depends(get_current_study),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+):
     if len(study["history"]) == 0:
         return {
             "graph": {},
@@ -43,14 +46,14 @@ def get_study(study_id: str, study: dict = Depends(get_current_study)):
 
     charts = study["history"][-1]["charts"]
 
-    history_item = csx_data.get_large_document(history_id)
+    history_item = storage.get_history_item(history_id)
 
     history = csx_study.extract_history_items(study)
 
     graph_type = history[len(history) - 1]["graph_type"]
 
     return {
-        "graph": pickle.loads(history_item)[graph_type],
+        "graph": history_item[graph_type],
         "name": study["study_name"],
         "description": study["study_description"],
         "author": study["study_author"] if "study_author" in study else "",
@@ -64,11 +67,14 @@ def get_study(study_id: str, study: dict = Depends(get_current_study)):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_study(data: StudyCreate, user_id: str = Depends(verify_user_exists)) -> str:
+def create_study(
+    data: StudyCreate,
+    user_id: str = Depends(verify_user_exists),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+) -> str:
     study_uuid = uuid.uuid4().hex
 
-    csx_data.insert_document(
-        "studies",
+    storage.insert_study(
         {
             "study_uuid": study_uuid,
             "user_uuid": user_id,
@@ -79,21 +85,20 @@ def create_study(data: StudyCreate, user_id: str = Depends(verify_user_exists)) 
             "public_url": "",
             "index": "",
             "history": [],
-        },
+        }
     )
 
     return study_uuid
 
 
 @router.get("/")
-def get_studies(user_id: str = Depends(verify_user_exists)):
+def get_studies(
+    user_id: str = Depends(verify_user_exists),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+):
     """Get all studies for a user"""
 
-    saved_studies = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies", {"$and": [{"user_uuid": user_id}, {"saved": True}]}, {"_id": 0}
-        )
-    )
+    saved_studies = storage.get_user_studies(user_id)
 
     return [
         {
@@ -111,7 +116,7 @@ def update_study(
     data: StudyUpdate,
     user_id: str = Depends(verify_user_exists),
     study: dict = Depends(get_current_study),
-    storage: StorageConnector = Depends(get_storage_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ) -> str:
     """Update study settings (public, name, description) and return public url if public is set to true for the first time"""
 
@@ -128,26 +133,13 @@ def update_study(
 
 
 @router.delete("/{study_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_study(study_id: str, user_id: str = Depends(verify_user_exists)):
+def delete_study(
+    study_id: str,
+    user_id: str = Depends(verify_user_exists),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+):
     """Delete a study and all its history items from the database and search index"""
-    study_entry = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies",
-            {
-                "$and": [
-                    {"study_uuid": study_id},
-                    {"user_uuid": user_id},
-                ]
-            },
-            {"_id": 0},
-        )
-    )
 
-    if len(study_entry) > 0:
-        history_ids = [item["item_id"] for item in study_entry[0]["history"]]
-        for item_id in history_ids:
-            csx_data.delete_large_document(item_id)
-
-    csx_data.delete_document("studies", {"study_uuid": study_id, "user_uuid": user_id})
+    storage.delete_study(user_id, study_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

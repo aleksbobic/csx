@@ -1,7 +1,12 @@
 from typing import Union
 
 import app.services.study.study as csx_study
-from app.api.dependencies import verify_user_exists
+from app.api.dependencies import (
+    get_current_study,
+    get_storage_connector,
+    verify_user_exists,
+)
+from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
@@ -19,7 +24,7 @@ class Comment(BaseModel):
     chart: Union[str, None]
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def add_comment(
     data: Comment,
     study_id: str,
@@ -45,16 +50,10 @@ def delete_comment(
     history_item_id: str,
     comment_id: str,
     user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
-    study = csx_study.get_study(user_id, study_id)
-
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
-    csx_study.delete_comment(study_id, user_id, history_item_id, comment_id)
+    storage.delete_comment(user_id, study_id, history_item_id, comment_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -75,17 +74,9 @@ def edit_comment(
     history_item_id: str,
     comment_id: str,
     user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
-    study = csx_study.get_study(user_id, study_id)
+    storage.edit_comment(study_id, user_id, history_item_id, comment_id, **data.dict())
 
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
-    csx_study.edit_comment(
-        study_id, user_id, history_item_id, comment_id, **data.dict()
-    )
-
-    return
+    return Response(status_code=status.HTTP_200_OK)
