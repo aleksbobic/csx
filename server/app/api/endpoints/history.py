@@ -360,8 +360,6 @@ class ExpandNodes(BaseModel):
     anchor: str
     visible_entries: List
     anchor_properties: List
-    graph_schema: List
-    visible_dimensions: List
     links: List
     action_time: str
     history_parent_id: str
@@ -381,9 +379,21 @@ def expand_nodes(
 
     values = data.values
     graph_type = data.graph_type
-    anchor_properties = data.anchor_properties
-    schema = data.graph_schema
-    visible_dimensions = data.visible_dimensions
+    anchor_properties = (
+        cache_data[graph_type]["meta"]["anchor_properties"]
+        if "anchor_properties" in cache_data[graph_type]["meta"]
+        else []
+    )
+    schema = (
+        cache_data[graph_type]["meta"]["schema"]
+        if "schema" in cache_data[graph_type]["meta"]
+        else []
+    )
+    visible_dimensions = (
+        cache_data[graph_type]["meta"]["dimensions"]
+        if "dimensions" in cache_data[graph_type]["meta"]
+        else []
+    )
     anchor = data.anchor
     links = data.links
     action_time = data.action_time

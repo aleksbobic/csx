@@ -1473,14 +1473,6 @@ export class GraphStore {
             visible_entries = [];
         }
 
-        const graph_schema = this.store.schema.getServerSchema();
-
-        const visible_dimensions = this.store.core.visibleDimensions[
-            this.store.core.currentGraph
-        ].length
-            ? this.store.core.visibleDimensions[this.store.core.currentGraph]
-            : [];
-
         const historyItemId =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
@@ -1497,8 +1489,6 @@ export class GraphStore {
             links: this.store.search.links,
             visible_entries: visible_entries,
             anchor_properties: anchor_properties,
-            graph_schema: graph_schema,
-            visible_dimensions: visible_dimensions,
             action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
             history_parent_id:
                 this.store.core.studyHistory.length > 0 &&
