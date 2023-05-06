@@ -30,12 +30,12 @@ function StudyInfo() {
         >
             <VStack
                 width="100%"
-                backgroundColor="whiteAlpha.100"
+                backgroundColor="whiteAlpha.200"
                 padding="10px"
                 borderRadius="10px"
             >
                 <Heading size="sm" width="100%">
-                    Study details
+                    Study settings
                 </Heading>
                 <Text
                     fontSize="xs"
@@ -266,7 +266,7 @@ function StudyInfo() {
             </VStack>
             <VStack
                 width="100%"
-                backgroundColor="whiteAlpha.100"
+                backgroundColor="whiteAlpha.200"
                 padding="10px"
                 borderRadius="10px"
                 style={{ marginTop: '20px' }}

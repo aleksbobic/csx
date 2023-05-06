@@ -807,21 +807,27 @@ function ControlPanel() {
         <TabList
             position="absolute"
             top="0"
-            width="50px"
+            paddingLeft="10px"
+            paddingRight="10px"
+            paddingTop="10px"
+            width="60px"
             height="100%"
             zIndex="2"
+            spacing="10px"
             bgColor={tabListbgColor}
         >
             <Tooltip label={isOpen ? 'Minimize' : 'Maximize'}>
                 <IconButton
                     variant="link"
-                    width="50px"
-                    height="50px"
+                    width="40px"
+                    height="40px"
                     borderRadius="6px"
                     color={tabInactiveColors}
+                    style={{ marginBottom: '10px', borderRadius: '10px' }}
                     onClick={() => {
                         toggleControlPanel();
                     }}
+                    _hover={{ bgColor: 'whiteAlpha.200' }}
                     icon={
                         isOpen ? (
                             <ChevronDoubleLeft style={{ '--ggs': 0.8 }} />
@@ -832,8 +838,8 @@ function ControlPanel() {
                 />
             </Tooltip>
             <Tab
-                width="50px"
-                height="50px"
+                width="40px"
+                height="40px"
                 onClick={() => {
                     openSliderIfClosed();
                     store.track.trackEvent(
@@ -846,15 +852,25 @@ function ControlPanel() {
                     );
                 }}
                 padding="8px"
+                _hover={{ bgColor: 'whiteAlpha.200' }}
                 style={
                     isOpen
-                        ? { borderRadius: '6px', borderColor: 'transparent' }
+                        ? {
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
                         : {
                               color: tabInactiveColors,
                               borderColor: 'transparent',
-                              borderRadius: '6px'
+                              borderRadius: '10px',
+                              marginBottom: '10px'
                           }
                 }
+                _selected={{
+                    bgColor: isOpen ? 'whiteAlpha.200' : 'transparent',
+                    color: 'blue.300'
+                }}
             >
                 <Tooltip label="Study Settings">
                     <Box
@@ -870,8 +886,8 @@ function ControlPanel() {
                 </Tooltip>
             </Tab>
             <Tab
-                width="50px"
-                height="50px"
+                width="40px"
+                height="40px"
                 onClick={() => {
                     openSliderIfClosed();
                     store.track.trackEvent(
@@ -883,16 +899,27 @@ function ControlPanel() {
                         })
                     );
                 }}
+                _hover={{ bgColor: 'whiteAlpha.200' }}
                 padding="8px"
+                marginbottom="10px"
                 style={
                     isOpen
-                        ? { borderRadius: '6px', borderColor: 'transparent' }
+                        ? {
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
                         : {
                               color: tabInactiveColors,
-                              borderRadius: '6px',
-                              borderColor: 'transparent'
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
                           }
                 }
+                _selected={{
+                    bgColor: isOpen ? 'whiteAlpha.200' : 'transparent',
+                    color: 'blue.300'
+                }}
             >
                 <Tooltip label="View settings">
                     <Box
@@ -921,11 +948,15 @@ function ControlPanel() {
             position="relative"
             style={{ overflowX: 'hidden' }}
         >
-            <TabPanel width="250px" height="100%" style={{ paddingLeft: 0 }}>
+            <TabPanel
+                width="250px"
+                height="100%"
+                style={{ paddingLeft: 0, paddingRight: '15px' }}
+            >
                 <CustomScroll
                     style={{
                         paddingLeft: '10px',
-                        paddingRight: '10px'
+                        paddingRight: '0'
                     }}
                 >
                     <StudyInfoComponent />
@@ -934,12 +965,16 @@ function ControlPanel() {
             <TabPanel
                 width="250px"
                 height="100%"
-                style={{ overflowX: 'hidden', paddingLeft: 0 }}
+                style={{
+                    overflowX: 'hidden',
+                    paddingLeft: 0,
+                    paddingRight: '15px'
+                }}
             >
                 <CustomScroll
                     style={{
                         paddingLeft: '10px',
-                        paddingRight: '10px'
+                        paddingRight: '0'
                     }}
                 >
                     <SettingsComponent />
@@ -966,6 +1001,7 @@ function ControlPanel() {
                 colorScheme="blue"
                 height="100%"
                 borderColor={tabBorderColor}
+                defaultIndex={1}
                 isLazy
             >
                 {renderTabs()}

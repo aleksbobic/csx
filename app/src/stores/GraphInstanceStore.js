@@ -30,6 +30,8 @@ export class GraphInstanceStore {
     selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
     selfCentricOriginNode = null;
     linkVisibility = true;
+    automaticEdgeOpacity = true;
+    customEdgeOpacity = 5;
     orphanNodeVisibility = true;
     edgeDirectionVisiblity = false;
     useCurvedEdges = false;
@@ -38,6 +40,7 @@ export class GraphInstanceStore {
     edgeColorScheme = { overview: 'auto', detail: 'auto' };
     edgeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
+    panSpeed = 5;
     visibleComponents = [];
     hoverData = [];
 
@@ -68,6 +71,20 @@ export class GraphInstanceStore {
         ));
 
     setHoverData = hoverData => (this.hoverData = hoverData);
+
+    toggleAutomaticEdgeOpacity = () =>
+        (this.automaticEdgeOpacity = !this.automaticEdgeOpacity);
+    setCustomEdgeOpacity = value => (this.customEdgeOpacity = value);
+
+    setPanSpeed = speed => {
+        this.panSpeed = speed;
+
+        const panningSpeedGraphValues = [
+            0.005, 0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 3
+        ];
+        this.graphInstance.controls().panSpeed =
+            panningSpeedGraphValues[this.panSpeed - 1];
+    };
 
     setGraphProps = ref => {
         this.graphInstance = ref;

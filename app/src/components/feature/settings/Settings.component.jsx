@@ -12,7 +12,12 @@ import {
     Tooltip,
     useColorMode,
     useColorModeValue,
-    Wrap
+    Wrap,
+    Slider,
+    SliderFilledTrack,
+    SliderThumb,
+    SliderTrack,
+    SliderMark
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
 import { Anchor, Awards, Bolt, Undo } from 'css.gg';
@@ -122,7 +127,7 @@ function Settings() {
     const renderColorOptions = () => {
         return (
             <HStack justifyContent="space-between" width="100%">
-                <Text fontSize="sm">Color: </Text>
+                <Text fontSize="sm">Node color: </Text>
                 <Tooltip label="Select property used for node colors.">
                     <Select
                         size="sm"
@@ -406,7 +411,7 @@ function Settings() {
     const renderEdgeColorOptions = () => {
         return (
             <HStack justifyContent="space-between" width="100%">
-                <Text fontSize="sm">Color: </Text>
+                <Text fontSize="sm">Edge color: </Text>
                 <Tooltip label="Select property used for edge colors.">
                     <Select
                         size="sm"
@@ -445,7 +450,7 @@ function Settings() {
             <>
                 <VStack
                     width="100%"
-                    backgroundColor="whiteAlpha.100"
+                    backgroundColor="whiteAlpha.200"
                     padding="10px"
                     borderRadius="10px"
                 >
@@ -454,43 +459,202 @@ function Settings() {
                         style={{ marginBottom: '10px' }}
                         width="100%"
                     >
+                        General settings
+                    </Heading>
+                    <VStack
+                        backgroundColor="whiteAlpha.50"
+                        width="100%"
+                        padding="10px"
+                        borderRadius="6px"
+                    >
+                        <Tooltip
+                            label={`Panning speed is ${store.graphInstance.panSpeed}`}
+                        >
+                            <VStack
+                                spacing="1"
+                                style={{
+                                    width: '100%',
+                                    marginBottom: '20px',
+                                    paddingLeft: '10px',
+                                    paddingRight: '10px'
+                                }}
+                            >
+                                <Text
+                                    fontSize="sm"
+                                    width="100%"
+                                    marginLeft="-15px"
+                                >
+                                    Panning speed
+                                </Text>
+                                <Slider
+                                    defaultValue={5}
+                                    min={1}
+                                    max={9}
+                                    colorScheme="blue"
+                                    value={store.graphInstance.panSpeed}
+                                    onChange={value =>
+                                        store.graphInstance.setPanSpeed(value)
+                                    }
+                                >
+                                    <SliderMark
+                                        value={1}
+                                        fontSize="xs"
+                                        marginTop="10px"
+                                        marginLeft="-8px"
+                                    >
+                                        Slow
+                                    </SliderMark>
+                                    <SliderMark
+                                        value={9}
+                                        fontSize="xs"
+                                        marginTop="10px"
+                                        marginLeft="-16px"
+                                    >
+                                        Fast
+                                    </SliderMark>
+
+                                    <SliderTrack>
+                                        <SliderFilledTrack />
+                                    </SliderTrack>
+                                    <SliderThumb />
+                                </Slider>
+                            </VStack>
+                        </Tooltip>
+                    </VStack>
+                </VStack>
+                <VStack
+                    width="100%"
+                    backgroundColor="whiteAlpha.200"
+                    padding="10px"
+                    borderRadius="10px"
+                    style={{ marginTop: '15px' }}
+                >
+                    <Heading
+                        size="sm"
+                        style={{ marginBottom: '10px' }}
+                        width="100%"
+                    >
                         Edge settings
                     </Heading>
-                    <Tooltip
-                        label={
-                            store.graphInstance.linkVisibility
-                                ? 'Hide edges'
-                                : 'Show edges'
-                        }
-                    >
-                        <HStack spacing="1" width="100%">
-                            <Switch
-                                id="edges"
-                                size="sm"
-                                marginRight="10px"
-                                isChecked={store.graphInstance.linkVisibility}
-                                value={store.graphInstance.linkVisibility}
-                                onChange={() => {
-                                    store.graphInstance.toggleLinkVisibility();
 
-                                    store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Switch',
-                                        JSON.stringify({
-                                            type: 'Toggle',
-                                            value: `${
-                                                store.graphInstance
-                                                    .linkVisibility
-                                                    ? 'Show'
-                                                    : 'Hide'
-                                            } links`
-                                        })
-                                    );
+                    <VStack
+                        backgroundColor="whiteAlpha.50"
+                        width="100%"
+                        padding="10px"
+                        borderRadius="6px"
+                        style={{ marginBottom: '10px' }}
+                    >
+                        <Tooltip
+                            label={
+                                store.graphInstance.automaticEdgeOpacity
+                                    ? 'Set custom edge opacity'
+                                    : 'Use automatic edge opacity'
+                            }
+                        >
+                            <HStack
+                                spacing="1"
+                                width="100%"
+                                style={{ paddingBottom: '10px' }}
+                            >
+                                <Switch
+                                    id="edges"
+                                    size="sm"
+                                    marginRight="10px"
+                                    isChecked={
+                                        store.graphInstance.automaticEdgeOpacity
+                                    }
+                                    value={
+                                        store.graphInstance.automaticEdgeOpacity
+                                    }
+                                    onChange={e => {
+                                        store.graphInstance.toggleAutomaticEdgeOpacity();
+
+                                        store.track.trackEvent(
+                                            'Side panel - View Settings',
+                                            'Switch',
+                                            JSON.stringify({
+                                                type: 'Toggle',
+                                                value: `${
+                                                    store.graphInstance
+                                                        .automaticEdgeOpacity
+                                                        ? 'Automatic'
+                                                        : 'Custom'
+                                                } edge opacity`
+                                            })
+                                        );
+                                    }}
+                                />
+                                <Text fontSize="sm">Automatic opacity</Text>
+                            </HStack>
+                        </Tooltip>
+                        <Tooltip
+                            label={`Edge opacity is ${
+                                store.graphInstance.customEdgeOpacity * 10
+                            }%`}
+                            isDisabled={
+                                store.graphInstance.automaticEdgeOpacity
+                            }
+                        >
+                            <VStack
+                                opacity={
+                                    store.graphInstance.automaticEdgeOpacity
+                                        ? '0.2'
+                                        : '1'
+                                }
+                                spacing="1"
+                                style={{
+                                    width: '100%',
+                                    marginBottom: '20px',
+                                    paddingLeft: '10px',
+                                    paddingRight: '10px'
                                 }}
-                            />
-                            <Text fontSize="sm">Edges</Text>
-                        </HStack>
-                    </Tooltip>
+                            >
+                                <Slider
+                                    defaultValue={5}
+                                    disabled={
+                                        store.graphInstance.automaticEdgeOpacity
+                                    }
+                                    min={0}
+                                    max={10}
+                                    colorScheme={
+                                        store.graphInstance.automaticEdgeOpacity
+                                            ? 'gray'
+                                            : 'blue'
+                                    }
+                                    value={
+                                        store.graphInstance.customEdgeOpacity
+                                    }
+                                    onChange={value =>
+                                        store.graphInstance.setCustomEdgeOpacity(
+                                            value
+                                        )
+                                    }
+                                >
+                                    <SliderMark
+                                        value={1}
+                                        fontSize="xs"
+                                        marginTop="10px"
+                                        marginLeft="-24px"
+                                    >
+                                        Invisible
+                                    </SliderMark>
+                                    <SliderMark
+                                        value={9}
+                                        fontSize="xs"
+                                        marginTop="10px"
+                                        marginLeft="-16px"
+                                    >
+                                        Visible
+                                    </SliderMark>
+
+                                    <SliderTrack>
+                                        <SliderFilledTrack />
+                                    </SliderTrack>
+                                    <SliderThumb />
+                                </Slider>
+                            </VStack>
+                        </Tooltip>
+                    </VStack>
                     <Tooltip
                         label={
                             store.graphInstance.useCurvedEdges
@@ -573,10 +737,10 @@ function Settings() {
                 </VStack>
                 <VStack
                     width="100%"
-                    backgroundColor="whiteAlpha.100"
+                    backgroundColor="whiteAlpha.200"
                     padding="10px"
                     borderRadius="10px"
-                    style={{ marginTop: '20px' }}
+                    style={{ marginTop: '15px' }}
                 >
                     <Heading
                         size="sm"
@@ -780,10 +944,10 @@ function Settings() {
             </VStack>
             <VStack
                 width="100%"
-                backgroundColor="whiteAlpha.100"
+                backgroundColor="whiteAlpha.200"
                 padding="10px"
                 borderRadius="10px"
-                style={{ marginTop: '20px' }}
+                style={{ marginTop: '15px' }}
             >
                 <Heading
                     size="sm"

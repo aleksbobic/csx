@@ -201,24 +201,32 @@ function Graph(props) {
     };
 
     useEffect(() => {
-        if (store.core.colorMode === 'light') {
-            setLinkOpacity(0.7);
+        if (!store.graphInstance.automaticEdgeOpacity) {
+            setLinkOpacity(store.graphInstance.customEdgeOpacity * 0.1);
         } else {
-            if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
-                if (store.graphInstance.selectedColorSchema === 'component') {
-                    setLinkOpacity(0.3);
-                } else {
-                    setLinkOpacity(0.1);
-                }
-            } else {
+            if (store.core.colorMode === 'light') {
                 setLinkOpacity(0.7);
+            } else {
+                if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
+                    if (
+                        store.graphInstance.selectedColorSchema === 'component'
+                    ) {
+                        setLinkOpacity(0.3);
+                    } else {
+                        setLinkOpacity(0.1);
+                    }
+                } else {
+                    setLinkOpacity(0.7);
+                }
             }
         }
     }, [
         linkOpacity,
         store.core.colorMode,
         store.graphInstance.selectedColorSchema,
-        store.graphInstance.selectedEdgeColorSchema
+        store.graphInstance.selectedEdgeColorSchema,
+        store.graphInstance.automaticEdgeOpacity,
+        store.graphInstance.customEdgeOpacity
     ]);
 
     return (
