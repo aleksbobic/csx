@@ -1,7 +1,7 @@
 import json
 import pickle
 import uuid
-from typing import Dict, List, Literal
+from typing import Dict, List, Literal, cast
 
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
@@ -571,3 +571,93 @@ def get_graph_from_cache(
     )
 
     return comparison_res["data"][graph_type]
+
+
+def calculate_trimmed_graph(cache_data, entries, graph_type):
+    df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
+
+    # Filter graph nodes
+    new_nodes = [
+        node
+        for node in cache_data[graph_type]["nodes"]
+        if len(set(node["entries"]).intersection(set(entries))) > 0
+    ]
+
+    cache_data[graph_type]["nodes"] = new_nodes
+
+    # Get visible nodes
+    visible_nodes = [
+        node["id"]
+        for node in new_nodes
+        if len(set(node["entries"]).intersection(set(entries))) > 0
+    ]
+
+    for node in cache_data[graph_type]["nodes"]:
+        node["entries"] = list(set(node["entries"]).intersection(set(entries)))
+
+    # Filter graph edges
+    cache_data[graph_type]["edges"] = [
+        edge
+        for edge in cache_data[graph_type]["edges"]
+        if edge["source"] in visible_nodes and edge["target"] in visible_nodes
+    ]
+
+    # Filter graph components
+    cache_data[graph_type]["components"] = [
+        component
+        for component in cache_data[graph_type]["components"]
+        if len(list(set(component["nodes"]).intersection(set(visible_nodes)))) > 0
+    ]
+
+    # Modify table data of graph
+    # Due to the particular structure of table_data in the cxs client both overview and detail graph have to have their own instance of table data
+    cache_data[graph_type]["meta"]["table_data"] = convert_table_data(
+        cache_data[graph_type]["nodes"], cache_data["global"]["elastic_json"]
+    )
+
+    # Generate new NetworkX graph
+    cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
+        from_graph_data(cache_data[graph_type])
+    )
+
+    components = csx_components.get_components(
+        cache_data[graph_type]["nodes"],
+        [],
+        from_graph_data(cache_data[graph_type]),
+    )
+
+    nodes = csx_nodes.enrich_with_components(new_nodes, components)
+    nodes = csx_nodes.enrich_with_neighbors(
+        nodes, [], from_graph_data(cache_data[graph_type])
+    )
+
+    nodes = csx_nodes.adjust_node_size(
+        nodes, df, cache_data[graph_type]["meta"]["dimensions"]
+    )
+
+    cache_data[graph_type]["edges"] = csx_edges.enrich_with_components(
+        cache_data[graph_type]["edges"], components
+    )
+
+    cache_data[graph_type]["nodes"] = nodes
+
+    if graph_type == "overview":
+        components = csx_components.enrich_with_top_connections(
+            components, cache_data[graph_type]["edges"]
+        )
+
+        for property_value in cache_data[graph_type]["meta"]["anchor_property_values"]:
+            property_value["values"] = [
+                node["properties"][property_value["property"]]
+                for node in cache_data[graph_type]["nodes"]
+            ]
+
+    components = sorted(components, key=lambda component: -component["node_count"])
+
+    cache_data[graph_type]["components"] = components
+
+    cache_data[graph_type]["meta"]["max_degree"] = get_max_degree(
+        from_graph_data(cache_data[graph_type])
+    )
+
+    return cache_data

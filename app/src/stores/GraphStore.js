@@ -1303,29 +1303,34 @@ export class GraphStore {
                 this.resetGraphData();
             }
 
-            const currentStudyHistoryItem =
+            const historyItemId =
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex
                 ].id;
 
+            const params = {
+                nodes: graph_data_copy.nodes,
+                delete_type: 'remove',
+                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                graph_type: this.store.core.currentGraph,
+                history_parent_id:
+                    this.store.core.studyHistory.length > 0 &&
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].id,
+                charts:
+                    this.store.stats.charts[this.store.search.currentDataset] ||
+                    []
+            };
+
             const { response, error } = await safeRequest(
-                axios.post('graphs/remove', {
-                    nodes: graph_data_copy.nodes,
-                    user_id: this.store.core.userUuid,
-                    history_item_id: currentStudyHistoryItem,
-                    graph_type: this.store.core.currentGraph,
-                    study_id: this.store.core.studyUuid,
-                    action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                    history_parent_id:
-                        this.store.core.studyHistory.length > 0 &&
-                        this.store.core.studyHistory[
-                            this.store.core.studyHistoryItemIndex
-                        ].id,
-                    charts:
-                        this.store.stats.charts[
-                            this.store.search.currentDataset
-                        ] || []
-                })
+                axios.put(
+                    `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/delete`,
+                    params,
+                    {
+                        headers: { user_id: this.store.core.userUuid }
+                    }
+                )
             );
 
             if (error) {
@@ -1374,27 +1379,32 @@ export class GraphStore {
             this.resetGraphData();
         }
 
-        const currentStudyHistoryItem =
+        const historyItemId =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
 
+        const params = {
+            nodes: graph_data_copy.nodes,
+            delete_type: 'trim',
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            graph_type: this.store.core.currentGraph,
+            history_parent_id:
+                this.store.core.studyHistory.length > 0 &&
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id,
+            charts:
+                this.store.stats.charts[this.store.search.currentDataset] || []
+        };
+
         const { response, error } = await safeRequest(
-            axios.post('graphs/trim', {
-                nodes: graph_data_copy.nodes,
-                user_id: this.store.core.userUuid,
-                history_item_id: currentStudyHistoryItem,
-                graph_type: this.store.core.currentGraph,
-                study_id: this.store.core.studyUuid,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                history_parent_id:
-                    this.store.core.studyHistory.length > 0 &&
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].id,
-                charts:
-                    this.store.stats.charts[this.store.search.currentDataset] ||
-                    []
-            })
+            axios.put(
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/delete`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
+            )
         );
 
         if (error) {
@@ -1471,38 +1481,42 @@ export class GraphStore {
             ? this.store.core.visibleDimensions[this.store.core.currentGraph]
             : [];
 
-        const currentStudyHistoryItem =
+        const historyItemId =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
 
+        const params = {
+            values: {
+                connector: connector,
+                nodes: nodes.map(node => {
+                    return { value: node.label, feature: node.feature };
+                })
+            },
+            graph_type: this.store.core.currentGraph,
+            anchor: this.store.search.anchor,
+            links: this.store.search.links,
+            visible_entries: visible_entries,
+            anchor_properties: anchor_properties,
+            graph_schema: graph_schema,
+            visible_dimensions: visible_dimensions,
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            history_parent_id:
+                this.store.core.studyHistory.length > 0 &&
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id,
+            charts:
+                this.store.stats.charts[this.store.search.currentDataset] || []
+        };
+
         const { response, error } = await safeRequest(
-            axios.post('graphs/expand', {
-                values: {
-                    connector: connector,
-                    nodes: nodes.map(node => {
-                        return { value: node.label, feature: node.feature };
-                    })
-                },
-                user_id: this.store.core.userUuid,
-                graph_type: this.store.core.currentGraph,
-                anchor: this.store.search.anchor,
-                links: this.store.search.links,
-                visible_entries: visible_entries,
-                anchor_properties: anchor_properties,
-                graph_schema: graph_schema,
-                visible_dimensions: visible_dimensions,
-                study_id: this.store.core.studyUuid,
-                history_item_id: currentStudyHistoryItem,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                history_parent_id:
-                    this.store.core.studyHistory.length > 0 &&
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].id,
-                charts:
-                    this.store.stats.charts[this.store.search.currentDataset] ||
-                    []
-            })
+            axios.put(
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/expand`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
+            )
         );
 
         if (error) {

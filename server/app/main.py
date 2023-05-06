@@ -1,7 +1,6 @@
 import uvicorn
 from app.api.endpoints.comment import router as comment_router
 from app.api.endpoints.dataset import router as dataset_router
-from app.api.endpoints.graph import router as graph_router
 from app.api.endpoints.history import router as history_router
 from app.api.endpoints.public import router as public_router
 from app.api.endpoints.search import router as search_router
@@ -16,7 +15,6 @@ def get_application():
 
     app.include_router(util_router)
     app.include_router(search_router)
-    app.include_router(graph_router)
     app.include_router(study_router)
     app.include_router(history_router)
     app.include_router(comment_router)

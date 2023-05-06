@@ -649,13 +649,13 @@ function NavigationPanelComponent() {
                 <HStack spacing="20px">
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
-                            <Button
+                            <IconButton
                                 size="sm"
                                 as={Link}
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
                                 borderRadius="6px"
-                                leftIcon={
+                                icon={
                                     <PresentationChartLineIcon
                                         width="16px"
                                         height="16px"
@@ -687,9 +687,7 @@ function NavigationPanelComponent() {
                                     textDecoration: 'none',
                                     backgroundColor: 'blue.500'
                                 }}
-                            >
-                                Present
-                            </Button>
+                            />
                         </Tooltip>
                     )}
                     {renderToggles()}
