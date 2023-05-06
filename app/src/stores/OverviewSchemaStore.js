@@ -5,6 +5,7 @@ import { getSchemaElementPositions } from 'schema.utils';
 export class OverviewSchemaStore {
     nodes = [];
     edges = [];
+    schemaHasChanges = false;
 
     anchorProperties = [];
     schemaHasLink = true;
@@ -26,6 +27,7 @@ export class OverviewSchemaStore {
     setAnchorProperties = properties => (this.anchorProperties = properties);
     setUseUploadData = val => (this.useUploadData = val);
     setSchemaHasLink = val => (this.schemaHasLink = val);
+    setSchemaHasChanges = val => (this.schemaHasChanges = val);
 
     getNodeProperties = () => {
         if (this.featureTypes[this.anchor] === 'list') {
@@ -199,6 +201,7 @@ export class OverviewSchemaStore {
         }
 
         this.generateLayout();
+        this.setSchemaHasChanges(true);
     };
 
     setAnchor = anchor => {
@@ -242,6 +245,8 @@ export class OverviewSchemaStore {
             entry.data.anchor = this.anchor;
             return entry;
         });
+
+        this.setSchemaHasChanges(true);
     };
 
     setLink = (link, nodeId) => {
@@ -284,7 +289,7 @@ export class OverviewSchemaStore {
                 entry => entry.id !== `${-1}${overviewLinkNodeId}`
             );
         } else {
-            this.links.push(link);
+            this.links = [...this.links, link];
 
             this.setSchemaHasLink(true);
 
@@ -309,6 +314,8 @@ export class OverviewSchemaStore {
         }
 
         this.generateLayout();
+
+        this.setSchemaHasChanges(true);
     };
 
     getNodeNameFromId = id => {
@@ -343,6 +350,7 @@ export class OverviewSchemaStore {
             return node;
         });
         this.generateLayout();
+        this.setSchemaHasChanges(true);
     };
 
     removeProperty = property => {
@@ -362,6 +370,7 @@ export class OverviewSchemaStore {
             return node;
         });
         this.generateLayout();
+        this.setSchemaHasChanges(true);
     };
 
     generateLayout = () => {

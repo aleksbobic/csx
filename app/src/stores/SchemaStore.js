@@ -10,6 +10,7 @@ export class SchemaStore {
     useUploadData = false;
     features = [];
     featureTypes = {};
+    schemaHasChanges = false;
     relationshipMapping = {
         '1:1': 'oneToOne',
         '1:M': 'oneToMany',
@@ -26,6 +27,7 @@ export class SchemaStore {
     }
 
     setUseUploadData = val => (this.useUploadData = val);
+    setSchemaHasChanges = val => (this.schemaHasChanges = val);
 
     toggleRelationship = (id, possibleRelationships) => {
         const edge = this.edges.find(edge => edge.id === id);
@@ -55,6 +57,8 @@ export class SchemaStore {
                 this.getServerSchema()
             );
         }
+
+        this.setSchemaHasChanges(true);
     };
 
     getServerSchema = () => {
@@ -159,6 +163,7 @@ export class SchemaStore {
         });
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
         this.store.core.updateVisibleDimensionsBasedOnSchema();
+        this.setSchemaHasChanges(true);
     };
 
     populateStoreData = (useUploadData = false) => {
@@ -277,6 +282,8 @@ export class SchemaStore {
             );
             this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
+
+        this.setSchemaHasChanges(true);
     };
 
     updateSchemaConnection = (oldEdge, newEdge) => {
@@ -295,6 +302,8 @@ export class SchemaStore {
                 this.getServerSchema()
             );
         }
+
+        this.setSchemaHasChanges(true);
     };
 
     removeSchemaConnection = id => {
@@ -314,5 +323,7 @@ export class SchemaStore {
             );
             this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
+
+        this.setSchemaHasChanges(true);
     };
 }

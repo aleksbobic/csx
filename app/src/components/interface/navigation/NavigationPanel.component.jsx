@@ -88,10 +88,6 @@ function NavigationPanelComponent() {
         }
     });
 
-    const regenerateGraph = () => {
-        store.graph.modifyStudy(store.core.currentGraph);
-    };
-
     const toggleDataPanel = useCallback(
         panel => {
             if (panelType === panel || panelType === '' || !isOpen) {
@@ -146,15 +142,12 @@ function NavigationPanelComponent() {
     };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
+        <Box position="absolute" marginLeft="-65px" top="70px" id="graphutils">
             <HStack
                 spacing="10px"
-                backgroundColor={
-                    colorMode === 'light' ? '#ffffff' : graphUtilsMenuBackground
-                }
+                backgroundColor="transparent"
                 padding="5px 6px"
                 borderRadius="8px"
-                border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
             >
                 <Tooltip
                     label={
@@ -201,27 +194,6 @@ function NavigationPanelComponent() {
                                 <Ring style={{ '--ggs': '0.7' }} />
                             )
                         }
-                    />
-                </Tooltip>
-                <Tooltip label="Regenerate graph">
-                    <IconButton
-                        id="regenerategraphbutton"
-                        size="sm"
-                        border="none"
-                        disabled={store.search.links.length === 0}
-                        aria-label="Regenerate graph"
-                        icon={<Sync style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - Graph Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Regenerate graph'
-                                })
-                            );
-                            regenerateGraph();
-                        }}
                     />
                 </Tooltip>
             </HStack>

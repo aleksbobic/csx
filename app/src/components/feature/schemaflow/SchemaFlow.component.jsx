@@ -3,12 +3,14 @@ import {
     HStack,
     IconButton,
     Tooltip,
-    useColorMode
+    useColorMode,
+    Button,
+    SlideFade
 } from '@chakra-ui/react';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Lock, LockUnlock } from 'css.gg';
+import { Assign, Lock, LockUnlock, Sync } from 'css.gg';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -36,6 +38,27 @@ function SchemaFlow() {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
     const [schemaViewport, setSchemaViewport] = useState(null);
+
+    const [showApplyChanges, setShowApplyChanges] = useState(false);
+
+    useEffect(() => {
+        if (
+            (store.core.isOverview &&
+                store.overviewSchema.schemaHasChanges &&
+                store.overviewSchema.links.length > 0) ||
+            (store.schema.schemaHasChanges && store.schema.edges.length > 0)
+        ) {
+            setShowApplyChanges(true);
+        } else {
+            setShowApplyChanges(false);
+        }
+    }, [
+        store.overviewSchema.schemaHasChanges,
+        store.overviewSchema.links,
+        store.schema.schemaHasChanges,
+        store.schema.edges,
+        store.core.isOverview
+    ]);
 
     const [schemaNodes, setSchemaNodes] = useState(
         store.core.isOverview ? store.overviewSchema.nodes : store.schema.nodes
@@ -99,14 +122,15 @@ function SchemaFlow() {
     };
 
     const onNodesChange = useCallback(
-        changes =>
+        changes => {
             store.core.isOverview
                 ? store.overviewSchema.updateNodes(
                       applyNodeChanges(changes, store.overviewSchema.nodes)
                   )
                 : store.schema.updateNodes(
                       applyNodeChanges(changes, store.schema.nodes)
-                  ),
+                  );
+        },
         [store.core.isOverview, store.overviewSchema, store.schema]
     );
     const onEdgesChange = useCallback(
@@ -158,6 +182,41 @@ function SchemaFlow() {
                     </ReactFlow>
                 )}
             </AutoSizer>
+
+            <Box
+                bottom="14px"
+                left="50%"
+                zIndex="20"
+                transform="translateX(-50%)"
+                position="absolute"
+            >
+                <SlideFade in={showApplyChanges} offsetY="10px">
+                    <Button
+                        backgroundColor="blue.600"
+                        borderRadius="full"
+                        position="relative"
+                        size="sm"
+                        leftIcon={<Sync style={{ '--ggs': '0.6' }} />}
+                        _hover={{ backgroundColor: 'blue.500' }}
+                        onClick={() => {
+                            store.track.trackEvent(
+                                'Graph Area - Graph Controls',
+                                'Button',
+                                JSON.stringify({
+                                    type: 'Click',
+                                    value: 'Regenerate graph'
+                                })
+                            );
+                            store.overviewSchema.setSchemaHasChanges(false);
+                            store.schema.setSchemaHasChanges(false);
+                            store.graph.modifyStudy(store.core.currentGraph);
+                        }}
+                    >
+                        Apply Changes
+                    </Button>
+                </SlideFade>
+            </Box>
+
             <HStack
                 backgroundColor={
                     colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.900'
