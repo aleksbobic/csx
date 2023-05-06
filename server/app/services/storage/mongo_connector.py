@@ -37,7 +37,7 @@ class MongoConnector(BaseStorageConnector):
 
     def get_history_item(self, item_id: str) -> dict:
         try:
-            history_item = self.fs.get(item_id).read()
+            history_item = self.fs.get(ObjectId(item_id)).read()
         except ConnectionError as e:
             raise e
 
