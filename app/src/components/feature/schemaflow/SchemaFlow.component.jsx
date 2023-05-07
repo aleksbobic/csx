@@ -46,7 +46,7 @@ function SchemaFlow() {
             (store.core.isOverview &&
                 store.overviewSchema.schemaHasChanges &&
                 store.overviewSchema.links.length > 0) ||
-            (store.schema.schemaHasChanges && store.schema.edges.length > 0)
+            store.schema.schemaHasChanges
         ) {
             setShowApplyChanges(true);
         } else {

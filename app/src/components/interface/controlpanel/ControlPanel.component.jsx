@@ -992,7 +992,7 @@ function ControlPanel() {
             left="0px"
             height="100%"
             zIndex="2"
-            marginTop="50px"
+            marginTop="60px"
             id="controlpanel"
         >
             <Tabs
@@ -1015,7 +1015,7 @@ function ControlPanel() {
                         position: 'fixed',
                         width: '250px',
                         bottom: '0px',
-                        marginTop: '50px'
+                        marginTop: '60px'
                     }}
                 >
                     {renderTabPanels()}

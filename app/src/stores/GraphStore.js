@@ -1075,6 +1075,8 @@ export class GraphStore {
                     'edge'
                 );
 
+                this.store.graphInstance.setNodeColorScheme('node type');
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'detail'

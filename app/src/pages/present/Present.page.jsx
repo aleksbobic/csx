@@ -228,7 +228,7 @@ function PresentPage() {
                                         </Text>
                                         <Image
                                             src={logo}
-                                            alt="Collaboration spotting logo"
+                                            alt="Collaboration spotting X logo"
                                             height="50px"
                                         />
                                         <Link

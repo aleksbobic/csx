@@ -38,13 +38,13 @@ function Footer() {
                 <HStack justifyContent="center" marginBottom="20px">
                     <Image
                         src={logodark}
-                        alt="Collaboration spotting logo"
+                        alt="Collaboration spotting X logo"
                         height="20px"
                         display={colorMode === 'light' ? 'none' : 'block'}
                     />
                     <Image
                         src={logolight}
-                        alt="Collaboration spotting logo"
+                        alt="Collaboration spotting X logo"
                         height="20px"
                         display={colorMode === 'light' ? 'block' : 'none'}
                     />{' '}

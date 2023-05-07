@@ -332,7 +332,7 @@ function HomePage() {
                 <Image
                     src={logo}
                     height="40px"
-                    alt="Collaboration spotting logo"
+                    alt="Collaboration spotting X logo"
                     marginBottom="10px"
                 />
                 <Heading

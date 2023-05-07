@@ -339,6 +339,12 @@ function NavigationPanelComponent() {
                                         ? 'black'
                                         : 'white'
                                 }
+                                borderRadius="10px"
+                                background={
+                                    panelType === 'search'
+                                        ? 'whiteAlpha.200'
+                                        : ''
+                                }
                                 onClick={() => {
                                     toggleDataPanel('search');
                                 }}
@@ -365,6 +371,10 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'details' ? 'whiteAlpha.200' : ''
+                            }
                             onClick={() => {
                                 toggleDataPanel('details');
                             }}
@@ -388,6 +398,10 @@ function NavigationPanelComponent() {
                                     : colorMode === 'light'
                                     ? 'black'
                                     : 'white'
+                            }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'results' ? 'whiteAlpha.200' : ''
                             }
                             onClick={() => {
                                 toggleDataPanel('results');
@@ -413,6 +427,10 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'schema' ? 'whiteAlpha.200' : ''
+                            }
                             onClick={() => {
                                 toggleDataPanel('schema');
                             }}
@@ -436,6 +454,10 @@ function NavigationPanelComponent() {
                                     : colorMode === 'light'
                                     ? 'black'
                                     : 'white'
+                            }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'history' ? 'whiteAlpha.200' : ''
                             }
                             onClick={() => {
                                 toggleDataPanel('history');
@@ -487,7 +509,7 @@ function NavigationPanelComponent() {
                 id="navigation"
                 pos="fixed"
                 zIndex="20"
-                height="50px"
+                height="60px"
                 backgroundColor={
                     location.pathname !== '/' &&
                     location.pathname !== '/present'
@@ -510,8 +532,8 @@ function NavigationPanelComponent() {
                         <Link
                             as={NavLink}
                             to="/"
-                            paddingRight="5px"
-                            paddingLeft="5px"
+                            paddingRight="10px"
+                            paddingLeft="10px"
                             borderRight="1px solid"
                             borderColor={
                                 location.pathname !== '/present'
@@ -536,7 +558,7 @@ function NavigationPanelComponent() {
                         >
                             <Image
                                 src={logo}
-                                alt="Collaboration spotting logo"
+                                alt="Collaboration spotting X logo"
                                 height="40px"
                                 padding="10px"
                             />
@@ -623,10 +645,12 @@ function NavigationPanelComponent() {
                         <Tooltip label="Open presentation mode in new tab">
                             <IconButton
                                 size="sm"
+                                width="40px"
+                                height="40px"
                                 as={Link}
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
-                                borderRadius="6px"
+                                borderRadius="10px"
                                 icon={
                                     <PresentationChartLineIcon
                                         width="16px"
@@ -680,7 +704,7 @@ function NavigationPanelComponent() {
                         position: 'fixed',
                         top: 0,
                         height: '100%',
-                        paddingTop: '50px'
+                        paddingTop: '60px'
                     }}
                 >
                     {renderGraphUtils()}
