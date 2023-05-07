@@ -36,6 +36,7 @@ export class CoreStore {
     rightPanelWidth = 0;
     surveyHidden = false;
     surveyHistoryDepthTrigger = 3;
+    dataModificationMessage = null;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -69,6 +70,8 @@ export class CoreStore {
     addCommentToCurrentHistoryItem = comment => {
         this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
     };
+
+    setDataModificationMessage = message => (this.dataModificationMessage = message);
 
     deleteCommentFromCurrentHistoryItem = id => {
         const commentIndex = this.studyHistory[

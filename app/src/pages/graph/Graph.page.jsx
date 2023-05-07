@@ -1,4 +1,4 @@
-import { Box, Center, useColorMode, useToast } from '@chakra-ui/react';
+import { Box, Center, Text, useColorMode, useToast } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
@@ -16,6 +16,8 @@ import { useRef } from 'react';
 import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 
 function GraphPage() {
+    const dataModificationInfoToastRef = useRef();
+    const dataModificationInfoToast = useToast();
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const { colorMode } = useColorMode();
@@ -153,6 +155,55 @@ function GraphPage() {
         store.core.studyHistory.length,
         store.core.surveyHidden,
         store.core.surveyHistoryDepthTrigger
+    ]);
+
+    const showDataModificationInfoToast = useCallback(
+        message => {
+            if (store.core.dataModificationMessage) {
+                if (dataModificationInfoToastRef.current) {
+                    dataModificationInfoToast.close(
+                        dataModificationInfoToastRef.current
+                    );
+                }
+
+                if (message) {
+                    dataModificationInfoToastRef.current =
+                        dataModificationInfoToast({
+                            render: () => (
+                                <Text
+                                    fontSize="sm"
+                                    fontWeight="bold"
+                                    backgroundColor="blackAlpha.900"
+                                    textAlign="center"
+                                    borderRadius="full"
+                                    padding="10px 20px"
+                                    marginBottom="10px"
+                                >
+                                    {message}
+                                </Text>
+                            ),
+                            status: 'info',
+                            duration: 5000,
+                            isClosable: true,
+                            containerStyle: {
+                                minWidth: '200px'
+                            }
+                        });
+                }
+            }
+        },
+        [dataModificationInfoToast, store.core]
+    );
+
+    useEffect(() => {
+        if (store.core.dataModificationMessage) {
+            showDataModificationInfoToast(store.core.dataModificationMessage);
+        }
+    }, [
+        dataModificationInfoToast,
+        showDataModificationInfoToast,
+        store.core,
+        store.core.dataModificationMessage
     ]);
 
     return (

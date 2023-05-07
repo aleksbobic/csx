@@ -1022,7 +1022,8 @@ function ControlPanel() {
                     {renderDirectConnectionsMenu()}
                     {renderNetworkModificationMenu()}
 
-                    {store.core.currentGraph &&
+                    {!store.core.dataIsLoading &&
+                        store.core.currentGraph &&
                         (!['none', 'component'].includes(
                             store.graphInstance.selectedColorSchema
                         ) ||

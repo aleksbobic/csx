@@ -518,6 +518,7 @@ def expand_nodes(
     return {
         "graph": graph,
         "history": csx_study.extract_history_items(study),
+        "entry_delta": len(results) - len(entries),
     }
 
 
@@ -539,6 +540,7 @@ def delete_nodes(
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     cache_data = storage.get_history_item(history_item_id)
+    initial_entry_count = len(cache_data["global"]["elastic_json"])
 
     entry_list = [
         node["entries"]
@@ -549,6 +551,7 @@ def delete_nodes(
     entries = list(set([entry for entries in entry_list for entry in entries]))
 
     cache_data = calculate_global_cache_properties(cache_data, entries)
+    new_entry_count = len(cache_data["global"]["elastic_json"])
 
     if data.graph_type == "overview":
         cache_data = csx_graph.calculate_trimmed_graph(cache_data, entries, "overview")
@@ -591,6 +594,7 @@ def delete_nodes(
     return {
         "graph": cache_data[data.graph_type],
         "history": csx_study.extract_history_items(study),
+        "entry_delta": initial_entry_count - new_entry_count,
     }
 
 

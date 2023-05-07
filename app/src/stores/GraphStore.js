@@ -1273,6 +1273,7 @@ export class GraphStore {
 
     removeSelection = async originNode => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
 
         let removedNodeEntries;
 
@@ -1364,11 +1365,26 @@ export class GraphStore {
             );
 
             this.store.history.generateHistoryNodes();
+
+            if (response.data.entry_delta === 0) {
+                this.store.core.setDataModificationMessage(
+                    'No search results removed.'
+                );
+            } else if (response.data.entry_delta === 1) {
+                this.store.core.setDataModificationMessage(
+                    '1 search result removed.'
+                );
+            } else {
+                this.store.core.setDataModificationMessage(
+                    `${response.data.entry_delta} search results removed.`
+                );
+            }
         }
     };
 
     trimNetwork = async () => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
         const graph_data_copy = { ...this.currentGraphData };
         graph_data_copy.nodes = graph_data_copy.nodes
             .filter(node => node.visible)
@@ -1437,10 +1453,25 @@ export class GraphStore {
         );
 
         this.store.history.generateHistoryNodes();
+
+        if (response.data.entry_delta === 0) {
+            this.store.core.setDataModificationMessage(
+                'No search results removed.'
+            );
+        } else if (response.data.entry_delta === 1) {
+            this.store.core.setDataModificationMessage(
+                '1 search result removed.'
+            );
+        } else {
+            this.store.core.setDataModificationMessage(
+                `${response.data.entry_delta} search results removed.`
+            );
+        }
     };
 
     expandNetwork = async (nodes, connector = null) => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
 
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
@@ -1539,6 +1570,20 @@ export class GraphStore {
         );
 
         this.store.history.generateHistoryNodes();
+
+        if (response.data.entry_delta === 0) {
+            this.store.core.setDataModificationMessage(
+                'No new search results added.'
+            );
+        } else if (response.data.entry_delta === 1) {
+            this.store.core.setDataModificationMessage(
+                '1 new search result added.'
+            );
+        } else {
+            this.store.core.setDataModificationMessage(
+                `${response.data.entry_delta} new search results added.`
+            );
+        }
     };
 
     get graphObjectCount() {
