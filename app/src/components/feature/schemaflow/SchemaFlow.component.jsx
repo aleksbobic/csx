@@ -183,39 +183,43 @@ function SchemaFlow() {
                 )}
             </AutoSizer>
 
-            <Box
-                bottom="14px"
-                left="50%"
-                zIndex="20"
-                transform="translateX(-50%)"
-                position="absolute"
-            >
-                <SlideFade in={showApplyChanges} offsetY="10px">
-                    <Button
-                        backgroundColor="blue.600"
-                        borderRadius="full"
-                        position="relative"
-                        size="sm"
-                        leftIcon={<Sync style={{ '--ggs': '0.6' }} />}
-                        _hover={{ backgroundColor: 'blue.500' }}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - Graph Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Regenerate graph'
-                                })
-                            );
-                            store.overviewSchema.setSchemaHasChanges(false);
-                            store.schema.setSchemaHasChanges(false);
-                            store.graph.modifyStudy(store.core.currentGraph);
-                        }}
-                    >
-                        Apply Changes
-                    </Button>
-                </SlideFade>
-            </Box>
+            {showApplyChanges && (
+                <Box
+                    bottom="14px"
+                    left="50%"
+                    zIndex="20"
+                    transform="translateX(-50%)"
+                    position="absolute"
+                >
+                    <SlideFade in={showApplyChanges} offsetY="10px">
+                        <Button
+                            backgroundColor="blue.600"
+                            borderRadius="full"
+                            position="relative"
+                            size="sm"
+                            leftIcon={<Sync style={{ '--ggs': '0.6' }} />}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Graph Area - Graph Controls',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Regenerate graph'
+                                    })
+                                );
+                                store.overviewSchema.setSchemaHasChanges(false);
+                                store.schema.setSchemaHasChanges(false);
+                                store.graph.modifyStudy(
+                                    store.core.currentGraph
+                                );
+                            }}
+                        >
+                            Apply Changes
+                        </Button>
+                    </SlideFade>
+                </Box>
+            )}
 
             <HStack
                 backgroundColor={

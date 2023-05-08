@@ -1,4 +1,5 @@
-import { Flex, Text } from '@chakra-ui/react';
+import { Flex, IconButton, Text } from '@chakra-ui/react';
+import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 import { Handle } from 'react-flow-renderer';
 
@@ -24,7 +25,27 @@ const schemaNode = ({ data, isConnectable }) => {
                 paddingLeft="5px"
                 paddingRight="5px"
             >
-                <Text>{data.label}</Text>
+                <Text fontWeight="bold">{data.label}</Text>
+                <IconButton
+                    className="nodrag"
+                    size="xs"
+                    marginLeft="10px"
+                    background={
+                        data.isVisible ? '#3182CE' : 'rgba(255, 255, 255, 0.08)'
+                    }
+                    _hover={{ background: '#3182CE' }}
+                    onClick={() => {
+                        data.toggleVisibility(data.label);
+                    }}
+                    icon={
+                        <LightBulbIcon
+                            style={{
+                                width: '14px',
+                                height: '14px'
+                            }}
+                        />
+                    }
+                />
             </Flex>
             <Handle
                 type="source"

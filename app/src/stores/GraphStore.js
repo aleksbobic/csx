@@ -1123,6 +1123,7 @@ export class GraphStore {
                 this.addNeighbourObjectsToNodes();
                 this.store.core.updateVisibleDimensionsBasedOnSchema();
                 // this.store.schema.populateStoreData();
+                this.store.schema.refreshNodeStyles();
             }
             this.store.core.setDataIsLoading(false);
         }

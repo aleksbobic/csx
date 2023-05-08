@@ -968,103 +968,6 @@ function Settings() {
         );
     };
 
-    const renderDimensionsToggle = () => {
-        const tags = [
-            ...Object.keys(store.search.nodeTypes),
-            ...Object.keys(store.search.newNodeTypes)
-        ].map((property, index) => (
-            <Tag
-                key={index}
-                size="sm"
-                borderRadius="full"
-                variant="solid"
-                style={{ padding: 0 }}
-                backgroundColor={
-                    store.core.visibleDimensions[
-                        store.core.currentGraph
-                    ].includes(property)
-                        ? 'blue.600'
-                        : graphDimensionBackground
-                }
-                transition="all 0.1s ease-in-out"
-                _hover={{
-                    backgroundColor: graphDimensionHoverBackground,
-                    cursor: 'pointer',
-                    color: 'white'
-                }}
-                onClick={() => {
-                    store.track.trackEvent(
-                        'Side panel - View Settings',
-                        `Button - Dimensions - ${property}`,
-                        JSON.stringify({
-                            type: 'Click',
-                            value: `${
-                                store.core.visibleDimensions[
-                                    store.core.currentGraph
-                                ].includes(property)
-                                    ? 'Hide'
-                                    : 'Show'
-                            }`
-                        })
-                    );
-
-                    store.core.toggleVisibleDimension(property);
-                }}
-            >
-                <Tooltip label={property}>
-                    <Text
-                        size="sm"
-                        whiteSpace="nowrap"
-                        letterSpacing="0.5px"
-                        fontWeight="semibold"
-                        maxWidth="140px"
-                        overflow="hidden"
-                        textOverflow="ellipsis"
-                        padding="0 8px"
-                        _hover={{ color: 'white' }}
-                        color={
-                            store.core.visibleDimensions[
-                                store.core.currentGraph
-                            ].includes(property)
-                                ? 'white'
-                                : colorMode === 'light'
-                                ? 'black'
-                                : 'white'
-                        }
-                    >
-                        {property}
-                    </Text>
-                </Tooltip>
-            </Tag>
-        ));
-
-        if (tags.length === 0) {
-            return <></>;
-        }
-
-        return (
-            <VStack
-                width="100%"
-                backgroundColor="whiteAlpha.100"
-                padding="10px"
-                borderRadius="10px"
-                spacing="10px"
-                align="start"
-                style={{ marginTop: '20px' }}
-            >
-                <Stack>
-                    <Heading
-                        size="sm"
-                        style={{ marginBottom: '10px', marginTop: '10px' }}
-                    >
-                        Visible features
-                    </Heading>
-                    <Wrap>{tags}</Wrap>
-                </Stack>
-            </VStack>
-        );
-    };
-
     return (
         <VStack
             align="center"
@@ -1093,8 +996,6 @@ function Settings() {
                 </Heading>
                 {renderLayoutOptions()}
             </VStack>
-
-            {store.core.currentGraph === 'detail' && renderDimensionsToggle()}
         </VStack>
     );
 }

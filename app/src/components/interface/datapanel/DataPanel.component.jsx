@@ -167,7 +167,12 @@ function DataPanel(props) {
 
     const renderTabPanels = () => {
         return (
-            <TabPanels width="100%" padding="10px" height="100%" ref={ref}>
+            <TabPanels
+                width="100%"
+                padding="0 10px 10px"
+                height="100%"
+                ref={ref}
+            >
                 <TabPanel padding="10px" height="100%">
                     <Box
                         height="100%"

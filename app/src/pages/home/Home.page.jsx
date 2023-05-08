@@ -287,7 +287,7 @@ function HomePage() {
     useEffect(() => {
         store.core.setIsStudyPublic(false);
         store.core.setDataModificationMessage(null);
-        store.schema.setSchemaHasChanges(false);
+        store.schema.resetSchema();
         store.overviewSchema.setSchemaHasChanges(false);
         store.core.setStudyPublicURL('');
         store.graphInstance.setEdgeColorScheme('auto');

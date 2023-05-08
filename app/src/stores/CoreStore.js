@@ -71,7 +71,8 @@ export class CoreStore {
         this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
     };
 
-    setDataModificationMessage = message => (this.dataModificationMessage = message);
+    setDataModificationMessage = message =>
+        (this.dataModificationMessage = message);
 
     deleteCommentFromCurrentHistoryItem = id => {
         const commentIndex = this.studyHistory[
@@ -134,6 +135,8 @@ export class CoreStore {
         this.isSchemaNodeTypeBound = val;
         if (val) {
             this.updateVisibleDimensionsBasedOnSchema();
+            this.store.schema.refreshNodeStyles();
+            this.store.schema.setSchemaHasChanges(true);
         }
     };
 

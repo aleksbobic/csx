@@ -28,6 +28,12 @@ export class SchemaStore {
 
     setUseUploadData = val => (this.useUploadData = val);
     setSchemaHasChanges = val => (this.schemaHasChanges = val);
+    resetSchema = () => {
+        this.nodes = [];
+        this.edges = [];
+        this.nodeLabelToID = {};
+        this.setSchemaHasChanges(false);
+    };
 
     toggleRelationship = (id, possibleRelationships) => {
         const edge = this.edges.find(edge => edge.id === id);
@@ -97,12 +103,23 @@ export class SchemaStore {
                 isAnchor: isAnchor,
                 setAnchor: this.setAnchor,
                 isLink: isLink,
-                setLink: this.setLink
+                setLink: this.setLink,
+                isVisible:
+                    this.store.core.visibleDimensions['detail'].includes(label),
+                toggleVisibility: feature => {
+                    this.store.core.toggleVisibleDimension(feature);
+                    this.refreshNodeStyles();
+                    this.setSchemaHasChanges(true);
+                }
             },
             style: {
-                background: '#323232',
+                background: this.store.core.visibleDimensions[
+                    'detail'
+                ].includes(label)
+                    ? '#283b57'
+                    : '#323232',
                 color: 'white',
-                borderRadius: '8px',
+                borderRadius: '10px',
                 height: 'auto',
                 borderWidth: 0,
                 padding: '10px',
@@ -212,7 +229,8 @@ export class SchemaStore {
 
         const nodePositions = generateNodePositions(schema);
 
-        this.edges = nodePositions.filter(entry => 'source' in entry);
+        this.edges = nodePositions.filter(entry => entry.type === 'schemaEdge');
+
         this.nodes = nodePositions.filter(entry => !('source' in entry));
     };
 
@@ -283,6 +301,8 @@ export class SchemaStore {
             this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
 
+        this.refreshNodeStyles();
+
         this.setSchemaHasChanges(true);
     };
 
@@ -324,6 +344,28 @@ export class SchemaStore {
             this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
 
+        this.refreshNodeStyles();
+
         this.setSchemaHasChanges(true);
+    };
+
+    refreshNodeStyles = () => {
+        this.nodes = [
+            ...this.nodes.map(node => {
+                node.data.isVisible = this.store.core.visibleDimensions[
+                    'detail'
+                ].includes(node.data.label);
+                node.style = {
+                    ...node.style,
+                    background: this.store.core.visibleDimensions[
+                        'detail'
+                    ].includes(node.data.label)
+                        ? '#283b57'
+                        : '#323232'
+                };
+
+                return node;
+            })
+        ];
     };
 }
