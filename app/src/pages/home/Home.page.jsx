@@ -286,6 +286,9 @@ function HomePage() {
 
     useEffect(() => {
         store.core.setIsStudyPublic(false);
+        store.core.setDataModificationMessage(null);
+        store.schema.setSchemaHasChanges(false);
+        store.overviewSchema.setSchemaHasChanges(false);
         store.core.setStudyPublicURL('');
         store.graphInstance.setEdgeColorScheme('auto');
         store.graphInstance.setNodeColorScheme('component');
@@ -301,6 +304,7 @@ function HomePage() {
         store.graph,
         store.graphInstance,
         store.overviewSchema,
+        store.schema,
         store.search,
         store.track
     ]);

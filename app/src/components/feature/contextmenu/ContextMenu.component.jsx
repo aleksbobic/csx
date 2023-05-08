@@ -126,6 +126,7 @@ function ContextMenu() {
                     justifyContent="left"
                     onClick={triggerSelfCentric}
                     key="selfCentricButton"
+                    _hover={{ backgroundColor: 'blue.500' }}
                 >
                     Show direct connections
                 </Button>
@@ -144,7 +145,7 @@ function ContextMenu() {
             left={store.contextMenu.x}
             display={store.contextMenu.isVisible ? 'block' : 'none'}
             backgroundColor={colorMode === 'light' ? 'white' : 'black'}
-            padding="5px"
+            padding="4px 5px 5px"
             borderRadius="10px"
             width="200px"
             border="1px solid"
@@ -154,13 +155,21 @@ function ContextMenu() {
         >
             <ButtonGroup variant="ghost" size="xs" width="100%">
                 <VStack align="stretch" spacing="0" width="100%">
-                    <Button justifyContent="left" onClick={selectNode}>
+                    <Button
+                        justifyContent="left"
+                        onClick={selectNode}
+                        _hover={{ backgroundColor: 'blue.500' }}
+                    >
                         {store.contextMenu.originNode?.selected
                             ? 'Deselect node'
                             : 'Select node'}
                     </Button>
                     {!store.graphInstance.isSelfCentric && (
-                        <Button justifyContent="left" onClick={selectComponent}>
+                        <Button
+                            justifyContent="left"
+                            onClick={selectComponent}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                        >
                             {store.graph.currentGraphData.selectedComponents.includes(
                                 store.contextMenu.originNode?.component
                             )
@@ -170,10 +179,18 @@ function ContextMenu() {
                     )}
                     {!store.graphInstance.isSelfCentric &&
                         renderAdvcancedButtons()}
-                    <Button justifyContent="left" onClick={expandGraph}>
+                    <Button
+                        justifyContent="left"
+                        onClick={expandGraph}
+                        _hover={{ backgroundColor: 'blue.500' }}
+                    >
                         Expand graph through node
                     </Button>
-                    <Button justifyContent="left" onClick={removeSelection}>
+                    <Button
+                        justifyContent="left"
+                        onClick={removeSelection}
+                        _hover={{ backgroundColor: 'blue.500' }}
+                    >
                         Remove node
                     </Button>
                 </VStack>

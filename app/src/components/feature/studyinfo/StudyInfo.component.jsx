@@ -281,7 +281,12 @@ function StudyInfo() {
                             : 'Make study public'
                     }
                 >
-                    <HStack spacing="1" width="100%">
+                    <HStack
+                        spacing="1"
+                        width="100%"
+                        justifyContent="space-between"
+                    >
+                        <Text fontSize="sm">Public</Text>
                         <Switch
                             id="curvedEdges"
                             size="sm"
@@ -306,7 +311,6 @@ function StudyInfo() {
                                 );
                             }}
                         />
-                        <Text fontSize="sm">Public</Text>
                     </HStack>
                 </Tooltip>
                 {store.core.isStudyPublic && (

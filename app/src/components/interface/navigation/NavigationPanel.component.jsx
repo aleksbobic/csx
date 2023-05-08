@@ -1,9 +1,5 @@
 import {
     Box,
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    Button,
     ButtonGroup,
     HStack,
     IconButton,
@@ -20,15 +16,13 @@ import {
     AlignBottom,
     Attribution,
     Carousel,
-    ChevronRight,
     List,
     Moon,
     RadioCheck,
     Ratio,
     Ring,
     Search,
-    Sun,
-    Sync
+    Sun
 } from 'css.gg';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
@@ -57,11 +51,6 @@ function NavigationPanelComponent() {
         location.pathname !== '/' ? 'gray.300' : 'transparent';
 
     const edgeColor = useColorModeValue(edgeColorLight, edgeColorDark);
-
-    const graphUtilsMenuBackground = useColorModeValue(
-        'whiteAlpha.800',
-        'blackAlpha.700'
-    );
 
     useEffect(() => {
         if (containerRef.current) {
@@ -564,81 +553,6 @@ function NavigationPanelComponent() {
                             />
                         </Link>
                     )}
-
-                    {location.pathname !== '/' &&
-                        location.pathname !== '/present' && (
-                            <HStack
-                                height="40px"
-                                style={{
-                                    marginLeft: '20px'
-                                }}
-                                spacing="20px"
-                            >
-                                <Breadcrumb
-                                    spacing="2px"
-                                    separator={
-                                        <ChevronRight
-                                            style={{ '--ggs': '0.5' }}
-                                        />
-                                    }
-                                >
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink
-                                            as={NavLink}
-                                            to="/"
-                                            fontSize="xs"
-                                            fontWeight="regular"
-                                        >
-                                            {store?.search?.currentDataset?.toUpperCase()}
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink
-                                            as={Button}
-                                            onClick={() => {
-                                                store.graph.modifyStudy(
-                                                    'overview'
-                                                );
-                                            }}
-                                            disabled={
-                                                store.core.currentGraph ===
-                                                'overview'
-                                            }
-                                            size="xs"
-                                            variant="ghost"
-                                            _hover={{
-                                                backgroundColor: 'transparent',
-                                                textDecoration:
-                                                    store.core.currentGraph ===
-                                                    'detail'
-                                                        ? 'underline'
-                                                        : 'none',
-                                                cursor:
-                                                    store.core.currentGraph ===
-                                                    'detail'
-                                                        ? 'pointer'
-                                                        : 'default'
-                                            }}
-                                            _disabled={{ opacity: '1' }}
-                                        >
-                                            Graph
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    {store.core.currentGraph === 'detail' && (
-                                        <BreadcrumbItem>
-                                            <BreadcrumbLink
-                                                as={Text}
-                                                fontSize="xs"
-                                                fontWeight="bold"
-                                                _hover={{ cursor: 'default' }}
-                                            >
-                                                Detail
-                                            </BreadcrumbLink>
-                                        </BreadcrumbItem>
-                                    )}
-                                </Breadcrumb>
-                            </HStack>
-                        )}
                 </HStack>
                 <HStack spacing="20px">
                     {location.pathname.startsWith('/graph') && (

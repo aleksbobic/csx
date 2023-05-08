@@ -17,10 +17,15 @@ import {
     SliderFilledTrack,
     SliderThumb,
     SliderTrack,
-    SliderMark
+    SliderMark,
+    Accordion,
+    AccordionItem,
+    AccordionPanel,
+    AccordionIcon,
+    AccordionButton
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
-import { Anchor, Awards, Bolt, Undo } from 'css.gg';
+import { Anchor, Bolt, Undo, MoreVerticalAlt } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -126,7 +131,7 @@ function Settings() {
 
     const renderColorOptions = () => {
         return (
-            <HStack justifyContent="space-between" width="100%">
+            <HStack justifyContent="space-between" width="100%" padding="5px">
                 <Text fontSize="sm">Node color: </Text>
                 <Tooltip label="Select property used for node colors.">
                     <Select
@@ -162,12 +167,17 @@ function Settings() {
         );
     };
 
-    const renderLabelOptions = () => {
+    const renderLabelOptions = isDisabled => {
         return (
-            <HStack justifyContent="space-between" width="100%">
+            <HStack
+                justifyContent="space-between"
+                width="100%"
+                opacity={isDisabled ? 0.3 : 1}
+            >
                 <Text fontSize="sm">Label size: </Text>
                 <Tooltip label="Select node label size.">
                     <Select
+                        isDisabled={isDisabled}
                         size="sm"
                         value={store.graphInstance.labels.visibilityDistance}
                         onChange={e => updateLabelDistance(e.target.value)}
@@ -186,93 +196,109 @@ function Settings() {
         );
     };
 
-    const renderLabelFeatureSelection = () => {
+    const renderLabelFeatureSelection = isDisabled => {
         return (
-            <Box>
-                <Menu closeOnSelect={false} zIndex="3">
-                    <Tooltip label="Select node types that should have visible labels.">
-                        <MenuButton
-                            width="100%"
-                            size="sm"
-                            as={IconButton}
-                            icon={<Awards style={{ '--ggs': 0.7 }} />}
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Side panel - Node Settings',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Open node types with labels menu'
-                                    })
-                                );
-                            }}
-                            zIndex="3"
-                        />
-                    </Tooltip>
-                    <MenuList
-                        backgroundColor="#222222"
-                        padding="5px"
-                        borderRadius="10px"
-                        width="200px"
-                        minWidth="200px"
-                    >
-                        {store.core.visibleDimensions[
-                            store.core.currentGraph
-                        ].map(feature => (
-                            <MenuItem
-                                key={`label_feature_checkbox_${feature}`}
-                                fontSize="xs"
-                                fontWeight="bold"
-                                borderRadius="6px"
-                                width="190px"
-                                minWidth="190px"
+            <HStack
+                spacing="1"
+                width="100%"
+                justifyContent="space-between"
+                opacity={isDisabled ? 0.3 : 1}
+            >
+                <Text fontSize="sm">Show only: </Text>
+                <Box>
+                    <Menu closeOnSelect={false} zIndex="3">
+                        <Tooltip label="Select node types that should have visible labels.">
+                            <MenuButton
+                                width="100%"
+                                isDisabled={isDisabled}
+                                size="sm"
+                                fontSize="sm"
+                                fontWeight="normal"
+                                backgroundColor="whiteAlpha.100"
+                                as={Button}
+                                rightIcon={
+                                    <MoreVerticalAlt style={{ '--ggs': 0.7 }} />
+                                }
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Side panel - Node Settings',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Open node types with labels menu'
+                                        })
+                                    );
+                                }}
+                                zIndex="3"
                             >
-                                <Checkbox
-                                    isChecked={store.graphInstance.labels.labelFeatures.includes(
-                                        feature
-                                    )}
+                                Types
+                            </MenuButton>
+                        </Tooltip>
+                        <MenuList
+                            backgroundColor="#222222"
+                            padding="5px"
+                            borderRadius="10px"
+                            width="200px"
+                            minWidth="200px"
+                        >
+                            {store.core.visibleDimensions[
+                                store.core.currentGraph
+                            ].map(feature => (
+                                <MenuItem
+                                    key={`label_feature_checkbox_${feature}`}
+                                    fontSize="xs"
+                                    fontWeight="bold"
+                                    borderRadius="6px"
                                     width="190px"
                                     minWidth="190px"
-                                    size="sm"
-                                    overflow="hidden"
-                                    whiteSpace="nowrap"
-                                    textOverflow="ellipsis"
-                                    onChange={e => {
-                                        if (!e.target.checked) {
-                                            store.track.trackEvent(
-                                                'Side panel - View Settings',
-                                                'Checkbox',
-                                                JSON.stringify({
-                                                    type: 'Check',
-                                                    value: `Hide labels for ${feature}`
-                                                })
-                                            );
-                                            store.graphInstance.removeLabelFeature(
-                                                feature
-                                            );
-                                        } else {
-                                            store.track.trackEvent(
-                                                'Side panel - View Settings',
-                                                'Checkbox',
-                                                JSON.stringify({
-                                                    type: 'Check',
-                                                    value: `Show labels for ${feature} `
-                                                })
-                                            );
-
-                                            store.graphInstance.addLabelFeature(
-                                                feature
-                                            );
-                                        }
-                                    }}
                                 >
-                                    {feature}
-                                </Checkbox>
-                            </MenuItem>
-                        ))}
-                    </MenuList>
-                </Menu>
-            </Box>
+                                    <Checkbox
+                                        isChecked={store.graphInstance.labels.labelFeatures.includes(
+                                            feature
+                                        )}
+                                        width="190px"
+                                        minWidth="190px"
+                                        size="sm"
+                                        overflow="hidden"
+                                        whiteSpace="nowrap"
+                                        textOverflow="ellipsis"
+                                        onChange={e => {
+                                            if (!e.target.checked) {
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Checkbox',
+                                                    JSON.stringify({
+                                                        type: 'Check',
+                                                        value: `Hide labels for ${feature}`
+                                                    })
+                                                );
+                                                store.graphInstance.removeLabelFeature(
+                                                    feature
+                                                );
+                                            } else {
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Checkbox',
+                                                    JSON.stringify({
+                                                        type: 'Check',
+                                                        value: `Show labels for ${feature} `
+                                                    })
+                                                );
+
+                                                store.graphInstance.addLabelFeature(
+                                                    feature
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        {feature}
+                                    </Checkbox>
+                                </MenuItem>
+                            ))}
+                        </MenuList>
+                    </Menu>
+                </Box>
+            </HStack>
         );
     };
 
@@ -410,7 +436,7 @@ function Settings() {
 
     const renderEdgeColorOptions = () => {
         return (
-            <HStack justifyContent="space-between" width="100%">
+            <HStack justifyContent="space-between" width="100%" padding="5px">
                 <Text fontSize="sm">Edge color: </Text>
                 <Tooltip label="Select property used for edge colors.">
                     <Select
@@ -448,387 +474,496 @@ function Settings() {
     const renderVisibilityOptions = () => {
         return (
             <>
-                <VStack
+                <Accordion
                     width="100%"
                     backgroundColor="whiteAlpha.200"
-                    padding="10px"
+                    padding="5px 10px"
                     borderRadius="10px"
+                    allowToggle={true}
                 >
-                    <Heading
-                        size="sm"
-                        style={{ marginBottom: '10px' }}
-                        width="100%"
-                    >
-                        General settings
-                    </Heading>
-                    <VStack
-                        backgroundColor="whiteAlpha.50"
-                        width="100%"
-                        padding="10px"
-                        borderRadius="6px"
-                    >
-                        <Tooltip
-                            label={`Panning speed is ${store.graphInstance.panSpeed}`}
+                    <AccordionItem>
+                        <AccordionButton
+                            style={{
+                                paddingLeft: 0,
+                                paddingRight: 0,
+                                textAlign: 'left',
+                                borderRadius: '10px',
+                                outline: 'none',
+                                boxShadow: 'none'
+                            }}
                         >
-                            <VStack
-                                spacing="1"
-                                style={{
-                                    width: '100%',
-                                    marginBottom: '20px',
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
-                            >
-                                <Text
-                                    fontSize="sm"
+                            <Heading size="sm" width="100%">
+                                General settings
+                            </Heading>
+                            <AccordionIcon />
+                        </AccordionButton>
+
+                        <AccordionPanel
+                            style={{ padding: '10px 0 0' }}
+                            _expanded={{ padding: '10px 0 10px' }}
+                        >
+                            <VStack>
+                                <VStack
+                                    backgroundColor="whiteAlpha.50"
                                     width="100%"
-                                    marginLeft="-15px"
+                                    padding="10px 10px 15px"
+                                    borderRadius="6px"
+                                    marginBottom="5px"
                                 >
-                                    Panning speed
-                                </Text>
-                                <Slider
-                                    defaultValue={5}
-                                    min={1}
-                                    max={9}
-                                    colorScheme="blue"
-                                    value={store.graphInstance.panSpeed}
-                                    onChange={value =>
-                                        store.graphInstance.setPanSpeed(value)
-                                    }
-                                >
-                                    <SliderMark
-                                        value={1}
-                                        fontSize="xs"
-                                        marginTop="10px"
-                                        marginLeft="-8px"
+                                    <Tooltip
+                                        label={`Panning speed is ${store.graphInstance.panSpeed}`}
                                     >
-                                        Slow
-                                    </SliderMark>
-                                    <SliderMark
-                                        value={9}
-                                        fontSize="xs"
-                                        marginTop="10px"
-                                        marginLeft="-16px"
-                                    >
-                                        Fast
-                                    </SliderMark>
+                                        <VStack
+                                            spacing="1"
+                                            style={{
+                                                width: '100%',
+                                                marginBottom: '20px',
+                                                paddingLeft: '10px',
+                                                paddingRight: '10px'
+                                            }}
+                                        >
+                                            <Text
+                                                fontSize="sm"
+                                                width="100%"
+                                                marginLeft="-15px"
+                                            >
+                                                Panning speed
+                                            </Text>
+                                            <Slider
+                                                defaultValue={5}
+                                                min={1}
+                                                max={9}
+                                                colorScheme="blue"
+                                                value={
+                                                    store.graphInstance.panSpeed
+                                                }
+                                                onChange={value =>
+                                                    store.graphInstance.setPanSpeed(
+                                                        value
+                                                    )
+                                                }
+                                            >
+                                                <SliderMark
+                                                    value={1}
+                                                    fontSize="xs"
+                                                    marginTop="10px"
+                                                    marginLeft="-8px"
+                                                >
+                                                    Slow
+                                                </SliderMark>
+                                                <SliderMark
+                                                    value={9}
+                                                    fontSize="xs"
+                                                    marginTop="10px"
+                                                    marginLeft="-16px"
+                                                >
+                                                    Fast
+                                                </SliderMark>
 
-                                    <SliderTrack>
-                                        <SliderFilledTrack />
-                                    </SliderTrack>
-                                    <SliderThumb />
-                                </Slider>
+                                                <SliderTrack>
+                                                    <SliderFilledTrack />
+                                                </SliderTrack>
+                                                <SliderThumb />
+                                            </Slider>
+                                        </VStack>
+                                    </Tooltip>
+                                </VStack>
                             </VStack>
-                        </Tooltip>
-                    </VStack>
-                </VStack>
-                <VStack
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
+
+                <Accordion
                     width="100%"
                     backgroundColor="whiteAlpha.200"
-                    padding="10px"
+                    padding="5px 10px"
                     borderRadius="10px"
+                    allowToggle={true}
                     style={{ marginTop: '15px' }}
                 >
-                    <Heading
-                        size="sm"
-                        style={{ marginBottom: '10px' }}
-                        width="100%"
-                    >
-                        Edge settings
-                    </Heading>
-
-                    <VStack
-                        backgroundColor="whiteAlpha.50"
-                        width="100%"
-                        padding="10px"
-                        borderRadius="6px"
-                        style={{ marginBottom: '10px' }}
-                    >
-                        <Tooltip
-                            label={
-                                store.graphInstance.automaticEdgeOpacity
-                                    ? 'Set custom edge opacity'
-                                    : 'Use automatic edge opacity'
-                            }
+                    <AccordionItem>
+                        <AccordionButton
+                            style={{
+                                paddingLeft: 0,
+                                paddingRight: 0,
+                                textAlign: 'left',
+                                borderRadius: '10px',
+                                outline: 'none',
+                                boxShadow: 'none'
+                            }}
                         >
-                            <HStack
-                                spacing="1"
-                                width="100%"
-                                style={{ paddingBottom: '10px' }}
-                            >
-                                <Switch
-                                    id="edges"
-                                    size="sm"
-                                    marginRight="10px"
-                                    isChecked={
-                                        store.graphInstance.automaticEdgeOpacity
-                                    }
-                                    value={
-                                        store.graphInstance.automaticEdgeOpacity
-                                    }
-                                    onChange={e => {
-                                        store.graphInstance.toggleAutomaticEdgeOpacity();
+                            <Heading size="sm" width="100%">
+                                Edge settings
+                            </Heading>
+                            <AccordionIcon />
+                        </AccordionButton>
 
-                                        store.track.trackEvent(
-                                            'Side panel - View Settings',
-                                            'Switch',
-                                            JSON.stringify({
-                                                type: 'Toggle',
-                                                value: `${
-                                                    store.graphInstance
-                                                        .automaticEdgeOpacity
-                                                        ? 'Automatic'
-                                                        : 'Custom'
-                                                } edge opacity`
-                                            })
-                                        );
-                                    }}
-                                />
-                                <Text fontSize="sm">Automatic opacity</Text>
-                            </HStack>
-                        </Tooltip>
-                        <Tooltip
-                            label={`Edge opacity is ${
-                                store.graphInstance.customEdgeOpacity * 10
-                            }%`}
-                            isDisabled={
-                                store.graphInstance.automaticEdgeOpacity
-                            }
-                        >
+                        <AccordionPanel padding="10px 0 0">
                             <VStack
-                                opacity={
-                                    store.graphInstance.automaticEdgeOpacity
-                                        ? '0.2'
-                                        : '1'
-                                }
-                                spacing="1"
-                                style={{
-                                    width: '100%',
-                                    marginBottom: '20px',
-                                    paddingLeft: '10px',
-                                    paddingRight: '10px'
-                                }}
+                                backgroundColor="whiteAlpha.50"
+                                width="100%"
+                                padding="10px 10px 15px"
+                                borderRadius="6px"
+                                style={{ marginBottom: '10px' }}
                             >
-                                <Slider
-                                    defaultValue={5}
-                                    disabled={
+                                <Tooltip
+                                    label={
                                         store.graphInstance.automaticEdgeOpacity
-                                    }
-                                    min={0}
-                                    max={10}
-                                    colorScheme={
-                                        store.graphInstance.automaticEdgeOpacity
-                                            ? 'gray'
-                                            : 'blue'
-                                    }
-                                    value={
-                                        store.graphInstance.customEdgeOpacity
-                                    }
-                                    onChange={value =>
-                                        store.graphInstance.setCustomEdgeOpacity(
-                                            value
-                                        )
+                                            ? 'Set custom edge opacity'
+                                            : 'Use automatic edge opacity'
                                     }
                                 >
-                                    <SliderMark
-                                        value={1}
-                                        fontSize="xs"
-                                        marginTop="10px"
-                                        marginLeft="-24px"
+                                    <HStack
+                                        spacing="1"
+                                        width="100%"
+                                        style={{ paddingBottom: '10px' }}
+                                        justifyContent="space-between"
                                     >
-                                        Invisible
-                                    </SliderMark>
-                                    <SliderMark
-                                        value={9}
-                                        fontSize="xs"
-                                        marginTop="10px"
-                                        marginLeft="-16px"
-                                    >
-                                        Visible
-                                    </SliderMark>
-
-                                    <SliderTrack>
-                                        <SliderFilledTrack />
-                                    </SliderTrack>
-                                    <SliderThumb />
-                                </Slider>
-                            </VStack>
-                        </Tooltip>
-                    </VStack>
-                    <Tooltip
-                        label={
-                            store.graphInstance.useCurvedEdges
-                                ? 'Use straight edges'
-                                : 'Use curved edges'
-                        }
-                    >
-                        <HStack spacing="1" width="100%">
-                            <Switch
-                                id="curvedEdges"
-                                size="sm"
-                                marginRight="10px"
-                                isChecked={store.graphInstance.useCurvedEdges}
-                                value={store.graphInstance.useCurvedEdges}
-                                onChange={() => {
-                                    store.graphInstance.toggleUseCurvedEdges();
-
-                                    store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Switch',
-                                        JSON.stringify({
-                                            type: 'Toggle',
-                                            value: `${
+                                        <Text fontSize="sm">
+                                            Automatic opacity
+                                        </Text>
+                                        <Switch
+                                            id="edges"
+                                            size="sm"
+                                            marginRight="10px"
+                                            isChecked={
                                                 store.graphInstance
-                                                    .useCurvedEdges
-                                                    ? 'Use curved links'
-                                                    : 'Use straight links'
-                                            }`
-                                        })
-                                    );
-                                }}
-                            />
-                            <Text fontSize="sm">Curved edges</Text>
-                        </HStack>
-                    </Tooltip>
-                    {store.core.isDetail && (
-                        <Tooltip
-                            label={
-                                store.graphInstance.edgeDirectionVisiblity
-                                    ? 'Use undirected edges'
-                                    : 'Use directed edges'
-                            }
-                        >
-                            <HStack spacing="1" width="100%">
-                                <Switch
-                                    id="curvedEdges"
-                                    size="sm"
-                                    marginRight="10px"
-                                    isChecked={
-                                        store.graphInstance
-                                            .edgeDirectionVisiblity
-                                    }
-                                    value={
-                                        store.graphInstance
-                                            .edgeDirectionVisiblity
-                                    }
-                                    onChange={() => {
-                                        store.graphInstance.toggleEdgeDirectionVisiblity();
+                                                    .automaticEdgeOpacity
+                                            }
+                                            value={
+                                                store.graphInstance
+                                                    .automaticEdgeOpacity
+                                            }
+                                            onChange={e => {
+                                                store.graphInstance.toggleAutomaticEdgeOpacity();
 
-                                        store.track.trackEvent(
-                                            'Side panel - View Settings',
-                                            'Switch',
-                                            JSON.stringify({
-                                                type: 'Toggle',
-                                                value: `${
-                                                    store.graphInstance
-                                                        .edgeDirectionVisiblity
-                                                        ? 'Use directed links'
-                                                        : 'Use undirected links'
-                                                }`
-                                            })
-                                        );
-                                    }}
-                                />
-                                <Text fontSize="sm">Directed edges</Text>
-                            </HStack>
-                        </Tooltip>
-                    )}
-                    {renderEdgeColorOptions()}
-                </VStack>
-                <VStack
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Switch',
+                                                    JSON.stringify({
+                                                        type: 'Toggle',
+                                                        value: `${
+                                                            store.graphInstance
+                                                                .automaticEdgeOpacity
+                                                                ? 'Automatic'
+                                                                : 'Custom'
+                                                        } edge opacity`
+                                                    })
+                                                );
+                                            }}
+                                        />
+                                    </HStack>
+                                </Tooltip>
+                                <Tooltip
+                                    label={`Edge opacity is ${
+                                        store.graphInstance.customEdgeOpacity *
+                                        10
+                                    }%`}
+                                    isDisabled={
+                                        store.graphInstance.automaticEdgeOpacity
+                                    }
+                                >
+                                    <VStack
+                                        opacity={
+                                            store.graphInstance
+                                                .automaticEdgeOpacity
+                                                ? '0.2'
+                                                : '1'
+                                        }
+                                        spacing="1"
+                                        style={{
+                                            width: '100%',
+                                            marginBottom: '20px',
+                                            paddingLeft: '10px',
+                                            paddingRight: '10px'
+                                        }}
+                                    >
+                                        <Slider
+                                            defaultValue={5}
+                                            disabled={
+                                                store.graphInstance
+                                                    .automaticEdgeOpacity
+                                            }
+                                            min={0}
+                                            max={10}
+                                            colorScheme={
+                                                store.graphInstance
+                                                    .automaticEdgeOpacity
+                                                    ? 'gray'
+                                                    : 'blue'
+                                            }
+                                            value={
+                                                store.graphInstance
+                                                    .customEdgeOpacity
+                                            }
+                                            onChange={value =>
+                                                store.graphInstance.setCustomEdgeOpacity(
+                                                    value
+                                                )
+                                            }
+                                        >
+                                            <SliderMark
+                                                value={1}
+                                                fontSize="xs"
+                                                marginTop="10px"
+                                                marginLeft="-24px"
+                                            >
+                                                Invisible
+                                            </SliderMark>
+                                            <SliderMark
+                                                value={9}
+                                                fontSize="xs"
+                                                marginTop="10px"
+                                                marginLeft="-16px"
+                                            >
+                                                Visible
+                                            </SliderMark>
+
+                                            <SliderTrack>
+                                                <SliderFilledTrack />
+                                            </SliderTrack>
+                                            <SliderThumb />
+                                        </Slider>
+                                    </VStack>
+                                </Tooltip>
+                            </VStack>
+                            <Tooltip
+                                label={
+                                    store.graphInstance.useCurvedEdges
+                                        ? 'Use straight edges'
+                                        : 'Use curved edges'
+                                }
+                            >
+                                <HStack
+                                    spacing="1"
+                                    width="100%"
+                                    justifyContent="space-between"
+                                    padding="5px"
+                                >
+                                    <Text fontSize="sm">Curved edges</Text>
+                                    <Switch
+                                        id="curvedEdges"
+                                        size="sm"
+                                        marginRight="10px"
+                                        isChecked={
+                                            store.graphInstance.useCurvedEdges
+                                        }
+                                        value={
+                                            store.graphInstance.useCurvedEdges
+                                        }
+                                        onChange={() => {
+                                            store.graphInstance.toggleUseCurvedEdges();
+
+                                            store.track.trackEvent(
+                                                'Side panel - View Settings',
+                                                'Switch',
+                                                JSON.stringify({
+                                                    type: 'Toggle',
+                                                    value: `${
+                                                        store.graphInstance
+                                                            .useCurvedEdges
+                                                            ? 'Use curved links'
+                                                            : 'Use straight links'
+                                                    }`
+                                                })
+                                            );
+                                        }}
+                                    />
+                                </HStack>
+                            </Tooltip>
+                            {store.core.isDetail && (
+                                <Tooltip
+                                    label={
+                                        store.graphInstance
+                                            .edgeDirectionVisiblity
+                                            ? 'Use undirected edges'
+                                            : 'Use directed edges'
+                                    }
+                                >
+                                    <HStack
+                                        spacing="1"
+                                        width="100%"
+                                        justifyContent="space-between"
+                                        padding="5px"
+                                    >
+                                        <Text fontSize="sm">
+                                            Directed edges
+                                        </Text>
+                                        <Switch
+                                            id="curvedEdges"
+                                            size="sm"
+                                            marginRight="10px"
+                                            isChecked={
+                                                store.graphInstance
+                                                    .edgeDirectionVisiblity
+                                            }
+                                            value={
+                                                store.graphInstance
+                                                    .edgeDirectionVisiblity
+                                            }
+                                            onChange={() => {
+                                                store.graphInstance.toggleEdgeDirectionVisiblity();
+
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Switch',
+                                                    JSON.stringify({
+                                                        type: 'Toggle',
+                                                        value: `${
+                                                            store.graphInstance
+                                                                .edgeDirectionVisiblity
+                                                                ? 'Use directed links'
+                                                                : 'Use undirected links'
+                                                        }`
+                                                    })
+                                                );
+                                            }}
+                                        />
+                                    </HStack>
+                                </Tooltip>
+                            )}
+                            {renderEdgeColorOptions()}
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
+                <Accordion
                     width="100%"
                     backgroundColor="whiteAlpha.200"
-                    padding="10px"
+                    padding="5px 10px"
                     borderRadius="10px"
+                    allowToggle={true}
                     style={{ marginTop: '15px' }}
                 >
-                    <Heading
-                        size="sm"
-                        style={{ marginBottom: '10px', width: '100%' }}
-                    >
-                        Node settings
-                    </Heading>
-                    <HStack justifyContent="space-between" width="100%">
-                        <Tooltip
-                            label={
-                                store.graphInstance.labels.isVisible
-                                    ? 'Hide node labels'
-                                    : 'Show node labels'
-                            }
+                    <AccordionItem>
+                        <AccordionButton
+                            style={{
+                                paddingLeft: 0,
+                                paddingRight: 0,
+                                textAlign: 'left',
+                                borderRadius: '10px',
+                                outline: 'none',
+                                boxShadow: 'none'
+                            }}
                         >
-                            <HStack spacing="1" width="100%">
-                                <Switch
-                                    id="nodelabels"
-                                    size="sm"
-                                    marginRight="10px"
-                                    isChecked={
+                            <Heading size="sm" width="100%">
+                                Node settings
+                            </Heading>
+                            <AccordionIcon />
+                        </AccordionButton>
+
+                        <AccordionPanel padding="10px 0 0">
+                            <VStack
+                                backgroundColor="whiteAlpha.50"
+                                width="100%"
+                                padding="10px"
+                                borderRadius="6px"
+                                style={{ marginBottom: '10px' }}
+                            >
+                                <Tooltip
+                                    label={
                                         store.graphInstance.labels.isVisible
+                                            ? 'Hide node labels'
+                                            : 'Show node labels'
                                     }
-                                    value={store.graphInstance.labels.isVisible}
-                                    onChange={() => {
-                                        store.graphInstance.toggleLabelVisibility();
+                                >
+                                    <HStack
+                                        spacing="1"
+                                        width="100%"
+                                        justifyContent="space-between"
+                                    >
+                                        <Text fontSize="sm">Node labels</Text>
+                                        <Switch
+                                            id="nodelabels"
+                                            size="sm"
+                                            marginRight="10px"
+                                            isChecked={
+                                                store.graphInstance.labels
+                                                    .isVisible
+                                            }
+                                            value={
+                                                store.graphInstance.labels
+                                                    .isVisible
+                                            }
+                                            onChange={() => {
+                                                store.graphInstance.toggleLabelVisibility();
 
-                                        store.track.trackEvent(
-                                            'Side panel - View Settings',
-                                            'Switch',
-                                            JSON.stringify({
-                                                type: 'Toggle',
-                                                value: `${
-                                                    store.graphInstance.labels
-                                                        .isVisible
-                                                        ? 'Show'
-                                                        : 'Hide'
-                                                } labels`
-                                            })
-                                        );
-                                    }}
-                                />
-                                <Text fontSize="sm">Node labels</Text>
-                            </HStack>
-                        </Tooltip>
-                        {store.core.currentGraph === 'detail' &&
-                            renderLabelFeatureSelection()}
-                    </HStack>
-                    <Tooltip
-                        label={
-                            store.graphInstance.orphanNodeVisibility
-                                ? 'Hide orphan nodes'
-                                : 'Show orphan nodes'
-                        }
-                    >
-                        <HStack spacing="1" width="100%">
-                            <Switch
-                                id="nodelabels"
-                                size="sm"
-                                marginRight="10px"
-                                isChecked={
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Switch',
+                                                    JSON.stringify({
+                                                        type: 'Toggle',
+                                                        value: `${
+                                                            store.graphInstance
+                                                                .labels
+                                                                .isVisible
+                                                                ? 'Show'
+                                                                : 'Hide'
+                                                        } labels`
+                                                    })
+                                                );
+                                            }}
+                                        />
+                                    </HStack>
+                                </Tooltip>
+                                {store.core.currentGraph === 'detail' &&
+                                    renderLabelFeatureSelection(
+                                        !store.graphInstance.labels.isVisible
+                                    )}
+                                {renderLabelOptions(
+                                    !store.graphInstance.labels.isVisible
+                                )}
+                            </VStack>
+
+                            <Tooltip
+                                label={
                                     store.graphInstance.orphanNodeVisibility
+                                        ? 'Hide orphan nodes'
+                                        : 'Show orphan nodes'
                                 }
-                                value={store.graphInstance.orphanNodeVisibility}
-                                onChange={() => {
-                                    store.graphInstance.toggleOrphanNodeVisibility();
+                            >
+                                <HStack
+                                    spacing="1"
+                                    width="100%"
+                                    justifyContent="space-between"
+                                    padding="5px"
+                                >
+                                    <Text fontSize="sm">Orphan nodes</Text>
+                                    <Switch
+                                        id="nodelabels"
+                                        size="sm"
+                                        marginRight="10px"
+                                        isChecked={
+                                            store.graphInstance
+                                                .orphanNodeVisibility
+                                        }
+                                        value={
+                                            store.graphInstance
+                                                .orphanNodeVisibility
+                                        }
+                                        onChange={() => {
+                                            store.graphInstance.toggleOrphanNodeVisibility();
 
-                                    store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Switch',
-                                        JSON.stringify({
-                                            type: 'Toggle',
-                                            value: `${
-                                                store.graphInstance
-                                                    .orphanNodeVisibility
-                                                    ? 'Show'
-                                                    : 'Hide'
-                                            } orphan nodes`
-                                        })
-                                    );
-                                }}
-                            />
-                            <Text fontSize="sm">Orphan nodes</Text>
-                        </HStack>
-                    </Tooltip>
-                    {renderColorOptions()}
-                    {renderLabelOptions()}
-                </VStack>
+                                            store.track.trackEvent(
+                                                'Side panel - View Settings',
+                                                'Switch',
+                                                JSON.stringify({
+                                                    type: 'Toggle',
+                                                    value: `${
+                                                        store.graphInstance
+                                                            .orphanNodeVisibility
+                                                            ? 'Show'
+                                                            : 'Hide'
+                                                    } orphan nodes`
+                                                })
+                                            );
+                                        }}
+                                    />
+                                </HStack>
+                            </Tooltip>
+                            {renderColorOptions()}
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
             </>
         );
     };

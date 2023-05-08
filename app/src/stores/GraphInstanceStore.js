@@ -88,6 +88,7 @@ export class GraphInstanceStore {
 
     setGraphProps = ref => {
         this.graphInstance = ref;
+
         this.graphInstance.d3ReheatSimulation();
 
         this.graphInstance.controls().noRotate = true;
