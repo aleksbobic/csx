@@ -15,8 +15,9 @@ export default function CustomEdge({
     targetPosition,
     style = {},
     data,
-    arrowHeadType,
-    markerEndId
+    markerEnd
+    // arrowHeadType,
+    // markerEndId
 }) {
     const edgePath = getBezierPath({
         sourceX,
@@ -26,7 +27,6 @@ export default function CustomEdge({
         targetY,
         targetPosition
     });
-    const markerEnd = getMarkerEnd(arrowHeadType, markerEndId);
     const [edgeCenterX, edgeCenterY] = getEdgeCenter({
         sourceX,
         sourceY,

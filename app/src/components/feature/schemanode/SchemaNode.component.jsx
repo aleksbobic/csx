@@ -1,4 +1,4 @@
-import { Flex, IconButton, Text } from '@chakra-ui/react';
+import { Flex, IconButton, Text, Tooltip } from '@chakra-ui/react';
 import { LightBulbIcon } from '@heroicons/react/24/outline';
 
 import { Handle } from 'react-flow-renderer';
@@ -24,28 +24,46 @@ const schemaNode = ({ data, isConnectable }) => {
                 fontSize="14px"
                 paddingLeft="5px"
                 paddingRight="5px"
+                maxWidth="150px"
+                width="150px"
+                justifyContent="space-between"
             >
-                <Text fontWeight="bold">{data.label}</Text>
-                <IconButton
-                    className="nodrag"
-                    size="xs"
-                    marginLeft="10px"
-                    background={
-                        data.isVisible ? '#3182CE' : 'rgba(255, 255, 255, 0.08)'
-                    }
-                    _hover={{ background: '#3182CE' }}
-                    onClick={() => {
-                        data.toggleVisibility(data.label);
-                    }}
-                    icon={
-                        <LightBulbIcon
-                            style={{
-                                width: '14px',
-                                height: '14px'
-                            }}
-                        />
-                    }
-                />
+                <Tooltip label={data.label}>
+                    <Text
+                        fontWeight="bold"
+                        overflow="hidden"
+                        whiteSpace="nowrap"
+                        textOverflow="ellipsis"
+                    >
+                        {data.label}
+                    </Text>
+                </Tooltip>
+                <Tooltip
+                    label={data.isVisible ? 'Hide node type' : 'Show node type'}
+                >
+                    <IconButton
+                        className="nodrag"
+                        size="xs"
+                        marginLeft="10px"
+                        background={
+                            data.isVisible
+                                ? '#3182CE'
+                                : 'rgba(255, 255, 255, 0.08)'
+                        }
+                        _hover={{ background: '#3182CE' }}
+                        onClick={() => {
+                            data.toggleVisibility(data.label);
+                        }}
+                        icon={
+                            <LightBulbIcon
+                                style={{
+                                    width: '14px',
+                                    height: '14px'
+                                }}
+                            />
+                        }
+                    />
+                </Tooltip>
             </Flex>
             <Handle
                 type="source"

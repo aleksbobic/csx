@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
 import { generateNodePositions } from 'schema.utils';
+import { MarkerType } from 'react-flow-renderer';
 
 export class SchemaStore {
     nodes = [];
@@ -150,6 +151,11 @@ export class SchemaStore {
             target: `${target}`,
             type: 'schemaEdge',
             arrowHeadType: 'arrowclosed',
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 26,
+                height: 26
+            },
             data: {
                 possibleRelationships: possibleRelations,
                 relationship: link?.relationship

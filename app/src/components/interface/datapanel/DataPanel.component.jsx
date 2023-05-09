@@ -474,7 +474,7 @@ function DataPanel(props) {
                         activeTab === 3 &&
                         store.search.default_schemas[store.core.currentGraph]
                             .length > 0 &&
-                        '110px'
+                        '80px'
                     }
                     index={activeTab}
                 >

@@ -13,15 +13,15 @@ export function SchemaList() {
             schema => {
                 return (
                     <Box
-                        minHeight="60px"
-                        minWidth="60px"
+                        minHeight="40px"
+                        minWidth="40px"
                         key={`default_schema_${schema.id}`}
                     >
                         <Tooltip label={`Load ${schema.name} schema`}>
                             <Button
                                 style={{
-                                    width: '60px',
-                                    height: '60px',
+                                    width: '40px',
+                                    height: '40px',
                                     borderRadius: '8px'
                                 }}
                                 _hover={{
@@ -64,19 +64,19 @@ export function SchemaList() {
 
     return (
         <Box
-            height="110px"
+            height="90px"
             width="100%"
             position="absolute"
-            top="50px"
+            top="60px"
             left="0px"
-            padding="20px"
+            padding="10px"
             paddingBottom="0"
         >
             <CustomScroll style={{ paddingBottom: '20px' }}>
                 <HStack
                     spacing="10px"
                     alignItems="flex-end"
-                    height="90px"
+                    height="70px"
                     paddingBottom="4px"
                 >
                     <Text
