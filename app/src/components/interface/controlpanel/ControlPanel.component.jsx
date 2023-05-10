@@ -1,7 +1,6 @@
 import {
     Box,
     Button,
-    Divider,
     Flex,
     Heading,
     HStack,
@@ -30,26 +29,16 @@ import {
     PaintBrushIcon,
     ScissorsIcon
 } from '@heroicons/react/20/solid';
+import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
+import NetworkExplorationTools from 'components/feature/networkexplorationtools/NetworkExplorationTools.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
-import {
-    ChevronDoubleLeft,
-    ChevronDoubleRight,
-    DisplayFullwidth,
-    FormatSeparator,
-    LayoutPin,
-    LivePhoto,
-    MediaLive,
-    PathDivide,
-    PathIntersect,
-    RadioChecked,
-    Trash
-} from 'css.gg';
+import { ChevronDoubleLeft, ChevronDoubleRight, MediaLive } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 function ControlPanel() {
@@ -60,7 +49,6 @@ function ControlPanel() {
     const tabInactiveColors = useColorModeValue('black', 'white');
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
-    const [originNodeExists, setOriginNodeExists] = useState(false);
     const { colorMode } = useColorMode();
 
     const selfCentricMenuBackground = useColorModeValue(
@@ -357,17 +345,6 @@ function ControlPanel() {
     };
 
     useEffect(() => {
-        setOriginNodeExists(
-            store.graph.currentGraphData.selectedNodes.length < 2 ||
-                !store.graphInstance.selfCentricOriginNode
-        );
-    }, [
-        store.graph.currentGraphData.selectedNodes.length,
-        store.graph.currentGraphData.selectedNodes,
-        store.graphInstance.selfCentricOriginNode
-    ]);
-
-    useEffect(() => {
         onOpen();
     }, [onOpen]);
 
@@ -414,28 +391,7 @@ function ControlPanel() {
                         }}
                     />
                 </Tooltip>
-                <Tooltip label="Remove selection">
-                    <IconButton
-                        disabled={
-                            !store.graph.currentGraphData.selectedNodes.length
-                        }
-                        borderRadius="6px"
-                        id="removeselectionbutton"
-                        size="sm"
-                        icon={<Trash style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Network Modification',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Remove selection from graph'
-                                })
-                            );
-                            store.graph.removeSelection();
-                        }}
-                    />
-                </Tooltip>
+
                 <Box>
                     <Menu style={{ zIndex: 40 }}>
                         <Tooltip label="Expand network">
@@ -557,247 +513,6 @@ function ControlPanel() {
                     >
                         Show all
                     </Button>
-                </Tooltip>
-                <Tooltip label="Show selected nodes">
-                    <IconButton
-                        borderRadius="6px"
-                        id="selectednodes"
-                        isDisabled={
-                            !store.graph.currentGraphData.selectedNodes.length
-                        }
-                        size="sm"
-                        icon={<RadioChecked style={{ '--ggs': '0.6' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show selected nodes',
-                                    nodes: store.graph.currentGraphData.selectedNodes.map(
-                                        node => {
-                                            return {
-                                                id: node.id,
-                                                label: node.label
-                                            };
-                                        }
-                                    )
-                                })
-                            );
-                            store.graphInstance.triggerSelectedNodes();
-                        }}
-                    />
-                </Tooltip>
-
-                <Tooltip label="Show nodes with same entries as origin node">
-                    <IconButton
-                        borderRadius="6px"
-                        id="mutualentriesoriginbutton"
-                        isDisabled={!store.graphInstance.selfCentricOriginNode}
-                        size="sm"
-                        style={{
-                            paddingTop: '5px'
-                        }}
-                        icon={<FormatSeparator style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show nodes with same entries as origin',
-                                    origin: {
-                                        id: store.graphInstance
-                                            .selfCentricOriginNode.id,
-                                        label: store.graphInstance
-                                            .selfCentricOriginNode.label,
-                                        entries:
-                                            store.graphInstance
-                                                .selfCentricOriginNode.entries
-                                    }
-                                })
-                            );
-                            store.graphInstance.triggerSameEntry();
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Show nodes with same entries as all selected nodes">
-                    <IconButton
-                        borderRadius="6px"
-                        id="mutualentriesoriginbutton"
-                        isDisabled={
-                            store.graph.currentGraphData.selectedNodes.length <
-                            2
-                        }
-                        size="sm"
-                        style={{
-                            paddingTop: '1px'
-                        }}
-                        icon={<DisplayFullwidth style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show nodes with same entries as all selected nodes',
-                                    nodes: store.graph.currentGraphData.selectedNodes.map(
-                                        node => {
-                                            return {
-                                                id: node.id,
-                                                label: node.label
-                                            };
-                                        }
-                                    )
-                                })
-                            );
-                            store.graphInstance.triggerSameEntry(true);
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Show direct connections of selected nodes">
-                    <IconButton
-                        borderRadius="6px"
-                        id="alldirectconnections"
-                        isDisabled={
-                            store.graph.currentGraphData.selectedNodes.length <
-                            1
-                        }
-                        size="sm"
-                        icon={<PathDivide style={{ '--ggs': '0.8' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show direct connections of selected nodes',
-                                    nodes: store.graph.currentGraphData.selectedNodes.map(
-                                        node => {
-                                            return {
-                                                id: node.id,
-                                                label: node.label
-                                            };
-                                        }
-                                    )
-                                })
-                            );
-
-                            store.graphInstance.triggerMultiSelfCentric();
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Show mutual connections of selected nodes">
-                    <IconButton
-                        borderRadius="6px"
-                        id="mutualconnectionsbutton"
-                        isDisabled={
-                            store.graph.currentGraphData.selectedNodes.length <
-                            2
-                        }
-                        size="sm"
-                        icon={<PathIntersect style={{ '--ggs': '0.8' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show mutual connections of selected nodes',
-                                    nodes: store.graph.currentGraphData.selectedNodes.map(
-                                        node => {
-                                            return {
-                                                id: node.id,
-                                                label: node.label
-                                            };
-                                        }
-                                    )
-                                })
-                            );
-                            store.graphInstance.triggerMultiSelfCentric(true);
-                        }}
-                    />
-                </Tooltip>
-            </HStack>
-            <Divider
-                orientation="vertical"
-                style={{
-                    height: '26px',
-                    width: '1px',
-                    opacity: 0.2
-                }}
-            />
-            <HStack spacing="1">
-                <Tooltip label="Show direct connections of origin node">
-                    <IconButton
-                        borderRadius="6px"
-                        id="directconnections"
-                        isDisabled={originNodeExists}
-                        size="sm"
-                        icon={<LivePhoto style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show direct connections of origin node',
-                                    origin: {
-                                        id: store.graphInstance
-                                            .selfCentricOriginNode.id,
-                                        label: store.graphInstance
-                                            .selfCentricOriginNode.label,
-                                        entries:
-                                            store.graphInstance
-                                                .selfCentricOriginNode.entries
-                                    }
-                                })
-                            );
-
-                            store.graphInstance.triggerSelfCentric();
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Show mutual connections with origin node">
-                    <IconButton
-                        borderRadius="6px"
-                        id="mutualconnectionsoriginbutton"
-                        isDisabled={originNodeExists}
-                        size="sm"
-                        icon={<LayoutPin style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show mutual connections with origin node',
-                                    origin: {
-                                        id: store.graphInstance
-                                            .selfCentricOriginNode.id,
-                                        label: store.graphInstance
-                                            .selfCentricOriginNode.label,
-                                        entries:
-                                            store.graphInstance
-                                                .selfCentricOriginNode.entries
-                                    },
-                                    nodes: store.graph.currentGraphData.selectedNodes.map(
-                                        node => {
-                                            return {
-                                                id: node.id,
-                                                label: node.label
-                                            };
-                                        }
-                                    )
-                                })
-                            );
-
-                            store.graphInstance.triggerMultiSelfCentric(
-                                true,
-                                true
-                            );
-                        }}
-                    />
                 </Tooltip>
             </HStack>
         </HStack>
@@ -934,6 +649,55 @@ function ControlPanel() {
                     </Box>
                 </Tooltip>
             </Tab>
+            <Tab
+                width="40px"
+                height="40px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open network exploration tools'
+                        })
+                    );
+                }}
+                _hover={{ bgColor: 'whiteAlpha.200' }}
+                padding="8px"
+                marginbottom="10px"
+                style={
+                    isOpen
+                        ? {
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
+                        : {
+                              color: tabInactiveColors,
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
+                }
+                _selected={{
+                    bgColor: isOpen ? 'whiteAlpha.200' : 'transparent',
+                    color: 'blue.300'
+                }}
+            >
+                <Tooltip label="Network exploration tools">
+                    <Box
+                        id="networkexplorationtoolstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <CubeTransparentIcon width="18px" height="18px" />
+                    </Box>
+                </Tooltip>
+            </Tab>
         </TabList>
     );
 
@@ -978,6 +742,24 @@ function ControlPanel() {
                     }}
                 >
                     <SettingsComponent />
+                </CustomScroll>
+            </TabPanel>
+            <TabPanel
+                width="250px"
+                height="100%"
+                style={{
+                    overflowX: 'hidden',
+                    paddingLeft: 0,
+                    paddingRight: '15px'
+                }}
+            >
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '0'
+                    }}
+                >
+                    <NetworkExplorationTools />
                 </CustomScroll>
             </TabPanel>
         </TabPanels>

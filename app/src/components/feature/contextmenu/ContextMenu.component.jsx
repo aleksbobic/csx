@@ -2,6 +2,7 @@ import { Button, ButtonGroup } from '@chakra-ui/button';
 import { useColorMode } from '@chakra-ui/color-mode';
 import { useOutsideClick } from '@chakra-ui/hooks';
 import { Box, VStack } from '@chakra-ui/layout';
+import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -127,6 +128,7 @@ function ContextMenu() {
                     onClick={triggerSelfCentric}
                     key="selfCentricButton"
                     _hover={{ backgroundColor: 'blue.500' }}
+                    width="100%"
                 >
                     Show direct connections
                 </Button>
@@ -154,45 +156,101 @@ function ContextMenu() {
             }
         >
             <ButtonGroup variant="ghost" size="xs" width="100%">
-                <VStack align="stretch" spacing="0" width="100%">
-                    <Button
-                        justifyContent="left"
-                        onClick={selectNode}
-                        _hover={{ backgroundColor: 'blue.500' }}
-                    >
-                        {store.contextMenu.originNode?.selected
-                            ? 'Deselect node'
-                            : 'Select node'}
-                    </Button>
-                    {!store.graphInstance.isSelfCentric && (
+                <VStack align="stretch" spacing="15px" width="100%">
+                    <VStack position="relative" spacing="0">
                         <Button
                             justifyContent="left"
-                            onClick={selectComponent}
+                            onClick={selectNode}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            width="100%"
+                        >
+                            {store.contextMenu.originNode?.selected
+                                ? 'Deselect node'
+                                : 'Select node'}
+                        </Button>
+                        {!store.graphInstance.isSelfCentric && (
+                            <Button
+                                justifyContent="left"
+                                onClick={selectComponent}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                {store.graph.currentGraphData.selectedComponents.includes(
+                                    store.contextMenu.originNode?.component
+                                )
+                                    ? 'Deselect component'
+                                    : 'Select component'}
+                            </Button>
+                        )}
+                        {!store.graphInstance.isSelfCentric &&
+                            renderAdvcancedButtons()}
+                        <Button
+                            justifyContent="left"
+                            onClick={expandGraph}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            width="100%"
+                        >
+                            Expand graph through node
+                        </Button>
+                    </VStack>
+                    <VStack
+                        borderTop="1px solid #ffffff33"
+                        position="relative"
+                        marginTop="10px"
+                        spacing="0"
+                        paddingTop="10px"
+                    >
+                        <Text
+                            fontSize="12px"
+                            fontWeight="bold"
+                            position="absolute"
+                            color="whiteAlpha.500"
+                            top="-10px"
+                            left="2px"
+                            backgroundColor="black"
+                            padding="0 10px"
+                        >
+                            Remove
+                        </Text>
+                        <Button
+                            justifyContent="left"
+                            onClick={removeSelection}
+                            width="100%"
                             _hover={{ backgroundColor: 'blue.500' }}
                         >
-                            {store.graph.currentGraphData.selectedComponents.includes(
-                                store.contextMenu.originNode?.component
-                            )
-                                ? 'Deselect component'
-                                : 'Select component'}
+                            Remove node
                         </Button>
-                    )}
-                    {!store.graphInstance.isSelfCentric &&
-                        renderAdvcancedButtons()}
-                    <Button
-                        justifyContent="left"
-                        onClick={expandGraph}
-                        _hover={{ backgroundColor: 'blue.500' }}
-                    >
-                        Expand graph through node
-                    </Button>
-                    <Button
-                        justifyContent="left"
-                        onClick={removeSelection}
-                        _hover={{ backgroundColor: 'blue.500' }}
-                    >
-                        Remove node
-                    </Button>
+                        <Button
+                            justifyContent="left"
+                            disabled={
+                                !store.graph.currentGraphData.selectedNodes
+                                    .length
+                            }
+                            width="100%"
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            _disabled={{
+                                opacity: 0.5,
+                                cursor: 'not-allowed',
+                                _hover: {
+                                    backgroundColor: 'transparent'
+                                }
+                            }}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Graph Area - Context Menu',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Remove selection from graph'
+                                    })
+                                );
+                                store.graph.removeSelection();
+                                store.contextMenu.hideContextMenu();
+                            }}
+                        >
+                            Remove selected nodes
+                        </Button>
+                    </VStack>
                 </VStack>
             </ButtonGroup>
         </Box>
