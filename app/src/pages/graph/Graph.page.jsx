@@ -1,4 +1,11 @@
-import { Box, Center, Text, useColorMode, useToast } from '@chakra-ui/react';
+import {
+    Box,
+    Center,
+    HStack,
+    Text,
+    useColorMode,
+    useToast
+} from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
@@ -14,6 +21,7 @@ import { isEnvSet } from 'general.utils';
 import { useCallback } from 'react';
 import { useRef } from 'react';
 import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 function GraphPage() {
     const dataModificationInfoToastRef = useRef();
@@ -170,17 +178,28 @@ function GraphPage() {
                     dataModificationInfoToastRef.current =
                         dataModificationInfoToast({
                             render: () => (
-                                <Text
-                                    fontSize="sm"
-                                    fontWeight="bold"
-                                    backgroundColor="blackAlpha.900"
-                                    textAlign="center"
-                                    borderRadius="full"
-                                    padding="10px 20px"
-                                    marginBottom="10px"
+                                <HStack
+                                    background="linear-gradient(45deg, #3182CE 0%, #2C5282 100%)"
+                                    borderRadius="10px"
+                                    padding="5px 10px 5px 5px"
+                                    marginBottom="15px"
                                 >
-                                    {message}
-                                </Text>
+                                    <Box padding="5px" borderRadius="6px">
+                                        <InformationCircleIcon
+                                            style={{
+                                                width: '30px',
+                                                heght: '30px'
+                                            }}
+                                        />
+                                    </Box>
+                                    <Text
+                                        fontSize="sm"
+                                        fontWeight="medium"
+                                        textAlign="left"
+                                    >
+                                        {message}
+                                    </Text>
+                                </HStack>
                             ),
                             status: 'info',
                             duration: 5000,

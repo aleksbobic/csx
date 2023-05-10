@@ -13,7 +13,7 @@ export class SchemaStore {
     featureTypes = {};
     schemaHasChanges = false;
     schemaHasErrors = false;
-    schemaError = '';
+    schemaError = null;
     relationshipMapping = {
         '1:1': 'oneToOne',
         '1:M': 'oneToMany',
@@ -37,6 +37,8 @@ export class SchemaStore {
         this.edges = [];
         this.nodeLabelToID = {};
         this.setSchemaHasChanges(false);
+        this.setSchemaHasErrors(false);
+        this.schemaError = null;
     };
 
     toggleRelationship = (id, possibleRelationships) => {
