@@ -4,7 +4,9 @@ import {
     HStack,
     Text,
     useColorMode,
-    useToast
+    useToast,
+    SlideFade,
+    Button
 } from '@chakra-ui/react';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
@@ -26,12 +28,25 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 function GraphPage() {
     const dataModificationInfoToastRef = useRef();
     const dataModificationInfoToast = useToast();
+    const [showViewAll, setViewAll] = useState(false);
+
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const { colorMode } = useColorMode();
     const history = useHistory();
     const surveyToastRef = useRef();
     const surveyToast = useToast();
+
+    useEffect(() => {
+        if (
+            store.graphInstance.isSelfCentric ||
+            store.graphInstance.isFiltered
+        ) {
+            setViewAll(true);
+        } else {
+            setViewAll(false);
+        }
+    }, [store.graphInstance.isSelfCentric, store.graphInstance.isFiltered]);
 
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
 
@@ -229,6 +244,41 @@ function GraphPage() {
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <StatsModalComponent />
             <ContextMenuComponent />
+
+            {showViewAll && (
+                <Box
+                    bottom="20px"
+                    left="50%"
+                    zIndex="20"
+                    transform="translateX(-50%)"
+                    position="absolute"
+                >
+                    <SlideFade in={showViewAll} offsetY="10px">
+                        <Button
+                            backgroundColor="blue.600"
+                            borderRadius="full"
+                            position="relative"
+                            size="sm"
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    'Side Panel - Direct Connections',
+                                    'Button',
+                                    JSON.stringify({
+                                        type: 'Click',
+                                        value: 'Show all nodes'
+                                    })
+                                );
+                                store.graphInstance.toggleVisibleComponents(-1);
+                                store.graphInstance.setIsFiltered(false);
+                                store.graphInstance.resetSelfCentric();
+                            }}
+                        >
+                            View all
+                        </Button>
+                    </SlideFade>
+                </Box>
+            )}
 
             {showLoader && (
                 <Center

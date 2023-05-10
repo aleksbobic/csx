@@ -316,6 +316,9 @@ function SelectedComponentList(props) {
                                                         store.graphInstance.toggleVisibleComponents(
                                                             component.id
                                                         );
+                                                        store.graphInstance.setIsFiltered(
+                                                            true
+                                                        );
                                                     }}
                                                     icon={
                                                         <Eye

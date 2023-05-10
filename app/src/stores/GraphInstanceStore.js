@@ -27,6 +27,7 @@ export class GraphInstanceStore {
     forceCooldownTicks = 0;
     forceCooldownTime = 0;
     isSelfCentric = false;
+    isFiltered = false;
     selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
     selfCentricOriginNode = null;
     linkVisibility = true;
@@ -64,6 +65,7 @@ export class GraphInstanceStore {
     }
 
     resetLabelFeatures = () => (this.labels.labelFeatures = []);
+    setIsFiltered = value => (this.isFiltered = value);
     addLabelFeature = feature => this.labels.labelFeatures.push(feature);
     removeLabelFeature = feature =>
         (this.labels.labelFeatures = this.labels.labelFeatures.filter(

@@ -1,6 +1,5 @@
 import {
     Box,
-    Button,
     Flex,
     Heading,
     HStack,
@@ -34,7 +33,7 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import NetworkExplorationTools from 'components/feature/networkexplorationtools/NetworkExplorationTools.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
-import { ChevronDoubleLeft, ChevronDoubleRight, MediaLive } from 'css.gg';
+import { ChevronDoubleLeft, ChevronDoubleRight } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
@@ -476,48 +475,6 @@ function ControlPanel() {
         </HStack>
     );
 
-    const renderDirectConnectionsMenu = () => (
-        <HStack
-            id="directconnectionsmenu"
-            position="absolute"
-            top="20px"
-            left="320px"
-            zIndex={20}
-            spacing="2"
-            backgroundColor={
-                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
-            }
-            padding="5px 6px"
-            borderRadius="8px"
-            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
-        >
-            <HStack spacing="1">
-                <Tooltip label="Show all nodes">
-                    <Button
-                        borderRadius="6px"
-                        id="closedirectconnections"
-                        size="sm"
-                        icon={<MediaLive style={{ '--ggs': '0.6' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Direct Connections',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show all nodes'
-                                })
-                            );
-                            store.graphInstance.toggleVisibleComponents(-1);
-                            store.graphInstance.resetSelfCentric();
-                        }}
-                    >
-                        Show all
-                    </Button>
-                </Tooltip>
-            </HStack>
-        </HStack>
-    );
-
     const renderTabs = () => (
         <TabList
             position="absolute"
@@ -801,7 +758,6 @@ function ControlPanel() {
                     }}
                 >
                     {renderTabPanels()}
-                    {renderDirectConnectionsMenu()}
                     {renderNetworkModificationMenu()}
 
                     {!store.core.dataIsLoading &&

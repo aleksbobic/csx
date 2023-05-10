@@ -31,7 +31,6 @@ function NetworkExplorationTools() {
                     padding="5px 10px"
                     borderRadius="10px"
                     allowToggle={true}
-                    style={{ marginTop: '15px' }}
                     defaultIndex={0}
                 >
                     <AccordionItem>
@@ -99,48 +98,7 @@ function NetworkExplorationTools() {
                                             }}
                                         />
                                     </Tooltip>
-                                    <Tooltip label="Show nodes found in same search results as selected nodes">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="mutualentriesoriginbutton"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 2
-                                            }
-                                            size="sm"
-                                            style={{}}
-                                            icon={
-                                                <FormatSeparator
-                                                    style={{
-                                                        '--ggs': '0.7',
-                                                        marginTop: '5px'
-                                                    }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show nodes with same entries as all selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerSameEntry(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip label="Show direct connections of selected nodes">
+                                    <Tooltip label="Show direct connections">
                                         <IconButton
                                             borderRadius="6px"
                                             id="alldirectconnections"
@@ -176,7 +134,7 @@ function NetworkExplorationTools() {
                                             }}
                                         />
                                     </Tooltip>
-                                    <Tooltip label="Show mutual connections of selected nodes">
+                                    <Tooltip label="Show mutual connections">
                                         <IconButton
                                             borderRadius="6px"
                                             id="mutualconnectionsbutton"
@@ -208,6 +166,47 @@ function NetworkExplorationTools() {
                                                     })
                                                 );
                                                 store.graphInstance.triggerMultiSelfCentric(
+                                                    true
+                                                );
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip label="Show nodes in same search results">
+                                        <IconButton
+                                            borderRadius="6px"
+                                            id="mutualentriesoriginbutton"
+                                            isDisabled={
+                                                store.graph.currentGraphData
+                                                    .selectedNodes.length < 1
+                                            }
+                                            size="sm"
+                                            style={{}}
+                                            icon={
+                                                <FormatSeparator
+                                                    style={{
+                                                        '--ggs': '0.7',
+                                                        marginTop: '5px'
+                                                    }}
+                                                />
+                                            }
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Side Panel - Direct Connections',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: 'Show nodes with same entries as all selected nodes',
+                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                            node => {
+                                                                return {
+                                                                    id: node.id,
+                                                                    label: node.label
+                                                                };
+                                                            }
+                                                        )
+                                                    })
+                                                );
+                                                store.graphInstance.triggerSameEntry(
                                                     true
                                                 );
                                             }}

@@ -385,6 +385,7 @@ function BarChart(props) {
                             );
                     }
 
+                    store.graphInstance.setIsFiltered(true);
                     if (visibleNodeIds.length === 1) {
                         store.graphInstance.zoomToFitByNodeId(
                             visibleNodeIds[0],
