@@ -268,7 +268,11 @@ function Graph(props) {
             }
             linkDirectionalArrowResolution={2}
             linkDirectionalArrowRelPos={1}
-            linkCurvature={store.graphInstance.useCurvedEdges ? 0.4 : 0}
+            linkCurvature={
+                store.graphInstance.useCurvedEdges
+                    ? store.graphInstance.customEdgeCurvature
+                    : 0
+            }
             onLinkHover={link => {
                 if (store.core.isOverview) {
                     if (link) {

@@ -714,50 +714,134 @@ function Settings() {
                                     </VStack>
                                 </Tooltip>
                             </VStack>
-                            <Tooltip
-                                label={
-                                    store.graphInstance.useCurvedEdges
-                                        ? 'Use straight edges'
-                                        : 'Use curved edges'
-                                }
+                            <VStack
+                                backgroundColor="whiteAlpha.50"
+                                width="100%"
+                                padding="10px 10px 15px"
+                                borderRadius="6px"
+                                style={{ marginBottom: '10px' }}
                             >
-                                <HStack
-                                    spacing="1"
-                                    width="100%"
-                                    justifyContent="space-between"
-                                    padding="5px"
+                                <Tooltip
+                                    label={
+                                        store.graphInstance.useCurvedEdges
+                                            ? 'Use straight edges'
+                                            : 'Use curved edges'
+                                    }
                                 >
-                                    <Text fontSize="sm">Curved edges</Text>
-                                    <Switch
-                                        id="curvedEdges"
-                                        size="sm"
-                                        marginRight="10px"
-                                        isChecked={
-                                            store.graphInstance.useCurvedEdges
-                                        }
-                                        value={
-                                            store.graphInstance.useCurvedEdges
-                                        }
-                                        onChange={() => {
-                                            store.graphInstance.toggleUseCurvedEdges();
+                                    <HStack
+                                        spacing="1"
+                                        width="100%"
+                                        justifyContent="space-between"
+                                        padding="5px"
+                                    >
+                                        <Text fontSize="sm">
+                                            Edge curvature
+                                        </Text>
+                                        <Switch
+                                            id="curvedEdges"
+                                            size="sm"
+                                            marginRight="10px"
+                                            isChecked={
+                                                store.graphInstance
+                                                    .useCurvedEdges
+                                            }
+                                            value={
+                                                store.graphInstance
+                                                    .useCurvedEdges
+                                            }
+                                            onChange={() => {
+                                                store.graphInstance.toggleUseCurvedEdges();
 
-                                            store.track.trackEvent(
-                                                'Side panel - View Settings',
-                                                'Switch',
-                                                JSON.stringify({
-                                                    type: 'Toggle',
-                                                    value: `${
-                                                        store.graphInstance
-                                                            .useCurvedEdges
-                                                            ? 'Use curved links'
-                                                            : 'Use straight links'
-                                                    }`
-                                                })
-                                            );
+                                                store.track.trackEvent(
+                                                    'Side panel - View Settings',
+                                                    'Switch',
+                                                    JSON.stringify({
+                                                        type: 'Toggle',
+                                                        value: `${
+                                                            store.graphInstance
+                                                                .useCurvedEdges
+                                                                ? 'Use curved links'
+                                                                : 'Use straight links'
+                                                        }`
+                                                    })
+                                                );
+                                            }}
+                                        />
+                                    </HStack>
+                                </Tooltip>
+                                <Tooltip
+                                    label={`Edge curvature is ${parseInt(
+                                        store.graphInstance
+                                            .customEdgeCurvature * 10
+                                    )}`}
+                                    isDisabled={
+                                        !store.graphInstance.useCurvedEdges
+                                    }
+                                >
+                                    <VStack
+                                        opacity={
+                                            store.graphInstance.useCurvedEdges
+                                                ? '1'
+                                                : '0.2'
+                                        }
+                                        spacing="1"
+                                        style={{
+                                            width: '100%',
+                                            marginBottom: '20px',
+                                            paddingLeft: '10px',
+                                            paddingRight: '10px'
                                         }}
-                                    />
-                                </HStack>
-                            </Tooltip>
+                                    >
+                                        <Slider
+                                            defaultValue={5}
+                                            disabled={
+                                                !store.graphInstance
+                                                    .useCurvedEdges
+                                            }
+                                            min={1}
+                                            max={10}
+                                            colorScheme={
+                                                store.graphInstance
+                                                    .useCurvedEdges
+                                                    ? 'blue'
+                                                    : 'gray'
+                                            }
+                                            value={
+                                                store.graphInstance
+                                                    .customEdgeCurvature * 10
+                                            }
+                                            onChange={value =>
+                                                store.graphInstance.setCustomEdgeCurvature(
+                                                    value * 0.1
+                                                )
+                                            }
+                                        >
+                                            <SliderMark
+                                                value={1}
+                                                fontSize="xs"
+                                                marginTop="10px"
+                                                marginLeft="-4px"
+                                            >
+                                                Slightly
+                                            </SliderMark>
+                                            <SliderMark
+                                                value={10}
+                                                fontSize="xs"
+                                                marginTop="10px"
+                                                marginLeft="-26px"
+                                            >
+                                                Very
+                                            </SliderMark>
+
+                                            <SliderTrack>
+                                                <SliderFilledTrack />
+                                            </SliderTrack>
+                                            <SliderThumb />
+                                        </Slider>
+                                    </VStack>
+                                </Tooltip>
+                            </VStack>
+
                             {store.core.isDetail && (
                                 <Tooltip
                                     label={

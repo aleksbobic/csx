@@ -36,6 +36,7 @@ export class GraphInstanceStore {
     orphanNodeVisibility = true;
     edgeDirectionVisiblity = false;
     useCurvedEdges = false;
+    customEdgeCurvature = 0.5;
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
     edgeColorScheme = { overview: 'auto', detail: 'auto' };
@@ -77,6 +78,7 @@ export class GraphInstanceStore {
     toggleAutomaticEdgeOpacity = () =>
         (this.automaticEdgeOpacity = !this.automaticEdgeOpacity);
     setCustomEdgeOpacity = value => (this.customEdgeOpacity = value);
+    setCustomEdgeCurvature = value => (this.customEdgeCurvature = value);
 
     setPanSpeed = speed => {
         this.panSpeed = speed;
