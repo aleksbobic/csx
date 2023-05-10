@@ -52,6 +52,20 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
+    const deselectAllNodes = () => {
+        const selectedNodes = [...store.graph.currentGraphData.selectedNodes];
+
+        selectedNodes.forEach(node => {
+            const index = store.graph.currentGraphData.selectedNodes.findIndex(
+                n => n.id === node.id
+            );
+
+            store.graph.toggleNodeSelection(node.id, index);
+        });
+
+        store.contextMenu.hideContextMenu();
+    };
+
     const removeSelection = () => {
         store.track.trackEvent(
             'Graph Area - Context Menu',
@@ -156,8 +170,8 @@ function ContextMenu() {
             }
         >
             <ButtonGroup variant="ghost" size="xs" width="100%">
-                <VStack align="stretch" spacing="15px" width="100%">
-                    <VStack position="relative" spacing="0">
+                {store.contextMenu.contextType === 'node' && (
+                    <VStack align="stretch" spacing="0" width="100%">
                         <Button
                             justifyContent="left"
                             onClick={selectNode}
@@ -192,26 +206,6 @@ function ContextMenu() {
                         >
                             Expand graph through node
                         </Button>
-                    </VStack>
-                    <VStack
-                        borderTop="1px solid #ffffff33"
-                        position="relative"
-                        marginTop="10px"
-                        spacing="0"
-                        paddingTop="10px"
-                    >
-                        <Text
-                            fontSize="12px"
-                            fontWeight="bold"
-                            position="absolute"
-                            color="whiteAlpha.500"
-                            top="-10px"
-                            left="2px"
-                            backgroundColor="black"
-                            padding="0 10px"
-                        >
-                            Remove
-                        </Text>
                         <Button
                             justifyContent="left"
                             onClick={removeSelection}
@@ -220,38 +214,173 @@ function ContextMenu() {
                         >
                             Remove node
                         </Button>
-                        <Button
-                            justifyContent="left"
-                            disabled={
-                                !store.graph.currentGraphData.selectedNodes
-                                    .length
-                            }
-                            width="100%"
-                            _hover={{ backgroundColor: 'blue.500' }}
-                            _disabled={{
-                                opacity: 0.5,
-                                cursor: 'not-allowed',
-                                _hover: {
-                                    backgroundColor: 'transparent'
-                                }
-                            }}
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Graph Area - Context Menu',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Remove selection from graph'
-                                    })
-                                );
-                                store.graph.removeSelection();
-                                store.contextMenu.hideContextMenu();
-                            }}
-                        >
-                            Remove selected nodes
-                        </Button>
                     </VStack>
-                </VStack>
+                )}
+
+                {store.contextMenu.contextType === 'canvas' && (
+                    <VStack align="stretch" spacing="15px" width="100%">
+                        <VStack align="stretch" spacing="0" width="100%">
+                            <Button
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 1
+                                }
+                                justifyContent="left"
+                                onClick={deselectAllNodes}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                Deselect all nodes
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graphInstance.isFiltered &&
+                                    !store.graphInstance.isSelfCentric
+                                }
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Side Panel - Direct Connections',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Show all nodes'
+                                        })
+                                    );
+                                    store.graphInstance.toggleVisibleComponents(
+                                        -1
+                                    );
+                                    store.graphInstance.setIsFiltered(false);
+                                    store.graphInstance.resetSelfCentric();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                View all nodes
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Graph Area - View Controls',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Zoom to fit'
+                                        })
+                                    );
+
+                                    store.graphInstance.zoomToFit();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                Fit graph to view
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Graph Area - View Controls',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Take screenshot'
+                                        })
+                                    );
+                                    store.graphInstance.takeScreenshot();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                Take screenshot
+                            </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="10px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 10px"
+                            >
+                                Remove
+                            </Text>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graph.currentGraphData.selectedNodes
+                                        .length
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Graph Area - Context Menu',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Remove selection from graph'
+                                        })
+                                    );
+                                    store.graph.removeSelection();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Remove selected nodes
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graphInstance.isSelfCentric &&
+                                    !store.graphInstance.isFiltered
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Side Panel - Network Modification',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Trim network'
+                                        })
+                                    );
+                                    store.graph.trimNetwork();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Remove invisible nodes
+                            </Button>
+                        </VStack>
+                    </VStack>
+                )}
             </ButtonGroup>
         </Box>
     );

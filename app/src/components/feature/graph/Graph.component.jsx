@@ -69,6 +69,18 @@ function Graph(props) {
         store.contextMenu.showContextMenu(node, event.clientX, event.clientY);
     };
 
+    const onBackgroundRightClick = event => {
+        store.track.trackEvent(
+            'Graph Area',
+            'Canvas',
+            JSON.stringify({
+                type: 'Click'
+            })
+        );
+
+        store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
+    };
+
     const handleNodeHover = (node, nodeout) => {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
@@ -283,6 +295,7 @@ function Graph(props) {
                 powerPreference: 'high-performance'
             }}
             onNodeClick={onNodeClick}
+            onBackgroundRightClick={onBackgroundRightClick}
             onBackgroundClick={() => {
                 store.track.trackEvent(
                     'Graph Area - Contex Menu',

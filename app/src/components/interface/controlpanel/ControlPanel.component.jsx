@@ -616,7 +616,7 @@ function ControlPanel() {
                         'Button',
                         JSON.stringify({
                             type: 'Click',
-                            value: 'Open network exploration tools'
+                            value: 'Open exploration tools'
                         })
                     );
                 }}
@@ -642,7 +642,7 @@ function ControlPanel() {
                     color: 'blue.300'
                 }}
             >
-                <Tooltip label="Network exploration tools">
+                <Tooltip label="Exploration tools">
                     <Box
                         id="networkexplorationtoolstab"
                         width="100%"

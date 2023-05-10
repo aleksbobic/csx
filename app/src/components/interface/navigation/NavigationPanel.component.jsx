@@ -19,17 +19,15 @@ import {
     List,
     Moon,
     RadioCheck,
-    Ratio,
     Ring,
     Search,
     Sun
 } from 'css.gg';
+import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
-import { isEnvFalse } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
-import { CameraIcon } from '@heroicons/react/24/solid';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -193,8 +191,8 @@ function NavigationPanelComponent() {
         <VStack
             alignItems="flex-start"
             position="absolute"
-            bottom="50px"
-            right="0px"
+            bottom="0px"
+            right="20px"
             width="200px"
             spacing="5px"
             backgroundColor={
@@ -237,57 +235,10 @@ function NavigationPanelComponent() {
     );
 
     const renderViewUtils = () => (
-        <Box
-            position="absolute"
-            marginLeft="-100px"
-            bottom="20px"
-            id="viewutils"
-        >
+        <Box position="absolute" bottom="20px" id="viewutils">
             {store.graphInstance.hoverData.length > 0 &&
                 store.core.isOverview &&
                 renderHoverData()}
-            <HStack spacing="10px">
-                <Tooltip label="Make Screenshot">
-                    <IconButton
-                        size="sm"
-                        border="none"
-                        aria-label="Make Screenshot"
-                        icon={<CameraIcon style={{ width: '16px' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - View Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Take screenshot'
-                                })
-                            );
-                            store.graphInstance.takeScreenshot();
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Zoom to fit">
-                    <IconButton
-                        id="zoomtofitbutton"
-                        size="sm"
-                        border="none"
-                        aria-label="Zoom to fit"
-                        icon={<Ratio style={{ '--ggs': '0.8' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - View Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Zoom to fit'
-                                })
-                            );
-
-                            store.graphInstance.zoomToFit();
-                        }}
-                    />
-                </Tooltip>
-            </HStack>
         </Box>
     );
 
