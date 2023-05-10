@@ -287,6 +287,7 @@ function HomePage() {
     useEffect(() => {
         store.core.setIsStudyPublic(false);
         store.core.setDataModificationMessage(null);
+        store.core.resetVisibleDimensions();
         store.schema.resetSchema();
         store.overviewSchema.setSchemaHasChanges(false);
         store.core.setStudyPublicURL('');

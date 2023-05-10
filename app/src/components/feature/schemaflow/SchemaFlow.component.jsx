@@ -123,7 +123,6 @@ function SchemaFlow() {
 
     const connectNodes = connection => {
         store.schema.addSchemaConnection(connection);
-        store.core.updateVisibleDimensionsBasedOnSchema();
     };
 
     const updateEdge = (oldEdge, newEdge) => {
@@ -152,7 +151,6 @@ function SchemaFlow() {
                 store.schema.updateEdges(
                     applyEdgeChanges(changes, store.schema.edges)
                 );
-                store.core.updateVisibleDimensionsBasedOnSchema();
             }
         },
         [store.core, store.overviewSchema, store.schema]
@@ -266,14 +264,14 @@ function SchemaFlow() {
 
             <HStack
                 backgroundColor={
-                    colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.900'
+                    colorMode === 'light' ? 'whiteAlpha.900' : '#1d1d1d'
                 }
                 position="absolute"
                 bottom="10px"
                 left="10px"
                 zIndex="20"
-                width={store.core.isDetail ? '82px' : '44px'}
-                height="42px"
+                width="44px"
+                height="44px"
                 padding="6px"
                 borderRadius="10px"
                 spacing="6px"
@@ -305,55 +303,6 @@ function SchemaFlow() {
                         }}
                     />
                 </Tooltip>
-                {store.core.isDetail && (
-                    <Tooltip
-                        label={
-                            store.core.isSchemaNodeTypeBound
-                                ? 'Unbind schema and visible node types'
-                                : 'Bind schema and visible node types'
-                        }
-                    >
-                        <IconButton
-                            size="sm"
-                            opacity="0.6"
-                            transition="0.2s all ease-in-out"
-                            _hover={{ opacity: 1 }}
-                            icon={
-                                store.core.isSchemaNodeTypeBound ? (
-                                    <Lock
-                                        style={{
-                                            '--ggs': '0.7'
-                                        }}
-                                    />
-                                ) : (
-                                    <LockUnlock
-                                        style={{
-                                            '--ggs': '0.7',
-                                            marginBottom: '-2px',
-                                            marginRight: '-2px'
-                                        }}
-                                    />
-                                )
-                            }
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Schema Panel',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: store.core.isSchemaNodeTypeBound
-                                            ? 'Unbind schema and visible node types'
-                                            : 'Bind schema and visible node types'
-                                    })
-                                );
-
-                                store.core.setIsSchemaNodeTypeBound(
-                                    !store.core.isSchemaNodeTypeBound
-                                );
-                            }}
-                        />
-                    </Tooltip>
-                )}
             </HStack>
         </Box>
     );

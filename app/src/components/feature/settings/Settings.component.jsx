@@ -1,5 +1,5 @@
 import { Button } from '@chakra-ui/button';
-import { Box, Heading, HStack, Stack, Text, VStack } from '@chakra-ui/layout';
+import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
     Checkbox,
     IconButton,
@@ -8,11 +8,8 @@ import {
     MenuItem,
     MenuList,
     Select,
-    Tag,
     Tooltip,
     useColorMode,
-    useColorModeValue,
-    Wrap,
     Slider,
     SliderFilledTrack,
     SliderThumb,
@@ -35,16 +32,6 @@ function Settings() {
     const store = useContext(RootStoreContext);
     const [forceRunning, setForceRunning] = useState(false);
     const { colorMode } = useColorMode();
-
-    const graphDimensionBackground = useColorModeValue(
-        'blackAlpha.200',
-        'whiteAlpha.300'
-    );
-
-    const graphDimensionHoverBackground = useColorModeValue(
-        'blue.500',
-        'blue.700'
-    );
 
     useEffect(() => {
         if (!store.graphInstance.forceEngine) {

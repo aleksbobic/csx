@@ -28,7 +28,6 @@ export class CoreStore {
     trackingEnabled = false;
     colorMode = null;
     showCookieInfo = false;
-    isSchemaNodeTypeBound = true;
     isLeftSidePanelOpen = true;
     isRightSidePanelOpen = false;
     rightPanelType = '';
@@ -130,15 +129,6 @@ export class CoreStore {
     setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
     setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
     setRightPanelType = val => (this.rightPanelType = val);
-
-    setIsSchemaNodeTypeBound = val => {
-        this.isSchemaNodeTypeBound = val;
-        if (val) {
-            this.updateVisibleDimensionsBasedOnSchema();
-            this.store.schema.refreshNodeStyles();
-            this.store.schema.setSchemaHasChanges(true);
-        }
-    };
 
     setRightPanelWidth = val => (this.rightPanelWidth = val);
 
@@ -408,21 +398,6 @@ export class CoreStore {
             );
         } else {
             this.visibleDimensions[this.currentGraph].push(dimension);
-        }
-    };
-
-    updateVisibleDimensionsBasedOnSchema = () => {
-        if (this.isSchemaNodeTypeBound) {
-            const connectedNodes = this.store.schema.getConnectedNodes();
-
-            if (!connectedNodes.length) {
-                this.visibleDimensions['detail'] = [
-                    this.store.search.links,
-                    this.store.search.anchor
-                ].flat();
-            } else {
-                this.visibleDimensions['detail'] = connectedNodes;
-            }
         }
     };
 

@@ -91,8 +91,6 @@ export class SchemaStore {
     };
 
     generateSchemaNode = label => {
-        const isLink = this.store.search.links.includes(label);
-        const isAnchor = label === this.store.search.anchor;
         const id = uuidv4();
         this.nodeLabelToID[label] = id;
 
@@ -104,10 +102,6 @@ export class SchemaStore {
             sourcePosition: 'bottom',
             data: {
                 label: label,
-                isAnchor: isAnchor,
-                setAnchor: this.setAnchor,
-                isLink: isLink,
-                setLink: this.setLink,
                 isVisible:
                     this.store.core.visibleDimensions['detail'].includes(label),
                 toggleVisibility: this.toggleVisibility
@@ -133,6 +127,17 @@ export class SchemaStore {
         this.refreshNodeStyles();
         this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
+    };
+
+    makeVisibleOnConnect = (nodelabel, nodeId) => {
+        if (
+            !this.store.core.visibleDimensions['detail'].includes(nodelabel) &&
+            !this.edges.find(
+                edge => edge.source === nodeId || edge.target === nodeId
+            )
+        ) {
+            this.toggleVisibility(nodelabel);
+        }
     };
 
     generateLink = link => {
@@ -207,7 +212,7 @@ export class SchemaStore {
             this.nodeLabelToID[node.data.label] = node.id;
         });
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
-        this.store.core.updateVisibleDimensionsBasedOnSchema();
+
         this.refreshNodeStyles();
         this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
@@ -316,11 +321,17 @@ export class SchemaStore {
             })
         );
 
+        const src = this.getNodeNameFromId(edge.source);
+        const dest = this.getNodeNameFromId(edge.target);
+
+        this.makeVisibleOnConnect(src, edge.source);
+        this.makeVisibleOnConnect(dest, edge.target);
+
         this.edges = [
             ...this.edges,
             this.generateLink({
-                src: this.getNodeNameFromId(edge.source),
-                dest: this.getNodeNameFromId(edge.target)
+                src: src,
+                dest: dest
             })
         ];
 
@@ -328,7 +339,6 @@ export class SchemaStore {
             this.store.search.updateCurrentDatasetSchema(
                 this.getServerSchema()
             );
-            this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
 
         this.refreshNodeStyles();
@@ -372,7 +382,6 @@ export class SchemaStore {
             this.store.search.updateCurrentDatasetSchema(
                 this.getServerSchema()
             );
-            this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
 
         this.refreshNodeStyles();

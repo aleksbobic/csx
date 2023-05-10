@@ -1,9 +1,5 @@
 import { Tag, TagCloseButton, TagLabel } from '@chakra-ui/react';
-import {
-    getBezierPath,
-    getEdgeCenter,
-    getMarkerEnd
-} from 'react-flow-renderer';
+import { getBezierPath, getEdgeCenter } from 'react-flow-renderer';
 
 export default function CustomEdge({
     id,
@@ -16,8 +12,6 @@ export default function CustomEdge({
     style = {},
     data,
     markerEnd
-    // arrowHeadType,
-    // markerEndId
 }) {
     const edgePath = getBezierPath({
         sourceX,
