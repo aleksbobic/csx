@@ -12,6 +12,8 @@ export class SchemaStore {
     features = [];
     featureTypes = {};
     schemaHasChanges = false;
+    schemaHasErrors = false;
+    schemaError = '';
     relationshipMapping = {
         '1:1': 'oneToOne',
         '1:M': 'oneToMany',
@@ -29,6 +31,7 @@ export class SchemaStore {
 
     setUseUploadData = val => (this.useUploadData = val);
     setSchemaHasChanges = val => (this.schemaHasChanges = val);
+    setSchemaHasErrors = val => (this.schemaHasErrors = val);
     resetSchema = () => {
         this.nodes = [];
         this.edges = [];
@@ -107,11 +110,7 @@ export class SchemaStore {
                 setLink: this.setLink,
                 isVisible:
                     this.store.core.visibleDimensions['detail'].includes(label),
-                toggleVisibility: feature => {
-                    this.store.core.toggleVisibleDimension(feature);
-                    this.refreshNodeStyles();
-                    this.setSchemaHasChanges(true);
-                }
+                toggleVisibility: this.toggleVisibility
             },
             style: {
                 background: this.store.core.visibleDimensions[
@@ -127,6 +126,13 @@ export class SchemaStore {
                 minWidth: 50
             }
         };
+    };
+
+    toggleVisibility = feature => {
+        this.store.core.toggleVisibleDimension(feature);
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
     };
 
     generateLink = link => {
@@ -175,10 +181,26 @@ export class SchemaStore {
         this.edges = schema_to_load.edges.map(edge => {
             edge.data.changeRelationship = this.toggleRelationship;
             edge.data.removeEdge = this.removeSchemaConnection;
+            edge.markerEnd = {
+                type: MarkerType.ArrowClosed,
+                width: 26,
+                height: 26
+            };
+
             return edge;
         });
 
-        this.nodes = schema_to_load.nodes;
+        this.nodes = schema_to_load.nodes.map(node => {
+            node.data = {
+                ...node.data,
+                isVisible: this.store.core.visibleDimensions['detail'].includes(
+                    node.data.label
+                ),
+                toggleVisibility: this.toggleVisibility
+            };
+
+            return node;
+        });
         this.nodeLabelToID = {};
 
         this.nodes.forEach(node => {
@@ -186,6 +208,8 @@ export class SchemaStore {
         });
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
         this.store.core.updateVisibleDimensionsBasedOnSchema();
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
     };
 
@@ -308,7 +332,7 @@ export class SchemaStore {
         }
 
         this.refreshNodeStyles();
-
+        this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
     };
 
@@ -329,6 +353,7 @@ export class SchemaStore {
             );
         }
 
+        this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
     };
 
@@ -351,7 +376,7 @@ export class SchemaStore {
         }
 
         this.refreshNodeStyles();
-
+        this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);
     };
 
@@ -373,5 +398,15 @@ export class SchemaStore {
                 return node;
             })
         ];
+    };
+
+    checkForSchemaErrors = () => {
+        if (this.store.core.visibleDimensions['detail'].length) {
+            this.setSchemaHasErrors(false);
+            this.schemaError = null;
+        } else {
+            this.setSchemaHasErrors(true);
+            this.schemaError = 'Schema must have at least one visible feature.';
+        }
     };
 }

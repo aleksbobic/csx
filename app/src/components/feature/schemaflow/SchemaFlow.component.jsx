@@ -5,7 +5,8 @@ import {
     Tooltip,
     useColorMode,
     Button,
-    SlideFade
+    SlideFade,
+    Text
 } from '@chakra-ui/react';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -33,6 +34,7 @@ import OverviewCustomEdge from '../overviewschemaedge/OverviewSchemaEdge.compone
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../schemanode/SchemaNode.component';
 import { observer } from 'mobx-react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 function SchemaFlow() {
     const store = useContext(RootStoreContext);
@@ -40,14 +42,20 @@ function SchemaFlow() {
     const [schemaViewport, setSchemaViewport] = useState(null);
 
     const [showApplyChanges, setShowApplyChanges] = useState(false);
+    const [showSchemaError, setShowSchemaError] = useState(false);
 
     useEffect(() => {
+        if (!store.core.isOverview && store.schema.schemaHasErrors) {
+            setShowSchemaError(true);
+        }
+
         if (
             (store.core.isOverview &&
                 store.overviewSchema.schemaHasChanges &&
                 store.overviewSchema.links.length > 0) ||
-            store.schema.schemaHasChanges
+            (store.schema.schemaHasChanges && !store.schema.schemaHasErrors)
         ) {
+            setShowSchemaError(false);
             setShowApplyChanges(true);
         } else {
             setShowApplyChanges(false);
@@ -56,6 +64,7 @@ function SchemaFlow() {
         store.overviewSchema.schemaHasChanges,
         store.overviewSchema.links,
         store.schema.schemaHasChanges,
+        store.schema.schemaHasErrors,
         store.schema.edges,
         store.core.isOverview
     ]);
@@ -217,6 +226,40 @@ function SchemaFlow() {
                         >
                             Apply Changes
                         </Button>
+                    </SlideFade>
+                </Box>
+            )}
+
+            {showSchemaError && (
+                <Box
+                    bottom="10px"
+                    left="50%"
+                    zIndex="20"
+                    transform="translateX(-50%)"
+                    position="absolute"
+                >
+                    <SlideFade in={showSchemaError} offsetY="10px">
+                        <HStack
+                            background="linear-gradient(45deg, #f26c29 0%, #a54514 100%)"
+                            borderRadius="10px"
+                            padding="5px 10px 5px 5px"
+                        >
+                            <Box padding="5px" borderRadius="6px">
+                                <ExclamationTriangleIcon
+                                    style={{
+                                        width: '30px',
+                                        heght: '30px'
+                                    }}
+                                />
+                            </Box>
+                            <Text
+                                fontSize="sm"
+                                fontWeight="medium"
+                                textAlign="left"
+                            >
+                                {store.schema.schemaError}
+                            </Text>
+                        </HStack>
                     </SlideFade>
                 </Box>
             )}

@@ -833,6 +833,7 @@ function Settings() {
                     borderRadius="10px"
                     allowToggle={true}
                     style={{ marginTop: '15px' }}
+                    defaultIndex={0}
                 >
                     <AccordionItem>
                         <AccordionButton
@@ -917,8 +918,8 @@ function Settings() {
                             <Tooltip
                                 label={
                                     store.graphInstance.orphanNodeVisibility
-                                        ? 'Hide orphan nodes'
-                                        : 'Show orphan nodes'
+                                        ? 'Hide isolated nodes'
+                                        : 'Show isolated nodes'
                                 }
                             >
                                 <HStack
@@ -927,7 +928,7 @@ function Settings() {
                                     justifyContent="space-between"
                                     padding="5px"
                                 >
-                                    <Text fontSize="sm">Orphan nodes</Text>
+                                    <Text fontSize="sm">Isolated nodes</Text>
                                     <Switch
                                         id="nodelabels"
                                         size="sm"
@@ -953,7 +954,7 @@ function Settings() {
                                                             .orphanNodeVisibility
                                                             ? 'Show'
                                                             : 'Hide'
-                                                    } orphan nodes`
+                                                    } isolated nodes`
                                                 })
                                             );
                                         }}
