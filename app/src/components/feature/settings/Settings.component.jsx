@@ -468,6 +468,7 @@ function Settings() {
                     borderRadius="10px"
                     allowToggle={true}
                     style={{ padding: '5px 10px' }}
+                    defaultIndex={0}
                 >
                     <AccordionItem>
                         <AccordionButton
