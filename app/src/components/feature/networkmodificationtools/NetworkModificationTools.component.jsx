@@ -1,12 +1,10 @@
-import { Heading, Text, VStack, HStack } from '@chakra-ui/layout';
+import { Heading, VStack } from '@chakra-ui/layout';
 import {
     Accordion,
     AccordionButton,
     AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    IconButton,
-    Tooltip,
     Button
 } from '@chakra-ui/react';
 import {
@@ -15,12 +13,6 @@ import {
     StopIcon,
     TrashIcon
 } from '@heroicons/react/24/outline';
-import {
-    FormatSeparator,
-    LivePhoto,
-    PathIntersect,
-    RadioChecked
-} from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 

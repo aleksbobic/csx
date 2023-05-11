@@ -4,10 +4,6 @@ import {
     Heading,
     HStack,
     IconButton,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
     Slide,
     Tab,
     TabList,
@@ -17,20 +13,13 @@ import {
     Tag,
     Text,
     Tooltip,
-    useColorMode,
     useColorModeValue,
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
-import {
-    ArrowsPointingOutIcon,
-    FolderOpenIcon,
-    PaintBrushIcon,
-    ScissorsIcon
-} from '@heroicons/react/20/solid';
-import { CubeTransparentIcon, WrenchIcon } from '@heroicons/react/24/outline';
+import { FolderOpenIcon, PaintBrushIcon } from '@heroicons/react/20/solid';
+import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import NetworkExplorationTools from 'components/feature/networkexplorationtools/NetworkExplorationTools.component';
 import NetworkModificationtools from 'components/feature/networkmodificationtools/NetworkModificationTools.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
@@ -49,12 +38,6 @@ function ControlPanel() {
     const tabInactiveColors = useColorModeValue('black', 'white');
     const tabBorderColor = useColorModeValue('white', 'black');
     const edgeColor = useColorModeValue('gray.300', 'gray.900');
-    const { colorMode } = useColorMode();
-
-    const selfCentricMenuBackground = useColorModeValue(
-        'whiteAlpha.800',
-        'blackAlpha.700'
-    );
 
     const legendBackgroundColor = useColorModeValue(
         'whiteAlpha.800',
