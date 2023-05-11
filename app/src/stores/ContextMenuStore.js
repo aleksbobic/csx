@@ -2,7 +2,8 @@ import { makeAutoObservable } from 'mobx';
 
 const CONTEXT_TYPES = {
     NODE: 'node',
-    CANVAS: 'canvas'
+    CANVAS: 'canvas',
+    NODE_DETAILS: 'node_details'
 };
 
 export class ContextMenuStore {
@@ -27,6 +28,17 @@ export class ContextMenuStore {
     };
 
     setContextType = type => (this.contextType = type);
+
+    showNodeDetails = (node, x, y) => {
+        this.setContextType(CONTEXT_TYPES.NODE_DETAILS);
+        this.x =
+            window.innerWidth - this.xOffset - x < 200
+                ? `${x - 200}px`
+                : `${x}px`;
+        this.y = window.innerHeight - y < 108 ? `${y - 64}px` : `${y}px`;
+        this.originNode = node;
+        this.isVisible = true;
+    };
 
     showContextMenu = (node, x, y) => {
         this.setContextType(CONTEXT_TYPES.NODE);

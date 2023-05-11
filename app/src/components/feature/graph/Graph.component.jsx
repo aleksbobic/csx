@@ -66,6 +66,18 @@ function Graph(props) {
             })
         );
 
+        store.contextMenu.showNodeDetails(node, event.clientX, event.clientY);
+    };
+
+    const onNodeRightClick = (node, event) => {
+        store.track.trackEvent(
+            'Graph Area',
+            `Node - ${node.label} - ${node.id}`,
+            JSON.stringify({
+                type: 'Click'
+            })
+        );
+
         store.contextMenu.showContextMenu(node, event.clientX, event.clientY);
     };
 
@@ -294,7 +306,8 @@ function Graph(props) {
                 alpha: false,
                 powerPreference: 'high-performance'
             }}
-            onNodeRightClick={onNodeClick}
+            onNodeClick={onNodeClick}
+            onNodeRightClick={onNodeRightClick}
             onBackgroundRightClick={onBackgroundRightClick}
             onBackgroundClick={() => {
                 store.track.trackEvent(

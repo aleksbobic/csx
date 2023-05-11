@@ -1,7 +1,7 @@
 import { Button, ButtonGroup } from '@chakra-ui/button';
 import { useColorMode } from '@chakra-ui/color-mode';
 import { useOutsideClick } from '@chakra-ui/hooks';
-import { Box, VStack } from '@chakra-ui/layout';
+import { Box, VStack, HStack } from '@chakra-ui/layout';
 import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';
@@ -152,23 +152,8 @@ function ContextMenu() {
         return buttons;
     };
 
-    return (
-        <Box
-            ref={contextMenuRef}
-            position="absolute"
-            zIndex="999"
-            top={store.contextMenu.y}
-            left={store.contextMenu.x}
-            display={store.contextMenu.isVisible ? 'block' : 'none'}
-            backgroundColor={colorMode === 'light' ? 'white' : 'black'}
-            padding="4px 5px 5px"
-            borderRadius="10px"
-            width="200px"
-            border="1px solid"
-            borderColor={
-                colorMode === 'light' ? 'blackAlpha.200' : 'transparent'
-            }
-        >
+    const renderMenus = () => {
+        return (
             <ButtonGroup variant="ghost" size="xs" width="100%">
                 {store.contextMenu.contextType === 'node' && (
                     <VStack align="stretch" spacing="0" width="100%">
@@ -416,6 +401,64 @@ function ContextMenu() {
                     </VStack>
                 )}
             </ButtonGroup>
+        );
+    };
+
+    const renderNodeDetails = () => {
+        if (!store.contextMenu.originNode) {
+            return <></>;
+        }
+        console.log(store.contextMenu.originNode);
+        return (
+            <VStack
+                width="100%"
+                padding="10px"
+                maxHeight="200px"
+                overflowY="scroll"
+            >
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Label:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.label}
+                </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Feature:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.feature}
+                </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Neighbour count:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.neighbours.size}
+                </Text>
+            </VStack>
+        );
+    };
+
+    return (
+        <Box
+            ref={contextMenuRef}
+            position="absolute"
+            zIndex="999"
+            top={store.contextMenu.y}
+            left={store.contextMenu.x}
+            display={store.contextMenu.isVisible ? 'block' : 'none'}
+            backgroundColor={colorMode === 'light' ? 'white' : 'black'}
+            padding="4px 5px 5px"
+            borderRadius="10px"
+            width="200px"
+            border="1px solid"
+            borderColor={
+                colorMode === 'light' ? 'blackAlpha.200' : 'transparent'
+            }
+        >
+            {['canvas', 'node'].includes(store.contextMenu.contextType) &&
+                renderMenus()}
+            {store.contextMenu.contextType === 'node_details' &&
+                renderNodeDetails()}
         </Box>
     );
 }
