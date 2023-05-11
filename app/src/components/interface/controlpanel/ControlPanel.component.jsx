@@ -28,9 +28,10 @@ import {
     PaintBrushIcon,
     ScissorsIcon
 } from '@heroicons/react/20/solid';
-import { CubeTransparentIcon } from '@heroicons/react/24/outline';
+import { CubeTransparentIcon, WrenchIcon } from '@heroicons/react/24/outline';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import NetworkExplorationTools from 'components/feature/networkexplorationtools/NetworkExplorationTools.component';
+import NetworkModificationtools from 'components/feature/networkmodificationtools/NetworkModificationTools.component';
 import SettingsComponent from 'components/feature/settings/Settings.component';
 import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
 import { ChevronDoubleLeft, ChevronDoubleRight } from 'css.gg';
@@ -651,7 +652,60 @@ function ControlPanel() {
                         justifyContent="center"
                         alignItems="center"
                     >
-                        <CubeTransparentIcon width="18px" height="18px" />
+                        <CubeTransparentIcon
+                            width="18px"
+                            height="18px"
+                            style={{ marginLeft: '-2px' }}
+                        />
+                    </Box>
+                </Tooltip>
+            </Tab>
+            <Tab
+                width="40px"
+                height="40px"
+                onClick={() => {
+                    openSliderIfClosed();
+                    store.track.trackEvent(
+                        'Side Panel',
+                        'Button',
+                        JSON.stringify({
+                            type: 'Click',
+                            value: 'Open modification tools'
+                        })
+                    );
+                }}
+                _hover={{ bgColor: 'whiteAlpha.200' }}
+                padding="8px"
+                marginbottom="10px"
+                style={
+                    isOpen
+                        ? {
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
+                        : {
+                              color: tabInactiveColors,
+                              borderRadius: '10px',
+                              borderColor: 'transparent',
+                              marginBottom: '10px'
+                          }
+                }
+                _selected={{
+                    bgColor: isOpen ? 'whiteAlpha.200' : 'transparent',
+                    color: 'blue.300'
+                }}
+            >
+                <Tooltip label="Modification tools">
+                    <Box
+                        id="networkexplorationtoolstab"
+                        width="100%"
+                        height="100%"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <WrenchIcon width="18px" height="18px" />
                     </Box>
                 </Tooltip>
             </Tab>
@@ -717,6 +771,24 @@ function ControlPanel() {
                     }}
                 >
                     <NetworkExplorationTools />
+                </CustomScroll>
+            </TabPanel>
+            <TabPanel
+                width="250px"
+                height="100%"
+                style={{
+                    overflowX: 'hidden',
+                    paddingLeft: 0,
+                    paddingRight: '15px'
+                }}
+            >
+                <CustomScroll
+                    style={{
+                        paddingLeft: '10px',
+                        paddingRight: '0'
+                    }}
+                >
+                    <NetworkModificationtools />
                 </CustomScroll>
             </TabPanel>
         </TabPanels>
