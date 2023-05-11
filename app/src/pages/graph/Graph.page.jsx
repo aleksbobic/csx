@@ -27,8 +27,9 @@ import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
-import canvasMenuInteraction from 'images/left_click_canvas.png';
-import panningInteraction from 'images/pan_and_move.png';
+import contextMenuInteraction from 'images/right_click.png';
+import nodeInformationInteraction from 'images/left_click_node.png';
+import panningInteraction from 'images/pan.png';
 import scrollInteraction from 'images/scroll.png';
 
 function GraphPage() {
@@ -226,7 +227,7 @@ function GraphPage() {
                         it.
                     </Text>
                     <HStack spacing="20px">
-                        <VStack width="33%">
+                        <VStack width="25%">
                             <Heading size="xs" width="100%">
                                 Zoom
                             </Heading>
@@ -240,9 +241,9 @@ function GraphPage() {
                                 alt="Mouse scroll interaction"
                             />
                         </VStack>
-                        <VStack width="33%">
+                        <VStack width="25%">
                             <Heading size="xs" width="100%">
-                                Pan View & Move Node
+                                Pan & Move
                             </Heading>
                             <Text fontSize="xs">
                                 Left click on the{' '}
@@ -269,9 +270,9 @@ function GraphPage() {
                                 alt="Mouse scroll interaction"
                             />
                         </VStack>
-                        <VStack width="33%">
+                        <VStack width="25%">
                             <Heading size="xs" width="100%">
-                                Open menu
+                                Open Menu
                             </Heading>
                             <Text fontSize="xs">
                                 Right click on the{' '}
@@ -294,7 +295,29 @@ function GraphPage() {
                             </Text>
 
                             <Image
-                                src={canvasMenuInteraction}
+                                src={contextMenuInteraction}
+                                height="50px"
+                                alt="Mouse scroll interaction"
+                            />
+                        </VStack>
+                        <VStack width="25%">
+                            <Heading size="xs" width="100%">
+                                View Node Info
+                            </Heading>
+                            <Text fontSize="xs">
+                                Left click on a{' '}
+                                <Text
+                                    as="span"
+                                    color="blue.500"
+                                    fontWeight="bold"
+                                >
+                                    node
+                                </Text>{' '}
+                                to view additional information.
+                            </Text>
+
+                            <Image
+                                src={nodeInformationInteraction}
                                 height="50px"
                                 alt="Mouse scroll interaction"
                             />
@@ -342,7 +365,8 @@ function GraphPage() {
             duration: null,
             isClosable: true,
             containerStyle: {
-                minWidth: '200px'
+                minWidth: '200px',
+                maxWidth: '700px'
             }
         });
     }, [interactionsToastRef, interactionsToast, store.core]);
