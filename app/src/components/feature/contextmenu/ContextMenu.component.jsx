@@ -222,7 +222,7 @@ function ContextMenu() {
                                 onClick={deselectAllNodes}
                                 width="100%"
                             >
-                                Deselect all nodes
+                                Deselect all
                             </Button>
                             <Button
                                 justifyContent="left"
@@ -256,7 +256,7 @@ function ContextMenu() {
                                 }}
                                 width="100%"
                             >
-                                View all nodes
+                                View all
                             </Button>
                         </VStack>
                         <VStack
@@ -365,7 +365,7 @@ function ContextMenu() {
                                     store.contextMenu.hideContextMenu();
                                 }}
                             >
-                                Remove selected nodes
+                                Remove selected
                             </Button>
                             <Button
                                 justifyContent="left"
@@ -395,7 +395,113 @@ function ContextMenu() {
                                     store.contextMenu.hideContextMenu();
                                 }}
                             >
-                                Remove invisible nodes
+                                Remove invisible
+                            </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="15px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 5px"
+                            >
+                                Expand
+                            </Text>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 2
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Side Panel - Network Modification',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Wide expand network',
+                                            nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                node => {
+                                                    return {
+                                                        id: node.id,
+                                                        label: node.label
+                                                    };
+                                                }
+                                            )
+                                        })
+                                    );
+
+                                    store.graph.expandNetwork(
+                                        store.graph.currentGraphData
+                                            .selectedNodes,
+                                        'or'
+                                    );
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Broad expand
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 2
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        'Side Panel - Network Modification',
+                                        'Button',
+                                        JSON.stringify({
+                                            type: 'Click',
+                                            value: 'Narrow expand network',
+                                            nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                node => {
+                                                    return {
+                                                        id: node.id,
+                                                        label: node.label
+                                                    };
+                                                }
+                                            )
+                                        })
+                                    );
+
+                                    store.graph.expandNetwork(
+                                        store.graph.currentGraphData
+                                            .selectedNodes,
+                                        'and'
+                                    );
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Narrow expand
                             </Button>
                         </VStack>
                     </VStack>
@@ -408,7 +514,7 @@ function ContextMenu() {
         if (!store.contextMenu.originNode) {
             return <></>;
         }
-        console.log(store.contextMenu.originNode);
+
         return (
             <VStack
                 width="100%"
