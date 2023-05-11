@@ -298,7 +298,7 @@ function Graph(props) {
                 alpha: false,
                 powerPreference: 'high-performance'
             }}
-            onNodeClick={onNodeClick}
+            onNodeRightClick={onNodeClick}
             onBackgroundRightClick={onBackgroundRightClick}
             onBackgroundClick={() => {
                 store.track.trackEvent(

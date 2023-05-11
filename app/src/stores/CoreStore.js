@@ -36,6 +36,7 @@ export class CoreStore {
     surveyHidden = false;
     surveyHistoryDepthTrigger = 3;
     dataModificationMessage = null;
+    neverShowInteractionModal = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -62,9 +63,24 @@ export class CoreStore {
         }
 
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
+        this.getInteractionsModalDisplay();
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setInteractionsModalDisplay = value => {
+        this.neverShowInteractionModal = value;
+
+        localStorage.setItem(
+            'neverShowInteractionsModal',
+            this.neverShowInteractionModal
+        );
+    };
+
+    getInteractionsModalDisplay = () => {
+        this.neverShowInteractionModal =
+            localStorage.getItem('neverShowInteractionsModal') === 'true';
+    };
 
     addCommentToCurrentHistoryItem = comment => {
         this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);

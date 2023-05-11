@@ -22,6 +22,7 @@ import {
     AccordionButton
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
+import { ViewfinderCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { Anchor, Bolt, Undo, MoreVerticalAlt } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
@@ -464,9 +465,9 @@ function Settings() {
                 <Accordion
                     width="100%"
                     backgroundColor="whiteAlpha.200"
-                    padding="5px 10px"
                     borderRadius="10px"
                     allowToggle={true}
+                    style={{ padding: '5px 10px' }}
                 >
                     <AccordionItem>
                         <AccordionButton
@@ -480,15 +481,12 @@ function Settings() {
                             }}
                         >
                             <Heading size="sm" width="100%">
-                                General settings
+                                Canvas
                             </Heading>
                             <AccordionIcon />
                         </AccordionButton>
 
-                        <AccordionPanel
-                            style={{ padding: '10px 0 0' }}
-                            _expanded={{ padding: '10px 0 10px' }}
-                        >
+                        <AccordionPanel padding="10px 0 0">
                             <VStack>
                                 <VStack
                                     backgroundColor="whiteAlpha.50"
@@ -501,7 +499,7 @@ function Settings() {
                                         label={`Panning speed is ${store.graphInstance.panSpeed}`}
                                     >
                                         <VStack
-                                            spacing="1"
+                                            spacing="10px"
                                             style={{
                                                 width: '100%',
                                                 marginBottom: '20px',
@@ -513,6 +511,7 @@ function Settings() {
                                                 fontSize="sm"
                                                 width="100%"
                                                 marginLeft="-15px"
+                                                style={{ paddingBottom: '5px' }}
                                             >
                                                 Panning speed
                                             </Text>
@@ -555,6 +554,58 @@ function Settings() {
                                         </VStack>
                                     </Tooltip>
                                 </VStack>
+                                <Button
+                                    leftIcon={
+                                        <ViewfinderCircleIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
+                                        />
+                                    }
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Graph Area - View Controls',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Zoom to fit'
+                                            })
+                                        );
+
+                                        store.graphInstance.zoomToFit();
+                                    }}
+                                    size="sm"
+                                    width="100%"
+                                >
+                                    Fit graph to view
+                                </Button>
+                                <Button
+                                    style={{ marginBottom: '5px' }}
+                                    leftIcon={
+                                        <CameraIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
+                                        />
+                                    }
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Graph Area - View Controls',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Take screenshot'
+                                            })
+                                        );
+                                        store.graphInstance.takeScreenshot();
+                                    }}
+                                    size="sm"
+                                    width="100%"
+                                >
+                                    Take screenshot
+                                </Button>
                             </VStack>
                         </AccordionPanel>
                     </AccordionItem>
@@ -580,7 +631,7 @@ function Settings() {
                             }}
                         >
                             <Heading size="sm" width="100%">
-                                Edge settings
+                                Edges
                             </Heading>
                             <AccordionIcon />
                         </AccordionButton>
@@ -918,7 +969,7 @@ function Settings() {
                             }}
                         >
                             <Heading size="sm" width="100%">
-                                Node settings
+                                Nodes
                             </Heading>
                             <AccordionIcon />
                         </AccordionButton>
@@ -1064,7 +1115,7 @@ function Settings() {
                     style={{ marginBottom: '10px' }}
                     width="100%"
                 >
-                    Layout settings
+                    Layout
                 </Heading>
                 {renderLayoutOptions()}
             </VStack>

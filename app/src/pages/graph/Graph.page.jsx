@@ -1,34 +1,44 @@
 import {
     Box,
+    Button,
     Center,
+    Checkbox,
     HStack,
-    Text,
-    useColorMode,
-    useToast,
+    Heading,
+    IconButton,
+    Image,
     SlideFade,
-    Button
+    Switch,
+    Text,
+    VStack,
+    useColorMode,
+    useToast
 } from '@chakra-ui/react';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
+import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
-import { Spinner } from 'css.gg';
+import { Close, Spinner } from 'css.gg';
+import { isEnvSet } from 'general.utils';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import { isEnvSet } from 'general.utils';
-import { useCallback } from 'react';
-import { useRef } from 'react';
-import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
-import { InformationCircleIcon } from '@heroicons/react/24/outline';
+
+import canvasMenuInteraction from 'images/left_click_canvas.png';
+import panningInteraction from 'images/pan_and_move.png';
+import scrollInteraction from 'images/scroll.png';
 
 function GraphPage() {
     const dataModificationInfoToastRef = useRef();
     const dataModificationInfoToast = useToast();
     const [showViewAll, setViewAll] = useState(false);
+    const interactionsToastRef = useRef();
+    const interactionsToast = useToast();
 
     const store = useContext(RootStoreContext);
     const location = useLocation();
@@ -42,11 +52,16 @@ function GraphPage() {
             store.graphInstance.isSelfCentric ||
             store.graphInstance.isFiltered
         ) {
+            interactionsToast.closeAll();
             setViewAll(true);
         } else {
             setViewAll(false);
         }
-    }, [store.graphInstance.isSelfCentric, store.graphInstance.isFiltered]);
+    }, [
+        store.graphInstance.isSelfCentric,
+        store.graphInstance.isFiltered,
+        interactionsToast
+    ]);
 
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
 
@@ -180,6 +195,162 @@ function GraphPage() {
         store.core.surveyHistoryDepthTrigger
     ]);
 
+    const showInteractionsToast = useCallback(() => {
+        if (interactionsToastRef.current) {
+            interactionsToast.close(interactionsToastRef.current);
+        }
+
+        interactionsToastRef.current = interactionsToast({
+            render: () => (
+                <VStack
+                    background="blackAlpha.900"
+                    borderRadius="10px"
+                    padding="20px"
+                    marginBottom="15px"
+                >
+                    <Heading
+                        size="sm"
+                        color="white"
+                        width="100%"
+                        textAlign="center"
+                    >
+                        Interactions
+                    </Heading>
+
+                    <Text
+                        fontSize="xs"
+                        textAlign="center"
+                        padding="0 20px 10px 20px"
+                    >
+                        This graph represents your search results. Here are some
+                        of the ways you can interact with it and the elemnts in
+                        it.
+                    </Text>
+                    <HStack spacing="20px">
+                        <VStack width="33%">
+                            <Heading size="xs" width="100%">
+                                Zoom
+                            </Heading>
+                            <Text fontSize="xs">
+                                Scroll with your mouse wheel to zoom in and out
+                                the view.
+                            </Text>
+                            <Image
+                                src={scrollInteraction}
+                                height="50px"
+                                alt="Mouse scroll interaction"
+                            />
+                        </VStack>
+                        <VStack width="33%">
+                            <Heading size="xs" width="100%">
+                                Pan View & Move Node
+                            </Heading>
+                            <Text fontSize="xs">
+                                Left click on the{' '}
+                                <Text
+                                    as="span"
+                                    color="blue.500"
+                                    fontWeight="bold"
+                                >
+                                    canvas
+                                </Text>{' '}
+                                or a{' '}
+                                <Text
+                                    as="span"
+                                    color="blue.500"
+                                    fontWeight="bold"
+                                >
+                                    node
+                                </Text>{' '}
+                                and drag your mouse to move it.
+                            </Text>
+                            <Image
+                                src={panningInteraction}
+                                height="50px"
+                                alt="Mouse scroll interaction"
+                            />
+                        </VStack>
+                        <VStack width="33%">
+                            <Heading size="xs" width="100%">
+                                Open menu
+                            </Heading>
+                            <Text fontSize="xs">
+                                Right click on the{' '}
+                                <Text
+                                    as="span"
+                                    color="blue.500"
+                                    fontWeight="bold"
+                                >
+                                    canvas
+                                </Text>{' '}
+                                or a{' '}
+                                <Text
+                                    as="span"
+                                    color="blue.500"
+                                    fontWeight="bold"
+                                >
+                                    node
+                                </Text>{' '}
+                                to open their context menus.
+                            </Text>
+
+                            <Image
+                                src={canvasMenuInteraction}
+                                height="50px"
+                                alt="Mouse scroll interaction"
+                            />
+                        </VStack>
+                    </HStack>
+                    <HStack spacing="20px">
+                        <Button
+                            size="xs"
+                            backgroundColor="blue.600"
+                            width="80px"
+                            paddingLeft="4px"
+                            _hover={{
+                                backgroundColor: 'blue.500'
+                            }}
+                            leftIcon={
+                                <Close
+                                    style={{
+                                        '--ggs': 0.7
+                                    }}
+                                />
+                            }
+                            onClick={() => interactionsToast.closeAll()}
+                        >
+                            Close
+                        </Button>
+                        <HStack spacing="10px" justifyContent="space-between">
+                            <Checkbox
+                                size="sm"
+                                onChange={e =>
+                                    store.core.setInteractionsModalDisplay(
+                                        e.target.checked
+                                    )
+                                }
+                            >
+                                Never show again
+                            </Checkbox>
+                        </HStack>
+                    </HStack>
+                </VStack>
+            ),
+            status: 'info',
+            duration: null,
+            isClosable: true,
+            containerStyle: {
+                minWidth: '200px'
+            }
+        });
+    }, [interactionsToastRef, interactionsToast, store.core]);
+
+    useEffect(() => {
+        if (!store.core.neverShowInteractionModal) {
+            showInteractionsToast();
+        }
+    }, [showInteractionsToast, store.core.neverShowInteractionModal]);
+
     const showDataModificationInfoToast = useCallback(
         message => {
             if (store.core.dataModificationMessage) {
@@ -231,13 +402,15 @@ function GraphPage() {
 
     useEffect(() => {
         if (store.core.dataModificationMessage) {
+            interactionsToast.closeAll();
             showDataModificationInfoToast(store.core.dataModificationMessage);
         }
     }, [
         dataModificationInfoToast,
         showDataModificationInfoToast,
         store.core,
-        store.core.dataModificationMessage
+        store.core.dataModificationMessage,
+        interactionsToast
     ]);
 
     return (

@@ -567,7 +567,7 @@ function ControlPanel() {
                         'Button',
                         JSON.stringify({
                             type: 'Click',
-                            value: 'Open view settings'
+                            value: 'Open view tools'
                         })
                     );
                 }}
@@ -593,7 +593,7 @@ function ControlPanel() {
                     color: 'blue.300'
                 }}
             >
-                <Tooltip label="View settings">
+                <Tooltip label="View tools">
                     <Box
                         id="viewsettingstab"
                         width="100%"

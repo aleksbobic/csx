@@ -28,7 +28,7 @@ function NetworkExplorationTools() {
                 <Accordion
                     width="100%"
                     backgroundColor="whiteAlpha.200"
-                    padding="5px 10px"
+                    padding="5px 10px 0"
                     borderRadius="10px"
                     allowToggle={true}
                     defaultIndex={0}

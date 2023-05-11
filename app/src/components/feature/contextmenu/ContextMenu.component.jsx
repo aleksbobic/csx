@@ -226,8 +226,15 @@ function ContextMenu() {
                                         .length < 1
                                 }
                                 justifyContent="left"
-                                onClick={deselectAllNodes}
                                 _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={deselectAllNodes}
                                 width="100%"
                             >
                                 Deselect all nodes
@@ -238,6 +245,14 @@ function ContextMenu() {
                                     !store.graphInstance.isFiltered &&
                                     !store.graphInstance.isSelfCentric
                                 }
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
                                 onClick={() => {
                                     store.track.trackEvent(
                                         'Side Panel - Direct Connections',
@@ -254,11 +269,30 @@ function ContextMenu() {
                                     store.graphInstance.resetSelfCentric();
                                     store.contextMenu.hideContextMenu();
                                 }}
-                                _hover={{ backgroundColor: 'blue.500' }}
                                 width="100%"
                             >
                                 View all nodes
                             </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="15px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 5px"
+                            >
+                                Canvas
+                            </Text>
                             <Button
                                 justifyContent="left"
                                 onClick={() => {
@@ -304,7 +338,7 @@ function ContextMenu() {
                             position="relative"
                             marginTop="10px"
                             spacing="0"
-                            paddingTop="10px"
+                            paddingTop="15px"
                         >
                             <Text
                                 fontSize="12px"
@@ -314,7 +348,7 @@ function ContextMenu() {
                                 top="-10px"
                                 left="2px"
                                 backgroundColor="black"
-                                padding="0 10px"
+                                padding="0 5px"
                             >
                                 Remove
                             </Text>
