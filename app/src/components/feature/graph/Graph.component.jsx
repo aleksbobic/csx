@@ -140,7 +140,7 @@ function Graph(props) {
         store.graphInstance.isSelfCentric,
         store.graphInstance.selfCentricType,
         store.graph.showLabelDistance,
-        store.graphInstance.useCurvedEdges,
+        store.graphInstance.customEdgeCurvature,
         linkOpacity,
         store.graph
     ]);
@@ -268,11 +268,7 @@ function Graph(props) {
             }
             linkDirectionalArrowResolution={2}
             linkDirectionalArrowRelPos={1}
-            linkCurvature={
-                store.graphInstance.useCurvedEdges
-                    ? store.graphInstance.customEdgeCurvature
-                    : 0
-            }
+            linkCurvature={() => store.graphInstance.customEdgeCurvature}
             onLinkHover={link => {
                 if (store.core.isOverview) {
                     if (link) {

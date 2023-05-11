@@ -348,134 +348,6 @@ function ControlPanel() {
         onOpen();
     }, [onOpen]);
 
-    const expandGraph = connector => {
-        store.graph.expandNetwork(
-            store.graph.currentGraphData.selectedNodes,
-            connector
-        );
-        store.contextMenu.hideContextMenu();
-    };
-
-    const renderNetworkModificationMenu = () => (
-        <HStack
-            id="networkmodificationmenu"
-            position="absolute"
-            bottom="20px"
-            left="320px"
-            zIndex={20}
-            spacing="2"
-            backgroundColor={
-                colorMode === 'light' ? '#ffffff' : selfCentricMenuBackground
-            }
-            padding="5px 6px"
-            borderRadius="8px"
-            border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
-        >
-            <HStack spacing="1">
-                <Tooltip label="Trim network">
-                    <IconButton
-                        borderRadius="6px"
-                        id="trimnetworkbutton"
-                        size="sm"
-                        icon={<ScissorsIcon style={{ width: '16px' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Side Panel - Network Modification',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Trim network'
-                                })
-                            );
-                            store.graph.trimNetwork();
-                        }}
-                    />
-                </Tooltip>
-
-                <Box>
-                    <Menu style={{ zIndex: 40 }}>
-                        <Tooltip label="Expand network">
-                            <MenuButton
-                                disabled={
-                                    !store.graph.currentGraphData.selectedNodes
-                                        .length
-                                }
-                                as={IconButton}
-                                borderRadius="6px"
-                                id="trimnetworkbutton"
-                                size="sm"
-                                icon={
-                                    <ArrowsPointingOutIcon
-                                        style={{ width: '16px' }}
-                                    />
-                                }
-                            />
-                        </Tooltip>
-                        <MenuList
-                            backgroundColor="black"
-                            padding="5px"
-                            borderRadius="10px"
-                        >
-                            <MenuItem
-                                fontSize="xs"
-                                fontWeight="bold"
-                                borderRadius="6px"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Side Panel - Network Modification',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Wide expand network',
-                                            nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                node => {
-                                                    return {
-                                                        id: node.id,
-                                                        label: node.label
-                                                    };
-                                                }
-                                            )
-                                        })
-                                    );
-                                    expandGraph('or');
-                                }}
-                            >
-                                Wide Expand
-                            </MenuItem>
-                            <MenuItem
-                                fontSize="xs"
-                                fontWeight="bold"
-                                borderRadius="6px"
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        'Side Panel - Network Modification',
-                                        'Button',
-                                        JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Narrow expand network',
-                                            nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                node => {
-                                                    return {
-                                                        id: node.id,
-                                                        label: node.label
-                                                    };
-                                                }
-                                            )
-                                        })
-                                    );
-
-                                    expandGraph('and');
-                                }}
-                            >
-                                Narrow Expand
-                            </MenuItem>
-                        </MenuList>
-                    </Menu>
-                </Box>
-            </HStack>
-        </HStack>
-    );
-
     const renderTabs = () => (
         <TabList
             position="absolute"
@@ -617,59 +489,6 @@ function ControlPanel() {
                         'Button',
                         JSON.stringify({
                             type: 'Click',
-                            value: 'Open exploration tools'
-                        })
-                    );
-                }}
-                _hover={{ bgColor: 'whiteAlpha.200' }}
-                padding="8px"
-                marginbottom="10px"
-                style={
-                    isOpen
-                        ? {
-                              borderRadius: '10px',
-                              borderColor: 'transparent',
-                              marginBottom: '10px'
-                          }
-                        : {
-                              color: tabInactiveColors,
-                              borderRadius: '10px',
-                              borderColor: 'transparent',
-                              marginBottom: '10px'
-                          }
-                }
-                _selected={{
-                    bgColor: isOpen ? 'whiteAlpha.200' : 'transparent',
-                    color: 'blue.300'
-                }}
-            >
-                <Tooltip label="Exploration tools">
-                    <Box
-                        id="networkexplorationtoolstab"
-                        width="100%"
-                        height="100%"
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
-                        <CubeTransparentIcon
-                            width="18px"
-                            height="18px"
-                            style={{ marginLeft: '-2px' }}
-                        />
-                    </Box>
-                </Tooltip>
-            </Tab>
-            <Tab
-                width="40px"
-                height="40px"
-                onClick={() => {
-                    openSliderIfClosed();
-                    store.track.trackEvent(
-                        'Side Panel',
-                        'Button',
-                        JSON.stringify({
-                            type: 'Click',
                             value: 'Open modification tools'
                         })
                     );
@@ -705,7 +524,11 @@ function ControlPanel() {
                         justifyContent="center"
                         alignItems="center"
                     >
-                        <WrenchIcon width="18px" height="18px" />
+                        <CubeTransparentIcon
+                            width="18px"
+                            height="18px"
+                            style={{ marginLeft: '-2px' }}
+                        />
                     </Box>
                 </Tooltip>
             </Tab>
@@ -770,24 +593,6 @@ function ControlPanel() {
                         paddingRight: '0'
                     }}
                 >
-                    <NetworkExplorationTools />
-                </CustomScroll>
-            </TabPanel>
-            <TabPanel
-                width="250px"
-                height="100%"
-                style={{
-                    overflowX: 'hidden',
-                    paddingLeft: 0,
-                    paddingRight: '15px'
-                }}
-            >
-                <CustomScroll
-                    style={{
-                        paddingLeft: '10px',
-                        paddingRight: '0'
-                    }}
-                >
                     <NetworkModificationtools />
                 </CustomScroll>
             </TabPanel>
@@ -830,7 +635,6 @@ function ControlPanel() {
                     }}
                 >
                     {renderTabPanels()}
-                    {renderNetworkModificationMenu()}
 
                     {!store.core.dataIsLoading &&
                         store.core.currentGraph &&
@@ -842,7 +646,7 @@ function ControlPanel() {
                             )) && (
                             <HStack
                                 position="absolute"
-                                bottom="70px"
+                                bottom="20px"
                                 left="320px"
                                 id="colorscheme"
                                 backgroundColor={legendBackgroundColor}

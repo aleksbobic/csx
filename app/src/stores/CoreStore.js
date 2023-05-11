@@ -37,6 +37,7 @@ export class CoreStore {
     surveyHistoryDepthTrigger = 3;
     dataModificationMessage = null;
     neverShowInteractionModal = false;
+    interactionModalClosed = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -67,6 +68,8 @@ export class CoreStore {
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setInteractionModalClosed = value => (this.interactionModalClosed = value);
 
     setInteractionsModalDisplay = value => {
         this.neverShowInteractionModal = value;

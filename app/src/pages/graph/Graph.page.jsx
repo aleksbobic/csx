@@ -60,7 +60,8 @@ function GraphPage() {
     }, [
         store.graphInstance.isSelfCentric,
         store.graphInstance.isFiltered,
-        interactionsToast
+        interactionsToast,
+        store.core.isOverview
     ]);
 
     const [showLoader, setShowLoader] = useState(store.core.dataIsLoading);
@@ -317,18 +318,21 @@ function GraphPage() {
                                     }}
                                 />
                             }
-                            onClick={() => interactionsToast.closeAll()}
+                            onClick={() => {
+                                interactionsToast.closeAll();
+                                store.core.setInteractionModalClosed(true);
+                            }}
                         >
                             Close
                         </Button>
                         <HStack spacing="10px" justifyContent="space-between">
                             <Checkbox
                                 size="sm"
-                                onChange={e =>
+                                onChange={e => {
                                     store.core.setInteractionsModalDisplay(
                                         e.target.checked
-                                    )
-                                }
+                                    );
+                                }}
                             >
                                 Never show again
                             </Checkbox>
@@ -346,10 +350,27 @@ function GraphPage() {
     }, [interactionsToastRef, interactionsToast, store.core]);
 
     useEffect(() => {
-        if (!store.core.neverShowInteractionModal) {
+        if (
+            !store.core.neverShowInteractionModal &&
+            store.core.isOverview &&
+            !store.core.interactionModalClosed
+        ) {
             showInteractionsToast();
+        } else {
         }
-    }, [showInteractionsToast, store.core.neverShowInteractionModal]);
+    }, [
+        showInteractionsToast,
+        store.core.isOverview,
+        store.core.interactionModalClosed,
+        store.core.neverShowInteractionModal
+    ]);
+
+    useEffect(() => {
+        if (store.core.isDetail) {
+            interactionsToast.closeAll();
+            store.core.setInteractionModalClosed(true);
+        }
+    }, [interactionsToast, store.core.isDetail, store.core]);
 
     const showDataModificationInfoToast = useCallback(
         message => {

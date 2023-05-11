@@ -23,7 +23,16 @@ import {
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
 import { ViewfinderCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
-import { Anchor, Bolt, Undo, MoreVerticalAlt } from 'css.gg';
+import {
+    Anchor,
+    Bolt,
+    Undo,
+    MoreVerticalAlt,
+    FormatSeparator,
+    LivePhoto,
+    PathIntersect,
+    RadioChecked
+} from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -714,7 +723,7 @@ function Settings() {
                                             width: '100%',
                                             marginBottom: '20px',
                                             paddingLeft: '10px',
-                                            paddingRight: '10px'
+                                            paddingRight: '20px'
                                         }}
                                     >
                                         <Slider
@@ -753,7 +762,7 @@ function Settings() {
                                                 value={9}
                                                 fontSize="xs"
                                                 marginTop="10px"
-                                                marginLeft="-16px"
+                                                marginLeft="-12px"
                                             >
                                                 Visible
                                             </SliderMark>
@@ -772,92 +781,30 @@ function Settings() {
                                 padding="10px 10px 15px"
                                 borderRadius="6px"
                                 style={{ marginBottom: '10px' }}
+                                spacing="20px"
                             >
-                                <Tooltip
-                                    label={
-                                        store.graphInstance.useCurvedEdges
-                                            ? 'Use straight edges'
-                                            : 'Use curved edges'
-                                    }
-                                >
-                                    <HStack
-                                        spacing="1"
-                                        width="100%"
-                                        justifyContent="space-between"
-                                        padding="5px"
-                                    >
-                                        <Text fontSize="sm">
-                                            Edge curvature
-                                        </Text>
-                                        <Switch
-                                            id="curvedEdges"
-                                            size="sm"
-                                            marginRight="10px"
-                                            isChecked={
-                                                store.graphInstance
-                                                    .useCurvedEdges
-                                            }
-                                            value={
-                                                store.graphInstance
-                                                    .useCurvedEdges
-                                            }
-                                            onChange={() => {
-                                                store.graphInstance.toggleUseCurvedEdges();
-
-                                                store.track.trackEvent(
-                                                    'Side panel - View Settings',
-                                                    'Switch',
-                                                    JSON.stringify({
-                                                        type: 'Toggle',
-                                                        value: `${
-                                                            store.graphInstance
-                                                                .useCurvedEdges
-                                                                ? 'Use curved links'
-                                                                : 'Use straight links'
-                                                        }`
-                                                    })
-                                                );
-                                            }}
-                                        />
-                                    </HStack>
-                                </Tooltip>
+                                <Text fontSize="sm" width="100%">
+                                    Edge curvature
+                                </Text>
                                 <Tooltip
                                     label={`Edge curvature is ${parseInt(
                                         store.graphInstance
                                             .customEdgeCurvature * 10
                                     )}`}
-                                    isDisabled={
-                                        !store.graphInstance.useCurvedEdges
-                                    }
                                 >
                                     <VStack
-                                        opacity={
-                                            store.graphInstance.useCurvedEdges
-                                                ? '1'
-                                                : '0.2'
-                                        }
                                         spacing="1"
                                         style={{
                                             width: '100%',
                                             marginBottom: '20px',
                                             paddingLeft: '10px',
-                                            paddingRight: '10px'
+                                            paddingRight: '20px'
                                         }}
                                     >
                                         <Slider
-                                            defaultValue={5}
-                                            disabled={
-                                                !store.graphInstance
-                                                    .useCurvedEdges
-                                            }
-                                            min={1}
+                                            defaultValue={0}
+                                            min={0}
                                             max={10}
-                                            colorScheme={
-                                                store.graphInstance
-                                                    .useCurvedEdges
-                                                    ? 'blue'
-                                                    : 'gray'
-                                            }
                                             value={
                                                 store.graphInstance
                                                     .customEdgeCurvature * 10
@@ -869,20 +816,20 @@ function Settings() {
                                             }
                                         >
                                             <SliderMark
-                                                value={1}
+                                                value={0}
                                                 fontSize="xs"
                                                 marginTop="10px"
                                                 marginLeft="-4px"
                                             >
-                                                Slightly
+                                                Straight
                                             </SliderMark>
                                             <SliderMark
                                                 value={10}
                                                 fontSize="xs"
                                                 marginTop="10px"
-                                                marginLeft="-26px"
+                                                marginLeft="-32px"
                                             >
-                                                Very
+                                                Cuverd
                                             </SliderMark>
 
                                             <SliderTrack>
@@ -1085,6 +1032,203 @@ function Settings() {
                                 </HStack>
                             </Tooltip>
                             {renderColorOptions()}
+                        </AccordionPanel>
+                    </AccordionItem>
+                </Accordion>
+                <Accordion
+                    width="100%"
+                    backgroundColor="whiteAlpha.200"
+                    padding="5px 10px 0"
+                    borderRadius="10px"
+                    allowToggle={true}
+                    style={{ marginTop: '15px' }}
+                >
+                    <AccordionItem>
+                        <AccordionButton
+                            style={{
+                                paddingLeft: 0,
+                                paddingRight: 0,
+                                paddingBottom: '10px',
+                                textAlign: 'left',
+                                borderRadius: '10px',
+                                outline: 'none',
+                                boxShadow: 'none'
+                            }}
+                        >
+                            <Heading size="sm" width="100%">
+                                Filtering
+                            </Heading>
+                            <AccordionIcon />
+                        </AccordionButton>
+                        <AccordionPanel padding="0">
+                            <VStack
+                                width="100%"
+                                padding="10px 0"
+                                borderRadius="6px"
+                            >
+                                <Button
+                                    leftIcon={
+                                        <RadioChecked
+                                            style={{ '--ggs': '0.5' }}
+                                        />
+                                    }
+                                    isDisabled={
+                                        !store.graph.currentGraphData
+                                            .selectedNodes.length
+                                    }
+                                    size="sm"
+                                    width="100%"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Side Panel - Direct Connections',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Show selected nodes',
+                                                nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            id: node.id,
+                                                            label: node.label
+                                                        };
+                                                    }
+                                                )
+                                            })
+                                        );
+                                        store.graphInstance.triggerSelectedNodes();
+                                    }}
+                                >
+                                    Show all selected
+                                </Button>
+                            </VStack>
+                            <VStack
+                                backgroundColor="whiteAlpha.50"
+                                width="100%"
+                                padding="10px"
+                                borderRadius="6px"
+                                style={{ marginBottom: '10px' }}
+                            >
+                                <Text fontSize="sm" width="100%">
+                                    Direct connections
+                                </Text>
+
+                                <HStack width="100%">
+                                    <Tooltip label="Show direct connections">
+                                        <IconButton
+                                            borderRadius="6px"
+                                            id="alldirectconnections"
+                                            isDisabled={
+                                                store.graph.currentGraphData
+                                                    .selectedNodes.length < 1
+                                            }
+                                            size="sm"
+                                            icon={
+                                                <LivePhoto
+                                                    style={{ '--ggs': '0.8' }}
+                                                />
+                                            }
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Side Panel - Direct Connections',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: 'Show direct connections of selected nodes',
+                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                            node => {
+                                                                return {
+                                                                    id: node.id,
+                                                                    label: node.label
+                                                                };
+                                                            }
+                                                        )
+                                                    })
+                                                );
+
+                                                store.graphInstance.triggerMultiSelfCentric();
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip label="Show mutual connections">
+                                        <IconButton
+                                            borderRadius="6px"
+                                            id="mutualconnectionsbutton"
+                                            isDisabled={
+                                                store.graph.currentGraphData
+                                                    .selectedNodes.length < 2
+                                            }
+                                            size="sm"
+                                            icon={
+                                                <PathIntersect
+                                                    style={{ '--ggs': '0.8' }}
+                                                />
+                                            }
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Side Panel - Direct Connections',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: 'Show mutual connections of selected nodes',
+                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                            node => {
+                                                                return {
+                                                                    id: node.id,
+                                                                    label: node.label
+                                                                };
+                                                            }
+                                                        )
+                                                    })
+                                                );
+                                                store.graphInstance.triggerMultiSelfCentric(
+                                                    true
+                                                );
+                                            }}
+                                        />
+                                    </Tooltip>
+                                    <Tooltip label="Show nodes in same search results">
+                                        <IconButton
+                                            borderRadius="6px"
+                                            id="mutualentriesoriginbutton"
+                                            isDisabled={
+                                                store.graph.currentGraphData
+                                                    .selectedNodes.length < 1
+                                            }
+                                            size="sm"
+                                            style={{}}
+                                            icon={
+                                                <FormatSeparator
+                                                    style={{
+                                                        '--ggs': '0.7',
+                                                        marginTop: '5px'
+                                                    }}
+                                                />
+                                            }
+                                            onClick={() => {
+                                                store.track.trackEvent(
+                                                    'Side Panel - Direct Connections',
+                                                    'Button',
+                                                    JSON.stringify({
+                                                        type: 'Click',
+                                                        value: 'Show nodes with same entries as all selected nodes',
+                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                            node => {
+                                                                return {
+                                                                    id: node.id,
+                                                                    label: node.label
+                                                                };
+                                                            }
+                                                        )
+                                                    })
+                                                );
+                                                store.graphInstance.triggerSameEntry(
+                                                    true
+                                                );
+                                            }}
+                                        />
+                                    </Tooltip>
+                                </HStack>
+                            </VStack>
                         </AccordionPanel>
                     </AccordionItem>
                 </Accordion>

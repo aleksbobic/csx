@@ -285,6 +285,7 @@ function HomePage() {
     });
 
     useEffect(() => {
+        store.core.setInteractionModalClosed(false);
         store.core.setIsStudyPublic(false);
         store.core.setDataModificationMessage(null);
         store.core.resetVisibleDimensions();

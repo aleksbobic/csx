@@ -6,8 +6,15 @@ import {
     AccordionItem,
     AccordionPanel,
     IconButton,
-    Tooltip
+    Tooltip,
+    Button
 } from '@chakra-ui/react';
+import {
+    ScissorsIcon,
+    Squares2X2Icon,
+    StopIcon,
+    TrashIcon
+} from '@heroicons/react/24/outline';
 import {
     FormatSeparator,
     LivePhoto,
@@ -52,167 +59,53 @@ function NetworkModificationTools() {
 
                         <AccordionPanel padding="10px 0 0">
                             <VStack
-                                backgroundColor="whiteAlpha.50"
                                 width="100%"
-                                padding="10px"
-                                borderRadius="6px"
-                                style={{ marginBottom: '10px' }}
+                                spacing="10px"
+                                paddingBottom="10px"
                             >
-                                <Text fontSize="sm" width="100%">
-                                    Selected nodes
-                                </Text>
-
-                                <HStack width="100%">
-                                    <Tooltip label="Show selected nodes">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="selectednodes"
-                                            isDisabled={
-                                                !store.graph.currentGraphData
-                                                    .selectedNodes.length
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <RadioChecked
-                                                    style={{ '--ggs': '0.6' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerSelectedNodes();
-                                            }}
+                                <Button
+                                    leftIcon={
+                                        <TrashIcon width="16px" height="16px" />
+                                    }
+                                    width="100%"
+                                    size="sm"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Graph Area - Context Menu',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Remove selection from graph'
+                                            })
+                                        );
+                                        store.graph.removeSelection();
+                                    }}
+                                >
+                                    Remove selected
+                                </Button>
+                                <Button
+                                    leftIcon={
+                                        <ScissorsIcon
+                                            width="16px"
+                                            height="16px"
                                         />
-                                    </Tooltip>
-                                    <Tooltip label="Show direct connections">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="alldirectconnections"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 1
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <LivePhoto
-                                                    style={{ '--ggs': '0.8' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show direct connections of selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-
-                                                store.graphInstance.triggerMultiSelfCentric();
-                                            }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip label="Show mutual connections">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="mutualconnectionsbutton"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 2
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <PathIntersect
-                                                    style={{ '--ggs': '0.8' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show mutual connections of selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerMultiSelfCentric(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip label="Show nodes in same search results">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="mutualentriesoriginbutton"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 1
-                                            }
-                                            size="sm"
-                                            style={{}}
-                                            icon={
-                                                <FormatSeparator
-                                                    style={{
-                                                        '--ggs': '0.7',
-                                                        marginTop: '5px'
-                                                    }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show nodes with same entries as all selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerSameEntry(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </HStack>
+                                    }
+                                    width="100%"
+                                    size="sm"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Side Panel - Network Modification',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Trim network'
+                                            })
+                                        );
+                                        store.graph.trimNetwork();
+                                    }}
+                                >
+                                    Remove Invisible
+                                </Button>
                             </VStack>
                         </AccordionPanel>
                     </AccordionItem>
@@ -245,167 +138,83 @@ function NetworkModificationTools() {
 
                         <AccordionPanel padding="10px 0 0">
                             <VStack
-                                backgroundColor="whiteAlpha.50"
                                 width="100%"
-                                padding="10px"
-                                borderRadius="6px"
-                                style={{ marginBottom: '10px' }}
+                                spacing="10px"
+                                paddingBottom="10px"
                             >
-                                <Text fontSize="sm" width="100%">
-                                    Selected nodes
-                                </Text>
+                                <Button
+                                    leftIcon={
+                                        <Squares2X2Icon
+                                            width="16px"
+                                            height="16px"
+                                        />
+                                    }
+                                    width="100%"
+                                    size="sm"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Side Panel - Network Modification',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Wide expand network',
+                                                nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            id: node.id,
+                                                            label: node.label
+                                                        };
+                                                    }
+                                                )
+                                            })
+                                        );
 
-                                <HStack width="100%">
-                                    <Tooltip label="Show selected nodes">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="selectednodes"
-                                            isDisabled={
-                                                !store.graph.currentGraphData
-                                                    .selectedNodes.length
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <RadioChecked
-                                                    style={{ '--ggs': '0.6' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerSelectedNodes();
-                                            }}
+                                        store.graph.expandNetwork(
+                                            store.graph.currentGraphData
+                                                .selectedNodes,
+                                            'or'
+                                        );
+                                    }}
+                                >
+                                    Broad Expand
+                                </Button>
+                                <Button
+                                    leftIcon={
+                                        <StopIcon
+                                            width="12px"
+                                            height="12px"
+                                            strokeWidth="2px"
                                         />
-                                    </Tooltip>
-                                    <Tooltip label="Show direct connections">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="alldirectconnections"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 1
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <LivePhoto
-                                                    style={{ '--ggs': '0.8' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show direct connections of selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
+                                    }
+                                    width="100%"
+                                    size="sm"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            'Side Panel - Network Modification',
+                                            'Button',
+                                            JSON.stringify({
+                                                type: 'Click',
+                                                value: 'Narrow expand network',
+                                                nodes: store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            id: node.id,
+                                                            label: node.label
+                                                        };
+                                                    }
+                                                )
+                                            })
+                                        );
 
-                                                store.graphInstance.triggerMultiSelfCentric();
-                                            }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip label="Show mutual connections">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="mutualconnectionsbutton"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 2
-                                            }
-                                            size="sm"
-                                            icon={
-                                                <PathIntersect
-                                                    style={{ '--ggs': '0.8' }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show mutual connections of selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerMultiSelfCentric(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                    </Tooltip>
-                                    <Tooltip label="Show nodes in same search results">
-                                        <IconButton
-                                            borderRadius="6px"
-                                            id="mutualentriesoriginbutton"
-                                            isDisabled={
-                                                store.graph.currentGraphData
-                                                    .selectedNodes.length < 1
-                                            }
-                                            size="sm"
-                                            style={{}}
-                                            icon={
-                                                <FormatSeparator
-                                                    style={{
-                                                        '--ggs': '0.7',
-                                                        marginTop: '5px'
-                                                    }}
-                                                />
-                                            }
-                                            onClick={() => {
-                                                store.track.trackEvent(
-                                                    'Side Panel - Direct Connections',
-                                                    'Button',
-                                                    JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Show nodes with same entries as all selected nodes',
-                                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                            node => {
-                                                                return {
-                                                                    id: node.id,
-                                                                    label: node.label
-                                                                };
-                                                            }
-                                                        )
-                                                    })
-                                                );
-                                                store.graphInstance.triggerSameEntry(
-                                                    true
-                                                );
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </HStack>
+                                        store.graph.expandNetwork(
+                                            store.graph.currentGraphData
+                                                .selectedNodes,
+                                            'and'
+                                        );
+                                    }}
+                                >
+                                    Narrow expand
+                                </Button>
                             </VStack>
                         </AccordionPanel>
                     </AccordionItem>
