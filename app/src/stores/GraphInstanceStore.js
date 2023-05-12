@@ -44,6 +44,7 @@ export class GraphInstanceStore {
     panSpeed = 5;
     visibleComponents = [];
     hoverData = [];
+    filterProperty = 'degree';
 
     labels = {
         isVisible: true,
@@ -64,6 +65,7 @@ export class GraphInstanceStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    setFilterProperty = value => (this.filterProperty = value);
     resetLabelFeatures = () => (this.labels.labelFeatures = []);
     setIsFiltered = value => (this.isFiltered = value);
     addLabelFeature = feature => this.labels.labelFeatures.push(feature);
