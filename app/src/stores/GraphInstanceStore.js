@@ -1069,6 +1069,47 @@ export class GraphInstanceStore {
         return visibleIds;
     };
 
+    filterEdgesByMinMaxVal = (min, max) => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        let visibleIds = [];
+
+        for (let i = 0; i < linkCount; i++) {
+            let isVisible =
+                this.store.graph.currentGraphData.links[i].weight >= min &&
+                this.store.graph.currentGraphData.links[i].weight <= max;
+            this.store.graph.currentGraphData.links[i].visible = isVisible;
+            if (isVisible) {
+                visibleIds.push(
+                    this.store.graph.currentGraphData.links[i].source.id
+                );
+                visibleIds.push(
+                    this.store.graph.currentGraphData.links[i].target.id
+                );
+            }
+        }
+
+        visibleIds = [...new Set(visibleIds)];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible = visibleIds.includes(
+                this.store.graph.currentGraphData.nodes[i].id
+            );
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
+        return visibleIds;
+    };
+
     filterEdgesWithValue = (property, value) => {
         this.toggleVisibleComponents(-1);
         this.resetSelfCentric();

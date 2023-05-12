@@ -66,6 +66,15 @@ function Settings() {
             setFilterSliderCurrentMaxValue(
                 store.graph.currentGraphData.meta.maxDegree
             );
+        } else if (store.graphInstance.filterProperty === 'edge_weight') {
+            setFilterSliderMinValue(1);
+            setFilterSliderCurrentMinValue(1);
+            setFilterSliderMaxValue(
+                store.graph.currentGraphData.meta.maxEdgeWeight
+            );
+            setFilterSliderCurrentMaxValue(
+                store.graph.currentGraphData.meta.maxEdgeWeight
+            );
         } else {
             setFilterSliderMinValue(
                 store.search.searchHints[store.graphInstance.filterProperty].min
@@ -84,15 +93,20 @@ function Settings() {
         store.graphInstance.filterProperty,
         store.core.currentGraph,
         store.graph.currentGraphData.meta.maxDegree,
-        store.search.searchHints
+        store.search.searchHints,
+        store.graph.currentGraphData.meta.maxEdgeWeight
     ]);
 
     const filterElements = values => {
-        store.graphInstance.filterNodesByNumericProp(
-            values[0],
-            values[1],
-            store.graphInstance.filterProperty
-        );
+        if (store.graphInstance.filterProperty === 'edge_weight') {
+            store.graphInstance.filterEdgesByMinMaxVal(values[0], values[1]);
+        } else {
+            store.graphInstance.filterNodesByNumericProp(
+                values[0],
+                values[1],
+                store.graphInstance.filterProperty
+            );
+        }
     };
 
     useEffect(() => {

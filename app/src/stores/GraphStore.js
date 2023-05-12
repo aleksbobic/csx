@@ -16,7 +16,8 @@ export class GraphStore {
             graphID: null,
             query: '',
             anchorProperties: [],
-            maxDegree: 0
+            maxDegree: 0,
+            maxEdgeWeight: 0
         },
         nodes: [],
         links: [],
@@ -39,7 +40,8 @@ export class GraphStore {
             graphID: null,
             query: '',
             visible_entries: [],
-            maxDegree: 0
+            maxDegree: 0,
+            maxEdgeWeight: 0
         },
         nodes: [],
         links: [],
@@ -75,7 +77,8 @@ export class GraphStore {
                 nodeCount: 0,
                 linkCount: 0,
                 anchorProperties: [],
-                maxDegree: 0
+                maxDegree: 0,
+                maxEdgeWeight: 0
             },
             nodes: [],
             links: [],
@@ -102,7 +105,8 @@ export class GraphStore {
                 references: [],
                 nodeCount: 0,
                 linkCount: 0,
-                maxDegree: 0
+                maxDegree: 0,
+                maxEdgeWeight: 0
             },
             nodes: [],
             links: [],
@@ -1011,7 +1015,10 @@ export class GraphStore {
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
                     anchorProperties: response.meta.anchor_property_values,
-                    maxDegree: response.meta.max_degree
+                    maxDegree: response.meta.max_degree,
+                    maxEdgeWeight: Math.max(
+                        ...response.edges.map(edge => edge.weight)
+                    )
                 };
 
                 this.graphData.perspectivesInGraph = response.meta.dimensions;
@@ -1097,7 +1104,10 @@ export class GraphStore {
                     ...this.detailGraphData.meta,
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
-                    maxDegree: response.meta.max_degree
+                    maxDegree: response.meta.max_degree,
+                    maxEdgeWeight: Math.max(
+                        ...response.edges.map(edge => edge.weight)
+                    )
                 };
 
                 this.detailGraphData.perspectivesInGraph =
