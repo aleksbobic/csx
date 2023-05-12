@@ -1,16 +1,16 @@
 import { Box, useColorMode, useToast } from '@chakra-ui/react';
-import ControlPanelComponent from 'components/interface/controlpanel/ControlPanel.component';
+import LeftPanel from 'components/interface/leftpanel/LeftPanel.component';
 import NavigationPanelComponent from 'components/interface/navigation/NavigationPanel.component';
 import { observer } from 'mobx-react';
-import OverviewGraphPage from 'pages/graph/Graph.page';
+import GraphPage from 'pages/graph/Graph.page';
 import HomePage from 'pages/home/Home.page';
 import SearchPage from 'pages/search/Search.page';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import {
-    BrowserRouter as Router,
+    Switch as RRSwitch,
     Route,
-    Switch as RRSwitch
+    BrowserRouter as Router
 } from 'react-router-dom';
 import './App.scss';
 
@@ -150,13 +150,13 @@ function CSX() {
                             </Route>
                             <Route path="/graph/detail" label="graphdetail">
                                 <CommentModal />
-                                <ControlPanelComponent />
-                                <OverviewGraphPage />
+                                <LeftPanel />
+                                <GraphPage />
                             </Route>
                             <Route path="/graph" label="graph">
                                 <CommentModal />
-                                <ControlPanelComponent />
-                                <OverviewGraphPage />
+                                <LeftPanel />
+                                <GraphPage />
                             </Route>
                             <Route exact path="/present" label="present">
                                 <PresentPage />

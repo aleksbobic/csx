@@ -18,7 +18,7 @@ import { useContext } from 'react';
 
 import { RootStoreContext } from 'stores/RootStore';
 
-function NetworkModificationTools() {
+function ModificationTools() {
     const store = useContext(RootStoreContext);
 
     const renderVisibilityOptions = () => {
@@ -231,4 +231,4 @@ function NetworkModificationTools() {
     );
 }
 
-export default observer(NetworkModificationTools);
+export default observer(ModificationTools);

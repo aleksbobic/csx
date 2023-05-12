@@ -20,9 +20,9 @@ import {
 import { FolderOpenIcon, PaintBrushIcon } from '@heroicons/react/20/solid';
 import { CubeTransparentIcon } from '@heroicons/react/24/outline';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import NetworkModificationtools from 'components/feature/networkmodificationtools/NetworkModificationTools.component';
-import SettingsComponent from 'components/feature/settings/Settings.component';
-import StudyInfoComponent from 'components/feature/studyinfo/StudyInfo.component';
+import ModificationTools from 'components/feature/leftpanel/modificationtools/ModificationTools.component';
+import ViewTools from 'components/feature/leftpanel/viewtools/ViewTools.component';
+import StudyInfo from 'components/feature/leftpanel/studyinfo/StudyInfo.component';
 import { ChevronDoubleLeft, ChevronDoubleRight } from 'css.gg';
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
@@ -30,7 +30,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-function ControlPanel() {
+function LeftPanel() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onToggle } = useDisclosure();
     const bgColor = useColorModeValue('white', 'black');
@@ -540,7 +540,7 @@ function ControlPanel() {
                         paddingRight: '0'
                     }}
                 >
-                    <StudyInfoComponent />
+                    <StudyInfo />
                 </CustomScroll>
             </TabPanel>
             <TabPanel
@@ -558,7 +558,7 @@ function ControlPanel() {
                         paddingRight: '0'
                     }}
                 >
-                    <SettingsComponent />
+                    <ViewTools />
                 </CustomScroll>
             </TabPanel>
             <TabPanel
@@ -576,7 +576,7 @@ function ControlPanel() {
                         paddingRight: '0'
                     }}
                 >
-                    <NetworkModificationtools />
+                    <ModificationTools />
                 </CustomScroll>
             </TabPanel>
         </TabPanels>
@@ -659,4 +659,4 @@ function ControlPanel() {
     );
 }
 
-export default observer(ControlPanel);
+export default observer(LeftPanel);
