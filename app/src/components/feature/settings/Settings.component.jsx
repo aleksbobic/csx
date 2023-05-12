@@ -829,7 +829,7 @@ function Settings() {
                                                 marginTop="10px"
                                                 marginLeft="-32px"
                                             >
-                                                Cuverd
+                                                Curved
                                             </SliderMark>
 
                                             <SliderTrack>
