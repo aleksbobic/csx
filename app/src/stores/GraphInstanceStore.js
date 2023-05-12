@@ -68,6 +68,7 @@ export class GraphInstanceStore {
     setFilterProperty = value => (this.filterProperty = value);
     resetLabelFeatures = () => (this.labels.labelFeatures = []);
     setIsFiltered = value => (this.isFiltered = value);
+    setIsSelfCentric = value => (this.isSelfCentric = value);
     addLabelFeature = feature => this.labels.labelFeatures.push(feature);
     removeLabelFeature = feature =>
         (this.labels.labelFeatures = this.labels.labelFeatures.filter(
@@ -153,7 +154,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
     };
@@ -224,7 +225,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
     };
@@ -263,7 +264,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.isSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.NEIGHBOURS;
     };
@@ -481,7 +482,7 @@ export class GraphInstanceStore {
                 this.store.graph.currentGraphData.links[i].visible = true;
             }
 
-            this.isSelfCentric = false;
+            this.setIsSelfCentric(false);
         }
 
         this.selfCentricType = null;
@@ -522,7 +523,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
         this.store.contextMenu.hideContextMenu();
     };
@@ -679,7 +680,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = onlyMutual
             ? mutualWithOrigin
@@ -763,7 +764,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.SAME_ENTRY;
     };
@@ -1067,6 +1068,26 @@ export class GraphInstanceStore {
         this.filterTabularData();
 
         return visibleIds;
+    };
+
+    resetAllFilters = () => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        for (let i = 0; i < linkCount; i++) {
+            this.store.graph.currentGraphData.links[i].visible = true;
+        }
+
+        for (let i = 0; i < nodeCount; i++) {
+            this.store.graph.currentGraphData.nodes[i].visible = true;
+        }
+
+        this.selfCentricType = null;
+
+        this.filterTabularData();
     };
 
     filterEdgesByMinMaxVal = (min, max) => {

@@ -98,7 +98,12 @@ function Settings() {
     ]);
 
     const filterElements = values => {
-        if (store.graphInstance.filterProperty === 'edge_weight') {
+        if (
+            values[0] === filterSliderMinValue &&
+            values[1] === filterSliderMaxValue
+        ) {
+            store.graphInstance.resetAllFilters();
+        } else if (store.graphInstance.filterProperty === 'edge_weight') {
             store.graphInstance.filterEdgesByMinMaxVal(values[0], values[1]);
         } else {
             store.graphInstance.filterNodesByNumericProp(
@@ -107,6 +112,11 @@ function Settings() {
                 store.graphInstance.filterProperty
             );
         }
+
+        store.graphInstance.setIsFiltered(
+            values[0] !== filterSliderMinValue ||
+                values[1] !== filterSliderMaxValue
+        );
     };
 
     useEffect(() => {
