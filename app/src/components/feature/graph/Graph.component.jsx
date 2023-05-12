@@ -105,7 +105,7 @@ function Graph(props) {
         store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
     };
 
-    const handleNodeHover = (node, nodeout) => {
+    const onNodeHover = (node, nodeout, event) => {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
         if (node && !node.selected) {
@@ -346,7 +346,7 @@ function Graph(props) {
                 );
             }}
             showNavInfo={false}
-            onNodeHover={handleNodeHover}
+            onNodeHover={onNodeHover}
             d3VelocityDecay={0.1}
             nodeVisibility={node => node.visible}
             linkVisibility={link =>

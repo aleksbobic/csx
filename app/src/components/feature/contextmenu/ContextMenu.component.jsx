@@ -1,7 +1,7 @@
 import { Button, ButtonGroup } from '@chakra-ui/button';
 import { useColorMode } from '@chakra-ui/color-mode';
 import { useOutsideClick } from '@chakra-ui/hooks';
-import { Box, VStack, HStack } from '@chakra-ui/layout';
+import { Box, VStack } from '@chakra-ui/layout';
 import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';

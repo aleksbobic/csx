@@ -32,31 +32,29 @@ import {
     BarElement,
     CategoryScale,
     Chart as ChartJS,
+    Tooltip as ChartJSTooltip,
     DoughnutController,
     Legend,
     LinearScale,
     LineController,
     LineElement,
     PointElement,
-    Title,
-    Tooltip as ChartJSTooltip
+    Title
 } from 'chart.js';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import BarChart from 'components/feature/widgets/charts/BarChart.component';
-import LineChart from 'components/feature/widgets/charts/LineChart.component';
 import DoughnutChart from 'components/feature/widgets/charts/DoughnutChart.component';
+import LineChart from 'components/feature/widgets/charts/LineChart.component';
+import RadarChartComponent from 'components/feature/widgets/charts/RadarChart.component';
 import ComponentStatsComponent from 'components/feature/widgets/component/ComponentStats.component';
-import ConnectionStatsComponent from 'components/feature/widgets/node/NodeConnectionStats.component';
 import GraphStatsComponent from 'components/feature/widgets/graph/GraphStats.component';
+import ConnectionStatsComponent from 'components/feature/widgets/node/NodeConnectionStats.component';
 import NodeStatsComponent from 'components/feature/widgets/node/NodeStats.component';
-import NodeFilterComponent from 'components/feature/widgets/node/NodeFilter.component';
 import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import RadarChartComponent from 'components/feature/widgets/charts/RadarChart.component';
-
 function FileUploadModal() {
     const store = useContext(RootStoreContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -459,12 +457,6 @@ function FileUploadModal() {
                                 'feature 2': { count: 43 }
                             }
                         }}
-                    />
-                );
-            case 'node filter':
-                return (
-                    <NodeFilterComponent
-                        demoData={[{ max: 55, prop: 'connection' }]}
                     />
                 );
             default:
@@ -884,10 +876,6 @@ function FileUploadModal() {
                             },
                             {
                                 statType: 'connections',
-                                type: 'stat'
-                            },
-                            {
-                                statType: 'node filter',
                                 type: 'stat'
                             }
                         ].map((entry, index) => {

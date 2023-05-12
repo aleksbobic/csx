@@ -34,8 +34,7 @@ export class StatsStore {
         'Nodes',
         'Components',
         'Graph stats',
-        'Connections',
-        'Node Filter'
+        'Connections'
     ];
     availableTypes = ['all'];
     newChartProps = {
@@ -348,10 +347,6 @@ export class StatsStore {
 
         if (this.newChartProps.type.toLowerCase() === 'graph stats') {
             return 'Graph properties';
-        }
-
-        if (this.newChartProps.type.toLowerCase() === 'node filter') {
-            return 'Node filter';
         }
 
         if (this.newChartProps.type.toLowerCase() === 'connections') {

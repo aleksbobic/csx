@@ -18,7 +18,6 @@ import SelectedComponentListComponent from '../widgets/component/ComponentStats.
 import SelectedNodeListComponent from '../widgets/node/NodeStats.component';
 import GraphStatsComponent from '../widgets/graph/GraphStats.component';
 import ConnectionStatsComponent from '../widgets/node/NodeConnectionStats.component';
-import NodeFilterComponent from '../widgets/node/NodeFilter.component';
 import { useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
@@ -82,8 +81,6 @@ function Overview(props) {
                 return <SelectedComponentListComponent chart={chart} />;
             case 'graph stats':
                 return <GraphStatsComponent chart={chart} />;
-            case 'node filter':
-                return <NodeFilterComponent chart={chart} />;
             default:
                 return <ConnectionStatsComponent chart={chart} />;
         }
