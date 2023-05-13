@@ -17,15 +17,15 @@ import {
     useColorMode,
     useColorModeValue
 } from '@chakra-ui/react';
-import Overview from 'components/feature/overview/Overview.component';
+import WidgetGrid from 'components/feature/rightpanel/widgetgrid/WidgetGrid.component';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import Comments from 'components/feature/comments/Comments.component';
-import SerpComponent from 'components/feature/serp/Serp.component';
-import TableComponent from 'components/feature/table/Table.component';
+import Comments from 'components/feature/rightpanel/comments/Comments.component';
+import SerpComponent from 'components/feature/rightpanel/serp/Serp.component';
+import TableComponent from 'components/feature/rightpanel/table/Table.component';
 import {
     MenuBoxed,
     MoreVerticalAlt,
@@ -36,15 +36,15 @@ import { useCallback } from 'react';
 import { CSVLink } from 'react-csv';
 import { useResizeDetector } from 'react-resize-detector';
 
+import AdvancedSearch from 'components/feature/advancedsearch/AdvancedSearch.component';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import { HistoryFlow } from 'components/feature/historyflow/HistoryFlow.component';
-import SchemaFlow from 'components/feature/schemaflow/SchemaFlow.component';
-import { SchemaList } from 'components/feature/schemalist/SchemaList.component';
+import { HistoryFlow } from 'components/feature/rightpanel/historyflow/HistoryFlow.component';
+import SchemaFlow from 'components/feature/rightpanel/schemaflow/SchemaFlow.component';
+import { SchemaList } from 'components/feature/rightpanel/schemalist/SchemaList.component';
 import { isEnvFalse } from 'general.utils';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import AdvancedSearch from 'components/feature/advancedsearch/AdvancedSearch.component';
 
-function DataPanel(props) {
+function RightPanel(props) {
     const store = useContext(RootStoreContext);
     const [panelWidth, setPanelWidth] = useState(0);
     const [activeTab, setActiveTab] = useState(0);
@@ -165,6 +165,26 @@ function DataPanel(props) {
         </CustomScroll>
     );
 
+    const renderTabPanel = child => {
+        return (
+            <TabPanel padding="10px" height="100%">
+                <Box
+                    height="100%"
+                    width="100%"
+                    padding="14px"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'blackAlpha.200'
+                            : 'whiteAlpha.100'
+                    }
+                    borderRadius="10px"
+                >
+                    {child}
+                </Box>
+            </TabPanel>
+        );
+    };
+
     const renderTabPanels = () => {
         return (
             <TabPanels
@@ -173,89 +193,21 @@ function DataPanel(props) {
                 height="100%"
                 ref={ref}
             >
-                <TabPanel padding="10px" height="100%">
-                    <Box
-                        height="100%"
-                        width="100%"
-                        padding="14px"
-                        backgroundColor={
-                            colorMode === 'light'
-                                ? 'blackAlpha.200'
-                                : 'whiteAlpha.100'
-                        }
-                        borderRadius="10px"
+                {renderTabPanel(<AdvancedSearch isPanel={true} />)}
+
+                {renderTabPanel(
+                    <CustomScroll
+                        style={{
+                            paddingLeft: '10px',
+                            paddingRight: '10px'
+                        }}
                     >
-                        <AdvancedSearch isPanel={true} />
-                    </Box>
-                </TabPanel>
-                <TabPanel padding="10px" height="100%">
-                    <Box
-                        height="100%"
-                        width="100%"
-                        padding="14px"
-                        backgroundColor={
-                            colorMode === 'light'
-                                ? 'blackAlpha.200'
-                                : 'whiteAlpha.100'
-                        }
-                        borderRadius="10px"
-                    >
-                        <CustomScroll
-                            style={{
-                                paddingLeft: '10px',
-                                paddingRight: '10px'
-                            }}
-                        >
-                            <Overview />
-                        </CustomScroll>
-                    </Box>
-                </TabPanel>
-                <TabPanel padding="10px" height="100%">
-                    <Box
-                        height="100%"
-                        width="100%"
-                        padding="14px"
-                        backgroundColor={
-                            colorMode === 'light'
-                                ? 'blackAlpha.200'
-                                : 'whiteAlpha.100'
-                        }
-                        borderRadius="10px"
-                        paddingTop={activeTab === 2 && '30px'}
-                    >
-                        {renderResultsTabContent()}
-                    </Box>
-                </TabPanel>
-                <TabPanel padding="10px" height="100%">
-                    <Box
-                        height="100%"
-                        width="100%"
-                        padding="14px"
-                        backgroundColor={
-                            colorMode === 'light'
-                                ? 'blackAlpha.200'
-                                : 'whiteAlpha.100'
-                        }
-                        borderRadius="10px"
-                    >
-                        <SchemaFlow />
-                    </Box>
-                </TabPanel>
-                <TabPanel padding="10px" height="100%">
-                    <Box
-                        height="100%"
-                        width="100%"
-                        padding="14px"
-                        backgroundColor={
-                            colorMode === 'light'
-                                ? 'blackAlpha.200'
-                                : 'whiteAlpha.100'
-                        }
-                        borderRadius="10px"
-                    >
-                        <HistoryFlow />
-                    </Box>
-                </TabPanel>
+                        <WidgetGrid />
+                    </CustomScroll>
+                )}
+                {renderTabPanel(renderResultsTabContent())}
+                {renderTabPanel(<SchemaFlow />)}
+                {renderTabPanel(<HistoryFlow />)}
             </TabPanels>
         );
     };
@@ -502,8 +454,8 @@ function DataPanel(props) {
     );
 }
 
-DataPanel.propTypes = {
+RightPanel.propTypes = {
     panelType: PropTypes.string
 };
 
-export default observer(DataPanel);
+export default observer(RightPanel);

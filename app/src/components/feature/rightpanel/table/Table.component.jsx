@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useGlobalFilter, useSortBy, useTable } from 'react-table';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 import GlobalFilterComponent from './globalFilter/GlobalFilter.component';
 import './table.scss';
 import TableBodyComponent from './tableBody/TableBody.component';

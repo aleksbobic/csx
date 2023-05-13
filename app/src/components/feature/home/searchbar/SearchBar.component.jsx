@@ -18,7 +18,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
-import AutoCompleteInputComponent from '../autocompleteinput/AutoCompleteInput.component';
+import AutoCompleteInputComponent from '../../autocompleteinput/AutoCompleteInput.component';
 
 function SearchBar(props) {
     const history = useHistory();

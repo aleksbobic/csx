@@ -20,7 +20,7 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 
 function StudyGrid(props) {
     const { colorMode } = useColorMode();

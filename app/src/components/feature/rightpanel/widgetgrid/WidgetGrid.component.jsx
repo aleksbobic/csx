@@ -12,20 +12,20 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import LineChart from '../widgets/charts/LineChart.component';
-import Widget from '../widgets/Widget.component';
-import SelectedComponentListComponent from '../widgets/component/ComponentStats.component';
-import SelectedNodeListComponent from '../widgets/node/NodeStats.component';
-import GraphStatsComponent from '../widgets/graph/GraphStats.component';
-import ConnectionStatsComponent from '../widgets/node/NodeConnectionStats.component';
+import LineChart from '../../widgets/charts/LineChart.component';
+import Widget from '../../widgets/Widget.component';
+import SelectedComponentListComponent from '../../widgets/component/ComponentStats.component';
+import SelectedNodeListComponent from '../../widgets/node/NodeStats.component';
+import GraphStatsComponent from '../../widgets/graph/GraphStats.component';
+import ConnectionStatsComponent from '../../widgets/node/NodeConnectionStats.component';
 import { useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { useCallback } from 'react';
-import DoughnutChart from '../widgets/charts/DoughnutChart.component';
-import BarChart from '../widgets/charts/BarChart.component';
-import RadarChartComponent from '../widgets/charts/RadarChart.component';
+import DoughnutChart from '../../widgets/charts/DoughnutChart.component';
+import BarChart from '../../widgets/charts/BarChart.component';
+import RadarChartComponent from '../../widgets/charts/RadarChart.component';
 
-function Overview(props) {
+function WidgetGrid(props) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
@@ -175,12 +175,12 @@ function Overview(props) {
     );
 }
 
-Overview.propTypes = {
+WidgetGrid.propTypes = {
     types: PropTypes.array
 };
 
-Overview.defaultProps = {
+WidgetGrid.defaultProps = {
     types: ['all', 'selection', 'visible']
 };
 
-export default observer(Overview);
+export default observer(WidgetGrid);

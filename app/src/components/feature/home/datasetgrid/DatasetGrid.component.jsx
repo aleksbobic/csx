@@ -10,8 +10,8 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { withRouter } from 'react-router-dom';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
-import CustomScroll from '../customscroll/CustomScroll.component';
-import { FileUploadArea } from '../fileupload/FileUploadArea.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
+import { FileUploadArea } from '../../fileupload/FileUploadArea.component';
 import { DocumentTextIcon } from '@heroicons/react/20/solid';
 
 function DatasetGrid(props) {

@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 import Comment from './comment/Comment.component';
 import CommentTextArea from './commenttextarea/CommentTextArea.component';
 

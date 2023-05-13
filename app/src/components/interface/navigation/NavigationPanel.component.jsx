@@ -31,7 +31,7 @@ import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import DataPanelComponent from '../datapanel/DataPanel.component';
+import RightPanel from '../rightpanel/RightPanel.component';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
@@ -574,7 +574,7 @@ function NavigationPanelComponent() {
                 >
                     {renderGraphUtils()}
                     {renderViewUtils()}
-                    <DataPanelComponent panelType={panelType} />
+                    <RightPanel panelType={panelType} />
                 </Box>
             )}
         </>

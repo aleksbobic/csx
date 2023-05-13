@@ -29,7 +29,7 @@ import { RootStoreContext } from 'stores/RootStore';
 
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { isEnvFalse } from 'general.utils';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 
 function CookieInfo() {
     const { colorMode } = useColorMode();

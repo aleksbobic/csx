@@ -15,7 +15,7 @@ import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { RootStoreContext } from 'stores/RootStore';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);

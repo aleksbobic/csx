@@ -15,7 +15,7 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 import { RootStoreContext } from 'stores/RootStore';
 
 function TutorialGrid(props) {

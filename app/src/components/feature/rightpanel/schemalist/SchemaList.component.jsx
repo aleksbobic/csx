@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import 'overlayscrollbars/styles/overlayscrollbars.css';
-import CustomScroll from '../customscroll/CustomScroll.component';
+import CustomScroll from '../../customscroll/CustomScroll.component';
 
 export function SchemaList() {
     const store = useContext(RootStoreContext);

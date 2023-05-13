@@ -13,16 +13,20 @@ import {
     useColorModeValue,
     useToast
 } from '@chakra-ui/react';
-import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
-import DatasetConfigModalComponent from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
-import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
+import SearchBar from 'components/feature/home/searchbar/SearchBar.component';
+import DatasetConfigModal from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
+import FileUploadModal from 'components/interface/fileuploadmodal/FileUploadModal.component';
 import { Close } from 'css.gg';
 
-import CookieInfo from 'components/feature/cookieinfo/CookieInfo.component';
-import DatasetGrid from 'components/feature/datasetgrid/DatasetGrid.component';
-import EmptySearch from 'components/feature/emptysearch/EmptySearch.component';
-import StudyGrid from 'components/feature/studygrid/StudyGrid.component';
+import CookieInfo from 'components/feature/home/cookieinfo/CookieInfo.component';
+import DatasetElement from 'components/feature/home/datasetgrid/datasetElement/DatasetElement.component';
+import DatasetGrid from 'components/feature/home/datasetgrid/DatasetGrid.component';
+import EmptySearch from 'components/feature/home/emptysearch/EmptySearch.component';
+import EmptyStudy from 'components/feature/home/emptystudy/EmptyStudy.component';
+import StudyGrid from 'components/feature/home/studygrid/StudyGrid.component';
+import TutorialGrid from 'components/feature/home/tutorialgrid/TutorialGrid.component';
 import Footer from 'components/interface/footer/Footer.component';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -31,10 +35,6 @@ import { useBeforeunload } from 'react-beforeunload';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
-import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
-import { isEnvFalse, isEnvTrue } from 'general.utils';
-import EmptyStudy from 'components/emptystudy/EmptyStudy.component';
-import TutorialGrid from 'components/feature/tutorialgrid/TutorialGrid.component';
 
 function HomePage() {
     const toast = useToast();
@@ -332,8 +332,8 @@ function HomePage() {
             backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
             paddingTop="150px"
         >
-            <FileUploadModalComponent />
-            <DatasetConfigModalComponent />
+            <FileUploadModal />
+            <DatasetConfigModal />
             <Center width="100%" minH="200px" flexDir="column">
                 <Image
                     src={logo}
@@ -357,7 +357,7 @@ function HomePage() {
                 maxW="container.sm"
             >
                 {store.search.datasets.length > 0 && (
-                    <SearchBarComponent
+                    <SearchBar
                         style={{ marginTop: '0px' }}
                         onSubmit={() => cookieToast.closeAll()}
                     />

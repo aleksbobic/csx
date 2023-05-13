@@ -26,13 +26,13 @@ import ReactFlow, {
     Background
 } from 'react-flow-renderer';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import DatasetNode from '../advancedsearch/datasetNode/Dataset.component';
-import SchemaEdge from '../schemaedge/SchemaEdge.component';
-import SearchNode from '../advancedsearch/searchnode/SearchNode.component';
-import HistoryNode from '../historyNode/HistoryNode.component';
-import OverviewCustomEdge from '../overviewschemaedge/OverviewSchemaEdge.component';
-import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
-import SchemaNode from '../schemanode/SchemaNode.component';
+import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
+import SchemaEdge from '../../schemaedge/SchemaEdge.component';
+import SearchNode from '../../advancedsearch/searchnode/SearchNode.component';
+import HistoryNode from '../../historyNode/HistoryNode.component';
+import OverviewCustomEdge from '../../overviewschemaedge/OverviewSchemaEdge.component';
+import OverviewSchemaNode from '../../overviewschemanode/OverviewSchemaNode.component';
+import SchemaNode from '../../schemanode/SchemaNode.component';
 import { observer } from 'mobx-react';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
