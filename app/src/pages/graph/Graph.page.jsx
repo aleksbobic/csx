@@ -2,13 +2,9 @@ import {
     Box,
     Button,
     Center,
-    Checkbox,
     HStack,
-    Heading,
-    Image,
     SlideFade,
     Text,
-    VStack,
     useColorMode,
     useToast
 } from '@chakra-ui/react';
@@ -16,8 +12,9 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import ContextMenuComponent from 'components/feature/contextmenu/ContextMenu.component';
 import GraphComponent from 'components/feature/graph/Graph.component';
 import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
-import StatsModalComponent from 'components/interface/statsmodal/StatsModal.component';
-import { Close, Spinner } from 'css.gg';
+import WidgetModal from 'components/interface/widgetmodal/WidgetModal.component';
+import InteractionsToast from 'components/feature/interactionstoast/InteractionsToast.component';
+import { Spinner } from 'css.gg';
 import { isEnvSet } from 'general.utils';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
@@ -26,11 +23,6 @@ import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-
-import contextMenuInteraction from 'images/right_click.png';
-import nodeInformationInteraction from 'images/left_click_node.png';
-import panningInteraction from 'images/pan.png';
-import scrollInteraction from 'images/scroll.png';
 
 function GraphPage() {
     const dataModificationInfoToastRef = useRef();
@@ -202,164 +194,12 @@ function GraphPage() {
 
         interactionsToastRef.current = interactionsToast({
             render: () => (
-                <VStack
-                    background="blackAlpha.900"
-                    borderRadius="10px"
-                    padding="20px"
-                    marginBottom="15px"
-                >
-                    <Heading
-                        size="sm"
-                        color="white"
-                        width="100%"
-                        textAlign="center"
-                    >
-                        Interactions
-                    </Heading>
-
-                    <Text
-                        fontSize="xs"
-                        textAlign="center"
-                        padding="0 20px 10px 20px"
-                    >
-                        This graph represents your search results. Here are some
-                        of the ways you can interact with it and the elemnts in
-                        it.
-                    </Text>
-                    <HStack spacing="20px">
-                        <VStack width="25%">
-                            <Heading size="xs" width="100%">
-                                Zoom
-                            </Heading>
-                            <Text fontSize="xs">
-                                Scroll with your mouse wheel to zoom in and out
-                                the view.
-                            </Text>
-                            <Image
-                                src={scrollInteraction}
-                                height="50px"
-                                alt="Mouse scroll interaction"
-                            />
-                        </VStack>
-                        <VStack width="25%">
-                            <Heading size="xs" width="100%">
-                                Pan & Move
-                            </Heading>
-                            <Text fontSize="xs">
-                                Left click on the{' '}
-                                <Text
-                                    as="span"
-                                    color="blue.500"
-                                    fontWeight="bold"
-                                >
-                                    canvas
-                                </Text>{' '}
-                                or a{' '}
-                                <Text
-                                    as="span"
-                                    color="blue.500"
-                                    fontWeight="bold"
-                                >
-                                    node
-                                </Text>{' '}
-                                and drag your mouse to move it.
-                            </Text>
-                            <Image
-                                src={panningInteraction}
-                                height="50px"
-                                alt="Mouse scroll interaction"
-                            />
-                        </VStack>
-                        <VStack width="25%">
-                            <Heading size="xs" width="100%">
-                                Open Menu
-                            </Heading>
-                            <Text fontSize="xs">
-                                Right click on the{' '}
-                                <Text
-                                    as="span"
-                                    color="blue.500"
-                                    fontWeight="bold"
-                                >
-                                    canvas
-                                </Text>{' '}
-                                or a{' '}
-                                <Text
-                                    as="span"
-                                    color="blue.500"
-                                    fontWeight="bold"
-                                >
-                                    node
-                                </Text>{' '}
-                                to open their context menus.
-                            </Text>
-
-                            <Image
-                                src={contextMenuInteraction}
-                                height="50px"
-                                alt="Mouse scroll interaction"
-                            />
-                        </VStack>
-                        <VStack width="25%">
-                            <Heading size="xs" width="100%">
-                                View Node Info
-                            </Heading>
-                            <Text fontSize="xs">
-                                Left click on a{' '}
-                                <Text
-                                    as="span"
-                                    color="blue.500"
-                                    fontWeight="bold"
-                                >
-                                    node
-                                </Text>{' '}
-                                to view additional information.
-                            </Text>
-
-                            <Image
-                                src={nodeInformationInteraction}
-                                height="50px"
-                                alt="Mouse scroll interaction"
-                            />
-                        </VStack>
-                    </HStack>
-                    <HStack spacing="20px">
-                        <Button
-                            size="xs"
-                            backgroundColor="blue.600"
-                            width="80px"
-                            paddingLeft="4px"
-                            _hover={{
-                                backgroundColor: 'blue.500'
-                            }}
-                            leftIcon={
-                                <Close
-                                    style={{
-                                        '--ggs': 0.7
-                                    }}
-                                />
-                            }
-                            onClick={() => {
-                                interactionsToast.closeAll();
-                                store.core.setInteractionModalClosed(true);
-                            }}
-                        >
-                            Close
-                        </Button>
-                        <HStack spacing="10px" justifyContent="space-between">
-                            <Checkbox
-                                size="sm"
-                                onChange={e => {
-                                    store.core.setInteractionsModalDisplay(
-                                        e.target.checked
-                                    );
-                                }}
-                            >
-                                Never show again
-                            </Checkbox>
-                        </HStack>
-                    </HStack>
-                </VStack>
+                <InteractionsToast
+                    onClose={() => {
+                        interactionsToast.closeAll();
+                        store.core.setInteractionModalClosed(true);
+                    }}
+                />
             ),
             status: 'info',
             duration: null,
@@ -458,7 +298,7 @@ function GraphPage() {
 
     return (
         <Box zIndex={1} height="100%" position="relative" id="graph">
-            <StatsModalComponent />
+            <WidgetModal />
             <ContextMenuComponent />
 
             {showViewAll && (
