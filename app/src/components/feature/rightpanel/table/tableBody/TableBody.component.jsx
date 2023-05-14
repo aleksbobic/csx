@@ -75,11 +75,17 @@ function TableBody(props) {
                     maxWidth="150px"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Results Panel - Table',
-                            'Cell',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Zoom to fit ${cell.value}`
+                                area: 'Results panel',
+                                sub_area: 'Results table'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Cell'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Zoom to node',
+                                event_value: cell.value
                             })
                         );
 
@@ -151,11 +157,17 @@ function TableBody(props) {
                         maxWidth="150px"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Results Panel - Table',
-                                'Cell',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: `Zoom to fit ${cell.value}`
+                                    area: 'Results panel',
+                                    sub_area: 'Results table'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Cell'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Zoom to node',
+                                    event_value: cell.value
                                 })
                             );
 

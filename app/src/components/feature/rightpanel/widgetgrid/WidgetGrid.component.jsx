@@ -115,11 +115,15 @@ function WidgetGrid(props) {
                         borderRadius="xl"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Details panel',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Add new widget'
+                                    area: 'Widget grid'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Add new widget'
                                 })
                             );
 

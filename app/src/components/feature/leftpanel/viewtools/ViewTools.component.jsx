@@ -44,22 +44,33 @@ function ViewTools() {
                                     setForceRunning(false);
 
                                     store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Run Force'
+                                            area: 'Left panel',
+                                            sub_area: 'VIew tools'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Run force'
                                         })
                                     );
                                 } else {
                                     store.graphInstance.applyForce();
                                     setForceRunning(true);
+
                                     store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Stop Force'
+                                            area: 'Left panel',
+                                            sub_area: 'VIew tools'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Stop force'
                                         })
                                     );
                                 }
@@ -72,8 +83,8 @@ function ViewTools() {
                     <Tooltip
                         label={
                             store.graphInstance.forceShouldIgnoreSelected
-                                ? 'Turn off layout position simulation for currently selected nodes.'
-                                : 'Turn on layout position simulation for currently selected nodes.'
+                                ? 'Turn off layout simulation for selected nodes.'
+                                : 'Turn on layout simulation for selected nodes.'
                         }
                     >
                         <IconButton
@@ -81,6 +92,22 @@ function ViewTools() {
                             size="sm"
                             icon={<Anchor style={{ '--ggs': '0.6' }} />}
                             onClick={() => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Left panel',
+                                        sub_area: 'VIew tools'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: store.graphInstance
+                                            .forceShouldIgnoreSelected
+                                            ? 'Turn off layout simulation for selected nodes.'
+                                            : 'Turn on layout simulation for selected nodes.'
+                                    })
+                                );
                                 store.graphInstance.ignoreSelected(
                                     !store.graphInstance
                                         .forceShouldIgnoreSelected
@@ -107,11 +134,16 @@ function ViewTools() {
                                 store.graph.resetNodesPositions();
 
                                 store.track.trackEvent(
-                                    'Side panel - View Settings',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Reset layout'
+                                        area: 'Left panel',
+                                        sub_area: 'VIew tools'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Reset layout'
                                     })
                                 );
                             }}

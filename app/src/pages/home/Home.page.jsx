@@ -100,11 +100,17 @@ function HomePage() {
                                 cookieToast.closeAll();
                                 store.core.setHideCookieBanner();
                                 store.core.setTrackingEnabled(true);
+
                                 store.track.trackEvent(
-                                    'Global',
-                                    'Initialisation',
                                     JSON.stringify({
-                                        userUUID: store.core.userUuid
+                                        area: 'Global'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: null
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Initialisation',
+                                        event_value: store.core.userUuid
                                     })
                                 );
                             }}

@@ -59,10 +59,18 @@ function Graph(props) {
 
     const onNodeClick = (node, event) => {
         store.track.trackEvent(
-            'Graph Area',
-            `Node - ${node.label} - ${node.id}`,
             JSON.stringify({
-                type: 'Click'
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: node.id,
+                item_label: node.label,
+                item_feature: node.feature
+            }),
+            JSON.stringify({
+                event_type: 'Left click',
+                event_action: 'Open node details'
             })
         );
 
@@ -71,10 +79,18 @@ function Graph(props) {
 
     const onNodeRightClick = (node, event) => {
         store.track.trackEvent(
-            'Graph Area',
-            `Node - ${node.label} - ${node.id}`,
             JSON.stringify({
-                type: 'Click'
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: node.id,
+                item_label: node.label,
+                item_feature: node.feature
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open node context menu'
             })
         );
 
@@ -83,10 +99,15 @@ function Graph(props) {
 
     const onBackgroundRightClick = event => {
         store.track.trackEvent(
-            'Graph Area',
-            'Canvas',
             JSON.stringify({
-                type: 'Click'
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Canvas'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open canvas context menu'
             })
         );
 
@@ -95,10 +116,15 @@ function Graph(props) {
 
     const onLinkRightClick = (link, event) => {
         store.track.trackEvent(
-            'Graph Area',
-            'Canvas',
             JSON.stringify({
-                type: 'Click'
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Edge'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open canvas context menu'
             })
         );
 
@@ -295,17 +321,6 @@ function Graph(props) {
             linkCurvature={() => store.graphInstance.customEdgeCurvature}
             onLinkHover={link => {
                 if (store.core.isOverview) {
-                    if (link) {
-                        store.track.trackEvent(
-                            'Graph Area',
-                            `Link - ${link.id}`,
-                            JSON.stringify({
-                                type: 'Hover',
-                                connections: link.connections
-                            })
-                        );
-                    }
-
                     handleLinkHover(link);
                 }
             }}
@@ -322,29 +337,7 @@ function Graph(props) {
             onNodeRightClick={onNodeRightClick}
             onBackgroundRightClick={onBackgroundRightClick}
             onLinkRightClick={onLinkRightClick}
-            onBackgroundClick={() => {
-                store.track.trackEvent(
-                    'Graph Area - Contex Menu',
-                    'Outised',
-                    JSON.stringify({
-                        type: 'Click',
-                        value: 'Close context menu'
-                    })
-                );
-
-                store.contextMenu.hideContextMenu();
-            }}
             onNodeDrag={store.contextMenu.hideContextMenu}
-            onNodeDragEnd={(node, translate) => {
-                store.track.trackEvent(
-                    'Graph Area',
-                    `Node - ${node.label} - ${node.id}`,
-                    JSON.stringify({
-                        type: 'Drag',
-                        value: translate
-                    })
-                );
-            }}
             showNavInfo={false}
             onNodeHover={onNodeHover}
             d3VelocityDecay={0.1}

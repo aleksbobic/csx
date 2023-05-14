@@ -190,11 +190,16 @@ function SchemaConfig(props) {
                         }
                         onClick={() => {
                             store.track.trackEvent(
-                                'Schema Panel',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show all schema nodes'
+                                    area: 'Schema config',
+                                    sub_area: 'Schema'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Show all schema nodes'
                                 })
                             );
 

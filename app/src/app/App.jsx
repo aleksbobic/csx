@@ -32,10 +32,15 @@ function CSX() {
     useEffect(() => {
         window.addEventListener('beforeunload', () => {
             store.track.trackEvent(
-                'Global',
-                'Tab Switch',
                 JSON.stringify({
-                    value: 'User closed the tab'
+                    area: 'Global'
+                }),
+                JSON.stringify({
+                    item_type: null
+                }),
+                JSON.stringify({
+                    event_type: 'Tab interaction',
+                    event_action: 'Close tab'
                 })
             );
         });
@@ -43,18 +48,28 @@ function CSX() {
         window.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User switched to a different tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Switch to another tab'
                     })
                 );
             } else {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User returned to the csx tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Return to tab'
                     })
                 );
             }
@@ -63,28 +78,43 @@ function CSX() {
         return () => {
             window.removeEventListener('beforeunload', () => {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User closed the tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Close tab'
                     })
                 );
             });
             window.removeEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     store.track.trackEvent(
-                        'Global',
-                        'Tab Switch',
                         JSON.stringify({
-                            value: 'User switched to a different tab'
+                            area: 'Global'
+                        }),
+                        JSON.stringify({
+                            item_type: null
+                        }),
+                        JSON.stringify({
+                            event_type: 'Tab interaction',
+                            event_action: 'Switch to another tab'
                         })
                     );
                 } else {
                     store.track.trackEvent(
-                        'Global',
-                        'Tab Switch',
                         JSON.stringify({
-                            value: 'User returned to the csx tab'
+                            area: 'Global'
+                        }),
+                        JSON.stringify({
+                            item_type: null
+                        }),
+                        JSON.stringify({
+                            event_type: 'Tab interaction',
+                            event_action: 'Return to tab'
                         })
                     );
                 }

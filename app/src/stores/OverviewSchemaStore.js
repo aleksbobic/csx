@@ -167,11 +167,17 @@ export class OverviewSchemaStore {
         const newNodeId = uuidv4();
 
         this.store.track.trackEvent(
-            'Schema Panel',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Add new link node ${newNodeId}`
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Add new edge node',
+                event_value: newNodeId
             })
         );
 
@@ -184,11 +190,17 @@ export class OverviewSchemaStore {
 
     removeLinkNode = id => {
         this.store.track.trackEvent(
-            'Schema Panel',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Remove link node ${id}`
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Remove edge node',
+                event_value: id
             })
         );
 
@@ -206,11 +218,18 @@ export class OverviewSchemaStore {
 
     setAnchor = anchor => {
         this.store.track.trackEvent(
-            'Schema Panel - Anchor Node',
-            'Select Element - Anchor Propertu',
             JSON.stringify({
-                type: 'Change selection',
-                value: anchor
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Anchor node'
+            }),
+            JSON.stringify({
+                item_type: 'Select element'
+            }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_action: 'Change anchor',
+                event_value: anchor
             })
         );
 
@@ -251,11 +270,19 @@ export class OverviewSchemaStore {
 
     setLink = (link, nodeId) => {
         this.store.track.trackEvent(
-            `Schema Panel - Link Node - ${nodeId}`,
-            'Select Element - Link Property',
             JSON.stringify({
-                type: 'Change selection',
-                value: link
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Edge node',
+                sub_sub_area_id: nodeId
+            }),
+            JSON.stringify({
+                item_type: 'Select element'
+            }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_action: 'Change edge property',
+                event_value: link
             })
         );
 
@@ -336,11 +363,18 @@ export class OverviewSchemaStore {
 
     addProperty = property => {
         this.store.track.trackEvent(
-            'Schema Panel - Anchor Node',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Add node property ${property}`
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Anchor node'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Add anchor property',
+                event_value: property
             })
         );
 
@@ -355,11 +389,18 @@ export class OverviewSchemaStore {
 
     removeProperty = property => {
         this.store.track.trackEvent(
-            'Schema Panel - Anchor Node',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Remove node property ${property}`
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Anchor node'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Remove anchor property',
+                event_value: property
             })
         );
 

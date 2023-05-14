@@ -197,21 +197,32 @@ function CookieInfo() {
                     value={store.core.trackingEnabled}
                     onChange={e => {
                         store.track.trackEvent(
-                            'Home Page - Tracking Information Panel',
-                            'Switch',
                             JSON.stringify({
-                                type: 'Toggle',
-                                value: `Interaction tracking: ${e.target.checked}`
+                                area: 'Home page',
+                                sub_area: 'Tracking information panel'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Switch'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Toggle',
+                                event_action: 'Toggle interaction tracking',
+                                event_value: e.target.checked ? 'On' : 'Off'
                             })
                         );
 
                         store.core.setTrackingEnabled(e.target.checked);
 
                         store.track.trackEvent(
-                            'Global',
-                            'Initialisation',
                             JSON.stringify({
-                                userUUID: store.core.userUuid
+                                area: 'Global'
+                            }),
+                            JSON.stringify({
+                                item_type: null
+                            }),
+                            JSON.stringify({
+                                event_type: 'Initialisation',
+                                event_value: store.core.userUuid
                             })
                         );
 
@@ -264,11 +275,16 @@ function CookieInfo() {
                 }}
                 onClick={() => {
                     store.track.trackEvent(
-                        'Home Page - Tracking Information Panel',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Close panel'
+                            area: 'Home page',
+                            sub_area: 'Tracking information panel'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Close tracking information panel'
                         })
                     );
                     store.core.setShowCookieInfo(false);

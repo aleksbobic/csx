@@ -128,11 +128,17 @@ function TutorialGrid(props) {
                                     height="100%"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Home Page - Tutorial Grid',
-                                            'Link',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: tutorial.title
+                                                area: 'Home page',
+                                                sub_area: 'Tutorial grid'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Link'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Open tutorial',
+                                                event_value: tutorial.title
                                             })
                                         );
                                     }}

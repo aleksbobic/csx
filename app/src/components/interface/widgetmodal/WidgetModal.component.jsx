@@ -523,11 +523,16 @@ function FileUploadModal() {
                                     }
                                     onSubmit={val => {
                                         store.track.trackEvent(
-                                            'Widget Modal',
-                                            'Editable Element - Title',
                                             JSON.stringify({
-                                                type: 'Write',
-                                                value: val
+                                                area: 'Widget modal'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Editable element'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Write',
+                                                event_action: 'Change title',
+                                                event_value: val
                                             })
                                         );
 
@@ -587,12 +592,20 @@ function FileUploadModal() {
                                             variant="filled"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget Modal',
-                                                    'Select Element - Network Elements',
                                                     JSON.stringify({
-                                                        type: 'Change selection',
-                                                        value: value.target
-                                                            .value
+                                                        area: 'Widget modal'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type:
+                                                            'Select element'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type:
+                                                            'Change selection',
+                                                        event_action:
+                                                            'Change network elements',
+                                                        event_value:
+                                                            value.target.value
                                                     })
                                                 );
 
@@ -634,12 +647,20 @@ function FileUploadModal() {
                                             size="sm"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget Modal',
-                                                    'Select Element - Element Values',
                                                     JSON.stringify({
-                                                        type: 'Change selection',
-                                                        value: value.target
-                                                            .value
+                                                        area: 'Widget modal'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type:
+                                                            'Select element'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type:
+                                                            'Change selection',
+                                                        event_action:
+                                                            'Change element values',
+                                                        event_value:
+                                                            value.target.value
                                                     })
                                                 );
 
@@ -683,12 +704,20 @@ function FileUploadModal() {
                                             size="sm"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget Modal',
-                                                    'Select Element - Group By Value',
                                                     JSON.stringify({
-                                                        type: 'Change selection',
-                                                        value: value.target
-                                                            .value
+                                                        area: 'Widget modal'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type:
+                                                            'Select element'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type:
+                                                            'Change selection',
+                                                        event_action:
+                                                            'Change group by values',
+                                                        event_value:
+                                                            value.target.value
                                                     })
                                                 );
 
@@ -736,12 +765,20 @@ function FileUploadModal() {
                                             size="sm"
                                             onChange={value => {
                                                 store.track.trackEvent(
-                                                    'Widget Modal',
-                                                    'Select Element - Show Only',
                                                     JSON.stringify({
-                                                        type: 'Change selection',
-                                                        value: value.target
-                                                            .value
+                                                        area: 'Widget modal'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type:
+                                                            'Select element'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type:
+                                                            'Change selection',
+                                                        event_action:
+                                                            'Change show only values',
+                                                        event_value:
+                                                            value.target.value
                                                     })
                                                 );
 
@@ -815,11 +852,16 @@ function FileUploadModal() {
                                 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Widget Modal',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: `Open ${entry} widget sample`
+                                            area: 'Widget modal'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Open widget sample',
+                                            event_value: entry
                                         })
                                     );
                                 }}
@@ -965,11 +1007,15 @@ function FileUploadModal() {
                         icon={<Close />}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Widget Modal',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Close widget modal'
+                                    area: 'Widget modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Close widget modal'
                                 })
                             );
 

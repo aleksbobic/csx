@@ -98,10 +98,16 @@ export class HistoryStore {
 
     loadStudy = historyID => {
         this.store.track.trackEvent(
-            'History Panel',
-            `Node - ${historyID}`,
             JSON.stringify({
-                type: 'Click'
+                area: 'History panel'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: historyID
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Load graph from history node'
             })
         );
 
@@ -181,11 +187,17 @@ export class HistoryStore {
 
     deleteNode = async id => {
         this.store.track.trackEvent(
-            'History Panel',
-            `Node - ${id}`,
             JSON.stringify({
-                type: 'Click',
-                value: 'Delete node'
+                area: 'History panel',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Delete node'
             })
         );
 

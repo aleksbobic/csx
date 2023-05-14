@@ -318,11 +318,15 @@ function GraphPage() {
                             _hover={{ backgroundColor: 'blue.500' }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Side Panel - Direct Connections',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Show all nodes'
+                                        area: 'Graph area'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Show all nodes'
                                     })
                                 );
                                 store.graphInstance.toggleVisibleComponents(-1);

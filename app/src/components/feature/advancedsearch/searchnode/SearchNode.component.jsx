@@ -45,11 +45,16 @@ const searchNode = ({ id, data, isConnectable }) => {
         }
 
         data.trackNodeAction(
-            `Node - ${id} - Input Element - Keyphrase`,
             JSON.stringify({
-                type: 'Write',
-                feature: data.feature,
-                value: `${data.keyphrase}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Input element' }),
+            JSON.stringify({
+                event_type: 'Write',
+                event_action: 'Enter keyphrase',
+                event_value: `${data.keyphrase}`
             })
         );
     };
@@ -60,10 +65,16 @@ const searchNode = ({ id, data, isConnectable }) => {
         data.updateActions(id);
 
         data.trackNodeAction(
-            `Node - ${id} - Select Element - Feature`,
             JSON.stringify({
-                type: 'Change selection',
-                value: `${data.feature}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Select element' }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_action: 'Change node feature',
+                event_value: `${data.feature}`
             })
         );
     };
@@ -81,13 +92,19 @@ const searchNode = ({ id, data, isConnectable }) => {
                 }
                 getValue={value => {
                     data.updateSearchNodeData(id, value);
-
+                }}
+                onBlur={value => {
                     data.trackNodeAction(
-                        `Node - ${id} - Input Element - Keyphrase`,
                         JSON.stringify({
-                            type: 'Write',
-                            feature: data.feature,
-                            value: `${value}`
+                            area: 'Advanced search',
+                            sub_area: 'Node',
+                            sub_area_id: id
+                        }),
+                        JSON.stringify({ item_type: 'Input element' }),
+                        JSON.stringify({
+                            event_type: 'Write',
+                            event_action: 'Enter keyphrase',
+                            event_value: value
                         })
                     );
                 }}
@@ -117,11 +134,16 @@ const searchNode = ({ id, data, isConnectable }) => {
                     data.updateSearchNodeData(id, event.target.value);
 
                     data.trackNodeAction(
-                        `Node - ${id} - Select Element - Keyphrase`,
                         JSON.stringify({
-                            type: 'Change selection',
-                            feature: data.feature,
-                            value: `${event.target.value}`
+                            area: 'Advanced search',
+                            sub_area: 'Node',
+                            sub_area_id: id
+                        }),
+                        JSON.stringify({ item_type: 'Select element' }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Change keyphrase',
+                            event_value: `${event.target.value}`
                         })
                     );
                 }}
@@ -156,13 +178,19 @@ const searchNode = ({ id, data, isConnectable }) => {
                 borderRadius="5px"
                 onChange={value => {
                     data.updateSearchNodeData(id, value);
-
+                }}
+                onBlur={value => {
                     data.trackNodeAction(
-                        `Node - ${id} - Number Input Element - Keyphrase`,
                         JSON.stringify({
-                            type: 'Write',
-                            feature: data.feature,
-                            value: `${value}`
+                            area: 'Advanced search',
+                            sub_area: 'Node',
+                            sub_area_id: id
+                        }),
+                        JSON.stringify({ item_type: 'Input element' }),
+                        JSON.stringify({
+                            event_type: 'Write',
+                            event_action: 'Enter keyphrase',
+                            event_value: value.target.value
                         })
                     );
                 }}

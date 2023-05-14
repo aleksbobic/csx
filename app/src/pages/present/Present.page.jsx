@@ -60,11 +60,18 @@ function PresentPage() {
             });
             deck.on('slidechanged', e => {
                 setCurrentSlide(e.indexv);
+
                 store.track.trackEvent(
-                    'Presentation Page',
-                    'Event',
                     JSON.stringify({
-                        value: `Navigate to slide ${e.indexv}`
+                        area: 'Presentation page'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Key press',
+                        event_action: 'Navigate to slide',
+                        event_value: e.indexv
                     })
                 );
             });
@@ -299,14 +306,21 @@ function PresentPage() {
                         _hover={{ opacity: 1 }}
                         onClick={() => {
                             store.present.generatePPT();
+
                             store.track.trackEvent(
-                                'Presentation Page',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: `Generate presentation file for study ${
-                                        queryString.parse(location.search).study
-                                    }`
+                                    area: 'Presentation page'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action:
+                                        'Generate presentation file for study',
+                                    event_value: queryString.parse(
+                                        location.search
+                                    ).study
                                 })
                             );
                         }}
@@ -318,12 +332,17 @@ function PresentPage() {
                         _hover={{ opacity: 1 }}
                         onClick={() => {
                             revealInstance.next();
+
                             store.track.trackEvent(
-                                'Presentation Page',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Next slide'
+                                    area: 'Presentation page'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Next slide'
                                 })
                             );
                         }}
@@ -335,12 +354,17 @@ function PresentPage() {
                         _hover={{ opacity: 1 }}
                         onClick={() => {
                             revealInstance.prev();
+
                             store.track.trackEvent(
-                                'Presentation Page',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Prev slide'
+                                    area: 'Presentation page'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Previous slide'
                                 })
                             );
                         }}

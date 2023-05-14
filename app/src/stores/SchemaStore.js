@@ -55,11 +55,18 @@ export class SchemaStore {
         }
 
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge - ${id}`,
             JSON.stringify({
-                type: 'Click',
-                value: `Change relationship to ${edge.data.relationship}`
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: 'Edge',
+                item_id: id
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Change relationship',
+                event_value: edge.data.relationship
             })
         );
 
@@ -316,10 +323,17 @@ export class SchemaStore {
 
     addSchemaConnection = edge => {
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge ${edge['source']}${edge['target']}`,
             JSON.stringify({
-                type: 'Create'
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: null
+            }),
+            JSON.stringify({
+                event_type: 'Connect',
+                event_action: 'Create new edge',
+                event_value: `${edge['source']}${edge['target']}`
             })
         );
 
@@ -371,10 +385,18 @@ export class SchemaStore {
 
     removeSchemaConnection = id => {
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge ${id}`,
             JSON.stringify({
-                type: 'Remove'
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Edge',
+                sub_sub_area_id: id
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Remove edge'
             })
         );
 

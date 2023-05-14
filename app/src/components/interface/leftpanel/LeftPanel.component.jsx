@@ -48,12 +48,17 @@ function LeftPanel() {
 
     const toggleControlPanel = () => {
         onToggle();
+
         store.track.trackEvent(
-            'Side Panel',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `${isOpen ? 'Open' : 'Close'} side panel`
+                area: 'Left panel'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: `${isOpen ? 'Open' : 'Close'} left panel`
             })
         );
     };
@@ -370,12 +375,17 @@ function LeftPanel() {
                 height="40px"
                 onClick={() => {
                     openSliderIfClosed();
+
                     store.track.trackEvent(
-                        'Side Panel',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Open study info'
+                            area: 'Left panel'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Open study info'
                         })
                     );
                 }}
@@ -418,12 +428,17 @@ function LeftPanel() {
                 height="40px"
                 onClick={() => {
                     openSliderIfClosed();
+
                     store.track.trackEvent(
-                        'Side Panel',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Open view tools'
+                            area: 'Left panel'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Open view tools'
                         })
                     );
                 }}
@@ -467,12 +482,17 @@ function LeftPanel() {
                 height="40px"
                 onClick={() => {
                     openSliderIfClosed();
+
                     store.track.trackEvent(
-                        'Side Panel',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Open modification tools'
+                            area: 'Left panel'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Open modification tools'
                         })
                     );
                 }}

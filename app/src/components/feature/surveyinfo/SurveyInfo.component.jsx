@@ -69,11 +69,16 @@ export function SurveyInfoModal(props) {
                         target="_blank"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph Area - Survey Modal',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open survey Link'
+                                    area: 'Graph area',
+                                    sub_area: 'Survey modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Navigate to survey'
                                 })
                             );
                             props.onClose();
@@ -90,11 +95,16 @@ export function SurveyInfoModal(props) {
                     <Button
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph Area - Survey Modal',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Close survey modal'
+                                    area: 'Graph area',
+                                    sub_area: 'Survey modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Close survey modal'
                                 })
                             );
                             props.onClose();

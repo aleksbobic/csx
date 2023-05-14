@@ -141,9 +141,19 @@ function AdvancedSearch(props) {
         const newNodeId = store.workflow.addNewAction(nodeType, position);
 
         store.track.trackEvent(
-            'Advanced Search - Search Canvas',
-            `Node - ${newNodeId}`,
-            JSON.stringify({ type: 'Drop', value: `${nodeType}` })
+            JSON.stringify({
+                area: 'Advanced search',
+                sub_area: 'Search canvas'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: `${newNodeId}`,
+                item_label: `${nodeType}`
+            }),
+            JSON.stringify({
+                event_type: 'Drop',
+                event_action: 'Add new node'
+            })
         );
     };
 

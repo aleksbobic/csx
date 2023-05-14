@@ -10,12 +10,10 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
-import { useContext, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useState } from 'react';
 import CustomScroll from '../customscroll/CustomScroll.component';
 
 function AutoCompleteInput(props) {
-    const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
     const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
@@ -44,22 +42,6 @@ function AutoCompleteInput(props) {
     };
 
     const clickSuggestion = clickedVal => {
-        store.track.trackEvent(
-            props.trackingLocation,
-            props.trackingEventTarget,
-            props.trackingEventFeature
-                ? JSON.stringify({
-                      type: 'Change selection',
-                      feature: props.trackingEventFeature,
-                      value: `${clickedVal}`
-                  })
-                : JSON.stringify({
-                      type: 'Change selection',
-                      dataset: props.trackingEventDataset,
-                      value: `${clickedVal}`
-                  })
-        );
-
         setInput(clickedVal);
         props.getValue(clickedVal);
         setSuggestionsVisible(false);
@@ -75,23 +57,6 @@ function AutoCompleteInput(props) {
                 activeSuggestion > -1
             ) {
                 e.preventDefault();
-
-                store.track.trackEvent(
-                    props.trackingLocation,
-                    props.trackingEventTarget,
-                    props.trackingEventFeature
-                        ? JSON.stringify({
-                              type: 'Change selection through key press',
-                              feature: props.trackingEventFeature,
-                              value: `${suggestions[activeSuggestion]}`
-                          })
-                        : JSON.stringify({
-                              type: 'Change selection through key press',
-                              dataset: props.trackingEventDataset,
-                              value: `${suggestions[activeSuggestion]}`
-                          })
-                );
-
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
 
@@ -145,6 +110,7 @@ function AutoCompleteInput(props) {
         setActiveSuggestion(-1);
         setSuggestionsVisible(false);
         setSuggestions([]);
+        props.onBlur(input);
     };
 
     const handleFocus = () => {
@@ -235,6 +201,7 @@ AutoCompleteInput.propTypes = {
     variant: PropTypes.string,
     getSuggestions: PropTypes.func,
     getValue: PropTypes.func,
+    onBlur: PropTypes.func,
     style: PropTypes.object,
     suggestionStyle: PropTypes.object,
     externalChangeHandler: PropTypes.func,

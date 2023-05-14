@@ -56,11 +56,16 @@ function TableHead(props) {
                         : `Sort descending by ${columnType}`;
 
                     store.track.trackEvent(
-                        'Results Panel - Table',
-                        'Header',
                         JSON.stringify({
-                            type: 'Click',
-                            value: eventData
+                            area: 'Results panel',
+                            sub_area: 'Results table'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Header'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: eventData
                         })
                     );
                 }}

@@ -139,11 +139,17 @@ function Footer() {
                         color={textColor}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Home Page - Footer',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open tracking information panel'
+                                    area: 'Home page',
+                                    sub_area: 'Footer'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action:
+                                        'Open tracking information panel'
                                 })
                             );
                             store.core.setStudyIsEmpty(false);

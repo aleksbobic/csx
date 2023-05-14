@@ -124,11 +124,19 @@ function StudyGrid(props) {
                                             }
                                             onClick={() => {
                                                 store.track.trackEvent(
-                                                    'Home Page - Study Grid',
-                                                    'Button',
                                                     JSON.stringify({
-                                                        type: 'Click',
-                                                        value: `Delete ${study.study_uuid}`
+                                                        area: 'Home page',
+                                                        sub_area: 'Study grid'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Button'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Click',
+                                                        event_action:
+                                                            'Delete study',
+                                                        event_value:
+                                                            study.study_uuid
                                                     })
                                                 );
 
@@ -195,11 +203,19 @@ function StudyGrid(props) {
                                             }}
                                             onClick={() => {
                                                 store.track.trackEvent(
-                                                    'Home Page - Study Grid',
-                                                    'Button',
                                                     JSON.stringify({
-                                                        type: 'Click',
-                                                        value: `Open ${study.study_uuid}`
+                                                        area: 'Home page',
+                                                        sub_area: 'Study grid'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Button'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Click',
+                                                        event_action:
+                                                            'Open study',
+                                                        event_value:
+                                                            study.study_uuid
                                                     })
                                                 );
                                                 openStudy(study.study_uuid);

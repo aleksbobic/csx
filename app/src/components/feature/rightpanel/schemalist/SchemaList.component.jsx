@@ -40,11 +40,17 @@ export function SchemaList() {
                                     }
 
                                     store.track.trackEvent(
-                                        'Default Schema List',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: `Load default schema ${schema.id} - ${schema.name}`
+                                            area: 'Schema panel',
+                                            sub_area: 'Default schema list'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Load default schema',
+                                            event_value: schema.name
                                         })
                                     );
                                 }}

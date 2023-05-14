@@ -85,11 +85,27 @@ function CanvasTools() {
                                         max={9}
                                         colorScheme="blue"
                                         value={store.graphInstance.panSpeed}
-                                        onChange={value =>
+                                        onChange={value => {
                                             store.graphInstance.setPanSpeed(
                                                 value
-                                            )
-                                        }
+                                            );
+
+                                            store.track.trackEvent(
+                                                JSON.stringify({
+                                                    area: 'Left panel',
+                                                    sub_area: 'VIew tools'
+                                                }),
+                                                JSON.stringify({
+                                                    item_type: 'Slider'
+                                                }),
+                                                JSON.stringify({
+                                                    event_type: 'Slide',
+                                                    event_action:
+                                                        'Change panning speed',
+                                                    event_value: value
+                                                })
+                                            );
+                                        }}
                                     >
                                         <SliderMark
                                             value={1}
@@ -127,11 +143,16 @@ function CanvasTools() {
                             }
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Graph Area - View Controls',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Zoom to fit'
+                                        area: 'Left panel',
+                                        sub_area: 'VIew tools'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Fit graph to view'
                                     })
                                 );
 
@@ -154,11 +175,16 @@ function CanvasTools() {
                             }
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Graph Area - View Controls',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Take screenshot'
+                                        area: 'Left panel',
+                                        sub_area: 'VIew tools'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Take screenshot'
                                     })
                                 );
                                 store.graphInstance.takeScreenshot();

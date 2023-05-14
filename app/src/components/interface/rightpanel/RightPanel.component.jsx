@@ -222,11 +222,16 @@ function RightPanel(props) {
                     icon={<MoreVerticalAlt style={{ '--ggs': 0.8 }} />}
                     onClick={() => {
                         store.track.trackEvent(
-                            'Results Panel',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: 'Open list options'
+                                area: 'Results panel',
+                                sub_area: 'Results list'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Open list options'
                             })
                         );
                     }}
@@ -247,11 +252,17 @@ function RightPanel(props) {
                             onChange={e => {
                                 if (e.target.checked) {
                                     store.track.trackEvent(
-                                        'Results Panel',
-                                        'Checkbox',
                                         JSON.stringify({
-                                            type: 'Check',
-                                            value: `Show ${feature} in list`
+                                            area: 'Results panel',
+                                            sub_area: 'Results list'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Checkbox'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Check',
+                                            event_action: 'Show in list',
+                                            event_value: feature
                                         })
                                     );
 
@@ -261,11 +272,17 @@ function RightPanel(props) {
                                     ]);
                                 } else if (visibleProperties.length > 1) {
                                     store.track.trackEvent(
-                                        'Results Panel',
-                                        'Checkbox',
                                         JSON.stringify({
-                                            type: 'Check',
-                                            value: `Hide ${feature} in list`
+                                            area: 'Results panel',
+                                            sub_area: 'Results list'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Checkbox'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Check',
+                                            event_action: 'Hide in list',
+                                            event_value: feature
                                         })
                                     );
 
@@ -312,11 +329,16 @@ function RightPanel(props) {
                                     opacity="0.5"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Results Panel',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Download data as CSV'
+                                                area: 'Results panel'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Check',
+                                                event_action:
+                                                    'Download data as CSV'
                                             })
                                         );
                                     }}
@@ -349,11 +371,16 @@ function RightPanel(props) {
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Results Panel',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Switch to table view'
+                                            area: 'Results panel',
+                                            sub_area: 'Results list'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Switch to table view'
                                         })
                                     );
 
@@ -371,11 +398,16 @@ function RightPanel(props) {
                                 _hover={{ opacity: 1 }}
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Results Panel',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Switch to list view'
+                                            area: 'Results panel',
+                                            sub_area: 'Results list'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Switch to list view'
                                         })
                                     );
 

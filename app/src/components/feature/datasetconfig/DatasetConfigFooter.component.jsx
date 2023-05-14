@@ -14,11 +14,16 @@ function DatasetConfigFooter(props) {
                 mr={3}
                 onClick={() => {
                     store.track.trackEvent(
-                        'Home Page - Dataset Configuration Modal',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Cancel configuration change'
+                            area: 'Home page',
+                            sub_area: 'Dataset config modal'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Cancel config change'
                         })
                     );
                     store.fileUpload.changeConfigChangeModalVisiblity(false);
@@ -32,11 +37,16 @@ function DatasetConfigFooter(props) {
                 backgroundColor="blue.500"
                 onClick={() => {
                     store.track.trackEvent(
-                        'Home Page - Dataset Configuration Modal',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Update default configuration'
+                            area: 'Home page',
+                            sub_area: 'Dataset config modal'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Update default config'
                         })
                     );
 
@@ -55,11 +65,16 @@ function DatasetConfigFooter(props) {
                     variant="outline"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Home Page - Dataset Upload Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: 'Cancel dataset upload'
+                                area: 'Home page',
+                                sub_area: 'Dataset upload modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Cancel dataset upload'
                             })
                         );
                         store.fileUpload.cancelFileUpload();
@@ -73,15 +88,21 @@ function DatasetConfigFooter(props) {
                     variant="outline"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Home Page - Dataset Upload Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Navigate to ${
+                                area: 'Home page',
+                                sub_area: 'Dataset upload modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button',
+                                item_label: 'Prev'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Navigate to page',
+                                event_value:
                                     props.activeTab === 2
                                         ? 'default overview schema config'
                                         : 'data types and general config of dataset'
-                                }`
                             })
                         );
 
@@ -100,15 +121,21 @@ function DatasetConfigFooter(props) {
                     backgroundColor="blue.500"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Home Page - Dataset Upload Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Navigate to ${
+                                area: 'Home page',
+                                sub_area: 'Dataset upload modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button',
+                                item_label: 'Next'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Navigate to page',
+                                event_value:
                                     props.activeTab === 0
                                         ? 'default overview schema config'
                                         : 'default detail schema config'
-                                }`
                             })
                         );
 
@@ -130,13 +157,19 @@ function DatasetConfigFooter(props) {
                     backgroundColor="blue.500"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Home Page - Dataset Upload Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: 'Set default configuration'
+                                area: 'Home page',
+                                sub_area: 'Dataset upload modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Set default configuration'
                             })
                         );
+
                         store.fileUpload.setDefaults();
                     }}
                 >

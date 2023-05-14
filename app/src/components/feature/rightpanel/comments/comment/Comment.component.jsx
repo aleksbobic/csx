@@ -115,11 +115,17 @@ function CommentComponent(props) {
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     onClick={() => {
                         store.track.trackEvent(
-                            'Comment Area - Comment List',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Edit ${props.comment.id}`
+                                area: 'Comment area',
+                                sub_area: 'Comment list'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_acton: 'Edit comment',
+                                event_value: props.comment.id
                             })
                         );
 
@@ -149,11 +155,17 @@ function CommentComponent(props) {
                     variant="ghost"
                     onClick={() => {
                         store.track.trackEvent(
-                            'Comment Area - Comment List',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Delete ${props.comment.id}`
+                                area: 'Comment area',
+                                sub_area: 'Comment list'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                action_type: 'Delete comment',
+                                event_value: props.comment.id
                             })
                         );
 

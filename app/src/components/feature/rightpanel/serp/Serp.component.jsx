@@ -208,12 +208,17 @@ function Serp(props) {
                                 .map(node => node.id);
 
                             store.track.trackEvent(
-                                'Results Panel - List',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: `Navigate to entry ${listData[index]['entry']}`,
-                                    nodes: nodeIds
+                                    area: 'Results panel',
+                                    sub_area: 'Results list'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Navigate to entry',
+                                    event_value: listData[index]['entry']
                                 })
                             );
 

@@ -291,11 +291,16 @@ function SchemaFlow() {
                         }
                         onClick={() => {
                             store.track.trackEvent(
-                                'Schema Panel',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show all schema nodes'
+                                    area: 'Schema panel',
+                                    sub_area: 'Schema'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Show all schema nodes'
                                 })
                             );
 

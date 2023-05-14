@@ -92,11 +92,16 @@ function NavigationPanelComponent() {
             }
 
             store.track.trackEvent(
-                'Navbar',
-                'Button',
                 JSON.stringify({
-                    type: 'Click',
-                    value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+                    area: 'Navbar'
+                }),
+                JSON.stringify({
+                    item_type: 'Button'
+                }),
+                JSON.stringify({
+                    event_type: 'Click',
+                    event_action: `${isOpen ? 'Close' : 'Open'} panel`,
+                    event_value: panel
                 })
             );
         },
@@ -111,17 +116,6 @@ function NavigationPanelComponent() {
     }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
     const toggleColor = () => {
-        store.track.trackEvent(
-            'Navbar',
-            'Button',
-            JSON.stringify({
-                type: 'Click',
-                value: `Change color mode to ${
-                    colorMode === 'light' ? 'dark' : 'light'
-                }`
-            })
-        );
-
         toggleColorMode();
         store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
         store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
@@ -150,11 +144,16 @@ function NavigationPanelComponent() {
                         aria-label="Switch graph view"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph Area - Graph Controls',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: `Switch to ${
+                                    area: 'Graph area',
+                                    sub_area: 'Graph controls'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: `Switch to ${
                                         store.core.currentGraph === 'detail'
                                             ? 'overview'
                                             : 'detail'
@@ -488,10 +487,15 @@ function NavigationPanelComponent() {
                                 store.core.setShowCookieInfo(false);
 
                                 store.track.trackEvent(
-                                    'Navbar',
-                                    'Button - Logo',
                                     JSON.stringify({
-                                        type: 'Click'
+                                        area: 'Navbar'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Logo'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Navigate home'
                                     })
                                 );
                             }}
@@ -529,11 +533,16 @@ function NavigationPanelComponent() {
                                     }
 
                                     store.track.trackEvent(
-                                        'Navbar',
-                                        'Link',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Open study in presentation mode'
+                                            area: 'Navbar'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Open study presentation mode'
                                         })
                                     );
                                 }}

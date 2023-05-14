@@ -89,11 +89,17 @@ function CommentTextArea(props) {
             !store.comment.commentTrigger
         ) {
             store.track.trackEvent(
-                'Comment Area - Textarea',
-                'Key',
                 JSON.stringify({
-                    type: 'Enter + Shift',
-                    value: `Submit comment: ${comment.trim()}`
+                    area: 'Comment area',
+                    sub_area: 'Textarea'
+                }),
+                JSON.stringify({
+                    item_type: 'Key'
+                }),
+                JSON.stringify({
+                    event_type: 'Enter + Shift',
+                    event_action: 'Submit comment',
+                    event_value: comment.trim()
                 })
             );
 
@@ -294,11 +300,16 @@ function CommentTextArea(props) {
                                 opacity="0.6"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Comment Area - Footer',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Markdown info'
+                                            area: 'Comment area',
+                                            sub_area: 'Comment area footer'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Show markdown info'
                                         })
                                     );
                                 }}
@@ -317,11 +328,17 @@ function CommentTextArea(props) {
                                     style={{ top: '14px', right: '14px' }}
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Comment Area - Markdown Info',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Close'
+                                                area: 'Comment area',
+                                                sub_area: 'Markdown info'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Close markdown info'
                                             })
                                         );
                                     }}
@@ -347,11 +364,17 @@ function CommentTextArea(props) {
                         color="white"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Comment Area - Footer',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: store.comment.isCommentListVisible
+                                    area: 'Comment area',
+                                    sub_area: 'Comment area footer'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: store.comment
+                                        .isCommentListVisible
                                         ? 'Hide comments'
                                         : 'Show comments'
                                 })
@@ -409,11 +432,17 @@ function CommentTextArea(props) {
                         store.comment.setChartToAttach(chart.id);
 
                         store.track.trackEvent(
-                            'Comment Area - Textarea',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Attach chart ${chart.id}`
+                                area: 'Comment area',
+                                sub_area: 'Textarea'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Attach chart',
+                                event_value: chart.id
                             })
                         );
                     }}
@@ -490,11 +519,16 @@ function CommentTextArea(props) {
                             }
 
                             store.track.trackEvent(
-                                'Comment Area - Textarea',
-                                'Key',
                                 JSON.stringify({
-                                    type: 'Enter',
-                                    value: 'Open chart attach menu'
+                                    area: 'Comment area',
+                                    sub_area: 'Textarea'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Key'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Enter',
+                                    event_action: 'Open chart attach menu'
                                 })
                             );
                         }}
@@ -507,11 +541,16 @@ function CommentTextArea(props) {
                             }
 
                             store.track.trackEvent(
-                                'Comment Area - Textarea',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open chart attach menu'
+                                    area: 'Comment area',
+                                    sub_area: 'Textarea'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Key'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Enter',
+                                    event_action: 'Open chart attach menu'
                                 })
                             );
                         }}
@@ -594,11 +633,16 @@ function CommentTextArea(props) {
                                     _hover={{ backgroundColor: 'blue.500' }}
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Comment Area - Textarea',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Exit edit mode'
+                                                area: 'Comment area',
+                                                sub_area: 'Textarea'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Exit edit mode'
                                             })
                                         );
 
@@ -629,12 +673,19 @@ function CommentTextArea(props) {
                                         }}
                                         onClick={() => {
                                             store.comment.removeChart();
+
                                             store.track.trackEvent(
-                                                'Comment Area - Textarea',
-                                                'Button',
                                                 JSON.stringify({
-                                                    type: 'Click',
-                                                    value: 'Remove chart'
+                                                    area: 'Comment area',
+                                                    sub_area: 'Textarea'
+                                                }),
+                                                JSON.stringify({
+                                                    item_type: 'Button'
+                                                }),
+                                                JSON.stringify({
+                                                    event_type: 'Click',
+                                                    event_action:
+                                                        'Remove chart from comment'
                                                 })
                                             );
                                         }}
@@ -676,12 +727,19 @@ function CommentTextArea(props) {
                                             }}
                                             onClick={() => {
                                                 store.comment.removeScreenshot();
+
                                                 store.track.trackEvent(
-                                                    'Comment Area - Textarea',
-                                                    'Button',
                                                     JSON.stringify({
-                                                        type: 'Click',
-                                                        value: 'Remove graph screenshot'
+                                                        area: 'Comment area',
+                                                        sub_area: 'Textarea'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Button'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Click',
+                                                        event_action:
+                                                            'Remove screenshot from comment'
                                                     })
                                                 );
                                             }}
@@ -721,11 +779,17 @@ function CommentTextArea(props) {
                                         );
 
                                         store.track.trackEvent(
-                                            'Comment Area - Textarea',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Attach graph screenshot'
+                                                area: 'Comment area',
+                                                sub_area: 'Textarea'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Attach graph screenshot'
                                             })
                                         );
                                     }}
@@ -808,11 +872,17 @@ function CommentTextArea(props) {
                                 }
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Comment Area - Textarea',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: `Submit comment: ${comment.trim()}`
+                                            area: 'Comment area',
+                                            sub_area: 'Textarea'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Submit comment',
+                                            event_value: comment.trim()
                                         })
                                     );
 

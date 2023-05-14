@@ -63,13 +63,19 @@ function ModificationTools() {
                                     size="sm"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Graph Area - Context Menu',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Remove selection from graph'
+                                                area: 'Left panel',
+                                                sub_area: 'Modification tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Remove selected'
                                             })
                                         );
+
                                         store.graph.removeSelection();
                                     }}
                                 >
@@ -86,11 +92,16 @@ function ModificationTools() {
                                     size="sm"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Network Modification',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Trim network'
+                                                area: 'Left panel',
+                                                sub_area: 'Modification tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Remove invisible'
                                             })
                                         );
                                         store.graph.trimNetwork();
@@ -145,19 +156,25 @@ function ModificationTools() {
                                     size="sm"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Network Modification',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Wide expand network',
-                                                nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            id: node.id,
-                                                            label: node.label
-                                                        };
-                                                    }
-                                                )
+                                                area: 'Left panel',
+                                                sub_area: 'Modification tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Broad expand',
+                                                event_value:
+                                                    store.graph.currentGraphData.selectedNodes.map(
+                                                        node => {
+                                                            return {
+                                                                id: node.feature,
+                                                                label: node.label
+                                                            };
+                                                        }
+                                                    )
                                             })
                                         );
 
@@ -182,19 +199,25 @@ function ModificationTools() {
                                     size="sm"
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Network Modification',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Narrow expand network',
-                                                nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            id: node.id,
-                                                            label: node.label
-                                                        };
-                                                    }
-                                                )
+                                                area: 'Left panel',
+                                                sub_area: 'Modification tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Narrow expand',
+                                                event_value:
+                                                    store.graph.currentGraphData.selectedNodes.map(
+                                                        node => {
+                                                            return {
+                                                                id: node.feature,
+                                                                label: node.label
+                                                            };
+                                                        }
+                                                    )
                                             })
                                         );
 

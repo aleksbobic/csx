@@ -129,7 +129,22 @@ function InteractionsToast(props) {
                             }}
                         />
                     }
-                    onClick={() => props.onClose()}
+                    onClick={() => {
+                        store.track.trackEvent(
+                            JSON.stringify({
+                                area: 'Graph area',
+                                sub_area: 'Interactions toast'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Close interactions toast'
+                            })
+                        );
+                        props.onClose();
+                    }}
                 >
                     Close
                 </Button>
@@ -139,6 +154,22 @@ function InteractionsToast(props) {
                         onChange={e => {
                             store.core.setInteractionsModalDisplay(
                                 e.target.checked
+                            );
+
+                            store.track.trackEvent(
+                                JSON.stringify({
+                                    area: 'Graph area',
+                                    sub_area: 'Interactions toast'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Checkbox'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Check',
+                                    event_action: e.target.checked
+                                        ? 'Never show again'
+                                        : 'Show again'
+                                })
                             );
                         }}
                     >

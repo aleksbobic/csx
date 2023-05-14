@@ -80,6 +80,21 @@ function FilterTools() {
     ]);
 
     const filterElements = values => {
+        store.track.trackEvent(
+            JSON.stringify({
+                area: 'Left panel',
+                sub_area: 'VIew tools'
+            }),
+            JSON.stringify({
+                item_type: 'Slider'
+            }),
+            JSON.stringify({
+                event_type: 'Slide',
+                event_action: 'Filter elements by values',
+                event_value: `Min: ${values[0]}, Max: ${values[1]}`
+            })
+        );
+
         if (
             values[0] === filterSliderMinValue &&
             values[1] === filterSliderMaxValue
@@ -141,21 +156,19 @@ function FilterTools() {
                             width="100%"
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Side Panel - Direct Connections',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Show selected nodes',
-                                        nodes: store.graph.currentGraphData.selectedNodes.map(
-                                            node => {
-                                                return {
-                                                    id: node.id,
-                                                    label: node.label
-                                                };
-                                            }
-                                        )
+                                        area: 'Left panel',
+                                        sub_area: 'VIew tools'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Show selected nodes'
                                     })
                                 );
+
                                 store.graphInstance.triggerSelectedNodes();
                             }}
                         >
@@ -188,19 +201,17 @@ function FilterTools() {
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Direct Connections',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Show direct connections of selected nodes',
-                                                nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            id: node.id,
-                                                            label: node.label
-                                                        };
-                                                    }
-                                                )
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Show direct connections of selected nodes'
                                             })
                                         );
 
@@ -224,19 +235,17 @@ function FilterTools() {
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Direct Connections',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Show mutual connections of selected nodes',
-                                                nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            id: node.id,
-                                                            label: node.label
-                                                        };
-                                                    }
-                                                )
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Show mutual connections of selected nodes'
                                             })
                                         );
                                         store.graphInstance.triggerMultiSelfCentric(
@@ -265,19 +274,17 @@ function FilterTools() {
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
-                                            'Side Panel - Direct Connections',
-                                            'Button',
                                             JSON.stringify({
-                                                type: 'Click',
-                                                value: 'Show nodes with same entries as all selected nodes',
-                                                nodes: store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            id: node.id,
-                                                            label: node.label
-                                                        };
-                                                    }
-                                                )
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Show nodes in same search results as selected nodes'
                                             })
                                         );
                                         store.graphInstance.triggerSameEntry(
@@ -314,11 +321,18 @@ function FilterTools() {
                                         );
 
                                         store.track.trackEvent(
-                                            'Side panel - View Settings',
-                                            'Select Element - Node Color',
                                             JSON.stringify({
-                                                type: 'Change selection',
-                                                value: e.target.value
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Select element'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Change selection',
+                                                event_action:
+                                                    'Change feature used for filtering',
+                                                new_value: e.target.value
                                             })
                                         );
                                     }}

@@ -35,11 +35,15 @@ function CommentModal() {
             store.comment.commentTrigger
         ) {
             store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
                 JSON.stringify({
-                    type: 'C + Shift',
-                    value: 'Open comment modal'
+                    area: 'Graph area'
+                }),
+                JSON.stringify({
+                    item_type: 'Key'
+                }),
+                JSON.stringify({
+                    event_type: 'C+Shift',
+                    event_action: 'Open comment modal'
                 })
             );
 
@@ -48,11 +52,15 @@ function CommentModal() {
 
         if (closeCommentModalKey && store.core.showCommentModal) {
             store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
                 JSON.stringify({
-                    type: 'Esc',
-                    value: 'Close comment modal'
+                    area: 'Graph area'
+                }),
+                JSON.stringify({
+                    item_type: 'Key'
+                }),
+                JSON.stringify({
+                    event_type: 'Esc',
+                    event_action: 'Close comment modal'
                 })
             );
             setComment('');
@@ -80,11 +88,17 @@ function CommentModal() {
             store.comment.commentTrigger
         ) {
             store.track.trackEvent(
-                'Graph Area - Comment Modal',
-                'Key',
                 JSON.stringify({
-                    type: 'Enter + Shift',
-                    value: `Submit comment: ${comment}`
+                    area: 'Graph area',
+                    sub_area: 'Comment modal'
+                }),
+                JSON.stringify({
+                    item_type: 'Key'
+                }),
+                JSON.stringify({
+                    event_type: 'Enter+Shift',
+                    event_action: 'Submit comment',
+                    event_value: comment
                 })
             );
 
@@ -144,11 +158,17 @@ function CommentModal() {
                         store.comment.setChartToAttach(chart.id);
 
                         store.track.trackEvent(
-                            'Graph Area - Comment Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Attach chart ${chart.id}`
+                                area: 'Graph area',
+                                sub_area: 'Comment modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Attach chart',
+                                event_value: chart.id
                             })
                         );
                     }}
@@ -223,11 +243,16 @@ function CommentModal() {
                             }
 
                             store.track.trackEvent(
-                                'Comment Area - Comment Modal',
-                                'Key',
                                 JSON.stringify({
-                                    type: 'Enter',
-                                    value: 'Open chart attach menu'
+                                    area: 'Graph area',
+                                    sub_area: 'Comment modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Key'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Enter',
+                                    event_action: 'Open chart attach menu'
                                 })
                             );
                         }}
@@ -240,11 +265,16 @@ function CommentModal() {
                             }
 
                             store.track.trackEvent(
-                                'Comment Area - Comment Modal',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open chart attach menu'
+                                    area: 'Graph area',
+                                    sub_area: 'Comment modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Open chart attach menu'
                                 })
                             );
                         }}
@@ -307,11 +337,16 @@ function CommentModal() {
                             onClick={() => {
                                 store.comment.removeChart();
                                 store.track.trackEvent(
-                                    'Graph Area - Comment Modal',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Remove chart'
+                                        area: 'Graph area',
+                                        sub_area: 'Comment modal'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Remove chart'
                                     })
                                 );
                             }}
@@ -351,12 +386,18 @@ function CommentModal() {
                             }}
                             onClick={() => {
                                 store.comment.removeScreenshot();
+
                                 store.track.trackEvent(
-                                    'Graph Area - Comment Modal',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Remove graph screenshot'
+                                        area: 'Graph area',
+                                        sub_area: 'Comment modal'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Remove graph screenshot'
                                     })
                                 );
                             }}
@@ -396,11 +437,16 @@ function CommentModal() {
                             );
 
                             store.track.trackEvent(
-                                'Graph Area - Comment Modal',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Attach graph screenshot'
+                                    area: 'Graph area',
+                                    sub_area: 'Comment modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Attach graph screenshot'
                                 })
                             );
                         }}
@@ -465,11 +511,17 @@ function CommentModal() {
                     }
                     onClick={() => {
                         store.track.trackEvent(
-                            'Graph Area - Comment Modal',
-                            'Button',
                             JSON.stringify({
-                                type: 'Click',
-                                value: `Submit comment: ${comment}`
+                                area: 'Graph area',
+                                sub_area: 'Comment modal'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Button'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: 'Submit comment',
+                                event_value: comment
                             })
                         );
                         submitComment();
@@ -526,11 +578,16 @@ function CommentModal() {
                 zIndex="2"
                 onClick={() => {
                     store.track.trackEvent(
-                        'Graph Area - Comment Modal',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Close comment modal'
+                            area: 'Graph area',
+                            sub_area: 'Comment modal'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Close comment modal'
                         })
                     );
                     closeCommentModal();

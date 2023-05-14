@@ -40,11 +40,17 @@ function ViewTools() {
         );
 
         store.track.trackEvent(
-            'Side panel - View Settings',
-            'Select Element - Label Size',
             JSON.stringify({
-                type: 'Change Selection',
-                value: value
+                area: 'Left panel',
+                sub_area: 'VIew tools'
+            }),
+            JSON.stringify({
+                item_type: 'Select element'
+            }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_action: 'Change label size',
+                event_value: value
             })
         );
     };
@@ -112,11 +118,17 @@ function ViewTools() {
                             updateColorScheme(e.target.value);
 
                             store.track.trackEvent(
-                                'Side panel - View Settings',
-                                'Select Element - Node Color',
                                 JSON.stringify({
-                                    type: 'Change selection',
-                                    value: e.target.value
+                                    area: 'Left panel',
+                                    sub_area: 'VIew tools'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Select element'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Change selection',
+                                    event_action: 'Change node color',
+                                    event_value: e.target.value
                                 })
                             );
                         }}
@@ -188,11 +200,17 @@ function ViewTools() {
                                 }
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        'Side panel - Node Settings',
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Open node types with labels menu'
+                                            area: 'Left panel',
+                                            sub_area: 'VIew tools'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Open node types with labels menu'
                                         })
                                     );
                                 }}
@@ -232,11 +250,18 @@ function ViewTools() {
                                         onChange={e => {
                                             if (!e.target.checked) {
                                                 store.track.trackEvent(
-                                                    'Side panel - View Settings',
-                                                    'Checkbox',
                                                     JSON.stringify({
-                                                        type: 'Check',
-                                                        value: `Hide labels for ${feature}`
+                                                        area: 'Left panel',
+                                                        sub_area: 'VIew tools'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Checkbox'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Check',
+                                                        event_action:
+                                                            'Hide labels',
+                                                        event_value: feature
                                                     })
                                                 );
                                                 store.graphInstance.removeLabelFeature(
@@ -244,11 +269,18 @@ function ViewTools() {
                                                 );
                                             } else {
                                                 store.track.trackEvent(
-                                                    'Side panel - View Settings',
-                                                    'Checkbox',
                                                     JSON.stringify({
-                                                        type: 'Check',
-                                                        value: `Show labels for ${feature} `
+                                                        area: 'Left panel',
+                                                        sub_area: 'VIew tools'
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Checkbox'
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Check',
+                                                        event_action:
+                                                            'Show labels',
+                                                        event_value: feature
                                                     })
                                                 );
 
@@ -329,11 +361,16 @@ function ViewTools() {
                                         store.graphInstance.toggleLabelVisibility();
 
                                         store.track.trackEvent(
-                                            'Side panel - View Settings',
-                                            'Switch',
                                             JSON.stringify({
-                                                type: 'Toggle',
-                                                value: `${
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Switch'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Toggle',
+                                                event_action: `${
                                                     store.graphInstance.labels
                                                         .isVisible
                                                         ? 'Show'
@@ -380,11 +417,16 @@ function ViewTools() {
                                     store.graphInstance.toggleOrphanNodeVisibility();
 
                                     store.track.trackEvent(
-                                        'Side panel - View Settings',
-                                        'Switch',
                                         JSON.stringify({
-                                            type: 'Toggle',
-                                            value: `${
+                                            area: 'Left panel',
+                                            sub_area: 'VIew tools'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Switch'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Toggle',
+                                            event_action: `${
                                                 store.graphInstance
                                                     .orphanNodeVisibility
                                                     ? 'Show'
