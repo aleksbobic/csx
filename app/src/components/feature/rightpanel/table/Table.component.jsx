@@ -38,7 +38,7 @@ function TableComponent(props) {
             height="100%"
             display="flex"
             flexDir="column"
-            paddingTop="10px"
+            paddingTop="30px"
             alignItems="center"
         >
             <Box padding="20px 0" width="100%">

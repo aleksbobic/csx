@@ -237,7 +237,7 @@ function Serp(props) {
     };
 
     return (
-        <VStack height="100%" width="100%" paddingTop="30px">
+        <VStack height="100%" width="100%" paddingTop="50px">
             <CustomScroll>
                 <Box height="100%" width="100%" borderRadius="6px">
                     <Box
