@@ -347,13 +347,46 @@ function GraphPage() {
                                     fontSize: '14px'
                                 }}
                             >
-                                The graph that you see in front of you
-                                represents your search results. Each node
-                                represents a property and each edge represents a
-                                relationship between two properties. You can
-                                left click on a node to see more information
-                                about it. To see what features represent nodes,
-                                properties on nodes and edges click next.
+                                The network that you see in front of you
+                                represents your search results. Each{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    node
+                                </span>
+                                represents a{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    column value
+                                </span>{' '}
+                                and each{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    edge
+                                </span>{' '}
+                                represents a
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    common value of a different column{' '}
+                                </span>
+                                . You can left click on a node to see more
+                                information about it. To see how you can change
+                                the network click next.
                             </p>
                         )
                     },
@@ -397,8 +430,8 @@ function GraphPage() {
                                 }}
                             >
                                 This is the ✨ schema panel ✨. It shows how the
-                                search result features are connected to create
-                                the graph. Click next to read more about it.
+                                search result columns are connected to create
+                                the network. Click next to read more about it.
                             </p>
                         )
                     },
@@ -421,19 +454,70 @@ function GraphPage() {
                                     }}
                                 >
                                     <li style={{ paddingBottom: '6px' }}>
-                                        The larger left node represents the
-                                        search result column used for graph
-                                        nodes.
+                                        The larger{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            left node
+                                        </span>{' '}
+                                        represents the search result{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            column used for network nodes
+                                        </span>
+                                        .
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        The bottom dropdown enables you to add
-                                        properties to nodes (for example an
-                                        author can have an h-index property).
+                                        The{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            bottom dropdown
+                                        </span>{' '}
+                                        enables you to add{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            properties
+                                        </span>{' '}
+                                        to nodes (for example an author can have
+                                        an h-index property).
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        The right smaller node represents the
-                                        search result column used for graph
-                                        edges.
+                                        The{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            right node
+                                        </span>{' '}
+                                        represents the search result{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            column used for network edges
+                                        </span>{' '}
+                                        (e.g. if two papers share the same
+                                        keyword they will have an edge between
+                                        them showing that keyword).
                                     </li>
                                 </ul>
                                 <p
@@ -442,8 +526,7 @@ function GraphPage() {
                                         fontSize: '14px'
                                     }}
                                 >
-                                    Click next to make some changes to the
-                                    shema.
+                                    Click next to change the schema.
                                 </p>
                             </div>
                         )
@@ -467,8 +550,25 @@ function GraphPage() {
                                     }}
                                 >
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Change the column representing the nodes
-                                        to authors.
+                                        Change the nodes to{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            authors
+                                        </span>{' '}
+                                        by changing the{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            left node top dropdown
+                                        </span>
+                                        .
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
                                         Remove the existing edge node by
@@ -476,17 +576,58 @@ function GraphPage() {
                                         (right smaller node).
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Add two new edge nodes by pressing the
-                                        🔗 button on the right edge of the left
-                                        larger node twice.
+                                        Add two new edge nodes by{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            pressing the 🔗 button
+                                        </span>{' '}
+                                        on the{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            right border of the left large node
+                                        </span>{' '}
+                                        twice.
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Select author institutions as the first
-                                        edge and title as the second edge.
+                                        Select{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            author institutions
+                                        </span>{' '}
+                                        as the first edge and{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            title
+                                        </span>{' '}
+                                        as the second edge.
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Click the apply changes button and then
-                                        click next.
+                                        Click the{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            apply changes
+                                        </span>{' '}
+                                        button and then click next.
                                     </li>
                                 </ol>
                             </div>
@@ -504,26 +645,77 @@ function GraphPage() {
                             </span>
                         ),
                         content: (
-                            <p
-                                style={{
-                                    textAlign: 'left',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Congratulations you've modeled your first
-                                network! If you don't see any nodes press the
-                                fit graph to view button at the top left. Next
-                                lets look at how you can explore your network
-                                and how you can modify it. Some notes about this
-                                network: The node size represents the frequency
-                                of a value in the search results. The node
-                                location does not represent anything. Two nodes
-                                are connected if they appear on the same row as
-                                the value on the edge (e.g. two authors in our
-                                graph are connected if they co-authored a paper
-                                or if they are affiliated with the same author
-                                institution) Click next to continue.
-                            </p>
+                            <div style={{ padding: '10px 20px' }}>
+                                <p
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    Congratulations you've modeled your first
+                                    network
+                                    <sup
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb'
+                                        }}
+                                    >
+                                        *
+                                    </sup>
+                                    👏! Some notes about this network: The{' '}
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb'
+                                        }}
+                                    >
+                                        node size
+                                    </span>{' '}
+                                    represents the{' '}
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb'
+                                        }}
+                                    >
+                                        frequency
+                                    </span>{' '}
+                                    of a value in the search results. The node
+                                    location does not represent anything.{' '}
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb'
+                                        }}
+                                    >
+                                        Two nodes are connected if they appear
+                                        on the same row as the value on the edge
+                                    </span>{' '}
+                                    (e.g. two authors in our graph are connected
+                                    if they co-authored a paper or if they are
+                                    affiliated with the same author institution)
+                                    Click next to continue.
+                                </p>
+                                <p
+                                    style={{
+                                        fontSize: '12px',
+                                        textAlign: 'left',
+                                        paddingTop: '20px'
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb',
+                                            fontSize: '18px'
+                                        }}
+                                    >
+                                        *
+                                    </span>{' '}
+                                    If you don't see any nodes press the fit
+                                    graph to view button at the top left.
+                                </p>
+                            </div>
                         )
                     },
                     {
@@ -547,11 +739,25 @@ function GraphPage() {
                                 This is a set of various tools used to change
                                 visible properties of the graph. These tools do
                                 not change the data or the shape of the network
-                                they are only used to either modify the visual
-                                properties of the network or to filter the
-                                network. Click the run force button at the
-                                bottom of the panel to get a better overview of
-                                the network and then click next.
+                                they are only used to either{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    modify the visual properties of the network
+                                </span>{' '}
+                                or to{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    filter the network
+                                </span>
+                                . Click next to continue.
                             </p>
                         )
                     },
@@ -596,11 +802,36 @@ function GraphPage() {
                                     fontSize: '14px'
                                 }}
                             >
-                                These tools are used to modify the network data
-                                by either removing search results associated
-                                with particular nodes or adding new search
-                                results with the same values as the selected
-                                nodes. Click next to try and remove some of the
+                                These tools are used to{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    modify the network data
+                                </span>{' '}
+                                by either{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    removing search results associated with
+                                    particular nodes
+                                </span>{' '}
+                                or{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    adding new search results with the same
+                                    values as the selected nodes
+                                </span>
+                                . Click next to try and remove some of the
                                 nodes.
                             </p>
                         )
@@ -613,26 +844,70 @@ function GraphPage() {
                             <span
                                 style={{ fontSize: '18px', fontWeight: 'bold' }}
                             >
-                                Slecting a Node
+                                Network Modification Tools
                             </span>
                         ),
                         content: (
-                            <p
-                                style={{
-                                    textAlign: 'left',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Right click on a node to open the node context
-                                menu<sup>[*]</sup>. Then click selet node to
-                                select it. Do the same with another node.
-                                Finally click remove selected from the network
-                                modification tools. Congratulations you just
-                                modified the network data! Click next to explore
-                                a different type of network schema. * If you
-                                can't see the nodes try zooming out by scrolling
-                                down.
-                            </p>
+                            <div style={{ padding: '10px 20px' }}>
+                                <ol
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        {' '}
+                                        Right click on a node to open the node
+                                        context menu
+                                        <sup
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            [*]
+                                        </sup>
+                                        . Then click select node to select it.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        {' '}
+                                        Do the same with another node.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Click remove selected from the network
+                                        modification tools.
+                                    </li>
+                                </ol>
+                                <p
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    Congratulations 🥳 you just modified the
+                                    network data! Click next to explore a
+                                    different type of network schema.
+                                </p>
+                                <p
+                                    style={{
+                                        fontSize: '12px',
+                                        textAlign: 'left',
+                                        paddingTop: '20px'
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb',
+                                            fontSize: '18px'
+                                        }}
+                                    >
+                                        *
+                                    </span>{' '}
+                                    If you can't see the nodes try zooming out
+                                    by scrolling down.
+                                </p>
+                            </div>
                         )
                     },
                     {
@@ -652,16 +927,75 @@ function GraphPage() {
                                     fontSize: '14px'
                                 }}
                             >
-                                Click this button to switch to the detail
-                                network. This network is used to display
-                                connections between multiple columns. Each node
-                                type is represented by a different search result
-                                column and each edge represent the coocurence of
-                                two values in the same row (e.g. an author node
-                                connected to country means that the author and
-                                the country appear on the same row in the search
-                                results).
+                                Click this button to switch to the{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    detail network
+                                </span>
+                                . This network is used to display connections
+                                between{' '}
+                                <span
+                                    style={{
+                                        fontWeight: 'bold',
+                                        color: '#43a2fb'
+                                    }}
+                                >
+                                    multiple columns
+                                </span>
+                                . Each node type is represented by a different
+                                search result column and each edge represent the
+                                coocurence of two values in the same row (e.g.
+                                an author node connected to country means that
+                                the author and the country appear on the same
+                                row in the search results).
                             </p>
+                        )
+                    },
+                    {
+                        target: '#schema',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Detail Network - Network Modeling
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Each node in this schema represents a
+                                        column in the searh results.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Two nodes can be conneted by connecting
+                                        the bottom connetion area of one to the
+                                        top connection area of another in the
+                                        same way as you would connect nodes in
+                                        the advanced search.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        You can turn off the visibility of some
+                                        of the nodes by clicking the eye icon on
+                                        the node. If two visible columns are
+                                        conneted through a third invisible
+                                        column, nodes of that column will not be
+                                        shown in the network but the values will
+                                        be used to calculate the network
+                                        structure.
+                                    </li>
+                                </ul>
+                            </div>
                         )
                     },
                     {
@@ -683,39 +1017,18 @@ function GraphPage() {
                                     }}
                                 >
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Each node in this schema represents a
-                                        column in the searh results.
-                                    </li>
-                                    <li style={{ paddingBottom: '6px' }}>
-                                        Two columns can be conneted by
-                                        connecting the bottom connetion area of
-                                        one to the top connection area of
-                                        another in the same way as you would
-                                        connect nodes in the advanced search.
-                                    </li>
-                                    <li style={{ paddingBottom: '6px' }}>
-                                        You can turn off the visibility of some
-                                        of the nodes by clicking the eye icon on
-                                        the node. If two visible columns are
-                                        conneted through a third invisible
-                                        column, nodes of that column will not be
-                                        shown in the network but the values will
-                                        be used to calculate the network
-                                        structure.
-                                    </li>
-                                    <li style={{ paddingBottom: '6px' }}>
                                         Connect the title to the author column
                                         and the author column to the author
-                                        institutions column. Since authors and
-                                        author institutions are represented as
-                                        lists in each cell they can be conneted
-                                        either using a 1:1 connetion (e.g. first
-                                        author in a cell is connected to the
-                                        first institution in the cell on the
-                                        same row, second author to the second
-                                        institution etc.) or M:N in which case
-                                        all authors and institutions on the same
-                                        row are interconnected.
+                                        institutions column{' '}
+                                        <sup
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            [*]
+                                        </sup>
+                                        .
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
                                         Click on the connection in order to
@@ -728,6 +1041,32 @@ function GraphPage() {
                                         to write comments.
                                     </li>
                                 </ol>
+                                <p
+                                    style={{
+                                        fontSize: '12px',
+                                        textAlign: 'left',
+                                        paddingTop: '20px'
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: '#43a2fb',
+                                            fontSize: '18px'
+                                        }}
+                                    >
+                                        *
+                                    </span>{' '}
+                                    Since authors and author institutions are
+                                    represented as lists in each cell they can
+                                    be conneted either using a 1:1 connetion
+                                    (e.g. first author in a cell is connected to
+                                    the first institution in the cell on the
+                                    same row, second author to the second
+                                    institution etc.) or M:N in which case all
+                                    authors and institutions on the same row are
+                                    interconnected.
+                                </p>
                             </div>
                         )
                     },
@@ -766,7 +1105,7 @@ function GraphPage() {
                         ),
                         content: (
                             <div style={{ padding: '10px 20px' }}>
-                                <ol
+                                <ul
                                     style={{
                                         textAlign: 'left',
                                         fontSize: '14px'
@@ -775,12 +1114,22 @@ function GraphPage() {
                                     <li style={{ paddingBottom: '6px' }}>
                                         Each history item represents the state
                                         of the search results at a particular
-                                        time. A new history item is created each
-                                        time you apply changes to the network
-                                        schema or the search results. The edge
-                                        labels indicate the type of change that
-                                        was made (e.g. expand, remove, modify
-                                        schema, change graph type).
+                                        time.{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            A new history item is created each
+                                            time you apply changes to the
+                                            network schema or the search
+                                            results.
+                                        </span>{' '}
+                                        The edge labels indicate the type of
+                                        change that was made (e.g. expand,
+                                        remove, modify schema, change graph
+                                        type).
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
                                         You can navigate to a previous data
@@ -791,15 +1140,67 @@ function GraphPage() {
                                         will create a new branch in history.
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Removing a histiry item by clicking the
+                                        Removing a history item by clicking the
                                         x button will also delete its children
                                         in the tree.
                                     </li>
-                                </ol>
-                                <p>
+                                </ul>
+                                <p
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
                                     Click next to see how you can write down
                                     observations about your data.
                                 </p>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#commentscomponent',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Comments
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Comments are associated with the
+                                        currently active history item. Moving to
+                                        a different history item will either
+                                        show you an empty comment list or the
+                                        comments that are already assoiated with
+                                        that history item.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Comments also support markdown syntax.
+                                        To see all supported markdown syntax
+                                        click the ? button bellow the textarea.
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            Writing a comment that starts with a
+                                            # or multiple # will also create a
+                                            title for the current history item
+                                        </span>{' '}
+                                        and enable you to easly navigate between
+                                        different states of your data.
+                                    </li>
+                                </ul>
                             </div>
                         )
                     },
@@ -822,34 +1223,18 @@ function GraphPage() {
                                     }}
                                 >
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Comments are associated with the
-                                        currently active history item. Moving to
-                                        a different history item will either
-                                        show you an empty comment list or the
-                                        comments that are already assoiated with
-                                        that history item.
-                                    </li>
-                                    <li style={{ paddingBottom: '6px' }}>
-                                        Comments also support markdown syntax.
-                                        To see all supported markdown syntax
-                                        click the ? button bellow the textarea.
-                                        Writing a comment that starts with a #
-                                        or multiple # will also create a title
-                                        for the current history item and enable
-                                        you to easly navigate between different
-                                        states of your data.
-                                    </li>
-                                    <li style={{ paddingBottom: '6px' }}>
                                         Write a markdown comment and add a
                                         screenshot of the graph by clicking the
                                         📷 icon next to the blue send button.
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        Now add your comment by clicking the
+                                        Now submit your comment by clicking the
                                         blue button or by pressing shift +
-                                        enter.Then click next to see how you can
-                                        explore alternative data
-                                        representations.
+                                        enter.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Click next to see how you can explore
+                                        alternative data representations.
                                     </li>
                                 </ol>
                             </div>
@@ -947,7 +1332,7 @@ function GraphPage() {
                                 To generate a presentation from your comments
                                 and in the chronologial order of your history
                                 items click the presentation mode button. You
-                                will notie that the presentation inlude an odd
+                                will notice that the presentation inlude an odd
                                 name and no introduction or author. Click the
                                 next button to see how to change that.
                             </p>
@@ -1021,6 +1406,12 @@ function GraphPage() {
                 showProgress={true}
                 continuous={true}
                 spotlightClicks={true}
+                callback={data => {
+                    if (data.action === 'reset') {
+                        store.core.setFinishedGraphJoyride(true);
+                    }
+                }}
+                run={!store.core.finishedGraphJoyride}
             />
 
             {showViewAll && (

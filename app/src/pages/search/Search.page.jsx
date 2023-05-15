@@ -520,6 +520,12 @@ function SearchPage(props) {
                 showProgress={true}
                 continuous={true}
                 spotlightClicks={true}
+                callback={data => {
+                    if (data.action === 'reset') {
+                        store.core.setFinishedAdvancedSearchJoyride(true);
+                    }
+                }}
+                run={!store.core.finishedAdvancedSearchJoyride}
             />
             <AdvancedSearchComponent marginTop="100px" isPanel={false} />
         </Flex>

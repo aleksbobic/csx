@@ -38,6 +38,9 @@ export class CoreStore {
     dataModificationMessage = null;
     neverShowInteractionModal = false;
     interactionModalClosed = false;
+    finishedHomeJoyride = false;
+    finishedAdvancedSearchJoyride = false;
+    finishedGraphJoyride = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -63,11 +66,37 @@ export class CoreStore {
             );
         }
 
+        this.finishedHomeJoyride =
+            localStorage.getItem('finishedHomeJoyride') === 'true';
+        this.finishedAdvancedSearchJoyride =
+            localStorage.getItem('finishedAdvancedSearchJoyride') === 'true';
+        this.finishedGraphJoyride =
+            localStorage.getItem('finishedGraphJoyride') === 'true';
+
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
         this.getInteractionsModalDisplay();
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    setFinishedHomeJoyride = value => {
+        this.finishedHomeJoyride = value;
+        localStorage.setItem('finishedHomeJoyride', value);
+    };
+    setFinishedAdvancedSearchJoyride = value => {
+        this.finishedAdvancedSearchJoyride = value;
+        localStorage.setItem('finishedAdvancedSearchJoyride', value);
+    };
+    setFinishedGraphJoyride = value => {
+        this.finishedGraphJoyride = value;
+        localStorage.setItem('finishedGraphJoyride', value);
+    };
+
+    resetJoyride = () => {
+        this.setFinishedHomeJoyride(false);
+        this.setFinishedAdvancedSearchJoyride(false);
+        this.setFinishedGraphJoyride(false);
+    };
 
     setInteractionModalClosed = value => (this.interactionModalClosed = value);
 

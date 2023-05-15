@@ -10,6 +10,7 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
+import { Redo } from 'css.gg';
 
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -158,6 +159,31 @@ function Footer() {
                         }}
                     >
                         Cookies & local storage
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        marginTop="10px"
+                        leftIcon={<Redo style={{ '--ggs': 0.7 }} />}
+                        onClick={() => {
+                            store.core.resetJoyride();
+
+                            store.track.trackEvent(
+                                JSON.stringify({
+                                    area: 'Home page',
+                                    sub_area: 'Footer'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Reset tutorial'
+                                })
+                            );
+                        }}
+                    >
+                        Reset tutorial
                     </Button>
                 </VStack>
             </Center>

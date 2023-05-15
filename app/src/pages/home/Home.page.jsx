@@ -430,6 +430,12 @@ function HomePage() {
                 showProgress={true}
                 continuous={true}
                 spotlightClicks={true}
+                callback={data => {
+                    if (data.action === 'reset') {
+                        store.core.setFinishedHomeJoyride(true);
+                    }
+                }}
+                run={!store.core.finishedHomeJoyride}
             />
             <FileUploadModal />
             <DatasetConfigModal />
