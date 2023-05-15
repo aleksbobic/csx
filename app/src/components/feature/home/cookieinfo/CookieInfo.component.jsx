@@ -76,6 +76,22 @@ function CookieInfo() {
         [
             'surveyhidden',
             'Used to track if a user closed the survey popup. If set to true the popup will not appear.'
+        ],
+        [
+            'neverShowInteractionsModal',
+            'Used to track if a user closed the interactions modal. If set to true the modal will not appear.'
+        ],
+        [
+            'finishedHomeJoyride',
+            'Used to track if a user finished the home page tutorial. If set to true the tutorial will not appear.'
+        ],
+        [
+            'finishedAdvancedSearchJoyride',
+            'Used to track if a user finished the advanced search tutorial. If set to true the tutorial will not appear.'
+        ],
+        [
+            'finishedGraphJoyride',
+            'Used to track if a user finished the network analysis tutorial. If set to true the tutorial will not appear.'
         ]
     ];
 
@@ -157,6 +173,16 @@ function CookieInfo() {
                 CSX (such as button clicks and page navigation) in addition to
                 the data mentioned above and enable us to analyze the data
                 associated with your unique ID for the purposes stated above.
+                The data will be stored only for the duration needed to conduct
+                analysis and will be deleted after. It may be published in fully
+                anonymised form in scientific publications. During the
+                collection phase the data is stored on a server located in the
+                European Union. If for any reason you decide to opt-out of the
+                interaction tracking, you can do so by clicking the button
+                below. Please note that this will not delete any of the data
+                that has already been collected immediatelly but the data will
+                not be used for analysis and will be deleted at the earliest
+                possible time.
             </Text>
 
             <Text
