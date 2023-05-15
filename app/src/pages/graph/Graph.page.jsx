@@ -23,6 +23,7 @@ import { useBeforeunload } from 'react-beforeunload';
 import { useLocation } from 'react-router';
 import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import Joyride from 'react-joyride';
 
 function GraphPage() {
     const dataModificationInfoToastRef = useRef();
@@ -300,6 +301,70 @@ function GraphPage() {
         <Box zIndex={1} height="100%" position="relative" id="graph">
             <WidgetModal />
             <ContextMenuComponent />
+            <Joyride
+                steps={[
+                    {
+                        target: '#graph',
+                        placement: 'center',
+                        floaterProps: { hideArrow: true },
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Analysis View
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Welcome to the analysis view 🔭! This is the
+                                main CSX area used for analysing search results.
+                                Click next to see what are the main components
+                                of the analysis view.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#graph',
+                        placement: 'right-end',
+                        floaterProps: { hideArrow: true },
+                        disableOverlay: true,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Graph View
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                The graph that you see in front of you
+                                represents your search results.
+                            </p>
+                        )
+                    }
+                ]}
+                styles={{
+                    options: {
+                        backgroundColor: '#171A23',
+                        textColor: 'white',
+                        primaryColor: '#43a2fb',
+                        arrowColor: '#171A23'
+                    }
+                }}
+                showProgress={true}
+                continuous={true}
+                spotlightClicks={true}
+            />
 
             {showViewAll && (
                 <Box
