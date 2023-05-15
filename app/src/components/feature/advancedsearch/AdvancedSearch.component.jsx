@@ -37,7 +37,7 @@ import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.compone
 import SchemaNode from '../schemanode/SchemaNode.component';
 import ConnectorNode from './connectornode/ConnectorNode.component';
 import CountsNode from './countsNode/Counts.component';
-// import DatasetNode from './datasetNode/Dataset.component';
+import DatasetNode from './datasetNode/Dataset.component';
 import FilterNode from './filternode/FilterNode.component';
 import KeywordExtractionNode from './keywordextractionnode/KeywordExtractionNode.component';
 import ResultsNode from './resultsNode/ResultsNode.component';
@@ -83,7 +83,7 @@ function AdvancedSearch(props) {
 
     const nodeTypes = useMemo(
         () => ({
-            // datasetNode: DatasetNode,
+            datasetNode: DatasetNode,
             searchNode: SearchNode,
             filterNode: FilterNode,
             keywordExtractionNode: KeywordExtractionNode,
@@ -186,12 +186,12 @@ function AdvancedSearch(props) {
 
     const getNodeIcon = nodeType => {
         switch (nodeType) {
-            // case 'datasetNode':
-            //     return (
-            //         <CircleStackIcon
-            //             style={{ width: '18px', height: '18px' }}
-            //         />
-            //     );
+            case 'datasetNode':
+                return (
+                    <CircleStackIcon
+                        style={{ width: '18px', height: '18px' }}
+                    />
+                );
             case 'filterNode':
                 return <FunnelIcon style={{ width: '18px', height: '18px' }} />;
             case 'connectorNode':
@@ -280,6 +280,7 @@ function AdvancedSearch(props) {
                 flexDirection="column"
                 flexGrow="1"
                 zIndex="10"
+                id="AdvancedSearchDock"
                 style={
                     props.isPanel
                         ? { bottom: '15px', borderRadius: '10px', left: '15px' }

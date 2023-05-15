@@ -18,14 +18,14 @@ export class WorkflowStore {
             tooltip: 'Search node'
         },
         {
-            nodeType: 'connectorNode',
-            label: 'Connector',
-            tooltip: 'Connector node'
-        },
-        {
             nodeType: 'filterNode',
             label: 'Filter',
             tooltip: 'Filter node'
+        },
+        {
+            nodeType: 'connectorNode',
+            label: 'Connector',
+            tooltip: 'Connector node'
         },
         {
             nodeType: 'resultsNode',
@@ -37,7 +37,7 @@ export class WorkflowStore {
     actionNodeColors = {
         dark: {
             searchNode: '#3182ce',
-            // datasetNode: '#3182ce',
+            datasetNode: '#3182ce',
             filterNode: '#ce8631',
             countsNode: '#ce8631',
             connectorNode: '#323232',
@@ -47,7 +47,7 @@ export class WorkflowStore {
         },
         light: {
             searchNode: '#3182ce',
-            // datasetNode: '#3182ce',
+            datasetNode: '#3182ce',
             filterNode: '#ce8631',
             countsNode: '#ce8631',
             connectorNode: '#323232',

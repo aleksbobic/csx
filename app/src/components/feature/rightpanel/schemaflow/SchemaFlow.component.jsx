@@ -26,7 +26,7 @@ import ReactFlow, {
     Background
 } from 'react-flow-renderer';
 import AutoSizer from 'react-virtualized-auto-sizer';
-// import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
+import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
 import SchemaEdge from '../../schemaedge/SchemaEdge.component';
 import SearchNode from '../../advancedsearch/searchnode/SearchNode.component';
 import HistoryNode from '../../historyNode/HistoryNode.component';
@@ -78,7 +78,7 @@ function SchemaFlow() {
 
     const nodeTypes = useMemo(
         () => ({
-            // datasetNode: DatasetNode,
+            datasetNode: DatasetNode,
             schemaNode: SchemaNode,
             overviewSchemaNode: OverviewSchemaNode,
             historyNode: HistoryNode,
