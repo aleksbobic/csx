@@ -98,7 +98,7 @@ function SearchBar(props) {
     );
 
     return (
-        <Box style={props.style}>
+        <Box style={props.style} id="Searchbar">
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {

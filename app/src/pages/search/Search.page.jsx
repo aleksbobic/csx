@@ -6,6 +6,7 @@ import { useContext, useEffect } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
+import Joyride from 'react-joyride';
 
 function SearchPage(props) {
     const location = useLocation();
@@ -44,6 +45,29 @@ function SearchPage(props) {
             paddingTop="55px"
             backgroundColor="blackAlpha.300"
         >
+            <Joyride
+                steps={[
+                    {
+                        target: '#Title',
+                        placement: 'center',
+                        floaterProps: { hideArrow: true },
+                        title: 'Advanced Search Page',
+                        content:
+                            'This is the advanced search page. Here you can define complex search queries for the dataset you selected.'
+                    }
+                ]}
+                styles={{
+                    options: {
+                        backgroundColor: '#171A23',
+                        textColor: 'white',
+                        primaryColor: '#43a2fb',
+                        arrowColor: '#171A23'
+                    }
+                }}
+                showProgress={true}
+                continuous={true}
+                spotlightClicks={true}
+            />
             <AdvancedSearchComponent marginTop="100px" isPanel={false} />
         </Flex>
     );

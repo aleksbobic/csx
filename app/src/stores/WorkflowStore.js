@@ -7,11 +7,11 @@ export class WorkflowStore {
     workflows = {};
 
     actionNodeTypes = [
-        {
-            nodeType: 'datasetNode',
-            label: 'Dataset',
-            tooltip: 'Dataset node'
-        },
+        // {
+        //     nodeType: 'datasetNode',
+        //     label: 'Dataset',
+        //     tooltip: 'Dataset node'
+        // },
         {
             nodeType: 'searchNode',
             label: 'Search',
@@ -37,7 +37,7 @@ export class WorkflowStore {
     actionNodeColors = {
         dark: {
             searchNode: '#3182ce',
-            datasetNode: '#3182ce',
+            // datasetNode: '#3182ce',
             filterNode: '#ce8631',
             countsNode: '#ce8631',
             connectorNode: '#323232',
@@ -47,7 +47,7 @@ export class WorkflowStore {
         },
         light: {
             searchNode: '#3182ce',
-            datasetNode: '#3182ce',
+            // datasetNode: '#3182ce',
             filterNode: '#ce8631',
             countsNode: '#ce8631',
             connectorNode: '#323232',

@@ -35,6 +35,7 @@ import { useBeforeunload } from 'react-beforeunload';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
+import Joyride from 'react-joyride';
 
 function HomePage() {
     const toast = useToast();
@@ -338,6 +339,43 @@ function HomePage() {
             backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
             paddingTop="150px"
         >
+            <Joyride
+                steps={[
+                    {
+                        target: '#Title',
+                        placement: 'center',
+                        floaterProps: { hideArrow: true },
+                        title: 'Welcome!',
+                        content:
+                            'Welcome to Collaboration Spotting X 🥳! This is a new visual network analysis tool that enables searching, exploring, analysing and modeling your data 🪄. Lets start this guide by clicking next 🚀.'
+                    },
+                    {
+                        target: '#Searchbar',
+                        placement: 'bottom',
+                        title: 'Search',
+                        content:
+                            'To search through a datasets you can use the search bar 🔎. You can select the dataset for searching in the left dropdown. The hint bellow the search bar provides information on the dataset feature used for search. Next lets take a look at the dataset list.'
+                    },
+                    {
+                        target: '#DatasetGrid',
+                        placement: 'bottom',
+                        title: 'Datasets',
+                        content:
+                            'Here you can see all datasets currently available in CSX 📊. You can view full datasets(➡️) as well as launch the advanced search view (🔎). Hover over the example dataset and click the 🔎 icon for the next part of this tutorial.'
+                    }
+                ]}
+                styles={{
+                    options: {
+                        backgroundColor: '#171A23',
+                        textColor: 'white',
+                        primaryColor: '#43a2fb',
+                        arrowColor: '#171A23'
+                    }
+                }}
+                showProgress={true}
+                continuous={true}
+                spotlightClicks={true}
+            />
             <FileUploadModal />
             <DatasetConfigModal />
             <Center width="100%" minH="200px" flexDir="column">
@@ -353,6 +391,7 @@ function HomePage() {
                     marginBottom="20px"
                     textAlign="center"
                     color={textColor}
+                    id="Title"
                 >
                     COLLABORATION SPOTTING X
                 </Heading>

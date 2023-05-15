@@ -20,7 +20,7 @@ import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import ReactFlow, { MiniMap } from 'react-flow-renderer';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
+// import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
 import SchemaEdge from '../../advancedsearch/searchedge/SearchEdge.component';
 import SearchNode from '../../advancedsearch/searchnode/SearchNode.component';
 import HistoryNode from '../../historyNode/HistoryNode.component';
@@ -34,7 +34,7 @@ export function HistoryFlow() {
 
     const nodeTypes = useMemo(
         () => ({
-            datasetNode: DatasetNode,
+            // datasetNode: DatasetNode,
             schemaNode: SchemaNode,
             overviewSchemaNode: OverviewSchemaNode,
             historyNode: HistoryNode,

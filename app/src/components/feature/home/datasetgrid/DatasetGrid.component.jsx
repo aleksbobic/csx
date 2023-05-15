@@ -44,6 +44,7 @@ function DatasetGrid(props) {
                 backgroundColor={gridBGColor}
                 borderRadius="12px"
                 paddingBottom={isEnvTrue('REACT_APP_DISABLE_UPLOAD') && '50px'}
+                id="DatasetGrid"
             >
                 <Heading
                     colSpan={2}
