@@ -157,7 +157,7 @@ function SchemaFlow() {
     );
 
     return (
-        <Box height="100%" minHeight="200px" width="100%">
+        <Box height="100%" minHeight="200px" width="100%" id="schema">
             <AutoSizer>
                 {({ height, width }) => (
                     <ReactFlow

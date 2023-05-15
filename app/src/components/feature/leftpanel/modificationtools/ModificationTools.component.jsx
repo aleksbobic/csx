@@ -244,7 +244,7 @@ function ModificationTools() {
             direction="column"
             paddingLeft="0"
             paddingRight="0"
-            id="viewsettingscomponent"
+            id="ModifcationToolsComponent"
             width="100%"
         >
             <VStack spacing="2px" align="start" width="100%">

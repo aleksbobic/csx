@@ -520,6 +520,7 @@ function NavigationPanelComponent() {
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
                                 borderRadius="10px"
+                                id="presentationmode"
                                 icon={
                                     <PresentationChartLineIcon
                                         width="16px"

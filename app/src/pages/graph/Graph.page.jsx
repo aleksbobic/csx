@@ -348,7 +348,664 @@ function GraphPage() {
                                 }}
                             >
                                 The graph that you see in front of you
-                                represents your search results.
+                                represents your search results. Each node
+                                represents a property and each edge represents a
+                                relationship between two properties. You can
+                                left click on a node to see more information
+                                about it. To see what features represent nodes,
+                                properties on nodes and edges click next.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#schemapnaletoggle',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Schema Panel
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Click this button to open the schema panel. Then
+                                click next.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#schema',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Schema Panel
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                This is the ✨ schema panel ✨. It shows how the
+                                search result features are connected to create
+                                the graph. Click next to read more about it.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#schema',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Schema Panel - Nodes
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        The larger left node represents the
+                                        search result column used for graph
+                                        nodes.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        The bottom dropdown enables you to add
+                                        properties to nodes (for example an
+                                        author can have an h-index property).
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        The right smaller node represents the
+                                        search result column used for graph
+                                        edges.
+                                    </li>
+                                </ul>
+                                <p
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    Click next to make some changes to the
+                                    shema.
+                                </p>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#schema',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Schema Panel - Network Modeling
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ol
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Change the column representing the nodes
+                                        to authors.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Remove the existing edge node by
+                                        pressing the x button on the edge node
+                                        (right smaller node).
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Add two new edge nodes by pressing the
+                                        🔗 button on the right edge of the left
+                                        larger node twice.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Select author institutions as the first
+                                        edge and title as the second edge.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Click the apply changes button and then
+                                        click next.
+                                    </li>
+                                </ol>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#graph',
+                        placement: 'left',
+                        disableOverlay: true,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Exploring the Graph
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Congratulations you've modeled your first
+                                network! If you don't see any nodes press the
+                                fit graph to view button at the top left. Next
+                                lets look at how you can explore your network
+                                and how you can modify it. Some notes about this
+                                network: The node size represents the frequency
+                                of a value in the search results. The node
+                                location does not represent anything. Two nodes
+                                are connected if they appear on the same row as
+                                the value on the edge (e.g. two authors in our
+                                graph are connected if they co-authored a paper
+                                or if they are affiliated with the same author
+                                institution) Click next to continue.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#viewsettingscomponent',
+                        placement: 'right-end',
+                        disableOverlay: false,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                View Tools
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                This is a set of various tools used to change
+                                visible properties of the graph. These tools do
+                                not change the data or the shape of the network
+                                they are only used to either modify the visual
+                                properties of the network or to filter the
+                                network. Click the run force button at the
+                                bottom of the panel to get a better overview of
+                                the network and then click next.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#NetworkModifcationTools',
+                        placement: 'right-end',
+                        disableOverlay: false,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Network Modification Tools
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Click this tab to open the network modification
+                                tools then click next.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#ModifcationToolsComponent',
+                        placement: 'right-end',
+                        disableOverlay: false,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Network Modification Tools
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                These tools are used to modify the network data
+                                by either removing search results associated
+                                with particular nodes or adding new search
+                                results with the same values as the selected
+                                nodes. Click next to try and remove some of the
+                                nodes.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#graph',
+                        placement: 'left',
+                        disableOverlay: true,
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Slecting a Node
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Right click on a node to open the node context
+                                menu<sup>[*]</sup>. Then click selet node to
+                                select it. Do the same with another node.
+                                Finally click remove selected from the network
+                                modification tools. Congratulations you just
+                                modified the network data! Click next to explore
+                                a different type of network schema. * If you
+                                can't see the nodes try zooming out by scrolling
+                                down.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#switchgraphviewbutton',
+                        placement: 'left',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Detail Network
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Click this button to switch to the detail
+                                network. This network is used to display
+                                connections between multiple columns. Each node
+                                type is represented by a different search result
+                                column and each edge represent the coocurence of
+                                two values in the same row (e.g. an author node
+                                connected to country means that the author and
+                                the country appear on the same row in the search
+                                results).
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#schema',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Detail Network - Network Modeling
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ol
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Each node in this schema represents a
+                                        column in the searh results.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Two columns can be conneted by
+                                        connecting the bottom connetion area of
+                                        one to the top connection area of
+                                        another in the same way as you would
+                                        connect nodes in the advanced search.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        You can turn off the visibility of some
+                                        of the nodes by clicking the eye icon on
+                                        the node. If two visible columns are
+                                        conneted through a third invisible
+                                        column, nodes of that column will not be
+                                        shown in the network but the values will
+                                        be used to calculate the network
+                                        structure.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Connect the title to the author column
+                                        and the author column to the author
+                                        institutions column. Since authors and
+                                        author institutions are represented as
+                                        lists in each cell they can be conneted
+                                        either using a 1:1 connetion (e.g. first
+                                        author in a cell is connected to the
+                                        first institution in the cell on the
+                                        same row, second author to the second
+                                        institution etc.) or M:N in which case
+                                        all authors and institutions on the same
+                                        row are interconnected.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Click on the connection in order to
+                                        change it from M:N to 1:1. Then click
+                                        the lightbulb icon on the authors node
+                                        to turn off the visiblity.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Apply changes and click next to see how
+                                        to write comments.
+                                    </li>
+                                </ol>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#historypnaletoggle',
+                        placement: 'left',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                History
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Click to see an interactive history of changes
+                                you made to the network shema and the search
+                                results.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#HistoryFlow',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                History
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ol
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Each history item represents the state
+                                        of the search results at a particular
+                                        time. A new history item is created each
+                                        time you apply changes to the network
+                                        schema or the search results. The edge
+                                        labels indicate the type of change that
+                                        was made (e.g. expand, remove, modify
+                                        schema, change graph type).
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        You can navigate to a previous data
+                                        state by clicking on one of the history
+                                        items that is not active (is not blue).
+                                        If you start making changes to the
+                                        network schema or the search results it
+                                        will create a new branch in history.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Removing a histiry item by clicking the
+                                        x button will also delete its children
+                                        in the tree.
+                                    </li>
+                                </ol>
+                                <p>
+                                    Click next to see how you can write down
+                                    observations about your data.
+                                </p>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#commentscomponent',
+                        placement: 'left-end',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Comments
+                            </span>
+                        ),
+                        content: (
+                            <div style={{ padding: '10px 20px' }}>
+                                <ol
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Comments are associated with the
+                                        currently active history item. Moving to
+                                        a different history item will either
+                                        show you an empty comment list or the
+                                        comments that are already assoiated with
+                                        that history item.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Comments also support markdown syntax.
+                                        To see all supported markdown syntax
+                                        click the ? button bellow the textarea.
+                                        Writing a comment that starts with a #
+                                        or multiple # will also create a title
+                                        for the current history item and enable
+                                        you to easly navigate between different
+                                        states of your data.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Write a markdown comment and add a
+                                        screenshot of the graph by clicking the
+                                        📷 icon next to the blue send button.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Now add your comment by clicking the
+                                        blue button or by pressing shift +
+                                        enter.Then click next to see how you can
+                                        explore alternative data
+                                        representations.
+                                    </li>
+                                </ol>
+                            </div>
+                        )
+                    },
+                    {
+                        target: '#resultspnaletoggle',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Results Panel
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                To explore your search results in a more
+                                familiar table or list format you can open the
+                                results panel.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#detailspnaletoggle',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Widgets Panel
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                To explore your search results using traditional
+                                data visualisation techniques in the form of
+                                various charts open the widgest panel. From
+                                there you can add widgets to the dashboard.
+                                Additionally widgets can be added to comments
+                                too.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#searchpnaletoggle',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Advanced Search Panel
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                To refine your search and potentially create a
+                                completly different search open the advaned
+                                search panel.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#presentationmode',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Presentation Mode
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                To generate a presentation from your comments
+                                and in the chronologial order of your history
+                                items click the presentation mode button. You
+                                will notie that the presentation inlude an odd
+                                name and no introduction or author. Click the
+                                next button to see how to change that.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#StudySettingsTab',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Studies
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Your entire exploration path including
+                                retrieval, analysis and comments is called a
+                                study. To see the study details and change them
+                                click on this tab and then click next.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#studyinfocomponent',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Studies
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Here you can change the study name, description
+                                and author. This data will also be used to
+                                generate the presentation. Additionally you can
+                                also make the presentation public and share the
+                                public link with your colleagues. If you
+                                followed the entire tutorial you will notice
+                                that the study is already saved this is because
+                                you already wrote a comment and because CSX
+                                assumes you would like to access your
+                                investigation at a later stage. You can find all
+                                your studies on the home sreen. Congratulations
+                                you finished the tutorial! 🥳🎉👏
                             </p>
                         )
                     }

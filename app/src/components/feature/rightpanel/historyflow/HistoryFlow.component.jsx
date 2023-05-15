@@ -89,6 +89,7 @@ export function HistoryFlow() {
             width="100%"
             backgroundColor="whiteAlpha.200"
             borderRadius="8px"
+            id="HistoryFlow"
         >
             <AutoSizer>
                 {({ height, width }) => (

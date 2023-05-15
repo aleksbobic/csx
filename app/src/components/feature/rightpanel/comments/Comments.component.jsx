@@ -22,6 +22,7 @@ function CommentsComponent(props) {
             }
             borderRadius="10px"
             style={{ justifyContent: 'space-between' }}
+            id="commentscomponent"
         >
             {store.comment.isCommentListVisible && (
                 <CustomScroll

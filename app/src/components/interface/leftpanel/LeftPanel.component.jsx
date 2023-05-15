@@ -412,7 +412,7 @@ function LeftPanel() {
             >
                 <Tooltip label="Study Settings">
                     <Box
-                        id="viewsettingstab"
+                        id="StudySettingsTab"
                         width="100%"
                         height="100%"
                         display="flex"
@@ -520,7 +520,7 @@ function LeftPanel() {
             >
                 <Tooltip label="Modification tools">
                     <Box
-                        id="networkexplorationtoolstab"
+                        id="NetworkModifcationTools"
                         width="100%"
                         height="100%"
                         display="flex"
