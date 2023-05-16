@@ -550,7 +550,9 @@ function NavigationPanelComponent() {
                                 transition="0.2s all ease-in-out"
                                 href={
                                     store.core.studyIsSaved
-                                        ? `http://localhost:8882/present?study=${store.core.studyUuid}`
+                                        ? `${store.core.getBasePresentURL()}?study=${
+                                              store.core.studyUuid
+                                          }`
                                         : ''
                                 }
                                 isExternal

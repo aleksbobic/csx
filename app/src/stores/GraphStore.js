@@ -898,6 +898,9 @@ export class GraphStore {
     };
 
     handleRetrievedGraph = (response, graphType, query) => {
+        this.store.graphInstance.setIsSelfCentric(false);
+        this.store.graphInstance.setIsFiltered(false);
+
         if (!response['nodes'].length) {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);

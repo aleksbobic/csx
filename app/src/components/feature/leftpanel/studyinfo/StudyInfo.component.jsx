@@ -355,11 +355,7 @@ function StudyInfo() {
                             width="100%"
                             _hover={{ opacity: 1 }}
                         >
-                            {`${window.location.href
-                                .replace('graph', 'present')
-                                .replace(/^https?:\/\//, '')
-                                .split('=')[0]
-                                .replace('study', 'pstudy')}=${
+                            {`${store.core.getBasePresentURL()}?pstudy=${
                                 store.core.studyPublicURL
                             }`}
                         </Text>

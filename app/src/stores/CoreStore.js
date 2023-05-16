@@ -79,6 +79,14 @@ export class CoreStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    getBasePresentURL = () => {
+        if (isEnvSet('REACT_APP_SERVER_PORT')) {
+            return 'http://localhost:8882/present';
+        } else {
+            return `${window.location.origin}/present`;
+        }
+    };
+
     setFinishedHomeJoyride = value => {
         this.finishedHomeJoyride = value;
         localStorage.setItem('finishedHomeJoyride', value);

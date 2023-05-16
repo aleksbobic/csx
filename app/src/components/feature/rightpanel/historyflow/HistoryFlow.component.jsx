@@ -232,7 +232,11 @@ export function HistoryFlow() {
                         }}
                         href={
                             store.core.studyIsSaved
-                                ? `http://localhost:8882/present?study=${store.core.studyUuid}&active_item=${store.core.studyHistoryItemIndex}`
+                                ? `${store.core.getBasePresentURL()}?study=${
+                                      store.core.studyUuid
+                                  }&active_item=${
+                                      store.core.studyHistoryItemIndex
+                                  }`
                                 : ''
                         }
                         isExternal
