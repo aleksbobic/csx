@@ -330,7 +330,7 @@ export class CoreStore {
 
         const { response, error } = await safeRequest(
             axios.post(
-                'studies',
+                'studies/',
                 { study_name: this.studyName },
                 {
                     headers: { user_id: this.userUuid }
@@ -398,7 +398,7 @@ export class CoreStore {
     getSavedStudies = async () => {
         if (this.userUuid) {
             const { response, error } = await safeRequest(
-                axios.get('studies', { headers: { user_id: this.userUuid } })
+                axios.get('studies/', { headers: { user_id: this.userUuid } })
             );
 
             if (error) {

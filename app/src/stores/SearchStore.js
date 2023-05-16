@@ -132,7 +132,7 @@ export class SearchStore {
     };
 
     getDatasets = async () => {
-        const { response, error } = await safeRequest(axios.get('datasets'));
+        const { response, error } = await safeRequest(axios.get('datasets/'));
 
         if (error) {
             this.store.core.handleRequestError(error);
