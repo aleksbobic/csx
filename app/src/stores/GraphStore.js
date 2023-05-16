@@ -613,7 +613,7 @@ export class GraphStore {
         }
 
         const { response, error } = await safeRequest(
-            axios.post(`studies/${studyId}/history`, params, {
+            axios.post(`studies/${studyId}/history/`, params, {
                 headers: { user_id: userId }
             })
         );

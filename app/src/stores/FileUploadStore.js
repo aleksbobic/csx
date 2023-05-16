@@ -62,7 +62,7 @@ export class FileUploadStore {
         };
 
         const { response, error } = await safeRequest(
-            axios.post('datasets', formData, requestConfig)
+            axios.post('datasets/', formData, requestConfig)
         );
 
         if (error) {

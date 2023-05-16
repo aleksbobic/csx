@@ -81,7 +81,7 @@ export class CommentStore {
         const studyId = this.store.core.studyUuid;
         const { error } = await safeRequest(
             axios.post(
-                `studies/${studyId}/history/${historyItemId}/comments`,
+                `studies/${studyId}/history/${historyItemId}/comments/`,
                 params,
                 { headers: { user_id: this.store.core.userUuid } }
             )
