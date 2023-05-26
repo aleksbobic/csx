@@ -447,14 +447,22 @@ export class CoreStore {
     };
 
     toggleVisibleDimension = dimension => {
-        if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
-            this.visibleDimensions[this.currentGraph].splice(
-                this.visibleDimensions[this.currentGraph].indexOf(dimension),
-                1
-            );
-        } else {
-            this.visibleDimensions[this.currentGraph].push(dimension);
+        if (this.visibleDimensions[this.currentGraph]) {
+            if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
+                this.visibleDimensions[this.currentGraph].splice(
+                    this.visibleDimensions[this.currentGraph].indexOf(
+                        dimension
+                    ),
+                    1
+                );
+            } else {
+                this.visibleDimensions[this.currentGraph].push(dimension);
+            }
         }
+    };
+
+    setArrayAsVisibleDimensions = dimensions => {
+        this.visibleDimensions[this.currentGraph] = dimensions;
     };
 
     get isOverview() {

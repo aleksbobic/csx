@@ -192,6 +192,18 @@ export class SchemaStore {
             schema => schema.id === id
         );
 
+        const schema_nodes = [
+            ...new Set(
+                schema_to_load.edges
+                    .map(edge => [edge.source, edge.target])
+                    .flat()
+            )
+        ].map(
+            node_id =>
+                schema_to_load.nodes.find(node => node.id === node_id).data
+                    .label
+        );
+
         this.edges = schema_to_load.edges.map(edge => {
             edge.data.changeRelationship = this.toggleRelationship;
             edge.data.removeEdge = this.removeSchemaConnection;
@@ -222,6 +234,7 @@ export class SchemaStore {
         });
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
 
+        this.store.core.setArrayAsVisibleDimensions(schema_nodes);
         this.refreshNodeStyles();
         this.checkForSchemaErrors();
         this.setSchemaHasChanges(true);

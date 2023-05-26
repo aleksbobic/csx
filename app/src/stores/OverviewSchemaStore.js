@@ -105,6 +105,7 @@ export class OverviewSchemaStore {
         this.setAnchorProperties(schema_to_load.anchorProperties);
         this.setDefaultsFromSearchStore();
         this.generateNodesAndEdges();
+        this.setSchemaHasChanges(true);
     };
 
     setDefaultsFromSearchStore = () => {

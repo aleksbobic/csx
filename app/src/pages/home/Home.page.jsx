@@ -298,6 +298,7 @@ function HomePage() {
         store.core.resetVisibleDimensions();
         store.schema.resetSchema();
         store.overviewSchema.setSchemaHasChanges(false);
+        store.schema.setSchemaHasChanges(false);
         store.core.setStudyPublicURL('');
         store.graphInstance.setEdgeColorScheme('auto');
         store.graphInstance.setNodeColorScheme('component');
