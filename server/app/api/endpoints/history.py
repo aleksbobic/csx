@@ -254,6 +254,7 @@ def create_history_item(
 
     comparison_switch = {
         "from_scratch": lambda: csx_graph.get_graph_from_scratch(
+            storage,
             graph_type,
             dimensions,
             elastic_json,
@@ -274,6 +275,7 @@ def create_history_item(
             charts,
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
+            storage,
             comparison_res,
             graph_type,
             dimensions,
@@ -292,6 +294,7 @@ def create_history_item(
             charts,
         ),
         "from_existing_data": lambda: csx_graph.get_graph_from_existing_data(
+            storage,
             graph_type,
             dimensions,
             elastic_json,
@@ -310,6 +313,7 @@ def create_history_item(
             charts,
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
+            storage,
             comparison_res,
             graph_type,
             study_id,
@@ -493,6 +497,7 @@ def expand_nodes(
         history_action = "narrow expand"
 
     graph = csx_graph.get_graph_from_scratch(
+        storage,
         graph_type,
         dimensions,
         elastic_json,
@@ -568,7 +573,7 @@ def delete_nodes(
 
     last_history_item = csx_study.load_last_history_item(study_id, user_id)
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {

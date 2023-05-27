@@ -43,6 +43,33 @@ class MongoConnector(BaseStorageConnector):
 
         return pickle.loads(history_item)
 
+    def insert_history_item(self, study_id: str, user_id: str, history_item_data: dict):
+        fs_id = self.fs.put(history_item_data["graph_data"])
+        self.database["studies"].update_one(
+            {"study_uuid": study_id, "user_uuid": user_id},
+            {
+                "$push": {
+                    "history": {
+                        "item_id": fs_id,
+                        "action": history_item_data["action"],
+                        "graph_type": history_item_data["graph_type"],
+                        "query": history_item_data["query"],
+                        "action_time": history_item_data["action_time"],
+                        "schema": history_item_data["schema"],
+                        "anchor_properties": history_item_data["anchor_properties"],
+                        "anchor": history_item_data["anchor"],
+                        "links": history_item_data["links"],
+                        "visible_dimensions": history_item_data["visible_dimensions"],
+                        "comments": [],
+                        "parent": history_item_data["history_parent_id"],
+                        "charts": history_item_data["charts"],
+                        "edge_count": history_item_data["edge_count"],
+                        "node_count": history_item_data["node_count"],
+                    }
+                }
+            },
+        )
+
     def get_history_ids_from_parent(self, nodes, id) -> List[str]:
         currentNode = [node for node in nodes if node["item_id"] == ObjectId(id)][0]
         currentNodeChildren = [node for node in nodes if str(node["parent"]) == str(id)]

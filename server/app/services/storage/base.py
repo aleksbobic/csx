@@ -24,6 +24,10 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def insert_history_item(self, study_id: str, user_id: str, history_item_data: dict):
+        pass
+
+    @abstractmethod
     def delete_history_item(self, study_id, user_id, item_id):
         pass
 

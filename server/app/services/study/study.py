@@ -8,36 +8,6 @@ from app.types import ComparisonResults
 from bson import ObjectId
 
 
-def new_history_entry(study_id, user_id, data):
-    insert_response = csx_data.insert_large_document(data["graph_data"])
-
-    csx_data.update_document(
-        "studies",
-        {"study_uuid": study_id, "user_uuid": user_id},
-        {
-            "$push": {
-                "history": {
-                    "item_id": insert_response,
-                    "action": data["action"],
-                    "graph_type": data["graph_type"],
-                    "query": data["query"],
-                    "action_time": data["action_time"],
-                    "schema": data["schema"],
-                    "anchor_properties": data["anchor_properties"],
-                    "anchor": data["anchor"],
-                    "links": data["links"],
-                    "visible_dimensions": data["visible_dimensions"],
-                    "comments": [],
-                    "parent": data["history_parent_id"],
-                    "charts": data["charts"],
-                    "edge_count": data["edge_count"],
-                    "node_count": data["node_count"],
-                }
-            }
-        },
-    )
-
-
 def load_last_history_item(study_id, user_id):
     history_list = list(
         csx_data.get_all_documents_by_conditions(

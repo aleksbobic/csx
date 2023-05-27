@@ -329,6 +329,7 @@ def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[D
 
 
 def get_graph_from_scratch(
+    storage,
     graph_type,
     dimensions,
     elastic_json,
@@ -383,7 +384,7 @@ def get_graph_from_scratch(
 
     cache_snapshot = csx_study.enrich_cache_with_ng_graph(cache_data, graph_type)
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -408,6 +409,7 @@ def get_graph_from_scratch(
 
 
 def get_graph_with_new_anchor_props(
+    storage,
     comparison_res,
     graph_type,
     dimensions,
@@ -439,7 +441,7 @@ def get_graph_with_new_anchor_props(
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -464,6 +466,7 @@ def get_graph_with_new_anchor_props(
 
 
 def get_graph_from_existing_data(
+    storage,
     graph_type,
     dimensions,
     elastic_json,
@@ -509,7 +512,7 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -534,6 +537,7 @@ def get_graph_from_existing_data(
 
 
 def get_graph_from_cache(
+    storage,
     comparison_res,
     graph_type,
     study_id,
@@ -549,7 +553,7 @@ def get_graph_from_cache(
     history_parent_id,
     charts,
 ):
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
