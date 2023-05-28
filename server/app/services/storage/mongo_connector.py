@@ -144,6 +144,21 @@ class MongoConnector(BaseStorageConnector):
 
         return studies[0]
 
+    def get_public_study(self, study_id):
+        studies = list(
+            self.database["studies"].find(
+                {"$and": [{"public_url": study_id}]}, {"_id": 0}
+            )
+        )
+
+        if len(studies) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Study not found",
+            )
+
+        return studies[0]
+
     def update_study_settings(self, study_id: str, user_id: str, settings: dict):
         self.database["studies"].update_one(
             {"study_uuid": study_id, "user_uuid": user_id},
@@ -248,3 +263,16 @@ class MongoConnector(BaseStorageConnector):
                 {"j._id": ObjectId(comment_id)},
             ],
         )
+
+    def get_precomputed_nodes(self, dataset, node_ids, node_features):
+        """Retrieve nodes stored in mongo by id list and feature"""
+        nodes = list(
+            self.database[dataset].find(
+                {"entries": {"$in": node_ids}, "feature": {"$in": node_features}},
+                {"_id": 0},
+            )
+        )
+        for node in nodes:
+            node["entries"] = [entry for entry in node["entries"] if entry in node_ids]
+
+        return nodes

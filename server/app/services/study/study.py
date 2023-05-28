@@ -1,38 +1,9 @@
-from typing import Dict, List, Literal, Union
+from typing import Dict, List, Literal
 
 import app.services.graph.graph as csx_graph
-import app.services.storage.mongo as csx_data
 import networkx as nx
 import pandas as pd
 from app.types import ComparisonResults
-from bson import ObjectId
-
-
-def load_last_history_item(study_id, user_id):
-    history_list = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies",
-            {"$and": [{"user_uuid": user_id}, {"study_uuid": study_id}]},
-            {"_id": 0},
-        )
-    )[0]["history"]
-
-    return history_list[len(history_list) - 1]
-
-
-def get_public_study(public_study_id):
-    studies = list(
-        csx_data.get_all_documents_by_conditions(
-            "studies",
-            {"$and": [{"public_url": public_study_id}]},
-            {"_id": 0},
-        )
-    )
-
-    if len(studies) == 0:
-        return None
-
-    return studies[0]
 
 
 def compare_instances(

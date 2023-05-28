@@ -1,7 +1,6 @@
 import os
 import uuid
 
-import app.services.storage.mongo as csx_data
 import app.services.study.study as csx_study
 from app.api.dependencies import (
     get_current_study,

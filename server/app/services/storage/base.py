@@ -40,6 +40,10 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def get_public_study(self, study_id) -> dict:
+        pass
+
+    @abstractmethod
     def get_user_studies(self, user_id) -> List[dict]:
         pass
 
@@ -96,4 +100,8 @@ class BaseStorageConnector(ABC):
         screenshot_height: Union[int, None],
         chart: Union[str, None],
     ):
+        pass
+
+    @abstractmethod
+    def get_precomputed_nodes(self, dataset, node_ids, node_features):
         pass

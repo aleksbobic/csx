@@ -1,20 +1,21 @@
 import json
 import pickle
 import uuid
-from typing import Dict, List, Literal, cast
+from typing import Dict, Generator, List, Literal, cast
 
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
-import app.services.storage.mongo as csx_data
 import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
+from app.services.storage.base import BaseStorageConnector
 from app.types import Node, SchemaElement
 from app.utils.timer import use_timing
 
 
 def get_graph(
+    storage: Generator[BaseStorageConnector, None, None],
     graph_type: Literal["overview", "detail"],
     elastic_json: Dict,
     dimensions: Dict,
@@ -24,6 +25,7 @@ def get_graph(
     """Generate graph"""
     if graph_type == "overview":
         return get_overview_graph(
+            storage,
             elastic_json,
             dimensions["links"],
             dimensions["anchor"]["dimension"],
@@ -32,7 +34,7 @@ def get_graph(
         )
 
     return get_detail_graph(
-        elastic_json, dimensions["all"], dimensions["visible"], schema, index
+        storage, elastic_json, dimensions["all"], dimensions["visible"], schema, index
     )
 
 
@@ -72,6 +74,7 @@ def generate_graph_metadata(
 
 @use_timing
 def get_detail_graph(
+    storage,
     search_results,
     features: List[str],
     visible_features: List[str],
@@ -108,7 +111,7 @@ def get_detail_graph(
         entries_with_nodes = {}
 
     if len(list_features) > 0:
-        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
+        mongo_nodes = storage.get_precomputed_nodes(
             index, search_results_df.entry.tolist(), list_features
         )
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
@@ -183,7 +186,12 @@ def get_props_for_cached_nodes(
 
 @use_timing
 def get_overview_graph(
-    search_results, links: List[str], anchor: str, anchor_properties: List[str], index
+    storage,
+    search_results,
+    links: List[str],
+    anchor: str,
+    anchor_properties: List[str],
+    index,
 ):
     search_results_df = pd.DataFrame(search_results)
 
@@ -210,7 +218,7 @@ def get_overview_graph(
         entries_with_nodes = {}
 
     if len(list_links) > 0 or is_anchor_list:
-        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
+        mongo_nodes = storage.get_precomputed_nodes(
             index,
             search_results_df.entry.tolist(),
             list_links + [anchor] if is_anchor_list else list_links,
@@ -349,7 +357,7 @@ def get_graph_from_scratch(
     history_parent_id,
     charts,
 ):
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
+    graph_data = get_graph(storage, graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
     anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
@@ -487,7 +495,12 @@ def get_graph_from_existing_data(
     # Take global table data and generate grpah
 
     graph_data = get_graph(
-        graph_type, cache_data["global"]["elastic_json"], dimensions, schema, index
+        storage,
+        graph_type,
+        cache_data["global"]["elastic_json"],
+        dimensions,
+        schema,
+        index,
     )
 
     table_data = convert_table_data(

@@ -381,7 +381,8 @@ def expand_nodes(
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     cache_data = storage.get_history_item(history_item_id)
-    last_history_item = csx_study.load_last_history_item(study_id, user_id)
+
+    last_history_item = study["history"][-1]
 
     values = data.values
     graph_type = data.graph_type
@@ -571,7 +572,7 @@ def delete_nodes(
                 cache_data, entries, "overview"
             )
 
-    last_history_item = csx_study.load_last_history_item(study_id, user_id)
+    last_history_item = storage.get_study(user_id, study_id)["history"][-1]
 
     storage.insert_history_item(
         study_id,
