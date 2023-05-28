@@ -143,7 +143,7 @@ export class CoreStore {
     editCommentFromCurrentHistoryItem = (index, newComment) => {
         this.studyHistory[this.studyHistoryItemIndex].comments[index] = {
             ...this.studyHistory[this.studyHistoryItemIndex].comments[index],
-            newComment
+            ...newComment
         };
 
         this.studyHistory[this.studyHistoryItemIndex].comments = [

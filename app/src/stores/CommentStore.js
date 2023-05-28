@@ -163,10 +163,11 @@ export class CommentStore {
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
         const studyId = this.store.core.studyUuid;
+        const editCommentId = this.editCommentId;
 
         const { error } = await safeRequest(
             axios.put(
-                `studies/${studyId}/history/${historyItemId}/comments/${this.editCommentId}`,
+                `studies/${studyId}/history/${historyItemId}/comments/${editCommentId}`,
                 params,
                 { headers: { user_id: this.store.core.userUuid } }
             )
@@ -179,7 +180,9 @@ export class CommentStore {
 
         const commentIndex = this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
-        ].comments.findIndex(comment => comment.id === this.editCommentId);
+        ].comments.findIndex(
+            commentObject => commentObject.id === editCommentId
+        );
 
         this.store.core.editCommentFromCurrentHistoryItem(commentIndex, {
             screenshot: params.screenshot ? params.screenshot : null,
@@ -195,5 +198,6 @@ export class CommentStore {
             edited: true
         });
         this.store.history.generateHistoryNodes();
+        this.setEditCommentId(null);
     };
 }
