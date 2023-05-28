@@ -137,10 +137,7 @@ class MongoConnector(BaseStorageConnector):
         )
 
         if len(studies) == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Study not found",
-            )
+            return None
 
         return studies[0]
 
@@ -152,10 +149,7 @@ class MongoConnector(BaseStorageConnector):
         )
 
         if len(studies) == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Study not found",
-            )
+            return None
 
         return studies[0]
 

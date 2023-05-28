@@ -153,6 +153,7 @@ def create_history_item(
     else:
         cache_data = storage.get_history_item(history_item_id)
         study = storage.get_study(user_id, study_id)
+
         if not study:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
@@ -335,6 +336,11 @@ def create_history_item(
     graph = comparison_switch[comparison_res["action"]]()
 
     study = storage.get_study(user_id, study_id)
+
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
+        )
 
     return {
         "graph": graph,
@@ -572,7 +578,14 @@ def delete_nodes(
                 cache_data, entries, "overview"
             )
 
-    last_history_item = storage.get_study(user_id, study_id)["history"][-1]
+    study = storage.get_study(user_id, study_id)
+
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
+        )
+
+    last_history_item = study["history"][-1]
 
     storage.insert_history_item(
         study_id,
@@ -596,6 +609,11 @@ def delete_nodes(
     )
 
     study = storage.get_study(user_id, study_id)
+
+    if not study:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
+        )
 
     return {
         "graph": cache_data[data.graph_type],
