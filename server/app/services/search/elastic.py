@@ -1,14 +1,13 @@
-from typing import Any, Dict, List, Union
+import os
+import re
+from typing import Any, Dict, Union
 
 import pandas as pd
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-from elasticsearch_dsl import Search, Q
-import pytextrank
 import spacy
-import re
-import os
+from elasticsearch.helpers import bulk
+from elasticsearch_dsl import Q, Search
 
+from elasticsearch import Elasticsearch
 
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("textrank")
@@ -152,7 +151,6 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
     # TODO: CHeck if feature is list
     if "query" not in query and "queries" not in query:
         if dimension_types[query["feature"]] == "list":
-
             results = query_to_dataframe(
                 Q("match_phrase", **{query["feature"]: query["keyphrase"]}),
                 index,
@@ -172,7 +170,6 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
 
     if query["action"] == "connect":
         if query["connector"] == "or":
-
             query_dfs = [
                 run_advanced_query(entry, index, dimension_types)
                 for entry in query["queries"]
@@ -187,7 +184,6 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
             return merged_df
 
         elif query["connector"] == "and":
-
             query_dfs = [
                 run_advanced_query(entry, index, dimension_types)
                 for entry in query["queries"]
@@ -197,7 +193,6 @@ def run_advanced_query(query, index, dimension_types) -> pd.DataFrame:
             query_dfs = query_dfs[1:]
 
             for entry_df in query_dfs:
-
                 merged_df = pd.concat([merged_df, entry_df], ignore_index=True)
                 merged_df = (
                     merged_df[merged_df.duplicated(subset=["entry"])]

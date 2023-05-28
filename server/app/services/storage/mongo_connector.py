@@ -4,7 +4,6 @@ from typing import List, Union
 import gridfs
 from app.services.storage.base import BaseStorageConnector
 from bson import ObjectId
-from fastapi import HTTPException, status
 from pymongo import MongoClient
 
 
