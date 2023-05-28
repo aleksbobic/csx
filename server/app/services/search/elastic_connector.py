@@ -5,7 +5,7 @@ from app.services.search.base import BaseSearchConnector
 from elasticsearch import Elasticsearch
 
 
-class ElasticsearchConnector(BaseSearchConnector):
+class ElasticConnector(BaseSearchConnector):
     def __init__(self, hostname="elasticsearch", port="9200", retry_on_timeout=True):
         self.hostname = hostname
         self.port = port

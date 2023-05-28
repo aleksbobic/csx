@@ -1,5 +1,7 @@
 from typing import Generator
 
+from app.services.search.base import BaseSearchConnector
+from app.services.search.elastic_connector import ElasticConnector
 from app.services.storage.base import BaseStorageConnector
 from app.services.storage.mongo_connector import MongoConnector
 from fastapi import Depends, Header, HTTPException, status
@@ -25,6 +27,23 @@ def get_storage_connector() -> Generator[BaseStorageConnector, None, None]:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not connect to storage backend: {e}",
+        )
+
+    try:
+        yield connector
+    finally:
+        connector.disconnect()
+
+
+def get_search_connector() -> Generator[BaseSearchConnector, None, None]:
+    """Get a connector to the search backend"""
+
+    try:
+        connector = ElasticConnector()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not connect to search backend: {e}",
         )
 
     try:
