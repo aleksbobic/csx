@@ -30,7 +30,8 @@ def add_comment(
     study_id: str,
     history_item_id: str,
     user_id: str = Depends(verify_user_exists),
-):
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+) -> str:
     study = csx_study.get_study(user_id, study_id)
 
     if not study:
@@ -39,9 +40,11 @@ def add_comment(
             detail="Study not found",
         )
 
-    csx_study.add_comment(study_id, user_id, history_item_id, **data.dict())
+    comment_id = storage.insert_comment(
+        user_id, study_id, history_item_id, **data.dict()
+    )
 
-    return
+    return comment_id
 
 
 @router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -79,7 +79,7 @@ export class CommentStore {
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
         const studyId = this.store.core.studyUuid;
-        const { error } = await safeRequest(
+        const { error, response } = await safeRequest(
             axios.post(
                 `studies/${studyId}/history/${historyItemId}/comments/`,
                 params,
@@ -93,6 +93,7 @@ export class CommentStore {
         }
 
         const newComment = {
+            id: response.data,
             comment: comment,
             time: comment_time,
             chart: params.chart ? params.chart : null
@@ -138,7 +139,7 @@ export class CommentStore {
         this.store.history.generateHistoryNodes();
     };
 
-    editComment = async (comment, id) => {
+    editComment = async comment => {
         const comment_time = format(new Date(), 'H:mm do MMM yyyy OOOO');
 
         const params = {
@@ -165,7 +166,7 @@ export class CommentStore {
 
         const { error } = await safeRequest(
             axios.put(
-                `studies/${studyId}/history/${historyItemId}/comments/${id}`,
+                `studies/${studyId}/history/${historyItemId}/comments/${this.editCommentId}`,
                 params,
                 { headers: { user_id: this.store.core.userUuid } }
             )
@@ -178,7 +179,7 @@ export class CommentStore {
 
         const commentIndex = this.store.core.studyHistory[
             this.store.core.studyHistoryItemIndex
-        ].comments.findIndex(comment => comment.id === id);
+        ].comments.findIndex(comment => comment.id === this.editCommentId);
 
         this.store.core.editCommentFromCurrentHistoryItem(commentIndex, {
             screenshot: params.screenshot ? params.screenshot : null,

@@ -68,10 +68,7 @@ function CommentTextArea(props) {
     const submitComment = () => {
         if (comment.trim() !== '') {
             if (store.comment.editMode) {
-                store.comment.editComment(
-                    comment.trim(),
-                    store.comment.editCommentId
-                );
+                store.comment.editComment(comment.trim());
                 exitEditMode();
             } else {
                 store.comment.addComment(comment.trim());
@@ -104,10 +101,7 @@ function CommentTextArea(props) {
             );
 
             if (store.comment.editMode) {
-                store.comment.editComment(
-                    comment.trim(),
-                    store.comment.editCommentId
-                );
+                store.comment.editComment(comment.trim());
                 store.comment.setEditMode(false);
                 store.comment.setEditCommentId(null);
                 setComment('');

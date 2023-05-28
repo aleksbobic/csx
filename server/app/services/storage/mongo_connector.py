@@ -168,6 +168,42 @@ class MongoConnector(BaseStorageConnector):
             )
         )
 
+    def insert_comment(
+        self,
+        user_id: str,
+        study_id: str,
+        history_id: str,
+        comment: str,
+        comment_time: str,
+        screenshot: Union[str, None],
+        screenshot_width: Union[int, None],
+        screenshot_height: Union[int, None],
+        chart: Union[str, None],
+    ):
+        comment_id = ObjectId()
+
+        self.database["studies"].update_one(
+            {
+                "study_uuid": study_id,
+                "user_uuid": user_id,
+                "history.item_id": ObjectId(history_id),
+            },
+            {
+                "$push": {
+                    "history.$.comments": {
+                        "_id": comment_id,
+                        "comment": comment,
+                        "time": comment_time,
+                        "screenshot": screenshot,
+                        "screenshot_width": screenshot_width,
+                        "screenshot_height": screenshot_height,
+                        "chart": chart,
+                    }
+                }
+            },
+        )
+        return str(comment_id)
+
     def delete_comment(
         self, user_id: str, study_id: str, history_id: str, comment_id: str
     ):

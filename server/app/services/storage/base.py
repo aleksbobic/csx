@@ -62,6 +62,21 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def insert_comment(
+        self,
+        user_id: str,
+        study_id: str,
+        history_id: str,
+        comment: str,
+        comment_time: str,
+        screenshot: Union[str, None],
+        screenshot_width: Union[int, None],
+        screenshot_height: Union[int, None],
+        chart: Union[str, None],
+    ) -> str:
+        pass
+
+    @abstractmethod
     def delete_comment(
         self, user_id: str, study_id: str, history_id: str, comment_id: str
     ) -> None:

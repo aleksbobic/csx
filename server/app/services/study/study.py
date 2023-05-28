@@ -59,40 +59,6 @@ def add_index(study_uuid: str, user_uuid: str, index: str):
     return
 
 
-def add_comment(
-    study_id: str,
-    user_id: str,
-    history_item_id: str,
-    comment: str,
-    comment_time: str,
-    screenshot: Union[str, None],
-    screenshot_width: Union[int, None],
-    screenshot_height: Union[int, None],
-    chart: Union[str, None],
-):
-    csx_data.update_document(
-        "studies",
-        {
-            "study_uuid": study_id,
-            "user_uuid": user_id,
-            "history.item_id": ObjectId(history_item_id),
-        },
-        {
-            "$push": {
-                "history.$.comments": {
-                    "_id": ObjectId(),
-                    "comment": comment,
-                    "time": comment_time,
-                    "screenshot": screenshot,
-                    "screenshot_width": screenshot_width,
-                    "screenshot_height": screenshot_height,
-                    "chart": chart,
-                }
-            }
-        },
-    )
-
-
 def compare_instances(
     cache_data: Dict, params: Dict, graph_type: Literal["overview", "detail"]
 ) -> ComparisonResults:

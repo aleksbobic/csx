@@ -1,17 +1,11 @@
 from typing import Any, List
 
-import gridfs
 from app.types import Node
 from app.utils.timer import use_timing
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx
-fs = gridfs.GridFS(database)
-
-
-def insert_large_document(doc) -> str:
-    return fs.put(doc)
 
 
 def update_document(collection_name: str, conditions: Any, new_values) -> None:
