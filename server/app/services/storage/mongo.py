@@ -8,11 +8,6 @@ client = MongoClient("mongodb://mongo:27017/csx")
 database = client.csx
 
 
-def update_document(collection_name: str, conditions: Any, new_values) -> None:
-    """Update a single value in a collection"""
-    database[collection_name].update_one(conditions, new_values)
-
-
 def get_all_documents_by_conditions(
     collection_name: str, conditions: object, visiblity_filter={}
 ):

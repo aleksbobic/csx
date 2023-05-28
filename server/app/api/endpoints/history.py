@@ -8,7 +8,11 @@ import app.services.graph.graph as csx_graph
 import app.services.search.elastic as csx_es
 import app.services.study.study as csx_study
 import pandas as pd
-from app.api.dependencies import get_storage_connector, verify_user_exists
+from app.api.dependencies import (
+    get_current_study,
+    get_storage_connector,
+    verify_user_exists,
+)
 from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
@@ -40,8 +44,7 @@ def delete_history_items(
 
 
 @router.get("/")
-def get_study_history(study_id: str, user_id: str = Depends(verify_user_exists)):
-    study = csx_study.get_study(user_id, study_id)
+def get_study_history(study_id: str, study: dict = Depends(get_current_study)):
     if study:
         history = csx_study.extract_history_items(study)
         return {
@@ -59,11 +62,9 @@ def get_study_history(study_id: str, user_id: str = Depends(verify_user_exists))
 def get_history_item(
     history_item_id: str,
     study_id: str,
-    user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
-    study = csx_study.get_study(user_id, study_id)
-
     if not study:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -147,11 +148,11 @@ def create_history_item(
     """Run search using given query."""
     if history_item_id == "":
         cache_data = {}
-        csx_study.add_index(study_id, user_id, index)
+        storage.update_study_settings(study_id, user_id, {"index": index})
         graph_type_changed = False
     else:
         cache_data = storage.get_history_item(history_item_id)
-        study = csx_study.get_study(user_id, study_id)
+        study = storage.get_study(user_id, study_id)
         if not study:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
@@ -333,7 +334,7 @@ def create_history_item(
 
     graph = comparison_switch[comparison_res["action"]]()
 
-    study = csx_study.get_study(user_id, study_id)
+    study = storage.get_study(user_id, study_id)
 
     return {
         "graph": graph,
@@ -376,6 +377,7 @@ def expand_nodes(
     study_id: str,
     history_item_id: str,
     user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
     cache_data = storage.get_history_item(history_item_id)
@@ -518,8 +520,6 @@ def expand_nodes(
         charts,
     )
 
-    study = csx_study.get_study(user_id, study_id)
-
     return {
         "graph": graph,
         "history": csx_study.extract_history_items(study),
@@ -594,7 +594,7 @@ def delete_nodes(
         },
     )
 
-    study = csx_study.get_study(user_id, study_id)
+    study = storage.get_study(user_id, study_id)
 
     return {
         "graph": cache_data[data.graph_type],

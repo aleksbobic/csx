@@ -30,16 +30,9 @@ def add_comment(
     study_id: str,
     history_item_id: str,
     user_id: str = Depends(verify_user_exists),
+    study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ) -> str:
-    study = csx_study.get_study(user_id, study_id)
-
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Study not found",
-        )
-
     comment_id = storage.insert_comment(
         user_id, study_id, history_item_id, **data.dict()
     )
