@@ -10,9 +10,11 @@ import app.services.study.study as csx_study
 import pandas as pd
 from app.api.dependencies import (
     get_current_study,
+    get_search_connector,
     get_storage_connector,
     verify_user_exists,
 )
+from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
@@ -129,6 +131,7 @@ def create_history_item(
     study_id: str,
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
+    search_connector: BaseSearchConnector = Depends(get_search_connector),
 ):
     history_item_id = data.history_item_id
     query = data.query
@@ -224,15 +227,19 @@ def create_history_item(
 
     elastic_json = json.loads(results.to_json(orient="records"))
 
+    dataset_features = search_connector.get_dataset_features(index)
+
+    if not dataset_features:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dataset features not found"
+        )
+
     dimensions = {
         "links": links,
         "anchor": {"dimension": anchor, "props": anchor_properties},
         "visible": visible_dimensions,
         "query_generated": query_generated_dimensions,
-        "all": [
-            property
-            for property in csx_es.get_index(index)[index]["mappings"]["properties"]
-        ],
+        "all": [property for property in dataset_features],
     }
 
     current_dimensions = visible_dimensions
@@ -385,6 +392,7 @@ def expand_nodes(
     user_id: str = Depends(verify_user_exists),
     study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
+    search_connector: BaseSearchConnector = Depends(get_search_connector),
 ):
     cache_data = storage.get_history_item(history_item_id)
 
@@ -487,15 +495,19 @@ def expand_nodes(
         ]
     ).reset_index(drop=True)
 
+    dataset_features = search_connector.get_dataset_features(index)
+
+    if not dataset_features:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dataset features not found"
+        )
+
     dimensions = {
         "links": links,
         "anchor": {"dimension": anchor, "props": anchor_properties},
         "visible": visible_dimensions,
         "query_generated": {},
-        "all": [
-            property
-            for property in csx_es.get_index(index)[index]["mappings"]["properties"]
-        ],
+        "all": [property for property in dataset_features],
     }
 
     history_action = "expand"

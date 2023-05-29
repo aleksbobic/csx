@@ -10,8 +10,9 @@ import app.services.search.autocomplete as csx_auto
 import app.services.search.elastic as csx_es
 import pandas as pd
 import polars as pl
-from app.api.dependencies import get_storage_connector
+from app.api.dependencies import get_search_connector, get_storage_connector
 from app.schemas.dataset import SettingsCreate, SettingsUpdate
+from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from elasticsearch_dsl import Q
 from fastapi import APIRouter, Depends, Response, UploadFile, status
@@ -20,13 +21,15 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
 @router.get("/")
-def get_datasets() -> dict:
+def get_datasets(
+    search_connector: BaseSearchConnector = Depends(get_search_connector),
+) -> dict:
     """Get list of all datasets and their schemas if they have one"""
 
     datasets = {}
 
     for index in csx_es.get_all_indices():
-        if "properties" not in csx_es.get_index(index)[index]["mappings"]:
+        if not search_connector.get_dataset_features(index):
             continue
 
         with open(f"./app/data/config/{index}.json") as f:

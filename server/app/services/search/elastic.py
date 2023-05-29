@@ -32,9 +32,9 @@ es = Elasticsearch(
 )
 
 
-def get_index(index: str) -> Dict[str, Any]:
-    """Retrieve elastic index"""
-    return es.indices.get(index=index)
+# def get_index(index: str) -> Dict[str, Any]:
+#     """Retrieve elastic index"""
+#     return es.indices.get(index=index)
 
 
 def set_result_window(index: str):
