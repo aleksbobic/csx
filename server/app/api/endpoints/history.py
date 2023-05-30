@@ -5,7 +5,6 @@ import pickle
 from typing import List, Literal, Union
 
 import app.services.graph.graph as csx_graph
-import app.services.search.elastic as csx_es
 import app.services.study.study as csx_study
 import pandas as pd
 from app.api.dependencies import (
@@ -207,20 +206,16 @@ def create_history_item(
                 if dimension_types[field] not in ["integer", "float"]
             ]
 
-        es_query = Q(
-            "query_string",
-            query=csx_es.convert_to_elastic_safe_query(f"{query}"),
-            type="phrase",
-            fields=filtered_fields,
-        )
-        results = csx_es.query_to_dataframe(es_query, index)
+        results = search_connector.simple_search(index, query, filtered_fields)
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
 
-        results = csx_es.run_advanced_query(json.loads(query), index, dimension_types)
+        results = search_connector.advanced_search(
+            index, json.loads(query), dimension_types
+        )
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -475,8 +470,8 @@ def expand_nodes(
         if not links:
             links = config["links"]
 
-    results = csx_es.run_advanced_query(
-        query, cache_data["global"]["index"], dimension_types
+    results = search_connector.advanced_search(
+        cache_data["global"]["index"], query, dimension_types
     )
 
     elastic_json = cache_data["global"]["elastic_json"]

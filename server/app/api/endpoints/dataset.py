@@ -7,7 +7,6 @@ from typing import Union
 
 import app.services.graph.nodes as csx_nodes
 import app.services.search.autocomplete as csx_auto
-import app.services.search.elastic as csx_es
 import pandas as pd
 import polars as pl
 from app.api.dependencies import get_search_connector, get_storage_connector
@@ -15,7 +14,8 @@ from app.schemas.dataset import SettingsCreate, SettingsUpdate
 from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from elasticsearch_dsl import Q
-from fastapi import APIRouter, Depends, Response, UploadFile, status
+from fastapi import (APIRouter, Depends, HTTPException, Response, UploadFile,
+                     status)
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -28,7 +28,7 @@ def get_datasets(
 
     datasets = {}
 
-    for index in csx_es.get_all_indices():
+    for index in search_connector.get_all_datasets():
         if not search_connector.get_dataset_features(index):
             continue
 
@@ -100,10 +100,12 @@ def get_column_type(column: pl.Series):
 
 @router.delete("/{dataset_name}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_dataset(
-    dataset_name: str, storage: BaseStorageConnector = Depends(get_storage_connector)
+    dataset_name: str,
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+    search_connector: BaseSearchConnector = Depends(get_search_connector),
 ):
     if exists(f"./app/data/config/{dataset_name}.json"):
-        csx_es.delete_index(dataset_name)
+        search_connector.delete_dataset(dataset_name)
         storage.delete_dataset(dataset_name)
 
         if exists(f"./app/data/autocomplete/auto_{dataset_name}"):
@@ -136,6 +138,7 @@ def save_dataset_settings(
     dataset_name: str,
     data: SettingsCreate,
     storage: BaseStorageConnector = Depends(get_storage_connector),
+    search_connector: BaseSearchConnector = Depends(get_search_connector),
 ):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
@@ -171,17 +174,6 @@ def save_dataset_settings(
     if bool(rename_mapping):
         dataset.rename(columns=rename_mapping, inplace=True)
 
-    columns = get_dimensions(defaults)
-
-    mapping = {
-        "mappings": {
-            "properties": {
-                dim: {"type": get_elastic_type(config["dimension_types"][dim])}
-                for dim in config["dimension_types"]
-            }
-        },
-    }
-
     config["search_hints"] = {
         feature: get_dimension_search_hints(dataset, feature, feature_type)
         for feature, feature_type in config["dimension_types"].items()
@@ -191,21 +183,16 @@ def save_dataset_settings(
     with open(f"./app/data/config/{data.name}.json", "w") as f:
         json.dump(config, f)
 
-    csx_es.create_index(data.name, mapping)
-    csx_es.set_result_window(data.name)
-
-    es_entries = generate_entries_from_dataframe(
-        dataset, columns, data.name, config["dimension_types"]
-    )
-
     try:
-        print("***** Populating elastic")
-        csx_es.bulk_populate(es_entries)
+        search_connector.insert_dataset(data.name, config, dataset)
     except Exception as exception:
         os.remove(f"./app/data/files/{dataset_name}.csv")
         delete_dataset(data.name)
-        print("\n\n\n\n", exception)
-        return exception
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Dataset upload failed",
+        )
 
     list_properties = [
         key for key, value in config["dimension_types"].items() if value == "list"
@@ -213,7 +200,7 @@ def save_dataset_settings(
 
     if len(list_properties) > 0:
         print("***** Retrieving elastic")
-        elastic_list_df = csx_es.query_to_dataframe(Q("match_all"), data.name, False)
+        elastic_list_df = search_connector.get_full_dataset(data.name)
         print("***** Generating nodes")
         nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
 
@@ -344,45 +331,8 @@ def get_renamed_dimensions(defaults):
     return dimension_name_mapping
 
 
-def get_dimensions(defaults):
-    return [defaults[key]["name"] for key in defaults]
-
-
-def get_processed_row_val(val, val_type):
-    if val_type == "integer":
-        return str(round(val))
-    if val_type == "list":
-        try:
-            return ast.literal_eval(val)
-        except:
-            new_val = str(val)
-            if new_val == "":
-                return []
-            else:
-                return [new_val]
-    else:
-        return str(val)
-
-
-def generate_entries_from_dataframe(data, columns, index, data_types):
-    for i, row in data.iterrows():
-        doc = {col: get_processed_row_val(row[col], data_types[col]) for col in columns}
-        doc["_index"] = index
-        yield doc
-
-
 def get_dimension_types(defaults):
     return {defaults[key]["name"]: defaults[key]["dataType"] for key in defaults}
-
-
-def get_elastic_type(dim_type):
-    if dim_type == "string":
-        return "text"
-    if dim_type == "integer":
-        return "integer"
-    if dim_type == "float":
-        return "float"
-    return "text"
 
 
 def transform_to_list(raw_entry: Union[str, None]) -> list:
