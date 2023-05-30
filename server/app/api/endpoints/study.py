@@ -11,14 +11,6 @@ from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from elasticsearch import Elasticsearch
-
-es = Elasticsearch(
-    "csx_elastic:9200",
-    retry_on_timeout=True,
-    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
-)
-
 router = APIRouter(prefix="/studies", tags=["studies"])
 
 
