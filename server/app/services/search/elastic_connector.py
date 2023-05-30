@@ -182,6 +182,13 @@ class ElasticConnector(BaseSearchConnector):
 
         return self.__execute_search(search)
 
+    def get_entries_by_id(self, dataset_name: str, ids: List[str]) -> pd.DataFrame:
+        search = Search(using=self.es, index=dataset_name).filter("terms", _id=ids)
+
+        search = search[0:10000]
+
+        return self.__execute_search(search)
+
     def __negated_search(
         self, dataset_name: str, query: str, feature: str
     ) -> pd.DataFrame:
@@ -190,10 +197,6 @@ class ElasticConnector(BaseSearchConnector):
                 "bool",
                 must_not=[
                     Q(
-                        # "query_string",
-                        # query=self.__remove_special_characters(str(query)),
-                        # type="phrase",
-                        # field=feature,
                         "term",
                         **{feature: self.__remove_special_characters(str(query))},
                     )

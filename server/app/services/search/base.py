@@ -53,3 +53,8 @@ class BaseSearchConnector(ABC):
     ) -> DataFrame:
         # Performs an advanced search with a dict representation of the advanced search query
         pass
+
+    @abstractmethod
+    def get_entries_by_id(self, dataset_name: str, entry_ids: List[str]) -> DataFrame:
+        # Returns entries by their id
+        pass

@@ -13,9 +13,7 @@ from app.api.dependencies import get_search_connector, get_storage_connector
 from app.schemas.dataset import SettingsCreate, SettingsUpdate
 from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
-from elasticsearch_dsl import Q
-from fastapi import (APIRouter, Depends, HTTPException, Response, UploadFile,
-                     status)
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 

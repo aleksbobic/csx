@@ -17,19 +17,10 @@ from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
-from elasticsearch_dsl import Q, Search
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
 
-from elasticsearch import Elasticsearch
-
 router = APIRouter(prefix="/studies/{study_id}/history", tags=["history"])
-
-es = Elasticsearch(
-    "csx_elastic:9200",
-    retry_on_timeout=True,
-    http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
-)
 
 
 @router.delete("/{history_item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -186,16 +177,11 @@ def create_history_item(
         if not links:
             links = config["links"]
 
-    search = Search(using=es, index=index)
-    search = search[0:10000]
-
     id_list = visible_entries
     query_generated_dimensions = {}
 
     if len(id_list):
-        results = convert_filter_res_to_df(
-            search.filter("terms", _id=id_list).execute()
-        )
+        results = search_connector.get_entries_by_id(index, id_list)
     elif not isJson(query) or isNumber(query):
         filtered_fields = default_search_fields
 
