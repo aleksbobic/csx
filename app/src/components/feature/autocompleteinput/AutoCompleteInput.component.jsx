@@ -110,7 +110,9 @@ function AutoCompleteInput(props) {
         setActiveSuggestion(-1);
         setSuggestionsVisible(false);
         setSuggestions([]);
-        props.onBlur(input);
+        if (props.onBlur) {
+            props.onBlur(input);
+        }
     };
 
     const handleFocus = () => {

@@ -1,4 +1,3 @@
-import os
 import uuid
 
 import app.services.study.study as csx_study
@@ -7,7 +6,7 @@ from app.api.dependencies import (
     get_storage_connector,
     verify_user_exists,
 )
-from app.schemas.study import Study, StudyCreate, StudyDelete, StudyUpdate
+from app.schemas.study import Study, StudyCreate, StudyUpdate
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 

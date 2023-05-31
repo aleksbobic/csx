@@ -11,7 +11,7 @@ from elasticsearch_dsl import Q, Search
 from elasticsearch import Elasticsearch
 
 
-class ElasticConnector(BaseSearchConnector):
+class ElasticSearchConnector(BaseSearchConnector):
     def __init__(self, hostname="csx_elastic", port="9200", retry_on_timeout=True):
         self.hostname = hostname
         self.port = port
@@ -39,8 +39,8 @@ class ElasticConnector(BaseSearchConnector):
 
         return dataset_index["mappings"]["properties"]
 
-    def get_all_datasets(self) -> Dict[str, Any]:
-        return self.es.indices.get(index="*")
+    def get_all_datasets(self) -> List[str]:
+        return list(self.es.indices.get(index="*").keys())
 
     def delete_dataset(self, dataset_name: str) -> None:
         self.es.indices.delete(index=dataset_name)
@@ -89,8 +89,10 @@ class ElasticConnector(BaseSearchConnector):
 
         for i, row in dataset.iterrows():
             doc = {
-                col: self.__get_processed_row_val(row[col], feature_types[col])
-                for col in features
+                feature: self.__get_processed_row_val(
+                    row[feature], feature_types[feature]
+                )
+                for feature in features
             }
             doc["_index"] = dataset_name
             yield doc

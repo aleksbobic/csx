@@ -121,7 +121,7 @@ def create_history_item(
     study_id: str,
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
-    search_connector: BaseSearchConnector = Depends(get_search_connector),
+    search: BaseSearchConnector = Depends(get_search_connector),
 ):
     history_item_id = data.history_item_id
     query = data.query
@@ -181,7 +181,7 @@ def create_history_item(
     query_generated_dimensions = {}
 
     if len(id_list):
-        results = search_connector.get_entries_by_id(index, id_list)
+        results = search.get_entries_by_id(index, id_list)
     elif not isJson(query) or isNumber(query):
         filtered_fields = default_search_fields
 
@@ -192,23 +192,22 @@ def create_history_item(
                 if dimension_types[field] not in ["integer", "float"]
             ]
 
-        results = search_connector.simple_search(index, query, filtered_fields)
+        results = search.simple_search(index, query, filtered_fields)
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
 
-        results = search_connector.advanced_search(
-            index, json.loads(query), dimension_types
-        )
+        results = search.advanced_search(index, json.loads(query), dimension_types)
 
     if len(results.index) == 0:
         return {"nodes": []}
 
-    elastic_json = json.loads(results.to_json(orient="records"))
+    json_results = results.to_json(orient="records")
+    elastic_json = json.loads(json_results)
 
-    dataset_features = search_connector.get_dataset_features(index)
+    dataset_features = search.get_dataset_features(index)
 
     if not dataset_features:
         raise HTTPException(
@@ -373,7 +372,7 @@ def expand_nodes(
     user_id: str = Depends(verify_user_exists),
     study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
-    search_connector: BaseSearchConnector = Depends(get_search_connector),
+    search: BaseSearchConnector = Depends(get_search_connector),
 ):
     cache_data = storage.get_history_item(history_item_id)
 
@@ -456,7 +455,7 @@ def expand_nodes(
         if not links:
             links = config["links"]
 
-    results = search_connector.advanced_search(
+    results = search.advanced_search(
         cache_data["global"]["index"], query, dimension_types
     )
 
@@ -476,7 +475,7 @@ def expand_nodes(
         ]
     ).reset_index(drop=True)
 
-    dataset_features = search_connector.get_dataset_features(index)
+    dataset_features = search.get_dataset_features(index)
 
     if not dataset_features:
         raise HTTPException(

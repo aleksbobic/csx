@@ -1,7 +1,8 @@
 from typing import Generator
 
 from app.services.search.base import BaseSearchConnector
-from app.services.search.elastic_connector import ElasticConnector
+from app.services.search.elastic_search_connector import ElasticSearchConnector
+from app.services.search.mongo_search_connector import MongoSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.services.storage.mongo_connector import MongoConnector
 from fastapi import Depends, Header, HTTPException, status
@@ -39,7 +40,8 @@ def get_search_connector() -> Generator[BaseSearchConnector, None, None]:
     """Get a connector to the search backend"""
 
     try:
-        connector = ElasticConnector()
+        # connector = ElasticSearchConnector()
+        connector = MongoSearchConnector()
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -20,14 +20,16 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 @router.get("/")
 def get_datasets(
-    search_connector: BaseSearchConnector = Depends(get_search_connector),
+    search: BaseSearchConnector = Depends(get_search_connector),
 ) -> dict:
     """Get list of all datasets and their schemas if they have one"""
 
     datasets = {}
 
-    for index in search_connector.get_all_datasets():
-        if not search_connector.get_dataset_features(index):
+    test = search.get_all_datasets()
+
+    for index in search.get_all_datasets():
+        if not search.get_dataset_features(index):
             continue
 
         with open(f"./app/data/config/{index}.json") as f:
@@ -100,10 +102,10 @@ def get_column_type(column: pl.Series):
 def delete_dataset(
     dataset_name: str,
     storage: BaseStorageConnector = Depends(get_storage_connector),
-    search_connector: BaseSearchConnector = Depends(get_search_connector),
+    search: BaseSearchConnector = Depends(get_search_connector),
 ):
     if exists(f"./app/data/config/{dataset_name}.json"):
-        search_connector.delete_dataset(dataset_name)
+        search.delete_dataset(dataset_name)
         storage.delete_dataset(dataset_name)
 
         if exists(f"./app/data/autocomplete/auto_{dataset_name}"):
@@ -136,7 +138,7 @@ def save_dataset_settings(
     dataset_name: str,
     data: SettingsCreate,
     storage: BaseStorageConnector = Depends(get_storage_connector),
-    search_connector: BaseSearchConnector = Depends(get_search_connector),
+    search: BaseSearchConnector = Depends(get_search_connector),
 ):
     """Save settings for a dataset to the server and generate a config file for it to be used by the frontend and backend later on in the process of creating a study."""
     defaults = data.defaults
@@ -182,14 +184,15 @@ def save_dataset_settings(
         json.dump(config, f)
 
     try:
-        search_connector.insert_dataset(data.name, config, dataset)
+        search.insert_dataset(data.name, config, dataset)
     except Exception as exception:
         os.remove(f"./app/data/files/{dataset_name}.csv")
-        delete_dataset(data.name)
+        search.delete_dataset(data.name)
+        storage.delete_dataset(data.name)
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Dataset upload failed",
+            detail=f"Dataset upload failed: {exception}",
         )
 
     list_properties = [
@@ -198,7 +201,7 @@ def save_dataset_settings(
 
     if len(list_properties) > 0:
         print("***** Retrieving elastic")
-        elastic_list_df = search_connector.get_full_dataset(data.name)
+        elastic_list_df = search.get_full_dataset(data.name)
         print("***** Generating nodes")
         nodes, entries_with_nodes = csx_nodes.get_nodes(elastic_list_df)
 
