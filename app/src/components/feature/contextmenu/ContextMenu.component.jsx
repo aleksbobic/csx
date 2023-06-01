@@ -440,7 +440,8 @@ function ContextMenu() {
                                 justifyContent="left"
                                 disabled={
                                     !store.graphInstance.isSelfCentric &&
-                                    !store.graphInstance.isFiltered
+                                    !store.graphInstance.isFiltered &&
+                                    store.graphInstance.orphanNodeVisibility
                                 }
                                 width="100%"
                                 _hover={{ backgroundColor: 'blue.500' }}

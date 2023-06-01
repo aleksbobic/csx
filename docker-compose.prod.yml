@@ -58,6 +58,8 @@ services:
     links: [mysql]
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    profiles:
+      - "elastic"
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=${ELASTIC_PASS}
@@ -73,7 +75,7 @@ services:
   mongo:
     image: mongo:4
     volumes:
-      - mongo-volume:/data/db
+      - ./mongo:/data/db
     restart: unless-stopped
     container_name: csx_mongo
 

@@ -309,6 +309,7 @@ function HomePage() {
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
         store.search.setAdvancedSearchQuery(null);
+        store.graphInstance.setOrphanNodeVisiblity(true);
     }, [
         store.core,
         store.graph,

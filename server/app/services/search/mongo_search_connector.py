@@ -5,7 +5,7 @@ import gridfs
 import pandas as pd
 from app.services.search.base import BaseSearchConnector
 from bson import ObjectId
-from pymongo import MongoClient
+from pymongo import TEXT, MongoClient
 
 
 class MongoSearchConnector(BaseSearchConnector):
@@ -85,6 +85,7 @@ class MongoSearchConnector(BaseSearchConnector):
 
     def delete_dataset(self, dataset_name: str) -> None:
         try:
+            self.database[dataset_name].drop_indexes()
             self.database[dataset_name].drop()
         except ConnectionError as e:
             raise e
