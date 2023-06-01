@@ -15,6 +15,8 @@ services:
       DISABLE_UPLOAD: 'false'
       SEARCH_SOURCE: 'mongo'
       ELASTIC_PASSWORD: 'elasticroot'
+      MONGO_PASSWORD: 'mongoroot'
+      MONGO_USERNAME: 'mongoroot'
     command: ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "app/main.py"]
   app:
     container_name: csx_app
@@ -79,6 +81,9 @@ services:
     volumes:
       - ./mongo:/data/db
     container_name: csx_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoroot
+      MONGO_INITDB_ROOT_PASSWORD: mongoroot
 
 volumes:
   mongo-volume:

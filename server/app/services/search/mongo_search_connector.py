@@ -1,11 +1,12 @@
 import ast
+import os
 from typing import Any, Dict, Generator, List, Union
 
 import gridfs
 import pandas as pd
 from app.services.search.base import BaseSearchConnector
 from bson import ObjectId
-from pymongo import TEXT, MongoClient
+from pymongo import MongoClient
 
 
 class MongoSearchConnector(BaseSearchConnector):
@@ -19,7 +20,11 @@ class MongoSearchConnector(BaseSearchConnector):
         self.disconnect()
 
     def connect(self) -> None:
-        self.client = MongoClient(f"mongodb://{self.hostname}:{self.port}/{self.db}")
+        mongo_pass = os.getenv("MONGO_PASSWORD")
+        mongo_user = os.getenv("MONGO_USERNAME")
+        self.client = MongoClient(
+            f"mongodb://{mongo_user}:{mongo_pass}@{self.hostname}:{self.port}/{self.db}?authSource=admin"
+        )
         self.database = self.client[self.db]
         self.fs = gridfs.GridFS(self.database)
 
