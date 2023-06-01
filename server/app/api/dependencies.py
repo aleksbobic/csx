@@ -5,7 +5,7 @@ from app.services.search.base import BaseSearchConnector
 from app.services.search.elastic_search_connector import ElasticSearchConnector
 from app.services.search.mongo_search_connector import MongoSearchConnector
 from app.services.storage.base import BaseStorageConnector
-from app.services.storage.mongo_connector import MongoConnector
+from app.services.storage.mongo_storage_connector import MongoStorageConnector
 from fastapi import Depends, Header, HTTPException, status
 from typing_extensions import Annotated
 
@@ -24,7 +24,7 @@ def get_storage_connector() -> Generator[BaseStorageConnector, None, None]:
     """Get a connector to the storage backend"""
 
     try:
-        connector = MongoConnector()
+        connector = MongoStorageConnector()
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

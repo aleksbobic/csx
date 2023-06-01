@@ -7,7 +7,7 @@ from bson import ObjectId
 from pymongo import MongoClient
 
 
-class MongoConnector(BaseStorageConnector):
+class MongoStorageConnector(BaseStorageConnector):
     def __init__(self, hostname="mongo", port="27017", db="csx"):
         self.hostname = hostname
         self.port = port
