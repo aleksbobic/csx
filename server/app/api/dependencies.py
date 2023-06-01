@@ -1,3 +1,4 @@
+import os
 from typing import Generator
 
 from app.services.search.base import BaseSearchConnector
@@ -36,12 +37,20 @@ def get_storage_connector() -> Generator[BaseStorageConnector, None, None]:
         connector.disconnect()
 
 
+def initiate_search_connector():
+    if os.getenv("SEARCH_SOURCE") == "mongo":
+        print("Using mongo search connector")
+        return MongoSearchConnector()
+
+    print("Using elastic search connector")
+    return ElasticSearchConnector()
+
+
 def get_search_connector() -> Generator[BaseSearchConnector, None, None]:
     """Get a connector to the search backend"""
 
     try:
-        # connector = ElasticSearchConnector()
-        connector = MongoSearchConnector()
+        connector = initiate_search_connector()
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

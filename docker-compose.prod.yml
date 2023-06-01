@@ -11,6 +11,7 @@ services:
       - 8881:80
     environment:
       DISABLE_UPLOAD: 'false'
+      SEARCH_SOURCE: 'mongo'
       ELASTIC_PASSWORD: ${ELASTIC_PASS}
     depends_on:
       - elastic

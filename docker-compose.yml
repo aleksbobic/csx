@@ -13,6 +13,7 @@ services:
       - 5678:5678 # for debugging
     environment:
       DISABLE_UPLOAD: 'false'
+      SEARCH_SOURCE: 'mongo'
       ELASTIC_PASSWORD: 'elasticroot'
     command: ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "app/main.py"]
   app:
@@ -59,6 +60,8 @@ services:
     links: [mysql]
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    profiles:
+      - "elastic"
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=elasticroot
