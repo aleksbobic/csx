@@ -13,6 +13,8 @@ services:
       DISABLE_UPLOAD: 'false'
       SEARCH_SOURCE: 'mongo'
       ELASTIC_PASSWORD: ${ELASTIC_PASS}
+      MONGO_USERNAME: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASS}
     depends_on:
       - elastic
     command: uvicorn app.main:app --host 0.0.0.0 --port 80
@@ -78,6 +80,9 @@ services:
       - ./mongo:/data/db
     restart: unless-stopped
     container_name: csx_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
 
 volumes:
   mongo-volume:
