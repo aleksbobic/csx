@@ -24,6 +24,10 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def get_history_items(self, study_id: str, user_id: str) -> List[dict]:
+        pass
+
+    @abstractmethod
     def insert_history_item(self, study_id: str, user_id: str, history_item_data: dict):
         pass
 

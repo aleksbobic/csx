@@ -331,7 +331,7 @@ def create_history_item(
 
     return {
         "graph": graph,
-        "history": csx_study.extract_history_items(study),
+        "history": storage.get_history_items(study_id, user_id),
     }
 
 
@@ -521,7 +521,7 @@ def expand_nodes(
 
     return {
         "graph": graph,
-        "history": csx_study.extract_history_items(study),
+        "history": storage.get_history_items(study_id, user_id),
         "entry_delta": len(results) - len(entries),
     }
 
@@ -609,7 +609,7 @@ def delete_nodes(
 
     return {
         "graph": cache_data[data.graph_type],
-        "history": csx_study.extract_history_items(study),
+        "history": storage.get_history_items(study_id, user_id),
         "entry_delta": initial_entry_count - new_entry_count,
     }
 

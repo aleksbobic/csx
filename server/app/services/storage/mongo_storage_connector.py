@@ -48,6 +48,36 @@ class MongoStorageConnector(BaseStorageConnector):
 
         return pickle.loads(history_item)
 
+    def get_history_items(self, study_id: str, user_id: str) -> List[dict]:
+        try:
+            study = self.get_study(user_id, study_id)
+        except ConnectionError as e:
+            raise e
+
+        if not study:
+            return []
+
+        history = [
+            {
+                **item,
+                "id": str(item["item_id"]),
+                "item_id": None,
+                "parent_id": str(item["parent"]),
+                "parent": None,
+                "comments": [
+                    {
+                        **comment,
+                        "id": str(comment["_id"]),
+                        "_id": None,
+                    }
+                    for comment in item["comments"]
+                ],
+            }
+            for item in study["history"]
+        ]
+
+        return history
+
     def insert_history_item(self, study_id: str, user_id: str, history_item_data: dict):
         fs_id = self.fs.put(history_item_data["graph_data"])
         self.database["studies"].update_one(
