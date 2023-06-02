@@ -1,6 +1,7 @@
 import os
 from typing import Generator
 
+from app.config import settings
 from app.services.search.base import BaseSearchConnector
 from app.services.search.elastic_search_connector import ElasticSearchConnector
 from app.services.search.mongo_search_connector import MongoSearchConnector
@@ -38,7 +39,7 @@ def get_storage_connector() -> Generator[BaseStorageConnector, None, None]:
 
 
 def initiate_search_connector():
-    if os.getenv("SEARCH_SOURCE") == "mongo":
+    if settings.search_source == "mongo":
         print("Using mongo search connector")
         return MongoSearchConnector()
 

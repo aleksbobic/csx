@@ -4,11 +4,11 @@ import re
 from typing import Any, Dict, Generator, List, Union
 
 import pandas as pd
+from app.config import settings
 from app.services.search.base import BaseSearchConnector
+from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl import Q, Search
-
-from elasticsearch import Elasticsearch
 
 
 class ElasticSearchConnector(BaseSearchConnector):
@@ -25,7 +25,7 @@ class ElasticSearchConnector(BaseSearchConnector):
         self.es = Elasticsearch(
             f"{self.hostname}:{self.port}",
             retry_on_timeout=self.retry_on_timeout,
-            http_auth=("elastic", os.getenv("ELASTIC_PASSWORD")),
+            http_auth=("elastic", settings.elastic_password),
         )
 
     def disconnect(self) -> None:

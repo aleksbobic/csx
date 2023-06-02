@@ -4,6 +4,7 @@ from typing import Any, Dict, Generator, List, Union
 
 import gridfs
 import pandas as pd
+from app.config import settings
 from app.services.search.base import BaseSearchConnector
 from bson import ObjectId
 from pymongo import MongoClient
@@ -20,10 +21,8 @@ class MongoSearchConnector(BaseSearchConnector):
         self.disconnect()
 
     def connect(self) -> None:
-        mongo_pass = os.getenv("MONGO_PASSWORD")
-        mongo_user = os.getenv("MONGO_USERNAME")
         self.client = MongoClient(
-            f"mongodb://{mongo_user}:{mongo_pass}@{self.hostname}:{self.port}/{self.db}?authSource=admin"
+            f"mongodb://{settings.mongo_username}:{settings.mongo_password}@{self.hostname}:{self.port}/{self.db}?authSource=admin"
         )
         self.database = self.client[self.db]
         self.fs = gridfs.GridFS(self.database)

@@ -3,6 +3,7 @@ import pickle
 from typing import List, Union
 
 import gridfs
+from app.config import settings
 from app.services.storage.base import BaseStorageConnector
 from bson import ObjectId
 from pymongo import MongoClient
@@ -19,10 +20,8 @@ class MongoStorageConnector(BaseStorageConnector):
         self.disconnect()
 
     def connect(self) -> None:
-        mongo_pass = os.getenv("MONGO_PASSWORD")
-        mongo_user = os.getenv("MONGO_USERNAME")
         self.client = MongoClient(
-            f"mongodb://{mongo_user}:{mongo_pass}@{self.hostname}:{self.port}/{self.db}?authSource=admin"
+            f"mongodb://{settings.mongo_username}:{settings.mongo_password}@{self.hostname}:{self.port}/{self.db}?authSource=admin"
         )
 
         self.database = self.client[self.db]

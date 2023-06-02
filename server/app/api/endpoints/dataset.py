@@ -10,6 +10,7 @@ import app.services.search.autocomplete as csx_auto
 import pandas as pd
 import polars as pl
 from app.api.dependencies import get_search_connector, get_storage_connector
+from app.config import settings
 from app.schemas.dataset import SettingsCreate, SettingsUpdate
 from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
@@ -67,7 +68,8 @@ def get_datasets(
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def upload_dataset(file: UploadFile):
     """Upload a dataset to the server"""
-    if os.getenv("DISABLE_UPLOAD") == "true" or not file.filename:
+
+    if settings.disable_upload or not file.filename:
         return {}
 
     data = pl.read_csv(file.file)
