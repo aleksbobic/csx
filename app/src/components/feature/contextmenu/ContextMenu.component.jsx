@@ -294,7 +294,7 @@ function ContextMenu() {
                                         }),
                                         JSON.stringify({
                                             event_type: 'Click',
-                                            event_action: 'Show all nodes'
+                                            event_action: 'Show all'
                                         })
                                     );
 
@@ -307,7 +307,43 @@ function ContextMenu() {
                                 }}
                                 width="100%"
                             >
-                                View all
+                                Show all
+                            </Button>
+                            <Button
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 1
+                                }
+                                justifyContent="left"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Show selected'
+                                        })
+                                    );
+
+                                    store.graphInstance.triggerSelectedNodes();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                width="100%"
+                            >
+                                Show selected
                             </Button>
                         </VStack>
                         <VStack
