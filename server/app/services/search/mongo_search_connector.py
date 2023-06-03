@@ -103,13 +103,21 @@ class MongoSearchConnector(BaseSearchConnector):
         return all_docs.rename(columns={"_id": "entry"})
 
     def simple_search(
-        self, dataset_name: str, query: str, features: List[str]
+        self, dataset_name: str, query: Union[str, int, float], features: List[str]
     ) -> pd.DataFrame:
+        if isinstance(query, (int, float)):
+            return self.__range_filter_to_dataframe(
+                features[0], query, query, dataset_name
+            )
+
+        # performe a caseinsensitive regex search  on all features  and store results in search_results as a list
         search_results = list(
             self.database[dataset_name].find(
-                {feature: {"$regex": query} for feature in features}, {}
+                {feature: {"$regex": query, "$options": "i"} for feature in features},
+                {},
             )
         )
+
         if not search_results:
             return pd.DataFrame()
 
