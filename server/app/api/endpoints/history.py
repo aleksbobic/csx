@@ -195,7 +195,12 @@ def create_history_item(
             query = int(query)
         elif dimension_types[default_search_fields[0]] == "float":
             query = float(query)
-        results = search.simple_search(index, query, filtered_fields)
+
+        search_features = {
+            feature: dimension_types[feature] for feature in filtered_fields
+        }
+
+        results = search.simple_search(index, query, search_features)
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]

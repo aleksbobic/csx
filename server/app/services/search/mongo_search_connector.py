@@ -103,17 +103,25 @@ class MongoSearchConnector(BaseSearchConnector):
         return all_docs.rename(columns={"_id": "entry"})
 
     def simple_search(
-        self, dataset_name: str, query: Union[str, int, float], features: List[str]
+        self, dataset_name: str, query: Union[str, int, float], features: Dict[str, str]
     ) -> pd.DataFrame:
         if isinstance(query, (int, float)):
             return self.__range_filter_to_dataframe(
-                features[0], query, query, dataset_name
+                list(features.keys())[0], query, query, dataset_name
             )
 
         # performe a caseinsensitive regex search  on all features  and store results in search_results as a list
         search_results = list(
             self.database[dataset_name].find(
-                {feature: {"$regex": query, "$options": "i"} for feature in features},
+                {
+                    feature: {"$eq": query}
+                    if features[feature] == "category"
+                    else {
+                        "$regex": query,
+                        "$options": "i",
+                    }
+                    for feature in features
+                },
                 {},
             )
         )
@@ -158,9 +166,14 @@ class MongoSearchConnector(BaseSearchConnector):
         return search_results.rename(columns={"_id": "entry"})
 
     def advanced_search(
-        self, dataset_name: str, query: dict, features: List[str]
+        self, dataset_name: str, query: dict, features: Dict[str, str]
     ) -> pd.DataFrame:
         if "min" in query and "max" in query:
+            if features[query["feature"]] == "integer":
+                return self.__range_filter_to_dataframe(
+                    query["feature"], int(query["min"]), int(query["max"]), dataset_name
+                )
+
             return self.__range_filter_to_dataframe(
                 query["feature"], float(query["min"]), float(query["max"]), dataset_name
             )
@@ -170,7 +183,9 @@ class MongoSearchConnector(BaseSearchConnector):
 
         if "query" not in query and "queries" not in query:
             return self.simple_search(
-                dataset_name, query["keyphrase"], [query["feature"]]
+                dataset_name,
+                query["keyphrase"],
+                {query["feature"]: features[query["feature"]]},
             )
 
         if query["action"] == "connect":

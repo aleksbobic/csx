@@ -146,14 +146,14 @@ class ElasticSearchConnector(BaseSearchConnector):
         )
 
     def simple_search(
-        self, dataset_name: str, query: Union[str, int, float], features: List[str]
+        self, dataset_name: str, query: Union[str, int, float], features: Dict[str, str]
     ) -> pd.DataFrame:
         search = Search(using=self.es, index=dataset_name).query(
             Q(
                 "query_string",
                 query=self.__remove_special_characters(str(query)),
                 type="phrase",
-                fields=features,
+                fields=list(features.keys()),
             )
         )
 
@@ -211,7 +211,7 @@ class ElasticSearchConnector(BaseSearchConnector):
         return self.__execute_search(search)
 
     def advanced_search(
-        self, dataset_name: str, query: dict, features: List[str]
+        self, dataset_name: str, query: dict, features: Dict[str, str]
     ) -> pd.DataFrame:
         if "min" in query and "max" in query:
             return self.__range_filter_to_dataframe(
@@ -228,7 +228,9 @@ class ElasticSearchConnector(BaseSearchConnector):
                 )
 
             return self.simple_search(
-                dataset_name, query["keyphrase"], [query["feature"]]
+                dataset_name,
+                query["keyphrase"],
+                {query["feature"]: features[query["feature"]]},
             )
 
         if query["action"] == "connect":
