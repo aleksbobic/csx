@@ -1562,8 +1562,6 @@ export class GraphStore {
             return;
         }
 
-        console.log(response.data.history);
-
         this.store.core.setStudyHistory(response.data.history);
 
         this.store.core.setStudyHistoryItemIndex(
