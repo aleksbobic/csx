@@ -42,7 +42,7 @@ class BaseSearchConnector(ABC):
 
     @abstractmethod
     def simple_search(
-        self, dataset_name: str, query: str, features: List[str]
+        self, dataset_name: str, query: Union[str, int, float], features: List[str]
     ) -> pd.DataFrame:
         # Performs a simple search with a string query
         pass

@@ -191,6 +191,10 @@ def create_history_item(
                 if dimension_types[field] not in ["integer", "float"]
             ]
 
+        if dimension_types[default_search_fields[0]] == "integer":
+            query = int(query)
+        elif dimension_types[default_search_fields[0]] == "float":
+            query = float(query)
         results = search.simple_search(index, query, filtered_fields)
     else:
         query_generated_dimensions = {

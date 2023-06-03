@@ -146,7 +146,7 @@ class ElasticSearchConnector(BaseSearchConnector):
         )
 
     def simple_search(
-        self, dataset_name: str, query: str, features: List[str]
+        self, dataset_name: str, query: Union[str, int, float], features: List[str]
     ) -> pd.DataFrame:
         search = Search(using=self.es, index=dataset_name).query(
             Q(
