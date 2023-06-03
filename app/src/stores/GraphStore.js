@@ -626,10 +626,11 @@ export class GraphStore {
 
         if (
             !response.data.hasOwnProperty('graph') ||
-            response.data.graph.nodes.length === 0
+            response.data?.nodes?.length === 0
         ) {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);
+            this.store.core.setDataIsLoading(false);
         } else {
             this.store.core.setStudyHistory(response.data.history);
 
