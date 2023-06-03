@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 router = APIRouter(prefix="/studies", tags=["studies"])
 
 
-@router.get("/{study_id}", response_model=Study)
+@router.get("/{study_id}", response_model=Study, status_code=status.HTTP_200_OK)
 def get_study(
     study_id: str,
     study: dict = Depends(get_current_study),
@@ -81,7 +81,7 @@ def create_study(
     return study_uuid
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK)
 def get_studies(
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
@@ -100,7 +100,7 @@ def get_studies(
     ]
 
 
-@router.patch("/{study_id}")
+@router.patch("/{study_id}", status_code=status.HTTP_200_OK)
 def update_study(
     study_id: str,
     data: StudyUpdate,

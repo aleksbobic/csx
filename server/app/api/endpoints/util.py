@@ -1,8 +1,8 @@
-import uuid
-
-from fastapi import APIRouter
 import base64
 import random
+import uuid
+
+from fastapi import APIRouter, status
 
 router = APIRouter(prefix="/utils", tags=["utils"])
 
@@ -12,7 +12,11 @@ def get_uuid() -> str:
     return uuid.uuid4().hex
 
 
-@router.get("/image", responses={200: {"content": {"image/png": {}}}})
+@router.get(
+    "/image",
+    responses={200: {"content": {"image/png": {}}}},
+    status_code=status.HTTP_200_OK,
+)
 def get_random_image():
     image_number = random.randint(1, 10)
 

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 router = APIRouter(prefix="/studies/public", tags=["public"])
 
 
-@router.get("/{public_study_id}/history")
+@router.get("/{public_study_id}/history", status_code=status.HTTP_200_OK)
 def get_public_study_history(
     public_study_id: str, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):

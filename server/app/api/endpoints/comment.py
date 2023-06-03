@@ -6,6 +6,7 @@ from app.api.dependencies import (
     get_storage_connector,
     verify_user_exists,
 )
+from app.schemas.comment import Comment
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import BaseModel
@@ -13,15 +14,6 @@ from pydantic import BaseModel
 router = APIRouter(
     prefix=("/studies/{study_id}/history/{history_item_id}/comments"), tags=["comments"]
 )
-
-
-class Comment(BaseModel):
-    comment: str
-    comment_time: str
-    screenshot: Union[str, None]
-    screenshot_width: Union[int, None]
-    screenshot_height: Union[int, None]
-    chart: Union[str, None]
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
@@ -54,18 +46,9 @@ def delete_comment(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-class EditComment(BaseModel):
-    comment: str
-    comment_time: str
-    screenshot: Union[str, None]
-    screenshot_width: Union[int, None]
-    screenshot_height: Union[int, None]
-    chart: Union[str, None]
-
-
-@router.put("/{comment_id}")
+@router.put("/{comment_id}", status_code=status.HTTP_200_OK)
 def edit_comment(
-    data: EditComment,
+    data: Comment,
     study_id: str,
     history_item_id: str,
     comment_id: str,

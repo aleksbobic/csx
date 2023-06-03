@@ -19,7 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, sta
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK)
 def get_datasets(
     search: BaseSearchConnector = Depends(get_search_connector),
     storage: BaseStorageConnector = Depends(get_storage_connector),
@@ -114,7 +114,7 @@ def delete_dataset(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/{dataset_name}/settings")
+@router.get("/{dataset_name}/settings", status_code=status.HTTP_200_OK)
 def get_dataset_settings(
     dataset_name: str, storage: BaseStorageConnector = Depends(get_storage_connector)
 ):
@@ -129,7 +129,7 @@ def get_dataset_settings(
     return {"config": config}
 
 
-@router.post("/{dataset_name}/settings")
+@router.post("/{dataset_name}/settings", status_code=status.HTTP_201_CREATED)
 def save_dataset_settings(
     dataset_name: str,
     data: SettingsCreate,
@@ -363,7 +363,7 @@ def convert_entry_with_nodes_to_mongo(entry, key, list_props):
     return new_entries
 
 
-@router.put("/{dataset_name}/settings")
+@router.put("/{dataset_name}/settings", status_code=status.HTTP_200_OK)
 def update_dataset_settings(
     dataset_name: str,
     data: SettingsUpdate,

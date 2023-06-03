@@ -7,18 +7,15 @@ from typing import List, Literal, Union
 import app.services.graph.graph as csx_graph
 import app.services.study.study as csx_study
 import pandas as pd
-from app.api.dependencies import (
-    get_current_study,
-    get_search_connector,
-    get_storage_connector,
-    verify_user_exists,
-)
+from app.api.dependencies import (get_current_study, get_search_connector,
+                                  get_storage_connector, verify_user_exists)
+from app.schemas.history import (DeleteNodesData, ExpandNodesData,
+                                 HistoryItemConfigData, UpdateChartsData)
 from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from pydantic import BaseModel
 
 router = APIRouter(prefix="/studies/{study_id}/history", tags=["history"])
 
@@ -35,7 +32,7 @@ def delete_history_items(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/")
+@router.get("/", status_code=status.HTTP_200_OK)
 def get_study_history(study_id: str, study: dict = Depends(get_current_study)):
     if study:
         history = csx_study.extract_history_items(study)
@@ -50,7 +47,7 @@ def get_study_history(study_id: str, study: dict = Depends(get_current_study)):
         return {"empty": True}
 
 
-@router.get("/{history_item_id}")
+@router.get("/{history_item_id}", status_code=status.HTTP_200_OK)
 def get_history_item(
     history_item_id: str,
     study_id: str,
@@ -98,26 +95,9 @@ def get_history_item(
     }
 
 
-class ModifyStudyData(BaseModel):
-    history_item_id: str
-    graph_type: Literal["overview", "detail"]
-    graph_schema: List
-    visible_dimensions: List
-    visible_entries: List
-    index: str
-    query: str
-    anchor: str
-    search_uuid: Union[str, None]
-    links: List
-    anchor_properties: List
-    action_time: str
-    history_parent_id: Union[str, None]
-    charts: List
-
-
 @router.post("/", status_code=status.HTTP_201_CREATED)
 def create_history_item(
-    data: ModifyStudyData,
+    data: HistoryItemConfigData,
     study_id: str,
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
@@ -343,15 +323,14 @@ def create_history_item(
     }
 
 
-class UpdateCharts(BaseModel):
-    charts: List
 
 
-@router.put("/{history_item_id}")
+
+@router.put("/{history_item_id}", status_code=status.HTTP_200_OK)
 def update_history_item(
     study_id: str,
     history_item_id: str,
-    data: UpdateCharts,
+    data: UpdateChartsData,
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
 ):
@@ -360,21 +339,9 @@ def update_history_item(
     return Response(status_code=status.HTTP_200_OK)
 
 
-class ExpandNodes(BaseModel):
-    values: dict
-    graph_type: str
-    anchor: str
-    visible_entries: List
-    anchor_properties: List
-    links: List
-    action_time: str
-    history_parent_id: str
-    charts: List
-
-
-@router.put("/{history_item_id}/nodes/expand")
+@router.put("/{history_item_id}/nodes/expand", status_code=status.HTTP_200_OK)
 def expand_nodes(
-    data: ExpandNodes,
+    data: ExpandNodesData,
     study_id: str,
     history_item_id: str,
     user_id: str = Depends(verify_user_exists),
@@ -528,18 +495,12 @@ def expand_nodes(
     }
 
 
-class DeleteNodes(BaseModel):
-    nodes: List[str]
-    delete_type: str
-    action_time: str
-    graph_type: str
-    charts: List
-    history_parent_id: str
 
 
-@router.put("/{history_item_id}/nodes/delete")
+
+@router.put("/{history_item_id}/nodes/delete", status_code=status.HTTP_200_OK)
 def delete_nodes(
-    data: DeleteNodes,
+    data: DeleteNodesData,
     study_id: str,
     history_item_id: str,
     user_id: str = Depends(verify_user_exists),
