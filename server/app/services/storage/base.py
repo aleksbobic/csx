@@ -20,6 +20,22 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def insert_config(self, config: dict) -> None:
+        pass
+
+    @abstractmethod
+    def get_config(self, dataset_name: str) -> dict:
+        pass
+
+    @abstractmethod
+    def delete_config(self, dataset_name: str) -> None:
+        pass
+
+    @abstractmethod
+    def update_config(self, dataset_name: str, config: dict) -> None:
+        pass
+
+    @abstractmethod
     def get_history_item(self, item_id: str) -> dict:
         pass
 

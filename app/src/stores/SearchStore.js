@@ -76,10 +76,6 @@ export class SearchStore {
             this.searchHints = dataset_config.search_hints;
             this.default_search_features = dataset_config.default_search_fields;
 
-            Object.keys(this.searchHints).forEach(key => {
-                this.searchHints[key] = JSON.parse(this.searchHints[key]);
-            });
-
             this.nodeTypes = dataset_config.types;
             this.anchor = dataset_config.anchor;
             this.store.schema.populateStoreData();

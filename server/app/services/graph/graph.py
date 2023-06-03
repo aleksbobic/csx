@@ -88,19 +88,14 @@ def get_detail_graph(
     list_features = []
     non_list_features = []
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
+    config = storage.get_config(index)
 
-        list_features = [
-            feature
-            for feature in features
-            if config["dimension_types"][feature] == "list"
-        ]
-        non_list_features = [
-            feature
-            for feature in features
-            if config["dimension_types"][feature] != "list"
-        ]
+    list_features = [
+        feature for feature in features if config["dimension_types"][feature] == "list"
+    ]
+    non_list_features = [
+        feature for feature in features if config["dimension_types"][feature] != "list"
+    ]
 
     if len(non_list_features) > 0:
         nodes, entries_with_nodes = csx_nodes.get_nodes(
@@ -199,15 +194,13 @@ def get_overview_graph(
     list_links = []
     non_list_links = []
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
-        is_anchor_list = config["dimension_types"][anchor] == "list"
-        list_links = [
-            link for link in links if config["dimension_types"][link] == "list"
-        ]
-        non_list_links = [
-            link for link in links if config["dimension_types"][link] != "list"
-        ]
+    config = storage.get_config(index)
+
+    is_anchor_list = config["dimension_types"][anchor] == "list"
+    list_links = [link for link in links if config["dimension_types"][link] == "list"]
+    non_list_links = [
+        link for link in links if config["dimension_types"][link] != "list"
+    ]
 
     if len(non_list_links) > 0 or not is_anchor_list:
         nodes, entries_with_nodes = csx_nodes.get_nodes(

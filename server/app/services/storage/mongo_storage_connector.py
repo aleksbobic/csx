@@ -39,6 +39,30 @@ class MongoStorageConnector(BaseStorageConnector):
     def insert_nodes(self, collection_name: str, nodes: list) -> None:
         self.database[collection_name].insert_many(nodes)
 
+    def insert_config(self, config: dict) -> None:
+        self.database["configs"].insert_one(config)
+
+    def get_config(self, dataset_name: str) -> dict:
+        try:
+            config = self.database["configs"].find_one({"dataset_name": dataset_name})
+        except ConnectionError as e:
+            return {}
+
+        if not config:
+            return {}
+
+        config.pop("_id", None)
+
+        return config
+
+    def delete_config(self, dataset_name: str) -> None:
+        self.database["configs"].delete_one({"dataset_name": dataset_name})
+
+    def update_config(self, dataset_name: str, config: dict) -> None:
+        self.database["configs"].update_one(
+            {"dataset_name": dataset_name}, {"$set": config}
+        )
+
     def get_history_item(self, item_id: str) -> dict:
         try:
             history_item = self.fs.get(ObjectId(item_id)).read()

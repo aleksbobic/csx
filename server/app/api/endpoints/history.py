@@ -158,24 +158,23 @@ def create_history_item(
             if entry["item_id"] == ObjectId(history_parent_id)
         ][0]["graph_type"] != graph_type
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
+    config = storage.get_config(index)
 
-        dimension_types = config["dimension_types"]
+    dimension_types = config["dimension_types"]
 
-        if len(schema) == 0:
-            schema = config["schemas"][0]["relations"]
+    if len(schema) == 0:
+        schema = config["schemas"][0]["relations"]
 
-        if len(visible_dimensions) == 0:
-            visible_dimensions = config["default_visible_dimensions"]
+    if len(visible_dimensions) == 0:
+        visible_dimensions = config["default_visible_dimensions"]
 
-        default_search_fields = config["default_search_fields"]
+    default_search_fields = config["default_search_fields"]
 
-        if anchor == "":
-            anchor = config["anchor"]
+    if anchor == "":
+        anchor = config["anchor"]
 
-        if not links:
-            links = config["links"]
+    if not links:
+        links = config["links"]
 
     id_list = visible_entries
     query_generated_dimensions = {}
@@ -431,29 +430,23 @@ def expand_nodes(
 
     dimension_types = {}
 
-    with open(f"./app/data/config/{cache_data['global']['index']}.json") as config:
-        config = json.load(config)
-
-        dimension_types = config["dimension_types"]
-
     index = cache_data["global"]["index"]
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
+    config = storage.get_config(index)
 
-        dimension_types = config["dimension_types"]
+    dimension_types = config["dimension_types"]
 
-        if len(schema) == 0:
-            schema = config["schemas"][0]["relations"]
+    if len(schema) == 0:
+        schema = config["schemas"][0]["relations"]
 
-        if len(visible_dimensions) == 0:
-            visible_dimensions = config["default_visible_dimensions"]
+    if len(visible_dimensions) == 0:
+        visible_dimensions = config["default_visible_dimensions"]
 
-        if anchor == "":
-            anchor = config["anchor"]
+    if anchor == "":
+        anchor = config["anchor"]
 
-        if not links:
-            links = config["links"]
+    if not links:
+        links = config["links"]
 
     results = search.advanced_search(
         cache_data["global"]["index"], query, dimension_types

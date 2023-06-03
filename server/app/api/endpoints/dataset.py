@@ -22,45 +22,33 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 @router.get("/")
 def get_datasets(
     search: BaseSearchConnector = Depends(get_search_connector),
+    storage: BaseStorageConnector = Depends(get_storage_connector),
 ) -> dict:
     """Get list of all datasets and their schemas if they have one"""
 
     datasets = {}
 
-    test = search.get_all_datasets()
-
     for index in search.get_all_datasets():
         if not search.get_dataset_features(index):
             continue
 
-        with open(f"./app/data/config/{index}.json") as f:
-            data = json.load(f)
-            datasets[index] = {"types": data["dimension_types"]}
+        config = storage.get_config(index)
 
-        try:
-            with open(f"./app/data/config/{index}.json") as config:
-                loaded_config = json.load(config)
-                datasets[index]["schemas"] = loaded_config["schemas"]
-                datasets[index]["default_schemas"] = loaded_config["default_schemas"]
-                datasets[index]["anchor"] = loaded_config["anchor"]
-                datasets[index]["links"] = loaded_config["links"]
-                datasets[index]["default_search_fields"] = loaded_config[
-                    "default_search_fields"
-                ]
+        if not config:
+            continue
 
-                datasets[index]["search_hints"] = {
-                    feature: json.dumps(loaded_config["search_hints"][feature])
-                    for feature in loaded_config["search_hints"]
-                    if data["dimension_types"][feature]
-                    in ["integer", "float", "category"]
-                }
-        except Exception as e:
-            datasets[index]["schemas"] = []
-            datasets[index]["default_schemas"] = []
-            datasets[index]["anchor"] = []
-            datasets[index]["links"] = []
-            datasets[index]["search_hints"] = []
-            datasets[index]["default_search_fields"] = []
+        datasets[index] = {"types": config["dimension_types"]}
+        datasets[index]["schemas"] = config["schemas"]
+        datasets[index]["default_schemas"] = config["default_schemas"]
+        datasets[index]["anchor"] = config["anchor"]
+        datasets[index]["links"] = config["links"]
+        datasets[index]["default_search_fields"] = config["default_search_fields"]
+
+        datasets[index]["search_hints"] = {
+            feature: config["search_hints"][feature]
+            for feature in config["search_hints"]
+            if config["dimension_types"][feature] in ["integer", "float", "category"]
+        }
 
     return datasets
 
@@ -106,21 +94,20 @@ def delete_dataset(
     storage: BaseStorageConnector = Depends(get_storage_connector),
     search: BaseSearchConnector = Depends(get_search_connector),
 ):
-    if exists(f"./app/data/config/{dataset_name}.json"):
+    config = storage.get_config(dataset_name)
+
+    if config:
         search.delete_dataset(dataset_name)
         storage.delete_dataset(dataset_name)
 
         if exists(f"./app/data/autocomplete/auto_{dataset_name}"):
             os.remove(f"./app/data/autocomplete/auto_{dataset_name}")
 
-            with open(f"./app/data/config/{dataset_name}.json") as config:
-                config = json.load(config)
-                dimension_types = config["dimension_types"]
-                for dim in dimension_types:
-                    if exists(f"./app/data/autocomplete/auto_{dataset_name}_{dim}"):
-                        os.remove(f"./app/data/autocomplete/auto_{dataset_name}_{dim}")
+            for dim in config["dimension_types"]:
+                if exists(f"./app/data/autocomplete/auto_{dataset_name}_{dim}"):
+                    os.remove(f"./app/data/autocomplete/auto_{dataset_name}_{dim}")
 
-            os.remove(f"./app/data/config/{dataset_name}.json")
+            storage.delete_config(dataset_name)
     else:
         os.remove(f"./app/data/files/{dataset_name}.csv")
 
@@ -128,11 +115,18 @@ def delete_dataset(
 
 
 @router.get("/{dataset_name}/settings")
-def get_dataset_settings(dataset_name: str):
+def get_dataset_settings(
+    dataset_name: str, storage: BaseStorageConnector = Depends(get_storage_connector)
+):
     """Get settings for a dataset"""
-    with open(f"./app/data/config/{dataset_name}.json") as f:
-        data = json.load(f)
-        return {"config": data}
+
+    config = storage.get_config(dataset_name)
+
+    if not config:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Dataset config not found"
+        )
+    return {"config": config}
 
 
 @router.post("/{dataset_name}/settings")
@@ -167,9 +161,6 @@ def save_dataset_settings(
 
     config["schemas"][0]["relations"].append(initial_relationship)
 
-    if not os.path.exists("./app/data/config"):
-        os.makedirs("./app/data/config")
-
     dataset = pd.read_csv(f"./app/data/files/{dataset_name}.csv", lineterminator="\n")
 
     rename_mapping = get_renamed_dimensions(defaults)
@@ -182,8 +173,7 @@ def save_dataset_settings(
         if feature_type != "string"
     }
 
-    with open(f"./app/data/config/{data.name}.json", "w") as f:
-        json.dump(config, f)
+    storage.insert_config({"dataset_name": data.name, **config})
 
     try:
         search.insert_dataset(data.name, config, dataset)
@@ -374,37 +364,39 @@ def convert_entry_with_nodes_to_mongo(entry, key, list_props):
 
 
 @router.put("/{dataset_name}/settings")
-def update_dataset_settings(dataset_name: str, data: SettingsUpdate):
+def update_dataset_settings(
+    dataset_name: str,
+    data: SettingsUpdate,
+    storage: BaseStorageConnector = Depends(get_storage_connector),
+):
     defaults = data.defaults
     schemas = []
     search_hints = {}
     initial_relationship = {}
 
-    with open(f"./app/data/config/{dataset_name}.json") as f:
-        config_data = json.load(f)
-        schemas = config_data["schemas"]
-        search_hints = config_data["search_hints"]
-        default_schemas = config_data["default_schemas"]
+    config = storage.get_config(dataset_name)
 
-        dest_type = config_data["dimension_types"][
-            get_default_link_dimensions(defaults)[0]
-        ]
-        src_type = config_data["dimension_types"][defaults[data.anchor]["name"]]
+    schemas = config["schemas"]
+    search_hints = config["search_hints"]
+    default_schemas = config["default_schemas"]
 
-        initial_relationship = {
-            "dest": get_default_link_dimensions(defaults)[0],
-            "src": defaults[data.anchor]["name"],
-            "relationship": "",
-        }
+    dest_type = config["dimension_types"][get_default_link_dimensions(defaults)[0]]
+    src_type = config["dimension_types"][defaults[data.anchor]["name"]]
 
-        if src_type == "list" and dest_type == "list":
-            initial_relationship["relationship"] = "manyToMany"
-        elif src_type == "list" and dest_type != "list":
-            initial_relationship["relationship"] = "ManyToOne"
-        elif src_type != "list" and dest_type == "list":
-            initial_relationship["relationship"] = "oneToMany"
-        else:
-            initial_relationship["relationship"] = "oneToOne"
+    initial_relationship = {
+        "dest": get_default_link_dimensions(defaults)[0],
+        "src": defaults[data.anchor]["name"],
+        "relationship": "",
+    }
+
+    if src_type == "list" and dest_type == "list":
+        initial_relationship["relationship"] = "manyToMany"
+    elif src_type == "list" and dest_type != "list":
+        initial_relationship["relationship"] = "ManyToOne"
+    elif src_type != "list" and dest_type == "list":
+        initial_relationship["relationship"] = "oneToMany"
+    else:
+        initial_relationship["relationship"] = "oneToOne"
 
     # Generate default config
     config = {
@@ -418,7 +410,6 @@ def update_dataset_settings(dataset_name: str, data: SettingsUpdate):
         "search_hints": search_hints,
     }
 
-    with open(f"./app/data/config/{dataset_name}.json", "w") as f:
-        json.dump(config, f)
+    storage.update_config(dataset_name, config)
 
     return Response(status_code=status.HTTP_200_OK)
