@@ -177,6 +177,7 @@ function AutoCompleteInput(props) {
                     textOverflow="ellipsis"
                     onChange={handleValueChange}
                     value={input}
+                    name={props.name}
                     style={{ ...props.style }}
                 ></Input>
             </Tooltip>
@@ -211,7 +212,8 @@ AutoCompleteInput.propTypes = {
     trackingLocation: PropTypes.string,
     trackingEventTarget: PropTypes.string,
     trackingEventFeature: PropTypes.string,
-    trackingEventDataset: PropTypes.string
+    trackingEventDataset: PropTypes.string,
+    name: PropTypes.string
 };
 
 AutoCompleteInput.defaultProps = {
@@ -223,7 +225,8 @@ AutoCompleteInput.defaultProps = {
     trackingLocation: '',
     trackingEventTarget: '',
     trackingEventFeature: '',
-    trackingEventDataset: ''
+    trackingEventDataset: '',
+    name: ''
 };
 
 export default observer(AutoCompleteInput);

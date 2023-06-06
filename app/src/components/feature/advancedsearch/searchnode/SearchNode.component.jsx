@@ -118,6 +118,7 @@ const searchNode = ({ id, data, isConnectable }) => {
                 trackingLocation="Advanced Search - Search Canvas"
                 trackingEventTarget={`Node - ${id} - Autocomplete Select Element - Keyphrase`}
                 trackingEventFeature={data.feature}
+                name="search-node"
             />
         );
     };

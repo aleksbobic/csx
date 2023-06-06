@@ -174,6 +174,7 @@ function SearchBar(props) {
                                         fontSize: '14px',
                                         fontWeight: 'bold'
                                     }}
+                                    name="dataset-selection"
                                 >
                                     {renderDatasetSelectionOptions()}
                                 </Select>
@@ -207,6 +208,7 @@ function SearchBar(props) {
                                     zIndex: '10',
                                     minWidth: '60%'
                                 }}
+                                name="search"
                                 getValue={value =>
                                     setFieldValue('search', value)
                                 }
