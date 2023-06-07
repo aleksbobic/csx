@@ -15,9 +15,10 @@ services:
       ELASTIC_PASSWORD: ${ELASTIC_PASS}
       MONGO_USERNAME: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASS}
+      SHOW_DOCS: 'false'
     depends_on:
       - elastic
-    command: uvicorn app.main:app --host 0.0.0.0 --port 80
+    command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80
   app:
     container_name: csxp_app
     image: csxpi_app

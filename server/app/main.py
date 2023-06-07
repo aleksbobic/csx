@@ -6,12 +6,21 @@ from app.api.endpoints.public import router as public_router
 from app.api.endpoints.search import router as search_router
 from app.api.endpoints.study import router as study_router
 from app.api.endpoints.util import router as util_router
+from app.config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
 def get_application():
-    app = FastAPI(title="Collaboration Spotting", version="1.3.0")
+    app_config = {
+        "title": "Collaboration Spotting X",
+        "version": "1.3.0",
+    }
+
+    if not settings.show_docs:
+        app_config["openapi_url"] = None
+
+    app = FastAPI(**app_config)
 
     app.include_router(util_router)
     app.include_router(search_router)

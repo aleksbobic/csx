@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     elastic_password: str
     mongo_password: str
     mongo_username: str
+    show_docs: bool
 
     class Config:
         fields = {
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
             "elastic_password": {"env": "ELASTIC_PASSWORD"},
             "mongo_password": {"env": "MONGO_PASSWORD"},
             "mongo_username": {"env": "MONGO_USERNAME"},
+            "show_docs": {"env": "SHOW_DOCS"},
         }
 
 

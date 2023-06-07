@@ -77,7 +77,9 @@ def enrich_node_with_props(
     }
 
     for feature in properties:
-        if np.issubdtype(properties[feature], np.integer):
+        if not type(properties[feature]) == str and np.issubdtype(
+            properties[feature], np.integer
+        ):
             if type(properties[feature]).__module__ == np.__name__:
                 properties[feature] = properties[feature].item()
 

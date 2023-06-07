@@ -3,7 +3,7 @@ import itertools
 import json
 import os
 from os.path import exists
-from typing import Union
+from typing import Dict, Union
 
 import app.services.graph.nodes as csx_nodes
 import app.services.search.autocomplete as csx_auto
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/datasets", tags=["datasets"])
 def get_datasets(
     search: BaseSearchConnector = Depends(get_search_connector),
     storage: BaseStorageConnector = Depends(get_storage_connector),
-) -> dict:
+) -> Dict:
     """Get list of all datasets and their schemas if they have one"""
 
     datasets = {}

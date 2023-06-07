@@ -178,6 +178,7 @@ function AutoCompleteInput(props) {
                     onChange={handleValueChange}
                     value={input}
                     name={props.name}
+                    autoComplete="off"
                     style={{ ...props.style }}
                 ></Input>
             </Tooltip>
