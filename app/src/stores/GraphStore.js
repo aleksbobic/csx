@@ -222,7 +222,7 @@ export class GraphStore {
             color: new THREE.Color('white')
         });
 
-        const geometryTemplate = new THREE.CircleGeometry(1, 32);
+        const geometryTemplate = new THREE.CircleGeometry(1, 16);
 
         const meshTemplate = new THREE.Mesh(
             geometryTemplate,
