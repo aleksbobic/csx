@@ -13,16 +13,20 @@ import {
     useColorModeValue,
     useToast
 } from '@chakra-ui/react';
-import SearchBarComponent from 'components/feature/searchbar/SearchBar.component';
-import DatasetConfigModalComponent from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
-import FileUploadModalComponent from 'components/interface/fileuploadmodal/FileUploadModal.component';
+import SearchBar from 'components/feature/home/searchbar/SearchBar.component';
+import DatasetConfigModal from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
+import FileUploadModal from 'components/interface/fileuploadmodal/FileUploadModal.component';
 import { Close } from 'css.gg';
 
-import CookieInfo from 'components/feature/cookieinfo/CookieInfo.component';
-import DatasetGrid from 'components/feature/datasetgrid/DatasetGrid.component';
-import EmptySearch from 'components/feature/emptysearch/EmptySearch.component';
-import StudyGrid from 'components/feature/studygrid/StudyGrid.component';
+import CookieInfo from 'components/feature/home/cookieinfo/CookieInfo.component';
+import DatasetElement from 'components/feature/home/datasetgrid/datasetElement/DatasetElement.component';
+import DatasetGrid from 'components/feature/home/datasetgrid/DatasetGrid.component';
+import EmptySearch from 'components/feature/home/emptysearch/EmptySearch.component';
+import EmptyStudy from 'components/feature/home/emptystudy/EmptyStudy.component';
+import StudyGrid from 'components/feature/home/studygrid/StudyGrid.component';
+import TutorialGrid from 'components/feature/home/tutorialgrid/TutorialGrid.component';
 import Footer from 'components/interface/footer/Footer.component';
+import { isEnvFalse, isEnvTrue } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -31,10 +35,7 @@ import { useBeforeunload } from 'react-beforeunload';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
-import DatasetElement from 'components/feature/datasetgrid/datasetElement/DatasetElement.component';
-import { isEnvFalse, isEnvTrue } from 'general.utils';
-import EmptyStudy from 'components/emptystudy/EmptyStudy.component';
-import TutorialGrid from 'components/feature/tutorialgrid/TutorialGrid.component';
+import Joyride from 'react-joyride';
 
 function HomePage() {
     const toast = useToast();
@@ -100,11 +101,17 @@ function HomePage() {
                                 cookieToast.closeAll();
                                 store.core.setHideCookieBanner();
                                 store.core.setTrackingEnabled(true);
+
                                 store.track.trackEvent(
-                                    'Global',
-                                    'Initialisation',
                                     JSON.stringify({
-                                        userUUID: store.core.userUuid
+                                        area: 'Global'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: null
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Initialisation',
+                                        event_value: store.core.userUuid
                                     })
                                 );
                             }}
@@ -285,7 +292,13 @@ function HomePage() {
     });
 
     useEffect(() => {
+        store.core.setInteractionModalClosed(false);
         store.core.setIsStudyPublic(false);
+        store.core.setDataModificationMessage(null);
+        store.core.resetVisibleDimensions();
+        store.schema.resetSchema();
+        store.overviewSchema.setSchemaHasChanges(false);
+        store.schema.setSchemaHasChanges(false);
         store.core.setStudyPublicURL('');
         store.graphInstance.setEdgeColorScheme('auto');
         store.graphInstance.setNodeColorScheme('component');
@@ -296,11 +309,13 @@ function HomePage() {
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
         store.search.setAdvancedSearchQuery(null);
+        store.graphInstance.setOrphanNodeVisiblity(true);
     }, [
         store.core,
         store.graph,
         store.graphInstance,
         store.overviewSchema,
+        store.schema,
         store.search,
         store.track
     ]);
@@ -326,13 +341,111 @@ function HomePage() {
             backgroundColor={colorMode === 'light' ? 'white' : '#171A23'}
             paddingTop="150px"
         >
-            <FileUploadModalComponent />
-            <DatasetConfigModalComponent />
+            <Joyride
+                steps={[
+                    {
+                        target: '#Title',
+                        placement: 'center',
+                        floaterProps: { hideArrow: true },
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Welcome!
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                Welcome to Collaboration Spotting X 🥳! This is
+                                a new visual network analysis tool that enables
+                                searching, exploring, analysing and modeling
+                                your data 🪄. Lets start this guide by clicking
+                                next 🚀.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#Searchbar',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Search
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                To search through a datasets you can use the
+                                search bar 🔎. You can select the dataset for
+                                searching in the left dropdown. The hint bellow
+                                the search bar provides information on the
+                                dataset feature used for search. Next lets take
+                                a look at the dataset list.
+                            </p>
+                        )
+                    },
+                    {
+                        target: '#DatasetGrid',
+                        placement: 'bottom',
+                        title: (
+                            <span
+                                style={{ fontSize: '18px', fontWeight: 'bold' }}
+                            >
+                                Datasets
+                            </span>
+                        ),
+                        content: (
+                            <p
+                                style={{
+                                    textAlign: 'left',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                The dataset list displays all datasets available
+                                in CSX 📊. You can view full datasets(➡️) as
+                                well as launch the advanced search view (🔎).
+                                Hover over the example dataset and click the 🔎
+                                icon for the next part of this tutorial.
+                            </p>
+                        )
+                    }
+                ]}
+                styles={{
+                    options: {
+                        backgroundColor: '#171A23',
+                        textColor: 'white',
+                        primaryColor: '#43a2fb',
+                        arrowColor: '#171A23'
+                    }
+                }}
+                showProgress={true}
+                continuous={true}
+                spotlightClicks={true}
+                callback={data => {
+                    if (data.action === 'reset') {
+                        store.core.setFinishedHomeJoyride(true);
+                    }
+                }}
+                run={!store.core.finishedHomeJoyride}
+            />
+            <FileUploadModal />
+            <DatasetConfigModal />
             <Center width="100%" minH="200px" flexDir="column">
                 <Image
                     src={logo}
                     height="40px"
-                    alt="Collaboration spotting logo"
+                    alt="Collaboration spotting X logo"
                     marginBottom="10px"
                 />
                 <Heading
@@ -341,6 +454,7 @@ function HomePage() {
                     marginBottom="20px"
                     textAlign="center"
                     color={textColor}
+                    id="Title"
                 >
                     COLLABORATION SPOTTING X
                 </Heading>
@@ -351,7 +465,7 @@ function HomePage() {
                 maxW="container.sm"
             >
                 {store.search.datasets.length > 0 && (
-                    <SearchBarComponent
+                    <SearchBar
                         style={{ marginTop: '0px' }}
                         onSubmit={() => cookieToast.closeAll()}
                     />

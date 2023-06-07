@@ -10,10 +10,16 @@ export function FileUploadArea() {
 
     const onDrop = async files => {
         store.track.trackEvent(
-            'Home Page - Dataset Grid',
-            'File Upload Area',
             JSON.stringify({
-                type: 'Drop'
+                area: 'Home page',
+                sub_area: 'Dataset grid'
+            }),
+            JSON.stringify({
+                item_type: 'File upload area'
+            }),
+            JSON.stringify({
+                event_type: 'Drop',
+                event_action: 'Upload file'
             })
         );
 

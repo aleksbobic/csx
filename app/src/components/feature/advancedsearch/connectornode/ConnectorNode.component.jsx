@@ -15,10 +15,15 @@ const connectorNode = ({ id, data, isConnectable }) => {
     const modifyConnector = value => {
         data.connector = value.target.value;
         data.trackNodeAction(
-            `Node - ${id} - Select Element`,
             JSON.stringify({
-                type: 'Change selection',
-                value: `${value.target.value}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Select element' }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_value: `${value.target.value}`
             })
         );
     };

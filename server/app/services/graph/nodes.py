@@ -6,10 +6,9 @@ from typing import Dict, List, Tuple, cast
 
 import networkx as nx
 import numpy as np
-from numpy import inf
 import pandas as pd
-from app.utils.timer import use_timing
 from app.types import Component, Node
+from app.utils.timer import use_timing
 
 
 @use_timing
@@ -77,6 +76,13 @@ def enrich_node_with_props(
         for feature in anchor_properties
     }
 
+    for feature in properties:
+        if not type(properties[feature]) == str and np.issubdtype(
+            properties[feature], np.integer
+        ):
+            if type(properties[feature]).__module__ == np.__name__:
+                properties[feature] = properties[feature].item()
+
     node["properties"] = properties
     return node
 
@@ -112,7 +118,7 @@ def adjust_node_size(
                 node_label_frequencies[node["feature"]][node["label"]]
             )
 
-            if calculated_size == -inf:
+            if calculated_size == -np.inf:
                 calculated_size = 0
         else:
             calculated_size = 0

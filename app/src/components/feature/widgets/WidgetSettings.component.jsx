@@ -117,24 +117,36 @@ function WidgetSettings(props) {
                         setTitle(val.trim());
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Editable Element - Title',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Write',
-                                value: val.trim()
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Editable element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Write',
+                                event_action: 'Change title',
+                                event_value: val.trim()
                             })
                         );
                     } else {
                         setTitle(store.stats.getWidgetTitle(props.widgetID));
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Editable Element - Title',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Write',
-                                value: store.stats.getWidgetTitle(
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Editable element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Write',
+                                event_action: 'Change title',
+                                event_value: store.stats.getWidgetTitle(
                                     props.widgetID
                                 )
                             })
@@ -199,12 +211,18 @@ function WidgetSettings(props) {
                         const newItemType = e.target.value;
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Select Element - Item Type',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Change selection',
-                                value: newItemType
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Select element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Change selection',
+                                event_action: 'Change item type',
+                                event_value: newItemType
                             })
                         );
 
@@ -277,12 +295,18 @@ function WidgetSettings(props) {
                     }
 
                     store.track.trackEvent(
-                        'Widget Settings',
-                        'Select Element - Primary Axis Prop',
                         JSON.stringify({
-                            widgetID: props.widgetID,
-                            type: 'Change selection',
-                            value: e.target.value
+                            area: 'Widget',
+                            area_id: props.widgetID,
+                            sub_area: 'Widget settings'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Change primary axis prop',
+                            event_value: e.target.value
                         })
                     );
 
@@ -338,12 +362,18 @@ function WidgetSettings(props) {
                     });
 
                     store.track.trackEvent(
-                        'Widget Settings',
-                        'Select Element - Secondary Axis prop',
                         JSON.stringify({
-                            widgetID: props.widgetID,
-                            type: 'Change selection',
-                            value: e.target.value
+                            area: 'Widget',
+                            area_id: props.widgetID,
+                            sub_area: 'Widget settings'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Change secondary axis prop',
+                            event_value: e.target.value
                         })
                     );
                 }}
@@ -397,12 +427,18 @@ function WidgetSettings(props) {
                         });
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Select Element - Group By Value',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Change selection',
-                                value: e.target.value
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Select element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Change selection',
+                                event_action: 'Change group by value',
+                                event_value: e.target.value
                             })
                         );
                     }}
@@ -472,12 +508,18 @@ function WidgetSettings(props) {
                         });
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Select Element - Element Types',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Change selection',
-                                value: e.target.value
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Select element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Change selection',
+                                event_action: 'Change element type',
+                                event_value: e.target.value
                             })
                         );
                     }}
@@ -530,12 +572,18 @@ function WidgetSettings(props) {
                         });
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Select Element - Display Limit',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Change selection',
-                                value: e.target.value
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Select element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Change selection',
+                                event_action: 'Change display limit',
+                                event_value: e.target.value
                             })
                         );
                     }}
@@ -588,12 +636,18 @@ function WidgetSettings(props) {
                         });
 
                         store.track.trackEvent(
-                            'Widget Settings',
-                            'Select Element - Show Only',
                             JSON.stringify({
-                                widgetID: props.widgetID,
-                                type: 'Change selection',
-                                value: e.target.value
+                                area: 'Widget',
+                                area_id: props.widgetID,
+                                sub_area: 'Widget settings'
+                            }),
+                            JSON.stringify({
+                                item_type: 'Select element'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Change selection',
+                                event_action: 'Change show only',
+                                event_value: e.target.value
                             })
                         );
                     }}
@@ -667,12 +721,18 @@ function WidgetSettings(props) {
                                     );
 
                                     store.track.trackEvent(
-                                        'Widget Settings',
-                                        'Checkbox - Visible Node Props',
                                         JSON.stringify({
-                                            widgetID: props.widgetID,
-                                            type: 'Check',
-                                            value: `Show property ${entry}`
+                                            area: 'Widget',
+                                            area_id: props.widgetID,
+                                            sub_area: 'Widget settings'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Checkbox element'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Check',
+                                            event_action: 'Show property',
+                                            event_value: entry
                                         })
                                     );
                                 } else {
@@ -690,12 +750,18 @@ function WidgetSettings(props) {
                                     );
 
                                     store.track.trackEvent(
-                                        'Widget Settings',
-                                        'Checkbox - Visible Node Props',
                                         JSON.stringify({
-                                            widgetID: props.widgetID,
-                                            type: 'Check',
-                                            value: `Hide property ${entry}`
+                                            area: 'Widget',
+                                            area_id: props.widgetID,
+                                            sub_area: 'Widget settings'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Checkbox element'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Uncheck',
+                                            event_action: 'Hide property',
+                                            event_value: entry
                                         })
                                     );
                                 }
@@ -730,12 +796,18 @@ function WidgetSettings(props) {
                     });
 
                     store.track.trackEvent(
-                        'Widget Settings',
-                        'Select Element - Max Distance',
                         JSON.stringify({
-                            widgetID: props.widgetID,
-                            type: 'Change selection',
-                            value: e.target.value
+                            area: 'Widget',
+                            area_id: props.widgetID,
+                            sub_area: 'Widget settings'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Max distance',
+                            event_value: e.target.value
                         })
                     );
                 }}
@@ -780,12 +852,18 @@ function WidgetSettings(props) {
                     });
 
                     store.track.trackEvent(
-                        'Widget Settings',
-                        'Select Element - Visible Features',
                         JSON.stringify({
-                            widgetID: props.widgetID,
-                            type: 'Change selection',
-                            value: e.target.value
+                            area: 'Widget',
+                            area_id: props.widgetID,
+                            sub_area: 'Widget settings'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Change visible features',
+                            event_value: e.target.value
                         })
                     );
                 }}
@@ -836,12 +914,18 @@ function WidgetSettings(props) {
                     });
 
                     store.track.trackEvent(
-                        'Widget Settings',
-                        'Select Element - Filtering Features',
                         JSON.stringify({
-                            widgetID: props.widgetID,
-                            type: 'Change selection',
-                            value: e.target.value
+                            area: 'Widget',
+                            area_id: props.widgetID,
+                            sub_area: 'Widget settings'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: 'Change filtering features',
+                            event_value: e.target.value
                         })
                     );
                 }}

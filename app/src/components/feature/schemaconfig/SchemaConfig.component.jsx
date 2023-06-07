@@ -95,7 +95,6 @@ function SchemaConfig(props) {
 
     const connectNodes = connection => {
         store.schema.addSchemaConnection(connection);
-        store.core.updateVisibleDimensionsBasedOnSchema();
     };
 
     const updateEdge = (oldEdge, newEdge) => {
@@ -123,10 +122,9 @@ function SchemaConfig(props) {
                 store.schema.updateEdges(
                     applyEdgeChanges(changes, store.schema.edges)
                 );
-                store.core.updateVisibleDimensionsBasedOnSchema();
             }
         },
-        [props.graphType, store.core, store.overviewSchema, store.schema]
+        [props.graphType, store.overviewSchema, store.schema]
     );
 
     return (
@@ -192,11 +190,16 @@ function SchemaConfig(props) {
                         }
                         onClick={() => {
                             store.track.trackEvent(
-                                'Schema Panel',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Show all schema nodes'
+                                    area: 'Schema config',
+                                    sub_area: 'Schema'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Show all schema nodes'
                                 })
                             );
 

@@ -27,19 +27,24 @@ export class GraphInstanceStore {
     forceCooldownTicks = 0;
     forceCooldownTime = 0;
     isSelfCentric = false;
+    isFiltered = false;
     selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
     selfCentricOriginNode = null;
     linkVisibility = true;
+    automaticEdgeOpacity = true;
+    customEdgeOpacity = 5;
     orphanNodeVisibility = true;
     edgeDirectionVisiblity = false;
-    useCurvedEdges = false;
+    customEdgeCurvature = 0;
     nodeColorScheme = { overview: 'component', detail: 'component' };
     nodeColorSchemeColors = { overview: {}, detail: {} };
     edgeColorScheme = { overview: 'auto', detail: 'auto' };
     edgeColorSchemeColors = { overview: {}, detail: {} };
     forceShouldIgnoreSelected = false;
+    panSpeed = 5;
     visibleComponents = [];
     hoverData = [];
+    filterProperty = 'degree';
 
     labels = {
         isVisible: true,
@@ -60,7 +65,10 @@ export class GraphInstanceStore {
         makeAutoObservable(this, {}, { deep: true });
     }
 
+    setFilterProperty = value => (this.filterProperty = value);
     resetLabelFeatures = () => (this.labels.labelFeatures = []);
+    setIsFiltered = value => (this.isFiltered = value);
+    setIsSelfCentric = value => (this.isSelfCentric = value);
     addLabelFeature = feature => this.labels.labelFeatures.push(feature);
     removeLabelFeature = feature =>
         (this.labels.labelFeatures = this.labels.labelFeatures.filter(
@@ -69,8 +77,24 @@ export class GraphInstanceStore {
 
     setHoverData = hoverData => (this.hoverData = hoverData);
 
+    toggleAutomaticEdgeOpacity = () =>
+        (this.automaticEdgeOpacity = !this.automaticEdgeOpacity);
+    setCustomEdgeOpacity = value => (this.customEdgeOpacity = value);
+    setCustomEdgeCurvature = value => (this.customEdgeCurvature = value);
+
+    setPanSpeed = speed => {
+        this.panSpeed = speed;
+
+        const panningSpeedGraphValues = [
+            0.005, 0.01, 0.05, 0.1, 0.3, 0.5, 1, 2, 3
+        ];
+        this.graphInstance.controls().panSpeed =
+            panningSpeedGraphValues[this.panSpeed - 1];
+    };
+
     setGraphProps = ref => {
         this.graphInstance = ref;
+
         this.graphInstance.d3ReheatSimulation();
 
         this.graphInstance.controls().noRotate = true;
@@ -130,7 +154,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.ONLY_SELECTED;
     };
@@ -201,7 +225,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.DEGREE_FILTER;
     };
@@ -240,7 +264,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
-        this.isSelfCentric = true;
+        this.isSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.NEIGHBOURS;
     };
@@ -458,7 +482,7 @@ export class GraphInstanceStore {
                 this.store.graph.currentGraphData.links[i].visible = true;
             }
 
-            this.isSelfCentric = false;
+            this.setIsSelfCentric(false);
         }
 
         this.selfCentricType = null;
@@ -499,7 +523,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = SELF_CENTRIC_TYPES.DIRECT;
         this.store.contextMenu.hideContextMenu();
     };
@@ -656,7 +680,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = onlyMutual
             ? mutualWithOrigin
@@ -740,7 +764,7 @@ export class GraphInstanceStore {
 
         this.filterTabularData(true);
 
-        this.isSelfCentric = true;
+        this.setIsSelfCentric(true);
         this.selfCentricType = null;
         this.selfCentricType = SELF_CENTRIC_TYPES.SAME_ENTRY;
     };
@@ -865,10 +889,6 @@ export class GraphInstanceStore {
 
     setOrphanNodeVisiblity = val => {
         this.orphanNodeVisibility = val;
-    };
-
-    toggleUseCurvedEdges = () => {
-        this.useCurvedEdges = !this.useCurvedEdges;
     };
 
     toggleOrphanNodeVisibility = () => {
@@ -1047,6 +1067,67 @@ export class GraphInstanceStore {
 
         this.filterTabularData();
 
+        return visibleIds;
+    };
+
+    resetAllFilters = () => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        for (let i = 0; i < linkCount; i++) {
+            this.store.graph.currentGraphData.links[i].visible = true;
+        }
+
+        for (let i = 0; i < nodeCount; i++) {
+            this.store.graph.currentGraphData.nodes[i].visible = true;
+        }
+
+        this.selfCentricType = null;
+
+        this.filterTabularData();
+    };
+
+    filterEdgesByMinMaxVal = (min, max) => {
+        this.toggleVisibleComponents(-1);
+        this.resetSelfCentric();
+
+        const nodeCount = this.store.graph.currentGraphData.nodes.length;
+        const linkCount = this.store.graph.currentGraphData.links.length;
+
+        let visibleIds = [];
+
+        for (let i = 0; i < linkCount; i++) {
+            let isVisible =
+                this.store.graph.currentGraphData.links[i].weight >= min &&
+                this.store.graph.currentGraphData.links[i].weight <= max;
+            this.store.graph.currentGraphData.links[i].visible = isVisible;
+            if (isVisible) {
+                visibleIds.push(
+                    this.store.graph.currentGraphData.links[i].source.id
+                );
+                visibleIds.push(
+                    this.store.graph.currentGraphData.links[i].target.id
+                );
+            }
+        }
+
+        visibleIds = [...new Set(visibleIds)];
+
+        for (let i = 0; i < nodeCount; i++) {
+            const isVisible = visibleIds.includes(
+                this.store.graph.currentGraphData.nodes[i].id
+            );
+
+            this.store.graph.currentGraphData.nodes[i].visible = isVisible;
+        }
+
+        this.selfCentricType = null;
+        this.selfCentricType = SELF_CENTRIC_TYPES.CHART_FILTER;
+
+        this.filterTabularData();
         return visibleIds;
     };
 

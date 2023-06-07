@@ -365,12 +365,17 @@ function LineChart(props) {
 
                     if ('nodeProperty' in data) {
                         store.track.trackEvent(
-                            `Details Panel - Widget - ${props.chart.id}`,
-                            'Chart Area',
                             JSON.stringify({
-                                type: 'Click',
-                                property: data.nodeProperty,
-                                value: data.labels[dataIndex]
+                                area: 'Widget',
+                                area_id: props.chart.id
+                            }),
+                            JSON.stringify({
+                                item_type: 'Chart area'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: `Filter by ${data.nodeProperty}`,
+                                event_value: data.labels[dataIndex]
                             })
                         );
 
@@ -381,12 +386,17 @@ function LineChart(props) {
                             );
                     } else {
                         store.track.trackEvent(
-                            `Details Panel - Widget - ${props.chart.id}`,
-                            'Chart area',
                             JSON.stringify({
-                                type: 'Click',
-                                property: data.edgeProperty,
-                                value: data.labels[dataIndex]
+                                area: 'Widget',
+                                area_id: props.chart.id
+                            }),
+                            JSON.stringify({
+                                item_type: 'Chart area'
+                            }),
+                            JSON.stringify({
+                                event_type: 'Click',
+                                event_action: `Filter by ${data.edgeProperty}`,
+                                event_value: data.labels[dataIndex]
                             })
                         );
 
@@ -397,6 +407,7 @@ function LineChart(props) {
                             );
                     }
 
+                    store.graphInstance.setIsFiltered(true);
                     if (visibleNodeIds.length === 1) {
                         store.graphInstance.zoomToFitByNodeId(
                             visibleNodeIds[0],

@@ -45,15 +45,20 @@ function DatasetConfig(props) {
                         borderRadius="5px"
                         onSubmit={val => {
                             store.track.trackEvent(
-                                `Home Page - ${
-                                    props.formType === 'modify'
-                                        ? 'Dataset Configuration Modal'
-                                        : 'Dataset Upload Modal'
-                                }`,
-                                'Editable Element - Dataset - Title',
                                 JSON.stringify({
-                                    type: 'Change selection',
-                                    value: val
+                                    area: 'Home page',
+                                    sub_area:
+                                        props.formType === 'modify'
+                                            ? 'Dataset config modal'
+                                            : 'Dataset upload modal'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Editable element'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Change selection',
+                                    event_action: 'Change title',
+                                    event_value: val
                                 })
                             );
 

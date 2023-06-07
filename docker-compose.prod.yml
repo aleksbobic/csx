@@ -11,10 +11,14 @@ services:
       - 8881:80
     environment:
       DISABLE_UPLOAD: 'false'
+      SEARCH_SOURCE: 'mongo'
       ELASTIC_PASSWORD: ${ELASTIC_PASS}
+      MONGO_USERNAME: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASS}
+      SHOW_DOCS: 'false'
     depends_on:
       - elastic
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 80
+    command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80
   app:
     container_name: csxp_app
     image: csxpi_app
@@ -57,6 +61,8 @@ services:
     links: [mysql]
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.1
+    profiles:
+      - "elastic"
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=${ELASTIC_PASS}
@@ -72,9 +78,12 @@ services:
   mongo:
     image: mongo:4
     volumes:
-      - mongo-volume:/data/db
+      - ./mongo:/data/db
     restart: unless-stopped
     container_name: csx_mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
 
 volumes:
   mongo-volume:

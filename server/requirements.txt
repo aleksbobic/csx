@@ -17,10 +17,12 @@ pytest
 requests
 setuptools
 wheel
-spacy==3.0.7
+spacy
 pytextrank
 python-multipart
 pymongo
 marisa-trie
 palettable
+uvicorn
 polars==0.16.4
+debugpy

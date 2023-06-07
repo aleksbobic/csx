@@ -2,6 +2,7 @@ import { Button, ButtonGroup } from '@chakra-ui/button';
 import { useColorMode } from '@chakra-ui/color-mode';
 import { useOutsideClick } from '@chakra-ui/hooks';
 import { Box, VStack } from '@chakra-ui/layout';
+import { Text } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -17,11 +18,16 @@ function ContextMenu() {
         handler: () => {
             if (store.contextMenu.isVisible) {
                 store.track.trackEvent(
-                    'Graph Area - Context Menu',
-                    'Outside',
                     JSON.stringify({
-                        type: 'Click',
-                        value: 'Close context menu'
+                        area: 'Graph area',
+                        sub_area: 'Context menu'
+                    }),
+                    JSON.stringify({
+                        item_type: 'Outside'
+                    }),
+                    JSON.stringify({
+                        event_type: 'Click',
+                        event_action: 'Close context menu'
                     })
                 );
 
@@ -36,11 +42,16 @@ function ContextMenu() {
         );
 
         store.track.trackEvent(
-            'Graph Area - Context Menu',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `${nodeIndex !== -1 ? 'Deselect' : 'Select'} node`
+                area: 'Graph area',
+                sub_area: 'Node context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: `${nodeIndex !== -1 ? 'Deselect' : 'Select'} node`
             })
         );
 
@@ -51,27 +62,46 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
-    const removeSelection = () => {
+    const deselectAllNodes = () => {
         store.track.trackEvent(
-            'Graph Area - Context Menu',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Remove node: ${store.contextMenu.originNode.id}`
+                area: 'Graph area',
+                sub_area: 'Canvas context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Deselect all nodes'
             })
         );
 
-        store.graph.removeSelection(store.contextMenu.originNode);
+        const selectedNodes = [...store.graph.currentGraphData.selectedNodes];
+
+        selectedNodes.forEach(node => {
+            const index = store.graph.currentGraphData.selectedNodes.findIndex(
+                n => n.id === node.id
+            );
+
+            store.graph.toggleNodeSelection(node.id, index);
+        });
+
         store.contextMenu.hideContextMenu();
     };
 
     const expandGraph = () => {
         store.track.trackEvent(
-            'Graph Area - Context Menu',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `Expand graph through node ${store.contextMenu.originNode.id}`
+                area: 'Graph area',
+                sub_area: 'Node context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Expand graph'
             })
         );
 
@@ -87,17 +117,22 @@ function ContextMenu() {
         const componentId = store.contextMenu.originNode.component;
 
         store.track.trackEvent(
-            'Graph Area - Context Menu',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: `${
+                area: 'Graph area',
+                sub_area: 'Node context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: `${
                     !store.graph.currentGraphData.selectedComponents.includes(
                         componentId
                     )
                         ? 'Deselect'
                         : 'Select'
-                } component ${componentId}`
+                } component`
             })
         );
 
@@ -105,15 +140,21 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
-    const triggerSelfCentric = () => {
+    const showDirectConnections = () => {
         store.track.trackEvent(
-            'Graph Area - Context Menu',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: 'Show direct connections'
+                area: 'Graph area',
+                sub_area: 'Node context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Show direct connections'
             })
         );
+
         store.graphInstance.triggerSelfCentric();
     };
 
@@ -124,8 +165,10 @@ function ContextMenu() {
             buttons.push(
                 <Button
                     justifyContent="left"
-                    onClick={triggerSelfCentric}
+                    onClick={showDirectConnections}
                     key="selfCentricButton"
+                    _hover={{ backgroundColor: 'blue.500' }}
+                    width="100%"
                 >
                     Show direct connections
                 </Button>
@@ -133,6 +176,497 @@ function ContextMenu() {
         }
 
         return buttons;
+    };
+
+    const renderMenus = () => {
+        return (
+            <ButtonGroup variant="ghost" size="xs" width="100%">
+                {store.contextMenu.contextType === 'node' && (
+                    <VStack align="stretch" spacing="0" width="100%">
+                        <Button
+                            justifyContent="left"
+                            onClick={selectNode}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            width="100%"
+                        >
+                            {store.contextMenu.originNode?.selected
+                                ? 'Deselect node'
+                                : 'Select node'}
+                        </Button>
+                        {!store.graphInstance.isSelfCentric && (
+                            <Button
+                                justifyContent="left"
+                                onClick={selectComponent}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                {store.graph.currentGraphData.selectedComponents.includes(
+                                    store.contextMenu.originNode?.component
+                                )
+                                    ? 'Deselect component'
+                                    : 'Select component'}
+                            </Button>
+                        )}
+                        {!store.graphInstance.isSelfCentric &&
+                            renderAdvcancedButtons()}
+                        <Button
+                            justifyContent="left"
+                            onClick={expandGraph}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            width="100%"
+                        >
+                            Expand graph through node
+                        </Button>
+                        <Button
+                            justifyContent="left"
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Graph area',
+                                        sub_area: 'Node context menu'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Remove node'
+                                    })
+                                );
+
+                                store.graph.removeSelection(
+                                    store.contextMenu.originNode
+                                );
+                                store.contextMenu.hideContextMenu();
+                            }}
+                            width="100%"
+                            _hover={{ backgroundColor: 'blue.500' }}
+                        >
+                            Remove node
+                        </Button>
+                    </VStack>
+                )}
+
+                {store.contextMenu.contextType === 'canvas' && (
+                    <VStack align="stretch" spacing="15px" width="100%">
+                        <VStack align="stretch" spacing="0" width="100%">
+                            <Button
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 1
+                                }
+                                justifyContent="left"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={deselectAllNodes}
+                                width="100%"
+                            >
+                                Deselect all
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graphInstance.isFiltered &&
+                                    !store.graphInstance.isSelfCentric
+                                }
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Show all'
+                                        })
+                                    );
+
+                                    store.graphInstance.toggleVisibleComponents(
+                                        -1
+                                    );
+                                    store.graphInstance.setIsFiltered(false);
+                                    store.graphInstance.resetSelfCentric();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                width="100%"
+                            >
+                                Show all
+                            </Button>
+                            <Button
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 1
+                                }
+                                justifyContent="left"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Show selected'
+                                        })
+                                    );
+
+                                    store.graphInstance.triggerSelectedNodes();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                width="100%"
+                            >
+                                Show selected
+                            </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="15px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 5px"
+                            >
+                                Canvas
+                            </Text>
+                            <Button
+                                justifyContent="left"
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Node context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Fit graph to view'
+                                        })
+                                    );
+
+                                    store.graphInstance.zoomToFit();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                Fit graph to view
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Node context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Take screenshot'
+                                        })
+                                    );
+
+                                    store.graphInstance.takeScreenshot();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                width="100%"
+                            >
+                                Take screenshot
+                            </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="15px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 5px"
+                            >
+                                Remove
+                            </Text>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graph.currentGraphData.selectedNodes
+                                        .length
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Remove selected nodes'
+                                        })
+                                    );
+
+                                    store.graph.removeSelection();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Remove selected
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    !store.graphInstance.isSelfCentric &&
+                                    !store.graphInstance.isFiltered &&
+                                    store.graphInstance.orphanNodeVisibility
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Remove invisible'
+                                        })
+                                    );
+                                    store.graph.trimNetwork();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Remove invisible
+                            </Button>
+                        </VStack>
+                        <VStack
+                            borderTop="1px solid #ffffff33"
+                            position="relative"
+                            marginTop="10px"
+                            spacing="0"
+                            paddingTop="15px"
+                        >
+                            <Text
+                                fontSize="12px"
+                                fontWeight="bold"
+                                position="absolute"
+                                color="whiteAlpha.500"
+                                top="-10px"
+                                left="2px"
+                                backgroundColor="black"
+                                padding="0 5px"
+                            >
+                                Expand
+                            </Text>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 2
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Broad expand',
+                                            event_value:
+                                                store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            label: node.label,
+                                                            feature:
+                                                                node.feature
+                                                        };
+                                                    }
+                                                )
+                                        })
+                                    );
+
+                                    store.graph.expandNetwork(
+                                        store.graph.currentGraphData
+                                            .selectedNodes,
+                                        'or'
+                                    );
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Broad expand
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 2
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Narrow expand',
+                                            event_value:
+                                                store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            label: node.label,
+                                                            feature:
+                                                                node.feature
+                                                        };
+                                                    }
+                                                )
+                                        })
+                                    );
+
+                                    store.graph.expandNetwork(
+                                        store.graph.currentGraphData
+                                            .selectedNodes,
+                                        'and'
+                                    );
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Narrow expand
+                            </Button>
+                        </VStack>
+                    </VStack>
+                )}
+            </ButtonGroup>
+        );
+    };
+
+    const renderNodeDetails = () => {
+        if (!store.contextMenu.originNode) {
+            return <></>;
+        }
+
+        return (
+            <VStack
+                width="100%"
+                padding="10px"
+                maxHeight="200px"
+                overflowY="scroll"
+            >
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Label:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.label}
+                </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Feature:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.feature}
+                </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Neighbour count:{' '}
+                    </Text>
+                    {store.contextMenu.originNode.neighbours.size}
+                </Text>
+            </VStack>
+        );
     };
 
     return (
@@ -144,7 +678,7 @@ function ContextMenu() {
             left={store.contextMenu.x}
             display={store.contextMenu.isVisible ? 'block' : 'none'}
             backgroundColor={colorMode === 'light' ? 'white' : 'black'}
-            padding="5px"
+            padding="4px 5px 5px"
             borderRadius="10px"
             width="200px"
             border="1px solid"
@@ -152,32 +686,10 @@ function ContextMenu() {
                 colorMode === 'light' ? 'blackAlpha.200' : 'transparent'
             }
         >
-            <ButtonGroup variant="ghost" size="xs" width="100%">
-                <VStack align="stretch" spacing="0" width="100%">
-                    <Button justifyContent="left" onClick={selectNode}>
-                        {store.contextMenu.originNode?.selected
-                            ? 'Deselect node'
-                            : 'Select node'}
-                    </Button>
-                    {!store.graphInstance.isSelfCentric && (
-                        <Button justifyContent="left" onClick={selectComponent}>
-                            {store.graph.currentGraphData.selectedComponents.includes(
-                                store.contextMenu.originNode?.component
-                            )
-                                ? 'Deselect component'
-                                : 'Select component'}
-                        </Button>
-                    )}
-                    {!store.graphInstance.isSelfCentric &&
-                        renderAdvcancedButtons()}
-                    <Button justifyContent="left" onClick={expandGraph}>
-                        Expand graph through node
-                    </Button>
-                    <Button justifyContent="left" onClick={removeSelection}>
-                        Remove node
-                    </Button>
-                </VStack>
-            </ButtonGroup>
+            {['canvas', 'node'].includes(store.contextMenu.contextType) &&
+                renderMenus()}
+            {store.contextMenu.contextType === 'node_details' &&
+                renderNodeDetails()}
         </Box>
     );
 }

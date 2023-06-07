@@ -16,7 +16,8 @@ export class GraphStore {
             graphID: null,
             query: '',
             anchorProperties: [],
-            maxDegree: 0
+            maxDegree: 0,
+            maxEdgeWeight: 0
         },
         nodes: [],
         links: [],
@@ -39,7 +40,8 @@ export class GraphStore {
             graphID: null,
             query: '',
             visible_entries: [],
-            maxDegree: 0
+            maxDegree: 0,
+            maxEdgeWeight: 0
         },
         nodes: [],
         links: [],
@@ -75,7 +77,8 @@ export class GraphStore {
                 nodeCount: 0,
                 linkCount: 0,
                 anchorProperties: [],
-                maxDegree: 0
+                maxDegree: 0,
+                maxEdgeWeight: 0
             },
             nodes: [],
             links: [],
@@ -102,7 +105,8 @@ export class GraphStore {
                 references: [],
                 nodeCount: 0,
                 linkCount: 0,
-                maxDegree: 0
+                maxDegree: 0,
+                maxEdgeWeight: 0
             },
             nodes: [],
             links: [],
@@ -218,7 +222,7 @@ export class GraphStore {
             color: new THREE.Color('white')
         });
 
-        const geometryTemplate = new THREE.CircleGeometry(1, 32);
+        const geometryTemplate = new THREE.CircleGeometry(1, 16);
 
         const meshTemplate = new THREE.Mesh(
             geometryTemplate,
@@ -558,8 +562,6 @@ export class GraphStore {
         }
 
         const params = {
-            study_uuid: studyId,
-            user_uuid: userId,
             search_uuid: this.store.search.searchID,
             history_item_id: currentStudyHistoryItem,
             graph_type: graphType,
@@ -611,7 +613,9 @@ export class GraphStore {
         }
 
         const { response, error } = await safeRequest(
-            axios.post('study/modify', params)
+            axios.post(`studies/${studyId}/history/`, params, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {
@@ -622,10 +626,11 @@ export class GraphStore {
 
         if (
             !response.data.hasOwnProperty('graph') ||
-            response.data.graph.nodes.length === 0
+            response.data?.nodes?.length === 0
         ) {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);
+            this.store.core.setDataIsLoading(false);
         } else {
             this.store.core.setStudyHistory(response.data.history);
 
@@ -667,14 +672,10 @@ export class GraphStore {
         this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
-        const params = {
-            study_uuid: studyId,
-            user_uuid: userId,
-            history_id: historyID
-        };
-
         const { response, error } = await safeRequest(
-            axios.post('study/', params)
+            axios.get(`studies/${studyId}/history/${historyID}`, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {
@@ -750,13 +751,10 @@ export class GraphStore {
         this.store.core.setDataIsLoading(true);
         const userId = this.store.core.userUuid;
 
-        const params = {
-            study_uuid: studyId,
-            user_uuid: userId
-        };
-
         const { response, error } = await safeRequest(
-            axios.post('study/', params)
+            axios.get(`studies/${studyId}`, {
+                headers: { user_id: userId }
+            })
         );
 
         if (error) {
@@ -901,6 +899,9 @@ export class GraphStore {
     };
 
     handleRetrievedGraph = (response, graphType, query) => {
+        this.store.graphInstance.setIsSelfCentric(false);
+        this.store.graphInstance.setIsFiltered(false);
+
         if (!response['nodes'].length) {
             this.graphData['isEmpty'] = true;
             this.store.search.setSearchIsEmpty(true);
@@ -1018,7 +1019,10 @@ export class GraphStore {
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
                     anchorProperties: response.meta.anchor_property_values,
-                    maxDegree: response.meta.max_degree
+                    maxDegree: response.meta.max_degree,
+                    maxEdgeWeight: Math.max(
+                        ...response.edges.map(edge => edge.weight)
+                    )
                 };
 
                 this.graphData.perspectivesInGraph = response.meta.dimensions;
@@ -1082,6 +1086,8 @@ export class GraphStore {
                     'edge'
                 );
 
+                this.store.graphInstance.setNodeColorScheme('node type');
+
                 const nodes = this.generateNodeObjects(
                     response.nodes,
                     'detail'
@@ -1102,7 +1108,10 @@ export class GraphStore {
                     ...this.detailGraphData.meta,
                     nodeCount: nodes.length,
                     linkCount: response.edges.length,
-                    maxDegree: response.meta.max_degree
+                    maxDegree: response.meta.max_degree,
+                    maxEdgeWeight: Math.max(
+                        ...response.edges.map(edge => edge.weight)
+                    )
                 };
 
                 this.detailGraphData.perspectivesInGraph =
@@ -1126,8 +1135,8 @@ export class GraphStore {
                     this.generateNodeKeyValueStore(this.detailGraphData.nodes);
 
                 this.addNeighbourObjectsToNodes();
-                this.store.core.updateVisibleDimensionsBasedOnSchema();
-                // this.store.schema.populateStoreData();
+
+                this.store.schema.refreshNodeStyles();
             }
             this.store.core.setDataIsLoading(false);
         }
@@ -1278,6 +1287,7 @@ export class GraphStore {
 
     removeSelection = async originNode => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
 
         let removedNodeEntries;
 
@@ -1310,29 +1320,34 @@ export class GraphStore {
                 this.resetGraphData();
             }
 
-            const currentStudyHistoryItem =
+            const historyItemId =
                 this.store.core.studyHistory[
                     this.store.core.studyHistoryItemIndex
                 ].id;
 
+            const params = {
+                nodes: graph_data_copy.nodes,
+                delete_type: 'remove',
+                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+                graph_type: this.store.core.currentGraph,
+                history_parent_id:
+                    this.store.core.studyHistory.length > 0 &&
+                    this.store.core.studyHistory[
+                        this.store.core.studyHistoryItemIndex
+                    ].id,
+                charts:
+                    this.store.stats.charts[this.store.search.currentDataset] ||
+                    []
+            };
+
             const { response, error } = await safeRequest(
-                axios.post('graph/remove', {
-                    nodes: graph_data_copy.nodes,
-                    user_id: this.store.core.userUuid,
-                    history_item_id: currentStudyHistoryItem,
-                    graph_type: this.store.core.currentGraph,
-                    study_id: this.store.core.studyUuid,
-                    action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                    history_parent_id:
-                        this.store.core.studyHistory.length > 0 &&
-                        this.store.core.studyHistory[
-                            this.store.core.studyHistoryItemIndex
-                        ].id,
-                    charts:
-                        this.store.stats.charts[
-                            this.store.search.currentDataset
-                        ] || []
-                })
+                axios.put(
+                    `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/delete`,
+                    params,
+                    {
+                        headers: { user_id: this.store.core.userUuid }
+                    }
+                )
             );
 
             if (error) {
@@ -1364,11 +1379,26 @@ export class GraphStore {
             );
 
             this.store.history.generateHistoryNodes();
+
+            if (response.data.entry_delta === 0) {
+                this.store.core.setDataModificationMessage(
+                    'No search results removed.'
+                );
+            } else if (response.data.entry_delta === 1) {
+                this.store.core.setDataModificationMessage(
+                    '1 search result removed.'
+                );
+            } else {
+                this.store.core.setDataModificationMessage(
+                    `${response.data.entry_delta} search results removed.`
+                );
+            }
         }
     };
 
     trimNetwork = async () => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
         const graph_data_copy = { ...this.currentGraphData };
         graph_data_copy.nodes = graph_data_copy.nodes
             .filter(node => node.visible)
@@ -1381,27 +1411,32 @@ export class GraphStore {
             this.resetGraphData();
         }
 
-        const currentStudyHistoryItem =
+        const historyItemId =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
 
+        const params = {
+            nodes: graph_data_copy.nodes,
+            delete_type: 'trim',
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            graph_type: this.store.core.currentGraph,
+            history_parent_id:
+                this.store.core.studyHistory.length > 0 &&
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id,
+            charts:
+                this.store.stats.charts[this.store.search.currentDataset] || []
+        };
+
         const { response, error } = await safeRequest(
-            axios.post('graph/trim', {
-                nodes: graph_data_copy.nodes,
-                user_id: this.store.core.userUuid,
-                history_item_id: currentStudyHistoryItem,
-                graph_type: this.store.core.currentGraph,
-                study_id: this.store.core.studyUuid,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                history_parent_id:
-                    this.store.core.studyHistory.length > 0 &&
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].id,
-                charts:
-                    this.store.stats.charts[this.store.search.currentDataset] ||
-                    []
-            })
+            axios.put(
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/delete`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
+            )
         );
 
         if (error) {
@@ -1432,10 +1467,25 @@ export class GraphStore {
         );
 
         this.store.history.generateHistoryNodes();
+
+        if (response.data.entry_delta === 0) {
+            this.store.core.setDataModificationMessage(
+                'No search results removed.'
+            );
+        } else if (response.data.entry_delta === 1) {
+            this.store.core.setDataModificationMessage(
+                '1 search result removed.'
+            );
+        } else {
+            this.store.core.setDataModificationMessage(
+                `${response.data.entry_delta} search results removed.`
+            );
+        }
     };
 
     expandNetwork = async (nodes, connector = null) => {
         this.store.core.setDataIsLoading(true);
+        this.store.core.setDataModificationMessage(null);
 
         if (this.store.core.currentGraph === 'detail') {
             this.resetDetailGraphData();
@@ -1470,46 +1520,40 @@ export class GraphStore {
             visible_entries = [];
         }
 
-        const graph_schema = this.store.schema.getServerSchema();
-
-        const visible_dimensions = this.store.core.visibleDimensions[
-            this.store.core.currentGraph
-        ].length
-            ? this.store.core.visibleDimensions[this.store.core.currentGraph]
-            : [];
-
-        const currentStudyHistoryItem =
+        const historyItemId =
             this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
                 .id;
 
+        const params = {
+            values: {
+                connector: connector,
+                nodes: nodes.map(node => {
+                    return { value: node.label, feature: node.feature };
+                })
+            },
+            graph_type: this.store.core.currentGraph,
+            anchor: this.store.search.anchor,
+            links: this.store.search.links,
+            visible_entries: visible_entries,
+            anchor_properties: anchor_properties,
+            action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            history_parent_id:
+                this.store.core.studyHistory.length > 0 &&
+                this.store.core.studyHistory[
+                    this.store.core.studyHistoryItemIndex
+                ].id,
+            charts:
+                this.store.stats.charts[this.store.search.currentDataset] || []
+        };
+
         const { response, error } = await safeRequest(
-            axios.post('graph/expand', {
-                values: {
-                    connector: connector,
-                    nodes: nodes.map(node => {
-                        return { value: node.label, feature: node.feature };
-                    })
-                },
-                user_id: this.store.core.userUuid,
-                graph_type: this.store.core.currentGraph,
-                anchor: this.store.search.anchor,
-                links: this.store.search.links,
-                visible_entries: visible_entries,
-                anchor_properties: anchor_properties,
-                graph_schema: graph_schema,
-                visible_dimensions: visible_dimensions,
-                study_id: this.store.core.studyUuid,
-                history_item_id: currentStudyHistoryItem,
-                action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
-                history_parent_id:
-                    this.store.core.studyHistory.length > 0 &&
-                    this.store.core.studyHistory[
-                        this.store.core.studyHistoryItemIndex
-                    ].id,
-                charts:
-                    this.store.stats.charts[this.store.search.currentDataset] ||
-                    []
-            })
+            axios.put(
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}/nodes/expand`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
+            )
         );
 
         if (error) {
@@ -1540,6 +1584,20 @@ export class GraphStore {
         );
 
         this.store.history.generateHistoryNodes();
+
+        if (response.data.entry_delta === 0) {
+            this.store.core.setDataModificationMessage(
+                'No new search results added.'
+            );
+        } else if (response.data.entry_delta === 1) {
+            this.store.core.setDataModificationMessage(
+                '1 new search result added.'
+            );
+        } else {
+            this.store.core.setDataModificationMessage(
+                `${response.data.entry_delta} new search results added.`
+            );
+        }
     };
 
     get graphObjectCount() {

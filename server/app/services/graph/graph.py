@@ -1,20 +1,21 @@
 import json
-from typing import List, Literal, Dict
+import pickle
+import uuid
+from typing import Dict, Generator, List, Literal, cast
 
-import app.services.data.mongo as csx_data
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
 import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
-import pickle
-from app.types import SchemaElement, Node
+from app.services.storage.base import BaseStorageConnector
+from app.types import Node, SchemaElement
 from app.utils.timer import use_timing
-import uuid
 
 
 def get_graph(
+    storage: Generator[BaseStorageConnector, None, None],
     graph_type: Literal["overview", "detail"],
     elastic_json: Dict,
     dimensions: Dict,
@@ -24,6 +25,7 @@ def get_graph(
     """Generate graph"""
     if graph_type == "overview":
         return get_overview_graph(
+            storage,
             elastic_json,
             dimensions["links"],
             dimensions["anchor"]["dimension"],
@@ -32,7 +34,7 @@ def get_graph(
         )
 
     return get_detail_graph(
-        elastic_json, dimensions["all"], dimensions["visible"], schema, index
+        storage, elastic_json, dimensions["all"], dimensions["visible"], schema, index
     )
 
 
@@ -47,7 +49,6 @@ def generate_graph_metadata(
     anchor_property_values,
     graph_data,
 ) -> Dict:
-
     if graph_type == "overview":
         return {
             "new_dimensions": dimensions["query_generated"],
@@ -73,6 +74,7 @@ def generate_graph_metadata(
 
 @use_timing
 def get_detail_graph(
+    storage,
     search_results,
     features: List[str],
     visible_features: List[str],
@@ -86,19 +88,14 @@ def get_detail_graph(
     list_features = []
     non_list_features = []
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
+    config = storage.get_config(index)
 
-        list_features = [
-            feature
-            for feature in features
-            if config["dimension_types"][feature] == "list"
-        ]
-        non_list_features = [
-            feature
-            for feature in features
-            if config["dimension_types"][feature] != "list"
-        ]
+    list_features = [
+        feature for feature in features if config["dimension_types"][feature] == "list"
+    ]
+    non_list_features = [
+        feature for feature in features if config["dimension_types"][feature] != "list"
+    ]
 
     if len(non_list_features) > 0:
         nodes, entries_with_nodes = csx_nodes.get_nodes(
@@ -109,7 +106,7 @@ def get_detail_graph(
         entries_with_nodes = {}
 
     if len(list_features) > 0:
-        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
+        mongo_nodes = storage.get_precomputed_nodes(
             index, search_results_df.entry.tolist(), list_features
         )
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
@@ -184,7 +181,12 @@ def get_props_for_cached_nodes(
 
 @use_timing
 def get_overview_graph(
-    search_results, links: List[str], anchor: str, anchor_properties: List[str], index
+    storage,
+    search_results,
+    links: List[str],
+    anchor: str,
+    anchor_properties: List[str],
+    index,
 ):
     search_results_df = pd.DataFrame(search_results)
 
@@ -192,15 +194,13 @@ def get_overview_graph(
     list_links = []
     non_list_links = []
 
-    with open(f"./app/data/config/{index}.json") as config:
-        config = json.load(config)
-        is_anchor_list = config["dimension_types"][anchor] == "list"
-        list_links = [
-            link for link in links if config["dimension_types"][link] == "list"
-        ]
-        non_list_links = [
-            link for link in links if config["dimension_types"][link] != "list"
-        ]
+    config = storage.get_config(index)
+
+    is_anchor_list = config["dimension_types"][anchor] == "list"
+    list_links = [link for link in links if config["dimension_types"][link] == "list"]
+    non_list_links = [
+        link for link in links if config["dimension_types"][link] != "list"
+    ]
 
     if len(non_list_links) > 0 or not is_anchor_list:
         nodes, entries_with_nodes = csx_nodes.get_nodes(
@@ -211,7 +211,7 @@ def get_overview_graph(
         entries_with_nodes = {}
 
     if len(list_links) > 0 or is_anchor_list:
-        mongo_nodes = csx_data.retrieve_raw_nodes_from_mongo(
+        mongo_nodes = storage.get_precomputed_nodes(
             index,
             search_results_df.entry.tolist(),
             list_links + [anchor] if is_anchor_list else list_links,
@@ -330,6 +330,7 @@ def convert_table_data(nodes: List[Node], elastic_results: List[Dict]) -> List[D
 
 
 def get_graph_from_scratch(
+    storage,
     graph_type,
     dimensions,
     elastic_json,
@@ -349,7 +350,7 @@ def get_graph_from_scratch(
     history_parent_id,
     charts,
 ):
-    graph_data = get_graph(graph_type, elastic_json, dimensions, schema, index)
+    graph_data = get_graph(storage, graph_type, elastic_json, dimensions, schema, index)
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
     anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
@@ -384,7 +385,7 @@ def get_graph_from_scratch(
 
     cache_snapshot = csx_study.enrich_cache_with_ng_graph(cache_data, graph_type)
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -409,6 +410,7 @@ def get_graph_from_scratch(
 
 
 def get_graph_with_new_anchor_props(
+    storage,
     comparison_res,
     graph_type,
     dimensions,
@@ -426,7 +428,6 @@ def get_graph_with_new_anchor_props(
     cache_data,
     charts,
 ):
-
     graph_data = get_props_for_cached_nodes(
         comparison_res, dimensions["anchor"]["props"], graph_type
     )
@@ -441,7 +442,7 @@ def get_graph_with_new_anchor_props(
     ]
     cache_data[graph_type]["nodes"] = graph_data["nodes"]
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -466,6 +467,7 @@ def get_graph_with_new_anchor_props(
 
 
 def get_graph_from_existing_data(
+    storage,
     graph_type,
     dimensions,
     elastic_json,
@@ -486,7 +488,12 @@ def get_graph_from_existing_data(
     # Take global table data and generate grpah
 
     graph_data = get_graph(
-        graph_type, cache_data["global"]["elastic_json"], dimensions, schema, index
+        storage,
+        graph_type,
+        cache_data["global"]["elastic_json"],
+        dimensions,
+        schema,
+        index,
     )
 
     table_data = convert_table_data(
@@ -511,7 +518,7 @@ def get_graph_from_existing_data(
 
     cache_data[graph_type] = graph_data
 
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -536,6 +543,7 @@ def get_graph_from_existing_data(
 
 
 def get_graph_from_cache(
+    storage,
     comparison_res,
     graph_type,
     study_id,
@@ -551,7 +559,7 @@ def get_graph_from_cache(
     history_parent_id,
     charts,
 ):
-    csx_study.new_history_entry(
+    storage.insert_history_item(
         study_id,
         user_id,
         {
@@ -573,3 +581,93 @@ def get_graph_from_cache(
     )
 
     return comparison_res["data"][graph_type]
+
+
+def calculate_trimmed_graph(cache_data, entries, graph_type):
+    df = cast(pd.DataFrame, pd.read_json(cache_data["global"]["results_df"]))
+
+    # Filter graph nodes
+    new_nodes = [
+        node
+        for node in cache_data[graph_type]["nodes"]
+        if len(set(node["entries"]).intersection(set(entries))) > 0
+    ]
+
+    cache_data[graph_type]["nodes"] = new_nodes
+
+    # Get visible nodes
+    visible_nodes = [
+        node["id"]
+        for node in new_nodes
+        if len(set(node["entries"]).intersection(set(entries))) > 0
+    ]
+
+    for node in cache_data[graph_type]["nodes"]:
+        node["entries"] = list(set(node["entries"]).intersection(set(entries)))
+
+    # Filter graph edges
+    cache_data[graph_type]["edges"] = [
+        edge
+        for edge in cache_data[graph_type]["edges"]
+        if edge["source"] in visible_nodes and edge["target"] in visible_nodes
+    ]
+
+    # Filter graph components
+    cache_data[graph_type]["components"] = [
+        component
+        for component in cache_data[graph_type]["components"]
+        if len(list(set(component["nodes"]).intersection(set(visible_nodes)))) > 0
+    ]
+
+    # Modify table data of graph
+    # Due to the particular structure of table_data in the cxs client both overview and detail graph have to have their own instance of table data
+    cache_data[graph_type]["meta"]["table_data"] = convert_table_data(
+        cache_data[graph_type]["nodes"], cache_data["global"]["elastic_json"]
+    )
+
+    # Generate new NetworkX graph
+    cache_data[graph_type]["meta"]["nx_graph"] = nx.to_dict_of_dicts(
+        from_graph_data(cache_data[graph_type])
+    )
+
+    components = csx_components.get_components(
+        cache_data[graph_type]["nodes"],
+        [],
+        from_graph_data(cache_data[graph_type]),
+    )
+
+    nodes = csx_nodes.enrich_with_components(new_nodes, components)
+    nodes = csx_nodes.enrich_with_neighbors(
+        nodes, [], from_graph_data(cache_data[graph_type])
+    )
+
+    nodes = csx_nodes.adjust_node_size(
+        nodes, df, cache_data[graph_type]["meta"]["dimensions"]
+    )
+
+    cache_data[graph_type]["edges"] = csx_edges.enrich_with_components(
+        cache_data[graph_type]["edges"], components
+    )
+
+    cache_data[graph_type]["nodes"] = nodes
+
+    if graph_type == "overview":
+        components = csx_components.enrich_with_top_connections(
+            components, cache_data[graph_type]["edges"]
+        )
+
+        for property_value in cache_data[graph_type]["meta"]["anchor_property_values"]:
+            property_value["values"] = [
+                node["properties"][property_value["property"]]
+                for node in cache_data[graph_type]["nodes"]
+            ]
+
+    components = sorted(components, key=lambda component: -component["node_count"])
+
+    cache_data[graph_type]["components"] = components
+
+    cache_data[graph_type]["meta"]["max_degree"] = get_max_degree(
+        from_graph_data(cache_data[graph_type])
+    )
+
+    return cache_data

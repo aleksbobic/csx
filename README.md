@@ -94,6 +94,11 @@ To configure, disable or enable various csx features visit the `./app/.env.{deve
 |REACT_APP_SURVEY_MESSAGE| The message that should show up when the survey popup displays.  | string |
 |REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH| Dispaly the survey popup after a user performs a particular number of actions on a graph | number (int) |
 
+### Starting with elastic container
+1. Make sure to delete the previously existing volumes, containers and images.
+2. Make sure that the SEARCH_SOURCE environment vairable in the environment of the server service in docker-compose is set to `elastic`.
+3. Run the following command: `docker-compose --profile elastic up --build`
+
 
 ### Starting the project in production mode 🚀
 
@@ -104,3 +109,7 @@ Open [http://localhost:8880](http://localhost:8880) to view it in the browser.
 
 ### Running production mode with analytics enabled
 In additiona to making sure the flag `REACT_APP_DISABLE_TRACKING` in `./app/.env.production` is set to `false` you must run the docker-compose command with particular parameters: `MATOMO_PASS=your_db_pass docker-compose -f docker-compose.prod.yml --profile analytics up --build --remove-orphans --force-recreate`
+
+To run also with elastic in production make sure to also add `--profile elastic` right after `--profile analytics` and also set the `ELASTIC_PASS` env variable.
+
+To run with mongo just make sure that the `SEARCH_SOURCE` in the environment of the server service is set to `mongo` and that the `MONGO_USER` and `MONGO_PASS` are set.

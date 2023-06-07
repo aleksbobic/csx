@@ -28,7 +28,6 @@ export class CoreStore {
     trackingEnabled = false;
     colorMode = null;
     showCookieInfo = false;
-    isSchemaNodeTypeBound = true;
     isLeftSidePanelOpen = true;
     isRightSidePanelOpen = false;
     rightPanelType = '';
@@ -36,6 +35,12 @@ export class CoreStore {
     rightPanelWidth = 0;
     surveyHidden = false;
     surveyHistoryDepthTrigger = 3;
+    dataModificationMessage = null;
+    neverShowInteractionModal = false;
+    interactionModalClosed = false;
+    finishedHomeJoyride = false;
+    finishedAdvancedSearchJoyride = false;
+    finishedGraphJoyride = false;
 
     visibleDimensions = { overview: [], detail: [] };
     toastInfo = {
@@ -61,22 +66,89 @@ export class CoreStore {
             );
         }
 
+        this.finishedHomeJoyride =
+            localStorage.getItem('finishedHomeJoyride') === 'true';
+        this.finishedAdvancedSearchJoyride =
+            localStorage.getItem('finishedAdvancedSearchJoyride') === 'true';
+        this.finishedGraphJoyride =
+            localStorage.getItem('finishedGraphJoyride') === 'true';
+
         this.colorMode = localStorage.getItem('chakra-ui-color-mode');
+        this.getInteractionsModalDisplay();
 
         makeAutoObservable(this, {}, { deep: true });
     }
+
+    getBasePresentURL = () => {
+        if (isEnvSet('REACT_APP_SERVER_PORT')) {
+            return 'http://localhost:8882/present';
+        } else {
+            return `${window.location.origin}/present`;
+        }
+    };
+
+    setFinishedHomeJoyride = value => {
+        this.finishedHomeJoyride = value;
+        localStorage.setItem('finishedHomeJoyride', value);
+    };
+    setFinishedAdvancedSearchJoyride = value => {
+        this.finishedAdvancedSearchJoyride = value;
+        localStorage.setItem('finishedAdvancedSearchJoyride', value);
+    };
+    setFinishedGraphJoyride = value => {
+        this.finishedGraphJoyride = value;
+        localStorage.setItem('finishedGraphJoyride', value);
+    };
+
+    resetJoyride = () => {
+        this.setFinishedHomeJoyride(false);
+        this.setFinishedAdvancedSearchJoyride(false);
+        this.setFinishedGraphJoyride(false);
+    };
+
+    setInteractionModalClosed = value => (this.interactionModalClosed = value);
+
+    setInteractionsModalDisplay = value => {
+        this.neverShowInteractionModal = value;
+
+        localStorage.setItem(
+            'neverShowInteractionsModal',
+            this.neverShowInteractionModal
+        );
+    };
+
+    getInteractionsModalDisplay = () => {
+        this.neverShowInteractionModal =
+            localStorage.getItem('neverShowInteractionsModal') === 'true';
+    };
 
     addCommentToCurrentHistoryItem = comment => {
         this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
     };
 
-    deleteCommentFromCurrentHistoryItem = index => {
-        this.studyHistory[this.studyHistoryItemIndex].comments.splice(index, 1);
+    setDataModificationMessage = message =>
+        (this.dataModificationMessage = message);
+
+    deleteCommentFromCurrentHistoryItem = id => {
+        const commentIndex = this.studyHistory[
+            this.studyHistoryItemIndex
+        ].comments.findIndex(comment => comment.id === id);
+
+        this.studyHistory[this.studyHistoryItemIndex].comments.splice(
+            commentIndex,
+            1
+        );
     };
 
     editCommentFromCurrentHistoryItem = (index, newComment) => {
-        this.studyHistory[this.studyHistoryItemIndex].comments[index] =
-            newComment;
+        this.studyHistory[this.studyHistoryItemIndex].comments[index] = {
+            ...this.studyHistory[this.studyHistoryItemIndex].comments[index],
+            ...newComment
+        };
+
+        this.studyHistory[this.studyHistoryItemIndex].comments = [
+            ...this.studyHistory[this.studyHistoryItemIndex].comments
+        ];
     };
 
     setSurveyHidden = val => {
@@ -93,52 +165,28 @@ export class CoreStore {
     toggleIsStudyPublic = async () => {
         this.setIsStudyPublic(!this.isStudyPublic);
 
-        if (this.isStudyPublic) {
-            const params = {
-                user_uuid: this.userUuid,
-                study_uuid: this.studyUuid
-            };
+        const params = {
+            public: this.isStudyPublic
+        };
 
-            const { response, error } = await safeRequest(
-                axios.post('study/public', params)
-            );
+        const { response, error } = await safeRequest(
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
+        );
 
-            if (error) {
-                this.handleRequestError(error);
-                return;
-            }
-
-            this.setStudyPublicURL(response.data);
-        } else {
-            const params = {
-                user_uuid: this.userUuid,
-                study_uuid: this.studyUuid
-            };
-
-            const { error } = await safeRequest(
-                axios.post('study/private', params)
-            );
-
-            if (error) {
-                this.handleRequestError(error);
-                return;
-            }
-
-            this.setStudyPublicURL('');
+        if (error) {
+            this.handleRequestError(error);
+            return;
         }
+
+        this.setStudyPublicURL(response.data);
     };
 
     setStudyPublicURL = val => (this.studyPublicURL = val);
     setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
     setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
     setRightPanelType = val => (this.rightPanelType = val);
-
-    setIsSchemaNodeTypeBound = val => {
-        this.isSchemaNodeTypeBound = val;
-        if (val) {
-            this.updateVisibleDimensionsBasedOnSchema();
-        }
-    };
 
     setRightPanelWidth = val => (this.rightPanelWidth = val);
 
@@ -189,15 +237,13 @@ export class CoreStore {
         this.studyName = name;
 
         const params = {
-            user_uuid: this.userUuid,
-            study_uuid: this.studyUuid,
-            study_name: this.studyName,
-            study_description: this.studyDescription,
-            study_author: this.studyAuthor
+            study_name: this.studyName
         };
 
         const { error } = await safeRequest(
-            axios.get('study/update', { params })
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -213,15 +259,13 @@ export class CoreStore {
         this.studyAuthor = author;
 
         const params = {
-            user_uuid: this.userUuid,
-            study_uuid: this.studyUuid,
-            study_name: this.studyName,
-            study_description: this.studyDescription,
             study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(
-            axios.get('study/update', { params })
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -237,15 +281,13 @@ export class CoreStore {
         this.studyDescription = description;
 
         const params = {
-            user_uuid: this.userUuid,
-            study_uuid: this.studyUuid,
-            study_name: this.studyName,
-            study_description: this.studyDescription,
-            study_author: this.studyAuthor
+            study_description: this.studyDescription
         };
 
         const { error } = await safeRequest(
-            axios.get('study/update', { params })
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -275,7 +317,7 @@ export class CoreStore {
     };
 
     generateUUID = async () => {
-        const { response, error } = await safeRequest(axios.get('util/uuid'));
+        const { response, error } = await safeRequest(axios.get('utils/uuid'));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -296,10 +338,14 @@ export class CoreStore {
 
         this.studyDescription = '';
 
-        const params = { user_uuid: this.userUuid, study_name: this.studyName };
-
         const { response, error } = await safeRequest(
-            axios.get('study/generate', { params })
+            axios.post(
+                'studies/',
+                { study_name: this.studyName },
+                {
+                    headers: { user_id: this.userUuid }
+                }
+            )
         );
 
         if (error) {
@@ -315,16 +361,15 @@ export class CoreStore {
     };
 
     deleteStudy = async studyUuid => {
-        if (!this.studyIsSaved || studyUuid) {
-            const params = {
-                study_uuid: studyUuid ? studyUuid : this.studyUuid,
-                user_uuid: this.userUuid,
-                user_trigger: !!studyUuid
-            };
+        if ((!this.studyIsSaved && !studyUuid) || studyUuid) {
+            const studyID = studyUuid ? studyUuid : this.studyUuid;
 
-            if (params.study_uuid) {
+            if (studyID) {
                 const { error } = await safeRequest(
-                    axios.get('study/delete', { params })
+                    axios.delete(`studies/${studyID}`, {
+                        headers: { user_id: this.userUuid },
+                        data: {}
+                    })
                 );
 
                 if (error) {
@@ -341,15 +386,15 @@ export class CoreStore {
 
     saveStudy = async () => {
         const params = {
-            user_uuid: this.userUuid,
-            study_uuid: this.studyUuid,
             study_name: this.studyName,
             study_description: this.studyDescription,
             study_author: this.studyAuthor
         };
 
         const { error } = await safeRequest(
-            axios.get('study/save', { params })
+            axios.patch(`studies/${this.studyUuid}`, params, {
+                headers: { user_id: this.userUuid }
+            })
         );
 
         if (error) {
@@ -361,10 +406,9 @@ export class CoreStore {
     };
 
     getSavedStudies = async () => {
-        const params = { user_uuid: this.userUuid };
-        if (params.user_uuid) {
+        if (this.userUuid) {
             const { response, error } = await safeRequest(
-                axios.get('study/saved', { params })
+                axios.get('studies/', { headers: { user_id: this.userUuid } })
             );
 
             if (error) {
@@ -405,29 +449,22 @@ export class CoreStore {
     };
 
     toggleVisibleDimension = dimension => {
-        if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
-            this.visibleDimensions[this.currentGraph].splice(
-                this.visibleDimensions[this.currentGraph].indexOf(dimension),
-                1
-            );
-        } else {
-            this.visibleDimensions[this.currentGraph].push(dimension);
+        if (this.visibleDimensions[this.currentGraph]) {
+            if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
+                this.visibleDimensions[this.currentGraph].splice(
+                    this.visibleDimensions[this.currentGraph].indexOf(
+                        dimension
+                    ),
+                    1
+                );
+            } else {
+                this.visibleDimensions[this.currentGraph].push(dimension);
+            }
         }
     };
 
-    updateVisibleDimensionsBasedOnSchema = () => {
-        if (this.isSchemaNodeTypeBound) {
-            const connectedNodes = this.store.schema.getConnectedNodes();
-
-            if (!connectedNodes.length) {
-                this.visibleDimensions['detail'] = [
-                    this.store.search.links,
-                    this.store.search.anchor
-                ].flat();
-            } else {
-                this.visibleDimensions['detail'] = connectedNodes;
-            }
-        }
+    setArrayAsVisibleDimensions = dimensions => {
+        this.visibleDimensions[this.currentGraph] = dimensions;
     };
 
     get isOverview() {

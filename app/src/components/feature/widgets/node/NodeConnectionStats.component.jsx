@@ -178,11 +178,18 @@ function ConnectionStats(props) {
                                 minWidth="210px"
                                 onClick={() => {
                                     store.track.trackEvent(
-                                        `Details Panel - Widget - ${props.chart.id}`,
-                                        'Button',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: `Set max degree level to ${level}`
+                                            area: 'Widget',
+                                            area_id: props.chart.id
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Set max degree level',
+                                            event_value: level
                                         })
                                     );
 
@@ -382,11 +389,21 @@ function ConnectionStats(props) {
                                         onClick={() => {
                                             if (!props.demoData.length) {
                                                 store.track.trackEvent(
-                                                    `Details Panel - Widget - ${props.chart.id}`,
-                                                    'Button',
                                                     JSON.stringify({
-                                                        type: 'Click',
-                                                        value: `Navigate to ${node.id} - ${node.label}`
+                                                        area: 'Widget',
+                                                        area_id: props.chart.id
+                                                    }),
+                                                    JSON.stringify({
+                                                        item_type: 'Button',
+                                                        item_id: node.id,
+                                                        item_label: node.label,
+                                                        item_feature:
+                                                            node.feature
+                                                    }),
+                                                    JSON.stringify({
+                                                        event_type: 'Click',
+                                                        event_action:
+                                                            'Navigate to node'
                                                     })
                                                 );
 
