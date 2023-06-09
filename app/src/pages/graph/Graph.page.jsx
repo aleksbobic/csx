@@ -356,7 +356,7 @@ function GraphPage() {
                                     }}
                                 >
                                     node
-                                </span>
+                                </span>{' '}
                                 represents a{' '}
                                 <span
                                     style={{
@@ -375,14 +375,14 @@ function GraphPage() {
                                 >
                                     edge
                                 </span>{' '}
-                                represents a
+                                represents a{' '}
                                 <span
                                     style={{
                                         fontWeight: 'bold',
                                         color: '#43a2fb'
                                     }}
                                 >
-                                    common value of a different column{' '}
+                                    common value of a different column
                                 </span>
                                 . You can left click on a node to see more
                                 information about it. To see how you can change

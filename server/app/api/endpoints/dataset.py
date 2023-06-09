@@ -19,7 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, sta
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 def get_datasets(
     search: BaseSearchConnector = Depends(get_search_connector),
     storage: BaseStorageConnector = Depends(get_storage_connector),
@@ -53,7 +53,7 @@ def get_datasets(
     return datasets
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 def upload_dataset(file: UploadFile):
     """Upload a dataset to the server"""
 

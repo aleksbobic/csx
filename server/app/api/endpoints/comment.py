@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 def add_comment(
     data: Comment,
     study_id: str,

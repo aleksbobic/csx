@@ -128,7 +128,7 @@ export class SearchStore {
     };
 
     getDatasets = async () => {
-        const { response, error } = await safeRequest(axios.get('datasets/'));
+        const { response, error } = await safeRequest(axios.get('datasets'));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -259,9 +259,9 @@ export class SearchStore {
 
     suggest = async (feature, input) => {
         const { response, error } = await safeRequest(
-            axios.get(
-                `datasets/${this.currentDataset}/search/suggest?feature=${feature}&value=${input}`
-            )
+            axios.get(`datasets/${this.currentDataset}/search/suggest`, {
+                params: { feature: feature, value: input }
+            })
         );
 
         if (error) {

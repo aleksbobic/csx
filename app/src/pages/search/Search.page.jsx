@@ -345,7 +345,7 @@ function SearchPage(props) {
                                                 color: '#43a2fb'
                                             }}
                                         >
-                                            connector node
+                                            connector node 🔗
                                         </span>{' '}
                                         on the canvas and{' '}
                                         <span

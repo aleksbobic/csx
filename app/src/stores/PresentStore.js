@@ -1009,7 +1009,7 @@ export class PresentStore {
 
     getStudyDetails = async studyID => {
         const { response, error } = await safeRequest(
-            axios.get(`studies/${studyID}/history/`, {
+            axios.get(`studies/${studyID}/history`, {
                 headers: { user_id: this.store.core.userUuid }
             })
         );

@@ -56,7 +56,7 @@ def get_study(
     }
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED)
 def create_study(
     data: StudyCreate,
     user_id: str = Depends(verify_user_exists),
@@ -81,7 +81,7 @@ def create_study(
     return study_uuid
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("", status_code=status.HTTP_200_OK)
 def get_studies(
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
