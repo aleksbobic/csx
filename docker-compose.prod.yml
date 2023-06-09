@@ -9,6 +9,8 @@ services:
       dockerfile: docker/Dockerfile.server
     ports:
       - 8881:80
+    volumes:
+      - ./server:/cs
     environment:
       DISABLE_UPLOAD: 'false'
       SEARCH_SOURCE: 'mongo'
