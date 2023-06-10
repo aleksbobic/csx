@@ -24,3 +24,4 @@ pymongo
 marisa-trie
 palettable
 polars==0.16.4
+typing_extensions==4.5.0
