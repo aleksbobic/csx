@@ -137,7 +137,9 @@ function CookieInfo() {
                             color: '#43a2fb'
                         }}
                     />
-                    Improving CSX with new features and fixing bugs.
+                    Improving CSX with new features (this may also include using
+                    the data to train machine learning features such as
+                    recommender systems) and fixing bugs.
                 </ListItem>
                 <ListItem>
                     <ChevronRight
@@ -148,7 +150,9 @@ function CookieInfo() {
                             color: '#43a2fb'
                         }}
                     />
-                    Contributing to research through interaction data analysis.
+                    Contributing to research through interaction data analysis
+                    and also through potentially open-sourcing the collected
+                    data.
                 </ListItem>
             </List>
             <Text
