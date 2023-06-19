@@ -1411,7 +1411,10 @@ function GraphPage() {
                         store.core.setFinishedGraphJoyride(true);
                     }
                 }}
-                run={!store.core.finishedGraphJoyride}
+                run={
+                    !store.core.finishedGraphJoyride &&
+                    store.search.currentDataset === 'example'
+                }
             />
 
             {showViewAll && (

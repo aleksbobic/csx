@@ -525,7 +525,10 @@ function SearchPage(props) {
                         store.core.setFinishedAdvancedSearchJoyride(true);
                     }
                 }}
-                run={!store.core.finishedAdvancedSearchJoyride}
+                run={
+                    !store.core.finishedAdvancedSearchJoyride &&
+                    store.search.currentDataset === 'example'
+                }
             />
             <AdvancedSearchComponent marginTop="100px" isPanel={false} />
         </Flex>
