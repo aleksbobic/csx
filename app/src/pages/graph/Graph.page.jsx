@@ -401,15 +401,39 @@ function GraphPage() {
                             </span>
                         ),
                         content: (
-                            <p
-                                style={{
-                                    textAlign: 'left',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Click this button to open the schema panel. Then
-                                click next.
-                            </p>
+                            <div style={{ padding: '10px 20px' }}>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px',
+                                        marginTop: '10px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            Click the highlighted button
+                                        </span>{' '}
+                                        to open the schema panel.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        One the schema panel is open{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            click next
+                                        </span>
+                                        .
+                                    </li>
+                                </ul>
+                            </div>
                         )
                     },
                     {
@@ -423,16 +447,37 @@ function GraphPage() {
                             </span>
                         ),
                         content: (
-                            <p
-                                style={{
-                                    textAlign: 'left',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                This is the ✨ schema panel ✨. It shows how the
-                                search result columns are connected to create
-                                the network. Click next to read more about it.
-                            </p>
+                            <div style={{ padding: '10px 20px' }}>
+                                <p
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    This is the ✨ schema panel ✨. It shows how
+                                    the search result columns are connected to
+                                    create the network.
+                                </p>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px',
+                                        marginTop: '10px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            Click next
+                                        </span>{' '}
+                                        to read more about it.
+                                    </li>
+                                </ul>
+                            </div>
                         )
                     },
                     {
