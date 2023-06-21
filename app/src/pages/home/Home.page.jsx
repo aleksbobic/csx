@@ -369,8 +369,7 @@ function HomePage() {
                                     the highlighted areas of this tutorial.{' '}
                                     <span
                                         style={{
-                                            fontWeight: 'bold',
-                                            color: '#fb4343'
+                                            fontWeight: 'bold'
                                         }}
                                     >
                                         Make sure to perform all tasks mentioned

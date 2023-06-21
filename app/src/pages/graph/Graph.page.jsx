@@ -421,7 +421,7 @@ function GraphPage() {
                                         to open the schema panel.
                                     </li>
                                     <li style={{ paddingBottom: '6px' }}>
-                                        One the schema panel is open{' '}
+                                        Once the schema panel is open{' '}
                                         <span
                                             style={{
                                                 fontWeight: 'bold',
@@ -611,7 +611,7 @@ function GraphPage() {
                                                 color: '#43a2fb'
                                             }}
                                         >
-                                            left node top dropdown
+                                            left nodes top dropdown
                                         </span>
                                         .
                                     </li>
@@ -818,15 +818,39 @@ function GraphPage() {
                             </span>
                         ),
                         content: (
-                            <p
-                                style={{
-                                    textAlign: 'left',
-                                    fontSize: '14px'
-                                }}
-                            >
-                                Click this tab to open the network modification
-                                tools then click next.
-                            </p>
+                            <div style={{ padding: '10px 20px' }}>
+                                <ul
+                                    style={{
+                                        textAlign: 'left',
+                                        fontSize: '14px',
+                                        marginTop: '10px'
+                                    }}
+                                >
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            Click the highlighted tab
+                                        </span>{' '}
+                                        to open the network modification tools.
+                                    </li>
+                                    <li style={{ paddingBottom: '6px' }}>
+                                        Once the panel is open{' '}
+                                        <span
+                                            style={{
+                                                fontWeight: 'bold',
+                                                color: '#43a2fb'
+                                            }}
+                                        >
+                                            click next
+                                        </span>
+                                        .
+                                    </li>
+                                </ul>
+                            </div>
                         )
                     },
                     {
