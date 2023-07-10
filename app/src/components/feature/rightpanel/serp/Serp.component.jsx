@@ -1,13 +1,14 @@
 import {
     Box,
     IconButton,
+    Link,
     Text,
     Tooltip,
     useColorMode,
     VStack
 } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowRight } from 'css.gg';
+import { ArrowRight, Link as GGLink } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
@@ -29,6 +30,23 @@ function Serp(props) {
     const { width, height } = useResizeDetector({ listContainerRefrence });
 
     const { colorMode } = useColorMode();
+
+    const isStringAURL = string => {
+        if (
+            string &&
+            !string.toLowerCase().startsWith('www') &&
+            !string.toLowerCase().startsWith('http')
+        ) {
+            return false;
+        }
+
+        try {
+            new URL(string);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    };
 
     const listVirtualizer = useVirtualizer({
         count: listData.length,
@@ -95,14 +113,37 @@ function Serp(props) {
                     >
                         {feature.toUpperCase()}
                     </Text>
-                    <Text
-                        fontSize="xs"
-                        width="100%"
-                        paddingTop="10px"
-                        display="inline"
-                    >
-                        {value.charAt(0).toUpperCase() + value.slice(1)}
-                    </Text>
+                    {isStringAURL(value) ? (
+                        <Link
+                            fontSize="xs"
+                            width="100%"
+                            paddingTop="10px"
+                            display="inline"
+                            color="blue.400"
+                            href={value}
+                            isExternal
+                        >
+                            {value}{' '}
+                            <GGLink
+                                style={{
+                                    '--ggs': 0.7,
+                                    display: 'inline-block',
+                                    marginLeft: '5px',
+                                    marginBottom: '3px'
+                                }}
+                            />
+                        </Link>
+                    ) : (
+                        <Text
+                            fontSize="xs"
+                            width="100%"
+                            paddingTop="10px"
+                            display="inline"
+                        >
+                            {value &&
+                                value.charAt(0).toUpperCase() + value.slice(1)}
+                        </Text>
+                    )}
                 </Box>
             );
         }

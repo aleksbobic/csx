@@ -13,7 +13,7 @@ import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import PropTypes from 'prop-types';
 
-import nodeInformationInteraction from 'images/left_click_node.png';
+import nodeInformationInteraction from 'images/hover_node.png';
 import panningInteraction from 'images/pan.png';
 import contextMenuInteraction from 'images/right_click.png';
 import scrollInteraction from 'images/scroll.png';
@@ -96,14 +96,18 @@ function InteractionsToast(props) {
                 </VStack>
                 <VStack width="25%">
                     <Heading size="xs" width="100%">
-                        View Node Info
+                        Node & Edge Info
                     </Heading>
                     <Text fontSize="xs">
-                        Left click on a{' '}
+                        Hover over a{' '}
                         <Text as="span" color="blue.500" fontWeight="bold">
                             node
                         </Text>{' '}
-                        to view additional information.
+                        or{' '}
+                        <Text as="span" color="blue.500" fontWeight="bold">
+                            edge
+                        </Text>{' '}
+                        to view information stored on it.
                     </Text>
 
                     <Image

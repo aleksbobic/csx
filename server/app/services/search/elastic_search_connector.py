@@ -4,6 +4,7 @@ import re
 from typing import Any, Dict, Generator, List, Union
 
 import pandas as pd
+import polars as pl
 from app.config import settings
 from app.services.search.base import BaseSearchConnector
 from elasticsearch import Elasticsearch
@@ -98,8 +99,9 @@ class ElasticSearchConnector(BaseSearchConnector):
             yield doc
 
     def insert_dataset(
-        self, dataset_name: str, config: dict, dataset: pd.DataFrame
+        self, dataset_name: str, config: dict, dataset: pl.DataFrame
     ) -> None:
+        dataset_pd = dataset.to_pandas()
         if self.es.indices.exists(index=dataset_name):
             self.delete_dataset(dataset_name)
 
@@ -112,7 +114,7 @@ class ElasticSearchConnector(BaseSearchConnector):
         try:
             bulk(
                 self.es,
-                self.__convert_df_to_entries(dataset_name, config, dataset),
+                self.__convert_df_to_entries(dataset_name, config, dataset_pd),
                 refresh="wait_for",
             )
         except Exception as e:

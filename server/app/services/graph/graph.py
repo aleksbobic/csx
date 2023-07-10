@@ -1,6 +1,7 @@
 import json
 import pickle
 import uuid
+from datetime import datetime
 from typing import Dict, Generator, List, Literal, cast
 
 import app.services.graph.components as csx_components
@@ -85,37 +86,7 @@ def get_detail_graph(
 
     search_results_df = pd.DataFrame(search_results)
 
-    list_features = []
-    non_list_features = []
-
-    config = storage.get_config(index)
-
-    list_features = [
-        feature for feature in features if config["dimension_types"][feature] == "list"
-    ]
-    non_list_features = [
-        feature for feature in features if config["dimension_types"][feature] != "list"
-    ]
-
-    if len(non_list_features) > 0:
-        nodes, entries_with_nodes = csx_nodes.get_nodes(
-            search_results_df, non_list_features
-        )
-    else:
-        nodes = []
-        entries_with_nodes = {}
-
-    if len(list_features) > 0:
-        mongo_nodes = storage.get_precomputed_nodes(
-            index, search_results_df.entry.tolist(), list_features
-        )
-        entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
-            entries_with_nodes, mongo_nodes
-        )
-        mongo_nodes = csx_nodes.adjust_node_size(
-            mongo_nodes, search_results_df, list_features
-        )
-        nodes = nodes + mongo_nodes
+    nodes, entries_with_nodes = csx_nodes.get_nodes(search_results_df, features)
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 
@@ -194,7 +165,51 @@ def get_overview_graph(
     list_links = []
     non_list_links = []
 
-    config = storage.get_config(index)
+    if index != "openalex":
+        config = storage.get_config(index)
+    else:
+        config = {
+            "dimension_types": {
+                "authors": "list",
+                "author_ids": "list",
+                "author_institutions": "list",
+                "author_countries": "list",
+                "institution_types": "list",
+                "institution_ids": "list",
+                "concepts_lv_1": "list",
+                "concepts_lv_2": "list",
+                "concepts_lv_3": "list",
+                "citation_counts": "integer",
+                "title": "string",
+                "doi": "string",
+                "publication_year": "integer",
+                "hosted_location": "string",
+                "hosted_location_type": "string",
+                "hosted_location_id": "string",
+            },
+            "schemas": [
+                {
+                    "name": "default",
+                    "relations": [
+                        {
+                            "dest": "authors",
+                            "src": "title",
+                            "relationship": "oneToMany",
+                        }
+                    ],
+                }
+            ],
+            "default_schemas": {"overview": [], "detail": []},
+            "anchor": "title",
+            "links": ["authors"],
+            "default_search_fields": ["title"],
+            "default_visible_dimensions": ["authors", "title"],
+            "dataset_type": "api",
+            "search_hints": {
+                "citation_counts": {"min": 0},
+                "publication_year": {"min": 0, "max": datetime.now().year},
+            },
+        }
 
     is_anchor_list = config["dimension_types"][anchor] == "list"
     list_links = [link for link in links if config["dimension_types"][link] == "list"]
@@ -202,30 +217,22 @@ def get_overview_graph(
         link for link in links if config["dimension_types"][link] != "list"
     ]
 
-    if len(non_list_links) > 0 or not is_anchor_list:
-        nodes, entries_with_nodes = csx_nodes.get_nodes(
-            search_results_df, non_list_links, anchor, anchor_properties, is_anchor_list
-        )
-    else:
-        nodes = []
-        entries_with_nodes = {}
+    nodes, entries_with_nodes = csx_nodes.get_nodes(
+        search_results_df,
+        non_list_links + (list_links + [anchor] if is_anchor_list else list_links),
+        anchor,
+        anchor_properties,
+        is_anchor_list,
+    )
 
     if len(list_links) > 0 or is_anchor_list:
-        mongo_nodes = storage.get_precomputed_nodes(
-            index,
-            search_results_df.entry.tolist(),
-            list_links + [anchor] if is_anchor_list else list_links,
-        )
-
         if is_anchor_list:
             unique_entry_set = set(search_results_df.entry.tolist())
             unique_mongo_anchor_node_entry_set = set(
                 [
                     item
                     for sublist in [
-                        node["entries"]
-                        for node in mongo_nodes
-                        if node["feature"] == anchor
+                        node["entries"] for node in nodes if node["feature"] == anchor
                     ]
                     for item in sublist
                 ]
@@ -236,29 +243,32 @@ def get_overview_graph(
             )
 
             if len(entries_with_no_anchor_value) > 0:
-                mongo_nodes.append(
-                    {
-                        "entries": entries_with_no_anchor_value,
-                        "id": uuid.uuid4().hex,
-                        "label": f"CSX_No_{anchor}",
-                        "feature": anchor,
-                        "community": 0,
-                        "component": 0,
-                        "size": len(entries_with_no_anchor_value) + 5,
-                    }
+                nodes.append(
+                    cast(
+                        Node,
+                        {
+                            "entries": entries_with_no_anchor_value,
+                            "id": uuid.uuid4().hex,
+                            "label": f"CSX_No_{anchor}",
+                            "feature": anchor,
+                            "community": 0,
+                            "component": 0,
+                            "size": len(entries_with_no_anchor_value) + 5,
+                        },
+                    )
                 )
 
         entries_with_nodes = csx_nodes.enrich_entries_with_nodes(
-            entries_with_nodes, mongo_nodes
+            entries_with_nodes, nodes
         )
 
         mongo_nodes = csx_nodes.adjust_node_size(
-            mongo_nodes,
+            nodes,
             search_results_df,
             list_links + [anchor] if is_anchor_list else list_links,
         )
 
-        nodes = nodes + mongo_nodes
+        nodes = mongo_nodes
 
     node_ids_with_labels = csx_nodes.get_node_ids_with_labels(nodes)
 

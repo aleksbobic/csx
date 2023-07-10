@@ -5,6 +5,7 @@ from typing import List, Union
 import gridfs
 from app.config import settings
 from app.services.storage.base import BaseStorageConnector
+from app.utils.timer import use_timing
 from bson import ObjectId
 from pymongo import MongoClient
 
@@ -36,6 +37,7 @@ class MongoStorageConnector(BaseStorageConnector):
         except ConnectionError as e:
             raise e
 
+    @use_timing
     def insert_nodes(self, collection_name: str, nodes: list) -> None:
         self.database[collection_name].insert_many(nodes)
 

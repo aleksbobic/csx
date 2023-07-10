@@ -24,5 +24,7 @@ pymongo
 marisa-trie
 palettable
 uvicorn
-polars==0.16.4
+polars==0.18.5
+pyarrow==12.0.1
 debugpy
+pyalex

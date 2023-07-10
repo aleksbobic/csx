@@ -4,6 +4,8 @@ from typing import Generator
 from app.config import settings
 from app.services.search.base import BaseSearchConnector
 from app.services.search.elastic_search_connector import ElasticSearchConnector
+from app.services.search.external.base import BaseExternalSearchConnector
+from app.services.search.external.openalex_connector import OpeanAlexSearchConnector
 from app.services.search.mongo_search_connector import MongoSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.services.storage.mongo_storage_connector import MongoStorageConnector
@@ -62,6 +64,12 @@ def get_search_connector() -> Generator[BaseSearchConnector, None, None]:
         yield connector
     finally:
         connector.disconnect()
+
+
+def get_external_search_connector() -> (
+    Generator[BaseExternalSearchConnector, None, None]
+):
+    yield OpeanAlexSearchConnector()
 
 
 def get_current_study(

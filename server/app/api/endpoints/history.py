@@ -9,6 +9,7 @@ import app.services.study.study as csx_study
 import pandas as pd
 from app.api.dependencies import (
     get_current_study,
+    get_external_search_connector,
     get_search_connector,
     get_storage_connector,
     verify_user_exists,
@@ -20,6 +21,7 @@ from app.schemas.history import (
     UpdateChartsData,
 )
 from app.services.search.base import BaseSearchConnector
+from app.services.search.external.base import BaseExternalSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
@@ -110,6 +112,9 @@ def create_history_item(
     user_id: str = Depends(verify_user_exists),
     storage: BaseStorageConnector = Depends(get_storage_connector),
     search: BaseSearchConnector = Depends(get_search_connector),
+    external_search: BaseExternalSearchConnector = Depends(
+        get_external_search_connector
+    ),
 ):
     history_item_id = data.history_item_id
     query = data.query
@@ -127,6 +132,7 @@ def create_history_item(
     charts = data.charts
 
     """Run search using given query."""
+
     if history_item_id == "":
         cache_data = {}
         storage.update_study_settings(study_id, user_id, {"index": index})
@@ -146,7 +152,10 @@ def create_history_item(
             if entry["item_id"] == ObjectId(history_parent_id)
         ][0]["graph_type"] != graph_type
 
-    config = storage.get_config(index)
+    if index != "openalex":
+        config = storage.get_config(index)
+    else:
+        config = external_search.get_config()
 
     dimension_types = config["dimension_types"]
 
@@ -188,14 +197,24 @@ def create_history_item(
             feature: dimension_types[feature] for feature in filtered_fields
         }
 
-        results = search.simple_search(index, query, search_features)
+        if index != "openalex":
+            results = search.simple_search(index, query, search_features)
+        else:
+            results = external_search.simple_search(
+                index, query, list(search_features.keys())[0]
+            )
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
             for entry in get_new_features(json.loads(query))
         }
 
-        results = search.advanced_search(index, json.loads(query), dimension_types)
+        if index != "openalex":
+            results = search.advanced_search(index, json.loads(query), dimension_types)
+        else:
+            results = external_search.advanced_search(
+                index, json.loads(query), dimension_types
+            )
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -203,7 +222,10 @@ def create_history_item(
     json_results = results.to_json(orient="records")
     elastic_json = json.loads(json_results)
 
-    dataset_features = search.get_dataset_features(index)
+    if index != "openalex":
+        dataset_features = search.get_dataset_features(index)
+    else:
+        dataset_features = external_search.get_dataset_features(index)
 
     if not dataset_features:
         raise HTTPException(
@@ -353,6 +375,9 @@ def expand_nodes(
     study: dict = Depends(get_current_study),
     storage: BaseStorageConnector = Depends(get_storage_connector),
     search: BaseSearchConnector = Depends(get_search_connector),
+    external_search: BaseExternalSearchConnector = Depends(
+        get_external_search_connector
+    ),
 ):
     cache_data = storage.get_history_item(history_item_id)
 
@@ -388,6 +413,7 @@ def expand_nodes(
                 "action": "search",
                 "feature": values["nodes"][0]["feature"],
                 "keyphrase": values["nodes"][0]["value"],
+                "entry": values["nodes"][0]["entry"],
             },
         }
     else:
@@ -396,6 +422,7 @@ def expand_nodes(
                 "action": "search",
                 "feature": entry["feature"],
                 "keyphrase": entry["value"],
+                "entry": entry["entry"],
             }
             for entry in values["nodes"]
         ]
@@ -413,7 +440,10 @@ def expand_nodes(
 
     index = cache_data["global"]["index"]
 
-    config = storage.get_config(index)
+    if index != "openalex":
+        config = storage.get_config(index)
+    else:
+        config = external_search.get_config()
 
     dimension_types = config["dimension_types"]
 
@@ -433,6 +463,18 @@ def expand_nodes(
         cache_data["global"]["index"], query, dimension_types
     )
 
+    if index != "openalex":
+        results = search.advanced_search(
+            cache_data["global"]["index"], query, dimension_types
+        )
+    else:
+        results = external_search.advanced_search(
+            cache_data["global"]["index"],
+            query,
+            dimension_types,
+            cache_data["global"]["elastic_json"],
+        )
+
     elastic_json = cache_data["global"]["elastic_json"]
     new_elastic_json = json.loads(results.to_json(orient="records"))
 
@@ -449,7 +491,10 @@ def expand_nodes(
         ]
     ).reset_index(drop=True)
 
-    dataset_features = search.get_dataset_features(index)
+    if index != "openalex":
+        dataset_features = search.get_dataset_features(index)
+    else:
+        dataset_features = external_search.get_dataset_features(index)
 
     if not dataset_features:
         raise HTTPException(

@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Union
 
 import pandas as pd
+import polars as pl
 
 
 class BaseSearchConnector(ABC):
@@ -30,7 +31,7 @@ class BaseSearchConnector(ABC):
 
     @abstractmethod
     def insert_dataset(
-        self, dataset_name: str, dataset_config: dict, dataset: pd.DataFrame
+        self, dataset_name: str, dataset_config: dict, dataset: pl.DataFrame
     ) -> None:
         # Inserts a dataset
         pass

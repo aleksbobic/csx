@@ -552,6 +552,9 @@ function HomePage() {
                                 {store.search.datasets.map(dataset => (
                                     <DatasetElement
                                         dataset={dataset}
+                                        datasetType={
+                                            store.search.datasetTypes[dataset]
+                                        }
                                         key={`dataset_list_${dataset}`}
                                         onNavigate={() =>
                                             cookieToast.closeAll()

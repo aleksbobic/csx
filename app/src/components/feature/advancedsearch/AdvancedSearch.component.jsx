@@ -213,7 +213,15 @@ function AdvancedSearch(props) {
 
     const renderNodeList = () => {
         return getFilteredActionNodeList().map((node, index) => (
-            <Tooltip label={node.tooltip} key={`workflow_node_${index}`}>
+            <Tooltip
+                label={
+                    store.search.datasetTypes[store.search.currentDataset] ===
+                        'api' && node.nodeType === 'connectorNode'
+                        ? ''
+                        : node.tooltip
+                }
+                key={`workflow_node_${index}`}
+            >
                 <Flex
                     width="40px"
                     height="40px"
@@ -224,17 +232,45 @@ function AdvancedSearch(props) {
                     }
                     borderRadius="8px"
                     onDragStart={event => onDragStart(event, node.nodeType)}
-                    draggable
-                    cursor="pointer"
+                    draggable={
+                        !(
+                            store.search.datasetTypes[
+                                store.search.currentDataset
+                            ] === 'api' && node.nodeType === 'connectorNode'
+                        )
+                    }
+                    opacity={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? 0.3
+                            : 1
+                    }
+                    cursor={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? 'default'
+                            : 'pointer'
+                    }
                     padding="5px 10px"
                     justifyContent="center"
                     alignItems="center"
                     transition="all 0.1s ease-in-out"
-                    _hover={{
-                        backgroundColor:
-                            colorMode === 'light' ? 'blue.400' : 'blue.700',
-                        color: colorMode === 'light' ? 'black' : 'white'
-                    }}
+                    _hover={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? {}
+                            : {
+                                  backgroundColor:
+                                      colorMode === 'light'
+                                          ? 'blue.400'
+                                          : 'blue.700',
+                                  color:
+                                      colorMode === 'light' ? 'black' : 'white'
+                              }
+                    }
                     role="group"
                 >
                     {getNodeIcon(node.nodeType)}

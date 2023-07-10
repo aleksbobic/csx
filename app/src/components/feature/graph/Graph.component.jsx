@@ -57,26 +57,6 @@ function Graph(props) {
         };
     });
 
-    const onNodeClick = (node, event) => {
-        store.track.trackEvent(
-            JSON.stringify({
-                area: 'Graph area'
-            }),
-            JSON.stringify({
-                item_type: 'Node',
-                item_id: node.id,
-                item_label: node.label,
-                item_feature: node.feature
-            }),
-            JSON.stringify({
-                event_type: 'Left click',
-                event_action: 'Open node details'
-            })
-        );
-
-        store.contextMenu.showNodeDetails(node, event.clientX, event.clientY);
-    };
-
     const onNodeRightClick = (node, event) => {
         store.track.trackEvent(
             JSON.stringify({
@@ -134,12 +114,42 @@ function Graph(props) {
     const onNodeHover = (node, nodeout, event) => {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
-        if (node && !node.selected) {
-            store.graphInstance.addOutlinePassObject(node?.__threeObj);
+        if (node) {
+            if (
+                containerRef.current &&
+                node.x &&
+                node.y &&
+                !store.contextMenu.contextType
+            ) {
+                const contextCoordinates =
+                    containerRef.current.graph2ScreenCoords(
+                        node.x,
+                        node.y,
+                        node.z ? node.z : 0
+                    );
+
+                store.contextMenu.showNodeDetails(
+                    node,
+                    contextCoordinates.x,
+                    contextCoordinates.y
+                );
+            }
+
+            if (!node.selected) {
+                store.graphInstance.addOutlinePassObject(node?.__threeObj);
+            }
         }
 
-        if (nodeout && !nodeout.selected) {
-            store.graphInstance.removeOutlinePassObject(nodeout?.__threeObj);
+        if (nodeout) {
+            if (store.contextMenu.contextType === 'node_details') {
+                store.contextMenu.hideContextMenu();
+            }
+
+            if (!nodeout.selected) {
+                store.graphInstance.removeOutlinePassObject(
+                    nodeout?.__threeObj
+                );
+            }
         }
     };
 
@@ -333,7 +343,6 @@ function Graph(props) {
                 alpha: false,
                 powerPreference: 'high-performance'
             }}
-            onNodeClick={onNodeClick}
             onNodeRightClick={onNodeRightClick}
             onBackgroundRightClick={onBackgroundRightClick}
             onLinkRightClick={onLinkRightClick}

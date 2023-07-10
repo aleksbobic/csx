@@ -4,8 +4,10 @@ from typing import Any, Dict, Generator, List, Union
 
 import gridfs
 import pandas as pd
+import polars as pl
 from app.config import settings
 from app.services.search.base import BaseSearchConnector
+from app.utils.timer import use_timing
 from bson import ObjectId
 from pymongo import MongoClient
 
@@ -68,9 +70,10 @@ class MongoSearchConnector(BaseSearchConnector):
         return processed_data
 
     def insert_dataset(
-        self, dataset_name: str, dataset_config: dict, dataset: pd.DataFrame
+        self, dataset_name: str, dataset_config: dict, dataset: pl.DataFrame
     ) -> None:
-        dataset_list = self.__convert_df_to_entries(dataset_config, dataset)
+        dataset_pd = dataset.to_pandas()
+        dataset_list = self.__convert_df_to_entries(dataset_config, dataset_pd)
         self.database[dataset_name].insert_many(dataset_list)
 
     def get_all_datasets(self) -> List[str]:
@@ -94,6 +97,7 @@ class MongoSearchConnector(BaseSearchConnector):
         except ConnectionError as e:
             raise e
 
+    @use_timing
     def get_full_dataset(self, dataset_name: str) -> pd.DataFrame:
         all_docs = list(self.database[dataset_name].find({}))
 

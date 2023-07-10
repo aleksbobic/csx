@@ -665,6 +665,26 @@ function ContextMenu() {
                     </Text>
                     {store.contextMenu.originNode.neighbours.size}
                 </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Frequency:{' '}
+                    </Text>
+                    Appears {store.contextMenu.originNode.csx_frequency}{' '}
+                    {store.contextMenu.originNode.csx_frequency === 1
+                        ? 'time'
+                        : 'times'}{' '}
+                    in dataset
+                </Text>
+                <Text fontSize="xs" width="100%">
+                    <Text as="span" fontWeight="black">
+                        Search result count:{' '}
+                    </Text>
+                    Appears in{' '}
+                    {store.contextMenu.originNode.csx_entry_frequency}{' '}
+                    {store.contextMenu.originNode.csx_entry_frequency === 1
+                        ? 'search result'
+                        : 'search results'}
+                </Text>
             </VStack>
         );
     };

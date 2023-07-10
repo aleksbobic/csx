@@ -4,6 +4,7 @@ from typing import List
 
 import marisa_trie
 import pandas as pd
+import polars as pl
 import pytextrank
 import spacy
 
@@ -50,14 +51,15 @@ def generate_main_auto_index(
     index: str,
     other_search_fields: List[str],
     string_search_fields: List[str],
-    data: pd.DataFrame,
+    data: pl.DataFrame,
 ) -> None:
     """Generate index consisting of multiple features"""
 
+    dataset = data.to_pandas()
     string_values = []
 
     for prop in string_search_fields:
-        string_values += data[prop].astype(str).to_list()
+        string_values += dataset[prop].astype(str).to_list()
 
     completion_phrases = []
 
@@ -66,7 +68,7 @@ def generate_main_auto_index(
 
     completion_phrases += list(
         itertools.chain.from_iterable(
-            data[other_search_fields].astype(str).values.tolist()
+            dataset[other_search_fields].astype(str).values.tolist()
         )
     )
 
@@ -85,9 +87,12 @@ def get_suggestions(index: str, input: str, feature: str = ""):
     """Retrieve top 20 suggestions based on given input and index"""
     completion_trie = marisa_trie.Trie()
 
+    if not os.path.exists(f"./app/data/autocomplete/auto_{index}_{feature}"):
+        return [input]
+
     if feature != "":
         completion_trie.load(f"./app/data/autocomplete/auto_{index}_{feature}")
     else:
         completion_trie.load(f"./app/data/autocomplete/auto_{index}")
 
-    return completion_trie.keys(input.lower())[:20]
+    return [input] + completion_trie.keys(input.lower())[:20]

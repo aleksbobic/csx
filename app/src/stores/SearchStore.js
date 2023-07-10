@@ -23,6 +23,8 @@ export class SearchStore {
     searchIsEmpty = false;
     datasetEdit = false;
 
+    datasetTypes = {};
+
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
@@ -42,6 +44,8 @@ export class SearchStore {
     getNodeTypeByFeature = feature => this.nodeTypes[feature];
 
     getSearchHintsByFeature = feature => this.searchHints[feature];
+
+    setDatasetTypes = datasetTypes => (this.datasetTypes = datasetTypes);
 
     setLinks = val => {
         this.links = val;
@@ -107,6 +111,15 @@ export class SearchStore {
 
     initDatasets = datasets => {
         this.datasets = [];
+
+        this.setDatasetTypes(
+            Object.fromEntries(
+                Object.entries(datasets).map(datasetObject => [
+                    datasetObject[0],
+                    datasetObject[1].dataset_type
+                ])
+            )
+        );
 
         for (let dataset_name in datasets) {
             this.setLocalStorageDataset(dataset_name, datasets[dataset_name]);
@@ -258,6 +271,13 @@ export class SearchStore {
     };
 
     suggest = async (feature, input) => {
+        if (
+            this.datasetTypes[this.currentDataset] === 'api' &&
+            input.length < 3
+        ) {
+            return [input];
+        }
+
         const { response, error } = await safeRequest(
             axios.get(`datasets/${this.currentDataset}/search/suggest`, {
                 params: { feature: feature, value: input }

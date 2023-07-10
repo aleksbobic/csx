@@ -957,7 +957,7 @@ export class GraphStore {
                 });
 
                 if (
-                    !['none', 'component'].includes(
+                    !['none', 'component', 'degree'].includes(
                         this.store.graphInstance.nodeColorScheme[
                             this.store.core.currentGraph
                         ]
@@ -1528,7 +1528,11 @@ export class GraphStore {
             values: {
                 connector: connector,
                 nodes: nodes.map(node => {
-                    return { value: node.label, feature: node.feature };
+                    return {
+                        value: node.label,
+                        feature: node.feature,
+                        entry: node.entries[0]
+                    };
                 })
             },
             graph_type: this.store.core.currentGraph,

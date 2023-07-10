@@ -19,21 +19,27 @@ function AutoCompleteInput(props) {
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
+    const [suggestTimeout, setSuggestTimeout] = useState(null);
 
     const handleValueChange = e => {
         setInput(e.target.value);
 
         props.getValue(e.target.value);
-        if (e.target.value.trim() !== '') {
-            const resolved = Promise.resolve(
-                props.getSuggestions(e.target.value)
-            );
-
-            resolved.then(returnedData => setSuggestions(returnedData));
-            setSuggestionsVisible(true);
-        } else {
+        if (e.target.value.trim() === '') {
             setSuggestionsVisible(false);
             setActiveSuggestion(0);
+        } else {
+            clearTimeout(suggestTimeout);
+            setSuggestTimeout(
+                setTimeout(() => {
+                    const resolved = Promise.resolve(
+                        props.getSuggestions(e.target.value)
+                    );
+
+                    resolved.then(returnedData => setSuggestions(returnedData));
+                    setSuggestionsVisible(true);
+                }, 200)
+            );
         }
 
         if (props.externalChangeHandler) {
