@@ -97,6 +97,7 @@ export class GraphInstanceStore {
 
         this.graphInstance.d3ReheatSimulation();
 
+        // this.graphInstance.controls().zoomSpeed = 0.01;
         this.graphInstance.controls().noRotate = true;
         this.graphInstance.controls().mouseButtons = {
             LEFT: 2,

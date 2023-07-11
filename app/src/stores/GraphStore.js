@@ -1285,7 +1285,11 @@ export class GraphStore {
         data.nodes = [...data.nodes];
     };
 
-    removeSelection = async originNode => {
+    removeInverseSelection = () => {
+        this.removeSelection(null, true);
+    };
+
+    removeSelection = async (originNode, inverse) => {
         this.store.core.setDataIsLoading(true);
         this.store.core.setDataModificationMessage(null);
 
@@ -1294,9 +1298,17 @@ export class GraphStore {
         if (originNode) {
             removedNodeEntries = originNode.entries;
         } else {
-            removedNodeEntries = this.store.graph.currentGraphData.selectedNodes
-                .map(node => node.entries)
-                .flat();
+            if (inverse) {
+                removedNodeEntries = this.store.graph.currentGraphData.nodes
+                    .filter(node => !node.selected)
+                    .map(node => node.entries)
+                    .flat();
+            } else {
+                removedNodeEntries =
+                    this.store.graph.currentGraphData.selectedNodes
+                        .map(node => node.entries)
+                        .flat();
+            }
         }
 
         const graph_data_copy = { ...this.currentGraphData };

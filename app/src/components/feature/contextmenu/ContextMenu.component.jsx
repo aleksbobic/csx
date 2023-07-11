@@ -475,6 +475,43 @@ function ContextMenu() {
                             <Button
                                 justifyContent="left"
                                 disabled={
+                                    !store.graph.currentGraphData.selectedNodes
+                                        .length
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Remove not selected nodes'
+                                        })
+                                    );
+
+                                    store.graph.removeInverseSelection();
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Remove not selected
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
                                     !store.graphInstance.isSelfCentric &&
                                     !store.graphInstance.isFiltered &&
                                     store.graphInstance.orphanNodeVisibility
