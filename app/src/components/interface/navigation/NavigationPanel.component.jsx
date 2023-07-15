@@ -3,6 +3,7 @@ import {
     ButtonGroup,
     HStack,
     IconButton,
+    Button,
     Image,
     Link,
     Text,
@@ -21,11 +22,13 @@ import {
     RadioCheck,
     Ring,
     Search,
+    Smile,
     Sun
 } from 'css.gg';
 import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
+import { isEnvSet } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -47,6 +50,12 @@ function NavigationPanelComponent() {
         location.pathname !== '/' ? 'gray.900' : 'transparent';
     const edgeColorLight =
         location.pathname !== '/' ? 'gray.300' : 'transparent';
+
+    const getSurveyLink = () => {
+        return `${isEnvSet('REACT_APP_SURVEY_LINK')}&${isEnvSet(
+            'REACT_APP_SURVEY_LINK_USER_ID'
+        )}=${store.core.userUuid}`;
+    };
 
     const edgeColor = useColorModeValue(edgeColorLight, edgeColorDark);
 
@@ -510,6 +519,49 @@ function NavigationPanelComponent() {
                     )}
                 </HStack>
                 <HStack spacing="20px">
+                    {location.pathname.startsWith('/graph') &&
+                        isEnvSet('REACT_APP_SURVEY_LINK') && (
+                            <Tooltip label="Provide your feedback">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    as={Link}
+                                    onClick={e => {
+                                        if (!store.core.studyIsSaved) {
+                                            e.preventDefault();
+                                        }
+
+                                        store.track.trackEvent(
+                                            JSON.stringify({
+                                                area: 'Navbar'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action: 'Open survey'
+                                            })
+                                        );
+                                    }}
+                                    href={getSurveyLink()}
+                                    isExternal
+                                    transition="0.2s all ease-in-out"
+                                    _hover={{
+                                        textDecoration: 'none',
+                                        backgroundColor: 'blue.500'
+                                    }}
+                                >
+                                    <Smile
+                                        style={{
+                                            '--ggs': 0.7,
+                                            marginRight: '5px'
+                                        }}
+                                    />{' '}
+                                    Feedback
+                                </Button>
+                            </Tooltip>
+                        )}
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
                             <IconButton

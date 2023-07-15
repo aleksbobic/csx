@@ -400,22 +400,98 @@ def expand_nodes(
         if "dimensions" in cache_data[graph_type]["meta"]
         else []
     )
+    original_query = cache_data["global"]["query"]
     anchor = data.anchor
     links = data.links
     action_time = data.action_time
     history_parent_id = data.history_parent_id
     charts = data.charts
 
+    index = cache_data["global"]["index"]
+
+    if index != "openalex":
+        config = storage.get_config(index)
+    else:
+        config = external_search.get_config()
+
     if len(values["nodes"]) == 1:
-        query = {
-            "action": "visualise",
-            "query": {
-                "action": "search",
-                "feature": values["nodes"][0]["feature"],
-                "keyphrase": values["nodes"][0]["value"],
-                "entry": values["nodes"][0]["entry"],
-            },
-        }
+        if data.preserve_context:
+            if not isJson(original_query) or isNumber(original_query):
+                filtered_fields = config["default_search_fields"]
+
+                if not isNumber(original_query):
+                    filtered_fields = [
+                        field
+                        for field in filtered_fields
+                        if config["dimension_types"][field] not in ["integer", "float"]
+                    ]
+
+                if (
+                    config["dimension_types"][config["default_search_fields"][0]]
+                    == "integer"
+                ):
+                    original_query = int(original_query)
+                elif (
+                    config["dimension_types"][config["default_search_fields"][0]]
+                    == "float"
+                ):
+                    original_query = float(original_query)
+
+                search_features = {
+                    feature: config["dimension_types"][feature]
+                    for feature in filtered_fields
+                }
+
+                query = {
+                    "action": "visualise",
+                    "query": {
+                        "action": "connect",
+                        "connector": "and",
+                        "queries": [
+                            {
+                                "action": "search",
+                                "feature": list(search_features.keys())[0],
+                                "keyphrase": original_query,
+                            },
+                            {
+                                "action": "search",
+                                "feature": values["nodes"][0]["feature"],
+                                "keyphrase": values["nodes"][0]["value"],
+                                "entry": values["nodes"][0]["entry"],
+                            },
+                        ],
+                    },
+                }
+            else:
+                original_query_json = json.loads(original_query)
+
+                query = {
+                    "action": "visualise",
+                    "query": {
+                        "action": "connect",
+                        "connector": "and",
+                        "queries": [
+                            original_query_json["query"],
+                            {
+                                "action": "search",
+                                "feature": values["nodes"][0]["feature"],
+                                "keyphrase": values["nodes"][0]["value"],
+                                "entry": values["nodes"][0]["entry"],
+                            },
+                        ],
+                    },
+                }
+
+        else:
+            query = {
+                "action": "visualise",
+                "query": {
+                    "action": "search",
+                    "feature": values["nodes"][0]["feature"],
+                    "keyphrase": values["nodes"][0]["value"],
+                    "entry": values["nodes"][0]["entry"],
+                },
+            }
     else:
         atomic_queries = [
             {
@@ -427,23 +503,70 @@ def expand_nodes(
             for entry in values["nodes"]
         ]
 
-        query = {
-            "action": "visualise",
-            "query": {
-                "action": "connect",
-                "connector": values["connector"],
-                "queries": atomic_queries,
-            },
-        }
+        if data.preserve_context:
+            if not isJson(original_query) or isNumber(original_query):
+                filtered_fields = config["default_search_fields"]
+
+                if not isNumber(original_query):
+                    filtered_fields = [
+                        field
+                        for field in filtered_fields
+                        if config["dimension_types"][field] not in ["integer", "float"]
+                    ]
+
+                if (
+                    config["dimension_types"][config["default_search_fields"][0]]
+                    == "integer"
+                ):
+                    original_query = int(original_query)
+                elif (
+                    config["dimension_types"][config["default_search_fields"][0]]
+                    == "float"
+                ):
+                    original_query = float(original_query)
+
+                search_features = {
+                    feature: config["dimension_types"][feature]
+                    for feature in filtered_fields
+                }
+
+                query = {
+                    "action": "visualise",
+                    "query": {
+                        "action": "connect",
+                        "connector": "and",
+                        "queries": [
+                            {
+                                "action": "search",
+                                "feature": list(search_features.keys())[0],
+                                "keyphrase": original_query,
+                            }
+                        ]
+                        + atomic_queries,
+                    },
+                }
+            else:
+                original_query_json = json.loads(original_query)
+
+                query = {
+                    "action": "visualise",
+                    "query": {
+                        "action": "connect",
+                        "connector": "and",
+                        "queries": [original_query_json["query"]] + atomic_queries,
+                    },
+                }
+        else:
+            query = {
+                "action": "visualise",
+                "query": {
+                    "action": "connect",
+                    "connector": values["connector"],
+                    "queries": atomic_queries,
+                },
+            }
 
     dimension_types = {}
-
-    index = cache_data["global"]["index"]
-
-    if index != "openalex":
-        config = storage.get_config(index)
-    else:
-        config = external_search.get_config()
 
     dimension_types = config["dimension_types"]
 

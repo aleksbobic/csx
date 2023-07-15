@@ -1496,7 +1496,7 @@ export class GraphStore {
         }
     };
 
-    expandNetwork = async (nodes, connector = null) => {
+    expandNetwork = async (nodes, connector = null, preserveContext=false) => {
         this.store.core.setDataIsLoading(true);
         this.store.core.setDataModificationMessage(null);
 
@@ -1554,6 +1554,7 @@ export class GraphStore {
             visible_entries: visible_entries,
             anchor_properties: anchor_properties,
             action_time: format(new Date(), 'H:mm do MMM yyyy OOOO'),
+            preserve_context: preserveContext,
             history_parent_id:
                 this.store.core.studyHistory.length > 0 &&
                 this.store.core.studyHistory[

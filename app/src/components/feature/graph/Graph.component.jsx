@@ -115,7 +115,6 @@ function Graph(props) {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
         if (node) {
-            console.log(node);
             if (
                 containerRef.current &&
                 node.x &&

@@ -34,6 +34,7 @@ class ExpandNodesData(BaseModel):
     action_time: str
     history_parent_id: str
     charts: List
+    preserve_context: bool
 
 
 class DeleteNodesData(BaseModel):

@@ -113,6 +113,29 @@ function ContextMenu() {
         store.contextMenu.hideContextMenu();
     };
 
+    const expandGraphWithContext = () => {
+        store.track.trackEvent(
+            JSON.stringify({
+                area: 'Graph area',
+                sub_area: 'Node context menu'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Expand graph with context'
+            })
+        );
+
+        const node = store.graph.currentGraphData.nodes.filter(
+            node => node.id === store.contextMenu.originNode.id
+        )[0];
+
+        store.graph.expandNetwork([node], null, true);
+        store.contextMenu.hideContextMenu();
+    };
+
     const selectComponent = () => {
         const componentId = store.contextMenu.originNode.component;
 
@@ -215,7 +238,15 @@ function ContextMenu() {
                             _hover={{ backgroundColor: 'blue.500' }}
                             width="100%"
                         >
-                            Expand graph through node
+                            Expand through node
+                        </Button>
+                        <Button
+                            justifyContent="left"
+                            onClick={expandGraphWithContext}
+                            _hover={{ backgroundColor: 'blue.500' }}
+                            width="100%"
+                        >
+                            Context expand through node
                         </Button>
                         <Button
                             justifyContent="left"
@@ -663,7 +694,59 @@ function ContextMenu() {
                                     store.contextMenu.hideContextMenu();
                                 }}
                             >
-                                Expand through selection
+                                Expand by selection
+                            </Button>
+                            <Button
+                                justifyContent="left"
+                                disabled={
+                                    store.graph.currentGraphData.selectedNodes
+                                        .length < 2
+                                }
+                                width="100%"
+                                _hover={{ backgroundColor: 'blue.500' }}
+                                _disabled={{
+                                    opacity: 0.5,
+                                    cursor: 'not-allowed',
+                                    _hover: {
+                                        backgroundColor: 'transparent'
+                                    }
+                                }}
+                                onClick={() => {
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Graph area',
+                                            sub_area: 'Canvas context menu'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Narrow expand with context',
+                                            event_value:
+                                                store.graph.currentGraphData.selectedNodes.map(
+                                                    node => {
+                                                        return {
+                                                            label: node.label,
+                                                            feature:
+                                                                node.feature
+                                                        };
+                                                    }
+                                                )
+                                        })
+                                    );
+
+                                    store.graph.expandNetwork(
+                                        store.graph.currentGraphData
+                                            .selectedNodes,
+                                        'and',
+                                        true
+                                    );
+                                    store.contextMenu.hideContextMenu();
+                                }}
+                            >
+                                Context expand by selection
                             </Button>
                         </VStack>
                     </VStack>
