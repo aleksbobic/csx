@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
@@ -24,7 +24,11 @@ class BaseExternalSearchConnector(ABC):
 
     @abstractmethod
     def advanced_search(
-        self, dataset_name: str, query: dict, features: Dict[str, str]
+        self,
+        dataset_name: str,
+        query: dict,
+        features: Dict[str, str],
+        tabular_data: Optional[pd.DataFrame],
     ) -> pd.DataFrame:
         # Performs an advanced search with a dict representation of the advanced search query
         pass

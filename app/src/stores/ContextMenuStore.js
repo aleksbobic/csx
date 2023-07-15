@@ -62,7 +62,7 @@ export class ContextMenuStore {
             window.innerWidth - this.xOffset - x < 200
                 ? `${x - 200}px`
                 : `${x}px`;
-        this.y = window.innerHeight - y < 330 ? `${y - 322}px` : `${y}px`;
+        this.y = window.innerHeight - y < 350 ? `${y - 332}px` : `${y}px`;
         this.isVisible = true;
     };
 }

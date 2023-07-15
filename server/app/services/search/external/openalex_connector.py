@@ -2,10 +2,14 @@ import time
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Union
 
+from collections import Counter
 import pandas as pd
+import polars as pl
 import requests
 from app.services.search.external.base import BaseExternalSearchConnector
-from pyalex import Authors, Concepts, Institutions, Sources, Works
+from app.services.search.external.openalex_helper import OpenAlexHelper
+from app.services.search.external.openalex_results import OpenAlexSearchResults
+from pyalex import Works
 
 RETRIEVABLE_FIELDS = [
     "authorships",
@@ -20,26 +24,13 @@ RETRIEVABLE_FIELDS = [
 
 
 class OpeanAlexSearchConnector(BaseExternalSearchConnector):
+    def __init__(self):
+        self.oa_helper = OpenAlexHelper()
+        self.oa_results = OpenAlexSearchResults(page_count=1, page_size=200)
+
     def get_dataset_features(self, dataset_name: str) -> Union[dict, None]:
         # Returns the features of a dataset and their types
-        return {
-            "authors": "list",
-            "author_ids": "list",
-            "author_institutions": "list",
-            "author_countries": "list",
-            "institution_types": "list",
-            "institution_ids": "list",
-            "concepts_lv_1": "list",
-            "concepts_lv_2": "list",
-            "concepts_lv_3": "list",
-            "citation_counts": "integer",
-            "title": "string",
-            "doi": "string",
-            "publication_year": "integer",
-            "hosted_location": "string",
-            "hosted_location_type": "string",
-            "hosted_location_id": "string",
-        }
+        return self.get_config()["dimension_types"]
 
     def get_config(self) -> dict:
         return {
@@ -55,6 +46,9 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 "concepts_lv_1": "list",
                 "concepts_lv_2": "list",
                 "concepts_lv_3": "list",
+                "concepts_lv_1_ids": "list",
+                "concepts_lv_2_ids": "list",
+                "concepts_lv_3_ids": "list",
                 "citation_counts": "integer",
                 "publication_year": "integer",
                 "hosted_location": "string",
@@ -85,346 +79,295 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             },
         }
 
-    def __get_author_names(self, authorship):
-        return [author_object["author"]["display_name"] for author_object in authorship]
+    def __generate_filter_query(self, feature, value) -> Dict:
+        ## Generate the query for a single filter
+        if "concepts_" in feature or feature == "concepts":
+            return {"concepts": {"id": value}}
+        if feature in ["authors", "author_ids"]:
+            return {"authorships": {"author": {"id": value}}}
+        if feature == "institution_types":
+            return {"authorships": {"institutions": {"type": value}}}
+        if "institution" in feature:
+            return {"authorships": {"institutions": {"id": value}}}
+        if feature == "author_countries":
+            return {"authorships": {"institutions": {"country_code": value}}}
+        if feature == "citation_counts":
+            return {"cited_by_count": value}
+        if feature == "publication_year":
+            return {"publication_year": value}
+        if feature == "doi":
+            return {"doi": value}
+        if feature in ["hosted_location", "hosted_location_id"]:
+            return {"primary_location": {"source": {"id": value}}}
+        if feature == "hosted_location_type":
+            return {"primary_location": {"source": {"type": value}}}
+        return {feature: {"search": value}}
 
-    def __get_author_ids(self, authorship):
-        return [author_object["author"]["id"] for author_object in authorship]
+    def __simple_concept_search(self, simple_query: str, feature: str) -> pd.DataFrame:
+        concept_ids = [str(simple_query)]
 
-    def __get_author_institutions(self, authorship):
-        return [
-            author_object["institutions"][0]["display_name"]
-            if author_object["institutions"]
-            and len(author_object["institutions"]) > 0
-            and author_object["institutions"][0]
-            and author_object["institutions"][0]["display_name"]
-            else ""
-            for author_object in authorship
-        ]
-
-    def __get_author_institution_countries(self, authorship):
-        return [
-            author_object["institutions"][0]["country_code"]
-            if author_object["institutions"]
-            else ""
-            for author_object in authorship
-        ]
-
-    def __get_author_institution_types(self, authorship):
-        return [
-            author_object["institutions"][0]["type"]
-            if author_object["institutions"]
-            else ""
-            for author_object in authorship
-        ]
-
-    def __get_author_institution_ids(self, authorship):
-        return [
-            author_object["institutions"][0]["id"]
-            if author_object["institutions"]
-            else ""
-            for author_object in authorship
-        ]
-
-    def __get_concepts_lv_1(self, concepts):
-        return [
-            concept_object["display_name"]
-            for concept_object in concepts
-            if concept_object["score"] > 0.3 and concept_object["level"] == 1
-        ]
-
-    def __get_concepts_lv_2(self, concepts):
-        return [
-            concept_object["display_name"]
-            for concept_object in concepts
-            if concept_object["score"] > 0.3 and concept_object["level"] == 2
-        ]
-
-    def __get_concepts_lv_3(self, concepts):
-        return [
-            concept_object["display_name"]
-            for concept_object in concepts
-            if concept_object["score"] > 0.3 and concept_object["level"] == 3
-        ]
-
-    def __process_search_results(self, pager) -> pd.DataFrame:
-        papers = []
-
-        for page in pager:
-            if len(papers) >= 200:
-                break
-            papers += page
-
-        return pd.DataFrame(
-            [
-                {
-                    "entry": paper["id"],
-                    "authors": self.__get_author_names(paper["authorships"]),
-                    "author_ids": self.__get_author_ids(paper["authorships"]),
-                    "author_institutions": self.__get_author_institutions(
-                        paper["authorships"]
-                    ),
-                    "author_countries": self.__get_author_institution_countries(
-                        paper["authorships"]
-                    ),
-                    "institution_types": self.__get_author_institution_types(
-                        paper["authorships"]
-                    ),
-                    "institution_ids": self.__get_author_institution_ids(
-                        paper["authorships"]
-                    ),
-                    "concepts_lv_1": self.__get_concepts_lv_1(paper["concepts"]),
-                    "concepts_lv_2": self.__get_concepts_lv_2(paper["concepts"]),
-                    "concepts_lv_3": self.__get_concepts_lv_3(paper["concepts"]),
-                    "citation_counts": paper["cited_by_count"],
-                    "title": paper["title"],
-                    "doi": paper["doi"]
-                    if paper["doi"]
-                    else paper["primary_location"]["landing_page_url"]
-                    if paper["primary_location"]
-                    and paper["primary_location"]["landing_page_url"]
-                    and "doi.org" in paper["primary_location"]["landing_page_url"]
-                    else paper["primary_location"]["pdf_url"]
-                    if paper["primary_location"]
-                    and paper["primary_location"]["pdf_url"]
-                    and "doi.org" in paper["primary_location"]["pdf_url"]
-                    else "",
-                    "publication_year": paper["publication_year"],
-                    "hosted_location": paper["primary_location"]["source"][
-                        "display_name"
-                    ]
-                    if paper["primary_location"] and paper["primary_location"]["source"]
-                    else "",
-                    "hosted_location_type": paper["primary_location"]["source"]["type"]
-                    if paper["primary_location"] and paper["primary_location"]["source"]
-                    else "",
-                    "hosted_location_id": paper["primary_location"]["source"]["id"]
-                    if paper["primary_location"] and paper["primary_location"]["source"]
-                    else "",
-                }
-                for paper in papers
-            ]
-        )
-
-    def _search_for_concepts(self, name):
-        concept_pager = Concepts().search(name).select(["id"]).paginate(per_page=50)
-
-        concept_list = []
-        for page in concept_pager:
-            if len(concept_list) >= 50:
-                break
-            concept_list += page
-
-        return [
-            concept["id"].replace("https://openalex.org/", "")
-            for concept in concept_list
-        ]
-
-    def _get_sources(self, source):
-        source_pager = Sources().search(source).select(["id"]).paginate(per_page=50)
-
-        source_list = []
-        for page in source_pager:
-            if len(source_list) >= 50:
-                break
-            source_list += page
-
-        return [
-            source["id"].replace("https://openalex.org/", "") for source in source_list
-        ]
-
-    def _get_institutions(self, name):
-        institution_pager = (
-            Institutions().search(name).select(["id"]).paginate(per_page=50)
-        )
-
-        institution_list = []
-        for page in institution_pager:
-            if len(institution_list) >= 50:
-                break
-            institution_list += page
-
-        return [
-            institution["id"].replace("https://openalex.org/", "")
-            for institution in institution_list
-        ]
-
-    def _get_authors(self, name=None):
-        author_pager = Authors().search(name).select(["id"]).paginate(per_page=50)
-
-        author_list = []
-        for page in author_pager:
-            if len(author_list) >= 50:
-                break
-            author_list += page
-
-        return [
-            author["id"].replace("https://openalex.org/", "") for author in author_list
-        ]
-
-    def simple_search(
-        self, dataset_name: str, query: Union[str, int, float], feature: str
-    ) -> pd.DataFrame:
-        if feature in ["concepts_lv_1", "concepts_lv_2", "concepts_lv_3"]:
-            concept_ids = self._search_for_concepts(query)
+        if not "ids" in feature:
+            concept_ids = self.oa_helper.get_ids("concept", simple_query)
 
             if len(concept_ids) == 0:
                 return pd.DataFrame()
 
-            pager = (
-                Works()
-                .filter(concepts={"id": "|".join(concept_ids)})
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
+        return self.__run_search_by_feature(feature, "|".join(concept_ids))
 
-            return self.__process_search_results(pager)
+    def __simple_author_search(self, simple_query: str, feature: str) -> pd.DataFrame:
+        author_ids = [str(simple_query)]
 
-        if feature in ["authors", "author_ids"]:
-            if feature == "authors":
-                authors = self._get_authors(query)
+        if not "ids" in feature:
+            author_ids = self.oa_helper.get_ids("author", simple_query)
 
-                if len(authors) == 0:
-                    return pd.DataFrame()
-            else:
-                authors = [str(query)]
+            if len(author_ids) == 0:
+                return pd.DataFrame()
 
-            pager = (
-                Works()
-                .filter(authorships={"author": {"id": "|".join(authors)}})
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
+        return self.__run_search_by_feature(feature, "|".join(author_ids))
 
-            return self.__process_search_results(pager)
-
-        if feature in [
-            "author_institutions",
-            "institution_ids",
-            "institution_types",
-            "author_countries",
-        ]:
-            if feature == "author_institutions":
-                institutions = self._get_institutions(query)
-
-                if len(institutions) == 0:
-                    return pd.DataFrame()
-            elif feature == "author_countries":
-                pager = (
-                    Works()
-                    .filter(authorships={"institutions": {"country_code": query}})
-                    .select(RETRIEVABLE_FIELDS)
-                    .paginate(per_page=200)
-                )
-
-                return self.__process_search_results(pager)
-            elif feature == "institution_types":
-                pager = (
-                    Works()
-                    .filter(authorships={"institutions": {"type": query}})
-                    .select(RETRIEVABLE_FIELDS)
-                    .paginate(per_page=200)
-                )
-
-                return self.__process_search_results(pager)
-            else:
-                institutions = [str(query)]
-
-            pager = (
-                Works()
-                .filter(authorships={"institutions": {"id": "|".join(institutions)}})
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
-
-            return self.__process_search_results(pager)
-
-        if feature == "citation_counts":
-            pager = (
-                Works()
-                .filter(cited_by_count=query)
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
-
-            return self.__process_search_results(pager)
-
-        if feature == "publication_year":
-            pager = (
-                Works()
-                .filter(publication_year=query)
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
-
-            return self.__process_search_results(pager)
-
-        if feature == "doi":
-            pager = (
-                Works()
-                .filter(doi=query)
-                .select(RETRIEVABLE_FIELDS)
-                .paginate(per_page=200)
-            )
-
-            return self.__process_search_results(pager)
-
-        if feature in ["hosted_location", "hosted_location_type", "hosted_location_id"]:
-            if feature == "hosted_location":
-                source_ids = self._get_sources(query)
-
-                pager = (
-                    Works()
-                    .filter(primary_location={"source": {"id": "|".join(source_ids)}})
-                    .select(RETRIEVABLE_FIELDS)
-                    .paginate(per_page=200)
-                )
-            elif feature == "hosted_location_id":
-                source_ids = [str(query)]
-                pager = (
-                    Works()
-                    .filter(primary_location={"source": {"id": "|".join(source_ids)}})
-                    .select(RETRIEVABLE_FIELDS)
-                    .paginate(per_page=200)
-                )
-            else:
-                pager = (
-                    Works()
-                    .filter(primary_location={"source": {"type": query}})
-                    .select(RETRIEVABLE_FIELDS)
-                    .paginate(per_page=200)
-                )
-
-            return self.__process_search_results(pager)
-
-        # Performs a simple search with a string query
-        pager = (
-            Works()
-            .filter(**{feature: {"search": query}})
-            .select(RETRIEVABLE_FIELDS)
-            .paginate(per_page=200)
-        )
-
-        return self.__process_search_results(pager)
-
-    def __range_filter_to_dataframe(
-        self,
-        feature: str,
-        min: Union[int, float],
-        max: Union[int, float],
+    def __simple_institution_search(
+        self, simple_query: str, feature: str
     ) -> pd.DataFrame:
-        """Run a range filter betwee values min and max on the provided index and feature and retrieve results as a dataframe"""
-        if feature == "citation_counts":
-            feature = "cited_by_count"
+        institution_ids = [str(simple_query)]
 
-        pager = (
-            Works()
-            .filter(**{feature: f"{min}-{max}"})
-            .select(RETRIEVABLE_FIELDS)
-            .paginate(per_page=200)
-        )
+        if not "ids" in feature:
+            institution_ids = self.oa_helper.get_ids("institution", simple_query)
 
-        return self.__process_search_results(pager)
+            if len(institution_ids) == 0:
+                return pd.DataFrame()
+
+        return self.__run_search_by_feature(feature, "|".join(institution_ids))
+
+    def __simple_hosted_location_search(
+        self, simple_query: str, feature: str
+    ) -> pd.DataFrame:
+        hosted_location_ids = [str(simple_query)]
+
+        if not "id" in feature:
+            hosted_location_ids = self.oa_helper.get_ids("source", simple_query)
+
+            if len(hosted_location_ids) == 0:
+                return pd.DataFrame()
+
+        return self.__run_search_by_feature(feature, "|".join(hosted_location_ids))
+
+    def simple_search(
+        self, dataset_name: str, simple_query: Union[str, int, float], feature: str
+    ) -> pd.DataFrame:
+        if "concepts_" in feature:
+            return self.__simple_concept_search(str(simple_query), feature)
+        if feature in ["authors", "author_ids"]:
+            return self.__simple_author_search(str(simple_query), feature)
+        if "institution" in feature:
+            return self.__simple_institution_search(str(simple_query), feature)
+        if feature in ["hosted_location", "hosted_location_id"]:
+            return self.__simple_hosted_location_search(str(simple_query), feature)
+
+        return self.__run_search_by_feature(feature, simple_query)
+
+    def __run_search_by_feature(self, feature, value):
+        filter_query = self.__generate_filter_query(feature, value)
+        pager = Works().filter(**filter_query).select(RETRIEVABLE_FIELDS)
+
+        self.oa_results.process_results(pager)
+        return self.oa_results.to_dataframe()
+
+    def __get_advanced_query_values(self, query):
+        query_values = [str(entry["keyphrase"]) for entry in query["queries"]]
+
+        if query["connector"] == "or":
+            return "|".join(query_values)
+        return query_values
+
+    def __get_advanced_query__complex_values(
+        self, query, tabular_data, id_selector, value_selector
+    ):
+        tabular_data_df = pd.DataFrame(tabular_data)
+
+        query_values = []
+
+        for entry in query["queries"]:
+            the_entry = tabular_data_df[tabular_data_df["entry"] == entry["entry"]]
+            the_entry_value_ids = the_entry[id_selector].values.tolist()[0]
+            the_entry_values = the_entry[value_selector].values.tolist()[0]
+            query_values.append(
+                the_entry_value_ids[the_entry_values.index(entry["keyphrase"])]
+            )
+
+        if query["connector"] == "or":
+            return "|".join(query_values)
+
+        return query_values
+
+    def __get_values_by_feature(self, query):
+        features = {}
+
+        if query["action"] == "visualise":
+            for entry in query["query"]["queries"]:
+                if entry["feature"] not in features:
+                    features[entry["feature"]] = []
+                features[entry["feature"]].append(entry["keyphrase"])
+        else:
+            for entry in query["queries"]:
+                if entry["feature"] not in features:
+                    features[entry["feature"]] = []
+                features[entry["feature"]].append(entry["keyphrase"])
+        return features
+
+    def __multi_feature_advanced_search(
+        self, values_by_feature, connector, tabular_data
+    ):
+        query_by_feature = {}
+        for feature in values_by_feature:
+            if feature in ["citation_counts", "publication_year"]:
+                if len(values_by_feature[feature]) == 1:
+                    query_by_feature[feature] = values_by_feature[feature][0]
+                else:
+                    query_by_feature[feature] = f"{min(values_by_feature[feature])}-{max(values_by_feature[feature])}"
+            if feature == "title":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature == "author_ids":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature == "author_countries":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature == "institution_types":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature == "institution_ids":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature in [
+                "concepts_lv_1_ids",
+                "concepts_lv_2_ids",
+                "concepts_lv_3_ids",
+            ]:
+                if "concepts" not in query_by_feature:
+                    query_by_feature["concepts"] = []
+
+                query_by_feature["concepts"] += values_by_feature[
+                    feature
+                ]
+            if feature == "doi":
+                query_by_feature[feature] = values_by_feature[feature]
+            if feature == "hosted_location_id":
+                # This basically means we have to create multiple queries for each case
+                if "hosted_location_id" not in query_by_feature:
+                    query_by_feature[feature] = []
+                query_by_feature[feature] += values_by_feature[feature]
+            if feature == "hosted_location_type":
+                query_by_feature[feature] = values_by_feature[feature]
+            # For the ones that are not unique select simply the largest ID (largest frequency) and run with that
+            if feature == "hosted_location":
+                tabular_data_df = pl.DataFrame(tabular_data)
+                # tabular_data_df = pd.DataFrame(tabular_data)
+                processed_values = []
+                for value in values_by_feature[feature]:
+
+
+                    common_ids = Counter(tabular_data_df.filter(
+                        pl.col("hosted_location").eq(value)
+                    ).select("hosted_location_id").to_numpy().flatten().tolist()).most_common()
+
+                    if (
+                        len(common_ids) > 0
+                        and common_ids[0][0] not in processed_values
+                    ):
+                        processed_values.append(common_ids[0][0])
+
+                if connector == "and":
+                    if "hosted_location_id" not in query_by_feature:
+                        query_by_feature["hosted_location_id"] = []
+                    query_by_feature["hosted_location_id"] += processed_values
+            if feature in [
+                "concepts_lv_1",
+                "concepts_lv_2",
+                "concepts_lv_3",
+            ]:
+                tabular_data_df = pl.DataFrame(tabular_data)
+                processed_values = []
+
+                for value in values_by_feature[feature]:
+                    filtered_df = tabular_data_df.with_columns(
+                        pl.col(feature)
+                        .apply(lambda x: x.to_list().index(value) if value in x else -1)
+                        .alias("indexes")
+                    ).filter(pl.col("indexes") > -1)
+
+                    common_ids = Counter([row[f"{feature}_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+
+
+                    if (
+                        len(common_ids) > 0
+                        and common_ids[0][0] not in processed_values
+                    ):
+                        processed_values.append(common_ids[0][0])
+
+                if connector == "and":
+                    if "concepts" not in query_by_feature:
+                        query_by_feature["concepts"] = []
+                    query_by_feature["concepts"] += processed_values
+
+            if feature == "authors":
+                tabular_data_df = pl.DataFrame(tabular_data)
+                processed_values = []
+
+                for value in values_by_feature[feature]:
+                    filtered_df = tabular_data_df.with_columns(
+                        pl.col("authors")
+                        .apply(lambda x: x.to_list().index(value) if value in x else -1)
+                        .alias("indexes")
+                    ).filter(pl.col("indexes") > -1)
+
+                    common_ids = Counter([row["author_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+
+                    if (
+                        len(common_ids) > 0
+                        and common_ids[0][0] not in processed_values
+                    ):
+                        processed_values.append(common_ids[0][0])
+
+                if "author_ids" not in query_by_feature:
+                    query_by_feature["author_ids"] = []
+                query_by_feature["author_ids"] += processed_values
+
+            if feature == "author_institutions":
+                tabular_data_df = pl.DataFrame(tabular_data)
+                processed_values = []
+
+                for value in values_by_feature[feature]:
+                    filtered_df = tabular_data_df.with_columns(
+                        pl.col("author_institutions")
+                        .apply(lambda x: x.to_list().index(value) if value in x else -1)
+                        .alias("indexes")
+                    ).filter(pl.col("indexes") > -1)
+
+                    common_ids = Counter([row["institution_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+
+                    if (
+                        len(common_ids) > 0
+                        and common_ids[0][0] not in processed_values
+                    ):
+                        processed_values.append(common_ids[0][0])
+
+                if "institution_ids" not in query_by_feature:
+                    query_by_feature["institution_ids"] = []
+                query_by_feature["institution_ids"] += processed_values
+
+        # hosted_location_type
+        # doi
+        # hosted_location_id
+        # Just return an empty dataset in this case
+        query = Works()
+        for feature in query_by_feature:
+            if (
+                (feature in ["title", "hosted_location_type", "doi", "hosted_location_id"]
+                and len(query_by_feature[feature]) > 1) or len(query_by_feature[feature]) == 0
+            ):
+                return pd.DataFrame()
+            query = query.filter(**self.__generate_filter_query(feature, query_by_feature[feature]))
+
+        pager = query.select(RETRIEVABLE_FIELDS)
+
+        self.oa_results.process_results(pager)
+        return self.oa_results.to_dataframe()
 
     def advanced_search(
         self,
@@ -436,280 +379,26 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         # Performs an advanced search with a dict representation of the advanced search query
 
         if tabular_data:
-            if query["action"] == "connect":
-                unique_features = list(
-                    set([entry["feature"] for entry in query["queries"]])
+            if query["action"] == "visualise":
+                query = query["query"]
+
+            if query["action"] == "search":
+                # unique_features = [query["feature"]]
+                return self.simple_search(
+                    dataset_name,
+                    query["keyphrase"],
+                    query["feature"],
                 )
 
-                if query["connector"] == "or":
-                    if len(unique_features) == 1:
-                        if unique_features[0] == "author_ids":
-                            author_ids = [
-                                entry["keyphrase"] for entry in query["queries"]
-                            ]
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={"author": {"id": "|".join(author_ids)}}
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-                        if unique_features[0] == "authors":
-                            # handle case where authors are searched for instead of author_ids do the same for AND
-                            tabular_data_df = pd.DataFrame(tabular_data)
-
-                            author_ids = []
-
-                            for entry in query["queries"]:
-                                the_entry = tabular_data_df[
-                                    tabular_data_df["entry"] == entry["entry"]
-                                ]
-                                the_entry_institution_ids = (
-                                    the_entry.author_ids.values.tolist()[0]
-                                )
-                                the_entry_institutions = (
-                                    the_entry.authors.values.tolist()[0]
-                                )
-                                author_ids.append(
-                                    the_entry_institution_ids[
-                                        the_entry_institutions.index(entry["keyphrase"])
-                                    ]
-                                )
-
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={"author": {"id": "|".join(author_ids)}}
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-
-                        if unique_features[0] == "author_institutions":
-                            tabular_data_df = pd.DataFrame(tabular_data)
-
-                            institution_ids = []
-
-                            for entry in query["queries"]:
-                                the_entry = tabular_data_df[
-                                    tabular_data_df["entry"] == entry["entry"]
-                                ]
-                                the_entry_institution_ids = (
-                                    the_entry.institution_ids.values.tolist()[0]
-                                )
-                                the_entry_institutions = (
-                                    the_entry.author_institutions.values.tolist()[0]
-                                )
-                                institution_ids.append(
-                                    the_entry_institution_ids[
-                                        the_entry_institutions.index(entry["keyphrase"])
-                                    ]
-                                )
-
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={
-                                        "institutions": {
-                                            "id": "|".join(institution_ids)
-                                        }
-                                    }
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-                        if unique_features[0] == "author_countries":
-                            author_countries = [
-                                entry["keyphrase"] for entry in query["queries"]
-                            ]
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={
-                                        "institutions": {
-                                            "country_code": "|".join(author_countries)
-                                        }
-                                    }
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-                        if unique_features[0] == "institution_types":
-                            institution_types = [
-                                entry["keyphrase"] for entry in query["queries"]
-                            ]
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={
-                                        "institutions": {
-                                            "type": "|".join(institution_types)
-                                        }
-                                    }
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-                        if unique_features[0] == "institution_ids":
-                            institution_ids = [
-                                entry["keyphrase"] for entry in query["queries"]
-                            ]
-                            pager = (
-                                Works()
-                                .filter(
-                                    authorships={
-                                        "institutions": {
-                                            "id": "|".join(institution_ids)
-                                        }
-                                    }
-                                )
-                                .select(RETRIEVABLE_FIELDS)
-                                .paginate(per_page=200)
-                            )
-
-                            return self.__process_search_results(pager)
-
-                if len(unique_features) == 1:
-                    if unique_features[0] == "author_ids":
-                        author_ids = [entry["keyphrase"] for entry in query["queries"]]
-                        pager = (
-                            Works()
-                            .filter(authorships={"author": {"id": author_ids}})
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
-
-                    if unique_features[0] == "authors":
-                        # handle case where authors are searched for instead of author_ids do the same for AND
-                        tabular_data_df = pd.DataFrame(tabular_data)
-
-                        author_ids = []
-
-                        for entry in query["queries"]:
-                            the_entry = tabular_data_df[
-                                tabular_data_df["entry"] == entry["entry"]
-                            ]
-                            the_entry_institution_ids = (
-                                the_entry.author_ids.values.tolist()[0]
-                            )
-                            the_entry_institutions = the_entry.authors.values.tolist()[
-                                0
-                            ]
-                            author_ids.append(
-                                the_entry_institution_ids[
-                                    the_entry_institutions.index(entry["keyphrase"])
-                                ]
-                            )
-
-                        pager = (
-                            Works()
-                            .filter(authorships={"author": {"id": author_ids}})
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
-
-                    if unique_features[0] == "author_institutions":
-                        tabular_data_df = pd.DataFrame(tabular_data)
-
-                        institution_ids = []
-
-                        for entry in query["queries"]:
-                            the_entry = tabular_data_df[
-                                tabular_data_df["entry"] == entry["entry"]
-                            ]
-                            the_entry_institution_ids = (
-                                the_entry.institution_ids.values.tolist()[0]
-                            )
-                            the_entry_institutions = (
-                                the_entry.author_institutions.values.tolist()[0]
-                            )
-                            institution_ids.append(
-                                the_entry_institution_ids[
-                                    the_entry_institutions.index(entry["keyphrase"])
-                                ]
-                            )
-
-                        pager = (
-                            Works()
-                            .filter(
-                                authorships={"institutions": {"id": institution_ids}}
-                            )
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
-                    if unique_features[0] == "author_countries":
-                        author_countries = [
-                            entry["keyphrase"] for entry in query["queries"]
-                        ]
-                        pager = (
-                            Works()
-                            .filter(
-                                authorships={
-                                    "institutions": {"country_code": author_countries}
-                                }
-                            )
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
-                    if unique_features[0] == "institution_types":
-                        institution_types = [
-                            entry["keyphrase"] for entry in query["queries"]
-                        ]
-                        pager = (
-                            Works()
-                            .filter(
-                                authorships={
-                                    "institutions": {"type": institution_types}
-                                }
-                            )
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
-                    if unique_features[0] == "institution_ids":
-                        institution_ids = [
-                            entry["keyphrase"] for entry in query["queries"]
-                        ]
-                        pager = (
-                            Works()
-                            .filter(
-                                authorships={"institutions": {"id": institution_ids}}
-                            )
-                            .select(RETRIEVABLE_FIELDS)
-                            .paginate(per_page=200)
-                        )
-
-                        return self.__process_search_results(pager)
+            values_by_features = self.__get_values_by_feature(query)
+            return self.__multi_feature_advanced_search(
+                values_by_features, query["connector"], tabular_data
+            )
 
         if "min" in query and "max" in query:
-            if features[query["feature"]] == "integer":
-                return self.__range_filter_to_dataframe(
-                    query["feature"], int(query["min"]), int(query["max"])
-                )
-
-            return self.__range_filter_to_dataframe(
-                query["feature"], float(query["min"]), float(query["max"])
-            )
+            feature = query["feature"]
+            filter_query = f"{query['min']}-{query['max']}"
+            return self.__run_search_by_feature(feature, filter_query)
 
         if "query" not in query and "queries" not in query:
             return self.simple_search(
@@ -719,12 +408,15 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             )
 
         return self.advanced_search(
-            dataset_name, query["query"], features, tabular_data
+            dataset_name,
+            query["query"] if "query" in query else query,
+            features,
+            tabular_data,
         )
 
     def get_suggestions(self, dataset, query, feature) -> List:
         # Returns a list of suggestions for the provided value and feature
-        item = ""
+        item = None
 
         if feature in ["title", ""]:
             item = "works"
@@ -737,15 +429,14 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         if feature == "hosted_location":
             item = "sources"
 
-        if item == "":
+        if not item:
             return [query]
 
         response = requests.get(
             f"https://api.openalex.org/autocomplete/{item}?q={query}"
         ).json()
+
         if response["meta"]["count"] == 0:
             return [query]
-        else:
-            return [query] + [result["display_name"] for result in response["results"]]
 
-        return [query]
+        return [query] + [result["display_name"] for result in response["results"]]

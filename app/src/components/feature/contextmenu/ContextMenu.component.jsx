@@ -565,7 +565,7 @@ function ContextMenu() {
                             >
                                 Expand
                             </Text>
-                            <Button
+                            {/* <Button
                                 justifyContent="left"
                                 disabled={
                                     store.graph.currentGraphData.selectedNodes
@@ -614,7 +614,7 @@ function ContextMenu() {
                                 }}
                             >
                                 Broad expand
-                            </Button>
+                            </Button> */}
                             <Button
                                 justifyContent="left"
                                 disabled={
@@ -663,7 +663,7 @@ function ContextMenu() {
                                     store.contextMenu.hideContextMenu();
                                 }}
                             >
-                                Narrow expand
+                                Expand through selection
                             </Button>
                         </VStack>
                     </VStack>

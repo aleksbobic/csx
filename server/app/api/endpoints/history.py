@@ -459,10 +459,6 @@ def expand_nodes(
     if not links:
         links = config["links"]
 
-    results = search.advanced_search(
-        cache_data["global"]["index"], query, dimension_types
-    )
-
     if index != "openalex":
         results = search.advanced_search(
             cache_data["global"]["index"], query, dimension_types
@@ -484,12 +480,15 @@ def expand_nodes(
         row for row in new_elastic_json if row["entry"] not in entries
     ]
 
-    results = pd.concat(
-        [
-            pd.read_json(cache_data["global"]["results_df"]),
-            results[~results["entry"].isin(entries)],
-        ]
-    ).reset_index(drop=True)
+    if results.size > 0:
+        results = pd.concat(
+            [
+                pd.read_json(cache_data["global"]["results_df"]),
+                results[~results["entry"].isin(entries)],
+            ]
+        ).reset_index(drop=True)
+    else:
+        results = pd.read_json(cache_data["global"]["results_df"])
 
     if index != "openalex":
         dataset_features = search.get_dataset_features(index)

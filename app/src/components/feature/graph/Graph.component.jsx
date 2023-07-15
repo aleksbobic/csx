@@ -115,6 +115,7 @@ function Graph(props) {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
         if (node) {
+            console.log(node);
             if (
                 containerRef.current &&
                 node.x &&
@@ -250,6 +251,11 @@ function Graph(props) {
             if (node.selected) {
                 store.graphInstance.addOutlinePassObject(nodeLevels);
             }
+
+            nodeLevels.raycast = function (raycaster, intersects) {
+                node.nodeWithoutLabel.raycast(raycaster, intersects);
+                node.nodeWithoutLabelSolo.raycast(raycaster, intersects);
+            };
 
             return nodeLevels;
         },
