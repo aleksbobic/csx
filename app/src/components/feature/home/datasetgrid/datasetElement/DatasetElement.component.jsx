@@ -2,6 +2,7 @@ import {
     Flex,
     Heading,
     IconButton,
+    Link,
     Tooltip,
     useColorModeValue
 } from '@chakra-ui/react';
@@ -70,8 +71,15 @@ function DatasetElement(props) {
                                 '--ggs': 0.7,
                                 display: 'inline-block',
                                 marginRight: '10px',
-                                marginBottom: '-2px'
+                                marginBottom: '-2px',
+                                transition: '0.2s all ease-in-out'
                             }}
+                            _hover={{
+                                color: 'purple.300'
+                            }}
+                            as={Link}
+                            href="https://openalex.org"
+                            isExternal
                         />
                     </Tooltip>
                 )}{' '}
