@@ -12,13 +12,16 @@ services:
       - 8881:80
       - 5678:5678 # for debugging
     environment:
-      DISABLE_UPLOAD: 'false'
-      SEARCH_SOURCE: 'mongo'
-      ELASTIC_PASSWORD: 'elasticroot'
-      MONGO_PASSWORD: 'mongoroot'
-      MONGO_USERNAME: 'mongoroot'
-      SHOW_DOCS: 'true'
-    command: ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "app/main.py"]
+      DISABLE_UPLOAD: "false"
+      SEARCH_SOURCE: "mongo"
+      ELASTIC_PASSWORD: "elasticroot"
+      MONGO_PASSWORD: "mongoroot"
+      MONGO_USERNAME: "mongoroot"
+      SHOW_DOCS: "true"
+      SHOW_EXTERNAL_SOURCES: "true"
+      OPENALEX_EMAIL: ""
+    command:
+      ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "app/main.py"]
   app:
     container_name: csx_app
     image: csxi_app

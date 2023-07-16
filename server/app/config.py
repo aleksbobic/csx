@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     mongo_password: str
     mongo_username: str
     show_docs: bool
+    show_external_sources: bool = True
+    openalex_email: str = ""
 
     class Config:
         fields = {
@@ -17,6 +19,8 @@ class Settings(BaseSettings):
             "mongo_password": {"env": "MONGO_PASSWORD"},
             "mongo_username": {"env": "MONGO_USERNAME"},
             "show_docs": {"env": "SHOW_DOCS"},
+            "show_external_sources": {"env": "SHOW_EXTERNAL_SOURCES"},
+            "openalex_email": {"env": "OPENALEX_EMAIL"},
         }
 
 

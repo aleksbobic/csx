@@ -12,12 +12,14 @@ services:
     volumes:
       - ./server:/cs
     environment:
-      DISABLE_UPLOAD: 'false'
-      SEARCH_SOURCE: 'mongo'
+      DISABLE_UPLOAD: "false"
+      SEARCH_SOURCE: "mongo"
       ELASTIC_PASSWORD: ${ELASTIC_PASS}
       MONGO_USERNAME: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASS}
-      SHOW_DOCS: 'false'
+      SHOW_DOCS: "false"
+      SHOW_EXTERNAL_SOURCES: "true"
+      OPENALEX_EMAIL: ""
     depends_on:
       - elastic
     command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80

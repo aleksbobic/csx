@@ -1,10 +1,15 @@
 import pandas as pd
 import math
+from app.config import settings
+import pyalex
 
 
 class OpenAlexSearchResults:
     def __init__(self, page_size=200):
         self.__page_size = page_size
+
+        if settings.openalex_email != "":
+            pyalex.config.email = settings.openalex_email
 
     def __get_author_names(self, paper):
         return [

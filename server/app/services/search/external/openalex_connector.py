@@ -10,6 +10,9 @@ from app.services.search.external.base import BaseExternalSearchConnector
 from app.services.search.external.openalex_helper import OpenAlexHelper
 from app.services.search.external.openalex_results import OpenAlexSearchResults
 from pyalex import Works
+import pyalex
+from app.config import settings
+
 
 RETRIEVABLE_FIELDS = [
     "authorships",
@@ -27,6 +30,9 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
     def __init__(self):
         self.oa_helper = OpenAlexHelper()
         self.oa_results = OpenAlexSearchResults(page_size=200)
+
+        if settings.openalex_email != "":
+            pyalex.config.email = settings.openalex_email
 
     def get_dataset_features(self, dataset_name: str) -> Union[dict, None]:
         # Returns the features of a dataset and their types
@@ -482,9 +488,14 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         if not item:
             return [query]
 
-        response = requests.get(
-            f"https://api.openalex.org/autocomplete/{item}?q={query}"
-        ).json()
+        if settings.openalex_email == "":
+            response = requests.get(
+                f"https://api.openalex.org/autocomplete/{item}?q={query}"
+            ).json()
+        else:
+            response = requests.get(
+                f"https://api.openalex.org/autocomplete/{item}?q={query}&mailto={settings.openalex_email}"
+            ).json()
 
         if response["meta"]["count"] == 0:
             return [query]

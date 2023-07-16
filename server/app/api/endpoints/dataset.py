@@ -16,6 +16,7 @@ from app.services.search.base import BaseSearchConnector
 from app.services.search.external.base import BaseExternalSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
+from app.config import settings
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
@@ -57,8 +58,9 @@ def get_datasets(
             },
         }
 
-    datasets["openalex"] = external_search.get_config()
-    datasets["openalex"]["types"] = datasets["openalex"].pop("dimension_types")
+    if settings.show_external_sources:
+        datasets["openalex"] = external_search.get_config()
+        datasets["openalex"]["types"] = datasets["openalex"].pop("dimension_types")
 
     return datasets
 
