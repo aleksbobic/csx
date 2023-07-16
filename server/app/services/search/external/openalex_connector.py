@@ -178,7 +178,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             concept_ids = self.oa_helper.get_ids("concept", simple_query)
 
             if len(concept_ids) == 0:
-                return pd.DataFrame()
+                return {"data": pd.DataFrame(), "pages": None}
 
         return self.__run_search_by_feature(feature, "|".join(concept_ids), page)
 
@@ -191,7 +191,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             author_ids = self.oa_helper.get_ids("author", simple_query)
 
             if len(author_ids) == 0:
-                return pd.DataFrame()
+                return {"data": pd.DataFrame(), "pages": None}
 
         return self.__run_search_by_feature(feature, "|".join(author_ids), page)
 
@@ -204,7 +204,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             institution_ids = self.oa_helper.get_ids("institution", simple_query)
 
             if len(institution_ids) == 0:
-                return pd.DataFrame()
+                return {"data": pd.DataFrame(), "pages": None}
 
         return self.__run_search_by_feature(feature, "|".join(institution_ids), page)
 
@@ -217,7 +217,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             hosted_location_ids = self.oa_helper.get_ids("source", simple_query)
 
             if len(hosted_location_ids) == 0:
-                return pd.DataFrame()
+                return {"data": pd.DataFrame(), "pages": None}
 
         return self.__run_search_by_feature(
             feature, "|".join(hosted_location_ids), page
@@ -406,10 +406,6 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                     query_by_feature["institution_ids"] = []
                 query_by_feature["institution_ids"] += processed_values
 
-        # hosted_location_type
-        # doi
-        # hosted_location_id
-        # Just return an empty dataset in this case
         query = Works()
         for feature in query_by_feature:
             if (
@@ -417,7 +413,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 in ["title", "hosted_location_type", "doi", "hosted_location_id"]
                 and len(query_by_feature[feature]) > 1
             ) or len(query_by_feature[feature]) == 0:
-                return pd.DataFrame()
+                return {"data": pd.DataFrame(), "pages": None}
             query = query.filter(
                 **self.__generate_filter_query(feature, query_by_feature[feature])
             )
@@ -442,7 +438,6 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 query = query["query"]
 
             if query["action"] == "search":
-                # unique_features = [query["feature"]]
                 return self.simple_search(
                     dataset_name, query["keyphrase"], query["feature"], page
                 )
