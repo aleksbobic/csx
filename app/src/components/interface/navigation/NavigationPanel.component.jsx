@@ -23,7 +23,8 @@ import {
     Ring,
     Search,
     Smile,
-    Sun
+    Sun,
+    ExtensionAdd
 } from 'css.gg';
 import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
@@ -132,13 +133,46 @@ function NavigationPanelComponent() {
     };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-65px" top="70px" id="graphutils">
+        <Box position="absolute" marginLeft="-95px" top="70px" id="graphutils">
             <HStack
                 spacing="10px"
                 backgroundColor="transparent"
                 padding="5px 6px"
                 borderRadius="8px"
             >
+                <Tooltip label="Get more data based on last retrieval action">
+                    <IconButton
+                        id="repeatlastretrievalaction"
+                        size="sm"
+                        isDisabled={!store.graph.repeatRetrieval}
+                        border="none"
+                        aria-label="Repeat last retrieval action"
+                        onClick={() => {
+                            store.track.trackEvent(
+                                JSON.stringify({
+                                    area: 'Graph area',
+                                    sub_area: 'Graph controls'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Repeat last retrieval action'
+                                })
+                            );
+
+                            store.graph.runRepeatRetrieval();
+                        }}
+                        icon={
+                            <ExtensionAdd
+                                style={{
+                                    '--ggs': '0.68'
+                                }}
+                            />
+                        }
+                    />
+                </Tooltip>
                 <Tooltip
                     label={
                         store.core.currentGraph === 'detail'

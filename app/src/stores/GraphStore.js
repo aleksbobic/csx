@@ -11,6 +11,7 @@ export class GraphStore {
     references = [];
     tableData = [];
     tableColumns = [];
+    repeatRetrieval = null;
 
     graphData = {
         meta: {
@@ -125,6 +126,19 @@ export class GraphStore {
             perspectivesInGraph: []
         };
         this.store.graphInstance.toggleVisibleComponents(-1);
+    };
+
+    setRepeatRetrieval = val => (this.repeatRetrieval = val);
+
+    runRepeatRetrieval = () => {
+        if (this.repeatRetrieval.type === 'expand') {
+            this.repeatRetrieval.repeatFunc(
+                this.repeatRetrieval.nodes,
+                this.repeatRetrieval.connector,
+                this.repeatRetrieval.preserveContext,
+                this.repeatRetrieval.page
+            );
+        }
     };
 
     generateNodeLabelSprite = (label, size) =>
@@ -1496,7 +1510,12 @@ export class GraphStore {
         }
     };
 
-    expandNetwork = async (nodes, connector = null, preserveContext=false) => {
+    expandNetwork = async (
+        nodes,
+        connector = null,
+        preserveContext = false,
+        page = null
+    ) => {
         this.store.core.setDataIsLoading(true);
         this.store.core.setDataModificationMessage(null);
 
@@ -1548,6 +1567,7 @@ export class GraphStore {
                     };
                 })
             },
+            page: page,
             graph_type: this.store.core.currentGraph,
             anchor: this.store.search.anchor,
             links: this.store.search.links,
@@ -1578,6 +1598,23 @@ export class GraphStore {
             this.store.core.setDataIsLoading(false);
             this.store.core.handleRequestError(error);
             return;
+        }
+
+        if (
+            response['data']['pages'] &&
+            response['data']['pages'] > 1 &&
+            (!page || (page < 50 && page < response['data']['pages']))
+        ) {
+            this.setRepeatRetrieval({
+                nodes: nodes,
+                connector: connector,
+                preserveContext: preserveContext,
+                page: page ? page + 1 : 2,
+                type: 'expand',
+                repeatFunc: this.expandNetwork
+            });
+        } else {
+            this.setRepeatRetrieval(null);
         }
 
         this.store.core.setStudyHistory(response.data.history);

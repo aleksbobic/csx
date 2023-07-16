@@ -1,10 +1,10 @@
 import pandas as pd
+import math
 
 
 class OpenAlexSearchResults:
-    def __init__(self, page_size=200, page_count=1):
+    def __init__(self, page_size=200):
         self.__page_size = page_size
-        self.__page_count = page_count
 
     def __get_author_names(self, paper):
         return [
@@ -92,15 +92,16 @@ class OpenAlexSearchResults:
             return paper["primary_location"]["source"]["id"]
         return ""
 
-    def process_results(self, pager):
+    def process_results(self, pager, page=1):
+        """returns number of pages available"""
         papers = []
 
-        results = pager.get(return_meta=True, per_page=self.__page_size)
+        results = pager.get(return_meta=True, per_page=self.__page_size, page=page)
 
         papers = results[0]
 
         self.papers = papers
-        return results[1]["count"]
+        return math.ceil(results[1]["count"] / 200)
 
     def to_dataframe(self) -> pd.DataFrame:
         return pd.DataFrame(

@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List, Union, Optional
 
 from collections import Counter
 import pandas as pd
@@ -26,7 +26,7 @@ RETRIEVABLE_FIELDS = [
 class OpeanAlexSearchConnector(BaseExternalSearchConnector):
     def __init__(self):
         self.oa_helper = OpenAlexHelper()
-        self.oa_results = OpenAlexSearchResults(page_count=1, page_size=200)
+        self.oa_results = OpenAlexSearchResults(page_size=200)
 
     def get_dataset_features(self, dataset_name: str) -> Union[dict, None]:
         # Returns the features of a dataset and their types
@@ -103,101 +103,86 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             return {"primary_location": {"source": {"type": value}}}
         return {feature: {"search": value}}
 
-    def __simple_concept_search(self, simple_query: str, feature: str) -> pd.DataFrame:
+    def __simple_concept_search(
+        self, simple_query: str, feature: str, page: int
+    ) -> Dict:
         concept_ids = [str(simple_query)]
 
-        if not "ids" in feature:
+        if "ids" not in feature:
             concept_ids = self.oa_helper.get_ids("concept", simple_query)
 
             if len(concept_ids) == 0:
                 return pd.DataFrame()
 
-        return self.__run_search_by_feature(feature, "|".join(concept_ids))
+        return self.__run_search_by_feature(feature, "|".join(concept_ids), page)
 
-    def __simple_author_search(self, simple_query: str, feature: str) -> pd.DataFrame:
+    def __simple_author_search(
+        self, simple_query: str, feature: str, page: int
+    ) -> Dict:
         author_ids = [str(simple_query)]
 
-        if not "ids" in feature:
+        if "ids" not in feature:
             author_ids = self.oa_helper.get_ids("author", simple_query)
 
             if len(author_ids) == 0:
                 return pd.DataFrame()
 
-        return self.__run_search_by_feature(feature, "|".join(author_ids))
+        return self.__run_search_by_feature(feature, "|".join(author_ids), page)
 
     def __simple_institution_search(
-        self, simple_query: str, feature: str
-    ) -> pd.DataFrame:
+        self, simple_query: str, feature: str, page: int
+    ) -> Dict:
         institution_ids = [str(simple_query)]
 
-        if not "ids" in feature:
+        if "ids" not in feature:
             institution_ids = self.oa_helper.get_ids("institution", simple_query)
 
             if len(institution_ids) == 0:
                 return pd.DataFrame()
 
-        return self.__run_search_by_feature(feature, "|".join(institution_ids))
+        return self.__run_search_by_feature(feature, "|".join(institution_ids), page)
 
     def __simple_hosted_location_search(
-        self, simple_query: str, feature: str
-    ) -> pd.DataFrame:
+        self, simple_query: str, feature: str, page: int
+    ) -> Dict:
         hosted_location_ids = [str(simple_query)]
 
-        if not "id" in feature:
+        if "id" not in feature:
             hosted_location_ids = self.oa_helper.get_ids("source", simple_query)
 
             if len(hosted_location_ids) == 0:
                 return pd.DataFrame()
 
-        return self.__run_search_by_feature(feature, "|".join(hosted_location_ids))
+        return self.__run_search_by_feature(
+            feature, "|".join(hosted_location_ids), page
+        )
 
     def simple_search(
-        self, dataset_name: str, simple_query: Union[str, int, float], feature: str
-    ) -> pd.DataFrame:
+        self,
+        dataset_name: str,
+        simple_query: Union[str, int, float],
+        feature: str,
+        page: Optional[int] = 1,
+    ) -> Dict:
         if "concepts_" in feature:
-            return self.__simple_concept_search(str(simple_query), feature)
+            return self.__simple_concept_search(str(simple_query), feature, page)
         if feature in ["authors", "author_ids"]:
-            return self.__simple_author_search(str(simple_query), feature)
+            return self.__simple_author_search(str(simple_query), feature, page)
         if "institution" in feature:
-            return self.__simple_institution_search(str(simple_query), feature)
+            return self.__simple_institution_search(str(simple_query), feature, page)
         if feature in ["hosted_location", "hosted_location_id"]:
-            return self.__simple_hosted_location_search(str(simple_query), feature)
+            return self.__simple_hosted_location_search(
+                str(simple_query), feature, page
+            )
 
-        return self.__run_search_by_feature(feature, simple_query)
+        return self.__run_search_by_feature(feature, simple_query, page)
 
-    def __run_search_by_feature(self, feature, value):
+    def __run_search_by_feature(self, feature, value, page) -> Dict:
         filter_query = self.__generate_filter_query(feature, value)
         pager = Works().filter(**filter_query).select(RETRIEVABLE_FIELDS)
 
-        self.oa_results.process_results(pager)
-        return self.oa_results.to_dataframe()
-
-    def __get_advanced_query_values(self, query):
-        query_values = [str(entry["keyphrase"]) for entry in query["queries"]]
-
-        if query["connector"] == "or":
-            return "|".join(query_values)
-        return query_values
-
-    def __get_advanced_query__complex_values(
-        self, query, tabular_data, id_selector, value_selector
-    ):
-        tabular_data_df = pd.DataFrame(tabular_data)
-
-        query_values = []
-
-        for entry in query["queries"]:
-            the_entry = tabular_data_df[tabular_data_df["entry"] == entry["entry"]]
-            the_entry_value_ids = the_entry[id_selector].values.tolist()[0]
-            the_entry_values = the_entry[value_selector].values.tolist()[0]
-            query_values.append(
-                the_entry_value_ids[the_entry_values.index(entry["keyphrase"])]
-            )
-
-        if query["connector"] == "or":
-            return "|".join(query_values)
-
-        return query_values
+        pages = self.oa_results.process_results(pager, page)
+        return {"data": self.oa_results.to_dataframe(), "pages": pages}
 
     def __get_values_by_feature(self, query):
         features = {}
@@ -215,7 +200,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         return features
 
     def __multi_feature_advanced_search(
-        self, values_by_feature, connector, tabular_data
+        self, values_by_feature, connector, tabular_data, page: int
     ):
         query_by_feature = {}
         for feature in values_by_feature:
@@ -223,7 +208,9 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 if len(values_by_feature[feature]) == 1:
                     query_by_feature[feature] = values_by_feature[feature][0]
                 else:
-                    query_by_feature[feature] = f"{min(values_by_feature[feature])}-{max(values_by_feature[feature])}"
+                    query_by_feature[
+                        feature
+                    ] = f"{min(values_by_feature[feature])}-{max(values_by_feature[feature])}"
             if feature == "title":
                 query_by_feature[feature] = values_by_feature[feature]
             if feature == "author_ids":
@@ -242,9 +229,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 if "concepts" not in query_by_feature:
                     query_by_feature["concepts"] = []
 
-                query_by_feature["concepts"] += values_by_feature[
-                    feature
-                ]
+                query_by_feature["concepts"] += values_by_feature[feature]
             if feature == "doi":
                 query_by_feature[feature] = values_by_feature[feature]
             if feature == "hosted_location_id":
@@ -260,16 +245,15 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                 # tabular_data_df = pd.DataFrame(tabular_data)
                 processed_values = []
                 for value in values_by_feature[feature]:
+                    common_ids = Counter(
+                        tabular_data_df.filter(pl.col("hosted_location").eq(value))
+                        .select("hosted_location_id")
+                        .to_numpy()
+                        .flatten()
+                        .tolist()
+                    ).most_common()
 
-
-                    common_ids = Counter(tabular_data_df.filter(
-                        pl.col("hosted_location").eq(value)
-                    ).select("hosted_location_id").to_numpy().flatten().tolist()).most_common()
-
-                    if (
-                        len(common_ids) > 0
-                        and common_ids[0][0] not in processed_values
-                    ):
+                    if len(common_ids) > 0 and common_ids[0][0] not in processed_values:
                         processed_values.append(common_ids[0][0])
 
                 if connector == "and":
@@ -291,13 +275,14 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                         .alias("indexes")
                     ).filter(pl.col("indexes") > -1)
 
-                    common_ids = Counter([row[f"{feature}_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+                    common_ids = Counter(
+                        [
+                            row[f"{feature}_ids"][row["indexes"]]
+                            for row in filtered_df.rows(named=True)
+                        ]
+                    ).most_common()
 
-
-                    if (
-                        len(common_ids) > 0
-                        and common_ids[0][0] not in processed_values
-                    ):
+                    if len(common_ids) > 0 and common_ids[0][0] not in processed_values:
                         processed_values.append(common_ids[0][0])
 
                 if connector == "and":
@@ -316,12 +301,14 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                         .alias("indexes")
                     ).filter(pl.col("indexes") > -1)
 
-                    common_ids = Counter([row["author_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+                    common_ids = Counter(
+                        [
+                            row["author_ids"][row["indexes"]]
+                            for row in filtered_df.rows(named=True)
+                        ]
+                    ).most_common()
 
-                    if (
-                        len(common_ids) > 0
-                        and common_ids[0][0] not in processed_values
-                    ):
+                    if len(common_ids) > 0 and common_ids[0][0] not in processed_values:
                         processed_values.append(common_ids[0][0])
 
                 if "author_ids" not in query_by_feature:
@@ -339,12 +326,14 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                         .alias("indexes")
                     ).filter(pl.col("indexes") > -1)
 
-                    common_ids = Counter([row["institution_ids"][row["indexes"]] for row in filtered_df.rows(named=True)]).most_common()
+                    common_ids = Counter(
+                        [
+                            row["institution_ids"][row["indexes"]]
+                            for row in filtered_df.rows(named=True)
+                        ]
+                    ).most_common()
 
-                    if (
-                        len(common_ids) > 0
-                        and common_ids[0][0] not in processed_values
-                    ):
+                    if len(common_ids) > 0 and common_ids[0][0] not in processed_values:
                         processed_values.append(common_ids[0][0])
 
                 if "institution_ids" not in query_by_feature:
@@ -358,16 +347,19 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         query = Works()
         for feature in query_by_feature:
             if (
-                (feature in ["title", "hosted_location_type", "doi", "hosted_location_id"]
-                and len(query_by_feature[feature]) > 1) or len(query_by_feature[feature]) == 0
-            ):
+                feature
+                in ["title", "hosted_location_type", "doi", "hosted_location_id"]
+                and len(query_by_feature[feature]) > 1
+            ) or len(query_by_feature[feature]) == 0:
                 return pd.DataFrame()
-            query = query.filter(**self.__generate_filter_query(feature, query_by_feature[feature]))
+            query = query.filter(
+                **self.__generate_filter_query(feature, query_by_feature[feature])
+            )
 
         pager = query.select(RETRIEVABLE_FIELDS)
 
-        self.oa_results.process_results(pager)
-        return self.oa_results.to_dataframe()
+        pages = self.oa_results.process_results(pager, page)
+        return {"data": self.oa_results.to_dataframe(), "pages": pages}
 
     def advanced_search(
         self,
@@ -375,7 +367,8 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
         query: dict,
         features: Dict[str, str],
         tabular_data=None,
-    ) -> pd.DataFrame:
+        page: Optional[int] = 1,
+    ) -> Dict:
         # Performs an advanced search with a dict representation of the advanced search query
 
         if tabular_data:
@@ -385,26 +378,22 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             if query["action"] == "search":
                 # unique_features = [query["feature"]]
                 return self.simple_search(
-                    dataset_name,
-                    query["keyphrase"],
-                    query["feature"],
+                    dataset_name, query["keyphrase"], query["feature"], page
                 )
 
             values_by_features = self.__get_values_by_feature(query)
             return self.__multi_feature_advanced_search(
-                values_by_features, query["connector"], tabular_data
+                values_by_features, query["connector"], tabular_data, page
             )
 
         if "min" in query and "max" in query:
             feature = query["feature"]
             filter_query = f"{query['min']}-{query['max']}"
-            return self.__run_search_by_feature(feature, filter_query)
+            return self.__run_search_by_feature(feature, filter_query, page)
 
         if "query" not in query and "queries" not in query:
             return self.simple_search(
-                dataset_name,
-                query["keyphrase"],
-                query["feature"],
+                dataset_name, query["keyphrase"], query["feature"], page
             )
 
         return self.advanced_search(
@@ -412,6 +401,7 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
             query["query"] if "query" in query else query,
             features,
             tabular_data,
+            page,
         )
 
     def get_suggestions(self, dataset, query, feature) -> List:

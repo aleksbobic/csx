@@ -306,6 +306,7 @@ function HomePage() {
         store.track.trackPageChange();
         store.graph.resetDetailGraphData();
         store.graph.resetGraphData();
+        store.graph.setRepeatRetrieval(null);
         store.core.updateIsStudySaved(false);
         store.core.getSavedStudies();
         store.search.setAdvancedSearchQuery(null);

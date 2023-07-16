@@ -18,6 +18,7 @@ class HistoryItemConfigData(BaseModel):
     action_time: str
     history_parent_id: Optional[Union[str, None]]
     charts: List
+    page: Optional[int]
 
 
 class UpdateChartsData(BaseModel):
@@ -35,6 +36,7 @@ class ExpandNodesData(BaseModel):
     history_parent_id: str
     charts: List
     preserve_context: bool
+    page: Optional[int]
 
 
 class DeleteNodesData(BaseModel):

@@ -198,11 +198,11 @@ def create_history_item(
         }
 
         if index != "openalex":
-            results = search.simple_search(index, query, search_features)
+            results = search.simple_search(index, query, search_features, data.page)
         else:
             results = external_search.simple_search(
                 index, query, list(search_features.keys())[0]
-            )
+            )["data"]
     else:
         query_generated_dimensions = {
             entry["feature"]: entry["type"]
@@ -214,7 +214,7 @@ def create_history_item(
         else:
             results = external_search.advanced_search(
                 index, json.loads(query), dimension_types
-            )
+            )["data"]
 
     if len(results.index) == 0:
         return {"nodes": []}
@@ -587,12 +587,16 @@ def expand_nodes(
             cache_data["global"]["index"], query, dimension_types
         )
     else:
-        results = external_search.advanced_search(
+        advanced_search_results = external_search.advanced_search(
             cache_data["global"]["index"],
             query,
             dimension_types,
             cache_data["global"]["elastic_json"],
+            data.page,
         )
+
+        results = advanced_search_results["data"]
+        pages = advanced_search_results["pages"]
 
     elastic_json = cache_data["global"]["elastic_json"]
     new_elastic_json = json.loads(results.to_json(orient="records"))
@@ -664,6 +668,7 @@ def expand_nodes(
         "graph": graph,
         "history": storage.get_history_items(study_id, user_id),
         "entry_delta": len(results) - len(entries),
+        "pages": pages if pages and pages > 1 else None,
     }
 
 

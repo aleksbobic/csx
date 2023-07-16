@@ -17,7 +17,11 @@ class BaseExternalSearchConnector(ABC):
 
     @abstractmethod
     def simple_search(
-        self, dataset_name: str, query: Union[str, int, float], features: Dict[str, str]
+        self,
+        dataset_name: str,
+        query: Union[str, int, float],
+        features: Dict[str, str],
+        page: Optional[int],
     ) -> pd.DataFrame:
         # Performs a simple search with a string query
         pass
