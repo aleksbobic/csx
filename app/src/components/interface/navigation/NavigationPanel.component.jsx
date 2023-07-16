@@ -137,7 +137,7 @@ function NavigationPanelComponent() {
             position="absolute"
             marginLeft={
                 store.search.datasetTypes[store.search.currentDataset] === 'api'
-                    ? '-95px'
+                    ? '-205px'
                     : '-55px'
             }
             top="70px"
@@ -151,11 +151,21 @@ function NavigationPanelComponent() {
             >
                 {store.search.datasetTypes[store.search.currentDataset] ===
                     'api' && (
-                    <Tooltip label="Get more data based on last retrieval action">
-                        <IconButton
+                    <Tooltip label="Get more data using the last expansion action">
+                        <Button
                             id="repeatlastretrievalaction"
                             size="sm"
                             isDisabled={!store.graph.repeatRetrieval}
+                            _disabled={{
+                                background: 'transparent',
+                                opacity: 0.5,
+                                cursor: 'default'
+                            }}
+                            background="purple.500"
+                            opacity="0.7"
+                            _hover={{
+                                opacity: 1
+                            }}
                             border="none"
                             aria-label="Repeat last retrieval action"
                             onClick={() => {
@@ -176,14 +186,15 @@ function NavigationPanelComponent() {
 
                                 store.graph.runRepeatRetrieval();
                             }}
-                            icon={
-                                <ExtensionAdd
-                                    style={{
-                                        '--ggs': '0.68'
-                                    }}
-                                />
-                            }
-                        />
+                        >
+                            Get more data{' '}
+                            <ExtensionAdd
+                                style={{
+                                    '--ggs': '0.6',
+                                    marginLeft: '5px'
+                                }}
+                            />
+                        </Button>
                     </Tooltip>
                 )}
                 <Tooltip

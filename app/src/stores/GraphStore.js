@@ -1314,10 +1314,20 @@ export class GraphStore {
             removedNodeEntries = originNode.entries;
         } else {
             if (inverse) {
-                removedNodeEntries = this.store.graph.currentGraphData.nodes
-                    .filter(node => !node.selected)
-                    .map(node => node.entries)
-                    .flat();
+                const notSelectedEntries =
+                    this.store.graph.currentGraphData.nodes
+                        .filter(node => !node.selected)
+                        .map(node => node.entries)
+                        .flat();
+
+                const selectedEntries =
+                    this.store.graph.currentGraphData.selectedNodes
+                        .map(node => node.entries)
+                        .flat();
+
+                removedNodeEntries = notSelectedEntries.filter(
+                    entry => !selectedEntries.includes(entry)
+                );
             } else {
                 removedNodeEntries =
                     this.store.graph.currentGraphData.selectedNodes
