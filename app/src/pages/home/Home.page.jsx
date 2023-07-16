@@ -9,6 +9,7 @@ import {
     IconButton,
     Image,
     Text,
+    Tooltip,
     useColorMode,
     useColorModeValue,
     useToast
@@ -513,7 +514,12 @@ function HomePage() {
             />
             <FileUploadModal />
             <DatasetConfigModal />
-            <Center width="100%" minH="200px" flexDir="column">
+            <Center
+                width="100%"
+                minH="200px"
+                flexDir="column"
+                position="relative"
+            >
                 <Image
                     src={logo}
                     height="40px"
@@ -523,13 +529,38 @@ function HomePage() {
                 <Heading
                     fontSize="2xl"
                     fontWeight="extrabold"
-                    marginBottom="20px"
                     textAlign="center"
                     color={textColor}
                     id="Title"
+                    marginBottom="10px"
                 >
                     COLLABORATION SPOTTING X
                 </Heading>
+                <Tooltip
+                    label={
+                        <Text fontSize="xs">
+                            CSX is currently a research proejct therefore
+                            features may rapidly change or accidentally break.
+                            If you see something break or you have an
+                            improvement idea feel free to open a ticket on
+                            github (footer) or fill out the feedback survey :)
+                        </Text>
+                    }
+                >
+                    <Text
+                        _hover={{
+                            cursor: 'default'
+                        }}
+                        fontSize="9px"
+                        fontWeight="bold"
+                        backgroundColor="purple.600"
+                        padding="3px 9px"
+                        borderRadius="full"
+                        marginBottom="20px"
+                    >
+                        PRE-ALPHA RELEASE
+                    </Text>
+                </Tooltip>
             </Center>
             <Container
                 marginTop="20px"

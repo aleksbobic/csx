@@ -198,10 +198,10 @@ def create_history_item(
         }
 
         if index != "openalex":
-            results = search.simple_search(index, query, search_features, data.page)
+            results = search.simple_search(index, query, search_features)
         else:
             results = external_search.simple_search(
-                index, query, list(search_features.keys())[0]
+                index, query, list(search_features.keys())[0], data.page
             )["data"]
     else:
         query_generated_dimensions = {
@@ -280,6 +280,7 @@ def create_history_item(
             comparison_res["history_action"],
             history_parent_id,
             charts,
+            external_search,
         ),
         "from_anchor_properties": lambda: csx_graph.get_graph_with_new_anchor_props(
             storage,
@@ -318,6 +319,7 @@ def create_history_item(
             comparison_res["history_action"],
             history_parent_id,
             charts,
+            external_search,
         ),
         "from_cache": lambda: csx_graph.get_graph_from_cache(
             storage,
@@ -408,6 +410,7 @@ def expand_nodes(
     charts = data.charts
 
     index = cache_data["global"]["index"]
+    pages = None
 
     if index != "openalex":
         config = storage.get_config(index)
@@ -662,6 +665,7 @@ def expand_nodes(
         history_action,
         history_parent_id,
         charts,
+        external_search,
     )
 
     return {

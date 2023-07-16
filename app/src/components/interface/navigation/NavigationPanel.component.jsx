@@ -133,46 +133,59 @@ function NavigationPanelComponent() {
     };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-95px" top="70px" id="graphutils">
+        <Box
+            position="absolute"
+            marginLeft={
+                store.search.datasetTypes[store.search.currentDataset] === 'api'
+                    ? '-95px'
+                    : '-55px'
+            }
+            top="70px"
+            id="graphutils"
+        >
             <HStack
                 spacing="10px"
                 backgroundColor="transparent"
                 padding="5px 6px"
                 borderRadius="8px"
             >
-                <Tooltip label="Get more data based on last retrieval action">
-                    <IconButton
-                        id="repeatlastretrievalaction"
-                        size="sm"
-                        isDisabled={!store.graph.repeatRetrieval}
-                        border="none"
-                        aria-label="Repeat last retrieval action"
-                        onClick={() => {
-                            store.track.trackEvent(
-                                JSON.stringify({
-                                    area: 'Graph area',
-                                    sub_area: 'Graph controls'
-                                }),
-                                JSON.stringify({
-                                    item_type: 'Button'
-                                }),
-                                JSON.stringify({
-                                    event_type: 'Click',
-                                    event_action: 'Repeat last retrieval action'
-                                })
-                            );
+                {store.search.datasetTypes[store.search.currentDataset] ===
+                    'api' && (
+                    <Tooltip label="Get more data based on last retrieval action">
+                        <IconButton
+                            id="repeatlastretrievalaction"
+                            size="sm"
+                            isDisabled={!store.graph.repeatRetrieval}
+                            border="none"
+                            aria-label="Repeat last retrieval action"
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Graph area',
+                                        sub_area: 'Graph controls'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action:
+                                            'Repeat last retrieval action'
+                                    })
+                                );
 
-                            store.graph.runRepeatRetrieval();
-                        }}
-                        icon={
-                            <ExtensionAdd
-                                style={{
-                                    '--ggs': '0.68'
-                                }}
-                            />
-                        }
-                    />
-                </Tooltip>
+                                store.graph.runRepeatRetrieval();
+                            }}
+                            icon={
+                                <ExtensionAdd
+                                    style={{
+                                        '--ggs': '0.68'
+                                    }}
+                                />
+                            }
+                        />
+                    </Tooltip>
+                )}
                 <Tooltip
                     label={
                         store.core.currentGraph === 'detail'
@@ -553,49 +566,48 @@ function NavigationPanelComponent() {
                     )}
                 </HStack>
                 <HStack spacing="20px">
-                    {location.pathname.startsWith('/graph') &&
-                        isEnvSet('REACT_APP_SURVEY_LINK') && (
-                            <Tooltip label="Provide your feedback">
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    as={Link}
-                                    onClick={e => {
-                                        if (!store.core.studyIsSaved) {
-                                            e.preventDefault();
-                                        }
+                    {isEnvSet('REACT_APP_SURVEY_LINK') && (
+                        <Tooltip label="Provide your feedback">
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                as={Link}
+                                onClick={e => {
+                                    if (!store.core.studyIsSaved) {
+                                        e.preventDefault();
+                                    }
 
-                                        store.track.trackEvent(
-                                            JSON.stringify({
-                                                area: 'Navbar'
-                                            }),
-                                            JSON.stringify({
-                                                item_type: 'Button'
-                                            }),
-                                            JSON.stringify({
-                                                event_type: 'Click',
-                                                event_action: 'Open survey'
-                                            })
-                                        );
+                                    store.track.trackEvent(
+                                        JSON.stringify({
+                                            area: 'Navbar'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action: 'Open survey'
+                                        })
+                                    );
+                                }}
+                                href={getSurveyLink()}
+                                isExternal
+                                transition="0.2s all ease-in-out"
+                                _hover={{
+                                    textDecoration: 'none',
+                                    backgroundColor: 'blue.500'
+                                }}
+                            >
+                                <Smile
+                                    style={{
+                                        '--ggs': 0.7,
+                                        marginRight: '5px'
                                     }}
-                                    href={getSurveyLink()}
-                                    isExternal
-                                    transition="0.2s all ease-in-out"
-                                    _hover={{
-                                        textDecoration: 'none',
-                                        backgroundColor: 'blue.500'
-                                    }}
-                                >
-                                    <Smile
-                                        style={{
-                                            '--ggs': 0.7,
-                                            marginRight: '5px'
-                                        }}
-                                    />{' '}
-                                    Feedback
-                                </Button>
-                            </Tooltip>
-                        )}
+                                />{' '}
+                                Feedback
+                            </Button>
+                        </Tooltip>
+                    )}
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
                             <IconButton

@@ -22,6 +22,7 @@ def get_graph(
     dimensions: Dict,
     schema: List[SchemaElement],
     index: str,
+    external_search,
 ) -> Dict:
     """Generate graph"""
     if graph_type == "overview":
@@ -32,6 +33,7 @@ def get_graph(
             dimensions["anchor"]["dimension"],
             dimensions["anchor"]["props"],
             index,
+            external_search,
         )
 
     return get_detail_graph(
@@ -158,6 +160,7 @@ def get_overview_graph(
     anchor: str,
     anchor_properties: List[str],
     index,
+    external_search,
 ):
     search_results_df = pd.DataFrame(search_results)
 
@@ -168,51 +171,7 @@ def get_overview_graph(
     if index != "openalex":
         config = storage.get_config(index)
     else:
-        config = {
-            "dimension_types": {
-                "authors": "list",
-                "author_ids": "list",
-                "author_institutions": "list",
-                "author_countries": "list",
-                "institution_types": "list",
-                "institution_ids": "list",
-                "concepts_lv_1": "list",
-                "concepts_lv_2": "list",
-                "concepts_lv_3": "list",
-                "concepts_lv_1_ids": "list",
-                "concepts_lv_2_ids": "list",
-                "concepts_lv_3_ids": "list",
-                "citation_counts": "integer",
-                "title": "string",
-                "doi": "string",
-                "publication_year": "integer",
-                "hosted_location": "string",
-                "hosted_location_type": "string",
-                "hosted_location_id": "string",
-            },
-            "schemas": [
-                {
-                    "name": "default",
-                    "relations": [
-                        {
-                            "dest": "authors",
-                            "src": "title",
-                            "relationship": "oneToMany",
-                        }
-                    ],
-                }
-            ],
-            "default_schemas": {"overview": [], "detail": []},
-            "anchor": "title",
-            "links": ["authors"],
-            "default_search_fields": ["title"],
-            "default_visible_dimensions": ["authors", "title"],
-            "dataset_type": "api",
-            "search_hints": {
-                "citation_counts": {"min": 0},
-                "publication_year": {"min": 0, "max": datetime.now().year},
-            },
-        }
+        config = external_search.get_config()
 
     is_anchor_list = config["dimension_types"][anchor] == "list"
     list_links = [link for link in links if config["dimension_types"][link] == "list"]
@@ -362,8 +321,11 @@ def get_graph_from_scratch(
     history_action,
     history_parent_id,
     charts,
+    external_search,
 ):
-    graph_data = get_graph(storage, graph_type, elastic_json, dimensions, schema, index)
+    graph_data = get_graph(
+        storage, graph_type, elastic_json, dimensions, schema, index, external_search
+    )
     table_data = convert_table_data(graph_data["nodes"], elastic_json)
     anchor_property_values = csx_nodes.get_anchor_property_values(
         elastic_json, dimensions["anchor"]["props"]
@@ -497,6 +459,7 @@ def get_graph_from_existing_data(
     history_action,
     history_parent_id,
     charts,
+    external_search,
 ):
     # Take global table data and generate grpah
 
@@ -507,6 +470,7 @@ def get_graph_from_existing_data(
         dimensions,
         schema,
         index,
+        external_search,
     )
 
     table_data = convert_table_data(
