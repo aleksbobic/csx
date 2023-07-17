@@ -560,7 +560,7 @@ function CommentModal() {
                 paddingRight="136px"
                 border="none"
                 resize="none"
-                placeholder="Enter your observations here ..."
+                placeholder="Enter your observations here ... (don't enter any personal info please :))"
                 fontSize="sm"
                 autoFocus={true}
                 value={comment}

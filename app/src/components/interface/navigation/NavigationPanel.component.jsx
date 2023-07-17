@@ -164,7 +164,11 @@ function NavigationPanelComponent() {
                             background="purple.500"
                             opacity="0.7"
                             _hover={{
-                                opacity: 1
+                                opacity: 1,
+                                _disabled: {
+                                    opacity: 0.5,
+                                    cursor: 'default'
+                                }
                             }}
                             border="none"
                             aria-label="Repeat last retrieval action"

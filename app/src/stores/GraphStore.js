@@ -1665,6 +1665,14 @@ export class GraphStore {
         }
     };
 
+    getMaxPropValue = property => {
+        return this.currentGraphData.nodes.reduce((maxValue, node) => {
+            return node.properties[property] > maxValue
+                ? node.properties[property]
+                : maxValue;
+        }, 0);
+    };
+
     get graphObjectCount() {
         if (
             !this.currentGraphData.meta.nodeCount &&

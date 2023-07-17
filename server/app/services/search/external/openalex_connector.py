@@ -131,6 +131,13 @@ class OpeanAlexSearchConnector(BaseExternalSearchConnector):
                         "anchorProperties": [],
                         "links": ["concepts_lv_1"],
                     },
+                    {
+                        "id": "openalex_overview_schema_9",
+                        "name": "Concepts through papers",
+                        "anchor": "concepts_lv_1",
+                        "anchorProperties": [],
+                        "links": ["title"],
+                    },
                 ],
                 "detail": [],
             },

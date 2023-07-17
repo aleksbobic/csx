@@ -238,7 +238,13 @@ function RightPanel(props) {
                     zIndex="3"
                 />
             </Tooltip>
-            <MenuList backgroundColor="black" padding="5px" borderRadius="10px">
+            <MenuList
+                backgroundColor="black"
+                padding="5px"
+                borderRadius="10px"
+                maxHeight="200px"
+                overflowY="scroll"
+            >
                 {Object.keys(store.search.nodeTypes).map(feature => (
                     <MenuItem
                         key={`serp_list_checkbox_${feature}`}

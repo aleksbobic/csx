@@ -1,4 +1,3 @@
-import { Button } from '@chakra-ui/button';
 import { Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
     IconButton,
@@ -25,7 +24,6 @@ import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
 import { RootStoreContext } from 'stores/RootStore';
-
 function FilterTools() {
     const store = useContext(RootStoreContext);
 
@@ -66,9 +64,21 @@ function FilterTools() {
             );
             setFilterSliderMaxValue(
                 store.search.searchHints[store.graphInstance.filterProperty].max
+                    ? store.search.searchHints[
+                          store.graphInstance.filterProperty
+                      ].max
+                    : store.graph.getMaxPropValue(
+                          store.graphInstance.filterProperty
+                      )
             );
             setFilterSliderCurrentMaxValue(
                 store.search.searchHints[store.graphInstance.filterProperty].max
+                    ? store.search.searchHints[
+                          store.graphInstance.filterProperty
+                      ].max
+                    : store.graph.getMaxPropValue(
+                          store.graphInstance.filterProperty
+                      )
             );
         }
     }, [
@@ -143,38 +153,6 @@ function FilterTools() {
                     <AccordionIcon />
                 </AccordionButton>
                 <AccordionPanel padding="0">
-                    <VStack width="100%" padding="10px 0" borderRadius="6px">
-                        <Button
-                            leftIcon={
-                                <RadioChecked style={{ '--ggs': '0.5' }} />
-                            }
-                            isDisabled={
-                                !store.graph.currentGraphData.selectedNodes
-                                    .length
-                            }
-                            size="sm"
-                            width="100%"
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    JSON.stringify({
-                                        area: 'Left panel',
-                                        sub_area: 'VIew tools'
-                                    }),
-                                    JSON.stringify({
-                                        item_type: 'Button'
-                                    }),
-                                    JSON.stringify({
-                                        event_type: 'Click',
-                                        event_action: 'Show selected nodes'
-                                    })
-                                );
-
-                                store.graphInstance.triggerSelectedNodes();
-                            }}
-                        >
-                            Show selected
-                        </Button>
-                    </VStack>
                     <VStack
                         backgroundColor="whiteAlpha.50"
                         width="100%"
@@ -187,6 +165,38 @@ function FilterTools() {
                         </Text>
 
                         <HStack width="100%">
+                            <Tooltip label="Show selected nodes">
+                                <IconButton
+                                    icon={
+                                        <RadioChecked
+                                            style={{ '--ggs': '0.8' }}
+                                        />
+                                    }
+                                    isDisabled={
+                                        !store.graph.currentGraphData
+                                            .selectedNodes.length
+                                    }
+                                    size="sm"
+                                    onClick={() => {
+                                        store.track.trackEvent(
+                                            JSON.stringify({
+                                                area: 'Left panel',
+                                                sub_area: 'VIew tools'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Button'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Click',
+                                                event_action:
+                                                    'Show selected nodes'
+                                            })
+                                        );
+
+                                        store.graphInstance.triggerSelectedNodes();
+                                    }}
+                                />
+                            </Tooltip>
                             <Tooltip label="Show direct connections">
                                 <IconButton
                                     borderRadius="6px"
