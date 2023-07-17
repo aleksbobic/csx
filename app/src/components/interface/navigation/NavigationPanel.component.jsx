@@ -32,6 +32,8 @@ import { observer } from 'mobx-react';
 import { isEnvSet } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
+
+import { NewspaperIcon } from '@heroicons/react/24/outline';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -623,12 +625,71 @@ function NavigationPanelComponent() {
                             </Button>
                         </Tooltip>
                     )}
+                    <Tooltip label="Visit the CSX wiki">
+                        <Button
+                            size="sm"
+                            as={Link}
+                            width={
+                                !location.pathname.startsWith('/search') &&
+                                !location.pathname.startsWith('/graph')
+                                    ? '75px'
+                                    : '32px'
+                            }
+                            padding={0}
+                            variant="ghost"
+                            id="wiki"
+                            onClick={e => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Navbar'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Open wiki'
+                                    })
+                                );
+                            }}
+                            transition="0.2s all ease-in-out"
+                            href="https://csxapp.notion.site/Collaboration-Spotting-X-FAQ-ccace3dc0f384b1fac6b15a3499523ed"
+                            target="_blank"
+                            isExternal
+                            _hover={{
+                                textDecoration: 'none',
+                                backgroundColor: 'blue.500'
+                            }}
+                        >
+                            <NewspaperIcon
+                                display="inline"
+                                width="16px"
+                                height="16px"
+                                style={{
+                                    marginRight:
+                                        !location.pathname.startsWith(
+                                            '/search'
+                                        ) &&
+                                        !location.pathname.startsWith(
+                                            '/graph'
+                                        ) &&
+                                        '5px'
+                                }}
+                            />
+                            {!location.pathname.startsWith('/search') &&
+                                !location.pathname.startsWith('/graph') &&
+                                'Wiki'}
+                        </Button>
+                    </Tooltip>
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
                             <IconButton
                                 size="sm"
                                 width="40px"
                                 height="40px"
+                                style={{
+                                    marginLeft: '10px'
+                                }}
                                 as={Link}
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
