@@ -539,7 +539,7 @@ function HomePage() {
                 <Tooltip
                     label={
                         <Text fontSize="xs">
-                            CSX is currently a research proejct therefore
+                            CSX is currently a research project therefore
                             features may rapidly change or accidentally break.
                             If you see something break or you have an
                             improvement idea feel free to open a ticket on

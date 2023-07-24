@@ -585,28 +585,9 @@ function NavigationPanelComponent() {
                 <HStack spacing="20px">
                     {isEnvSet('REACT_APP_SURVEY_LINK') && (
                         <Tooltip label="Provide your feedback">
-                            <Button
+                            <Link
                                 size="sm"
                                 variant="ghost"
-                                as={Link}
-                                onClick={e => {
-                                    if (!store.core.studyIsSaved) {
-                                        e.preventDefault();
-                                    }
-
-                                    store.track.trackEvent(
-                                        JSON.stringify({
-                                            area: 'Navbar'
-                                        }),
-                                        JSON.stringify({
-                                            item_type: 'Button'
-                                        }),
-                                        JSON.stringify({
-                                            event_type: 'Click',
-                                            event_action: 'Open survey'
-                                        })
-                                    );
-                                }}
                                 href={getSurveyLink()}
                                 isExternal
                                 transition="0.2s all ease-in-out"
@@ -614,15 +595,21 @@ function NavigationPanelComponent() {
                                     textDecoration: 'none',
                                     backgroundColor: 'blue.500'
                                 }}
+                                style={{
+                                    borderRadius: '8px',
+                                    padding: '4px 8px'
+                                }}
                             >
                                 <Smile
                                     style={{
                                         '--ggs': 0.7,
-                                        marginRight: '5px'
+                                        marginRight: '5px',
+                                        display: 'inline-block',
+                                        marginBottom: '-4px'
                                     }}
                                 />{' '}
                                 Feedback
-                            </Button>
+                            </Link>
                         </Tooltip>
                     )}
                     <Tooltip label="Visit the CSX wiki">
