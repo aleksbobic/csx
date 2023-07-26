@@ -1,16 +1,16 @@
 import { Box, useColorMode, useToast } from '@chakra-ui/react';
-import ControlPanelComponent from 'components/interface/controlpanel/ControlPanel.component';
+import LeftPanel from 'components/interface/leftpanel/LeftPanel.component';
 import NavigationPanelComponent from 'components/interface/navigation/NavigationPanel.component';
 import { observer } from 'mobx-react';
-import OverviewGraphPage from 'pages/graph/Graph.page';
+import GraphPage from 'pages/graph/Graph.page';
 import HomePage from 'pages/home/Home.page';
 import SearchPage from 'pages/search/Search.page';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
 import {
-    BrowserRouter as Router,
+    Switch as RRSwitch,
     Route,
-    Switch as RRSwitch
+    BrowserRouter as Router
 } from 'react-router-dom';
 import './App.scss';
 
@@ -32,10 +32,15 @@ function CSX() {
     useEffect(() => {
         window.addEventListener('beforeunload', () => {
             store.track.trackEvent(
-                'Global',
-                'Tab Switch',
                 JSON.stringify({
-                    value: 'User closed the tab'
+                    area: 'Global'
+                }),
+                JSON.stringify({
+                    item_type: null
+                }),
+                JSON.stringify({
+                    event_type: 'Tab interaction',
+                    event_action: 'Close tab'
                 })
             );
         });
@@ -43,18 +48,28 @@ function CSX() {
         window.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User switched to a different tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Switch to another tab'
                     })
                 );
             } else {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User returned to the csx tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Return to tab'
                     })
                 );
             }
@@ -63,28 +78,43 @@ function CSX() {
         return () => {
             window.removeEventListener('beforeunload', () => {
                 store.track.trackEvent(
-                    'Global',
-                    'Tab Switch',
                     JSON.stringify({
-                        value: 'User closed the tab'
+                        area: 'Global'
+                    }),
+                    JSON.stringify({
+                        item_type: null
+                    }),
+                    JSON.stringify({
+                        event_type: 'Tab interaction',
+                        event_action: 'Close tab'
                     })
                 );
             });
             window.removeEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     store.track.trackEvent(
-                        'Global',
-                        'Tab Switch',
                         JSON.stringify({
-                            value: 'User switched to a different tab'
+                            area: 'Global'
+                        }),
+                        JSON.stringify({
+                            item_type: null
+                        }),
+                        JSON.stringify({
+                            event_type: 'Tab interaction',
+                            event_action: 'Switch to another tab'
                         })
                     );
                 } else {
                     store.track.trackEvent(
-                        'Global',
-                        'Tab Switch',
                         JSON.stringify({
-                            value: 'User returned to the csx tab'
+                            area: 'Global'
+                        }),
+                        JSON.stringify({
+                            item_type: null
+                        }),
+                        JSON.stringify({
+                            event_type: 'Tab interaction',
+                            event_action: 'Return to tab'
                         })
                     );
                 }
@@ -150,13 +180,13 @@ function CSX() {
                             </Route>
                             <Route path="/graph/detail" label="graphdetail">
                                 <CommentModal />
-                                <ControlPanelComponent />
-                                <OverviewGraphPage />
+                                <LeftPanel />
+                                <GraphPage />
                             </Route>
                             <Route path="/graph" label="graph">
                                 <CommentModal />
-                                <ControlPanelComponent />
-                                <OverviewGraphPage />
+                                <LeftPanel />
+                                <GraphPage />
                             </Route>
                             <Route exact path="/present" label="present">
                                 <PresentPage />

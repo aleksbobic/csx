@@ -297,24 +297,35 @@ function SelectedComponentList(props) {
                                                     _hover={{ opacity: 1 }}
                                                     onClick={() => {
                                                         store.track.trackEvent(
-                                                            `Details Panel - Widget - ${props.chart.id}`,
-                                                            'Button',
                                                             JSON.stringify({
-                                                                type: 'Click',
-                                                                value: `${
+                                                                area: 'Widget',
+                                                                area_id:
+                                                                    props.chart
+                                                                        .id
+                                                            }),
+                                                            JSON.stringify({
+                                                                item_type:
+                                                                    'Button'
+                                                            }),
+                                                            JSON.stringify({
+                                                                event_type:
+                                                                    'Click',
+                                                                event_action:
                                                                     store.graphInstance.visibleComponents.includes(
                                                                         component.id
                                                                     )
-                                                                        ? 'Hide'
-                                                                        : 'Show'
-                                                                } ${
+                                                                        ? 'Hide component'
+                                                                        : 'Show component',
+                                                                event_value:
                                                                     component.id
-                                                                }`
                                                             })
                                                         );
 
                                                         store.graphInstance.toggleVisibleComponents(
                                                             component.id
+                                                        );
+                                                        store.graphInstance.setIsFiltered(
+                                                            true
                                                         );
                                                     }}
                                                     icon={
@@ -355,11 +366,24 @@ function SelectedComponentList(props) {
                                                                 .length
                                                         ) {
                                                             store.track.trackEvent(
-                                                                `Details Panel - Widget - ${props.chart.id}`,
-                                                                'Button',
                                                                 JSON.stringify({
-                                                                    type: 'Click',
-                                                                    value: `Deselect ${component.id}`
+                                                                    area: 'Widget',
+                                                                    area_id:
+                                                                        props
+                                                                            .chart
+                                                                            .id
+                                                                }),
+                                                                JSON.stringify({
+                                                                    item_type:
+                                                                        'Button'
+                                                                }),
+                                                                JSON.stringify({
+                                                                    event_type:
+                                                                        'Click',
+                                                                    event_action:
+                                                                        'Deselect component',
+                                                                    event_value:
+                                                                        component.id
                                                                 })
                                                             );
 

@@ -23,6 +23,8 @@ export class SearchStore {
     searchIsEmpty = false;
     datasetEdit = false;
 
+    datasetTypes = {};
+
     constructor(store) {
         this.store = store;
         makeAutoObservable(this);
@@ -42,6 +44,8 @@ export class SearchStore {
     getNodeTypeByFeature = feature => this.nodeTypes[feature];
 
     getSearchHintsByFeature = feature => this.searchHints[feature];
+
+    setDatasetTypes = datasetTypes => (this.datasetTypes = datasetTypes);
 
     setLinks = val => {
         this.links = val;
@@ -76,10 +80,6 @@ export class SearchStore {
             this.searchHints = dataset_config.search_hints;
             this.default_search_features = dataset_config.default_search_fields;
 
-            Object.keys(this.searchHints).forEach(key => {
-                this.searchHints[key] = JSON.parse(this.searchHints[key]);
-            });
-
             this.nodeTypes = dataset_config.types;
             this.anchor = dataset_config.anchor;
             this.store.schema.populateStoreData();
@@ -112,6 +112,15 @@ export class SearchStore {
     initDatasets = datasets => {
         this.datasets = [];
 
+        this.setDatasetTypes(
+            Object.fromEntries(
+                Object.entries(datasets).map(datasetObject => [
+                    datasetObject[0],
+                    datasetObject[1].dataset_type
+                ])
+            )
+        );
+
         for (let dataset_name in datasets) {
             this.setLocalStorageDataset(dataset_name, datasets[dataset_name]);
 
@@ -132,9 +141,7 @@ export class SearchStore {
     };
 
     getDatasets = async () => {
-        const { response, error } = await safeRequest(
-            axios.get('search/datasets')
-        );
+        const { response, error } = await safeRequest(axios.get('datasets'));
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -228,12 +235,8 @@ export class SearchStore {
     };
 
     deleteDataset = async dataset => {
-        const params = {
-            name: dataset
-        };
-
         const { error } = await safeRequest(
-            axios.get('file/delete', { params })
+            axios.delete(`datasets/${dataset}`)
         );
 
         if (error) {
@@ -252,12 +255,8 @@ export class SearchStore {
     };
 
     getConifg = async dataset => {
-        const params = {
-            name: dataset
-        };
-
         const { response, error } = await safeRequest(
-            axios.get('file/config', { params })
+            axios.get(`datasets/${dataset}/settings`)
         );
 
         if (error) {
@@ -272,11 +271,16 @@ export class SearchStore {
     };
 
     suggest = async (feature, input) => {
+        if (
+            this.datasetTypes[this.currentDataset] === 'api' &&
+            input.length < 3
+        ) {
+            return [input];
+        }
+
         const { response, error } = await safeRequest(
-            axios.post('search/suggest', {
-                index: this.currentDataset,
-                feature,
-                input
+            axios.get(`datasets/${this.currentDataset}/search/suggest`, {
+                params: { feature: feature, value: input }
             })
         );
 
@@ -289,9 +293,7 @@ export class SearchStore {
     };
 
     getRandomImage = async () => {
-        const { response, error } = await safeRequest(
-            axios.get('file/randomimage')
-        );
+        const { response, error } = await safeRequest(axios.get('utils/image'));
 
         if (error) {
             this.store.core.handleRequestError(error);

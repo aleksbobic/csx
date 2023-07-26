@@ -10,6 +10,7 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
+import { Redo } from 'css.gg';
 
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -38,13 +39,13 @@ function Footer() {
                 <HStack justifyContent="center" marginBottom="20px">
                     <Image
                         src={logodark}
-                        alt="Collaboration spotting logo"
+                        alt="Collaboration spotting X logo"
                         height="20px"
                         display={colorMode === 'light' ? 'none' : 'block'}
                     />
                     <Image
                         src={logolight}
-                        alt="Collaboration spotting logo"
+                        alt="Collaboration spotting X logo"
                         height="20px"
                         display={colorMode === 'light' ? 'block' : 'none'}
                     />{' '}
@@ -139,11 +140,17 @@ function Footer() {
                         color={textColor}
                         onClick={() => {
                             store.track.trackEvent(
-                                'Home Page - Footer',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Open tracking information panel'
+                                    area: 'Home page',
+                                    sub_area: 'Footer'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action:
+                                        'Open tracking information panel'
                                 })
                             );
                             store.core.setStudyIsEmpty(false);
@@ -152,6 +159,31 @@ function Footer() {
                         }}
                     >
                         Cookies & local storage
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        marginTop="10px"
+                        leftIcon={<Redo style={{ '--ggs': 0.7 }} />}
+                        onClick={() => {
+                            store.core.resetJoyride();
+
+                            store.track.trackEvent(
+                                JSON.stringify({
+                                    area: 'Home page',
+                                    sub_area: 'Footer'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: 'Reset tutorial'
+                                })
+                            );
+                        }}
+                    >
+                        Reset tutorial
                     </Button>
                 </VStack>
             </Center>

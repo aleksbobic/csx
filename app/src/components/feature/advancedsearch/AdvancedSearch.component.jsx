@@ -1,20 +1,20 @@
 import {
     Box,
     Flex,
-    Heading,
     HStack,
-    IconButton,
-    Input,
-    InputGroup,
-    InputRightElement,
-    Text,
     Tooltip,
     useColorMode,
-    VStack
+    Wrap
 } from '@chakra-ui/react';
+import {
+    CircleStackIcon,
+    DocumentTextIcon,
+    FunnelIcon,
+    LinkIcon,
+    MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
 import OverviewCustomEdge from 'components/feature/overviewschemaedge/OverviewSchemaEdge.component';
 import SchemaEdge from 'components/feature/schemaedge/SchemaEdge.component';
-import { Check, ChevronRight, Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import {
@@ -49,6 +49,14 @@ function AdvancedSearch(props) {
     const store = useContext(RootStoreContext);
     const history = useHistory();
     const { colorMode } = useColorMode();
+
+    const [nodes, setNodes] = useState([]);
+    const [edges, setEdges] = useState([]);
+
+    useEffect(() => {
+        setNodes(store.workflow.nodes);
+        setEdges(store.workflow.edges);
+    }, [store.workflow.edges, store.workflow.nodes]);
 
     useEffect(() => {
         if (colorMode) {
@@ -133,9 +141,19 @@ function AdvancedSearch(props) {
         const newNodeId = store.workflow.addNewAction(nodeType, position);
 
         store.track.trackEvent(
-            'Advanced Search - Search Canvas',
-            `Node - ${newNodeId}`,
-            JSON.stringify({ type: 'Drop', value: `${nodeType}` })
+            JSON.stringify({
+                area: 'Advanced search',
+                sub_area: 'Search canvas'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: `${newNodeId}`,
+                item_label: `${nodeType}`
+            }),
+            JSON.stringify({
+                event_type: 'Drop',
+                event_action: 'Add new node'
+            })
         );
     };
 
@@ -166,117 +184,98 @@ function AdvancedSearch(props) {
         });
     };
 
-    const renderNodeList = () => {
-        return getFilteredActionNodeList().map((node, index) => (
-            <Flex
-                key={`workflow_node_${index}`}
-                border="2px solid"
-                borderColor="whiteAlpha.400"
-                width="100%"
-                height="40px"
-                backgroundColor={
-                    colorMode === 'light' ? 'whiteAlpha.900' : 'blackAlpha.900'
-                }
-                borderRadius="8px"
-                onDragStart={event => onDragStart(event, node.nodeType)}
-                draggable
-                cursor="pointer"
-                padding="5px 10px"
-                justifyContent="center"
-                alignItems="center"
-                transition="all 0.1s ease-in-out"
-                _hover={{
-                    backgroundColor:
-                        colorMode === 'light' ? 'blue.400' : 'blue.700',
-                    color: colorMode === 'light' ? 'black' : 'white'
-                }}
-                role="group"
-            >
-                <Tooltip label={node.tooltip}>
-                    <Text
-                        fontSize="sm"
-                        fontWeight="bold"
-                        _groupHover={{ color: 'white' }}
-                    >
-                        {node.label}
-                    </Text>
-                </Tooltip>
-            </Flex>
-        ));
+    const getNodeIcon = nodeType => {
+        switch (nodeType) {
+            case 'datasetNode':
+                return (
+                    <CircleStackIcon
+                        style={{ width: '18px', height: '18px' }}
+                    />
+                );
+            case 'filterNode':
+                return <FunnelIcon style={{ width: '18px', height: '18px' }} />;
+            case 'connectorNode':
+                return <LinkIcon style={{ width: '18px', height: '18px' }} />;
+            case 'searchNode':
+                return (
+                    <MagnifyingGlassIcon
+                        style={{ width: '18px', height: '18px' }}
+                    />
+                );
+            default:
+                return (
+                    <DocumentTextIcon
+                        style={{ width: '18px', height: '18px' }}
+                    />
+                );
+        }
     };
 
-    const renderSavedWorkflows = () => {
-        const savedWorkflows = Object.keys(
-            store.workflow.workflows[store.search.currentDataset]
-        );
-
-        return savedWorkflows.map(workflow => (
-            <Flex
-                key={`workflow_${workflow}`}
-                width="100%"
-                justifyContent="space-between"
-                alignItems="center"
-                backgroundColor={
-                    colorMode === 'light' ? 'blackAlpha.200' : 'whiteAlpha.100'
+    const renderNodeList = () => {
+        return getFilteredActionNodeList().map((node, index) => (
+            <Tooltip
+                label={
+                    store.search.datasetTypes[store.search.currentDataset] ===
+                        'api' && node.nodeType === 'connectorNode'
+                        ? ''
+                        : node.tooltip
                 }
-                borderRadius="6px"
-                paddingLeft="10px"
+                key={`workflow_node_${index}`}
             >
-                <Tooltip label={workflow}>
-                    <Text
-                        fontSize="sm"
-                        overflow="hidden"
-                        whiteSpace="nowrap"
-                        textOverflow="ellipsis"
-                    >
-                        {workflow}
-                    </Text>
-                </Tooltip>
-                <HStack marginLeft="6px" spacing="0">
-                    <Tooltip label="Remove workflow">
-                        <IconButton
-                            icon={<Close style={{ '--ggs': '0.7' }} />}
-                            size="sm"
-                            variant="ghost"
-                            opacity="0.5"
-                            _hover={{ opacity: 1 }}
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Advanced Search - Saved Workflows',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: `Remove ${workflow}`
-                                    })
-                                );
-
-                                store.workflow.removeWorkflow(workflow);
-                            }}
-                        />
-                    </Tooltip>
-                    <Tooltip label="Load workflow">
-                        <IconButton
-                            icon={<ChevronRight style={{ '--ggs': '0.7' }} />}
-                            size="sm"
-                            variant="ghost"
-                            opacity="0.5"
-                            _hover={{ opacity: 1 }}
-                            onClick={() => {
-                                store.track.trackEvent(
-                                    'Advanced Search - Saved Workflows',
-                                    'Button',
-                                    JSON.stringify({
-                                        type: 'Click',
-                                        value: `Load ${workflow}`
-                                    })
-                                );
-
-                                store.workflow.loadWorkflow(workflow);
-                            }}
-                        />
-                    </Tooltip>
-                </HStack>
-            </Flex>
+                <Flex
+                    width="40px"
+                    height="40px"
+                    backgroundColor={
+                        colorMode === 'light'
+                            ? 'whiteAlpha.500'
+                            : 'blackAlpha.500'
+                    }
+                    borderRadius="8px"
+                    onDragStart={event => onDragStart(event, node.nodeType)}
+                    draggable={
+                        !(
+                            store.search.datasetTypes[
+                                store.search.currentDataset
+                            ] === 'api' && node.nodeType === 'connectorNode'
+                        )
+                    }
+                    opacity={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? 0.3
+                            : 1
+                    }
+                    cursor={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? 'default'
+                            : 'pointer'
+                    }
+                    padding="5px 10px"
+                    justifyContent="center"
+                    alignItems="center"
+                    transition="all 0.1s ease-in-out"
+                    _hover={
+                        store.search.datasetTypes[
+                            store.search.currentDataset
+                        ] === 'api' && node.nodeType === 'connectorNode'
+                            ? {}
+                            : {
+                                  backgroundColor:
+                                      colorMode === 'light'
+                                          ? 'blue.400'
+                                          : 'blue.700',
+                                  color:
+                                      colorMode === 'light' ? 'black' : 'white'
+                              }
+                    }
+                    role="group"
+                >
+                    {getNodeIcon(node.nodeType)}
+                </Flex>
+            </Tooltip>
         ));
     };
 
@@ -287,11 +286,12 @@ function AdvancedSearch(props) {
             height="100%"
             borderRadius="10px"
             overflow="hidden"
+            position="relative"
         >
             <Box width="100%" height="100%" ref={reactFlowWrapper}>
                 <ReactFlow
-                    nodes={store.workflow.nodes}
-                    edges={store.workflow.edges}
+                    nodes={nodes}
+                    edges={edges}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
                     onNodesChange={onNodesChange}
@@ -309,129 +309,39 @@ function AdvancedSearch(props) {
             </Box>
             <Box
                 position="absolute"
-                right="15px"
-                width="220px"
+                width="206px"
                 backgroundColor="transparent"
                 marginLeft="0px"
                 display="flex"
                 flexDirection="column"
                 flexGrow="1"
-                paddingTop="35px"
-                paddingBottom="25px"
                 zIndex="10"
-                top="30px"
+                id="AdvancedSearchDock"
+                style={
+                    props.isPanel
+                        ? { bottom: '15px', borderRadius: '10px', left: '15px' }
+                        : {
+                              bottom: '15px',
+                              borderRadius: '10px',
+                              left: '50%',
+                              transform: 'translateX(-50%)'
+                          }
+                }
             >
-                <VStack
-                    alignItems="start"
-                    padding="20px"
-                    backgroundColor={
-                        colorMode === 'light'
-                            ? 'rgba(255,255,255,0.85)'
-                            : 'rgba(0,0,0,0.85)'
-                    }
-                    borderTopLeftRadius="10px"
-                    borderTopRightRadius="10px"
-                    borderBottomColor={
-                        colorMode === 'light' ? 'gray.300' : '#2d2d2d'
-                    }
-                    borderBottomWidth="1px"
-                >
-                    <Heading size="sm">Search Nodes</Heading>
-                    <Text fontSize="xs" fontWeight="bold" opacity="0.75">
-                        Drag and drop nodes to create a custom search workflow
-                    </Text>
-                </VStack>
-                <VStack
+                <Wrap
                     height="auto"
                     padding="10px 10px"
                     backgroundColor={
                         colorMode === 'light'
-                            ? 'whiteAlpha.500'
-                            : 'blackAlpha.500'
+                            ? 'whiteAlpha.200'
+                            : 'whiteAlpha.200'
                     }
+                    borderRadius="10px"
                     flexGrow="1"
+                    position="relative"
                 >
                     {renderNodeList()}
-                </VStack>
-                <VStack
-                    borderTopColor={
-                        colorMode === 'light' ? 'gray.300' : '#2d2d2d'
-                    }
-                    borderTopWidth="1px"
-                    backgroundColor={colorMode === 'light' ? 'white' : 'black'}
-                    padding="10px 10px"
-                    borderBottomLeftRadius="10px"
-                    borderBottomRightRadius="10px"
-                >
-                    <Heading
-                        size="sm"
-                        textAlign="left"
-                        width="100%"
-                        marginBottom="6px"
-                        marginTop="6px"
-                    >
-                        Saved workflows
-                    </Heading>
-                    <VStack maxHeight="130px" width="100%" overflowY="scroll">
-                        {store.workflow.workflows &&
-                            store.workflow.workflows[
-                                store.search.currentDataset
-                            ] &&
-                            renderSavedWorkflows()}
-                    </VStack>
-                    <InputGroup size="sm" marginTop="20px">
-                        <Input
-                            placeholder="Workflow name ..."
-                            size="sm"
-                            variant="filled"
-                            backgroundColor={
-                                colorMode === 'light'
-                                    ? 'blackAlpha.200'
-                                    : 'whiteAlpha.300'
-                            }
-                            borderRadius="6px"
-                            value={store.workflow.newWorkflowName}
-                            onChange={e =>
-                                store.workflow.setNewWorkflowName(
-                                    e.target.value
-                                )
-                            }
-                        />
-                        <InputRightElement>
-                            <Tooltip label="Save current workflow">
-                                <IconButton
-                                    backgroundColor={
-                                        colorMode === 'light'
-                                            ? 'blue.400'
-                                            : 'whiteAlpha.300'
-                                    }
-                                    _hover={{
-                                        backgroundColor:
-                                            colorMode === 'light'
-                                                ? 'blue.500'
-                                                : 'whiteAlpha.500'
-                                    }}
-                                    role="group"
-                                    disabled={!store.workflow.newWorkflowName}
-                                    icon={<Check />}
-                                    size="sm"
-                                    onClick={() => {
-                                        store.track.trackEvent(
-                                            'Advanced Search - Saved Workflows',
-                                            'Button',
-                                            JSON.stringify({
-                                                type: 'Click',
-                                                value: `Save ${store.workflow.newWorkflowName}`
-                                            })
-                                        );
-
-                                        store.workflow.saveNewWorkflow();
-                                    }}
-                                />
-                            </Tooltip>
-                        </InputRightElement>
-                    </InputGroup>
-                </VStack>
+                </Wrap>
             </Box>
         </HStack>
     );
@@ -439,12 +349,14 @@ function AdvancedSearch(props) {
 
 AdvancedSearch.propTypes = {
     datasetSelectorDisabled: PropTypes.bool,
-    placeholder: PropTypes.string
+    placeholder: PropTypes.string,
+    isPanel: PropTypes.bool
 };
 
 AdvancedSearch.defaultProps = {
     datasetSelectorDisabled: false,
-    placeholder: 'Search through the selected dataset ...'
+    placeholder: 'Search through the selected dataset ...',
+    isPanel: false
 };
 
 export default observer(AdvancedSearch);

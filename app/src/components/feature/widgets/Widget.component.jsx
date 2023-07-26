@@ -50,11 +50,17 @@ function WidgetContainer(props) {
                 }}
                 onClick={() => {
                     store.track.trackEvent(
-                        `Details Panel - Widget Container - ${props.chart.id}`,
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: 'Remove widget'
+                            area: 'Widget',
+                            area_id: props.chart.id,
+                            sub_area: 'Widget container'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: 'Remove widget'
                         })
                     );
                     store.stats.removeChart(props.chart.id);
@@ -82,11 +88,17 @@ function WidgetContainer(props) {
                 }}
                 onClick={() => {
                     store.track.trackEvent(
-                        `Details Panel - Widget Container - ${props.chart.id}`,
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: isExpanded
+                            area: 'Widget',
+                            area_id: props.chart.id,
+                            sub_area: 'Widget container'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: isExpanded
                                 ? 'Shrink widget'
                                 : 'Expand widget'
                         })
@@ -119,13 +131,19 @@ function WidgetContainer(props) {
                 }
                 onClick={() => {
                     store.track.trackEvent(
-                        'Side panel - Node Settings',
-                        'Button',
                         JSON.stringify({
-                            type: 'Click',
-                            value: settingsMode
-                                ? 'Turn off settings mode'
-                                : 'Turn on settings mode'
+                            area: 'Widget',
+                            area_id: props.chart.id,
+                            sub_area: 'Widget container'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Button'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Click',
+                            event_action: !settingsMode
+                                ? 'Open settings'
+                                : 'Close settings'
                         })
                     );
 

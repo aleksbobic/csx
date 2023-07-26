@@ -53,15 +53,20 @@ function DatasetConfigColumns(props) {
                 variant="filled"
                 onChange={val => {
                     store.track.trackEvent(
-                        `Home Page - ${
-                            props.formType === 'modify'
-                                ? 'Dataset Configuration Modal'
-                                : 'Dataset Upload Modal'
-                        }`,
-                        `Select Element - ${column} - Data Type`,
                         JSON.stringify({
-                            type: 'Change selection',
-                            value: `${val.target.value}`
+                            area: 'Home page',
+                            sub_area:
+                                props.formType === 'modify'
+                                    ? 'Dataset config modal'
+                                    : 'Dataset upload modal'
+                        }),
+                        JSON.stringify({
+                            item_type: 'Select element'
+                        }),
+                        JSON.stringify({
+                            event_type: 'Change selection',
+                            event_action: `Change data type for ${column}`,
+                            event_value: val.target.value
                         })
                     );
 
@@ -156,15 +161,22 @@ function DatasetConfigColumns(props) {
                                         maxWidth="176px"
                                         onSubmit={val => {
                                             store.track.trackEvent(
-                                                `Home Page - ${
-                                                    props.formType === 'modify'
-                                                        ? 'Dataset Configuration Modal'
-                                                        : 'Dataset Upload Modal'
-                                                }`,
-                                                `Editable Element - ${column} - Title`,
                                                 JSON.stringify({
-                                                    type: 'Write',
-                                                    value: `${val}`
+                                                    area: 'Home page',
+                                                    sub_area:
+                                                        props.formType ===
+                                                        'modify'
+                                                            ? 'Dataset config modal'
+                                                            : 'Dataset upload modal'
+                                                }),
+                                                JSON.stringify({
+                                                    item_type:
+                                                        'Editable element'
+                                                }),
+                                                JSON.stringify({
+                                                    event_type: 'Write',
+                                                    event_action: `Change title for ${column}`,
+                                                    event_value: val
                                                 })
                                             );
 
@@ -233,15 +245,21 @@ function DatasetConfigColumns(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            `Home Page - ${
-                                                props.formType === 'modify'
-                                                    ? 'Dataset Configuration Modal'
-                                                    : 'Dataset Upload Modal'
-                                            }`,
-                                            `Radio Element - ${column} - Default Anchor`,
                                             JSON.stringify({
-                                                type: 'Change selection',
-                                                value: column
+                                                area: 'Home page',
+                                                sub_area:
+                                                    props.formType === 'modify'
+                                                        ? 'Dataset config modal'
+                                                        : 'Dataset upload modal'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Radio element'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Change selection',
+                                                event_action:
+                                                    'Change default node column',
+                                                event_value: column
                                             })
                                         );
 
@@ -285,15 +303,21 @@ function DatasetConfigColumns(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            `Home Page - ${
-                                                props.formType === 'modify'
-                                                    ? 'Dataset Configuration Modal'
-                                                    : 'Dataset Upload Modal'
-                                            }`,
-                                            `Radio Element - ${column} - Default Link`,
                                             JSON.stringify({
-                                                type: 'Change selection',
-                                                value: column
+                                                area: 'Home page',
+                                                sub_area:
+                                                    props.formType === 'modify'
+                                                        ? 'Dataset config modal'
+                                                        : 'Dataset upload modal'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Radio element'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Change selection',
+                                                event_action:
+                                                    'Change default edge column',
+                                                event_value: column
                                             })
                                         );
 
@@ -338,15 +362,21 @@ function DatasetConfigColumns(props) {
                                     }
                                     onChange={() => {
                                         store.track.trackEvent(
-                                            `Home Page - ${
-                                                props.formType === 'modify'
-                                                    ? 'Dataset Configuration Modal'
-                                                    : 'Dataset Upload Modal'
-                                            }`,
-                                            `Radio Element - ${column} - Default Search`,
                                             JSON.stringify({
-                                                type: 'Change selection',
-                                                value: column
+                                                area: 'Home page',
+                                                sub_area:
+                                                    props.formType === 'modify'
+                                                        ? 'Dataset config modal'
+                                                        : 'Dataset upload modal'
+                                            }),
+                                            JSON.stringify({
+                                                item_type: 'Radio element'
+                                            }),
+                                            JSON.stringify({
+                                                event_type: 'Change selection',
+                                                event_action:
+                                                    'Change default search column',
+                                                event_value: column
                                             })
                                         );
 

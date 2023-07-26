@@ -6,10 +6,10 @@ from typing import Dict, List, Tuple, cast
 
 import networkx as nx
 import numpy as np
-from numpy import inf
 import pandas as pd
-from app.utils.timer import use_timing
+import polars as pl
 from app.types import Component, Node
+from app.utils.timer import use_timing
 
 
 @use_timing
@@ -77,6 +77,13 @@ def enrich_node_with_props(
         for feature in anchor_properties
     }
 
+    for feature in properties:
+        if not type(properties[feature]) == str and np.issubdtype(
+            properties[feature], np.integer
+        ):
+            if type(properties[feature]).__module__ == np.__name__:
+                properties[feature] = properties[feature].item()
+
     node["properties"] = properties
     return node
 
@@ -112,7 +119,7 @@ def adjust_node_size(
                 node_label_frequencies[node["feature"]][node["label"]]
             )
 
-            if calculated_size == -inf:
+            if calculated_size == -np.inf:
                 calculated_size = 0
         else:
             calculated_size = 0
@@ -122,43 +129,125 @@ def adjust_node_size(
     return nodes
 
 
+def get_label_counts(
+    data: pl.DataFrame, feature, featureIsList, size_factor
+) -> List[Dict]:
+    """Get counts of labels in a given feature"""
+    if featureIsList:
+        data = (
+            data.explode(feature)
+            .with_columns(csx_entry=pl.col("entry"))
+            .groupby(feature, maintain_order=True)
+            .all()
+        )
+
+        return (
+            data.lazy()
+            .with_columns(
+                [
+                    pl.col("csx_entry").list.lengths().alias("csx_frequency"),
+                    pl.col("csx_entry").list.unique().alias("csx_entries"),
+                    pl.lit(feature).alias("feature"),
+                    pl.lit(0).alias("community"),
+                    pl.lit(0).alias("component"),
+                    pl.Series(
+                        name="id", values=[uuid.uuid4().hex for _ in range(len(data))]
+                    ),
+                ]
+            )
+            .with_columns(
+                pl.col("csx_entries").list.lengths().alias("csx_entry_frequency")
+            )
+            .with_columns(
+                pl.col("csx_entry_frequency")
+                .apply(lambda x: math.ceil(np.log2(x) + size_factor))
+                .alias("size")
+            )
+            .drop("csx_entry")
+            .rename({feature: "label", "csx_entries": "entries"})
+            .select(
+                pl.col(
+                    [
+                        "feature",
+                        "label",
+                        "csx_frequency",
+                        "entries",
+                        "csx_entry_frequency",
+                        "community",
+                        "component",
+                        "id",
+                        "size",
+                    ]
+                )
+            )
+            .collect()
+            .to_dicts()
+        )
+
+    data = (
+        data.with_columns(csx_entry=pl.col("entry"))
+        .groupby(feature, maintain_order=True)
+        .all()
+    )
+    return (
+        data.lazy()
+        .with_columns(
+            [
+                pl.col("csx_entry").list.lengths().alias("csx_frequency"),
+                pl.col("csx_entry").list.lengths().alias("csx_entry_frequency"),
+                pl.lit(feature).alias("feature"),
+                pl.lit(0).alias("community"),
+                pl.lit(0).alias("component"),
+                pl.Series(
+                    name="id", values=[uuid.uuid4().hex for _ in range(len(data))]
+                ),
+            ]
+        )
+        .with_columns(
+            pl.col("csx_entry_frequency")
+            .apply(lambda x: math.ceil(np.log2(x) + size_factor))
+            .alias("size")
+        )
+        .rename({"csx_entry": "entries", feature: "label"})
+        .select(
+            pl.col(
+                [
+                    "feature",
+                    "label",
+                    "csx_frequency",
+                    "entries",
+                    "csx_entry_frequency",
+                    "community",
+                    "component",
+                    "id",
+                    "size",
+                ]
+            )
+        )
+        .collect()
+        .to_dicts()
+    )
+
+
+def get_entry_list(df: pl.DataFrame):
+    return {entry: [] for entry in df.get_column("entry").to_list()}
+
+
 @use_timing
 def get_feature_nodes(df: pd.DataFrame, feature: str, size_factor: int = 2):
     # -> List[Node]:
     """Generate list of node objects for all values of a given feature."""
+    pldf = pl.from_pandas(df)
 
-    node_labels = get_labels(df, feature)
+    featureIsList = isinstance(df.iloc[0][feature], list)
 
-    entry_list = {}
-
-    def expand_entities(node_label, node_labels):
-        node = {
-            "entries": get_label_entries(df, feature, node_label),
-            "id": uuid.uuid4().hex,
-            "label": node_label,
-            "feature": feature,
-            "community": 0,
-            "component": 0,
-            "size": math.ceil(np.log2(node_labels[node_label]) + size_factor),
-        }
-
+    new_entry_list = get_entry_list(pldf)
+    new_nodes = get_label_counts(pldf, feature, featureIsList, size_factor)
+    for node in new_nodes:
         for entry in node["entries"]:
-            if entry in entry_list:
-                entry_list[entry].append(node)
-            else:
-                entry_list[entry] = [node]
+            new_entry_list[entry].append(node)
 
-        return node
-
-    nodes = [
-        cast(
-            Node,
-            expand_entities(node_label, node_labels),
-        )
-        for node_label in node_labels
-    ]
-
-    return nodes, entry_list
+    return new_nodes, new_entry_list
 
 
 def enrich_entries_with_nodes(entries_with_nodes: Dict, nodes: List[Node]) -> Dict:
@@ -171,6 +260,17 @@ def enrich_entries_with_nodes(entries_with_nodes: Dict, nodes: List[Node]) -> Di
                 entries_with_nodes[entry] = [node]
 
     return entries_with_nodes
+
+@use_timing
+def get_new_entries(new_entries_array):
+    entries = {}
+    for entry_array in new_entries_array:
+        for entry in entry_array:
+            if entry in entries:
+                entries[entry] = entries[entry] + entry_array[entry]
+            else:
+                entries[entry] = entry_array[entry]
+    return entries
 
 
 @use_timing
@@ -187,25 +287,19 @@ def get_nodes(
     nodes = []
     entries = {}
 
-    if len(features) == 0:
-        for feature in df.columns:
-            new_nodes, new_entries = get_feature_nodes(df, feature, 5)
-            nodes.extend(new_nodes)
-            for entry in new_entries:
-                if entry in entries:
-                    entries[entry] = entries[entry] + new_entries[entry]
-                else:
-                    entries[entry] = new_entries[entry]
-    else:
-        for feature in features:
-            new_nodes, new_entries = get_feature_nodes(df, feature, 5)
-            nodes.extend(new_nodes)
-            for entry in new_entries:
-                if entry in entries:
-                    entries[entry] = entries[entry] + new_entries[entry]
-                else:
-                    entries[entry] = new_entries[entry]
+    new_entries_arrays = []
+
+    feature_list = features if len(features) > 0 else df.columns
+
+    for feature in feature_list:
+        new_nodes, new_entries = get_feature_nodes(df, feature, 5)
+        nodes.extend(new_nodes)
+        new_entries_arrays.append(new_entries)
+
+    if len(features) > 0:
         nodes = enrich_with_props(df, nodes, anchor, anchor_properties)
+
+    entries = get_new_entries(new_entries_arrays)
 
     return nodes, entries
 

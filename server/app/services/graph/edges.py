@@ -61,7 +61,6 @@ def get_overview_edge_tuples(
 
     for node in graph.nodes:
         if node in link_nodes:
-
             temp_new_edge_tuples = combinations(list(graph.neighbors(node)), 2)
 
             node_instance = [
@@ -258,7 +257,6 @@ def get_shortest_schema_paths(
         if pair[0] == pair[1]:
             continue
         try:
-
             new_shortest_path = nx.shortest_path(graph, source=pair[0], target=pair[1])
             new_shortest_path_details = []
 
@@ -361,7 +359,6 @@ def get_single_column_edges(
     ).tolist()
 
     for group in edge_groups:
-
         entry_nodes = entries_with_nodes[group.entry]
 
         for edge in group["edges"]:
@@ -517,7 +514,6 @@ def get_row_edge_based_on_path(
                 if edge_has_empty_node(chained_edge, node_ids_with_labels):
                     continue
                 for edge in generated_edges:
-
                     # src = str(chained_edge[0]) + str(src_type)
                     # dest = str(chained_edge[1]) + str(dest_type)
                     src = chained_edge[0]

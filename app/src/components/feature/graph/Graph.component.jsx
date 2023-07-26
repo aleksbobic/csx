@@ -57,27 +57,99 @@ function Graph(props) {
         };
     });
 
-    const onNodeClick = (node, event) => {
+    const onNodeRightClick = (node, event) => {
         store.track.trackEvent(
-            'Graph Area',
-            `Node - ${node.label} - ${node.id}`,
             JSON.stringify({
-                type: 'Click'
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: node.id,
+                item_label: node.label,
+                item_feature: node.feature
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open node context menu'
             })
         );
 
         store.contextMenu.showContextMenu(node, event.clientX, event.clientY);
     };
 
-    const handleNodeHover = (node, nodeout) => {
+    const onBackgroundRightClick = event => {
+        store.track.trackEvent(
+            JSON.stringify({
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Canvas'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open canvas context menu'
+            })
+        );
+
+        store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
+    };
+
+    const onLinkRightClick = (link, event) => {
+        store.track.trackEvent(
+            JSON.stringify({
+                area: 'Graph area'
+            }),
+            JSON.stringify({
+                item_type: 'Edge'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Open canvas context menu'
+            })
+        );
+
+        store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
+    };
+
+    const onNodeHover = (node, nodeout, event) => {
         graphContainerElement.style.cursor = node ? 'pointer' : 'default';
 
-        if (node && !node.selected) {
-            store.graphInstance.addOutlinePassObject(node?.__threeObj);
+        if (node) {
+            if (
+                containerRef.current &&
+                node.x &&
+                node.y &&
+                !store.contextMenu.contextType
+            ) {
+                const contextCoordinates =
+                    containerRef.current.graph2ScreenCoords(
+                        node.x,
+                        node.y,
+                        node.z ? node.z : 0
+                    );
+
+                store.contextMenu.showNodeDetails(
+                    node,
+                    contextCoordinates.x,
+                    contextCoordinates.y
+                );
+            }
+
+            if (!node.selected) {
+                store.graphInstance.addOutlinePassObject(node?.__threeObj);
+            }
         }
 
-        if (nodeout && !nodeout.selected) {
-            store.graphInstance.removeOutlinePassObject(nodeout?.__threeObj);
+        if (nodeout) {
+            if (store.contextMenu.contextType === 'node_details') {
+                store.contextMenu.hideContextMenu();
+            }
+
+            if (!nodeout.selected) {
+                store.graphInstance.removeOutlinePassObject(
+                    nodeout?.__threeObj
+                );
+            }
         }
     };
 
@@ -128,7 +200,7 @@ function Graph(props) {
         store.graphInstance.isSelfCentric,
         store.graphInstance.selfCentricType,
         store.graph.showLabelDistance,
-        store.graphInstance.useCurvedEdges,
+        store.graphInstance.customEdgeCurvature,
         linkOpacity,
         store.graph
     ]);
@@ -179,6 +251,11 @@ function Graph(props) {
                 store.graphInstance.addOutlinePassObject(nodeLevels);
             }
 
+            nodeLevels.raycast = function (raycaster, intersects) {
+                node.nodeWithoutLabel.raycast(raycaster, intersects);
+                node.nodeWithoutLabelSolo.raycast(raycaster, intersects);
+            };
+
             return nodeLevels;
         },
         [store.graphInstance]
@@ -201,24 +278,32 @@ function Graph(props) {
     };
 
     useEffect(() => {
-        if (store.core.colorMode === 'light') {
-            setLinkOpacity(0.7);
+        if (!store.graphInstance.automaticEdgeOpacity) {
+            setLinkOpacity(store.graphInstance.customEdgeOpacity * 0.1);
         } else {
-            if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
-                if (store.graphInstance.selectedColorSchema === 'component') {
-                    setLinkOpacity(0.3);
-                } else {
-                    setLinkOpacity(0.1);
-                }
-            } else {
+            if (store.core.colorMode === 'light') {
                 setLinkOpacity(0.7);
+            } else {
+                if (store.graphInstance.selectedEdgeColorSchema === 'auto') {
+                    if (
+                        store.graphInstance.selectedColorSchema === 'component'
+                    ) {
+                        setLinkOpacity(0.3);
+                    } else {
+                        setLinkOpacity(0.1);
+                    }
+                } else {
+                    setLinkOpacity(0.7);
+                }
             }
         }
     }, [
         linkOpacity,
         store.core.colorMode,
         store.graphInstance.selectedColorSchema,
-        store.graphInstance.selectedEdgeColorSchema
+        store.graphInstance.selectedEdgeColorSchema,
+        store.graphInstance.automaticEdgeOpacity,
+        store.graphInstance.customEdgeOpacity
     ]);
 
     return (
@@ -248,20 +333,9 @@ function Graph(props) {
             }
             linkDirectionalArrowResolution={2}
             linkDirectionalArrowRelPos={1}
-            linkCurvature={store.graphInstance.useCurvedEdges ? 0.4 : 0}
+            linkCurvature={() => store.graphInstance.customEdgeCurvature}
             onLinkHover={link => {
                 if (store.core.isOverview) {
-                    if (link) {
-                        store.track.trackEvent(
-                            'Graph Area',
-                            `Link - ${link.id}`,
-                            JSON.stringify({
-                                type: 'Hover',
-                                connections: link.connections
-                            })
-                        );
-                    }
-
                     handleLinkHover(link);
                 }
             }}
@@ -274,32 +348,12 @@ function Graph(props) {
                 alpha: false,
                 powerPreference: 'high-performance'
             }}
-            onNodeClick={onNodeClick}
-            onBackgroundClick={() => {
-                store.track.trackEvent(
-                    'Graph Area - Contex Menu',
-                    'Outised',
-                    JSON.stringify({
-                        type: 'Click',
-                        value: 'Close context menu'
-                    })
-                );
-
-                store.contextMenu.hideContextMenu();
-            }}
+            onNodeRightClick={onNodeRightClick}
+            onBackgroundRightClick={onBackgroundRightClick}
+            onLinkRightClick={onLinkRightClick}
             onNodeDrag={store.contextMenu.hideContextMenu}
-            onNodeDragEnd={(node, translate) => {
-                store.track.trackEvent(
-                    'Graph Area',
-                    `Node - ${node.label} - ${node.id}`,
-                    JSON.stringify({
-                        type: 'Drag',
-                        value: translate
-                    })
-                );
-            }}
             showNavInfo={false}
-            onNodeHover={handleNodeHover}
+            onNodeHover={onNodeHover}
             d3VelocityDecay={0.1}
             nodeVisibility={node => node.visible}
             linkVisibility={link =>

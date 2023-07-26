@@ -1,6 +1,7 @@
 import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
 import { generateNodePositions } from 'schema.utils';
+import { MarkerType } from 'react-flow-renderer';
 
 export class SchemaStore {
     nodes = [];
@@ -10,6 +11,9 @@ export class SchemaStore {
     useUploadData = false;
     features = [];
     featureTypes = {};
+    schemaHasChanges = false;
+    schemaHasErrors = false;
+    schemaError = null;
     relationshipMapping = {
         '1:1': 'oneToOne',
         '1:M': 'oneToMany',
@@ -26,6 +30,16 @@ export class SchemaStore {
     }
 
     setUseUploadData = val => (this.useUploadData = val);
+    setSchemaHasChanges = val => (this.schemaHasChanges = val);
+    setSchemaHasErrors = val => (this.schemaHasErrors = val);
+    resetSchema = () => {
+        this.nodes = [];
+        this.edges = [];
+        this.nodeLabelToID = {};
+        this.setSchemaHasChanges(false);
+        this.setSchemaHasErrors(false);
+        this.schemaError = null;
+    };
 
     toggleRelationship = (id, possibleRelationships) => {
         const edge = this.edges.find(edge => edge.id === id);
@@ -41,11 +55,18 @@ export class SchemaStore {
         }
 
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge - ${id}`,
             JSON.stringify({
-                type: 'Click',
-                value: `Change relationship to ${edge.data.relationship}`
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: 'Edge',
+                item_id: id
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Change relationship',
+                event_value: edge.data.relationship
             })
         );
 
@@ -55,6 +76,8 @@ export class SchemaStore {
                 this.getServerSchema()
             );
         }
+
+        this.setSchemaHasChanges(true);
     };
 
     getServerSchema = () => {
@@ -77,8 +100,6 @@ export class SchemaStore {
     };
 
     generateSchemaNode = label => {
-        const isLink = this.store.search.links.includes(label);
-        const isAnchor = label === this.store.search.anchor;
         const id = uuidv4();
         this.nodeLabelToID[label] = id;
 
@@ -90,21 +111,42 @@ export class SchemaStore {
             sourcePosition: 'bottom',
             data: {
                 label: label,
-                isAnchor: isAnchor,
-                setAnchor: this.setAnchor,
-                isLink: isLink,
-                setLink: this.setLink
+                isVisible:
+                    this.store.core.visibleDimensions['detail'].includes(label),
+                toggleVisibility: this.toggleVisibility
             },
             style: {
-                background: '#323232',
+                background: this.store.core.visibleDimensions[
+                    'detail'
+                ].includes(label)
+                    ? '#283b57'
+                    : '#323232',
                 color: 'white',
-                borderRadius: '8px',
+                borderRadius: '10px',
                 height: 'auto',
                 borderWidth: 0,
                 padding: '10px',
                 minWidth: 50
             }
         };
+    };
+
+    toggleVisibility = feature => {
+        this.store.core.toggleVisibleDimension(feature);
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
+    };
+
+    makeVisibleOnConnect = (nodelabel, nodeId) => {
+        if (
+            !this.store.core.visibleDimensions['detail'].includes(nodelabel) &&
+            !this.edges.find(
+                edge => edge.source === nodeId || edge.target === nodeId
+            )
+        ) {
+            this.toggleVisibility(nodelabel);
+        }
     };
 
     generateLink = link => {
@@ -129,6 +171,11 @@ export class SchemaStore {
             target: `${target}`,
             type: 'schemaEdge',
             arrowHeadType: 'arrowclosed',
+            markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 26,
+                height: 26
+            },
             data: {
                 possibleRelationships: possibleRelations,
                 relationship: link?.relationship
@@ -145,20 +192,52 @@ export class SchemaStore {
             schema => schema.id === id
         );
 
+        const schema_nodes = [
+            ...new Set(
+                schema_to_load.edges
+                    .map(edge => [edge.source, edge.target])
+                    .flat()
+            )
+        ].map(
+            node_id =>
+                schema_to_load.nodes.find(node => node.id === node_id).data
+                    .label
+        );
+
         this.edges = schema_to_load.edges.map(edge => {
             edge.data.changeRelationship = this.toggleRelationship;
             edge.data.removeEdge = this.removeSchemaConnection;
+            edge.markerEnd = {
+                type: MarkerType.ArrowClosed,
+                width: 26,
+                height: 26
+            };
+
             return edge;
         });
 
-        this.nodes = schema_to_load.nodes;
+        this.nodes = schema_to_load.nodes.map(node => {
+            node.data = {
+                ...node.data,
+                isVisible: this.store.core.visibleDimensions['detail'].includes(
+                    node.data.label
+                ),
+                toggleVisibility: this.toggleVisibility
+            };
+
+            return node;
+        });
         this.nodeLabelToID = {};
 
         this.nodes.forEach(node => {
             this.nodeLabelToID[node.data.label] = node.id;
         });
         this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
-        this.store.core.updateVisibleDimensionsBasedOnSchema();
+
+        this.store.core.setArrayAsVisibleDimensions(schema_nodes);
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
     };
 
     populateStoreData = (useUploadData = false) => {
@@ -207,7 +286,8 @@ export class SchemaStore {
 
         const nodePositions = generateNodePositions(schema);
 
-        this.edges = nodePositions.filter(entry => 'source' in entry);
+        this.edges = nodePositions.filter(entry => entry.type === 'schemaEdge');
+
         this.nodes = nodePositions.filter(entry => !('source' in entry));
     };
 
@@ -256,18 +336,31 @@ export class SchemaStore {
 
     addSchemaConnection = edge => {
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge ${edge['source']}${edge['target']}`,
             JSON.stringify({
-                type: 'Create'
+                area: 'Schema panel',
+                sub_area: 'Schema'
+            }),
+            JSON.stringify({
+                item_type: null
+            }),
+            JSON.stringify({
+                event_type: 'Connect',
+                event_action: 'Create new edge',
+                event_value: `${edge['source']}${edge['target']}`
             })
         );
+
+        const src = this.getNodeNameFromId(edge.source);
+        const dest = this.getNodeNameFromId(edge.target);
+
+        this.makeVisibleOnConnect(src, edge.source);
+        this.makeVisibleOnConnect(dest, edge.target);
 
         this.edges = [
             ...this.edges,
             this.generateLink({
-                src: this.getNodeNameFromId(edge.source),
-                dest: this.getNodeNameFromId(edge.target)
+                src: src,
+                dest: dest
             })
         ];
 
@@ -275,8 +368,11 @@ export class SchemaStore {
             this.store.search.updateCurrentDatasetSchema(
                 this.getServerSchema()
             );
-            this.store.core.updateVisibleDimensionsBasedOnSchema();
         }
+
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
     };
 
     updateSchemaConnection = (oldEdge, newEdge) => {
@@ -295,14 +391,25 @@ export class SchemaStore {
                 this.getServerSchema()
             );
         }
+
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
     };
 
     removeSchemaConnection = id => {
         this.store.track.trackEvent(
-            'Schema Panel',
-            `Edge ${id}`,
             JSON.stringify({
-                type: 'Remove'
+                area: 'Schema panel',
+                sub_area: 'Schema',
+                sub_sub_area: 'Edge',
+                sub_sub_area_id: id
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Remove edge'
             })
         );
 
@@ -312,7 +419,40 @@ export class SchemaStore {
             this.store.search.updateCurrentDatasetSchema(
                 this.getServerSchema()
             );
-            this.store.core.updateVisibleDimensionsBasedOnSchema();
+        }
+
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
+    };
+
+    refreshNodeStyles = () => {
+        this.nodes = [
+            ...this.nodes.map(node => {
+                node.data.isVisible = this.store.core.visibleDimensions[
+                    'detail'
+                ].includes(node.data.label);
+                node.style = {
+                    ...node.style,
+                    background: this.store.core.visibleDimensions[
+                        'detail'
+                    ].includes(node.data.label)
+                        ? '#283b57'
+                        : '#323232'
+                };
+
+                return node;
+            })
+        ];
+    };
+
+    checkForSchemaErrors = () => {
+        if (this.store.core.visibleDimensions['detail'].length) {
+            this.setSchemaHasErrors(false);
+            this.schemaError = null;
+        } else {
+            this.setSchemaHasErrors(true);
+            this.schemaError = 'Schema must have at least one visible feature.';
         }
     };
 }

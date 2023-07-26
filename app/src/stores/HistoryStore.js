@@ -98,10 +98,16 @@ export class HistoryStore {
 
     loadStudy = historyID => {
         this.store.track.trackEvent(
-            'History Panel',
-            `Node - ${historyID}`,
             JSON.stringify({
-                type: 'Click'
+                area: 'History panel'
+            }),
+            JSON.stringify({
+                item_type: 'Node',
+                item_id: historyID
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Load graph from history node'
             })
         );
 
@@ -181,24 +187,26 @@ export class HistoryStore {
 
     deleteNode = async id => {
         this.store.track.trackEvent(
-            'History Panel',
-            `Node - ${id}`,
             JSON.stringify({
-                type: 'Click',
-                value: 'Delete node'
+                area: 'History panel',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Delete node'
             })
         );
 
         const deleteNodeIDs = this.getAllChildNodes(id);
 
-        const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_indexes: deleteNodeIDs
-        };
-
         const { error } = await safeRequest(
-            axios.post('history/delete', params)
+            axios.delete(`studies/${this.store.core.studyUuid}/history/${id}`, {
+                headers: { user_id: this.store.core.userUuid }
+            })
         );
 
         if (error) {
@@ -227,14 +235,21 @@ export class HistoryStore {
 
     updateStudyCharts = async charts => {
         const params = {
-            study_uuid: this.store.core.studyUuid,
-            user_uuid: this.store.core.userUuid,
-            history_item_index: this.store.core.studyHistoryItemIndex,
             charts: charts
         };
 
+        const historyItemId =
+            this.store.core.studyHistory[this.store.core.studyHistoryItemIndex]
+                .id;
+
         const { error } = await safeRequest(
-            axios.post('study/updatecharts', params)
+            axios.put(
+                `studies/${this.store.core.studyUuid}/history/${historyItemId}`,
+                params,
+                {
+                    headers: { user_id: this.store.core.userUuid }
+                }
+            )
         );
 
         if (error) {

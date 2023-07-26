@@ -7,32 +7,30 @@ export class WorkflowStore {
     workflows = {};
 
     actionNodeTypes = [
-        {
-            nodeType: 'datasetNode',
-            label: 'Dataset',
-            tooltip: 'Retrieve an entire dataset'
-        },
+        // {
+        //     nodeType: 'datasetNode',
+        //     label: 'Dataset',
+        //     tooltip: 'Dataset node'
+        // },
         {
             nodeType: 'searchNode',
             label: 'Search',
-            tooltip: 'Represents a single search keyword.'
-        },
-        {
-            nodeType: 'connectorNode',
-            label: 'Connector',
-            tooltip: 'Serves as a connection between differnt keywords.'
+            tooltip: 'Search node'
         },
         {
             nodeType: 'filterNode',
             label: 'Filter',
-            tooltip:
-                'Serves as an advanced search node which enables more elaborate filtering of values.'
+            tooltip: 'Filter node'
+        },
+        {
+            nodeType: 'connectorNode',
+            label: 'Connector',
+            tooltip: 'Connector node'
         },
         {
             nodeType: 'resultsNode',
             label: 'Results',
-            tooltip:
-                'Serves as an exit node which indicates that everything connected to it should be executed and visualised as a network.'
+            tooltip: 'Results node'
         }
     ];
 
@@ -173,11 +171,17 @@ export class WorkflowStore {
 
     deleteNode = nodeID => {
         this.store.track.trackEvent(
-            'Advanced Search - Search Canvas',
-            `Node - ${nodeID} - Button`,
             JSON.stringify({
-                type: 'Click',
-                value: 'Delete'
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: nodeID
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Delete node'
             })
         );
 
@@ -234,12 +238,8 @@ export class WorkflowStore {
         });
     };
 
-    trackNodeAction = (element, value) => {
-        this.store.track.trackEvent(
-            'Advanced Search - Search Canvas',
-            element,
-            value
-        );
+    trackNodeAction = (area, item, event) => {
+        this.store.track.trackEvent(area, item, event);
     };
 
     updateFilterNodeData = (nodeID, dataKey, dataValue) => {
@@ -703,9 +703,18 @@ export class WorkflowStore {
 
     onConnect = connection => {
         this.store.track.trackEvent(
-            'Advanced search - Search Canvas',
-            `Edge - e${connection.source}-${connection.target}`,
-            JSON.stringify({ type: 'Create' })
+            JSON.stringify({
+                area: 'Advanced search',
+                sub_area: 'Search canvas'
+            }),
+            JSON.stringify({
+                item_type: 'Edge',
+                item_id: `e${connection.source}-${connection.target}`
+            }),
+            JSON.stringify({
+                event_type: 'Connect',
+                event_action: 'Add new edge'
+            })
         );
 
         const newConnection = {
@@ -746,9 +755,18 @@ export class WorkflowStore {
 
     removeEdge = id => {
         this.store.track.trackEvent(
-            'Advanced search - Search Canvas',
-            `Edge - ${id}`,
-            JSON.stringify({ type: 'Remove' })
+            JSON.stringify({
+                area: 'Advanced search',
+                sub_area: 'Edge',
+                sub_area_id: id
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Remove edge'
+            })
         );
 
         const connection = this.edges.find(element => element.id === id);
@@ -777,11 +795,30 @@ export class WorkflowStore {
 
     runWorkFlow = resultsNodeId => {
         this.store.track.trackEvent(
-            'Advanced Search - Search Canvas',
-            `Node - ${resultsNodeId} - Button`,
             JSON.stringify({
-                type: 'Click',
-                value: 'Run Search'
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: resultsNodeId
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Run search'
+            })
+        );
+
+        this.store.track.trackEvent(
+            JSON.stringify({
+                area: 'Global'
+            }),
+            JSON.stringify({
+                item_type: null
+            }),
+            JSON.stringify({
+                event_type: 'Enter study',
+                event_value: this.store.core.studyUuid
             })
         );
 

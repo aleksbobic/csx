@@ -34,8 +34,7 @@ export class StatsStore {
         'Nodes',
         'Components',
         'Graph stats',
-        'Connections',
-        'Node Filter'
+        'Connections'
     ];
     availableTypes = ['all'];
     newChartProps = {
@@ -350,10 +349,6 @@ export class StatsStore {
             return 'Graph properties';
         }
 
-        if (this.newChartProps.type.toLowerCase() === 'node filter') {
-            return 'Node filter';
-        }
-
         if (this.newChartProps.type.toLowerCase() === 'connections') {
             return 'Node connections';
         }
@@ -388,27 +383,16 @@ export class StatsStore {
         const newChartId = uuidv4();
 
         this.store.track.trackEvent(
-            'Widget Modal',
-            'Button',
             JSON.stringify({
-                type: 'Click',
-                value: 'Add new chart',
-                properties: {
-                    id: newChartId,
-                    type: this.newChartProps.type,
-                    elements: this.newChartProps.elements,
-                    element_values: this.newChartProps.element_values,
-                    network: this.newChartProps.network,
-                    element_sort_values: 'frequency',
-                    visible_node_properties: [
-                        'Neighbours',
-                        'Documents',
-                        'Links'
-                    ],
-                    max_distance: 2,
-                    direct_connection_features: 'all',
-                    filter_property: 'degree'
-                }
+                area: 'Widget modal'
+            }),
+            JSON.stringify({
+                item_type: 'Button'
+            }),
+            JSON.stringify({
+                event_type: 'Click',
+                event_action: 'Add new widget',
+                event_value: newChartId
             })
         );
 

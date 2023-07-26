@@ -10,32 +10,36 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
-import { useContext, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useState } from 'react';
 import CustomScroll from '../customscroll/CustomScroll.component';
 
 function AutoCompleteInput(props) {
-    const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
     const [input, setInput] = useState(props.initialValue);
     const [suggestionsVisible, setSuggestionsVisible] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
     const [activeSuggestion, setActiveSuggestion] = useState(-1);
+    const [suggestTimeout, setSuggestTimeout] = useState(null);
 
     const handleValueChange = e => {
         setInput(e.target.value);
 
         props.getValue(e.target.value);
-        if (e.target.value.trim() !== '') {
-            const resolved = Promise.resolve(
-                props.getSuggestions(e.target.value)
-            );
-
-            resolved.then(returnedData => setSuggestions(returnedData));
-            setSuggestionsVisible(true);
-        } else {
+        if (e.target.value.trim() === '') {
             setSuggestionsVisible(false);
             setActiveSuggestion(0);
+        } else {
+            clearTimeout(suggestTimeout);
+            setSuggestTimeout(
+                setTimeout(() => {
+                    const resolved = Promise.resolve(
+                        props.getSuggestions(e.target.value)
+                    );
+
+                    resolved.then(returnedData => setSuggestions(returnedData));
+                    setSuggestionsVisible(true);
+                }, 200)
+            );
         }
 
         if (props.externalChangeHandler) {
@@ -44,22 +48,6 @@ function AutoCompleteInput(props) {
     };
 
     const clickSuggestion = clickedVal => {
-        store.track.trackEvent(
-            props.trackingLocation,
-            props.trackingEventTarget,
-            props.trackingEventFeature
-                ? JSON.stringify({
-                      type: 'Change selection',
-                      feature: props.trackingEventFeature,
-                      value: `${clickedVal}`
-                  })
-                : JSON.stringify({
-                      type: 'Change selection',
-                      dataset: props.trackingEventDataset,
-                      value: `${clickedVal}`
-                  })
-        );
-
         setInput(clickedVal);
         props.getValue(clickedVal);
         setSuggestionsVisible(false);
@@ -75,23 +63,6 @@ function AutoCompleteInput(props) {
                 activeSuggestion > -1
             ) {
                 e.preventDefault();
-
-                store.track.trackEvent(
-                    props.trackingLocation,
-                    props.trackingEventTarget,
-                    props.trackingEventFeature
-                        ? JSON.stringify({
-                              type: 'Change selection through key press',
-                              feature: props.trackingEventFeature,
-                              value: `${suggestions[activeSuggestion]}`
-                          })
-                        : JSON.stringify({
-                              type: 'Change selection through key press',
-                              dataset: props.trackingEventDataset,
-                              value: `${suggestions[activeSuggestion]}`
-                          })
-                );
-
                 setInput(suggestions[activeSuggestion]);
                 props.getValue(suggestions[activeSuggestion]);
 
@@ -145,6 +116,9 @@ function AutoCompleteInput(props) {
         setActiveSuggestion(-1);
         setSuggestionsVisible(false);
         setSuggestions([]);
+        if (props.onBlur) {
+            props.onBlur(input);
+        }
     };
 
     const handleFocus = () => {
@@ -209,6 +183,8 @@ function AutoCompleteInput(props) {
                     textOverflow="ellipsis"
                     onChange={handleValueChange}
                     value={input}
+                    name={props.name}
+                    autoComplete="off"
                     style={{ ...props.style }}
                 ></Input>
             </Tooltip>
@@ -235,6 +211,7 @@ AutoCompleteInput.propTypes = {
     variant: PropTypes.string,
     getSuggestions: PropTypes.func,
     getValue: PropTypes.func,
+    onBlur: PropTypes.func,
     style: PropTypes.object,
     suggestionStyle: PropTypes.object,
     externalChangeHandler: PropTypes.func,
@@ -242,7 +219,8 @@ AutoCompleteInput.propTypes = {
     trackingLocation: PropTypes.string,
     trackingEventTarget: PropTypes.string,
     trackingEventFeature: PropTypes.string,
-    trackingEventDataset: PropTypes.string
+    trackingEventDataset: PropTypes.string,
+    name: PropTypes.string
 };
 
 AutoCompleteInput.defaultProps = {
@@ -254,7 +232,8 @@ AutoCompleteInput.defaultProps = {
     trackingLocation: '',
     trackingEventTarget: '',
     trackingEventFeature: '',
-    trackingEventDataset: ''
+    trackingEventDataset: '',
+    name: ''
 };
 
 export default observer(AutoCompleteInput);

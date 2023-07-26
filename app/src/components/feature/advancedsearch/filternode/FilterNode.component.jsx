@@ -15,24 +15,36 @@ import { Handle } from 'react-flow-renderer';
 const filterNode = ({ id, data, isConnectable }) => {
     const modifyMin = value => {
         data.updateFilterNodeData(id, 'min', value);
+
         data.trackNodeAction(
-            `Node - ${id} - Input Element - Min`,
             JSON.stringify({
-                type: 'Write',
-                feature: data.feature,
-                value: `${value}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Input element' }),
+            JSON.stringify({
+                event_type: 'Write',
+                event_action: 'Set min value',
+                event_value: `${value}`
             })
         );
     };
 
     const modifyMax = value => {
         data.updateFilterNodeData(id, 'max', value);
+
         data.trackNodeAction(
-            `Node - ${id} - Input Element - Max`,
             JSON.stringify({
-                type: 'Write',
-                feature: data.feature,
-                value: `${value}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Input element' }),
+            JSON.stringify({
+                event_type: 'Write',
+                event_action: 'Set max value',
+                event_value: `${value}`
             })
         );
     };
@@ -40,11 +52,18 @@ const filterNode = ({ id, data, isConnectable }) => {
     const modifyFeature = value => {
         data.feature = value.target.value;
         data.updateFilterNodeValues(id, value.target.value);
+
         data.trackNodeAction(
-            `Node - ${id} - Select Element - Feature`,
             JSON.stringify({
-                type: 'Change selection',
-                value: `${value.target.value}`
+                area: 'Advanced search',
+                sub_area: 'Node',
+                sub_area_id: id
+            }),
+            JSON.stringify({ item_type: 'Select element' }),
+            JSON.stringify({
+                event_type: 'Change selection',
+                event_action: 'Change node feature',
+                event_value: `${value.target.value}`
             })
         );
     };

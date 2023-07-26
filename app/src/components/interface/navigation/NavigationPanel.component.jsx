@@ -1,13 +1,9 @@
 import {
     Box,
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    Button,
     ButtonGroup,
-    Divider,
     HStack,
     IconButton,
+    Button,
     Image,
     Link,
     Text,
@@ -21,27 +17,31 @@ import {
     AlignBottom,
     Attribution,
     Carousel,
-    ChevronRight,
     List,
+    Moon,
     RadioCheck,
-    Ratio,
     Ring,
-    Sync
+    Search,
+    Smile,
+    Sun,
+    ExtensionAdd
 } from 'css.gg';
+import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
+import { isEnvSet } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
-import { CameraIcon } from '@heroicons/react/24/solid';
-import { isEnvFalse } from 'general.utils';
+
+import { NewspaperIcon } from '@heroicons/react/24/outline';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
-import DataPanelComponent from '../datapanel/DataPanel.component';
+import RightPanel from '../rightpanel/RightPanel.component';
 
 function NavigationPanelComponent() {
     const store = useContext(RootStoreContext);
-    const { colorMode } = useColorMode();
+    const { colorMode, toggleColorMode } = useColorMode();
     const { isOpen, onToggle } = useDisclosure();
     const [panelType, setPanelType] = useState('');
     const location = useLocation();
@@ -54,12 +54,13 @@ function NavigationPanelComponent() {
     const edgeColorLight =
         location.pathname !== '/' ? 'gray.300' : 'transparent';
 
-    const edgeColor = useColorModeValue(edgeColorLight, edgeColorDark);
+    const getSurveyLink = () => {
+        return `${isEnvSet('REACT_APP_SURVEY_LINK')}&${isEnvSet(
+            'REACT_APP_SURVEY_LINK_USER_ID'
+        )}=${store.core.userUuid}`;
+    };
 
-    const graphUtilsMenuBackground = useColorModeValue(
-        'whiteAlpha.800',
-        'blackAlpha.700'
-    );
+    const edgeColor = useColorModeValue(edgeColorLight, edgeColorDark);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -86,10 +87,6 @@ function NavigationPanelComponent() {
         }
     });
 
-    const regenerateGraph = () => {
-        store.graph.modifyStudy(store.core.currentGraph);
-    };
-
     const toggleDataPanel = useCallback(
         panel => {
             if (panelType === panel || panelType === '' || !isOpen) {
@@ -107,11 +104,16 @@ function NavigationPanelComponent() {
             }
 
             store.track.trackEvent(
-                'Navbar',
-                'Button',
                 JSON.stringify({
-                    type: 'Click',
-                    value: `${isOpen ? 'Close' : 'Open'} ${panel} panel`
+                    area: 'Navbar'
+                }),
+                JSON.stringify({
+                    item_type: 'Button'
+                }),
+                JSON.stringify({
+                    event_type: 'Click',
+                    event_action: `${isOpen ? 'Close' : 'Open'} panel`,
+                    event_value: panel
                 })
             );
         },
@@ -125,35 +127,82 @@ function NavigationPanelComponent() {
         }
     }, [store.core.rightPanelTypeToOpen, toggleDataPanel, store.core]);
 
-    // const toggleColor = () => {
-    //     store.track.trackEvent(
-    //         'Navbar',
-    //         'Button',
-    //         JSON.stringify({
-    //             type: 'Click',
-    //             value: `Change color mode to ${
-    //                 colorMode === 'light' ? 'dark' : 'light'
-    //             }`
-    //         })
-    //     );
-
-    //     toggleColorMode();
-    //     store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
-    //     store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
-    //     store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
-    // };
+    const toggleColor = () => {
+        toggleColorMode();
+        store.core.setColorMode(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateLinkColor(colorMode === 'light' ? 'dark' : 'light');
+        store.graph.updateNodeColor(colorMode === 'light' ? 'dark' : 'light');
+    };
 
     const renderGraphUtils = () => (
-        <Box position="absolute" marginLeft="-105px" top="70px" id="graphutils">
+        <Box
+            position="absolute"
+            marginLeft={
+                store.search.datasetTypes[store.search.currentDataset] === 'api'
+                    ? '-205px'
+                    : '-55px'
+            }
+            top="70px"
+            id="graphutils"
+        >
             <HStack
                 spacing="10px"
-                backgroundColor={
-                    colorMode === 'light' ? '#ffffff' : graphUtilsMenuBackground
-                }
+                backgroundColor="transparent"
                 padding="5px 6px"
                 borderRadius="8px"
-                border={colorMode === 'light' ? '1px solid #CBD5E0' : 'none'}
             >
+                {store.search.datasetTypes[store.search.currentDataset] ===
+                    'api' && (
+                    <Tooltip label="Get more data using the last expansion action">
+                        <Button
+                            id="repeatlastretrievalaction"
+                            size="sm"
+                            isDisabled={!store.graph.repeatRetrieval}
+                            _disabled={{
+                                background: 'transparent',
+                                opacity: 0.5,
+                                cursor: 'default'
+                            }}
+                            background="purple.500"
+                            opacity="0.7"
+                            _hover={{
+                                opacity: 1,
+                                _disabled: {
+                                    opacity: 0.5,
+                                    cursor: 'default'
+                                }
+                            }}
+                            border="none"
+                            aria-label="Repeat last retrieval action"
+                            onClick={() => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Graph area',
+                                        sub_area: 'Graph controls'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action:
+                                            'Repeat last retrieval action'
+                                    })
+                                );
+
+                                store.graph.runRepeatRetrieval();
+                            }}
+                        >
+                            Get more data{' '}
+                            <ExtensionAdd
+                                style={{
+                                    '--ggs': '0.6',
+                                    marginLeft: '5px'
+                                }}
+                            />
+                        </Button>
+                    </Tooltip>
+                )}
                 <Tooltip
                     label={
                         store.core.currentGraph === 'detail'
@@ -168,11 +217,16 @@ function NavigationPanelComponent() {
                         aria-label="Switch graph view"
                         onClick={() => {
                             store.track.trackEvent(
-                                'Graph Area - Graph Controls',
-                                'Button',
                                 JSON.stringify({
-                                    type: 'Click',
-                                    value: `Switch to ${
+                                    area: 'Graph area',
+                                    sub_area: 'Graph controls'
+                                }),
+                                JSON.stringify({
+                                    item_type: 'Button'
+                                }),
+                                JSON.stringify({
+                                    event_type: 'Click',
+                                    event_action: `Switch to ${
                                         store.core.currentGraph === 'detail'
                                             ? 'overview'
                                             : 'detail'
@@ -201,27 +255,6 @@ function NavigationPanelComponent() {
                         }
                     />
                 </Tooltip>
-                <Tooltip label="Regenerate graph">
-                    <IconButton
-                        id="regenerategraphbutton"
-                        size="sm"
-                        border="none"
-                        disabled={store.search.links.length === 0}
-                        aria-label="Regenerate graph"
-                        icon={<Sync style={{ '--ggs': '0.7' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - Graph Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Regenerate graph'
-                                })
-                            );
-                            regenerateGraph();
-                        }}
-                    />
-                </Tooltip>
             </HStack>
         </Box>
     );
@@ -230,8 +263,8 @@ function NavigationPanelComponent() {
         <VStack
             alignItems="flex-start"
             position="absolute"
-            bottom="50px"
-            right="0px"
+            bottom="0px"
+            right="20px"
             width="200px"
             spacing="5px"
             backgroundColor={
@@ -274,97 +307,11 @@ function NavigationPanelComponent() {
     );
 
     const renderViewUtils = () => (
-        <Box
-            position="absolute"
-            marginLeft="-100px"
-            bottom="20px"
-            id="viewutils"
-        >
+        <Box position="absolute" bottom="20px" id="viewutils">
             {store.graphInstance.hoverData.length > 0 &&
                 store.core.isOverview &&
                 renderHoverData()}
-            <HStack spacing="10px">
-                <Tooltip label="Make Screenshot">
-                    <IconButton
-                        size="sm"
-                        border="none"
-                        aria-label="Make Screenshot"
-                        icon={<CameraIcon style={{ width: '16px' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - View Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Take screenshot'
-                                })
-                            );
-                            store.graphInstance.takeScreenshot();
-                        }}
-                    />
-                </Tooltip>
-                <Tooltip label="Zoom to fit">
-                    <IconButton
-                        id="zoomtofitbutton"
-                        size="sm"
-                        border="none"
-                        aria-label="Zoom to fit"
-                        icon={<Ratio style={{ '--ggs': '0.8' }} />}
-                        onClick={() => {
-                            store.track.trackEvent(
-                                'Graph Area - View Controls',
-                                'Button',
-                                JSON.stringify({
-                                    type: 'Click',
-                                    value: 'Zoom to fit'
-                                })
-                            );
-
-                            store.graphInstance.zoomToFit();
-                        }}
-                    />
-                </Tooltip>
-            </HStack>
         </Box>
-    );
-
-    const renderWorkspaceSwitch = () => (
-        <ButtonGroup size="xs" isAttached>
-            <Tooltip label="Search workspace">
-                <Button
-                    variant={
-                        location.pathname === '/search' ? 'solid' : 'outline'
-                    }
-                    as={NavLink}
-                    to={`/search?study=${store.core.studyUuid}`}
-                    border="1px solid transparent"
-                    opacity={location.pathname === '/search' ? '1' : '0.5'}
-                >
-                    Search
-                </Button>
-            </Tooltip>
-            <Tooltip label="Graph analysis workspace">
-                <Button
-                    variant={
-                        location.pathname === '/graph' ? 'solid' : 'outline'
-                    }
-                    border="1px solid transparent"
-                    as={NavLink}
-                    to={`/graph?study=${store.core.studyUuid}`}
-                    opacity={
-                        location.pathname.startsWith('/graph') ? '1' : '0.5'
-                    }
-                    style={{
-                        pointerEvents: !store.graph.currentGraphData.nodes
-                            .length
-                            ? 'none'
-                            : 'auto'
-                    }}
-                >
-                    Graph
-                </Button>
-            </Tooltip>
-        </ButtonGroup>
     );
 
     const renderToggles = () => (
@@ -391,6 +338,39 @@ function NavigationPanelComponent() {
                     paddingRight="10px"
                     borderColor={edgeColor}
                 >
+                    {isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') && (
+                        <Tooltip label="Toggle search panel">
+                            <IconButton
+                                border="none"
+                                aria-label="Search panel toggle"
+                                id="searchpnaletoggle"
+                                color={
+                                    panelType === 'search'
+                                        ? 'blue.400'
+                                        : colorMode === 'light'
+                                        ? 'black'
+                                        : 'white'
+                                }
+                                borderRadius="10px"
+                                background={
+                                    panelType === 'search'
+                                        ? 'whiteAlpha.200'
+                                        : ''
+                                }
+                                onClick={() => {
+                                    toggleDataPanel('search');
+                                }}
+                                icon={
+                                    <Search
+                                        style={{
+                                            '--ggs': '0.7',
+                                            marginBottom: '-2px'
+                                        }}
+                                    />
+                                }
+                            />
+                        </Tooltip>
+                    )}
                     <Tooltip label="Toggle details panel">
                         <IconButton
                             border="none"
@@ -402,6 +382,10 @@ function NavigationPanelComponent() {
                                     : colorMode === 'light'
                                     ? 'black'
                                     : 'white'
+                            }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'details' ? 'whiteAlpha.200' : ''
                             }
                             onClick={() => {
                                 toggleDataPanel('details');
@@ -427,6 +411,10 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'results' ? 'whiteAlpha.200' : ''
+                            }
                             onClick={() => {
                                 toggleDataPanel('results');
                             }}
@@ -450,6 +438,10 @@ function NavigationPanelComponent() {
                                     : colorMode === 'light'
                                     ? 'black'
                                     : 'white'
+                            }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'schema' ? 'whiteAlpha.200' : ''
                             }
                             onClick={() => {
                                 toggleDataPanel('schema');
@@ -475,6 +467,10 @@ function NavigationPanelComponent() {
                                     ? 'black'
                                     : 'white'
                             }
+                            borderRadius="10px"
+                            background={
+                                panelType === 'history' ? 'whiteAlpha.200' : ''
+                            }
                             onClick={() => {
                                 toggleDataPanel('history');
                             }}
@@ -492,7 +488,7 @@ function NavigationPanelComponent() {
                 </ButtonGroup>
             )}
 
-            {/* {location.pathname !== '/present' && (
+            {location.pathname === '/doesnotexist' && (
                 <Tooltip label="Toggle color mode">
                     <IconButton
                         border="none"
@@ -515,7 +511,7 @@ function NavigationPanelComponent() {
                         onClick={toggleColor}
                     />
                 </Tooltip>
-            )} */}
+            )}
         </ButtonGroup>
     );
 
@@ -525,7 +521,7 @@ function NavigationPanelComponent() {
                 id="navigation"
                 pos="fixed"
                 zIndex="20"
-                height="50px"
+                height="60px"
                 backgroundColor={
                     location.pathname !== '/' &&
                     location.pathname !== '/present'
@@ -548,8 +544,8 @@ function NavigationPanelComponent() {
                         <Link
                             as={NavLink}
                             to="/"
-                            paddingRight="5px"
-                            paddingLeft="5px"
+                            paddingRight="10px"
+                            paddingLeft="10px"
                             borderRight="1px solid"
                             borderColor={
                                 location.pathname !== '/present'
@@ -564,127 +560,129 @@ function NavigationPanelComponent() {
                                 store.core.setShowCookieInfo(false);
 
                                 store.track.trackEvent(
-                                    'Navbar',
-                                    'Button - Logo',
                                     JSON.stringify({
-                                        type: 'Click'
+                                        area: 'Navbar'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Logo'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Navigate home'
                                     })
                                 );
                             }}
                         >
                             <Image
                                 src={logo}
-                                alt="Collaboration spotting logo"
+                                alt="Collaboration spotting X logo"
                                 height="40px"
                                 padding="10px"
                             />
                         </Link>
                     )}
-
-                    {location.pathname !== '/' &&
-                        location.pathname !== '/present' &&
-                        isEnvFalse('REACT_APP_DISABLE_ADVANCED_SEARCH') &&
-                        renderWorkspaceSwitch()}
-                    {location.pathname !== '/' &&
-                        location.pathname !== '/present' && (
-                            <HStack
-                                height="40px"
-                                style={{
-                                    marginLeft: isEnvFalse(
-                                        'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                    )
-                                        ? '125px'
-                                        : '0'
-                                }}
-                                spacing="20px"
-                            >
-                                {isEnvFalse(
-                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                ) && (
-                                    <Divider
-                                        opacity="0.2"
-                                        orientation="vertical"
-                                        height="100%"
-                                        backgroundColor="gray.900"
-                                    />
-                                )}
-                                <Breadcrumb
-                                    marginLeft="20px"
-                                    spacing="2px"
-                                    separator={
-                                        <ChevronRight
-                                            style={{ '--ggs': '0.5' }}
-                                        />
-                                    }
-                                >
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink
-                                            as={NavLink}
-                                            to="/"
-                                            fontSize="xs"
-                                            fontWeight="regular"
-                                        >
-                                            {store?.search?.currentDataset?.toUpperCase()}
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    <BreadcrumbItem>
-                                        <BreadcrumbLink
-                                            as={Button}
-                                            onClick={() => {
-                                                store.graph.modifyStudy(
-                                                    'overview'
-                                                );
-                                            }}
-                                            disabled={
-                                                store.core.currentGraph ===
-                                                'overview'
-                                            }
-                                            size="xs"
-                                            variant="ghost"
-                                            _hover={{
-                                                backgroundColor: 'transparent',
-                                                textDecoration:
-                                                    store.core.currentGraph ===
-                                                    'detail'
-                                                        ? 'underline'
-                                                        : 'none',
-                                                cursor:
-                                                    store.core.currentGraph ===
-                                                    'detail'
-                                                        ? 'pointer'
-                                                        : 'default'
-                                            }}
-                                            _disabled={{ opacity: '1' }}
-                                        >
-                                            Graph
-                                        </BreadcrumbLink>
-                                    </BreadcrumbItem>
-                                    {store.core.currentGraph === 'detail' && (
-                                        <BreadcrumbItem>
-                                            <BreadcrumbLink
-                                                as={Text}
-                                                fontSize="xs"
-                                                fontWeight="bold"
-                                                _hover={{ cursor: 'default' }}
-                                            >
-                                                Detail
-                                            </BreadcrumbLink>
-                                        </BreadcrumbItem>
-                                    )}
-                                </Breadcrumb>
-                            </HStack>
-                        )}
                 </HStack>
                 <HStack spacing="20px">
+                    {isEnvSet('REACT_APP_SURVEY_LINK') && (
+                        <Tooltip label="Provide your feedback">
+                            <Link
+                                size="sm"
+                                variant="ghost"
+                                href={getSurveyLink()}
+                                isExternal
+                                transition="0.2s all ease-in-out"
+                                _hover={{
+                                    textDecoration: 'none',
+                                    backgroundColor: 'blue.500'
+                                }}
+                                style={{
+                                    borderRadius: '8px',
+                                    padding: '4px 8px'
+                                }}
+                            >
+                                <Smile
+                                    style={{
+                                        '--ggs': 0.7,
+                                        marginRight: '5px',
+                                        display: 'inline-block',
+                                        marginBottom: '-4px'
+                                    }}
+                                />{' '}
+                                Feedback
+                            </Link>
+                        </Tooltip>
+                    )}
+                    <Tooltip label="Visit the CSX wiki">
+                        <Button
+                            size="sm"
+                            as={Link}
+                            width={
+                                !location.pathname.startsWith('/search') &&
+                                !location.pathname.startsWith('/graph')
+                                    ? '75px'
+                                    : '32px'
+                            }
+                            padding={0}
+                            variant="ghost"
+                            id="wiki"
+                            onClick={e => {
+                                store.track.trackEvent(
+                                    JSON.stringify({
+                                        area: 'Navbar'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Open wiki'
+                                    })
+                                );
+                            }}
+                            transition="0.2s all ease-in-out"
+                            href="https://csxapp.notion.site/Collaboration-Spotting-X-FAQ-ccace3dc0f384b1fac6b15a3499523ed"
+                            target="_blank"
+                            isExternal
+                            _hover={{
+                                textDecoration: 'none',
+                                backgroundColor: 'blue.500'
+                            }}
+                        >
+                            <NewspaperIcon
+                                display="inline"
+                                width="16px"
+                                height="16px"
+                                style={{
+                                    marginRight:
+                                        !location.pathname.startsWith(
+                                            '/search'
+                                        ) &&
+                                        !location.pathname.startsWith(
+                                            '/graph'
+                                        ) &&
+                                        '5px'
+                                }}
+                            />
+                            {!location.pathname.startsWith('/search') &&
+                                !location.pathname.startsWith('/graph') &&
+                                'Wiki'}
+                        </Button>
+                    </Tooltip>
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
-                            <Button
+                            <IconButton
                                 size="sm"
+                                width="40px"
+                                height="40px"
+                                style={{
+                                    marginLeft: '10px'
+                                }}
                                 as={Link}
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
-                                borderRadius="6px"
-                                leftIcon={
+                                borderRadius="10px"
+                                id="presentationmode"
+                                icon={
                                     <PresentationChartLineIcon
                                         width="16px"
                                         height="16px"
@@ -697,18 +695,25 @@ function NavigationPanelComponent() {
                                     }
 
                                     store.track.trackEvent(
-                                        'Navbar',
-                                        'Link',
                                         JSON.stringify({
-                                            type: 'Click',
-                                            value: 'Open study in presentation mode'
+                                            area: 'Navbar'
+                                        }),
+                                        JSON.stringify({
+                                            item_type: 'Button'
+                                        }),
+                                        JSON.stringify({
+                                            event_type: 'Click',
+                                            event_action:
+                                                'Open study presentation mode'
                                         })
                                     );
                                 }}
                                 transition="0.2s all ease-in-out"
                                 href={
                                     store.core.studyIsSaved
-                                        ? `http://localhost:8882/present?study=${store.core.studyUuid}`
+                                        ? `${store.core.getBasePresentURL()}?study=${
+                                              store.core.studyUuid
+                                          }`
                                         : ''
                                 }
                                 isExternal
@@ -716,9 +721,7 @@ function NavigationPanelComponent() {
                                     textDecoration: 'none',
                                     backgroundColor: 'blue.500'
                                 }}
-                            >
-                                Present
-                            </Button>
+                            />
                         </Tooltip>
                     )}
                     {renderToggles()}
@@ -739,12 +742,12 @@ function NavigationPanelComponent() {
                         position: 'fixed',
                         top: 0,
                         height: '100%',
-                        paddingTop: '50px'
+                        paddingTop: '60px'
                     }}
                 >
                     {renderGraphUtils()}
                     {renderViewUtils()}
-                    <DataPanelComponent panelType={panelType} />
+                    <RightPanel panelType={panelType} />
                 </Box>
             )}
         </>

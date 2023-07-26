@@ -214,11 +214,20 @@ function SelectedNodeList(props) {
                                     onClick={() => {
                                         if (!props.demoData.length) {
                                             store.track.trackEvent(
-                                                `Details Panel - Widget - ${props.chart.id}`,
-                                                'Button',
                                                 JSON.stringify({
-                                                    type: 'Click',
-                                                    value: `Zoom to fit ${node.id} - ${node.label}`
+                                                    area: 'Widget',
+                                                    area_id: props.chart.id
+                                                }),
+                                                JSON.stringify({
+                                                    item_type: 'Button',
+                                                    item_id: node.id,
+                                                    item_label: node.label,
+                                                    item_feature: node.feature
+                                                }),
+                                                JSON.stringify({
+                                                    event_type: 'Click',
+                                                    event_action:
+                                                        'Navigate to node'
                                                 })
                                             );
 
@@ -266,11 +275,27 @@ function SelectedNodeList(props) {
                                                         !props.demoData.length
                                                     ) {
                                                         store.track.trackEvent(
-                                                            `Details Panel - Widget - ${props.chart.id}`,
-                                                            'Button',
                                                             JSON.stringify({
-                                                                type: 'Click',
-                                                                value: `Deselect ${node.id} - ${node.label}`
+                                                                area: 'Widget',
+                                                                area_id:
+                                                                    props.chart
+                                                                        .id
+                                                            }),
+                                                            JSON.stringify({
+                                                                item_type:
+                                                                    'Button',
+                                                                item_id:
+                                                                    node.id,
+                                                                item_label:
+                                                                    node.label,
+                                                                item_feature:
+                                                                    node.feature
+                                                            }),
+                                                            JSON.stringify({
+                                                                event_type:
+                                                                    'Click',
+                                                                event_action:
+                                                                    'Deselect node'
                                                             })
                                                         );
 
