@@ -1062,6 +1062,8 @@ export class GraphStore {
                 this.addNeighbourObjectsToNodes();
 
                 this.store.overviewSchema.populateStoreData();
+                this.store.overviewSchema.pushCurrentSchemaToPastSchemas();
+                this.store.overviewSchema.getSchemaRecommendations('schema');
             } else {
                 // Handle detail graph data
                 this.detailGraphData.meta.query = query;
@@ -1152,6 +1154,8 @@ export class GraphStore {
                 this.addNeighbourObjectsToNodes();
 
                 this.store.schema.refreshNodeStyles();
+                this.store.schema.pushCurrentSchemaToPastSchemas();
+                this.store.schema.getSchemaRecommendations('schema');
             }
             this.store.core.setDataIsLoading(false);
         }

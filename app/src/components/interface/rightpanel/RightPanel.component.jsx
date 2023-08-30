@@ -40,7 +40,7 @@ import AdvancedSearch from 'components/feature/advancedsearch/AdvancedSearch.com
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { HistoryFlow } from 'components/feature/rightpanel/historyflow/HistoryFlow.component';
 import SchemaFlow from 'components/feature/rightpanel/schemaflow/SchemaFlow.component';
-import { SchemaList } from 'components/feature/rightpanel/schemalist/SchemaList.component';
+import SchemaList from 'components/feature/rightpanel/schemalist/SchemaList.component';
 import { isEnvFalse } from 'general.utils';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 
@@ -462,8 +462,8 @@ function RightPanel(props) {
                     }
                     paddingTop={
                         activeTab === 3 &&
-                        store.search.default_schemas[store.core.currentGraph]
-                            .length > 0 &&
+                        // store.search.default_schemas[store.core.currentGraph]
+                        //     .length > 0 &&
                         '80px'
                     }
                     index={activeTab}

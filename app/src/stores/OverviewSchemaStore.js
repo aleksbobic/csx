@@ -1,6 +1,8 @@
 import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
 import { getSchemaElementPositions } from 'schema.utils';
+import { safeRequest } from 'general.utils';
+import axios from 'axios';
 
 export class OverviewSchemaStore {
     nodes = [];
@@ -15,6 +17,49 @@ export class OverviewSchemaStore {
     anchor = null;
     links = [];
     nodeLabelToID = {};
+
+    pastSchemas = [];
+    recommendedSchemas = [];
+
+    pushCurrentSchemaToPastSchemas = () => {
+        this.pastSchemas.push(
+            JSON.stringify({
+                node: this.anchor,
+                properties: this.anchorProperties,
+                edges: this.links
+            })
+        );
+        if (this.pastSchemas.length > 10) {
+            this.pastSchemas.pop();
+        }
+    };
+
+    getSchemaRecommendations = async rectype => {
+        const params = {
+            schematype: 'overview',
+            rectype: rectype,
+            recinput: this.pastSchemas
+        };
+
+        const { error, response } = await safeRequest(
+            axios.post('utils/recommendation', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.recommendedSchemas = [];
+
+        this.recommendedSchemas = response.data.map((schema, index) => {
+            return {
+                id: index,
+                name: `${schema['node']} and ${schema['edges'][0]}`,
+                ...schema
+            };
+        });
+    };
 
     updateNodes = nodes => (this.nodes = nodes);
     updateEdges = edges => (this.edges = edges);
@@ -92,6 +137,20 @@ export class OverviewSchemaStore {
             data: {},
             type: 'overviewCustomEdge'
         };
+    };
+
+    loadRecommendedSchema = id => {
+        const schema_to_load = this.recommendedSchemas.find(
+            schema => schema.id === id
+        );
+
+        this.resetProperties();
+        this.store.search.setLinks(schema_to_load.edges);
+        this.store.search.setAnchor(schema_to_load.node);
+        this.setAnchorProperties(schema_to_load.properties);
+        this.setDefaultsFromSearchStore();
+        this.generateNodesAndEdges();
+        this.setSchemaHasChanges(true);
     };
 
     loadDefaultSchema = id => {

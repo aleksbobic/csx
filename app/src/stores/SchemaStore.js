@@ -2,6 +2,8 @@ import { makeAutoObservable } from 'mobx';
 import { v4 as uuidv4 } from 'uuid';
 import { generateNodePositions } from 'schema.utils';
 import { MarkerType } from 'react-flow-renderer';
+import { safeRequest } from 'general.utils';
+import axios from 'axios';
 
 export class SchemaStore {
     nodes = [];
@@ -19,6 +21,58 @@ export class SchemaStore {
         '1:M': 'oneToMany',
         'M:N': 'manyToMany',
         'M:1': 'manyToOne'
+    };
+
+    pastSchemas = [];
+    recommendedSchemas = [];
+
+    pushCurrentSchemaToPastSchemas = () => {
+        // you need: {"src": "author_institutions", "dst": "concepts_lv_2", "rel": "M:N"}
+        this.pastSchemas.push(
+            JSON.stringify(
+                this.edges.map(edge => {
+                    return {
+                        src: this.nodes.find(node => node.id === edge.source)
+                            .data.label,
+                        dst: this.nodes.find(node => node.id === edge.target)
+                            .data.label,
+                        rel: edge.data.relationship
+                    };
+                })
+            )
+        );
+        if (this.pastSchemas.length > 10) {
+            this.pastSchemas.pop();
+        }
+    };
+
+    getSchemaRecommendations = async rectype => {
+        const params = {
+            schematype: 'detail',
+            rectype: rectype,
+            recinput: this.pastSchemas
+        };
+
+        const { error, response } = await safeRequest(
+            axios.post('utils/recommendation', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.recommendedSchemas = [];
+
+        this.recommendedSchemas = response.data.map((schema, index) => {
+            const parsedSchema = JSON.parse(schema);
+
+            return {
+                id: index,
+                name: `${parsedSchema[0]['src']} and ${parsedSchema[0]['dst']}`,
+                schema: parsedSchema
+            };
+        });
     };
 
     updateNodes = nodes => (this.nodes = nodes);
@@ -185,6 +239,43 @@ export class SchemaStore {
                 removeEdge: this.removeSchemaConnection
             }
         };
+    };
+
+    loadRecommendedSchema = id => {
+        const schema_to_load = this.recommendedSchemas.find(
+            schema => schema.id === id
+        ).schema;
+
+        const schema_nodes = [
+            ...new Set(schema_to_load.map(edge => [edge.dst, edge.src]).flat())
+        ];
+
+        this.edges = [];
+
+        for (let i = 0; i < schema_to_load.length; i++) {
+            const edge = schema_to_load[i];
+
+            const source = edge.src;
+            const dest = edge.dst;
+
+            this.makeVisibleOnConnect(source, this.nodeLabelToID[source]);
+            this.makeVisibleOnConnect(dest, this.nodeLabelToID[dest]);
+
+            this.edges.push(
+                this.generateLink({
+                    src: source,
+                    dest: dest,
+                    relationship: this.relationshipMapping[edge.rel]
+                })
+            );
+        }
+
+        this.store.search.updateCurrentDatasetSchema(this.getServerSchema());
+
+        this.store.core.setArrayAsVisibleDimensions(schema_nodes);
+        this.refreshNodeStyles();
+        this.checkForSchemaErrors();
+        this.setSchemaHasChanges(true);
     };
 
     loadDefaultSchema = id => {

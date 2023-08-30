@@ -208,13 +208,19 @@ function SchemaFlow() {
                             _hover={{ backgroundColor: 'blue.500' }}
                             onClick={() => {
                                 store.track.trackEvent(
-                                    'Graph Area - Graph Controls',
-                                    'Button',
                                     JSON.stringify({
-                                        type: 'Click',
-                                        value: 'Regenerate graph'
+                                        area: 'Graph area',
+                                        sub_area: 'Graph Controls'
+                                    }),
+                                    JSON.stringify({
+                                        item_type: 'Button'
+                                    }),
+                                    JSON.stringify({
+                                        event_type: 'Click',
+                                        event_action: 'Regenerate graph'
                                     })
                                 );
+
                                 store.overviewSchema.setSchemaHasChanges(false);
                                 store.schema.setSchemaHasChanges(false);
                                 store.graph.modifyStudy(
