@@ -1063,7 +1063,8 @@ export class GraphStore {
 
                 this.store.overviewSchema.populateStoreData();
                 this.store.overviewSchema.pushCurrentSchemaToPastSchemas();
-                this.store.overviewSchema.getSchemaRecommendations('schema');
+                this.store.overviewSchema.getSchemaRecommendations();
+                this.store.overviewSchema.getActionRecommendations();
             } else {
                 // Handle detail graph data
                 this.detailGraphData.meta.query = query;
@@ -1155,7 +1156,8 @@ export class GraphStore {
 
                 this.store.schema.refreshNodeStyles();
                 this.store.schema.pushCurrentSchemaToPastSchemas();
-                this.store.schema.getSchemaRecommendations('schema');
+                this.store.schema.getSchemaRecommendations();
+                this.store.schema.getActionRecommendations();
             }
             this.store.core.setDataIsLoading(false);
         }

@@ -6,7 +6,9 @@ import {
     useColorMode,
     Button,
     SlideFade,
-    Text
+    Text,
+    VStack,
+    Skeleton
 } from '@chakra-ui/react';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -156,6 +158,32 @@ function SchemaFlow() {
         [store.core, store.overviewSchema, store.schema]
     );
 
+    const getActionRecommendationLabel = action => {
+        if (action === 'change_node') {
+            return '~Node';
+        }
+        if (action.includes('edge')) {
+            return `${action.includes('add') ? '+' : '-'}Edge`;
+        }
+
+        return `${action.includes('add') ? '+' : '-'}Prop`;
+    };
+
+    const getACtionRecommendationTooltip = (action, value) => {
+        if (action === 'change_node') {
+            return `Change node to ${value}`;
+        }
+        if (action.includes('edge')) {
+            return `${
+                action.includes('add') ? 'Add' : 'Remove'
+            } ${value} as an edge`;
+        }
+
+        return `${
+            action.includes('add') ? 'Add' : 'Remove'
+        }  ${value} as a node property`;
+    };
+
     return (
         <Box height="100%" minHeight="200px" width="100%" id="schema">
             <AutoSizer>
@@ -192,7 +220,7 @@ function SchemaFlow() {
 
             {showApplyChanges && (
                 <Box
-                    bottom="14px"
+                    bottom="64px"
                     left="50%"
                     zIndex="20"
                     transform="translateX(-50%)"
@@ -280,7 +308,7 @@ function SchemaFlow() {
                 height="44px"
                 padding="6px"
                 borderRadius="10px"
-                spacing="6px"
+                spacing="16px"
             >
                 <Tooltip label="Show all nodes">
                     <IconButton
@@ -314,6 +342,154 @@ function SchemaFlow() {
                         }}
                     />
                 </Tooltip>
+
+                <HStack
+                    padding="8px 5px 11px"
+                    spacing="5px"
+                    borderRadius="10px"
+                    marginLeft="10px"
+                    backgroundColor="whiteAlpha.100"
+                    position="relative"
+                >
+                    <VStack alignItems="flex-start">
+                        <Text
+                            fontSize="7px"
+                            fontWeight="black"
+                            position="absolute"
+                            letterSpacing="0.5px"
+                            top="3px"
+                            left="5px"
+                            textTransform="uppercase"
+                        >
+                            Recommended Actions
+                        </Text>
+                        <HStack marginBottom="-5px" minWidth="172px">
+                            {store.overviewSchema.recommendedActions.map(
+                                recommendation => {
+                                    if (
+                                        store.overviewSchema
+                                            .loadingActionRecommendations ||
+                                        store.core.dataIsLoading
+                                    ) {
+                                        return (
+                                            <Box
+                                                key={recommendation.id}
+                                                minHeight="22x"
+                                                minWidth="52px"
+                                                borderRadius="7px"
+                                                padding="1px"
+                                                display="flex"
+                                                justifyContent="center"
+                                                alignItems="center"
+                                                style={{ marginBottom: '-5px' }}
+                                            >
+                                                <Skeleton
+                                                    height="20px"
+                                                    width="50px"
+                                                />
+                                            </Box>
+                                        );
+                                    }
+
+                                    return (
+                                        <Box
+                                            key={recommendation.id}
+                                            minHeight="22x"
+                                            minWidth="52px"
+                                            background="linear-gradient(152deg, rgba(3,25,119,1) 0%, rgba(66,154,226,1) 100%)"
+                                            borderRadius="7px"
+                                            padding="1px"
+                                            display="flex"
+                                            justifyContent="center"
+                                            alignItems="center"
+                                            style={{ marginBottom: '-5px' }}
+                                        >
+                                            <Tooltip
+                                                label={getACtionRecommendationTooltip(
+                                                    recommendation.action,
+                                                    recommendation.value
+                                                )}
+                                            >
+                                                <Button
+                                                    background="blackAlpha.800"
+                                                    style={{
+                                                        width: '50px',
+                                                        height: '20px',
+                                                        borderRadius: '6px'
+                                                    }}
+                                                    fontSize="xs"
+                                                    _hover={{
+                                                        backgroundColor:
+                                                            'blue.500',
+                                                        color: 'white'
+                                                    }}
+                                                    onClick={() => {
+                                                        if (
+                                                            recommendation.action ===
+                                                            'change_node'
+                                                        ) {
+                                                            store.overviewSchema.setAnchor(
+                                                                recommendation.value
+                                                            );
+                                                        }
+                                                        if (
+                                                            recommendation.action.includes(
+                                                                'edge'
+                                                            )
+                                                        ) {
+                                                            if (
+                                                                recommendation.action.includes(
+                                                                    'add'
+                                                                )
+                                                            ) {
+                                                                const newNodeId =
+                                                                    store.overviewSchema.addLinkNode();
+                                                                store.overviewSchema.setLink(
+                                                                    recommendation.value,
+                                                                    newNodeId
+                                                                );
+                                                            } else {
+                                                                store.overviewSchema.removeLinkNode(
+                                                                    store.overviewSchema.nodes.find(
+                                                                        node =>
+                                                                            node
+                                                                                .data
+                                                                                .label ===
+                                                                            recommendation.value
+                                                                    ).id
+                                                                );
+                                                            }
+                                                        }
+                                                        if (
+                                                            recommendation.action.includes(
+                                                                'add'
+                                                            )
+                                                        ) {
+                                                            store.overviewSchema.addProperty(
+                                                                recommendation.value
+                                                            );
+                                                        } else {
+                                                            store.overviewSchema.removeProperty(
+                                                                recommendation.value
+                                                            );
+                                                        }
+
+                                                        store.overviewSchema.pushCurrentSchemaToPastSchemasIncremental();
+                                                        store.overviewSchema.getActionRecommendations();
+                                                    }}
+                                                >
+                                                    {getActionRecommendationLabel(
+                                                        recommendation.action
+                                                    )}
+                                                </Button>
+                                            </Tooltip>
+                                        </Box>
+                                    );
+                                }
+                            )}
+                        </HStack>
+                    </VStack>
+                </HStack>
             </HStack>
         </Box>
     );

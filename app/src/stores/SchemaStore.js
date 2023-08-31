@@ -46,10 +46,10 @@ export class SchemaStore {
         }
     };
 
-    getSchemaRecommendations = async rectype => {
+    getSchemaRecommendations = async () => {
         const params = {
             schematype: 'detail',
-            rectype: rectype,
+            rectype: 'schema',
             recinput: this.pastSchemas
         };
 
@@ -73,6 +73,25 @@ export class SchemaStore {
                 schema: parsedSchema
             };
         });
+    };
+
+    getActionRecommendations = async () => {
+        const params = {
+            schematype: 'detail',
+            rectype: 'action',
+            recinput: this.pastSchemas
+        };
+
+        const { error, response } = await safeRequest(
+            axios.post('utils/recommendation', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        console.log(response.data);
     };
 
     updateNodes = nodes => (this.nodes = nodes);

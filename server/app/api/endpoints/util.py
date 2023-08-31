@@ -194,10 +194,10 @@ def get_recommendation(data: ReccmmendationData):
             with torch.no_grad():
                 output = model(sample_input_tensor)
 
-            # Get top 3 action indices
-            top3_probabilities, top3_indices = torch.topk(output, 3)
+            # Get top 10 action indices
+            top3_probabilities, top10_indices = torch.topk(output, 10)
 
-            return [label_lookup[index]["label"] for index in top3_indices[0].tolist()]
+            return [label_lookup[index]["label"] for index in top10_indices[0].tolist()]
 
         MODEL_PATH = "./app/data/models/2.3._lstm_model_v1.2.pth"
 
@@ -222,10 +222,63 @@ def get_recommendation(data: ReccmmendationData):
         with torch.no_grad():
             output = model(sample_input_tensor)
 
-        # Get top 3 action indices
-        top3_probabilities, top3_indices = torch.topk(output, 3)
+        # Get top 10 action indices
+        top3_probabilities, top10_indices = torch.topk(output, 30)
 
-        return [label_lookup[index]["label"] for index in top3_indices[0].tolist()]
+        processed_suggestions = [
+            label_lookup[index]["label"] for index in top10_indices[0].tolist()
+        ]
+
+        schema_dict = json.loads(rec_input[-1])
+
+        filtered_suggestions = []
+
+        add_property_counter = 0
+        add_edge_counter = 0
+        change_node_counter = 0
+        remove_edge_counter = 0
+        remove_prop_counter = 0
+
+        for entry in processed_suggestions:
+            action = entry.split(" ")[0]
+            value = entry.split(" ")[1]
+
+            if (
+                action in ["add_edge", "add_property"]
+                and value not in schema_dict["properties"]
+                and value not in schema_dict["edges"]
+                and not value == schema_dict["node"]
+            ):
+                if action == "add_edge":
+                    if add_edge_counter < 1:
+                        filtered_suggestions.append({"action": action, "value": value})
+                        add_edge_counter += 1
+                if action == "add_property":
+                    if add_property_counter < 1:
+                        filtered_suggestions.append({"action": action, "value": value})
+                        add_property_counter += 1
+            if action == "remove_property" and value in schema_dict["properties"]:
+                if remove_prop_counter < 1:
+                    filtered_suggestions.append({"action": action, "value": value})
+                    remove_prop_counter += 1
+            if action == "remove_edge" and value in schema_dict["edges"]:
+                if remove_edge_counter < 1:
+                    filtered_suggestions.append({"action": action, "value": value})
+                    remove_edge_counter += 1
+            if (
+                action == "change_node"
+                and value != schema_dict["node"]
+                and value not in schema_dict["properties"]
+                and value not in schema_dict["edges"]
+            ):
+                if change_node_counter < 1:
+                    filtered_suggestions.append({"action": action, "value": value})
+                    change_node_counter += 1
+
+            if len(filtered_suggestions) == 4:
+                break
+
+        return filtered_suggestions
 
     if schema_type == "detail":
         MODEL_PATH = "./app/data/models/2.2._lstm_model_v1.pth"

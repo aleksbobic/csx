@@ -20,6 +20,9 @@ export class OverviewSchemaStore {
 
     pastSchemas = [];
     recommendedSchemas = [];
+    recommendedActions = [];
+    pastSchemasIncremental = [];
+    loadingActionRecommendations = false;
 
     pushCurrentSchemaToPastSchemas = () => {
         this.pastSchemas.push(
@@ -34,10 +37,23 @@ export class OverviewSchemaStore {
         }
     };
 
-    getSchemaRecommendations = async rectype => {
+    pushCurrentSchemaToPastSchemasIncremental = () => {
+        this.pastSchemasIncremental.push(
+            JSON.stringify({
+                node: this.anchor,
+                properties: this.anchorProperties,
+                edges: this.links
+            })
+        );
+        if (this.pastSchemasIncremental.length > 10) {
+            this.pastSchemasIncremental.pop();
+        }
+    };
+
+    getSchemaRecommendations = async () => {
         const params = {
             schematype: 'overview',
-            rectype: rectype,
+            rectype: 'schema',
             recinput: this.pastSchemas
         };
 
@@ -59,6 +75,37 @@ export class OverviewSchemaStore {
                 ...schema
             };
         });
+    };
+
+    getActionRecommendations = async () => {
+        this.loadingActionRecommendations = true;
+        const params = {
+            schematype: 'overview',
+            rectype: 'action',
+            recinput:
+                this.pastSchemasIncremental.length > 0
+                    ? this.pastSchemasIncremental
+                    : this.pastSchemas
+        };
+
+        const { error, response } = await safeRequest(
+            axios.post('utils/recommendation', params)
+        );
+
+        if (error) {
+            this.store.core.handleRequestError(error);
+            return;
+        }
+
+        this.recommendedActions = response.data.map((action, index) => {
+            return {
+                id: index,
+                name: `${action['action']} ${action['value']}`,
+                ...action
+            };
+        });
+
+        this.loadingActionRecommendations = false;
     };
 
     updateNodes = nodes => (this.nodes = nodes);
@@ -246,6 +293,8 @@ export class OverviewSchemaStore {
         this.edges.push(this.generateLink(newNodeId));
 
         this.generateLayout();
+
+        return newNodeId;
     };
 
     removeLinkNode = id => {
@@ -262,6 +311,12 @@ export class OverviewSchemaStore {
                 event_action: 'Remove edge node',
                 event_value: id
             })
+        );
+
+        const edgeValue = this.nodes.find(node => node.id === id).data.label;
+        this.links = this.links.filter(link => link !== edgeValue);
+        this.store.search.links = this.store.search.links.filter(
+            link => link !== edgeValue
         );
 
         this.nodes = this.nodes.filter(node => node.id !== id);
