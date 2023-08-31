@@ -124,6 +124,7 @@ function SchemaFlow() {
     ]);
 
     const connectNodes = connection => {
+        console.log(connection);
         store.schema.addSchemaConnection(connection);
     };
 
@@ -169,7 +170,7 @@ function SchemaFlow() {
         return `${action.includes('add') ? '+' : '-'}Prop`;
     };
 
-    const getACtionRecommendationTooltip = (action, value) => {
+    const getActionRecommendationTooltip = (action, value) => {
         if (action === 'change_node') {
             return `Change node to ${value}`;
         }
@@ -182,6 +183,254 @@ function SchemaFlow() {
         return `${
             action.includes('add') ? 'Add' : 'Remove'
         }  ${value} as a node property`;
+    };
+
+    const getDetailActionRecommendationLabel = action => {
+        if (action === 'add_edge') {
+            return '+Edge';
+        }
+        if (action === 'remove_edge') {
+            return '-Edge';
+        }
+
+        return '~Edge';
+    };
+
+    const getDetailActionRecommendationTooltip = (action, value) => {
+        if (action === 'add_edge') {
+            return `Add connection from ${value.src} to ${value.dst}`;
+        }
+        if (action === 'remove_edge') {
+            return `Remove connection from ${value.src} to ${value.dst}`;
+        }
+
+        return `Change connection from ${value.src} to ${value.dst} to ${value.rel}`;
+    };
+
+    const renderRecommendedActions = () => {
+        if (store.core.isOverview) {
+            return store.overviewSchema.recommendedActions.map(
+                recommendation => {
+                    if (
+                        store.overviewSchema.loadingActionRecommendations ||
+                        store.core.dataIsLoading
+                    ) {
+                        return (
+                            <Box
+                                key={recommendation.id}
+                                minHeight="22x"
+                                minWidth="52px"
+                                borderRadius="7px"
+                                padding="1px"
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                                style={{ marginBottom: '-5px' }}
+                            >
+                                <Skeleton height="20px" width="50px" />
+                            </Box>
+                        );
+                    }
+
+                    return (
+                        <Box
+                            key={recommendation.id}
+                            minHeight="22x"
+                            minWidth="52px"
+                            background="linear-gradient(152deg, rgba(3,25,119,1) 0%, rgba(66,154,226,1) 100%)"
+                            borderRadius="7px"
+                            padding="1px"
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                            style={{ marginBottom: '-5px' }}
+                        >
+                            <Tooltip
+                                label={getActionRecommendationTooltip(
+                                    recommendation.action,
+                                    recommendation.value
+                                )}
+                            >
+                                <Button
+                                    background="blackAlpha.800"
+                                    style={{
+                                        width: '50px',
+                                        height: '20px',
+                                        borderRadius: '6px'
+                                    }}
+                                    fontSize="xs"
+                                    _hover={{
+                                        backgroundColor: 'blue.500',
+                                        color: 'white'
+                                    }}
+                                    onClick={() => {
+                                        if (
+                                            recommendation.action ===
+                                            'change_node'
+                                        ) {
+                                            store.overviewSchema.setAnchor(
+                                                recommendation.value
+                                            );
+                                        }
+                                        if (
+                                            recommendation.action.includes(
+                                                'edge'
+                                            )
+                                        ) {
+                                            if (
+                                                recommendation.action.includes(
+                                                    'add'
+                                                )
+                                            ) {
+                                                const newNodeId =
+                                                    store.overviewSchema.addLinkNode();
+                                                store.overviewSchema.setLink(
+                                                    recommendation.value,
+                                                    newNodeId
+                                                );
+                                            } else {
+                                                store.overviewSchema.removeLinkNode(
+                                                    store.overviewSchema.nodes.find(
+                                                        node =>
+                                                            node.data.label ===
+                                                            recommendation.value
+                                                    ).id
+                                                );
+                                            }
+                                        }
+                                        if (
+                                            recommendation.action.includes(
+                                                'add'
+                                            )
+                                        ) {
+                                            store.overviewSchema.addProperty(
+                                                recommendation.value
+                                            );
+                                        } else {
+                                            store.overviewSchema.removeProperty(
+                                                recommendation.value
+                                            );
+                                        }
+
+                                        store.overviewSchema.pushCurrentSchemaToPastSchemasIncremental();
+                                        store.overviewSchema.getActionRecommendations();
+                                    }}
+                                >
+                                    {getActionRecommendationLabel(
+                                        recommendation.action
+                                    )}
+                                </Button>
+                            </Tooltip>
+                        </Box>
+                    );
+                }
+            );
+        }
+
+        return store.schema.recommendedActions.map(recommendation => {
+            if (
+                store.schema.loadingActionRecommendations ||
+                store.core.dataIsLoading
+            ) {
+                return (
+                    <Box
+                        key={recommendation.id}
+                        minHeight="22x"
+                        minWidth="52px"
+                        borderRadius="7px"
+                        padding="1px"
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        style={{ marginBottom: '-5px' }}
+                    >
+                        <Skeleton height="20px" width="50px" />
+                    </Box>
+                );
+            }
+
+            return (
+                <Box
+                    key={recommendation.id}
+                    minHeight="22x"
+                    minWidth="52px"
+                    background="linear-gradient(152deg, rgba(3,25,119,1) 0%, rgba(66,154,226,1) 100%)"
+                    borderRadius="7px"
+                    padding="1px"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    style={{ marginBottom: '-5px' }}
+                >
+                    <Tooltip
+                        label={getDetailActionRecommendationTooltip(
+                            recommendation.action,
+                            recommendation.value
+                        )}
+                    >
+                        <Button
+                            background="blackAlpha.800"
+                            style={{
+                                width: '50px',
+                                height: '20px',
+                                borderRadius: '6px'
+                            }}
+                            fontSize="xs"
+                            _hover={{
+                                backgroundColor: 'blue.500',
+                                color: 'white'
+                            }}
+                            onClick={() => {
+                                const sourceid = store.schema.nodes.find(
+                                    node =>
+                                        node.data.label ===
+                                        recommendation.value.src
+                                ).id;
+                                const targetid = store.schema.nodes.find(
+                                    node =>
+                                        node.data.label ===
+                                        recommendation.value.dst
+                                ).id;
+
+                                if (recommendation.action === 'add_edge') {
+                                    store.schema.addSchemaConnection({
+                                        source: sourceid,
+                                        target: targetid
+                                    });
+                                } else if (
+                                    recommendation.action === 'remove_edge'
+                                ) {
+                                    store.schema.removeSchemaConnection(
+                                        store.schema.edges.find(
+                                            edge =>
+                                                edge.source === sourceid &&
+                                                edge.target === targetid
+                                        ).id
+                                    );
+                                } else {
+                                    const edgeid = store.schema.edges.find(
+                                        edge =>
+                                            edge.source === sourceid &&
+                                            edge.target === targetid
+                                    ).id;
+                                    store.schema.toggleRelationship(edgeid, [
+                                        'M:N',
+                                        '1:1'
+                                    ]);
+                                }
+
+                                store.schema.pushCurrentSchemaToPastSchemasIncremental();
+                                store.schema.getActionRecommendations();
+                            }}
+                        >
+                            {getDetailActionRecommendationLabel(
+                                recommendation.action
+                            )}
+                        </Button>
+                    </Tooltip>
+                </Box>
+            );
+        });
     };
 
     return (
@@ -364,129 +613,7 @@ function SchemaFlow() {
                             Recommended Actions
                         </Text>
                         <HStack marginBottom="-5px" minWidth="172px">
-                            {store.overviewSchema.recommendedActions.map(
-                                recommendation => {
-                                    if (
-                                        store.overviewSchema
-                                            .loadingActionRecommendations ||
-                                        store.core.dataIsLoading
-                                    ) {
-                                        return (
-                                            <Box
-                                                key={recommendation.id}
-                                                minHeight="22x"
-                                                minWidth="52px"
-                                                borderRadius="7px"
-                                                padding="1px"
-                                                display="flex"
-                                                justifyContent="center"
-                                                alignItems="center"
-                                                style={{ marginBottom: '-5px' }}
-                                            >
-                                                <Skeleton
-                                                    height="20px"
-                                                    width="50px"
-                                                />
-                                            </Box>
-                                        );
-                                    }
-
-                                    return (
-                                        <Box
-                                            key={recommendation.id}
-                                            minHeight="22x"
-                                            minWidth="52px"
-                                            background="linear-gradient(152deg, rgba(3,25,119,1) 0%, rgba(66,154,226,1) 100%)"
-                                            borderRadius="7px"
-                                            padding="1px"
-                                            display="flex"
-                                            justifyContent="center"
-                                            alignItems="center"
-                                            style={{ marginBottom: '-5px' }}
-                                        >
-                                            <Tooltip
-                                                label={getACtionRecommendationTooltip(
-                                                    recommendation.action,
-                                                    recommendation.value
-                                                )}
-                                            >
-                                                <Button
-                                                    background="blackAlpha.800"
-                                                    style={{
-                                                        width: '50px',
-                                                        height: '20px',
-                                                        borderRadius: '6px'
-                                                    }}
-                                                    fontSize="xs"
-                                                    _hover={{
-                                                        backgroundColor:
-                                                            'blue.500',
-                                                        color: 'white'
-                                                    }}
-                                                    onClick={() => {
-                                                        if (
-                                                            recommendation.action ===
-                                                            'change_node'
-                                                        ) {
-                                                            store.overviewSchema.setAnchor(
-                                                                recommendation.value
-                                                            );
-                                                        }
-                                                        if (
-                                                            recommendation.action.includes(
-                                                                'edge'
-                                                            )
-                                                        ) {
-                                                            if (
-                                                                recommendation.action.includes(
-                                                                    'add'
-                                                                )
-                                                            ) {
-                                                                const newNodeId =
-                                                                    store.overviewSchema.addLinkNode();
-                                                                store.overviewSchema.setLink(
-                                                                    recommendation.value,
-                                                                    newNodeId
-                                                                );
-                                                            } else {
-                                                                store.overviewSchema.removeLinkNode(
-                                                                    store.overviewSchema.nodes.find(
-                                                                        node =>
-                                                                            node
-                                                                                .data
-                                                                                .label ===
-                                                                            recommendation.value
-                                                                    ).id
-                                                                );
-                                                            }
-                                                        }
-                                                        if (
-                                                            recommendation.action.includes(
-                                                                'add'
-                                                            )
-                                                        ) {
-                                                            store.overviewSchema.addProperty(
-                                                                recommendation.value
-                                                            );
-                                                        } else {
-                                                            store.overviewSchema.removeProperty(
-                                                                recommendation.value
-                                                            );
-                                                        }
-
-                                                        store.overviewSchema.pushCurrentSchemaToPastSchemasIncremental();
-                                                        store.overviewSchema.getActionRecommendations();
-                                                    }}
-                                                >
-                                                    {getActionRecommendationLabel(
-                                                        recommendation.action
-                                                    )}
-                                                </Button>
-                                            </Tooltip>
-                                        </Box>
-                                    );
-                                }
-                            )}
+                            {renderRecommendedActions()}
                         </HStack>
                     </VStack>
                 </HStack>

@@ -25,6 +25,9 @@ export class SchemaStore {
 
     pastSchemas = [];
     recommendedSchemas = [];
+    recommendedActions = [];
+    pastSchemasIncremental = [];
+    loadingActionRecommendations = false;
 
     pushCurrentSchemaToPastSchemas = () => {
         // you need: {"src": "author_institutions", "dst": "concepts_lv_2", "rel": "M:N"}
@@ -43,6 +46,26 @@ export class SchemaStore {
         );
         if (this.pastSchemas.length > 10) {
             this.pastSchemas.pop();
+        }
+    };
+
+    pushCurrentSchemaToPastSchemasIncremental = () => {
+        // you need: {"src": "author_institutions", "dst": "concepts_lv_2", "rel": "M:N"}
+        this.pastSchemasIncremental.push(
+            JSON.stringify(
+                this.edges.map(edge => {
+                    return {
+                        src: this.nodes.find(node => node.id === edge.source)
+                            .data.label,
+                        dst: this.nodes.find(node => node.id === edge.target)
+                            .data.label,
+                        rel: edge.data.relationship
+                    };
+                })
+            )
+        );
+        if (this.pastSchemasIncremental.length > 10) {
+            this.pastSchemasIncremental.pop();
         }
     };
 
@@ -76,10 +99,15 @@ export class SchemaStore {
     };
 
     getActionRecommendations = async () => {
+        this.loadingActionRecommendations = true;
+
         const params = {
             schematype: 'detail',
             rectype: 'action',
-            recinput: this.pastSchemas
+            recinput:
+                this.pastSchemasIncremental.length > 0
+                    ? this.pastSchemasIncremental
+                    : this.pastSchemas
         };
 
         const { error, response } = await safeRequest(
@@ -91,7 +119,16 @@ export class SchemaStore {
             return;
         }
 
-        console.log(response.data);
+        this.recommendedActions = response.data.map((action, index) => {
+            return {
+                id: index,
+                name: `${action['action']} ${action['value']['src']} ${action['value']['dst']}`,
+                action: action['action'],
+                value: action['value']
+            };
+        });
+
+        this.loadingActionRecommendations = false;
     };
 
     updateNodes = nodes => (this.nodes = nodes);
@@ -115,6 +152,7 @@ export class SchemaStore {
     };
 
     toggleRelationship = (id, possibleRelationships) => {
+        console.log(id, possibleRelationships);
         const edge = this.edges.find(edge => edge.id === id);
 
         const currentRelIndex = possibleRelationships.indexOf(

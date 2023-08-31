@@ -195,9 +195,69 @@ def get_recommendation(data: ReccmmendationData):
                 output = model(sample_input_tensor)
 
             # Get top 10 action indices
-            top3_probabilities, top10_indices = torch.topk(output, 10)
+            top3_probabilities, top10_indices = torch.topk(output, 30)
 
-            return [label_lookup[index]["label"] for index in top10_indices[0].tolist()]
+            processed_suggestions = [
+                label_lookup[index]["label"] for index in top10_indices[0].tolist()
+            ]
+
+            # Should be multiple schemas in the input we are only interested in the last one
+            processed_input = [json.loads(entry) for entry in rec_input][-1]
+            print("\n\n\nprocessed_input: ", processed_input)
+
+            filtered_suggestions = []
+
+            def is_in_processed_input(src, dst, start_schema):
+                for edge in start_schema:
+                    if edge["src"] == src and edge["dst"] == dst:
+                        return True
+                return False
+
+            add_edge_counter = 0
+            remove_edge_counter = 0
+            modify_edge_counter = 0
+
+            for entry in processed_suggestions:
+                action = entry.split(" ", 1)[0]
+                print(entry.split(" ", 1)[1])
+                value = json.loads(entry.split(" ", 1)[1])
+
+                if (
+                    action == "change_edge"
+                    and is_in_processed_input(
+                        value["src"], value["dst"], processed_input
+                    )
+                    and modify_edge_counter < 2
+                ):
+                    filtered_suggestions.append({"action": action, "value": value})
+                    modify_edge_counter += 1
+
+                if (
+                    action == "add_edge"
+                    and not is_in_processed_input(
+                        value["src"], value["dst"], processed_input
+                    )
+                    and add_edge_counter < 2
+                    and add_edge_counter + remove_edge_counter < 3
+                ):
+                    filtered_suggestions.append({"action": action, "value": value})
+                    add_edge_counter += 1
+
+                if (
+                    action == "remove_edge"
+                    and is_in_processed_input(
+                        value["src"], value["dst"], processed_input
+                    )
+                    and remove_edge_counter < 2
+                    and add_edge_counter + remove_edge_counter < 3
+                ):
+                    filtered_suggestions.append({"action": action, "value": value})
+                    remove_edge_counter += 1
+
+                if len(filtered_suggestions) == 4:
+                    break
+
+            return filtered_suggestions
 
         MODEL_PATH = "./app/data/models/2.3._lstm_model_v1.2.pth"
 
@@ -304,11 +364,13 @@ def get_recommendation(data: ReccmmendationData):
             output = model(sample_input_tensor)
 
         # Get top 3 action indices
-        top3_probabilities, top3_indices = torch.topk(output, 3)
+        top3_probabilities, top5_indices = torch.topk(output, 9)
 
-        return [
-            get_schema_label(index, schema_lookup) for index in top3_indices[0].tolist()
+        processed_suggestions = [
+            get_schema_label(index, schema_lookup) for index in top5_indices[0].tolist()
         ]
+
+        return processed_suggestions
     MODEL_PATH = "./app/data/models/2.1._lstm_model_v1.pth"
 
     schema_lookup = read_data("overview_schemas_lookup")
