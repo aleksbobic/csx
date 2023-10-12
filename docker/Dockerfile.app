@@ -1,8 +1,8 @@
 # Build react app
-FROM node:14-alpine3.13 as build
+FROM node:16-alpine3.18 as build
 
 RUN apk add --no-cache bash
-RUN npm install -g npm@latest
+RUN npm install -g npm@8.19.4
 
 RUN mkdir /home/node/csx
 WORKDIR /home/node/csx
