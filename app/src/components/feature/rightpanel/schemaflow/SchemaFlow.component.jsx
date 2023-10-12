@@ -592,31 +592,33 @@ function SchemaFlow() {
                     />
                 </Tooltip>
 
-                <HStack
-                    padding="8px 5px 11px"
-                    spacing="5px"
-                    borderRadius="10px"
-                    marginLeft="10px"
-                    backgroundColor="whiteAlpha.100"
-                    position="relative"
-                >
-                    <VStack alignItems="flex-start">
-                        <Text
-                            fontSize="7px"
-                            fontWeight="black"
-                            position="absolute"
-                            letterSpacing="0.5px"
-                            top="3px"
-                            left="5px"
-                            textTransform="uppercase"
-                        >
-                            Recommended Actions
-                        </Text>
-                        <HStack marginBottom="-5px" minWidth="172px">
-                            {renderRecommendedActions()}
-                        </HStack>
-                    </VStack>
-                </HStack>
+                {store.search.currentDataset === 'openalex' && (
+                    <HStack
+                        padding="8px 5px 11px"
+                        spacing="5px"
+                        borderRadius="10px"
+                        marginLeft="10px"
+                        backgroundColor="whiteAlpha.100"
+                        position="relative"
+                    >
+                        <VStack alignItems="flex-start">
+                            <Text
+                                fontSize="7px"
+                                fontWeight="black"
+                                position="absolute"
+                                letterSpacing="0.5px"
+                                top="3px"
+                                left="5px"
+                                textTransform="uppercase"
+                            >
+                                Recommended Actions
+                            </Text>
+                            <HStack marginBottom="-5px" minWidth="172px">
+                                {renderRecommendedActions()}
+                            </HStack>
+                        </VStack>
+                    </HStack>
+                )}
             </HStack>
         </Box>
     );

@@ -181,27 +181,29 @@ function SchemaList() {
                     height="70px"
                     paddingBottom="4px"
                 >
-                    <HStack
-                        spacing="10px"
-                        alignItems="flex-end"
-                        height="70px"
-                        padding="0"
-                        margin="0"
-                        position="relative"
-                        paddingRight="10px"
-                    >
-                        <Text
-                            fontSize="xs"
-                            position="absolute"
-                            top="0px"
-                            left="10px"
-                            fontWeight="bold"
-                            opacity="0.6"
+                    {store.search.currentDataset === 'openalex' && (
+                        <HStack
+                            spacing="10px"
+                            alignItems="flex-end"
+                            height="70px"
+                            padding="0"
+                            margin="0"
+                            position="relative"
+                            paddingRight="10px"
                         >
-                            Recommended schemas
-                        </Text>
-                        {renderRecommendedSchemas()}
-                    </HStack>
+                            <Text
+                                fontSize="xs"
+                                position="absolute"
+                                top="0px"
+                                left="10px"
+                                fontWeight="bold"
+                                opacity="0.6"
+                            >
+                                Recommended schemas
+                            </Text>
+                            {renderRecommendedSchemas()}
+                        </HStack>
+                    )}
 
                     {store.search.default_schemas[store.core.currentGraph]
                         .length > 0 && (
@@ -209,6 +211,7 @@ function SchemaList() {
                             spacing="10px"
                             alignItems="flex-end"
                             height="70px"
+                            minWidth="150px"
                             padding="0"
                             margin="0"
                             position="relative"
