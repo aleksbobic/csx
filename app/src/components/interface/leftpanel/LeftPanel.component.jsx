@@ -23,7 +23,12 @@ import CustomScroll from 'components/feature/customscroll/CustomScroll.component
 import ModificationTools from 'components/feature/leftpanel/modificationtools/ModificationTools.component';
 import ViewTools from 'components/feature/leftpanel/viewtools/ViewTools.component';
 import StudyInfo from 'components/feature/leftpanel/studyinfo/StudyInfo.component';
-import { ChevronDoubleLeft, ChevronDoubleRight } from 'css.gg';
+
+import {
+    ChevronDoubleLeftIcon,
+    ChevronDoubleRightIcon
+} from '@heroicons/react/24/solid';
+
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
@@ -363,9 +368,13 @@ function LeftPanel() {
                     _hover={{ bgColor: 'whiteAlpha.200' }}
                     icon={
                         isOpen ? (
-                            <ChevronDoubleLeft style={{ '--ggs': 0.8 }} />
+                            <ChevronDoubleLeftIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
                         ) : (
-                            <ChevronDoubleRight style={{ '--ggs': 0.8 }} />
+                            <ChevronDoubleRightIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
                         )
                     }
                 />

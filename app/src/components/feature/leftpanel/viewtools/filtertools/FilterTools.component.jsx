@@ -1,4 +1,3 @@
-import { Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
     IconButton,
     Select,
@@ -12,14 +11,20 @@ import {
     RangeSliderMark,
     RangeSliderTrack,
     RangeSliderFilledTrack,
-    RangeSliderThumb
+    RangeSliderThumb,
+    Heading,
+    HStack,
+    Text,
+    VStack
 } from '@chakra-ui/react';
+
 import {
-    FormatSeparator,
-    LivePhoto,
-    PathIntersect,
-    RadioChecked
-} from 'css.gg';
+    CursorArrowRippleIcon,
+    Bars3CenterLeftIcon,
+    SunIcon,
+    PuzzlePieceIcon
+} from '@heroicons/react/24/outline';
+
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -168,8 +173,11 @@ function FilterTools() {
                             <Tooltip label="Show selected nodes">
                                 <IconButton
                                     icon={
-                                        <RadioChecked
-                                            style={{ '--ggs': '0.8' }}
+                                        <CursorArrowRippleIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
                                         />
                                     }
                                     isDisabled={
@@ -207,7 +215,12 @@ function FilterTools() {
                                     }
                                     size="sm"
                                     icon={
-                                        <LivePhoto style={{ '--ggs': '0.8' }} />
+                                        <SunIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
+                                        />
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
@@ -239,8 +252,11 @@ function FilterTools() {
                                     }
                                     size="sm"
                                     icon={
-                                        <PathIntersect
-                                            style={{ '--ggs': '0.8' }}
+                                        <PuzzlePieceIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
                                         />
                                     }
                                     onClick={() => {
@@ -275,9 +291,10 @@ function FilterTools() {
                                     size="sm"
                                     style={{}}
                                     icon={
-                                        <FormatSeparator
+                                        <Bars3CenterLeftIcon
                                             style={{
-                                                '--ggs': '0.7',
+                                                width: '16px',
+                                                height: '16px',
                                                 marginTop: '5px'
                                             }}
                                         />

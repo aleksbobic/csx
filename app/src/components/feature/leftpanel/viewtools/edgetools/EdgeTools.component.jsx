@@ -1,4 +1,3 @@
-import { Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
     Select,
     Tooltip,
@@ -12,9 +11,13 @@ import {
     AccordionItem,
     AccordionPanel,
     AccordionIcon,
-    AccordionButton
+    AccordionButton,
+    Heading,
+    HStack,
+    Text,
+    VStack,
+    Switch
 } from '@chakra-ui/react';
-import { Switch } from '@chakra-ui/switch';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 

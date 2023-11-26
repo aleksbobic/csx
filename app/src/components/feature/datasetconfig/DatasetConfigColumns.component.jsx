@@ -17,7 +17,12 @@ import {
     Tr,
     useColorMode
 } from '@chakra-ui/react';
-import { Anchor, Link as LinkGG, Search } from 'css.gg';
+
+import {
+    StarIcon,
+    LinkIcon,
+    MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
 import { isEnvTrue } from 'general.utils';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -97,7 +102,9 @@ function DatasetConfigColumns(props) {
                             justifyContent="center"
                             alignItems="center"
                         >
-                            <Anchor style={{ '--ggs': '0.7' }} />
+                            <StarIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
                         </Flex>
                     </Tooltip>
                 </Th>
@@ -109,7 +116,9 @@ function DatasetConfigColumns(props) {
                             justifyContent="center"
                             alignItems="center"
                         >
-                            <LinkGG style={{ '--ggs': '0.7' }} />
+                            <LinkIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
                         </Flex>
                     </Tooltip>
                 </Th>
@@ -121,9 +130,10 @@ function DatasetConfigColumns(props) {
                             justifyContent="center"
                             alignItems="center"
                         >
-                            <Search
+                            <MagnifyingGlassIcon
                                 style={{
-                                    '--ggs': '0.7'
+                                    width: '16px',
+                                    height: '16px'
                                 }}
                             />
                         </Flex>

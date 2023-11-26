@@ -17,7 +17,7 @@ import {
 import SearchBar from 'components/feature/home/searchbar/SearchBar.component';
 import DatasetConfigModal from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
 import FileUploadModal from 'components/interface/fileuploadmodal/FileUploadModal.component';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import CookieInfo from 'components/feature/home/cookieinfo/CookieInfo.component';
 import DatasetElement from 'components/feature/home/datasetgrid/datasetElement/DatasetElement.component';
@@ -68,7 +68,7 @@ function HomePage() {
                     position="absolute"
                     right="16px"
                     top="16px"
-                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    icon={<XMarkIcon width="16px" height="16px" />}
                     transition="0.2s all ease-in-out"
                     _hover={{ backgroundColor: 'whiteAlpha.200' }}
                     onClick={() => {
@@ -158,7 +158,7 @@ function HomePage() {
                     position="absolute"
                     right="16px"
                     top="16px"
-                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    icon={<XMarkIcon width="16px" height="16px" />}
                     transition="0.2s all ease-in-out"
                     _hover={{ backgroundColor: 'blackAlpha.50' }}
                     onClick={() => {

@@ -7,7 +7,8 @@ import {
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
-import { Chart, Close } from 'css.gg';
+
+import { XMarkIcon, ChartPieIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 
 import { PencilIcon, PhotoIcon } from '@heroicons/react/20/solid';
@@ -173,9 +174,10 @@ function CommentComponent(props) {
                     }}
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     icon={
-                        <Close
+                        <XMarkIcon
                             style={{
-                                '--ggs': 0.8,
+                                width: '16px',
+                                height: '16px',
                                 opacity: colorMode === 'light' && 0.5
                             }}
                         />
@@ -235,9 +237,10 @@ function CommentComponent(props) {
                         />
                     )}
                     {props.comment.chart && (
-                        <Chart
+                        <ChartPieIcon
                             style={{
-                                '--ggs': '0.7',
+                                width: '16px',
+                                height: '16px',
                                 opacity: 0.5,
                                 marginBottom: '2px'
                             }}

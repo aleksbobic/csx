@@ -6,7 +6,7 @@ import {
     Tooltip,
     VStack
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Handle } from 'react-flow-renderer';
 
 const datasetNode = ({ id, data, isConnectable }) => {
@@ -27,7 +27,7 @@ const datasetNode = ({ id, data, isConnectable }) => {
                         <Tooltip label="Remove node">
                             <IconButton
                                 size="xs"
-                                icon={<Close />}
+                                icon={<XMarkIcon width="22px" height="22px" />}
                                 onClick={() => data.deleteNode(id)}
                             />
                         </Tooltip>

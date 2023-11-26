@@ -11,7 +11,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Sync } from 'css.gg';
+import { ViewfinderCircleIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -204,7 +204,11 @@ function SchemaFlow() {
                             borderRadius="full"
                             position="relative"
                             size="sm"
-                            leftIcon={<Sync style={{ '--ggs': '0.6' }} />}
+                            leftIcon={
+                                <ArrowPathIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
+                            }
                             _hover={{ backgroundColor: 'blue.500' }}
                             onClick={() => {
                                 store.track.trackEvent(
@@ -283,9 +287,10 @@ function SchemaFlow() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '16px',
+                                    height: '16px'
                                 }}
                             />
                         }

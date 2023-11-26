@@ -13,7 +13,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import AutoCompleteInputComponent from 'components/feature/autocompleteinput/AutoCompleteInput.component';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Handle } from 'react-flow-renderer';
 
 const searchNode = ({ id, data, isConnectable }) => {
@@ -239,7 +239,7 @@ const searchNode = ({ id, data, isConnectable }) => {
                         <Tooltip label="Remove node">
                             <IconButton
                                 size="xs"
-                                icon={<Close />}
+                                icon={<XMarkIcon width="22px" height="22px" />}
                                 onClick={() => data.deleteNode(id)}
                             />
                         </Tooltip>

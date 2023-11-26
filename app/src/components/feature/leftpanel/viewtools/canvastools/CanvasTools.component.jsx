@@ -1,6 +1,5 @@
-import { Button } from '@chakra-ui/button';
-import { Heading, Text, VStack } from '@chakra-ui/layout';
 import {
+    Button,
     Tooltip,
     Slider,
     SliderFilledTrack,
@@ -11,7 +10,10 @@ import {
     AccordionItem,
     AccordionPanel,
     AccordionIcon,
-    AccordionButton
+    AccordionButton,
+    Heading,
+    Text,
+    VStack
 } from '@chakra-ui/react';
 
 import { ViewfinderCircleIcon, CameraIcon } from '@heroicons/react/24/outline';

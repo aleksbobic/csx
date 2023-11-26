@@ -10,7 +10,10 @@ import {
     useColorModeValue
 } from '@chakra-ui/react';
 import { LightBulbIcon } from '@heroicons/react/20/solid';
-import { Database, Search } from 'css.gg';
+import {
+    CircleStackIcon,
+    MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -150,11 +153,12 @@ function SearchBar(props) {
                     <Form onSubmit={handleSubmit} style={{ flexGrow: 1 }}>
                         <InputGroup alignItems="center">
                             {!props.datasetSelectorDisabled && (
-                                <Database
+                                <CircleStackIcon
                                     style={{
                                         position: 'absolute',
                                         marginLeft: '12px',
-                                        '--ggs': '0.8',
+                                        width: '16px',
+                                        height: '16px',
                                         zIndex: 2,
                                         color: textColor
                                     }}
@@ -227,9 +231,10 @@ function SearchBar(props) {
                                                 : 'whiteAlpha.100'
                                         }
                                         icon={
-                                            <Search
+                                            <MagnifyingGlassIcon
                                                 style={{
-                                                    '--ggs': '0.9'
+                                                    width: '16px',
+                                                    height: '16px'
                                                 }}
                                             />
                                         }

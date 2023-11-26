@@ -26,12 +26,13 @@ import { RootStoreContext } from 'stores/RootStore';
 import Comments from 'components/feature/rightpanel/comments/Comments.component';
 import SerpComponent from 'components/feature/rightpanel/serp/Serp.component';
 import TableComponent from 'components/feature/rightpanel/table/Table.component';
+
 import {
-    MenuBoxed,
-    MoreVerticalAlt,
-    SoftwareDownload,
-    ViewComfortable
-} from 'css.gg';
+    Bars4Icon,
+    EllipsisVerticalIcon,
+    ArrowDownTrayIcon,
+    TableCellsIcon
+} from '@heroicons/react/24/outline';
 import { useCallback } from 'react';
 import { CSVLink } from 'react-csv';
 import { useResizeDetector } from 'react-resize-detector';
@@ -219,7 +220,11 @@ function RightPanel(props) {
                     disabled={!useList}
                     size="sm"
                     as={IconButton}
-                    icon={<MoreVerticalAlt style={{ '--ggs': 0.8 }} />}
+                    icon={
+                        <EllipsisVerticalIcon
+                            style={{ width: '16px', height: '16px' }}
+                        />
+                    }
                     onClick={() => {
                         store.track.trackEvent(
                             JSON.stringify({
@@ -351,9 +356,10 @@ function RightPanel(props) {
                                     transition="all 0.2 ease-in-out"
                                     _hover={{ opacity: 1 }}
                                     icon={
-                                        <SoftwareDownload
+                                        <ArrowDownTrayIcon
                                             style={{
-                                                '--ggs': '0.8'
+                                                width: '16px',
+                                                height: '16px'
                                             }}
                                         />
                                     }
@@ -367,8 +373,11 @@ function RightPanel(props) {
                             <IconButton
                                 opacity={!useList ? 1 : 0.5}
                                 icon={
-                                    <ViewComfortable
-                                        style={{ '--ggs': '0.7' }}
+                                    <TableCellsIcon
+                                        style={{
+                                            width: '16px',
+                                            height: '16px'
+                                        }}
                                     />
                                 }
                                 size="sm"
@@ -397,7 +406,14 @@ function RightPanel(props) {
                         <Tooltip label="Use list view">
                             <IconButton
                                 opacity={useList ? 1 : 0.5}
-                                icon={<MenuBoxed style={{ '--ggs': '0.7' }} />}
+                                icon={
+                                    <Bars4Icon
+                                        style={{
+                                            width: '16px',
+                                            height: '16px'
+                                        }}
+                                    />
+                                }
                                 size="sm"
                                 borderStartRadius="0"
                                 transition="all 0.2 ease-in-out"

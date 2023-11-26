@@ -8,7 +8,7 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
@@ -153,7 +153,11 @@ export function ErrorModal(props) {
                         variant="ghost"
                         size="sm"
                         borderRadius="10px"
-                        icon={<Close style={{ '--ggs': 0.7 }} />}
+                        icon={
+                            <XMarkIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
+                        }
                         onClick={() => {
                             props.onClose();
                         }}

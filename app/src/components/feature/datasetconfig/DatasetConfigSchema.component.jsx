@@ -9,7 +9,7 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { Close, MathPlus } from 'css.gg';
+import { XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
@@ -76,7 +76,11 @@ function DatasetConfigSchema(props) {
                                     props.graphType
                                 );
                             }}
-                            icon={<Close style={{ '--ggs': 0.8 }} />}
+                            icon={
+                                <XMarkIcon
+                                    style={{ width: '16px', height: '16px' }}
+                                />
+                            }
                         />
                     </Tooltip>
                 </HStack>
@@ -165,7 +169,9 @@ function DatasetConfigSchema(props) {
                                         );
                                         setSchemaName('');
                                     }}
-                                    icon={<MathPlus style={{ '--ggs': 0.7 }} />}
+                                    icon={
+                                        <PlusIcon width="16px" height="16px" />
+                                    }
                                 />
                             </Tooltip>
                         </HStack>

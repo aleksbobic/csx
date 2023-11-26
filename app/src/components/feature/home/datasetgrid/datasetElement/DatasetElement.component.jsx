@@ -7,7 +7,13 @@ import {
     useColorModeValue
 } from '@chakra-ui/react';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { ArrowRight, Data, Search, TrashEmpty } from 'css.gg';
+
+import {
+    MagnifyingGlassIcon,
+    TrashIcon,
+    SignalIcon,
+    ArrowSmallRightIcon
+} from '@heroicons/react/24/outline';
 import { isEnvFalse } from 'general.utils';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
@@ -66,9 +72,10 @@ function DatasetElement(props) {
             >
                 {props.datasetType === 'api' && (
                     <Tooltip label="External source: OpenAlex.org">
-                        <Data
+                        <SignalIcon
                             style={{
-                                '--ggs': 0.7,
+                                width: '16px',
+                                height: '16px',
                                 display: 'inline-block',
                                 marginRight: '10px',
                                 marginBottom: '-2px',
@@ -79,7 +86,6 @@ function DatasetElement(props) {
                             }}
                             as={Link}
                             href="https://openalex.org"
-                            isExternal
                         />
                     </Tooltip>
                 )}{' '}
@@ -116,9 +122,10 @@ function DatasetElement(props) {
                                 store.search.deleteDataset(props.dataset);
                             }}
                             icon={
-                                <TrashEmpty
+                                <TrashIcon
                                     style={{
-                                        '--ggs': '0.7',
+                                        width: '16px',
+                                        height: '16px',
                                         marginTop: '1px'
                                     }}
                                 />
@@ -201,9 +208,10 @@ function DatasetElement(props) {
                             navigateToAdvancedSearch(props.dataset);
                         }}
                         icon={
-                            <Search
+                            <MagnifyingGlassIcon
                                 style={{
-                                    '--ggs': 0.7
+                                    height: '16px',
+                                    width: '16px'
                                 }}
                             />
                         }
@@ -260,9 +268,10 @@ function DatasetElement(props) {
                                 );
                             }}
                             icon={
-                                <ArrowRight
+                                <ArrowSmallRightIcon
                                     style={{
-                                        '--ggs': '0.7'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             }

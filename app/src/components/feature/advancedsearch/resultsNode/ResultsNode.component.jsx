@@ -7,7 +7,8 @@ import {
     Tooltip,
     VStack
 } from '@chakra-ui/react';
-import { Close, PlayButton } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
+import { PlayIcon } from '@heroicons/react/24/solid';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
@@ -37,7 +38,7 @@ const resultsNode = ({ id, data, isConnectable }) => {
                         <Tooltip label="Remove node">
                             <IconButton
                                 size="xs"
-                                icon={<Close />}
+                                icon={<XMarkIcon width="22px" height="22px" />}
                                 onClick={() => data.deleteNode(id)}
                             />
                         </Tooltip>
@@ -46,7 +47,7 @@ const resultsNode = ({ id, data, isConnectable }) => {
                         <Button
                             variant="solid"
                             size="sm"
-                            rightIcon={<PlayButton />}
+                            rightIcon={<PlayIcon width="16px" height="16px" />}
                             onClick={() => data.runWorkflow(id)}
                         >
                             Run workflow

@@ -12,7 +12,7 @@ import {
     useColorMode
 } from '@chakra-ui/react';
 import { CameraIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid';
-import { Chart, Close } from 'css.gg';
+import { XMarkIcon, ChartPieIcon } from '@heroicons/react/24/outline';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -181,15 +181,7 @@ function CommentModal() {
         if (chartItems.length === 0) {
             return (
                 <IconButton
-                    icon={
-                        <Chart
-                            style={{
-                                '--ggs': 0.7,
-                                marginLeft: '5px',
-                                marginBottom: '5px'
-                            }}
-                        />
-                    }
+                    icon={<ChartPieIcon width="16px" height="16px" />}
                     isDisabled={true}
                     size="sm"
                     opacity={1}
@@ -221,15 +213,7 @@ function CommentModal() {
                 >
                     <MenuButton
                         as={IconButton}
-                        icon={
-                            <Chart
-                                style={{
-                                    '--ggs': 0.7,
-                                    marginLeft: '5px',
-                                    marginBottom: '5px'
-                                }}
-                            />
-                        }
+                        icon={<ChartPieIcon width="16px" height="16px" />}
                         isDisabled={store.comment.chart}
                         size="sm"
                         opacity={1}
@@ -350,14 +334,7 @@ function CommentModal() {
                                     })
                                 );
                             }}
-                            icon={
-                                <Close
-                                    style={{
-                                        '--ggs': 0.5,
-                                        marginLeft: '-2px'
-                                    }}
-                                />
-                            }
+                            icon={<XMarkIcon width="12px" height="12px" />}
                         />
                     </Tooltip>
                 )}
@@ -401,14 +378,7 @@ function CommentModal() {
                                     })
                                 );
                             }}
-                            icon={
-                                <Close
-                                    style={{
-                                        '--ggs': 0.5,
-                                        marginLeft: '-2px'
-                                    }}
-                                />
-                            }
+                            icon={<XMarkIcon width="12px" height="12px" />}
                         />
                     </Tooltip>
                 )}
@@ -570,7 +540,7 @@ function CommentModal() {
             {renderIconButtons()}
             <IconButton
                 size="xs"
-                icon={<Close style={{ '--ggs': 0.7 }} />}
+                icon={<XMarkIcon width="12px" height="12px" />}
                 position="absolute"
                 right="12px"
                 top="12px"

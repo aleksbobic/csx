@@ -5,6 +5,7 @@ venv/
 
 # dependencies
 /app/node_modules
+/app/.pnpm-store/
 /app/.pnp
 .pnp.js
 

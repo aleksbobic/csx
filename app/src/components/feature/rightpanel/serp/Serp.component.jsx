@@ -8,7 +8,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowRight, Link as GGLink } from 'css.gg';
+import { ArrowRightIcon, LinkIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
@@ -124,9 +124,10 @@ function Serp(props) {
                             isExternal
                         >
                             {value}{' '}
-                            <GGLink
+                            <LinkIcon
                                 style={{
-                                    '--ggs': 0.7,
+                                    width: '16px',
+                                    height: '16px',
                                     display: 'inline-block',
                                     marginLeft: '5px',
                                     marginBottom: '3px'
@@ -238,7 +239,11 @@ function Serp(props) {
                         bottom="20px"
                         size="xs"
                         variant="ghost"
-                        icon={<ArrowRight style={{ '--ggs': 0.6 }} />}
+                        icon={
+                            <ArrowRightIcon
+                                style={{ width: '16px', height: '16px' }}
+                            />
+                        }
                         onClick={() => {
                             const nodeIds = store.graph.currentGraphData.nodes
                                 .filter(node =>

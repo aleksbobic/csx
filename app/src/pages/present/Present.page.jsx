@@ -25,7 +25,7 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import { useHistory, useLocation } from 'react-router';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { withRouter } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
@@ -36,7 +36,7 @@ function PresentPage() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
     const location = useLocation();
-    const history = useHistory();
+    const navigate = useNavigate();
     const [revealInstance, setRevealInstance] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -80,9 +80,9 @@ function PresentPage() {
 
     useEffect(() => {
         if (store.core.studyIsEmpty) {
-            history.push('/');
+            navigate('/');
         }
-    }, [history, store.core.studyIsEmpty]);
+    }, [navigate, store.core.studyIsEmpty]);
 
     const renderLoader = () => (
         <Center

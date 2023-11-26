@@ -35,7 +35,7 @@ services:
     depends_on:
       - server
       # - analytics
-    command: bash -c "npm install && npm start"
+    command: bash -c "pnpm install && pnpm start"
   mysql:
     image: "mysql:5.7"
     profiles:

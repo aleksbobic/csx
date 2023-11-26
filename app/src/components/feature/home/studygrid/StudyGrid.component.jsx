@@ -12,7 +12,7 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { FolderOpenIcon } from '@heroicons/react/20/solid';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
@@ -118,8 +118,9 @@ function StudyGrid(props) {
                                             zIndex="3"
                                             color={textColor}
                                             icon={
-                                                <Close
-                                                    style={{ '--ggs': '0.7' }}
+                                                <XMarkIcon
+                                                    width="16px"
+                                                    height="16px"
                                                 />
                                             }
                                             onClick={() => {

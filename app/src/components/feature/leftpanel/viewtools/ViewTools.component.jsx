@@ -1,7 +1,18 @@
-import { Button } from '@chakra-ui/button';
-import { Heading, HStack, VStack } from '@chakra-ui/layout';
-import { IconButton, Tooltip, useColorMode } from '@chakra-ui/react';
-import { Anchor, Bolt, Undo } from 'css.gg';
+import {
+    Heading,
+    HStack,
+    VStack,
+    Button,
+    IconButton,
+    Tooltip,
+    useColorMode
+} from '@chakra-ui/react';
+
+import {
+    BoltIcon,
+    ArrowUturnLeftIcon,
+    StarIcon
+} from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 import CanvasTools from 'components/feature/leftpanel/viewtools/canvastools/CanvasTools.component';
@@ -30,7 +41,11 @@ function ViewTools() {
                         <Button
                             id="applyforcebutton"
                             size="sm"
-                            leftIcon={<Bolt style={{ '--ggs': '0.6' }} />}
+                            leftIcon={
+                                <BoltIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
+                            }
                             backgroundColor={
                                 forceRunning
                                     ? 'blue.400'
@@ -90,7 +105,11 @@ function ViewTools() {
                         <IconButton
                             id="resetLayoutButton"
                             size="sm"
-                            icon={<Anchor style={{ '--ggs': '0.6' }} />}
+                            icon={
+                                <StarIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
+                            }
                             onClick={() => {
                                 store.track.trackEvent(
                                     JSON.stringify({
@@ -129,7 +148,11 @@ function ViewTools() {
                         <IconButton
                             id="resetLayoutButton"
                             size="sm"
-                            icon={<Undo style={{ '--ggs': '0.6' }} />}
+                            icon={
+                                <ArrowUturnLeftIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
+                            }
                             onClick={() => {
                                 store.graph.resetNodesPositions();
 

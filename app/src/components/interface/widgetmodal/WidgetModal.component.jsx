@@ -50,7 +50,7 @@ import ComponentStatsComponent from 'components/feature/widgets/component/Compon
 import GraphStatsComponent from 'components/feature/widgets/graph/GraphStats.component';
 import ConnectionStatsComponent from 'components/feature/widgets/node/NodeConnectionStats.component';
 import NodeStatsComponent from 'components/feature/widgets/node/NodeStats.component';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
@@ -1004,7 +1004,7 @@ function FileUploadModal() {
                         size="sm"
                         top="20px"
                         right="20px"
-                        icon={<Close />}
+                        icon={<XMarkIcon width="16px" height="16px" />}
                         onClick={() => {
                             store.track.trackEvent(
                                 JSON.stringify({

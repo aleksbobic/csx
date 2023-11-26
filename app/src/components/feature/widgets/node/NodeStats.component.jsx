@@ -11,7 +11,7 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { Remove } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -264,10 +264,9 @@ function SelectedNodeList(props) {
                                                 variant="ghost"
                                                 aria-label="Remove from list"
                                                 icon={
-                                                    <Remove
-                                                        style={{
-                                                            '--ggs': '0.8'
-                                                        }}
+                                                    <XMarkIcon
+                                                        width="16px"
+                                                        height="16px"
                                                     />
                                                 }
                                                 onClick={() => {

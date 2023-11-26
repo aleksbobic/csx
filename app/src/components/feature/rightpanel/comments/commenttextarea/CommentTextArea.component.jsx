@@ -27,7 +27,12 @@ import {
 } from '@chakra-ui/react';
 import { CameraIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Chart, ChevronDown, ChevronUp, Close } from 'css.gg';
+import {
+    ChartPieIcon,
+    XMarkIcon,
+    ChevronUpIcon,
+    ChevronDownIcon
+} from '@heroicons/react/24/outline';
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import { useCallback } from 'react';
@@ -380,9 +385,13 @@ function CommentTextArea(props) {
                         }}
                         icon={
                             store.comment.isCommentListVisible ? (
-                                <ChevronDown style={{ '--ggs': '0.7' }} />
+                                <ChevronDownIcon
+                                    style={{ width: '16px', height: '16px' }}
+                                />
                             ) : (
-                                <ChevronUp style={{ '--ggs': '0.7' }} />
+                                <ChevronUpIcon
+                                    style={{ width: '16px', height: '16px' }}
+                                />
                             )
                         }
                     />
@@ -450,9 +459,10 @@ function CommentTextArea(props) {
             return (
                 <IconButton
                     icon={
-                        <Chart
+                        <ChartPieIcon
                             style={{
-                                '--ggs': 0.7,
+                                width: '16px',
+                                height: '16px',
                                 marginLeft: '5px',
                                 marginBottom: '5px'
                             }}
@@ -490,9 +500,10 @@ function CommentTextArea(props) {
                     <MenuButton
                         as={IconButton}
                         icon={
-                            <Chart
+                            <ChartPieIcon
                                 style={{
-                                    '--ggs': 0.7,
+                                    width: '16px',
+                                    height: '16px',
                                     marginLeft: '5px',
                                     marginBottom: '5px'
                                 }}
@@ -623,7 +634,14 @@ function CommentTextArea(props) {
                                     opacity={1}
                                     borderRadius="4px"
                                     transition="0.2s all ease-in-out"
-                                    icon={<Close style={{ '--ggs': '0.7' }} />}
+                                    icon={
+                                        <XMarkIcon
+                                            style={{
+                                                width: '16px',
+                                                height: '16px'
+                                            }}
+                                        />
+                                    }
                                     _hover={{ backgroundColor: 'blue.500' }}
                                     onClick={() => {
                                         store.track.trackEvent(
@@ -684,9 +702,10 @@ function CommentTextArea(props) {
                                             );
                                         }}
                                         icon={
-                                            <Close
+                                            <XMarkIcon
                                                 style={{
-                                                    '--ggs': 0.5,
+                                                    width: '16px',
+                                                    height: '16px',
                                                     marginLeft: '-2px'
                                                 }}
                                             />
@@ -738,9 +757,10 @@ function CommentTextArea(props) {
                                                 );
                                             }}
                                             icon={
-                                                <Close
+                                                <XMarkIcon
                                                     style={{
-                                                        '--ggs': 0.5,
+                                                        width: '16px',
+                                                        height: '16px',
                                                         marginLeft: '-2px'
                                                     }}
                                                 />

@@ -7,7 +7,7 @@ import {
     Text,
     VStack
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -126,13 +126,7 @@ function InteractionsToast(props) {
                     _hover={{
                         backgroundColor: 'blue.500'
                     }}
-                    leftIcon={
-                        <Close
-                            style={{
-                                '--ggs': 0.7
-                            }}
-                        />
-                    }
+                    leftIcon={<XMarkIcon width="16px" height="16px" />}
                     onClick={() => {
                         store.track.trackEvent(
                             JSON.stringify({

@@ -1,11 +1,12 @@
-import { Heading, VStack } from '@chakra-ui/layout';
 import {
     Accordion,
     AccordionButton,
     AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    Button
+    Button,
+    Heading,
+    VStack
 } from '@chakra-ui/react';
 import {
     ScissorsIcon,

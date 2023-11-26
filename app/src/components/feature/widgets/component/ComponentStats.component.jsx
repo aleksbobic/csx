@@ -13,7 +13,7 @@ import {
     Wrap
 } from '@chakra-ui/react';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import { Eye, Remove } from 'css.gg';
+import { EyeIcon, MinusCircleIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import 'overlayscrollbars/styles/overlayscrollbars.css';
 import PropTypes from 'prop-types';
@@ -329,10 +329,9 @@ function SelectedComponentList(props) {
                                                         );
                                                     }}
                                                     icon={
-                                                        <Eye
-                                                            style={{
-                                                                '--ggs': '0.7'
-                                                            }}
+                                                        <EyeIcon
+                                                            width="16px"
+                                                            height="16px"
                                                         />
                                                     }
                                                 />
@@ -354,10 +353,9 @@ function SelectedComponentList(props) {
                                                     variant="ghost"
                                                     aria-label="Remove from list"
                                                     icon={
-                                                        <Remove
-                                                            style={{
-                                                                '--ggs': '0.8'
-                                                            }}
+                                                        <MinusCircleIcon
+                                                            width="16px"
+                                                            height="16px"
                                                         />
                                                     }
                                                     onClick={() => {

@@ -13,19 +13,20 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
+
 import {
-    AlignBottom,
-    Attribution,
-    Carousel,
-    List,
-    Moon,
-    RadioCheck,
-    Ring,
-    Search,
-    Smile,
-    Sun,
-    ExtensionAdd
-} from 'css.gg';
+    ChartBarIcon,
+    BeakerIcon,
+    ClockIcon,
+    MoonIcon,
+    SunIcon,
+    ListBulletIcon,
+    MapPinIcon,
+    MapIcon,
+    FaceSmileIcon,
+    MagnifyingGlassIcon,
+    SquaresPlusIcon
+} from '@heroicons/react/24/outline';
 import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
@@ -194,9 +195,10 @@ function NavigationPanelComponent() {
                             }}
                         >
                             Get more data{' '}
-                            <ExtensionAdd
+                            <SquaresPlusIcon
                                 style={{
-                                    '--ggs': '0.6',
+                                    width: '16px',
+                                    height: '16px',
                                     marginLeft: '5px'
                                 }}
                             />
@@ -244,13 +246,16 @@ function NavigationPanelComponent() {
                         }}
                         icon={
                             store.core.currentGraph === 'detail' ? (
-                                <RadioCheck
+                                <MapIcon
                                     style={{
-                                        '--ggs': '0.68'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             ) : (
-                                <Ring style={{ '--ggs': '0.7' }} />
+                                <MapPinIcon
+                                    style={{ height: '16px', width: '16px' }}
+                                />
                             )
                         }
                     />
@@ -361,9 +366,10 @@ function NavigationPanelComponent() {
                                     toggleDataPanel('search');
                                 }}
                                 icon={
-                                    <Search
+                                    <MagnifyingGlassIcon
                                         style={{
-                                            '--ggs': '0.7',
+                                            width: '16px',
+                                            height: '16px',
                                             marginBottom: '-2px'
                                         }}
                                     />
@@ -391,9 +397,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('details');
                             }}
                             icon={
-                                <AlignBottom
+                                <ChartBarIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             }
@@ -419,9 +426,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('results');
                             }}
                             icon={
-                                <List
+                                <ListBulletIcon
                                     style={{
-                                        '--ggs': '0.7'
+                                        height: '16px',
+                                        width: '16px'
                                     }}
                                 />
                             }
@@ -447,9 +455,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('schema');
                             }}
                             icon={
-                                <Attribution
+                                <BeakerIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             }
@@ -475,9 +484,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('history');
                             }}
                             icon={
-                                <Carousel
+                                <ClockIcon
                                     style={{
-                                        '--ggs': '0.7',
+                                        width: '16px',
+                                        height: '16px',
                                         transform:
                                             'rotate(180deg) scale(0.7, 0.8)'
                                     }}
@@ -495,15 +505,17 @@ function NavigationPanelComponent() {
                         aria-label="Color mode"
                         icon={
                             colorMode === 'light' ? (
-                                <Moon
+                                <MoonIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             ) : (
-                                <Sun
+                                <SunIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '16px',
+                                        height: '16px'
                                     }}
                                 />
                             )
@@ -600,9 +612,10 @@ function NavigationPanelComponent() {
                                     padding: '4px 8px'
                                 }}
                             >
-                                <Smile
+                                <FaceSmileIcon
                                     style={{
-                                        '--ggs': 0.7,
+                                        width: '16px',
+                                        height: '16px',
                                         marginRight: '5px',
                                         display: 'inline-block',
                                         marginBottom: '-4px'

@@ -8,7 +8,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign } from 'css.gg';
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -182,9 +182,10 @@ function SchemaConfig(props) {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '16px',
+                                    height: '16px'
                                 }}
                             />
                         }

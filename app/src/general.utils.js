@@ -1,13 +1,16 @@
 export function isEnvTrue(name) {
-    return process?.env[name] === 'true';
+    if (!process.env) return false;
+    return process.env[name] === 'true';
 }
 
 export function isEnvFalse(name) {
-    return process?.env[name] === 'false';
+    if (!process.env) return false;
+    return process.env[name] === 'false';
 }
 
 export function isEnvSet(name) {
-    return process?.env[name];
+    if (!process.env) return false;
+    return process.env[name];
 }
 
 export function capitaliseFirstLetter(value) {

@@ -9,7 +9,10 @@ import {
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Presentation } from 'css.gg';
+import {
+    ViewfinderCircleIcon,
+    PresentationChartLineIcon
+} from '@heroicons/react/24/outline';
 
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
@@ -170,9 +173,10 @@ export function HistoryFlow() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '16px',
+                                    height: '16px'
                                 }}
                             />
                         }
@@ -205,9 +209,10 @@ export function HistoryFlow() {
                         isDisabled={!store.core.studyIsSaved}
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Presentation
+                            <PresentationChartLineIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '16px',
+                                    height: '16px'
                                 }}
                             />
                         }
@@ -239,7 +244,6 @@ export function HistoryFlow() {
                                   }`
                                 : ''
                         }
-                        isExternal
                     />
                 </Tooltip>
             </HStack>

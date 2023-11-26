@@ -1,5 +1,3 @@
-import { Button } from '@chakra-ui/button';
-import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
     Checkbox,
     Menu,
@@ -13,10 +11,16 @@ import {
     AccordionItem,
     AccordionPanel,
     AccordionIcon,
-    AccordionButton
+    AccordionButton,
+    Button,
+    Box,
+    Heading,
+    HStack,
+    Text,
+    VStack,
+    Switch
 } from '@chakra-ui/react';
-import { Switch } from '@chakra-ui/switch';
-import { MoreVerticalAlt } from 'css.gg';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 
@@ -196,7 +200,12 @@ function ViewTools() {
                                 backgroundColor="whiteAlpha.100"
                                 as={Button}
                                 rightIcon={
-                                    <MoreVerticalAlt style={{ '--ggs': 0.7 }} />
+                                    <EllipsisVerticalIcon
+                                        style={{
+                                            width: '16px',
+                                            height: '16px'
+                                        }}
+                                    />
                                 }
                                 onClick={() => {
                                     store.track.trackEvent(
