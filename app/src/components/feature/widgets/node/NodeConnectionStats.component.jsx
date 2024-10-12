@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';

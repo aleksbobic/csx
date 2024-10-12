@@ -11,16 +11,16 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { Remove } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function SelectedNodeList(props) {
     const store = useContext(RootStoreContext);
@@ -264,9 +264,10 @@ function SelectedNodeList(props) {
                                                 variant="ghost"
                                                 aria-label="Remove from list"
                                                 icon={
-                                                    <Remove
+                                                    <XMarkIcon
                                                         style={{
-                                                            '--ggs': '0.8'
+                                                            width: '14px',
+                                                            height: '14px'
                                                         }}
                                                     />
                                                 }

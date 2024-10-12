@@ -4,7 +4,7 @@ import {
     InputGroup,
     InputRightElement
 } from '@chakra-ui/react';
-import { Search } from 'css.gg';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
@@ -44,7 +44,11 @@ function GlobalFilter(props) {
                 <IconButton
                     variant="ghost"
                     size="sm"
-                    icon={<Search style={{ '--ggs': '0.7' }} />}
+                    icon={
+                        <MagnifyingGlassIcon
+                            style={{ width: '14px', height: '14px' }}
+                        />
+                    }
                     onClick={() => {
                         store.track.trackEvent(
                             JSON.stringify({

@@ -9,13 +9,13 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { Close, MathPlus } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../customscroll/CustomScroll.component';
 import SchemaConfig from '../schemaconfig/SchemaConfig.component';
+import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 function DatasetConfigSchema(props) {
     const store = useContext(RootStoreContext);
@@ -76,7 +76,11 @@ function DatasetConfigSchema(props) {
                                     props.graphType
                                 );
                             }}
-                            icon={<Close style={{ '--ggs': 0.8 }} />}
+                            icon={
+                                <XMarkIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
+                            }
                         />
                     </Tooltip>
                 </HStack>
@@ -165,7 +169,14 @@ function DatasetConfigSchema(props) {
                                         );
                                         setSchemaName('');
                                     }}
-                                    icon={<MathPlus style={{ '--ggs': 0.7 }} />}
+                                    icon={
+                                        <PlusIcon
+                                            style={{
+                                                width: '14px',
+                                                height: '14px'
+                                            }}
+                                        />
+                                    }
                                 />
                             </Tooltip>
                         </HStack>

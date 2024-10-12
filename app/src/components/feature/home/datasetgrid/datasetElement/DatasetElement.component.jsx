@@ -6,8 +6,13 @@ import {
     Tooltip,
     useColorModeValue
 } from '@chakra-ui/react';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { ArrowRight, Data, Search, TrashEmpty } from 'css.gg';
+import {
+    ArrowRightIcon,
+    Cog6ToothIcon,
+    MagnifyingGlassIcon,
+    TrashIcon,
+    WifiIcon
+} from '@heroicons/react/24/outline';
 import { isEnvFalse } from 'general.utils';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
@@ -66,21 +71,24 @@ function DatasetElement(props) {
             >
                 {props.datasetType === 'api' && (
                     <Tooltip label="External source: OpenAlex.org">
-                        <Data
-                            style={{
-                                '--ggs': 0.7,
-                                display: 'inline-block',
-                                marginRight: '10px',
-                                marginBottom: '-2px',
-                                transition: '0.2s all ease-in-out'
-                            }}
+                        <Link
+                            href="https://openalex.org"
+                            isExternal
                             _hover={{
                                 color: 'purple.300'
                             }}
-                            as={Link}
-                            href="https://openalex.org"
-                            isExternal
-                        />
+                        >
+                            <WifiIcon
+                                style={{
+                                    width: '14px',
+                                    height: '14px',
+                                    display: 'inline-block',
+                                    marginRight: '10px',
+                                    marginBottom: '-2px',
+                                    transition: '0.2s all ease-in-out'
+                                }}
+                            />
+                        </Link>
                     </Tooltip>
                 )}{' '}
                 {props.dataset}
@@ -116,9 +124,10 @@ function DatasetElement(props) {
                                 store.search.deleteDataset(props.dataset);
                             }}
                             icon={
-                                <TrashEmpty
+                                <TrashIcon
                                     style={{
-                                        '--ggs': '0.7',
+                                        width: '14px',
+                                        height: '14px',
                                         marginTop: '1px'
                                     }}
                                 />
@@ -201,9 +210,10 @@ function DatasetElement(props) {
                             navigateToAdvancedSearch(props.dataset);
                         }}
                         icon={
-                            <Search
+                            <MagnifyingGlassIcon
                                 style={{
-                                    '--ggs': 0.7
+                                    width: '14px',
+                                    height: '14px'
                                 }}
                             />
                         }
@@ -260,9 +270,10 @@ function DatasetElement(props) {
                                 );
                             }}
                             icon={
-                                <ArrowRight
+                                <ArrowRightIcon
                                     style={{
-                                        '--ggs': '0.7'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             }

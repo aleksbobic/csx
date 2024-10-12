@@ -10,7 +10,7 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { Redo } from 'css.gg';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
 import logodark from 'images/logodark.png';
 import logolight from 'images/logolight.png';
@@ -164,7 +164,15 @@ function Footer() {
                         size="sm"
                         variant="outline"
                         marginTop="10px"
-                        leftIcon={<Redo style={{ '--ggs': 0.7 }} />}
+                        leftIcon={
+                            <ArrowUturnLeftIcon
+                                style={{
+                                    width: '12px',
+                                    height: '12px',
+                                    marginTop: '-3px'
+                                }}
+                            />
+                        }
                         onClick={() => {
                             store.core.resetJoyride();
 

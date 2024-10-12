@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react';
 
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { withRouter } from 'react-router-dom';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
 import CustomScroll from '../../customscroll/CustomScroll.component';

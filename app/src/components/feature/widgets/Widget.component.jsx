@@ -6,8 +6,12 @@ import {
     Tooltip,
     useColorModeValue
 } from '@chakra-ui/react';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { ArrowsH, ArrowsMergeAltH, Close } from 'css.gg';
+import {
+    Cog6ToothIcon,
+    MagnifyingGlassMinusIcon,
+    MagnifyingGlassPlusIcon,
+    XMarkIcon
+} from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import {
@@ -41,7 +45,7 @@ function WidgetContainer(props) {
     const renderWidgetRemoveButton = () => (
         <Tooltip label="Remove widget">
             <IconButton
-                icon={<Close style={{ '--ggs': 0.7 }} />}
+                icon={<XMarkIcon style={{ width: '14px', height: '14px' }} />}
                 size="xs"
                 variant="ghost"
                 opacity={0.5}
@@ -74,9 +78,13 @@ function WidgetContainer(props) {
             <IconButton
                 icon={
                     isExpanded ? (
-                        <ArrowsMergeAltH style={{ '--ggs': 0.7 }} />
+                        <MagnifyingGlassMinusIcon
+                            style={{ width: '14px', height: '14px' }}
+                        />
                     ) : (
-                        <ArrowsH style={{ '--ggs': 0.7 }} />
+                        <MagnifyingGlassPlusIcon
+                            style={{ width: '14px', height: '14px' }}
+                        />
                     )
                 }
                 size="xs"

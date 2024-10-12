@@ -317,7 +317,13 @@ export class CoreStore {
     };
 
     generateUUID = async () => {
-        const { response, error } = await safeRequest(axios.get('utils/uuid'));
+        const { response, error } = await safeRequest(
+            axios.get('utils/uuid', {
+                headers: {
+                    accept: 'application/json'
+                }
+            })
+        );
 
         if (error) {
             this.store.core.handleRequestError(error);
@@ -479,20 +485,20 @@ export class CoreStore {
 
         switch (error['type']) {
             case 'response':
-                this.store.track.trackEvent(
+                this?.store?.track?.trackEvent(
                     'Global',
                     'Response Error',
                     JSON.stringify({
                         url: error.url,
                         method: error.method,
-                        statusCode: error.status,
-                        message: error.data.detail[0].msg
+                        statusCode: error.status
+                        // message: error.data.detail[0].msg
                     })
                 );
 
                 break;
             case 'request':
-                this.store.track.trackEvent(
+                this?.store?.track?.trackEvent(
                     'Global',
                     'Request Error',
                     JSON.stringify({
@@ -505,7 +511,7 @@ export class CoreStore {
 
                 break;
             default:
-                this.store.track.trackEvent(
+                this?.store?.track?.trackEvent(
                     'Global',
                     'Request setup error',
                     JSON.stringify({

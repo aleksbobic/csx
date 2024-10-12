@@ -8,12 +8,12 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
 import { getReasonPhrase } from 'http-status-codes';
 import CustomScroll from '../customscroll/CustomScroll.component';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 export function ErrorModal(props) {
     const store = useContext(RootStoreContext);
@@ -96,7 +96,10 @@ export function ErrorModal(props) {
                 )}
                 {renderErrorProperty(
                     'Message',
-                    store.core.errorDetails.data.detail[0].msg
+                    'unkown error'
+                    // store?.core?.errorDetails?.data?.detail
+                    //     ? store?.core?.errorDetails?.data?.detail[0]?.msg
+                    //     : 'unkown error'
                 )}
             </>
         );
@@ -153,7 +156,11 @@ export function ErrorModal(props) {
                         variant="ghost"
                         size="sm"
                         borderRadius="10px"
-                        icon={<Close style={{ '--ggs': 0.7 }} />}
+                        icon={
+                            <XMarkIcon
+                                style={{ width: '14px', height: '14px' }}
+                            />
+                        }
                         onClick={() => {
                             props.onClose();
                         }}

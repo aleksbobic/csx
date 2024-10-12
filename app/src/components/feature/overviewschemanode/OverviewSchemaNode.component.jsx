@@ -7,7 +7,7 @@ import {
     Tooltip,
     VStack
 } from '@chakra-ui/react';
-import { Close, Link, MathPlus } from 'css.gg';
+import { LinkIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 import { Handle } from 'react-flow-renderer';
 
@@ -116,9 +116,10 @@ const overviewSchemaNode = ({ id, data }) => {
                         cursor: 'pointer'
                     }}
                     icon={
-                        <Link
+                        <LinkIcon
                             style={{
-                                '--ggs': '0.7'
+                                width: '14px',
+                                height: '14px'
                             }}
                         />
                     }
@@ -163,9 +164,10 @@ const overviewSchemaNode = ({ id, data }) => {
                                     size="xs"
                                     variant="ghost"
                                     icon={
-                                        <Close
+                                        <XMarkIcon
                                             style={{
-                                                '--ggs': '0.7'
+                                                width: '14px',
+                                                height: '14px'
                                             }}
                                         />
                                     }
@@ -234,11 +236,12 @@ const overviewSchemaNode = ({ id, data }) => {
                                     }}
                                     style={{ marginLeft: '0px' }}
                                     rightIcon={
-                                        <MathPlus
+                                        <PlusIcon
                                             style={{
                                                 marginLeft: '-8px',
                                                 marginTop: '0px',
-                                                '--ggs': '0.7'
+                                                width: '14px',
+                                                height: '14px'
                                             }}
                                         />
                                     }
@@ -298,9 +301,10 @@ const overviewSchemaNode = ({ id, data }) => {
                         }
                         opacity={data.isLink ? 1 : 0.5}
                         icon={
-                            <Close
+                            <XMarkIcon
                                 style={{
-                                    '--ggs': '0.7'
+                                    width: '14px',
+                                    height: '14px'
                                 }}
                             />
                         }

@@ -7,7 +7,10 @@ import {
     VStack,
     Wrap
 } from '@chakra-ui/react';
-import { Close, Comment } from 'css.gg';
+import {
+    ChatBubbleBottomCenterIcon,
+    XMarkIcon
+} from '@heroicons/react/24/outline';
 
 import { Handle } from 'react-flow-renderer';
 
@@ -34,9 +37,10 @@ const historyNode = ({ id, data, isConnectable }) => {
                         }}
                         _hover={{ backgroundColor: 'whiteAlpha.200' }}
                         icon={
-                            <Close
+                            <XMarkIcon
                                 style={{
-                                    '--ggs': '0.7',
+                                    width: '14px',
+                                    height: '14px',
                                     color:
                                         (data.colorMode === 'light' ||
                                             data.isActive) &&
@@ -159,9 +163,10 @@ const historyNode = ({ id, data, isConnectable }) => {
                                     >
                                         {data.comments.length}
                                     </Text>
-                                    <Comment
+                                    <ChatBubbleBottomCenterIcon
                                         style={{
-                                            '--ggs': '0.5',
+                                            width: '10px',
+                                            height: '10px',
                                             marginTop: '-2px',
                                             opacity: 0.7,
                                             color: 'currentColor'

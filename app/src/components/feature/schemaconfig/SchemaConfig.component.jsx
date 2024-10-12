@@ -8,8 +8,6 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign } from 'css.gg';
-
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
 import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
@@ -17,7 +15,7 @@ import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextr
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import ReactFlow, {
     applyEdgeChanges,
@@ -32,6 +30,7 @@ import OverviewCustomEdge from '../overviewschemaedge/OverviewSchemaEdge.compone
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
 import SchemaEdge from '../schemaedge/SchemaEdge.component';
 import SchemaNode from '../schemanode/SchemaNode.component';
+import { ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 
 function SchemaConfig(props) {
     const store = useContext(RootStoreContext);
@@ -182,9 +181,10 @@ function SchemaConfig(props) {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '14px',
+                                    height: '14px'
                                 }}
                             />
                         }

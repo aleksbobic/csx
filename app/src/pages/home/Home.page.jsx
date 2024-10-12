@@ -17,7 +17,6 @@ import {
 import SearchBar from 'components/feature/home/searchbar/SearchBar.component';
 import DatasetConfigModal from 'components/interface/datasetconfigmodal/DatasetConfigModal.component';
 import FileUploadModal from 'components/interface/fileuploadmodal/FileUploadModal.component';
-import { Close } from 'css.gg';
 
 import CookieInfo from 'components/feature/home/cookieinfo/CookieInfo.component';
 import DatasetElement from 'components/feature/home/datasetgrid/datasetElement/DatasetElement.component';
@@ -37,6 +36,7 @@ import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 import Joyride from 'react-joyride';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function HomePage() {
     const toast = useToast();
@@ -68,7 +68,9 @@ function HomePage() {
                     position="absolute"
                     right="16px"
                     top="16px"
-                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    icon={
+                        <XMarkIcon style={{ width: '14px', height: '14px' }} />
+                    }
                     transition="0.2s all ease-in-out"
                     _hover={{ backgroundColor: 'whiteAlpha.200' }}
                     onClick={() => {
@@ -158,7 +160,7 @@ function HomePage() {
                     position="absolute"
                     right="16px"
                     top="16px"
-                    icon={<Close style={{ '--ggs': 0.7 }} />}
+                    // icon={<Close style={{ '--ggs': 0.7 }} />}
                     transition="0.2s all ease-in-out"
                     _hover={{ backgroundColor: 'blackAlpha.50' }}
                     onClick={() => {

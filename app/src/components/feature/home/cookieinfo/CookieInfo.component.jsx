@@ -19,7 +19,6 @@ import {
     useColorModeValue,
     VStack
 } from '@chakra-ui/react';
-import { ChevronLeft, ChevronRight } from 'css.gg';
 
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -27,9 +26,10 @@ import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { isEnvFalse } from 'general.utils';
 import CustomScroll from '../../customscroll/CustomScroll.component';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 function CookieInfo() {
     const { colorMode } = useColorMode();
@@ -129,9 +129,10 @@ function CookieInfo() {
                 color={textColor}
             >
                 <ListItem>
-                    <ChevronRight
+                    <ChevronRightIcon
                         style={{
-                            '--ggs': 0.5,
+                            width: '12px',
+                            height: '12px',
                             display: 'inline-block',
                             marginBottom: '-7px',
                             color: '#43a2fb'
@@ -142,9 +143,10 @@ function CookieInfo() {
                     recommender systems) and fixing bugs.
                 </ListItem>
                 <ListItem>
-                    <ChevronRight
+                    <ChevronRightIcon
                         style={{
-                            '--ggs': 0.5,
+                            width: '12px',
+                            height: '12px',
                             display: 'inline-block',
                             marginBottom: '-7px',
                             color: '#43a2fb'
@@ -286,8 +288,12 @@ function CookieInfo() {
         >
             <Button
                 leftIcon={
-                    <ChevronLeft
-                        style={{ '--ggs': 0.6, marginRight: '-4px' }}
+                    <ChevronLeftIcon
+                        style={{
+                            width: '12px',
+                            height: '12px',
+                            marginRight: '-4px'
+                        }}
                     />
                 }
                 position="absolute"

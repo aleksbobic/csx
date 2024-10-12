@@ -13,14 +13,14 @@ import {
     Wrap
 } from '@chakra-ui/react';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
-import { Eye, Remove } from 'css.gg';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
+import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 function SelectedComponentList(props) {
     const store = useContext(RootStoreContext);
@@ -329,9 +329,10 @@ function SelectedComponentList(props) {
                                                         );
                                                     }}
                                                     icon={
-                                                        <Eye
+                                                        <EyeIcon
                                                             style={{
-                                                                '--ggs': '0.7'
+                                                                width: '14px',
+                                                                height: '14px'
                                                             }}
                                                         />
                                                     }
@@ -354,9 +355,10 @@ function SelectedComponentList(props) {
                                                     variant="ghost"
                                                     aria-label="Remove from list"
                                                     icon={
-                                                        <Remove
+                                                        <XMarkIcon
                                                             style={{
-                                                                '--ggs': '0.8'
+                                                                width: '14px',
+                                                                height: '14px'
                                                             }}
                                                         />
                                                     }

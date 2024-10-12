@@ -13,19 +13,7 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
-import {
-    AlignBottom,
-    Attribution,
-    Carousel,
-    List,
-    Moon,
-    RadioCheck,
-    Ring,
-    Search,
-    Smile,
-    Sun,
-    ExtensionAdd
-} from 'css.gg';
+
 import { isEnvFalse } from 'general.utils';
 import logo from 'images/logo.png';
 import { observer } from 'mobx-react';
@@ -33,7 +21,20 @@ import { isEnvSet } from 'general.utils';
 
 import { PresentationChartLineIcon } from '@heroicons/react/20/solid';
 
-import { NewspaperIcon } from '@heroicons/react/24/outline';
+import {
+    ChartBarIcon,
+    ClockIcon,
+    FaceSmileIcon,
+    FingerPrintIcon,
+    GlobeAltIcon,
+    ListBulletIcon,
+    MagnifyingGlassIcon,
+    MoonIcon,
+    NewspaperIcon,
+    RectangleGroupIcon,
+    SquaresPlusIcon,
+    SunIcon
+} from '@heroicons/react/24/outline';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
@@ -194,12 +195,7 @@ function NavigationPanelComponent() {
                             }}
                         >
                             Get more data{' '}
-                            <ExtensionAdd
-                                style={{
-                                    '--ggs': '0.6',
-                                    marginLeft: '5px'
-                                }}
-                            />
+                            <SquaresPlusIcon width="16px" height="16px" />
                         </Button>
                     </Tooltip>
                 )}
@@ -244,13 +240,16 @@ function NavigationPanelComponent() {
                         }}
                         icon={
                             store.core.currentGraph === 'detail' ? (
-                                <RadioCheck
+                                <GlobeAltIcon
                                     style={{
-                                        '--ggs': '0.68'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             ) : (
-                                <Ring style={{ '--ggs': '0.7' }} />
+                                <FingerPrintIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
                             )
                         }
                     />
@@ -361,9 +360,10 @@ function NavigationPanelComponent() {
                                     toggleDataPanel('search');
                                 }}
                                 icon={
-                                    <Search
+                                    <MagnifyingGlassIcon
                                         style={{
-                                            '--ggs': '0.7',
+                                            width: '14px',
+                                            height: '14px',
                                             marginBottom: '-2px'
                                         }}
                                     />
@@ -391,9 +391,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('details');
                             }}
                             icon={
-                                <AlignBottom
+                                <ChartBarIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             }
@@ -419,9 +420,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('results');
                             }}
                             icon={
-                                <List
+                                <ListBulletIcon
                                     style={{
-                                        '--ggs': '0.7'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             }
@@ -447,9 +449,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('schema');
                             }}
                             icon={
-                                <Attribution
+                                <RectangleGroupIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             }
@@ -475,11 +478,10 @@ function NavigationPanelComponent() {
                                 toggleDataPanel('history');
                             }}
                             icon={
-                                <Carousel
+                                <ClockIcon
                                     style={{
-                                        '--ggs': '0.7',
-                                        transform:
-                                            'rotate(180deg) scale(0.7, 0.8)'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             }
@@ -495,15 +497,17 @@ function NavigationPanelComponent() {
                         aria-label="Color mode"
                         icon={
                             colorMode === 'light' ? (
-                                <Moon
+                                <MoonIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             ) : (
-                                <Sun
+                                <SunIcon
                                     style={{
-                                        '--ggs': '0.8'
+                                        width: '14px',
+                                        height: '14px'
                                     }}
                                 />
                             )
@@ -600,9 +604,10 @@ function NavigationPanelComponent() {
                                     padding: '4px 8px'
                                 }}
                             >
-                                <Smile
+                                <FaceSmileIcon
                                     style={{
-                                        '--ggs': 0.7,
+                                        width: '14px',
+                                        height: '14px',
                                         marginRight: '5px',
                                         display: 'inline-block',
                                         marginBottom: '-4px'
@@ -613,16 +618,31 @@ function NavigationPanelComponent() {
                         </Tooltip>
                     )}
                     <Tooltip label="Visit the CSX wiki">
-                        <Button
+                        <Link
                             size="sm"
-                            as={Link}
                             width={
                                 !location.pathname.startsWith('/search') &&
                                 !location.pathname.startsWith('/graph')
                                     ? '75px'
-                                    : '32px'
+                                    : '40px'
                             }
-                            padding={0}
+                            height={
+                                !location.pathname.startsWith('/search') &&
+                                !location.pathname.startsWith('/graph')
+                                    ? 'auto'
+                                    : '40px'
+                            }
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius:
+                                    !location.pathname.startsWith('/search') &&
+                                    !location.pathname.startsWith('/graph')
+                                        ? '7px'
+                                        : '10px',
+                                padding: '2px 5px'
+                            }}
                             variant="ghost"
                             id="wiki"
                             onClick={e => {
@@ -666,29 +686,24 @@ function NavigationPanelComponent() {
                             {!location.pathname.startsWith('/search') &&
                                 !location.pathname.startsWith('/graph') &&
                                 'Wiki'}
-                        </Button>
+                        </Link>
                     </Tooltip>
                     {location.pathname.startsWith('/graph') && (
                         <Tooltip label="Open presentation mode in new tab">
-                            <IconButton
+                            <Link
                                 size="sm"
                                 width="40px"
                                 height="40px"
                                 style={{
-                                    marginLeft: '10px'
+                                    marginLeft: '10px',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center'
                                 }}
-                                as={Link}
                                 isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
                                 borderRadius="10px"
                                 id="presentationmode"
-                                icon={
-                                    <PresentationChartLineIcon
-                                        width="16px"
-                                        height="16px"
-                                        display="inline"
-                                    />
-                                }
                                 onClick={e => {
                                     if (!store.core.studyIsSaved) {
                                         e.preventDefault();
@@ -721,7 +736,14 @@ function NavigationPanelComponent() {
                                     textDecoration: 'none',
                                     backgroundColor: 'blue.500'
                                 }}
-                            />
+                            >
+                                {' '}
+                                <PresentationChartLineIcon
+                                    width="16px"
+                                    height="16px"
+                                    display="inline"
+                                />
+                            </Link>
                         </Tooltip>
                     )}
                     {renderToggles()}

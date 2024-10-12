@@ -18,15 +18,19 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { FolderOpenIcon, PaintBrushIcon } from '@heroicons/react/20/solid';
-import { CubeTransparentIcon } from '@heroicons/react/24/outline';
+import {
+    ChevronDoubleLeftIcon,
+    ChevronDoubleRightIcon,
+    CubeTransparentIcon
+} from '@heroicons/react/24/outline';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import ModificationTools from 'components/feature/leftpanel/modificationtools/ModificationTools.component';
 import ViewTools from 'components/feature/leftpanel/viewtools/ViewTools.component';
 import StudyInfo from 'components/feature/leftpanel/studyinfo/StudyInfo.component';
-import { ChevronDoubleLeft, ChevronDoubleRight } from 'css.gg';
+
 import { schemeYlOrRd } from 'd3-scale-chromatic';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
@@ -363,9 +367,13 @@ function LeftPanel() {
                     _hover={{ bgColor: 'whiteAlpha.200' }}
                     icon={
                         isOpen ? (
-                            <ChevronDoubleLeft style={{ '--ggs': 0.8 }} />
+                            <ChevronDoubleLeftIcon
+                                style={{ width: '14px', height: '14px' }}
+                            />
                         ) : (
-                            <ChevronDoubleRight style={{ '--ggs': 0.8 }} />
+                            <ChevronDoubleRightIcon
+                                style={{ width: '14px', height: '14px' }}
+                            />
                         )
                     }
                 />

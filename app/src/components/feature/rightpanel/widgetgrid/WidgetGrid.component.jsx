@@ -7,7 +7,6 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { MathPlus } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
@@ -24,6 +23,7 @@ import { useCallback } from 'react';
 import DoughnutChart from '../../widgets/charts/DoughnutChart.component';
 import BarChart from '../../widgets/charts/BarChart.component';
 import RadarChartComponent from '../../widgets/charts/RadarChart.component';
+import { PlusIcon } from '@heroicons/react/24/outline';
 
 function WidgetGrid(props) {
     const store = useContext(RootStoreContext);
@@ -133,10 +133,11 @@ function WidgetGrid(props) {
                             );
                         }}
                         icon={
-                            <MathPlus
+                            <PlusIcon
                                 style={{
                                     opacity: 0.5,
-                                    '--ggs': '2'
+                                    width: '24px',
+                                    height: '24px'
                                 }}
                             />
                         }

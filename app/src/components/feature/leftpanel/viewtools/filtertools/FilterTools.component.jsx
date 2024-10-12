@@ -15,11 +15,12 @@ import {
     RangeSliderThumb
 } from '@chakra-ui/react';
 import {
-    FormatSeparator,
-    LivePhoto,
-    PathIntersect,
-    RadioChecked
-} from 'css.gg';
+    CubeIcon,
+    EllipsisHorizontalCircleIcon,
+    Square3Stack3DIcon,
+    SunIcon
+} from '@heroicons/react/24/outline';
+
 import { observer } from 'mobx-react';
 import { useContext, useEffect, useState } from 'react';
 
@@ -168,8 +169,11 @@ function FilterTools() {
                             <Tooltip label="Show selected nodes">
                                 <IconButton
                                     icon={
-                                        <RadioChecked
-                                            style={{ '--ggs': '0.8' }}
+                                        <EllipsisHorizontalCircleIcon
+                                            style={{
+                                                width: '14px',
+                                                height: '14px'
+                                            }}
                                         />
                                     }
                                     isDisabled={
@@ -207,7 +211,12 @@ function FilterTools() {
                                     }
                                     size="sm"
                                     icon={
-                                        <LivePhoto style={{ '--ggs': '0.8' }} />
+                                        <SunIcon
+                                            style={{
+                                                width: '14px',
+                                                height: '14px'
+                                            }}
+                                        />
                                     }
                                     onClick={() => {
                                         store.track.trackEvent(
@@ -239,8 +248,11 @@ function FilterTools() {
                                     }
                                     size="sm"
                                     icon={
-                                        <PathIntersect
-                                            style={{ '--ggs': '0.8' }}
+                                        <Square3Stack3DIcon
+                                            style={{
+                                                width: '14px',
+                                                height: '14px'
+                                            }}
                                         />
                                     }
                                     onClick={() => {
@@ -275,9 +287,10 @@ function FilterTools() {
                                     size="sm"
                                     style={{}}
                                     icon={
-                                        <FormatSeparator
+                                        <CubeIcon
                                             style={{
-                                                '--ggs': '0.7',
+                                                width: '14px',
+                                                height: '14px',
                                                 marginTop: '5px'
                                             }}
                                         />

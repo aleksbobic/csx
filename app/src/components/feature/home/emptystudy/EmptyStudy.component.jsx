@@ -6,9 +6,9 @@ import {
     useColorMode,
     VStack
 } from '@chakra-ui/react';
-import { ChevronLeft } from 'css.gg';
 
 import { LightBulbIcon } from '@heroicons/react/20/solid';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
@@ -42,8 +42,12 @@ function EmptyStudy() {
         >
             <Button
                 leftIcon={
-                    <ChevronLeft
-                        style={{ '--ggs': 0.6, marginRight: '-4px' }}
+                    <ChevronLeftIcon
+                        style={{
+                            width: '14px',
+                            height: '14px',
+                            marginRight: '-4px'
+                        }}
                     />
                 }
                 position="absolute"

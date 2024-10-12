@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 import CustomScroll from '../customscroll/CustomScroll.component';

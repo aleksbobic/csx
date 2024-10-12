@@ -9,15 +9,13 @@ import {
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Presentation } from 'css.gg';
-
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
 import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
 import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import ReactFlow, { MiniMap } from 'react-flow-renderer';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
@@ -27,6 +25,10 @@ import HistoryNode from '../../historyNode/HistoryNode.component';
 import OverviewCustomEdge from '../../overviewschemaedge/OverviewSchemaEdge.component';
 import OverviewSchemaNode from '../../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../../schemanode/SchemaNode.component';
+import {
+    PresentationChartBarIcon,
+    ViewfinderCircleIcon
+} from '@heroicons/react/24/outline';
 
 export function HistoryFlow() {
     const store = useContext(RootStoreContext);
@@ -170,9 +172,10 @@ export function HistoryFlow() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '14px',
+                                    height: '14px'
                                 }}
                             />
                         }
@@ -197,20 +200,20 @@ export function HistoryFlow() {
                 </Tooltip>
 
                 <Tooltip label="Open presentation up to active history item.">
-                    <IconButton
+                    <Link
                         size="sm"
-                        as={Link}
                         opacity="0.6"
                         transition="0.2s all ease-in-out"
-                        isDisabled={!store.core.studyIsSaved}
+                        style={{
+                            padding: '8px',
+                            borderRadius: '5px',
+                            backgroundColor: '#6e6e6e4f',
+                            cursor: !store.core.studyIsSaved
+                                ? 'not-allowed'
+                                : 'pointer',
+                            opacity: !store.core.studyIsSaved ? 0.6 : 1
+                        }}
                         _hover={{ opacity: 1 }}
-                        icon={
-                            <Presentation
-                                style={{
-                                    '--ggs': '0.8'
-                                }}
-                            />
-                        }
                         onClick={e => {
                             if (!store.core.studyIsSaved) {
                                 e.preventDefault();
@@ -240,7 +243,14 @@ export function HistoryFlow() {
                                 : ''
                         }
                         isExternal
-                    />
+                    >
+                        <PresentationChartBarIcon
+                            style={{
+                                width: '14px',
+                                height: '14px'
+                            }}
+                        />
+                    </Link>
                 </Tooltip>
             </HStack>
         </Box>

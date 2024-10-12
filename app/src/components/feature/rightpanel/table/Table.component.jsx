@@ -1,6 +1,6 @@
 import { Box, Table } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useGlobalFilter, useSortBy, useTable } from 'react-table';
 import CustomScroll from '../../customscroll/CustomScroll.component';

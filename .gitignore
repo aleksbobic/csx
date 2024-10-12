@@ -6,6 +6,8 @@ venv/
 # dependencies
 /app/node_modules
 /app/.pnp
+/app2/node_modules
+/app2/.pnp
 .pnp.js
 
 # production

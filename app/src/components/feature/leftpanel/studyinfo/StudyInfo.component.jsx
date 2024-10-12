@@ -10,7 +10,7 @@ import {
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
-import { Heart } from 'css.gg';
+import { HeartIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -286,7 +286,13 @@ function StudyInfo() {
                     _disabled={{ backgroundColor: 'blue.500', opacity: 0.5 }}
                 >
                     {store.core.studyIsSaved ? 'Saved' : 'Save'}
-                    <Heart style={{ '--ggs': '0.7', marginLeft: '10px' }} />
+                    <HeartIcon
+                        style={{
+                            width: '14px',
+                            height: '14px',
+                            marginLeft: '10px'
+                        }}
+                    />
                 </Button>
             </VStack>
             <VStack

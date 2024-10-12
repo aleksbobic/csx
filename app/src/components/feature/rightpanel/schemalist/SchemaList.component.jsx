@@ -2,7 +2,7 @@ import { Box, Button, HStack, Text, Tooltip } from '@chakra-ui/react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import CustomScroll from '../../customscroll/CustomScroll.component';
 
 export function SchemaList() {

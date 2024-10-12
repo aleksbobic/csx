@@ -11,15 +11,13 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-import { Assign, Sync } from 'css.gg';
-
 import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
 import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
 import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
 import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
 import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
 import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import ReactFlow, {
     applyEdgeChanges,
     applyNodeChanges,
@@ -34,7 +32,11 @@ import OverviewCustomEdge from '../../overviewschemaedge/OverviewSchemaEdge.comp
 import OverviewSchemaNode from '../../overviewschemanode/OverviewSchemaNode.component';
 import SchemaNode from '../../schemanode/SchemaNode.component';
 import { observer } from 'mobx-react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import {
+    ArrowPathIcon,
+    ExclamationTriangleIcon,
+    ViewfinderCircleIcon
+} from '@heroicons/react/24/outline';
 
 function SchemaFlow() {
     const store = useContext(RootStoreContext);
@@ -204,7 +206,11 @@ function SchemaFlow() {
                             borderRadius="full"
                             position="relative"
                             size="sm"
-                            leftIcon={<Sync style={{ '--ggs': '0.6' }} />}
+                            leftIcon={
+                                <ArrowPathIcon
+                                    style={{ width: '12px', height: '12px' }}
+                                />
+                            }
                             _hover={{ backgroundColor: 'blue.500' }}
                             onClick={() => {
                                 store.track.trackEvent(
@@ -283,9 +289,10 @@ function SchemaFlow() {
                         transition="0.2s all ease-in-out"
                         _hover={{ opacity: 1 }}
                         icon={
-                            <Assign
+                            <ViewfinderCircleIcon
                                 style={{
-                                    '--ggs': '0.8'
+                                    width: '14px',
+                                    height: '14px'
                                 }}
                             />
                         }

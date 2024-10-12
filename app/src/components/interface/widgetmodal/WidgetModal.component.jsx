@@ -26,6 +26,7 @@ import {
     useDisclosure,
     VStack
 } from '@chakra-ui/react';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import {
     ArcElement,
     BarController,
@@ -50,9 +51,8 @@ import ComponentStatsComponent from 'components/feature/widgets/component/Compon
 import GraphStatsComponent from 'components/feature/widgets/graph/GraphStats.component';
 import ConnectionStatsComponent from 'components/feature/widgets/node/NodeConnectionStats.component';
 import NodeStatsComponent from 'components/feature/widgets/node/NodeStats.component';
-import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext, useEffect } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 function FileUploadModal() {
@@ -1004,7 +1004,11 @@ function FileUploadModal() {
                         size="sm"
                         top="20px"
                         right="20px"
-                        icon={<Close />}
+                        icon={
+                            <XMarkIcon
+                                style={{ width: '14px', height: '14px' }}
+                            />
+                        }
                         onClick={() => {
                             store.track.trackEvent(
                                 JSON.stringify({

@@ -8,15 +8,15 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { ArrowRight, Link as GGLink } from 'css.gg';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../../customscroll/CustomScroll.component';
+import { ArrowRightIcon, LinkIcon } from '@heroicons/react/24/outline';
 
 function Serp(props) {
     const store = useContext(RootStoreContext);
@@ -124,12 +124,13 @@ function Serp(props) {
                             isExternal
                         >
                             {value}{' '}
-                            <GGLink
+                            <LinkIcon
                                 style={{
-                                    '--ggs': 0.7,
+                                    width: '14px',
+                                    height: '14px',
                                     display: 'inline-block',
                                     marginLeft: '5px',
-                                    marginBottom: '3px'
+                                    marginBottom: '-2px'
                                 }}
                             />
                         </Link>
@@ -238,7 +239,11 @@ function Serp(props) {
                         bottom="20px"
                         size="xs"
                         variant="ghost"
-                        icon={<ArrowRight style={{ '--ggs': 0.6 }} />}
+                        icon={
+                            <ArrowRightIcon
+                                style={{ width: '12px', height: '12px' }}
+                            />
+                        }
                         onClick={() => {
                             const nodeIds = store.graph.currentGraphData.nodes
                                 .filter(node =>

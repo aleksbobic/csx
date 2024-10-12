@@ -10,7 +10,7 @@ import {
     useColorModeValue
 } from '@chakra-ui/react';
 import { LightBulbIcon } from '@heroicons/react/20/solid';
-import { Database, Search } from 'css.gg';
+// import { Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -19,6 +19,10 @@ import { useHistory } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
 import AutoCompleteInputComponent from '../../autocompleteinput/AutoCompleteInput.component';
+import {
+    CircleStackIcon,
+    MagnifyingGlassIcon
+} from '@heroicons/react/24/outline';
 
 function SearchBar(props) {
     const history = useHistory();
@@ -150,11 +154,12 @@ function SearchBar(props) {
                     <Form onSubmit={handleSubmit} style={{ flexGrow: 1 }}>
                         <InputGroup alignItems="center">
                             {!props.datasetSelectorDisabled && (
-                                <Database
+                                <CircleStackIcon
                                     style={{
                                         position: 'absolute',
                                         marginLeft: '12px',
-                                        '--ggs': '0.8',
+                                        width: '14px',
+                                        height: '14px',
                                         zIndex: 2,
                                         color: textColor
                                     }}
@@ -227,9 +232,10 @@ function SearchBar(props) {
                                                 : 'whiteAlpha.100'
                                         }
                                         icon={
-                                            <Search
+                                            <MagnifyingGlassIcon
                                                 style={{
-                                                    '--ggs': '0.9'
+                                                    width: '14px',
+                                                    height: '14px'
                                                 }}
                                             />
                                         }

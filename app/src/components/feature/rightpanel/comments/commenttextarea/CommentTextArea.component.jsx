@@ -26,8 +26,14 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { CameraIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
+import {
+    ChartPieIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
+    XMarkIcon
+} from '@heroicons/react/24/outline';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { Chart, ChevronDown, ChevronUp, Close } from 'css.gg';
+
 import { useKeyPress } from 'hooks/useKeyPress.hook';
 import { observer } from 'mobx-react';
 import { useCallback } from 'react';
@@ -380,9 +386,13 @@ function CommentTextArea(props) {
                         }}
                         icon={
                             store.comment.isCommentListVisible ? (
-                                <ChevronDown style={{ '--ggs': '0.7' }} />
+                                <ChevronDownIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
                             ) : (
-                                <ChevronUp style={{ '--ggs': '0.7' }} />
+                                <ChevronUpIcon
+                                    style={{ width: '14px', height: '14px' }}
+                                />
                             )
                         }
                     />
@@ -450,9 +460,10 @@ function CommentTextArea(props) {
             return (
                 <IconButton
                     icon={
-                        <Chart
+                        <ChartPieIcon
                             style={{
-                                '--ggs': 0.7,
+                                width: '14px',
+                                height: '14px',
                                 marginLeft: '5px',
                                 marginBottom: '5px'
                             }}
@@ -489,15 +500,15 @@ function CommentTextArea(props) {
                 >
                     <MenuButton
                         as={IconButton}
-                        icon={
-                            <Chart
-                                style={{
-                                    '--ggs': 0.7,
-                                    marginLeft: '5px',
-                                    marginBottom: '5px'
-                                }}
-                            />
-                        }
+                        // icon={
+                        //     <Chart
+                        //         style={{
+                        //             '--ggs': 0.7,
+                        //             marginLeft: '5px',
+                        //             marginBottom: '5px'
+                        //         }}
+                        //     />
+                        // }
                         isDisabled={store.comment.chart}
                         size="sm"
                         opacity={1}
@@ -623,7 +634,14 @@ function CommentTextArea(props) {
                                     opacity={1}
                                     borderRadius="4px"
                                     transition="0.2s all ease-in-out"
-                                    icon={<Close style={{ '--ggs': '0.7' }} />}
+                                    icon={
+                                        <XMarkIcon
+                                            style={{
+                                                width: '14px',
+                                                height: '14px'
+                                            }}
+                                        />
+                                    }
                                     _hover={{ backgroundColor: 'blue.500' }}
                                     onClick={() => {
                                         store.track.trackEvent(
@@ -683,14 +701,14 @@ function CommentTextArea(props) {
                                                 })
                                             );
                                         }}
-                                        icon={
-                                            <Close
-                                                style={{
-                                                    '--ggs': 0.5,
-                                                    marginLeft: '-2px'
-                                                }}
-                                            />
-                                        }
+                                        // icon={
+                                        //     <Close
+                                        //         style={{
+                                        //             '--ggs': 0.5,
+                                        //             marginLeft: '-2px'
+                                        //         }}
+                                        //     />
+                                        // }
                                     />
                                 </Tooltip>
                             )}
@@ -737,14 +755,14 @@ function CommentTextArea(props) {
                                                     })
                                                 );
                                             }}
-                                            icon={
-                                                <Close
-                                                    style={{
-                                                        '--ggs': 0.5,
-                                                        marginLeft: '-2px'
-                                                    }}
-                                                />
-                                            }
+                                            // icon={
+                                            //     <Close
+                                            //         style={{
+                                            //             '--ggs': 0.5,
+                                            //             marginLeft: '-2px'
+                                            //         }}
+                                            //     />
+                                            // }
                                         />
                                     </Tooltip>
                                 )}

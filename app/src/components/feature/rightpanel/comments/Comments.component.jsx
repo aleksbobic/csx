@@ -1,7 +1,7 @@
 import { useColorMode, VStack } from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../../customscroll/CustomScroll.component';

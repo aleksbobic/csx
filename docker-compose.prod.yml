@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   server:
     container_name: csxp_server
@@ -22,7 +21,7 @@ services:
       OPENALEX_EMAIL: ""
     depends_on:
       - elastic
-    command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80
+    command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80 --limit-max-headers 8192
   app:
     container_name: csxp_app
     image: csxpi_app
@@ -35,6 +34,9 @@ services:
     depends_on:
       - server
       - elastic
+    environment:
+      NODE_ENV: production
+      WDS_SOCKET_PORT: 0
   mysql:
     image: "mysql:5.7"
     profiles:

@@ -12,15 +12,15 @@ import {
     VStack
 } from '@chakra-ui/react';
 import { FolderOpenIcon } from '@heroicons/react/20/solid';
-import { Close } from 'css.gg';
 
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { useHistory, withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../../customscroll/CustomScroll.component';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function StudyGrid(props) {
     const { colorMode } = useColorMode();
@@ -118,7 +118,7 @@ function StudyGrid(props) {
                                             zIndex="3"
                                             color={textColor}
                                             icon={
-                                                <Close
+                                                <XMarkIcon
                                                     style={{ '--ggs': '0.7' }}
                                                 />
                                             }

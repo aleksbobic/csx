@@ -14,7 +14,6 @@ import GraphComponent from 'components/feature/graph/Graph.component';
 import { SurveyInfoModal } from 'components/feature/surveyinfo/SurveyInfo.component';
 import WidgetModal from 'components/interface/widgetmodal/WidgetModal.component';
 import InteractionsToast from 'components/feature/interactionstoast/InteractionsToast.component';
-import { Spinner } from 'css.gg';
 import { isEnvSet } from 'general.utils';
 import { observer } from 'mobx-react';
 import queryString from 'query-string';
@@ -1537,14 +1536,7 @@ function GraphPage() {
                     left="0"
                     zIndex="2"
                 >
-                    <Spinner
-                        thickness="4px"
-                        speed="0.65s"
-                        emptyColor="gray.200"
-                        color="blue.500"
-                        size="xl"
-                        zIndex="20"
-                    />
+                    Loading ...
                 </Center>
             )}
 

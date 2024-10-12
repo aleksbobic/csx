@@ -7,7 +7,6 @@ import {
     Text,
     VStack
 } from '@chakra-ui/react';
-import { Close } from 'css.gg';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
@@ -17,6 +16,7 @@ import nodeInformationInteraction from 'images/hover_node.png';
 import panningInteraction from 'images/pan.png';
 import contextMenuInteraction from 'images/right_click.png';
 import scrollInteraction from 'images/scroll.png';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 function InteractionsToast(props) {
     const store = useContext(RootStoreContext);
@@ -127,9 +127,10 @@ function InteractionsToast(props) {
                         backgroundColor: 'blue.500'
                     }}
                     leftIcon={
-                        <Close
+                        <XMarkIcon
                             style={{
-                                '--ggs': 0.7
+                                width: '14px',
+                                height: '14px'
                             }}
                         />
                     }

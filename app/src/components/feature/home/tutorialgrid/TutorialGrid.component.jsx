@@ -12,7 +12,7 @@ import {
 import { AcademicCapIcon } from '@heroicons/react/20/solid';
 
 import { observer } from 'mobx-react';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext } from 'react';
 import { withRouter } from 'react-router-dom';
 import CustomScroll from '../../customscroll/CustomScroll.component';

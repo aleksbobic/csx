@@ -16,7 +16,7 @@ import {
     AccordionButton
 } from '@chakra-ui/react';
 import { Switch } from '@chakra-ui/switch';
-import { MoreVerticalAlt } from 'css.gg';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 
@@ -196,7 +196,12 @@ function ViewTools() {
                                 backgroundColor="whiteAlpha.100"
                                 as={Button}
                                 rightIcon={
-                                    <MoreVerticalAlt style={{ '--ggs': 0.7 }} />
+                                    <EllipsisVerticalIcon
+                                        style={{
+                                            width: '14px',
+                                            height: '14px'
+                                        }}
+                                    />
                                 }
                                 onClick={() => {
                                     store.track.trackEvent(

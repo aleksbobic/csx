@@ -18,7 +18,7 @@ import CommentModal from 'components/feature/commentmodal/CommentModal.component
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
 import { ErrorModal } from 'components/feature/errorModal/ErrorModal.component';
 import { isEnvFalse, isEnvTrue } from 'general.utils';
-import 'overlayscrollbars/styles/overlayscrollbars.css';
+import 'overlayscrollbars/overlayscrollbars.css';
 import PresentPage from 'pages/present/Present.page';
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';

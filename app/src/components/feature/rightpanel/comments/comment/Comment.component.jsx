@@ -7,7 +7,7 @@ import {
     Tooltip,
     useColorMode
 } from '@chakra-ui/react';
-import { Chart, Close } from 'css.gg';
+
 import { observer } from 'mobx-react';
 
 import { PencilIcon, PhotoIcon } from '@heroicons/react/20/solid';
@@ -20,6 +20,7 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 import { RootStoreContext } from 'stores/RootStore';
 import './Comment.scss';
+import { ChartPieIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 function CommentComponent(props) {
     const store = useContext(RootStoreContext);
@@ -173,9 +174,10 @@ function CommentComponent(props) {
                     }}
                     backgroundColor={colorMode === 'light' && 'blackAlpha.200'}
                     icon={
-                        <Close
+                        <XMarkIcon
                             style={{
-                                '--ggs': 0.8,
+                                width: '14px',
+                                height: '14px',
                                 opacity: colorMode === 'light' && 0.5
                             }}
                         />
@@ -235,7 +237,7 @@ function CommentComponent(props) {
                         />
                     )}
                     {props.comment.chart && (
-                        <Chart
+                        <ChartPieIcon
                             style={{
                                 '--ggs': '0.7',
                                 opacity: 0.5,
