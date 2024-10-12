@@ -41,12 +41,10 @@ export class RootStore {
 
     initAxios = () => {
         if (isEnvSet('REACT_APP_SERVER_PORT')) {
-            console.log('This is how we initialize');
             axios.defaults.baseURL = `http://localhost:${isEnvSet(
                 'REACT_APP_SERVER_PORT'
             )}`;
         } else {
-            console.log('This is how we initialize 2');
             axios.defaults.baseURL = `${window.location.origin}/api`;
         }
     };

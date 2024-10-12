@@ -27,6 +27,7 @@ from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+
 router = APIRouter(prefix="/studies/{study_id}/history", tags=["history"])
 
 
