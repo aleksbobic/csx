@@ -91,6 +91,7 @@ export function HistoryFlow() {
             width="100%"
             backgroundColor="whiteAlpha.200"
             borderRadius="8px"
+            style={{ position: 'relative' }}
             id="HistoryFlow"
         >
             <AutoSizer>
@@ -136,15 +137,15 @@ export function HistoryFlow() {
                                 node.data.isActive
                                     ? '#3182ceeb'
                                     : colorMode === 'light'
-                                    ? '#c5c5c5'
-                                    : '#323232'
+                                      ? '#c5c5c5'
+                                      : '#323232'
                             }
                             nodeStrokeColor={node =>
                                 node.data.isActive
                                     ? '#3182ceeb'
                                     : colorMode === 'light'
-                                    ? '#7bc5c5c57b7b'
-                                    : '#323232'
+                                      ? '#7bc5c5c57b7b'
+                                      : '#323232'
                             }
                             nodeBorderRadius="15px"
                             maskColor={
