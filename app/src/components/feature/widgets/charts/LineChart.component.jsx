@@ -213,16 +213,16 @@ function LineChart({
                     }
                 ]
             });
-        } else {
-            const chart = store.stats.activeWidgets.find(
+        } else if (chart) {
+            const chartObject = store.stats.activeWidgets.find(
                 widget => widget.id === chart.id
             );
 
-            setChartConfig(chart);
-            setData(getChartData(chart));
+            setChartConfig(chartObject);
+            setData(getChartData(chartObject));
         }
     }, [
-        chart.id,
+        chart,
         demoData,
         store.core.currentGraph,
         store.core.isOverview,

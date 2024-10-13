@@ -107,17 +107,17 @@ function DoughnutChart({
     useEffect(() => {
         if (demoData) {
             setData(demoData);
-        } else {
-            const chart = store.stats.activeWidgets.find(
+        } else if (chart) {
+            const chartObject = store.stats.activeWidgets.find(
                 widget => widget.id === chart.id
             );
 
-            setChartConfig(chart);
-            setData(getChartData(chart));
+            setChartConfig(chartObject);
+            setData(getChartData(chartObject));
         }
     }, [
         getChartData,
-        chart.id,
+        chart,
         demoData,
         store.stats.activeWidgets,
         store.graph.currentGraphData.nodes,
