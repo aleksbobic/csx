@@ -2,7 +2,7 @@
 
 Collaboration spotting X (CSX) is a network-based visual-analytics application for exploring tabular data through network visualizations, interactions, and advanced network analytics. The main aim of CSX is to enable users to retrieve a subset of their dataset and provide tools for visual and interactive exploration and filtering of their retrieved data in a network format. You can read more about the project on [csxp.me](https://csxp.me/).
 
-![Collaboration Spotting X - Screenshot](https://github.com/aleksbobic/csx/blob/master/cover.png?raw=true)
+![Collaboration Spotting X - Screenshot](https://github.com/aleksbobic/csx/blob/main/cover.png?raw=true)
 
 
 ## About & History 📖
@@ -28,7 +28,7 @@ A big thank you to all contributiors of this project:
 @LorenaEgger
 
 ## TUTORIALS 📖
-![Collaboration Spotting X - Preview](https://github.com/aleksbobic/csx/blob/master/cover.gif?raw=true)
+![Collaboration Spotting X - Preview](https://github.com/aleksbobic/csx/blob/main/cover.gif?raw=true)
 * [Introduction](https://youtu.be/io-_aeOemwA)
 * [Overview Graph](https://youtu.be/io-_aeOemwA)
 * [Detail Graph](https://youtu.be/-Dj19hOWTTU)
