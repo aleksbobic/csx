@@ -23,7 +23,6 @@ import {
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 import 'overlayscrollbars/overlayscrollbars.css';
@@ -447,4 +446,4 @@ CookieInfo.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(CookieInfo));
+export default observer(CookieInfo);

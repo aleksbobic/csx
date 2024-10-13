@@ -8,25 +8,30 @@ import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 
-function DoughnutChart(props) {
+function DoughnutChart({
+    isExpanded = false,
+    isExample = false,
+    demoData,
+    chart,
+    chartIndex,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const [data, setData] = useState(null);
 
     const [chartConfig, setChartConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart.id) || {}
     );
 
     useEffect(() => {
-        if (store.comment.chartToAttach === props.chart.id) {
+        if (store.comment.chartToAttach === chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+    }, [chart.id, store.comment, store.comment.chartToAttach]);
 
     const getElementProperties = useCallback(chart => {
         switch (chart.element_values) {
@@ -100,11 +105,11 @@ function DoughnutChart(props) {
     );
 
     useEffect(() => {
-        if (props.demoData) {
-            setData(props.demoData);
+        if (demoData) {
+            setData(demoData);
         } else {
             const chart = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setChartConfig(chart);
@@ -112,8 +117,8 @@ function DoughnutChart(props) {
         }
     }, [
         getChartData,
-        props.chart.id,
-        props.demoData,
+        chart.id,
+        demoData,
         store.stats.activeWidgets,
         store.graph.currentGraphData.nodes,
         store.graph.currentGraphData.selectedNodes,
@@ -166,7 +171,7 @@ function DoughnutChart(props) {
         };
 
         pluginOptions.datalabels = {
-            display: props.isExpanded ? 'auto' : false,
+            display: isExpanded ? 'auto' : false,
             color: 'white',
             anchor: 'center',
             align: 'end',
@@ -199,10 +204,10 @@ function DoughnutChart(props) {
         return pluginOptions;
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={[
                     'item type',
                     'main axis',
@@ -215,7 +220,7 @@ function DoughnutChart(props) {
     }
 
     if (!data || data.labels.length === 0) {
-        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -224,11 +229,11 @@ function DoughnutChart(props) {
             ref={chartRef}
             type={'doughnut'}
             height="250px"
-            key={`chart_instance_${props.chartIndex}_${Math.random()}`}
+            key={`chart_instance_${chartIndex}_${Math.random()}`}
             redraw
             data={{ ...data }}
             onClick={event => {
-                if (!props.isExample) {
+                if (!isExample) {
                     let dataIndex;
 
                     try {
@@ -247,7 +252,7 @@ function DoughnutChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -268,7 +273,7 @@ function DoughnutChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -306,10 +311,10 @@ function DoughnutChart(props) {
                 borderColor: '#fff',
                 layout: {
                     padding: {
-                        right: props.isExpanded ? 30 : 0,
-                        top: props.isExpanded ? 30 : 0,
-                        bottom: props.isExpanded ? 30 : 0,
-                        left: props.isExpanded ? 30 : 0
+                        right: isExpanded ? 30 : 0,
+                        top: isExpanded ? 30 : 0,
+                        bottom: isExpanded ? 30 : 0,
+                        left: isExpanded ? 30 : 0
                     }
                 },
                 devicePixelRatio: 2,
@@ -359,11 +364,6 @@ DoughnutChart.propTypes = {
     chartIndex: PropTypes.number,
     isExpanded: PropTypes.bool,
     isExample: PropTypes.bool
-};
-
-DoughnutChart.defaultProps = {
-    isExpanded: false,
-    isExample: false
 };
 
 export default observer(DoughnutChart);

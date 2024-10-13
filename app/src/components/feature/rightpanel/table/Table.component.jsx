@@ -9,11 +9,7 @@ import './table.scss';
 import TableBodyComponent from './tableBody/TableBody.component';
 import TableHeadComponent from './tableHead/TableHead.component';
 
-function TableComponent(props) {
-    const data = props.data;
-    const columns = props.columns;
-    const hiddenColumns = props.hiddenColumns;
-
+function TableComponent({ hiddenColumns = [], data, columns }) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -68,10 +64,6 @@ TableComponent.propTypes = {
     data: PropTypes.array,
     columns: PropTypes.array,
     hiddenColumns: PropTypes.array
-};
-
-TableComponent.defaultProps = {
-    hiddenColumns: []
 };
 
 export default observer(TableComponent);

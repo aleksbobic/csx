@@ -22,23 +22,27 @@ import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 import { EyeIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
-function SelectedComponentList(props) {
+function SelectedComponentList({
+    isExpanded = false,
+    demoData = [],
+    chart,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart?.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart?.id) ||
+            {}
     );
 
     useEffect(() => {
-        if (props.demoData.length) {
-            setData(props.demoData);
+        if (demoData.length) {
+            setData(demoData);
         } else {
             const components = store.graph.currentGraphData.components;
             const widget = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setWidgetConfig(widget);
@@ -60,8 +64,8 @@ function SelectedComponentList(props) {
             }
         }
     }, [
-        props.chart?.id,
-        props.demoData,
+        chart?.id,
+        demoData,
         store.graph.currentGraphData.components,
         store.graph.currentGraphData.selectedComponents,
         store.stats.activeWidgets,
@@ -208,10 +212,10 @@ function SelectedComponentList(props) {
         </Wrap>
     );
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={['item state', 'item count']}
                 customItemStates={[
                     {
@@ -227,7 +231,7 @@ function SelectedComponentList(props) {
     if (!data || data.length === 0) {
         return (
             <WidgetAlert
-                size={props.isExpanded ? 'md' : 'sm'}
+                size={isExpanded ? 'md' : 'sm'}
                 message="Select some components to see details here! 😉"
             />
         );
@@ -270,9 +274,7 @@ function SelectedComponentList(props) {
                                 >
                                     <Heading
                                         size="xs"
-                                        marginBottom={
-                                            props.isExpanded ? '8px' : '0'
-                                        }
+                                        marginBottom={isExpanded ? '8px' : '0'}
                                         whiteSpace="nowrap"
                                         overflow="hidden"
                                         textOverflow="ellipsis"
@@ -300,8 +302,7 @@ function SelectedComponentList(props) {
                                                             JSON.stringify({
                                                                 area: 'Widget',
                                                                 area_id:
-                                                                    props.chart
-                                                                        .id
+                                                                    chart.id
                                                             }),
                                                             JSON.stringify({
                                                                 item_type:
@@ -363,17 +364,12 @@ function SelectedComponentList(props) {
                                                         />
                                                     }
                                                     onClick={() => {
-                                                        if (
-                                                            !props.demoData
-                                                                .length
-                                                        ) {
+                                                        if (!demoData.length) {
                                                             store.track.trackEvent(
                                                                 JSON.stringify({
                                                                     area: 'Widget',
                                                                     area_id:
-                                                                        props
-                                                                            .chart
-                                                                            .id
+                                                                        chart.id
                                                                 }),
                                                                 JSON.stringify({
                                                                     item_type:
@@ -398,7 +394,7 @@ function SelectedComponentList(props) {
                                             </Tooltip>
                                         </Box>
                                     )}
-                                {props.isExpanded &&
+                                {isExpanded &&
                                     renderComponentDetails(component)}
                             </Stat>
                         );
@@ -410,11 +406,6 @@ function SelectedComponentList(props) {
 SelectedComponentList.propTypes = {
     isExpanded: PropTypes.bool,
     demoData: PropTypes.array
-};
-
-SelectedComponentList.defaultProps = {
-    isExpanded: false,
-    demoData: []
 };
 
 export default observer(SelectedComponentList);

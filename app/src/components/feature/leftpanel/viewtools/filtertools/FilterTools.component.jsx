@@ -1,18 +1,21 @@
-import { Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
-    IconButton,
-    Select,
-    Tooltip,
     Accordion,
+    AccordionButton,
+    AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    AccordionIcon,
-    AccordionButton,
+    Heading,
+    HStack,
+    IconButton,
     RangeSlider,
-    RangeSliderMark,
-    RangeSliderTrack,
     RangeSliderFilledTrack,
-    RangeSliderThumb
+    RangeSliderMark,
+    RangeSliderThumb,
+    RangeSliderTrack,
+    Select,
+    Text,
+    Tooltip,
+    VStack
 } from '@chakra-ui/react';
 import {
     CubeIcon,

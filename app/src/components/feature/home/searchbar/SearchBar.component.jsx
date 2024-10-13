@@ -10,12 +10,11 @@ import {
     useColorModeValue
 } from '@chakra-ui/react';
 import { LightBulbIcon } from '@heroicons/react/20/solid';
-// import { Search } from 'css.gg';
 import { Form, Formik } from 'formik';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import { v4 as uuidv4 } from 'uuid';
 import AutoCompleteInputComponent from '../../autocompleteinput/AutoCompleteInput.component';
@@ -24,8 +23,13 @@ import {
     MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
-function SearchBar(props) {
-    const history = useHistory();
+function SearchBar({
+    datasetSelectorDisabled = false,
+    placeholder = 'Search through the selected dataset ...',
+    onSubmit = () => {},
+    style
+}) {
+    const navigate = useNavigate();
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
@@ -102,7 +106,7 @@ function SearchBar(props) {
     );
 
     return (
-        <Box style={props.style} id="Searchbar">
+        <Box style={style} id="Searchbar">
             <Formik
                 initialValues={{ search: '' }}
                 onSubmit={values => {
@@ -136,7 +140,7 @@ function SearchBar(props) {
 
                     store.core.setStudyIsEmpty(false);
                     store.search.setSearchIsEmpty(false);
-                    props.onSubmit();
+                    onSubmit();
                     store.core.setCurrentGraph('overview');
                     store.graphInstance.setNodeColorScheme('component');
                     store.search.useDataset(selectedDataset);
@@ -147,13 +151,17 @@ function SearchBar(props) {
                     store.core.setStudyHistoryItemIndex(0);
                     store.search.setSearchQuery(values.search);
                     store.search.setSearchID(uuidv4());
-                    history.push(`/graph?study=${store.core.studyUuid}`);
+
+                    navigate(`/graph?study=${store.core.studyUuid}`);
                 }}
             >
                 {({ values, handleSubmit, setFieldValue }) => (
-                    <Form onSubmit={handleSubmit} style={{ flexGrow: 1 }}>
+                    <Form
+                        onSubmit={handleSubmit}
+                        style={{ flexGrow: 1, position: 'relative', zIndex: 2 }}
+                    >
                         <InputGroup alignItems="center">
-                            {!props.datasetSelectorDisabled && (
+                            {!datasetSelectorDisabled && (
                                 <CircleStackIcon
                                     style={{
                                         position: 'absolute',
@@ -165,7 +173,7 @@ function SearchBar(props) {
                                     }}
                                 />
                             )}
-                            {!props.datasetSelectorDisabled && (
+                            {!datasetSelectorDisabled && (
                                 <Select
                                     onChange={selectedDatasetChange}
                                     variant="filled"
@@ -185,7 +193,7 @@ function SearchBar(props) {
                                 </Select>
                             )}
                             <AutoCompleteInputComponent
-                                placeholder={props.placeholder}
+                                placeholder={placeholder}
                                 getSuggestions={value =>
                                     store.search.suggest('', value)
                                 }
@@ -194,13 +202,9 @@ function SearchBar(props) {
                                     borderRadius: '6px',
                                     color: textColor,
                                     borderEndStartRadius:
-                                        props.datasetSelectorDisabled
-                                            ? '4px'
-                                            : '0',
+                                        datasetSelectorDisabled ? '4px' : '0',
                                     borderStartStartRadius:
-                                        props.datasetSelectorDisabled
-                                            ? '4px'
-                                            : '0'
+                                        datasetSelectorDisabled ? '4px' : '0'
                                 }}
                                 suggestionStyle={{
                                     position: 'absolute',
@@ -211,7 +215,8 @@ function SearchBar(props) {
                                     top: '44px',
                                     left: '145px',
                                     zIndex: '10',
-                                    minWidth: '60%'
+                                    minWidth: '60%',
+                                    paddingRight: '50px'
                                 }}
                                 name="search"
                                 getValue={value =>
@@ -258,12 +263,6 @@ SearchBar.propTypes = {
     datasetSelectorDisabled: PropTypes.bool,
     placeholder: PropTypes.string,
     onSubmit: PropTypes.func
-};
-
-SearchBar.defaultProps = {
-    datasetSelectorDisabled: false,
-    placeholder: 'Search through the selected dataset ...',
-    onSubmit: () => {}
 };
 
 export default observer(SearchBar);

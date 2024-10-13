@@ -17,7 +17,7 @@ import { observer } from 'mobx-react';
 import 'overlayscrollbars/overlayscrollbars.css';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
-import { useHistory, withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../../customscroll/CustomScroll.component';
 import { XMarkIcon } from '@heroicons/react/24/outline';
@@ -26,11 +26,11 @@ function StudyGrid(props) {
     const { colorMode } = useColorMode();
     const textColor = useColorModeValue('black', 'white');
     const store = useContext(RootStoreContext);
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const openStudy = studyUuid => {
         props.onOpenStudy();
-        history.push(`/graph?study=${studyUuid}`);
+        navigate(`/graph?study=${studyUuid}`);
     };
 
     return (
@@ -238,4 +238,4 @@ StudyGrid.propTypes = {
     onOpenStudy: PropTypes.func
 };
 
-export default withRouter(observer(StudyGrid));
+export default observer(StudyGrid);

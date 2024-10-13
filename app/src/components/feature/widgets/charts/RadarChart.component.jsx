@@ -9,27 +9,32 @@ import { Radar } from 'react-chartjs-2';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 
-function RadarChart(props) {
+function RadarChart({
+    isExpanded = false,
+    isExample = false,
+    settingsMode = false,
+    demoData,
+    chart,
+    chartIndex
+}) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const [data, setData] = useState(null);
     const [chartConfig, setChartConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart.id) || {}
     );
 
     const [tooManySelectedElements, setTooManySelectedElements] =
         useState(false);
 
     useEffect(() => {
-        if (store.comment.chartToAttach === props.chart.id) {
+        if (store.comment.chartToAttach === chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+    }, [chart.id, store.comment, store.comment.chartToAttach]);
 
     const getChartData = useCallback(
         chart => {
@@ -55,14 +60,14 @@ function RadarChart(props) {
                 if (store.core.isDetail) {
                     const nodeProperties =
                         store.stats.getRadarDetailVisibleNodeProperties(
-                            props.chart.id
+                            chart.id
                         );
 
                     data = store.stats.getRadarDetailNodes(nodeProperties);
                 } else {
                     const nodeProperties =
                         store.stats.getRadarOverviewVisibleNodeProperties(
-                            props.chart.id
+                            chart.id
                         );
                     data = store.stats.getRadarOverviewNodes(nodeProperties);
                 }
@@ -98,7 +103,7 @@ function RadarChart(props) {
             };
         },
         [
-            props.chart.id,
+            chart.id,
             store.core.isDetail,
             store.graph.currentGraphData.selectedComponents.length,
             store.graph.currentGraphData.selectedNodes.length,
@@ -107,10 +112,10 @@ function RadarChart(props) {
     );
 
     useEffect(() => {
-        if (props.demoData) {
+        if (demoData) {
             setData({
-                ...props.demoData,
-                datasets: props.demoData.datasets.map((dataset, index) => {
+                ...demoData,
+                datasets: demoData.datasets.map((dataset, index) => {
                     return {
                         ...dataset,
                         fill: true,
@@ -128,7 +133,7 @@ function RadarChart(props) {
             });
         } else {
             const chart = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setChartConfig(chart);
@@ -136,9 +141,9 @@ function RadarChart(props) {
         }
     }, [
         getChartData,
-        props.chart.id,
-        props.demoData,
-        props.isExpanded,
+        chart.id,
+        demoData,
+        isExpanded,
         store.core.isOverview,
         store.overviewSchema.anchorProperties,
         store.stats,
@@ -202,10 +207,10 @@ function RadarChart(props) {
         return pluginOptions;
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={['item type', 'visible node props']}
                 customAvailableTypes={[
                     { value: 'nodes', label: 'Nodes' },
@@ -216,7 +221,7 @@ function RadarChart(props) {
     }
 
     if ((!data || data.labels.length === 0) && !tooManySelectedElements) {
-        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={isExpanded ? 'md' : 'sm'} />;
     }
 
     if (tooManySelectedElements) {
@@ -224,7 +229,7 @@ function RadarChart(props) {
             <WidgetAlert
                 title="TOO MANY DATAPOINTS"
                 message="Please select fever elements to get useful insights from this chart! 😉"
-                size={props.isExpanded ? 'md' : 'sm'}
+                size={isExpanded ? 'md' : 'sm'}
             />
         );
     }
@@ -235,7 +240,7 @@ function RadarChart(props) {
             ref={chartRef}
             data={{ ...data }}
             height="250px"
-            key={`chart_instance_${props.chartIndex}_${Math.random()}`}
+            key={`chart_instance_${chartIndex}_${Math.random()}`}
             redraw
             options={{
                 maintainAspectRatio: false,
@@ -244,10 +249,10 @@ function RadarChart(props) {
                 devicePixelRatio: 2,
                 layout: {
                     padding: {
-                        right: props.isExpanded ? 5 : 0,
-                        top: props.isExpanded ? 5 : 0,
-                        bottom: props.isExpanded ? 5 : 0,
-                        left: props.isExpanded ? 5 : 0
+                        right: isExpanded ? 5 : 0,
+                        top: isExpanded ? 5 : 0,
+                        bottom: isExpanded ? 5 : 0,
+                        left: isExpanded ? 5 : 0
                     }
                 },
                 onHover: (event, elements) => {
@@ -257,16 +262,16 @@ function RadarChart(props) {
                     r: {
                         beginAtZero: true,
                         ticks: {
-                            display: props.isExpanded || props.isExample,
+                            display: isExpanded || isExample,
                             color: '#FFFFFF85',
                             backdropColor: 'transparent'
                         },
                         pointLabels: {
-                            display: props.isExpanded || props.isExample,
+                            display: isExpanded || isExample,
                             color: 'white'
                         },
                         angleLines: {
-                            display: props.isExpanded || props.isExample,
+                            display: isExpanded || isExample,
                             color: '#FFFFFF33'
                         },
                         grid: {
@@ -287,7 +292,7 @@ function RadarChart(props) {
                         display: false
                     },
                     legend: {
-                        display: props.isExpanded || props.isExample,
+                        display: isExpanded || isExample,
                         labels: {
                             usePointStyle: true,
                             pointStyle: 'rectRounded'
@@ -310,12 +315,6 @@ RadarChart.propTypes = {
     isExpanded: PropTypes.bool,
     isExample: PropTypes.bool,
     settingsMode: PropTypes.bool
-};
-
-RadarChart.defaultProps = {
-    isExpanded: false,
-    isExample: false,
-    settingsMode: false
 };
 
 export default observer(RadarChart);

@@ -3,12 +3,12 @@ import { observer, useLocalObservable } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
-import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import * as THREE from 'three';
 import { useResizeDetector } from 'react-resize-detector';
 
 import './Graph.scss';
+import { useLocationEffect } from 'hooks/useLocationEffect.hook';
 
 function Graph(props) {
     const store = useContext(RootStoreContext);
@@ -159,15 +159,7 @@ function Graph(props) {
         );
     }, []);
 
-    useEffect(() => {
-        const unlisten = props.history.listen(() => {
-            store.graph.clearGraphId();
-        });
-
-        return () => {
-            unlisten();
-        };
-    }, [props.history, store.graph]);
+    useLocationEffect(() => store.graph.clearGraphId());
 
     useEffect(() => {
         store.graphInstance.setGraphProps(containerRef.current);
@@ -314,7 +306,7 @@ function Graph(props) {
             numDimensions={2}
             width={windowSize.width ? windowSize.width : width}
             height={windowSize.height ? windowSize.height : height}
-            linkColor={link => link.color}
+            // linkColor={link => link.color}
             enableNodeDrag={true}
             nodeThreeObject={generateNode}
             cooldownTicks={store.graphInstance.forceCooldownTicks}
@@ -340,8 +332,8 @@ function Graph(props) {
                 }
             }}
             d3AlphaDecay={0}
-            linkWidth={0}
-            linkResolution={2}
+            // linkWidth={1}
+            // linkResolution={2}
             linkHoverPrecision={8}
             rendererConfig={{
                 antialias: false,
@@ -356,9 +348,9 @@ function Graph(props) {
             onNodeHover={onNodeHover}
             d3VelocityDecay={0.1}
             nodeVisibility={node => node.visible}
-            linkVisibility={link =>
-                link.visible && store.graphInstance.linkVisibility
-            }
+            // linkVisibility={link =>
+            //     link.visible && store.graphInstance.linkVisibility
+            // }
         />
     );
 }
@@ -371,4 +363,4 @@ Graph.propTypes = {
     graphData: PropTypes.object
 };
 
-export default withRouter(observer(Graph));
+export default observer(Graph);

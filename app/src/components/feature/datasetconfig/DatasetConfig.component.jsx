@@ -19,7 +19,7 @@ import DatasetConfigColumns from './DatasetConfigColumns.component';
 import DatasetConfigFooter from './DatasetConfigFooter.component';
 import DatasetConfigSchema from './DatasetConfigSchema.component';
 
-function DatasetConfig(props) {
+function DatasetConfig({ formType = 'upload' }) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
     const [activeTab, setActiveTab] = useState(0);
@@ -27,11 +27,11 @@ function DatasetConfig(props) {
     const renderDatasetNameConfig = () => (
         <>
             <Heading size="xs" marginBottom="10px" opacity="0.6">
-                {props.formType === 'modify'
+                {formType === 'modify'
                     ? store.fileUpload.fileUploadData.name.toUpperCase()
                     : 'Dataset name:'}
             </Heading>
-            {props.formType === 'upload' &&
+            {formType === 'upload' &&
                 store.fileUpload.fileUploadData.originalName !== '' && (
                     <Editable
                         defaultValue={
@@ -48,7 +48,7 @@ function DatasetConfig(props) {
                                 JSON.stringify({
                                     area: 'Home page',
                                     sub_area:
-                                        props.formType === 'modify'
+                                        formType === 'modify'
                                             ? 'Dataset config modal'
                                             : 'Dataset upload modal'
                                 }),
@@ -113,29 +113,27 @@ function DatasetConfig(props) {
             <Tabs variant="solid-rounded" size="sm" index={activeTab}>
                 <TabPanels>
                     <TabPanel
-                        padding={
-                            props.formType === 'upload' ? '20px 0 0 0' : '0'
-                        }
+                        padding={formType === 'upload' ? '20px 0 0 0' : '0'}
                         height="450px"
                     >
                         {renderDatasetNameConfig()}
-                        <DatasetConfigColumns formType={props.formType} />
+                        <DatasetConfigColumns formType={formType} />
                     </TabPanel>
-                    {props.formType === 'upload' && (
+                    {formType === 'upload' && (
                         <TabPanel padding="20px 0 0 0" height="450px">
                             <DatasetConfigSchema graphType="overview" />
                         </TabPanel>
                     )}
-                    {props.formType === 'upload' && (
+                    {formType === 'upload' && (
                         <TabPanel padding="20px 0 0 0" height="450px">
                             <DatasetConfigSchema graphType="detail" />
                         </TabPanel>
                     )}
                 </TabPanels>
-                {props.formType === 'upload' && renderTabs(3)}
+                {formType === 'upload' && renderTabs(3)}
             </Tabs>
             <DatasetConfigFooter
-                formType={props.formType}
+                formType={formType}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
             />
@@ -145,10 +143,6 @@ function DatasetConfig(props) {
 
 DatasetConfig.propTypes = {
     formType: PropTypes.string
-};
-
-DatasetConfig.defaultProps = {
-    formType: 'upload'
 };
 
 export default observer(DatasetConfig);

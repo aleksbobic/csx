@@ -4,13 +4,13 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
-import { useHistory, useLocation, withRouter } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import Joyride from 'react-joyride';
 
 function SearchPage(props) {
     const location = useLocation();
-    const history = useHistory();
+    const navigate = useNavigate();
     const store = useContext(RootStoreContext);
 
     useBeforeunload(() => {
@@ -26,10 +26,10 @@ function SearchPage(props) {
             store.core.currentGraph === '' ||
             store.search.currentDataset === null
         ) {
-            history.push('/');
+            navigate('/');
         }
     }, [
-        history,
+        navigate,
         location.search,
         store.core.currentGraph,
         store.search.currentDataset
@@ -539,4 +539,4 @@ SearchPage.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(SearchPage));
+export default observer(SearchPage);

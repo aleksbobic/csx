@@ -17,7 +17,7 @@ import { isEnvFalse } from 'general.utils';
 import { observer } from 'mobx-react-lite';
 import PropTypes from 'prop-types';
 import { useContext } from 'react';
-import { useHistory, withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function DatasetElement(props) {
@@ -28,7 +28,7 @@ function DatasetElement(props) {
         'blackAlpha.100',
         'whiteAlpha.50'
     );
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const navigateToAdvancedSearch = dataset => {
         props.onNavigate();
@@ -38,7 +38,7 @@ function DatasetElement(props) {
         store.workflow.resetWorkflow();
         store.overviewSchema.setAnchorProperties([]);
 
-        history.push(`/search?dataset=${dataset}`);
+        navigate(`/search?dataset=${dataset}`);
     };
 
     return (
@@ -51,7 +51,7 @@ function DatasetElement(props) {
             gap="5px"
             paddingLeft="5px"
             paddingRight="5px"
-            key={props.key}
+            key={props.datasetKey}
             opacity="0.7"
             transition="all 0.1s ease-in-out"
             _hover={{ opacity: '1' }}
@@ -265,7 +265,7 @@ function DatasetElement(props) {
                                     }
                                 });
                                 store.workflow.setShouldRunWorkflow(true);
-                                history.push(
+                                navigate(
                                     `/graph?study=${store.core.studyUuid}`
                                 );
                             }}
@@ -286,9 +286,9 @@ function DatasetElement(props) {
 
 DatasetElement.propTypes = {
     dataset: PropTypes.string,
-    key: PropTypes.string,
+    datasetKey: PropTypes.string,
     onNavigate: PropTypes.func,
     datasetType: PropTypes.string
 };
 
-export default withRouter(observer(DatasetElement));
+export default observer(DatasetElement);

@@ -8,25 +8,30 @@ import { Chart as ChartReactCharts, getElementAtEvent } from 'react-chartjs-2';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 
-function BarChart(props) {
+function BarChart({
+    isExpanded = false,
+    isExample = false,
+    demoData,
+    chart,
+    chartIndex,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
     const [data, setData] = useState(null);
 
     const [chartConfig, setChartConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart.id) || {}
     );
 
     useEffect(() => {
-        if (store.comment.chartToAttach === props.chart.id) {
+        if (store.comment.chartToAttach === chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+    }, [chart.id, store.comment, store.comment.chartToAttach]);
 
     const getGroupBy = chart => {
         if (chart.type.toLowerCase() !== 'grouped bar') {
@@ -132,11 +137,11 @@ function BarChart(props) {
     );
 
     useEffect(() => {
-        if (props.demoData) {
-            setData(props.demoData);
+        if (demoData) {
+            setData(demoData);
         } else {
             const chart = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setChartConfig(chart);
@@ -144,8 +149,8 @@ function BarChart(props) {
             setData(getChartData(chart));
         }
     }, [
-        props.chart.id,
-        props.demoData,
+        chart.id,
+        demoData,
         store.core.currentGraph,
         store.core.isOverview,
         store.overviewSchema.anchorProperties,
@@ -192,7 +197,7 @@ function BarChart(props) {
                 displayColors: false,
                 callbacks: {
                     title: tooltipItem => {
-                        if (props.chart.type.toLowerCase() === 'grouped bar') {
+                        if (chart.type.toLowerCase() === 'grouped bar') {
                             return `${propsInChart}:${
                                 tooltipItem[0].dataset.label.length > 10
                                     ? '\n'
@@ -211,66 +216,64 @@ function BarChart(props) {
             }
         };
 
-        if (props.chart.groupHoverLabel) {
+        if (chart.groupHoverLabel) {
             pluginOptions.tooltip.callbacks.title = tooltipItems => {
-                return `${props.chart.hoverLabel}: ${tooltipItems[0].label}`;
+                return `${chart.hoverLabel}: ${tooltipItems[0].label}`;
             };
         }
 
         return pluginOptions;
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={[
-                    props.chart.type.toLowerCase() !== 'grouped bar' &&
-                        'item type',
-                    props.chart.type.toLowerCase() !== 'grouped bar' &&
-                        'second axis',
-                    props.chart.type.toLowerCase() === 'grouped bar' && 'group',
+                    chart.type.toLowerCase() !== 'grouped bar' && 'item type',
+                    chart.type.toLowerCase() !== 'grouped bar' && 'second axis',
+                    chart.type.toLowerCase() === 'grouped bar' && 'group',
                     'main axis',
                     'item state',
                     'item count',
                     store.core.isDetail && 'visible types'
                 ]}
-                mainAxis={props.chart.type.toLowerCase() === 'bar' ? 'Y' : 'X'}
+                mainAxis={chart.type.toLowerCase() === 'bar' ? 'Y' : 'X'}
             />
         );
     }
 
     if (!data || data.labels.length === 0) {
-        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={isExpanded ? 'md' : 'sm'} />;
     }
 
     const getPadding = () => {
         return {
-            right: props.isExpanded ? 5 : 0,
-            top: props.isExpanded ? 5 : 0,
-            bottom: props.isExpanded ? 5 : 0,
-            left: props.isExpanded ? 5 : 0
+            right: isExpanded ? 5 : 0,
+            top: isExpanded ? 5 : 0,
+            bottom: isExpanded ? 5 : 0,
+            left: isExpanded ? 5 : 0
         };
     };
 
     const getAxisTitle = () => {
-        if (props.chart.type.toLowerCase() === 'grouped bar') {
-            if (props.demoData) {
+        if (chart.type.toLowerCase() === 'grouped bar') {
+            if (demoData) {
                 return 'Group by property';
             }
 
             return (
-                props.chart.group_by.charAt(0).toUpperCase() +
-                props.chart.group_by.slice(1).toLowerCase()
+                chart.group_by.charAt(0).toUpperCase() +
+                chart.group_by.slice(1).toLowerCase()
             );
         }
 
-        if (props.chart.elements === 'edges') {
-            if (props.demoData) {
+        if (chart.elements === 'edges') {
+            if (demoData) {
                 return 'Edge property';
             }
 
-            switch (props.chart.element_values) {
+            switch (chart.element_values) {
                 case 'values':
                     return 'Edge values';
                 case 'types':
@@ -280,21 +283,19 @@ function BarChart(props) {
             }
         }
 
-        if (props.demoData) {
+        if (demoData) {
             return 'Node property';
         }
 
-        switch (props.chart.element_values) {
+        switch (chart.element_values) {
             case 'values':
-                return props.chart.show_only
-                    ? props.chart.show_only
-                    : 'Node values';
+                return chart.show_only ? chart.show_only : 'Node values';
             case 'types':
                 return 'Node types';
             default:
                 return (
-                    props.chart.element_values.charAt(0).toUpperCase() +
-                    props.chart.element_values.slice(1).toLowerCase()
+                    chart.element_values.charAt(0).toUpperCase() +
+                    chart.element_values.slice(1).toLowerCase()
                 );
         }
     };
@@ -305,11 +306,11 @@ function BarChart(props) {
             ref={chartRef}
             type="bar"
             height="250px"
-            key={`chart_instance_${props.chartIndex}_${Math.random()}`}
+            key={`chart_instance_${chartIndex}_${Math.random()}`}
             redraw
             data={{ ...data }}
             onClick={event => {
-                if (!props.isExample) {
+                if (!isExample) {
                     let dataIndex;
                     let groupValue;
                     let groupProperty;
@@ -329,7 +330,7 @@ function BarChart(props) {
                                 true
                             );
 
-                        groupProperty = props.chart.group_by;
+                        groupProperty = chart.group_by;
                         groupValue =
                             data.datasets[points[0].datasetIndex].label;
                         clickedValue = data.labels[points[0].index];
@@ -345,7 +346,7 @@ function BarChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -357,7 +358,7 @@ function BarChart(props) {
                             })
                         );
 
-                        if (props.chart.type.toLowerCase() === 'grouped bar') {
+                        if (chart.type.toLowerCase() === 'grouped bar') {
                             visibleNodeIds =
                                 store.graphInstance.filterNodesWithValue(
                                     data.nodeProperty,
@@ -376,7 +377,7 @@ function BarChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -412,7 +413,7 @@ function BarChart(props) {
                 animation: false,
                 borderColor: '#fff',
                 devicePixelRatio: 2,
-                indexAxis: props.chart.type.toLowerCase() === 'bar' && 'y',
+                indexAxis: chart.type.toLowerCase() === 'bar' && 'y',
                 layout: {
                     padding: getPadding()
                 },
@@ -429,15 +430,15 @@ function BarChart(props) {
                             display: true,
                             color: 'white',
                             text: ['vertical bar', 'grouped bar'].includes(
-                                props.chart.type.toLowerCase()
+                                chart.type.toLowerCase()
                             )
                                 ? chartConfig.element_sort_values
                                 : getAxisTitle()
                         },
-                        display: props.isExpanded,
+                        display: isExpanded,
                         ticks: {
                             color: 'white',
-                            diplay: props.isExpanded,
+                            diplay: isExpanded,
                             callback: function (value, index, ticks) {
                                 const stringValue =
                                     this.getLabelForValue(value);
@@ -453,7 +454,7 @@ function BarChart(props) {
                         grid: {
                             color: context => {
                                 if (
-                                    props.chart.type.toLowerCase() === 'bar' ||
+                                    chart.type.toLowerCase() === 'bar' ||
                                     context.index === 0
                                 ) {
                                     return 'transparent';
@@ -468,18 +469,16 @@ function BarChart(props) {
                         title: {
                             display: true,
                             color: 'white',
-                            text: ['bar'].includes(
-                                props.chart.type.toLowerCase()
-                            )
+                            text: ['bar'].includes(chart.type.toLowerCase())
                                 ? chartConfig?.element_sort_values
                                     ? chartConfig?.element_sort_values
                                     : 'frequency'
                                 : getAxisTitle()
                         },
-                        display: props.isExpanded,
+                        display: isExpanded,
                         ticks: {
                             color: 'white',
-                            diplay: props.isExpanded,
+                            diplay: isExpanded,
                             callback: function (value, index, ticks) {
                                 const stringValue =
                                     this.getLabelForValue(value);
@@ -495,7 +494,7 @@ function BarChart(props) {
                         grid: {
                             color: context => {
                                 if (
-                                    props.chart.type.toLowerCase() ===
+                                    chart.type.toLowerCase() ===
                                         'vertical bar' ||
                                     context.index === 0
                                 ) {
@@ -522,8 +521,8 @@ function BarChart(props) {
                     },
                     legend: {
                         display:
-                            props.chart.type.toLowerCase() === 'grouped bar' &&
-                            props.isExpanded &&
+                            chart.type.toLowerCase() === 'grouped bar' &&
+                            isExpanded &&
                             data.datasets &&
                             data.datasets.length <= 10,
                         labels: {
@@ -563,10 +562,4 @@ BarChart.propTypes = {
     isExpanded: PropTypes.bool,
     isExample: PropTypes.bool
 };
-
-BarChart.defaultProps = {
-    isExpanded: false,
-    isExample: false
-};
-
 export default observer(BarChart);

@@ -22,14 +22,18 @@ import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
-function SelectedNodeList(props) {
+function SelectedNodeList({
+    isExpanded = false,
+    demoData = [],
+    chart,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart?.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart?.id) ||
+            {}
     );
 
     const sortWidgetData = data => {
@@ -92,11 +96,11 @@ function SelectedNodeList(props) {
     );
 
     useEffect(() => {
-        if (props.demoData.length) {
-            setData(props.demoData);
+        if (demoData.length) {
+            setData(demoData);
         } else {
             const widget = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setWidgetConfig(widget);
@@ -104,8 +108,8 @@ function SelectedNodeList(props) {
         }
     }, [
         getWidgetData,
-        props.chart?.id,
-        props.demoData,
+        chart?.id,
+        demoData,
         store.stats.activeWidgets,
         store.core.currentGraph,
         store.core.isOverview,
@@ -158,17 +162,17 @@ function SelectedNodeList(props) {
         );
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={['item state', 'item count']}
             />
         );
     }
 
     if (!data || data.length === 0) {
-        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -197,9 +201,7 @@ function SelectedNodeList(props) {
                             >
                                 <Heading
                                     size="xs"
-                                    marginBottom={
-                                        props.isExpanded ? '8px' : '0'
-                                    }
+                                    marginBottom={isExpanded ? '8px' : '0'}
                                     whiteSpace="nowrap"
                                     overflow="hidden"
                                     textOverflow="ellipsis"
@@ -212,11 +214,11 @@ function SelectedNodeList(props) {
                                     }
                                     _hover={{ cursor: 'pointer' }}
                                     onClick={() => {
-                                        if (!props.demoData.length) {
+                                        if (!demoData.length) {
                                             store.track.trackEvent(
                                                 JSON.stringify({
                                                     area: 'Widget',
-                                                    area_id: props.chart.id
+                                                    area_id: chart.id
                                                 }),
                                                 JSON.stringify({
                                                     item_type: 'Button',
@@ -249,7 +251,7 @@ function SelectedNodeList(props) {
                                     {node.label}
                                 </Heading>
 
-                                {props.isExpanded && renderNodeDetails(node)}
+                                {isExpanded && renderNodeDetails(node)}
 
                                 {widgetConfig.network_data === 'selected' && (
                                     <Box
@@ -272,15 +274,12 @@ function SelectedNodeList(props) {
                                                     />
                                                 }
                                                 onClick={() => {
-                                                    if (
-                                                        !props.demoData.length
-                                                    ) {
+                                                    if (!demoData.length) {
                                                         store.track.trackEvent(
                                                             JSON.stringify({
                                                                 area: 'Widget',
                                                                 area_id:
-                                                                    props.chart
-                                                                        .id
+                                                                    chart.id
                                                             }),
                                                             JSON.stringify({
                                                                 item_type:
@@ -328,11 +327,6 @@ function SelectedNodeList(props) {
 SelectedNodeList.propTypes = {
     isExpanded: PropTypes.bool,
     demoData: PropTypes.array
-};
-
-SelectedNodeList.defaultProps = {
-    isExpanded: false,
-    demoData: []
 };
 
 export default observer(SelectedNodeList);

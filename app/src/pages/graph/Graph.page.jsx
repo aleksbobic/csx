@@ -19,8 +19,7 @@ import { observer } from 'mobx-react';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
-import { useLocation } from 'react-router';
-import { useHistory } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import Joyride from 'react-joyride';
 
@@ -34,7 +33,7 @@ function GraphPage() {
     const store = useContext(RootStoreContext);
     const location = useLocation();
     const { colorMode } = useColorMode();
-    const history = useHistory();
+    const navigate = useNavigate();
     const surveyToastRef = useRef();
     const surveyToast = useToast();
 
@@ -131,10 +130,10 @@ function GraphPage() {
                 store.graph.getStudy(studyId);
             }
         } else {
-            history.push('/');
+            navigate('/');
         }
     }, [
-        history,
+        navigate,
         location.search,
         location.state,
         shouldReload,
@@ -146,9 +145,9 @@ function GraphPage() {
 
     useEffect(() => {
         if (store.search.searchIsEmpty || store.core.studyIsEmpty) {
-            history.push('/');
+            navigate('/');
         }
-    }, [history, store.core.studyIsEmpty, store.search.searchIsEmpty]);
+    }, [navigate, store.core.studyIsEmpty, store.search.searchIsEmpty]);
 
     useEffect(() => {
         store.workflow.setShouldRunWorkflow(false);

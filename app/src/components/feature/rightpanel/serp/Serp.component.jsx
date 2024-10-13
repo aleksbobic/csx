@@ -11,14 +11,14 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 
+import { ArrowRightIcon, LinkIcon } from '@heroicons/react/24/outline';
 import 'overlayscrollbars/overlayscrollbars.css';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
 import { RootStoreContext } from 'stores/RootStore';
 import CustomScroll from '../../customscroll/CustomScroll.component';
-import { ArrowRightIcon, LinkIcon } from '@heroicons/react/24/outline';
 
-function Serp(props) {
+function Serp({ hiddenColumns = [], data, columns, visibleProperties }) {
     const store = useContext(RootStoreContext);
 
     const [listData, setListData] = useState([]);
@@ -65,10 +65,10 @@ function Serp(props) {
     };
 
     useEffect(() => {
-        setListData(props.data);
+        setListData(data);
 
         setTimeout(() => {
-            const newSizes = Array(props.data.length);
+            const newSizes = Array(data.length);
 
             listVirtualizer.getVirtualItems().forEach(item => {
                 newSizes[item.index] =
@@ -79,7 +79,7 @@ function Serp(props) {
             setListSizes(newSizes);
             listVirtualizer.measure();
         }, 100);
-    }, [props.data, listVirtualizer, props.visibleProperties]);
+    }, [data, listVirtualizer, visibleProperties]);
 
     useEffect(() => {
         const resizeSERP = () => {
@@ -205,7 +205,7 @@ function Serp(props) {
         );
     };
     const renderResult = (index, key) => {
-        const propertyObjects = props.visibleProperties.map(
+        const propertyObjects = visibleProperties.map(
             (feature, feature_index) => {
                 return getDataComponent(
                     feature,
@@ -344,10 +344,6 @@ Serp.propTypes = {
     columns: PropTypes.array,
     hiddenColumns: PropTypes.array,
     visibleProperties: PropTypes.array
-};
-
-Serp.defaultProps = {
-    hiddenColumns: []
 };
 
 export default observer(Serp);

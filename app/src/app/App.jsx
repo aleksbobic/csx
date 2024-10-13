@@ -7,13 +7,8 @@ import HomePage from 'pages/home/Home.page';
 import SearchPage from 'pages/search/Search.page';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
-import {
-    Switch as RRSwitch,
-    Route,
-    BrowserRouter as Router
-} from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import './App.scss';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 
 import CommentModal from 'components/feature/commentmodal/CommentModal.component';
 import CustomScroll from 'components/feature/customscroll/CustomScroll.component';
@@ -151,60 +146,78 @@ function CSX() {
 
     return (
         <HelmetProvider>
-            <Router>
-                <CompatRouter>
-                    {isEnvTrue('REACT_APP_MANDATORY_HTTPS') && (
-                        <Helmet>
-                            <meta
-                                http-equiv="Content-Security-Policy"
-                                content="upgrade-insecure-requests"
-                            />
-                        </Helmet>
-                    )}
-                    <CustomScroll
-                        style={{
-                            backgroundColor:
-                                colorMode === 'light' ? 'white' : '#171A23'
-                        }}
+            <BrowserRouter>
+                {isEnvTrue('REACT_APP_MANDATORY_HTTPS') && (
+                    <Helmet>
+                        <meta
+                            http-equiv="Content-Security-Policy"
+                            content="upgrade-insecure-requests"
+                        />
+                    </Helmet>
+                )}
+                <CustomScroll
+                    style={{
+                        backgroundColor:
+                            colorMode === 'light' ? 'white' : '#171A23'
+                    }}
+                >
+                    <NavigationPanelComponent />
+                    <Box
+                        backgroundColor={
+                            colorMode === 'light' ? 'white' : '#171A23'
+                        }
+                        height="100%"
+                        width="100%"
+                        zIndex="1"
                     >
-                        <NavigationPanelComponent />
-                        <Box
-                            backgroundColor={
-                                colorMode === 'light' ? 'white' : '#171A23'
-                            }
-                            height="100%"
-                            width="100%"
-                            zIndex="1"
-                        >
-                            <RRSwitch>
-                                <Route exact path="/" label="home">
-                                    <HomePage />
-                                </Route>
-                                <Route path="/graph/detail" label="graphdetail">
-                                    <CommentModal />
-                                    <LeftPanel />
-                                    <GraphPage />
-                                </Route>
-                                <Route path="/graph" label="graph">
-                                    <CommentModal />
-                                    <LeftPanel />
-                                    <GraphPage />
-                                </Route>
-                                <Route exact path="/present" label="present">
-                                    <PresentPage />
-                                </Route>
-                                {isEnvFalse(
-                                    'REACT_APP_DISABLE_ADVANCED_SEARCH'
-                                ) && (
-                                    <Route path="/search" label="search">
-                                        <SearchPage />
-                                    </Route>
-                                )}
-                            </RRSwitch>
-                        </Box>
-                    </CustomScroll>
-                </CompatRouter>
-            </Router>
+                        <Routes>
+                            <Route
+                                exact
+                                path="/"
+                                label="home"
+                                element={<HomePage />}
+                            />
+                            <Route
+                                path="/graph/detail"
+                                label="graphdetail"
+                                element={
+                                    <>
+                                        <CommentModal />
+                                        <LeftPanel />
+                                        <GraphPage />
+                                    </>
+                                }
+                            />
+                            <Route
+                                path="/graph"
+                                label="graph"
+                                element={
+                                    <>
+                                        <CommentModal />
+                                        <LeftPanel />
+                                        <GraphPage />
+                                    </>
+                                }
+                            />
+                            <Route
+                                exact
+                                path="/present"
+                                label="present"
+                                element={<PresentPage />}
+                            />
+                            {isEnvFalse(
+                                'REACT_APP_DISABLE_ADVANCED_SEARCH'
+                            ) && (
+                                <Route
+                                    path="/search"
+                                    label="search"
+                                    element={<SearchPage />}
+                                />
+                            )}
+                        </Routes>
+                    </Box>
+                </CustomScroll>
+            </BrowserRouter>
         </HelmetProvider>
     );
 }

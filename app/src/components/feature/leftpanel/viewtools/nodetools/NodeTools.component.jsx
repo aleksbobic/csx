@@ -1,21 +1,25 @@
-import { Button } from '@chakra-ui/button';
-import { Box, Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
+    Accordion,
+    AccordionButton,
+    AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
+    Box,
+    Button,
     Checkbox,
+    Heading,
+    HStack,
     Menu,
     MenuButton,
     MenuItem,
     MenuList,
     Select,
+    Switch,
+    Text,
     Tooltip,
     useColorMode,
-    Accordion,
-    AccordionItem,
-    AccordionPanel,
-    AccordionIcon,
-    AccordionButton
+    VStack
 } from '@chakra-ui/react';
-import { Switch } from '@chakra-ui/switch';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';

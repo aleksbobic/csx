@@ -1,20 +1,26 @@
-import { Button } from '@chakra-ui/button';
-import { Heading, HStack, VStack } from '@chakra-ui/layout';
-import { IconButton, Tooltip, useColorMode } from '@chakra-ui/react';
+import {
+    Button,
+    Heading,
+    HStack,
+    IconButton,
+    Tooltip,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
 
-import { observer } from 'mobx-react';
-import { useContext, useEffect, useState } from 'react';
 import CanvasTools from 'components/feature/leftpanel/viewtools/canvastools/CanvasTools.component';
 import EdgeTools from 'components/feature/leftpanel/viewtools/edgetools/EdgeTools.component';
-import NodeTools from 'components/feature/leftpanel/viewtools/nodetools/NodeTools.component';
 import FilterTools from 'components/feature/leftpanel/viewtools/filtertools/FilterTools.component';
+import NodeTools from 'components/feature/leftpanel/viewtools/nodetools/NodeTools.component';
+import { observer } from 'mobx-react';
+import { useContext, useEffect, useState } from 'react';
 
-import { RootStoreContext } from 'stores/RootStore';
 import {
     ArrowUturnLeftIcon,
     BoltIcon,
     PlayIcon
 } from '@heroicons/react/24/outline';
+import { RootStoreContext } from 'stores/RootStore';
 
 function ViewTools() {
     const store = useContext(RootStoreContext);
@@ -44,8 +50,8 @@ function ViewTools() {
                                 forceRunning
                                     ? 'blue.400'
                                     : colorMode === 'light'
-                                    ? 'blackAlpha.200'
-                                    : 'whiteAlpha.200'
+                                      ? 'blackAlpha.200'
+                                      : 'whiteAlpha.200'
                             }
                             onClick={() => {
                                 if (forceRunning) {

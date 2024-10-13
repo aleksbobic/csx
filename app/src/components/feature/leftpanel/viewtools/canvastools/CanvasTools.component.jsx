@@ -1,20 +1,22 @@
-import { Button } from '@chakra-ui/button';
-import { Heading, Text, VStack } from '@chakra-ui/layout';
 import {
-    Tooltip,
-    Slider,
-    SliderFilledTrack,
-    SliderThumb,
-    SliderTrack,
-    SliderMark,
     Accordion,
+    AccordionButton,
+    AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    AccordionIcon,
-    AccordionButton
+    Button,
+    Heading,
+    Slider,
+    SliderFilledTrack,
+    SliderMark,
+    SliderThumb,
+    SliderTrack,
+    Text,
+    Tooltip,
+    VStack
 } from '@chakra-ui/react';
 
-import { ViewfinderCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
+import { CameraIcon, ViewfinderCircleIcon } from '@heroicons/react/24/outline';
 
 import { observer } from 'mobx-react';
 import { useContext } from 'react';

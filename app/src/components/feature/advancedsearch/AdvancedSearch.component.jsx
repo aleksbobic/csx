@@ -30,7 +30,7 @@ import ReactFlow, {
     applyNodeChanges,
     Background
 } from 'react-flow-renderer';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import historyNode from '../historyNode/HistoryNode.component';
 import OverviewSchemaNode from '../overviewschemanode/OverviewSchemaNode.component';
@@ -44,10 +44,15 @@ import ResultsNode from './resultsNode/ResultsNode.component';
 import SearchEdge from './searchedge/SearchEdge.component';
 import SearchNode from './searchnode/SearchNode.component';
 
-function AdvancedSearch(props) {
+function AdvancedSearch({
+    datasetSelectorDisabled = false,
+    placeholder = 'Search through the selected dataset ...',
+    isPanel = false,
+    style
+}) {
     const reactFlowWrapper = useRef(null);
     const store = useContext(RootStoreContext);
-    const history = useHistory();
+    const navigate = useNavigate();
     const { colorMode } = useColorMode();
 
     const [nodes, setNodes] = useState([]);
@@ -108,10 +113,10 @@ function AdvancedSearch(props) {
 
     useEffect(() => {
         if (store.workflow.shouldRunWorkflow) {
-            history.push(`/graph?study=${store.core.studyUuid}`);
+            navigate(`/graph?study=${store.core.studyUuid}`);
         }
     }, [
-        history,
+        navigate,
         store.core.studyUuid,
         store.search,
         store.search.advancedSearchQuery,
@@ -281,7 +286,7 @@ function AdvancedSearch(props) {
 
     return (
         <HStack
-            style={props.style}
+            style={style}
             width="100%"
             height="100%"
             borderRadius="10px"
@@ -318,7 +323,7 @@ function AdvancedSearch(props) {
                 zIndex="10"
                 id="AdvancedSearchDock"
                 style={
-                    props.isPanel
+                    isPanel
                         ? { bottom: '15px', borderRadius: '10px', left: '15px' }
                         : {
                               bottom: '15px',
@@ -351,12 +356,6 @@ AdvancedSearch.propTypes = {
     datasetSelectorDisabled: PropTypes.bool,
     placeholder: PropTypes.string,
     isPanel: PropTypes.bool
-};
-
-AdvancedSearch.defaultProps = {
-    datasetSelectorDisabled: false,
-    placeholder: 'Search through the selected dataset ...',
-    isPanel: false
 };
 
 export default observer(AdvancedSearch);

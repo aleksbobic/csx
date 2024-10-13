@@ -29,7 +29,7 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-function DatasetConfigColumns(props) {
+function DatasetConfigColumns({ formType = 'upload' }) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
@@ -38,7 +38,7 @@ function DatasetConfigColumns(props) {
             <Select
                 defaultValue={defaultType}
                 size="sm"
-                isDisabled={props.formType !== 'upload'}
+                isDisabled={formType !== 'upload'}
                 backgroundColor={
                     colorMode === 'light' ? 'blackAlpha.100' : 'blackAlpha.300'
                 }
@@ -61,7 +61,7 @@ function DatasetConfigColumns(props) {
                         JSON.stringify({
                             area: 'Home page',
                             sub_area:
-                                props.formType === 'modify'
+                                formType === 'modify'
                                     ? 'Dataset config modal'
                                     : 'Dataset upload modal'
                         }),
@@ -150,7 +150,7 @@ function DatasetConfigColumns(props) {
                 (column, id) => (
                     <Tr key={`upload_file_${id}`}>
                         <Td width="24%">
-                            {props.formType === 'upload' && (
+                            {formType === 'upload' && (
                                 <Tooltip
                                     label={
                                         store.fileUpload.fileUploadData
@@ -174,8 +174,7 @@ function DatasetConfigColumns(props) {
                                                 JSON.stringify({
                                                     area: 'Home page',
                                                     sub_area:
-                                                        props.formType ===
-                                                        'modify'
+                                                        formType === 'modify'
                                                             ? 'Dataset config modal'
                                                             : 'Dataset upload modal'
                                                 }),
@@ -212,7 +211,7 @@ function DatasetConfigColumns(props) {
                                     </Editable>
                                 </Tooltip>
                             )}
-                            {props.formType === 'modify' && (
+                            {formType === 'modify' && (
                                 <Tooltip
                                     label={
                                         store.fileUpload.fileUploadData
@@ -258,7 +257,7 @@ function DatasetConfigColumns(props) {
                                             JSON.stringify({
                                                 area: 'Home page',
                                                 sub_area:
-                                                    props.formType === 'modify'
+                                                    formType === 'modify'
                                                         ? 'Dataset config modal'
                                                         : 'Dataset upload modal'
                                             }),
@@ -316,7 +315,7 @@ function DatasetConfigColumns(props) {
                                             JSON.stringify({
                                                 area: 'Home page',
                                                 sub_area:
-                                                    props.formType === 'modify'
+                                                    formType === 'modify'
                                                         ? 'Dataset config modal'
                                                         : 'Dataset upload modal'
                                             }),
@@ -363,8 +362,7 @@ function DatasetConfigColumns(props) {
                                     isDisabled={
                                         store.fileUpload.fileUploadData
                                             .defaults[column].dataType ===
-                                            'list' ||
-                                        props.formType === 'modify'
+                                            'list' || formType === 'modify'
                                     }
                                     isChecked={
                                         store.fileUpload.fileUploadData
@@ -375,7 +373,7 @@ function DatasetConfigColumns(props) {
                                             JSON.stringify({
                                                 area: 'Home page',
                                                 sub_area:
-                                                    props.formType === 'modify'
+                                                    formType === 'modify'
                                                         ? 'Dataset config modal'
                                                         : 'Dataset upload modal'
                                             }),
@@ -484,10 +482,6 @@ function DatasetConfigColumns(props) {
 
 DatasetConfigColumns.propTypes = {
     formType: PropTypes.string
-};
-
-DatasetConfigColumns.defaultProps = {
-    formType: 'upload'
 };
 
 export default observer(DatasetConfigColumns);

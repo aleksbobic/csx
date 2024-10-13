@@ -1,8 +1,12 @@
-import { Button, ButtonGroup } from '@chakra-ui/button';
-import { useColorMode } from '@chakra-ui/color-mode';
 import { useOutsideClick } from '@chakra-ui/hooks';
-import { Box, VStack } from '@chakra-ui/layout';
-import { Text } from '@chakra-ui/react';
+import {
+    Box,
+    Button,
+    ButtonGroup,
+    Text,
+    useColorMode,
+    VStack
+} from '@chakra-ui/react';
 import { observer } from 'mobx-react';
 import { useContext, useRef } from 'react';
 import { RootStoreContext } from 'stores/RootStore';

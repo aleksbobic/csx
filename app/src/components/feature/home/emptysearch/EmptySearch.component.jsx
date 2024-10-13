@@ -12,7 +12,6 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function EmptySearch() {
@@ -123,4 +122,4 @@ EmptySearch.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(EmptySearch));
+export default observer(EmptySearch);

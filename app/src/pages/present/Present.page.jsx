@@ -24,9 +24,8 @@ import PropTypes from 'prop-types';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
-import { useHistory, useLocation } from 'react-router';
-import { withRouter } from 'react-router-dom';
+import Markdown from 'react-markdown';
+import { useNavigate, useLocation } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 import Reveal from 'reveal.js';
 import { RootStoreContext } from 'stores/RootStore';
@@ -36,7 +35,7 @@ function PresentPage() {
     const { colorMode } = useColorMode();
     const store = useContext(RootStoreContext);
     const location = useLocation();
-    const history = useHistory();
+    const navigate = useNavigate();
     const [revealInstance, setRevealInstance] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -80,9 +79,9 @@ function PresentPage() {
 
     useEffect(() => {
         if (store.core.studyIsEmpty) {
-            history.push('/');
+            navigate('/');
         }
-    }, [history, store.core.studyIsEmpty]);
+    }, [navigate, store.core.studyIsEmpty]);
 
     const renderLoader = () => (
         <Center
@@ -158,7 +157,7 @@ function PresentPage() {
                         >
                             <Flex justifyContent="center" alignItems="center">
                                 <Box maxWidth="800px">
-                                    <ReactMarkdown
+                                    <Markdown
                                         className="mkdslide"
                                         children={slide.content}
                                         remarkPlugins={[remarkGfm]}
@@ -208,7 +207,7 @@ function PresentPage() {
                                     height="auto"
                                     zIndex="5"
                                 >
-                                    <ReactMarkdown
+                                    <Markdown
                                         className="mkdslide"
                                         children={slide.content}
                                         remarkPlugins={[remarkGfm]}
@@ -385,4 +384,4 @@ PresentPage.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(PresentPage));
+export default observer(PresentPage);

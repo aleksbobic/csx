@@ -25,7 +25,7 @@ import BarChart from '../../widgets/charts/BarChart.component';
 import RadarChartComponent from '../../widgets/charts/RadarChart.component';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
-function WidgetGrid(props) {
+function WidgetGrid({ types = ['all', 'selection', 'visible'] }) {
     const store = useContext(RootStoreContext);
     const { colorMode } = useColorMode();
 
@@ -127,10 +127,7 @@ function WidgetGrid(props) {
                                 })
                             );
 
-                            store.stats.toggleStatsModalVisiblity(
-                                true,
-                                props.types
-                            );
+                            store.stats.toggleStatsModalVisiblity(true, types);
                         }}
                         icon={
                             <PlusIcon
@@ -182,10 +179,6 @@ function WidgetGrid(props) {
 
 WidgetGrid.propTypes = {
     types: PropTypes.array
-};
-
-WidgetGrid.defaultProps = {
-    types: ['all', 'selection', 'visible']
 };
 
 export default observer(WidgetGrid);

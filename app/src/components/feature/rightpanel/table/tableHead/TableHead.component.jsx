@@ -52,8 +52,8 @@ function TableHead(props) {
                     const eventData = !isSorted
                         ? `Sort ascending by ${columnType}`
                         : isSortedDesc
-                        ? `Reset sort for ${columnType}`
-                        : `Sort descending by ${columnType}`;
+                          ? `Reset sort for ${columnType}`
+                          : `Sort descending by ${columnType}`;
 
                     store.track.trackEvent(
                         JSON.stringify({
@@ -83,9 +83,14 @@ function TableHead(props) {
     };
 
     const renderHeader = (header, index, endIndex) => {
+        const headerProps = header.getHeaderProps(
+            header.getSortByToggleProps()
+        );
+
         return (
             <Th
-                {...header.getHeaderProps(header.getSortByToggleProps())}
+                key={headerProps.key}
+                role={headerProps.role}
                 style={{
                     color: 'white',
                     fontWeight: 'bold',
@@ -110,17 +115,21 @@ function TableHead(props) {
 
     return (
         <Thead>
-            {props.headerGroups.map(headerGroup => (
-                <Tr {...headerGroup.getHeaderGroupProps()}>
-                    {headerGroup.headers.map((header, index) =>
-                        renderHeader(
-                            header,
-                            index,
-                            headerGroup.headers.length - 1
-                        )
-                    )}
-                </Tr>
-            ))}
+            {props.headerGroups.map(headerGroup => {
+                const headerProps = headerGroup.getHeaderGroupProps();
+
+                return (
+                    <Tr key={headerProps.key} role={headerProps.role}>
+                        {headerGroup.headers.map((header, index) =>
+                            renderHeader(
+                                header,
+                                index,
+                                headerGroup.headers.length - 1
+                            )
+                        )}
+                    </Tr>
+                );
+            })}
         </Thead>
     );
 }

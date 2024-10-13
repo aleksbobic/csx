@@ -12,7 +12,6 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 
 function EmptyStudy() {
@@ -142,4 +141,4 @@ EmptyStudy.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(EmptyStudy));
+export default observer(EmptyStudy);

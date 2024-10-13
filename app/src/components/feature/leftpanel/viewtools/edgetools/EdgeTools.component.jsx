@@ -1,20 +1,23 @@
-import { Heading, HStack, Text, VStack } from '@chakra-ui/layout';
 import {
-    Select,
-    Tooltip,
-    useColorMode,
-    Slider,
-    SliderFilledTrack,
-    SliderThumb,
-    SliderTrack,
-    SliderMark,
     Accordion,
+    AccordionButton,
+    AccordionIcon,
     AccordionItem,
     AccordionPanel,
-    AccordionIcon,
-    AccordionButton
+    Heading,
+    HStack,
+    Select,
+    Slider,
+    SliderFilledTrack,
+    SliderMark,
+    SliderThumb,
+    SliderTrack,
+    Switch,
+    Text,
+    Tooltip,
+    useColorMode,
+    VStack
 } from '@chakra-ui/react';
-import { Switch } from '@chakra-ui/switch';
 import { observer } from 'mobx-react';
 import { useContext } from 'react';
 

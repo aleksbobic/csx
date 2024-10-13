@@ -28,7 +28,7 @@ export function FileUploadArea() {
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
-        accept: '.csv'
+        accept: { 'text/csv': ['.csv'] }
     });
 
     return (

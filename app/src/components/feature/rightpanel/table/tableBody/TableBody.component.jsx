@@ -218,8 +218,10 @@ function TableBody(props) {
             textAlign: 'left'
         };
 
+        const cellProps = cell.getCellProps();
+
         return (
-            <Td key="1" {...cell.getCellProps()} style={styles}>
+            <Td key={cellProps.key} role={cellProps.role} style={styles}>
                 <Wrap padding="20px 10px">
                     {cell.render(({ cell }) => renderCellContent(cell))}
                 </Wrap>
@@ -231,9 +233,12 @@ function TableBody(props) {
         <Tbody {...props.getTableBodyProps()} id="nodelistbody">
             {props.rows.map(row => {
                 props.prepareRow(row);
+                const rowProps = row.getRowProps();
+
                 return (
                     <Tr
-                        {...row.getRowProps()}
+                        key={rowProps.key}
+                        role={rowProps.role}
                         className={
                             colorMode === 'light'
                                 ? 'table-row-light'

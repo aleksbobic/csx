@@ -1,14 +1,17 @@
-import { Heading, HStack, Stack, VStack } from '@chakra-ui/layout';
 import {
     Button,
     Editable,
     EditableInput,
     EditablePreview,
     EditableTextarea,
+    Heading,
+    HStack,
+    Stack,
     Switch,
     Text,
     Tooltip,
-    useColorMode
+    useColorMode,
+    VStack
 } from '@chakra-ui/react';
 import { HeartIcon } from '@heroicons/react/24/outline';
 import { observer } from 'mobx-react';

@@ -32,7 +32,6 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useBeforeunload } from 'react-beforeunload';
-import { withRouter } from 'react-router-dom';
 import { RootStoreContext } from 'stores/RootStore';
 import './Home.scss';
 import Joyride from 'react-joyride';
@@ -590,6 +589,7 @@ function HomePage() {
                                             store.search.datasetTypes[dataset]
                                         }
                                         key={`dataset_list_${dataset}`}
+                                        datasetKey={`dataset_list_${dataset}`}
                                         onNavigate={() =>
                                             cookieToast.closeAll()
                                         }
@@ -637,4 +637,4 @@ HomePage.propTypes = {
     history: PropTypes.object
 };
 
-export default withRouter(observer(HomePage));
+export default observer(HomePage);

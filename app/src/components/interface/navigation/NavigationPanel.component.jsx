@@ -347,8 +347,8 @@ function NavigationPanelComponent() {
                                     panelType === 'search'
                                         ? 'blue.400'
                                         : colorMode === 'light'
-                                        ? 'black'
-                                        : 'white'
+                                          ? 'black'
+                                          : 'white'
                                 }
                                 borderRadius="10px"
                                 background={
@@ -380,8 +380,8 @@ function NavigationPanelComponent() {
                                 panelType === 'details'
                                     ? 'blue.400'
                                     : colorMode === 'light'
-                                    ? 'black'
-                                    : 'white'
+                                      ? 'black'
+                                      : 'white'
                             }
                             borderRadius="10px"
                             background={
@@ -409,8 +409,8 @@ function NavigationPanelComponent() {
                                 panelType === 'results'
                                     ? 'blue.400'
                                     : colorMode === 'light'
-                                    ? 'black'
-                                    : 'white'
+                                      ? 'black'
+                                      : 'white'
                             }
                             borderRadius="10px"
                             background={
@@ -438,8 +438,8 @@ function NavigationPanelComponent() {
                                 panelType === 'schema'
                                     ? 'blue.400'
                                     : colorMode === 'light'
-                                    ? 'black'
-                                    : 'white'
+                                      ? 'black'
+                                      : 'white'
                             }
                             borderRadius="10px"
                             background={
@@ -467,8 +467,8 @@ function NavigationPanelComponent() {
                                 panelType === 'history'
                                     ? 'blue.400'
                                     : colorMode === 'light'
-                                    ? 'black'
-                                    : 'white'
+                                      ? 'black'
+                                      : 'white'
                             }
                             borderRadius="10px"
                             background={
@@ -698,9 +698,12 @@ function NavigationPanelComponent() {
                                     marginLeft: '10px',
                                     display: 'flex',
                                     justifyContent: 'center',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    opacity: !store.core.studyIsSaved ? 0.5 : 1,
+                                    cursor: !store.core.studyIsSaved
+                                        ? 'not-allowed'
+                                        : 'pointer'
                                 }}
-                                isDisabled={!store.core.studyIsSaved}
                                 variant="ghost"
                                 borderRadius="10px"
                                 id="presentationmode"

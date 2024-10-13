@@ -8,26 +8,31 @@ import { getElementAtEvent, Line } from 'react-chartjs-2';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 
-function LineChart(props) {
+function LineChart({
+    isExpanded = false,
+    isExample = false,
+    demoData,
+    chart,
+    chartIndex,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const chartRef = useRef([]);
 
     const [data, setData] = useState(null);
 
     const [chartConfig, setChartConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart.id) || {}
     );
 
     useEffect(() => {
-        if (store.comment.chartToAttach === props.chart.id) {
+        if (store.comment.chartToAttach === chart.id) {
             store.comment.attachChart(
                 chartRef.current.toBase64Image('image/octet-stream', 1.0)
             );
             store.comment.setChartToAttach(null);
         }
-    }, [props.chart.id, store.comment, store.comment.chartToAttach]);
+    }, [chart.id, store.comment, store.comment.chartToAttach]);
 
     const getElementProperties = useCallback(chart => {
         switch (chart.element_values) {
@@ -113,7 +118,7 @@ function LineChart(props) {
                             borderColor: '#3182CE',
                             borderWidth: 2,
                             pointBackgroundColor: '#3182CE',
-                            pointRadius: props.isExpanded ? 3 : 0
+                            pointRadius: isExpanded ? 3 : 0
                         }
                     ]
                 };
@@ -156,7 +161,7 @@ function LineChart(props) {
                         borderColor: '#3182CE',
                         borderWidth: 2,
                         pointBackgroundColor: '#3182CE',
-                        pointRadius: props.isExpanded
+                        pointRadius: isExpanded
                             ? function () {
                                   if (data.labels.length > 10) {
                                       return 2;
@@ -170,7 +175,7 @@ function LineChart(props) {
         },
         [
             getElementProperties,
-            props.isExpanded,
+            isExpanded,
             store.core.isOverview,
             store.overviewSchema.anchorProperties,
             store.stats
@@ -178,12 +183,12 @@ function LineChart(props) {
     );
 
     useEffect(() => {
-        if (props.demoData) {
+        if (demoData) {
             setData({
-                ...props.demoData,
+                ...demoData,
                 datasets: [
                     {
-                        ...props.demoData.datasets[0],
+                        ...demoData.datasets[0],
                         fill: true,
                         backgroundColor: function (context) {
                             if (!context.chart.chartArea) {
@@ -204,21 +209,21 @@ function LineChart(props) {
                         borderColor: '#3182CE',
                         borderWidth: 2,
                         pointBackgroundColor: '#3182CE',
-                        pointRadius: props.isExpanded ? 3 : 0
+                        pointRadius: isExpanded ? 3 : 0
                     }
                 ]
             });
         } else {
             const chart = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setChartConfig(chart);
             setData(getChartData(chart));
         }
     }, [
-        props.chart.id,
-        props.demoData,
+        chart.id,
+        demoData,
         store.core.currentGraph,
         store.core.isOverview,
         store.overviewSchema.anchorProperties,
@@ -230,7 +235,7 @@ function LineChart(props) {
         store.graphInstance.selfCentricType,
         store.graphInstance.visibleComponents,
         getChartData,
-        props.isExpanded
+        isExpanded
     ]);
 
     const getPluginOptions = () => {
@@ -238,25 +243,25 @@ function LineChart(props) {
 
         let propsInChart = '';
 
-        switch (props.chart.element_values) {
+        switch (chart.element_values) {
             case 'values':
                 propsInChart =
-                    props.chart.elements === 'nodes'
-                        ? props.chart.show_only !== 'all'
-                            ? props.chart.show_only
+                    chart.elements === 'nodes'
+                        ? chart.show_only !== 'all'
+                            ? chart.show_only
                             : 'Node value'
                         : 'Edge value';
                 break;
             case 'types':
                 propsInChart =
-                    props.chart.elements === 'nodes'
+                    chart.elements === 'nodes'
                         ? 'Node feature'
                         : 'Edge feature';
                 break;
             default:
                 propsInChart =
-                    props.chart.elements === 'nodes'
-                        ? props.chart.element_values
+                    chart.elements === 'nodes'
+                        ? chart.element_values
                         : 'Edge weight';
                 break;
         }
@@ -275,9 +280,9 @@ function LineChart(props) {
             }
         };
 
-        if (props.chart.groupHoverLabel) {
+        if (chart.groupHoverLabel) {
             pluginOptions.tooltip.callbacks.title = tooltipItems => {
-                return `${props.chart.hoverLabel}: ${tooltipItems[0].label}`;
+                return `${chart.hoverLabel}: ${tooltipItems[0].label}`;
             };
         }
 
@@ -285,11 +290,11 @@ function LineChart(props) {
     };
 
     const getAxisTitle = () => {
-        if (props.chart.elements === 'edges') {
-            if (props.demoData) {
+        if (chart.elements === 'edges') {
+            if (demoData) {
                 return 'Edge property';
             }
-            switch (props.chart.element_values) {
+            switch (chart.element_values) {
                 case 'values':
                     return 'Edge values';
                 case 'types':
@@ -299,29 +304,27 @@ function LineChart(props) {
             }
         }
 
-        if (props.demoData) {
+        if (demoData) {
             return 'Node property';
         }
 
-        switch (props.chart.element_values) {
+        switch (chart.element_values) {
             case 'values':
-                return props.chart.show_only
-                    ? props.chart.show_only
-                    : 'Node values';
+                return chart.show_only ? chart.show_only : 'Node values';
             case 'types':
                 return 'Node types';
             default:
                 return (
-                    props.chart.element_values.charAt(0).toUpperCase() +
-                    props.chart.element_values.slice(1).toLowerCase()
+                    chart.element_values.charAt(0).toUpperCase() +
+                    chart.element_values.slice(1).toLowerCase()
                 );
         }
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={[
                     'item type',
                     'second axis',
@@ -336,7 +339,7 @@ function LineChart(props) {
     }
 
     if (!data || data.labels.length === 0) {
-        return <WidgetAlert size={props.isExpanded ? 'md' : 'sm'} />;
+        return <WidgetAlert size={isExpanded ? 'md' : 'sm'} />;
     }
 
     return (
@@ -345,10 +348,10 @@ function LineChart(props) {
             ref={chartRef}
             data={{ ...data }}
             height="250px"
-            key={`chart_instance_${props.chartIndex}_${Math.random()}`}
+            key={`chart_instance_${chartIndex}_${Math.random()}`}
             redraw
             onClick={event => {
-                if (!props.isExample) {
+                if (!isExample) {
                     let dataIndex;
 
                     try {
@@ -367,7 +370,7 @@ function LineChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -388,7 +391,7 @@ function LineChart(props) {
                         store.track.trackEvent(
                             JSON.stringify({
                                 area: 'Widget',
-                                area_id: props.chart.id
+                                area_id: chart.id
                             }),
                             JSON.stringify({
                                 item_type: 'Chart area'
@@ -425,10 +428,10 @@ function LineChart(props) {
                 devicePixelRatio: 2,
                 layout: {
                     padding: {
-                        right: props.isExpanded ? 5 : 0,
-                        top: props.isExpanded ? 5 : 0,
-                        bottom: props.isExpanded ? 5 : 0,
-                        left: props.isExpanded ? 5 : 0
+                        right: isExpanded ? 5 : 0,
+                        top: isExpanded ? 5 : 0,
+                        bottom: isExpanded ? 5 : 0,
+                        left: isExpanded ? 5 : 0
                     }
                 },
                 onHover: (event, elements) => {
@@ -445,11 +448,11 @@ function LineChart(props) {
                             color: 'white',
                             text: chartConfig.element_sort_values
                         },
-                        display: props.isExpanded,
+                        display: isExpanded,
                         beginAtZero: true,
                         ticks: {
                             color: 'white',
-                            diplay: props.isExpanded,
+                            diplay: isExpanded,
 
                             callback: function (value, index, ticks) {
                                 const stringValue =
@@ -464,7 +467,7 @@ function LineChart(props) {
                         grid: {
                             color: context => {
                                 if (
-                                    props.chart.type.toLowerCase() === 'bar' ||
+                                    chart.type.toLowerCase() === 'bar' ||
                                     context.index === 0
                                 ) {
                                     return 'transparent';
@@ -481,10 +484,10 @@ function LineChart(props) {
                             color: 'white',
                             text: getAxisTitle()
                         },
-                        display: props.isExpanded,
+                        display: isExpanded,
                         ticks: {
                             color: 'white',
-                            diplay: props.isExpanded,
+                            diplay: isExpanded,
                             beginAtZero: true,
                             callback: function (value, index, ticks) {
                                 const stringValue =
@@ -500,7 +503,7 @@ function LineChart(props) {
                             display: false,
                             color: context => {
                                 if (
-                                    props.chart.type.toLowerCase() ===
+                                    chart.type.toLowerCase() ===
                                         'vertical bar' ||
                                     context.index === 0
                                 ) {
@@ -536,11 +539,6 @@ LineChart.propTypes = {
     chartIndex: PropTypes.number,
     isExpanded: PropTypes.bool,
     isExample: PropTypes.bool
-};
-
-LineChart.defaultProps = {
-    isExpanded: false,
-    isExample: false
 };
 
 export default observer(LineChart);

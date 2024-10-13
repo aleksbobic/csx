@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { useContext } from 'react';
 import { RootStoreContext } from 'stores/RootStore';
 
-function DatasetConfigFooter(props) {
+function DatasetConfigFooter({ formType = 'upload', activeTab, setActiveTab }) {
     const store = useContext(RootStoreContext);
 
     const renderEditConfigModalFooter = () => (
@@ -60,7 +60,7 @@ function DatasetConfigFooter(props) {
 
     const renderSetConfigModalFooter = () => (
         <HStack justifyContent="center" paddingBottom="20px">
-            {props.activeTab === 0 && (
+            {activeTab === 0 && (
                 <Button
                     variant="outline"
                     onClick={() => {
@@ -83,7 +83,7 @@ function DatasetConfigFooter(props) {
                     Cancel
                 </Button>
             )}
-            {props.activeTab > 0 && (
+            {activeTab > 0 && (
                 <Button
                     variant="outline"
                     onClick={() => {
@@ -100,22 +100,22 @@ function DatasetConfigFooter(props) {
                                 event_type: 'Click',
                                 event_action: 'Navigate to page',
                                 event_value:
-                                    props.activeTab === 2
+                                    activeTab === 2
                                         ? 'default overview schema config'
                                         : 'data types and general config of dataset'
                             })
                         );
 
-                        if (props.activeTab === 2) {
+                        if (activeTab === 2) {
                             store.overviewSchema.populateStoreData(true);
                         }
-                        props.setActiveTab(props.activeTab - 1);
+                        setActiveTab(activeTab - 1);
                     }}
                 >
                     Prev
                 </Button>
             )}
-            {props.activeTab < 2 && (
+            {activeTab < 2 && (
                 <Button
                     variant="solid"
                     backgroundColor="blue.500"
@@ -133,25 +133,25 @@ function DatasetConfigFooter(props) {
                                 event_type: 'Click',
                                 event_action: 'Navigate to page',
                                 event_value:
-                                    props.activeTab === 0
+                                    activeTab === 0
                                         ? 'default overview schema config'
                                         : 'default detail schema config'
                             })
                         );
 
-                        if (props.activeTab === 0) {
+                        if (activeTab === 0) {
                             store.overviewSchema.populateStoreData(true);
                         }
-                        if (props.activeTab === 1) {
+                        if (activeTab === 1) {
                             store.schema.populateStoreData(true);
                         }
-                        props.setActiveTab(props.activeTab + 1);
+                        setActiveTab(activeTab + 1);
                     }}
                 >
                     Next
                 </Button>
             )}
-            {props.activeTab === 2 && (
+            {activeTab === 2 && (
                 <Button
                     variant="solid"
                     backgroundColor="blue.500"
@@ -179,7 +179,7 @@ function DatasetConfigFooter(props) {
         </HStack>
     );
 
-    return props.formType === 'modify'
+    return formType === 'modify'
         ? renderEditConfigModalFooter()
         : renderSetConfigModalFooter();
 }
@@ -188,10 +188,6 @@ DatasetConfigFooter.propTypes = {
     formType: PropTypes.string,
     activeTab: PropTypes.number,
     setActiveTab: PropTypes.func
-};
-
-DatasetConfigFooter.defaultProps = {
-    formType: 'upload'
 };
 
 export default observer(DatasetConfigFooter);

@@ -1,5 +1,5 @@
 # Build react app
-FROM node:14-alpine3.13 as build
+FROM node:18-alpine3.19 as build
 
 RUN apk update && apk upgrade && apk add git
 

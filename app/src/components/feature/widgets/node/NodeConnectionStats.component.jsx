@@ -20,15 +20,21 @@ import { RootStoreContext } from 'stores/RootStore';
 import WidgetAlert from '../WidgetAlert.component';
 import WidgetSettings from '../WidgetSettings.component';
 
-function ConnectionStats(props) {
+function ConnectionStats({
+    isExpanded = false,
+    demoData = [],
+    connectionFeature = 'all',
+    maxConnectionDegree = 2,
+    chart,
+    settingsMode
+}) {
     const store = useContext(RootStoreContext);
     const [visiblity, setVisiblity] = useState(false);
     const [data, setData] = useState([]);
     const { colorMode } = useColorMode();
     const [widgetConfig, setWidgetConfig] = useState(
-        store.stats?.activeWidgets?.find(
-            widget => widget.id === props.chart?.id
-        ) || {}
+        store.stats?.activeWidgets?.find(widget => widget.id === chart?.id) ||
+            {}
     );
 
     useEffect(() => {
@@ -41,11 +47,11 @@ function ConnectionStats(props) {
     }, [store.graphInstance, store.graphInstance.selfCentricType]);
 
     useEffect(() => {
-        if (props.demoData.length) {
-            setData(props.demoData);
+        if (demoData.length) {
+            setData(demoData);
         } else if (visiblity) {
             const widget = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setWidgetConfig(widget);
@@ -53,15 +59,15 @@ function ConnectionStats(props) {
             setData(store.graph.currentGraphData.selectedNodes);
         } else {
             const widget = store.stats.activeWidgets.find(
-                widget => widget.id === props.chart.id
+                widget => widget.id === chart.id
             );
 
             setWidgetConfig(widget);
             setData([]);
         }
     }, [
-        props.chart?.id,
-        props.demoData,
+        chart?.id,
+        demoData,
         store.graph.currentGraphData.components,
         store.graph.currentGraphData.selectedComponents,
         store.stats.activeWidgets,
@@ -113,7 +119,7 @@ function ConnectionStats(props) {
                     borderRadius="6px"
                     key={`1st_level_connection_${feature}_${index}}`}
                     background={
-                        props.demoData.length === 0 &&
+                        demoData.length === 0 &&
                         store.core.currentGraph === 'detail'
                             ? store.graphInstance.nodeColorSchemeColors[
                                   [store.core.currentGraph]
@@ -158,7 +164,7 @@ function ConnectionStats(props) {
                 marginTop="8px"
                 key={neighbours[level].title}
             >
-                {props.isExpanded && (
+                {isExpanded && (
                     <HStack width="100%">
                         <Divider style={{ opacity: 0.2 }} />
                         <Tooltip
@@ -180,7 +186,7 @@ function ConnectionStats(props) {
                                     store.track.trackEvent(
                                         JSON.stringify({
                                             area: 'Widget',
-                                            area_id: props.chart.id
+                                            area_id: chart.id
                                         }),
                                         JSON.stringify({
                                             item_type: 'Button'
@@ -308,7 +314,7 @@ function ConnectionStats(props) {
                     .map((level, index) => {
                         if (
                             index === 0 ||
-                            (props.isExpanded && level.neighbours.length > 0)
+                            (isExpanded && level.neighbours.length > 0)
                         ) {
                             return renderDetailLevel(
                                 node,
@@ -322,10 +328,10 @@ function ConnectionStats(props) {
         );
     };
 
-    if (props.settingsMode && props.isExpanded) {
+    if (settingsMode && isExpanded) {
         return (
             <WidgetSettings
-                widgetID={props.chart.id}
+                widgetID={chart.id}
                 settings={['max distance', 'direct connection feature']}
             />
         );
@@ -334,7 +340,7 @@ function ConnectionStats(props) {
     if (!data || data.length === 0) {
         return (
             <WidgetAlert
-                size={props.isExpanded ? 'md' : 'sm'}
+                size={isExpanded ? 'md' : 'sm'}
                 message="Explore direct connections of nodes to see details here! 😉"
             />
         );
@@ -387,11 +393,11 @@ function ConnectionStats(props) {
                                         paddingRight="30px"
                                         _hover={{ cursor: 'pointer' }}
                                         onClick={() => {
-                                            if (!props.demoData.length) {
+                                            if (!demoData.length) {
                                                 store.track.trackEvent(
                                                     JSON.stringify({
                                                         area: 'Widget',
-                                                        area_id: props.chart.id
+                                                        area_id: chart.id
                                                     }),
                                                     JSON.stringify({
                                                         item_type: 'Button',
@@ -429,13 +435,6 @@ ConnectionStats.propTypes = {
     demoData: PropTypes.array,
     connectionFeature: PropTypes.string,
     maxConnectionDegree: PropTypes.number
-};
-
-ConnectionStats.defaultProps = {
-    isExpanded: false,
-    demoData: [],
-    connectionFeature: 'all',
-    maxConnectionDegree: 2
 };
 
 export default observer(ConnectionStats);
