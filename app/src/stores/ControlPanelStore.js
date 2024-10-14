@@ -1,34 +1,34 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable } from "mobx";
 
 export class ControlPanelStore {
-    isVisible = false;
+  isVisible = false;
 
-    navigationValues = {
-        perspectives: [],
-        references: []
+  navigationValues = {
+    perspectives: [],
+    references: [],
+  };
+
+  constructor(store) {
+    this.store = store;
+    makeAutoObservable(this);
+  }
+
+  setSelectedNavigationPerspectives = (perspectives) => {
+    this.navigationValues.perspectives = perspectives;
+  };
+
+  setSelectedNavigationReferences = (references) => {
+    this.navigationValues.references = references;
+  };
+
+  toggleVisiblity = () => {
+    this.isVisible = !this.isVisible;
+  };
+
+  resetNavigationValues = () => {
+    this.navigationValues = {
+      perspectives: [],
+      references: [],
     };
-
-    constructor(store) {
-        this.store = store;
-        makeAutoObservable(this);
-    }
-
-    setSelectedNavigationPerspectives = perspectives => {
-        this.navigationValues.perspectives = perspectives;
-    };
-
-    setSelectedNavigationReferences = references => {
-        this.navigationValues.references = references;
-    };
-
-    toggleVisiblity = () => {
-        this.isVisible = !this.isVisible;
-    };
-
-    resetNavigationValues = () => {
-        this.navigationValues = {
-            perspectives: [],
-            references: []
-        };
-    };
+  };
 }

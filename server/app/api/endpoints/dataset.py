@@ -18,6 +18,7 @@ from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from app.config import settings
 
+
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 
 
@@ -33,11 +34,15 @@ def get_datasets(
 
     datasets = {}
 
-    for index in search.get_all_datasets():
+    dataset_names = search.get_all_datasets()
+
+    configs = storage.get_configs(dataset_names)
+
+    for index in dataset_names:
         if not search.get_dataset_features(index):
             continue
 
-        config = storage.get_config(index)
+        config = configs.get(index)
 
         if not config:
             continue

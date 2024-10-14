@@ -1,7 +1,6 @@
 services:
   server:
     container_name: csx_server
-    image: csxi_server
     build:
       context: ./
       dockerfile: docker/Dockerfile.server
@@ -23,7 +22,6 @@ services:
       ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "app/main.py"]
   app:
     container_name: csx_app
-    image: csxi_app
     build:
       context: ./
       dockerfile: docker/Dockerfile.app
@@ -37,7 +35,7 @@ services:
     environment:
       NODE_ENV: development
       WDS_SOCKET_PORT: 0
-    command: bash -c "npm install && npm start"
+    command: bash -c "npm install && npm run dev"
   mysql:
     image: "mysql:5.7"
     profiles:

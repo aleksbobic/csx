@@ -1,6 +1,6 @@
 import os
 import pickle
-from typing import List, Union
+from typing import List, Union, Dict
 
 import gridfs
 from app.config import settings
@@ -56,6 +56,21 @@ class MongoStorageConnector(BaseStorageConnector):
         config.pop("_id", None)
 
         return config
+
+    def get_configs(self, dataset_names: List[str]) -> Dict[str, dict]:
+        try:
+            configs = self.database["configs"].find(
+                {"dataset_name": {"$in": dataset_names}}
+            )
+        except ConnectionError as e:
+            return {}
+
+        result = {}
+        for config in configs:
+            config.pop("_id", None)
+            result[config["dataset_name"]] = config
+
+        return result
 
     def delete_config(self, dataset_name: str) -> None:
         self.database["configs"].delete_one({"dataset_name": dataset_name})

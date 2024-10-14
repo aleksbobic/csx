@@ -28,6 +28,10 @@ class BaseStorageConnector(ABC):
         pass
 
     @abstractmethod
+    def get_configs(self, dataset_name: List[str]) -> dict:
+        pass
+
+    @abstractmethod
     def delete_config(self, dataset_name: str) -> None:
         pass
 

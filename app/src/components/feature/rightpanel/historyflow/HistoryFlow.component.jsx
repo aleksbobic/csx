@@ -1,259 +1,244 @@
-import {
-    Box,
-    HStack,
-    IconButton,
-    Link,
-    Tooltip,
-    useColorMode
-} from '@chakra-ui/react';
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import "overlayscrollbars/overlayscrollbars.css";
 
-import ConnectorNode from 'components/feature/advancedsearch/connectornode/ConnectorNode.component';
-import CountsNode from 'components/feature/advancedsearch/countsNode/Counts.component';
-import FilterNode from 'components/feature/advancedsearch/filternode/FilterNode.component';
-import KeywordExtractionNode from 'components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component';
-import ResultsNode from 'components/feature/advancedsearch/resultsNode/ResultsNode.component';
-import SearchEdge from 'components/feature/advancedsearch/searchedge/SearchEdge.component';
-import 'overlayscrollbars/overlayscrollbars.css';
-import ReactFlow, { MiniMap } from 'react-flow-renderer';
-import AutoSizer from 'react-virtualized-auto-sizer';
-import DatasetNode from '../../advancedsearch/datasetNode/Dataset.component';
-import SchemaEdge from '../../advancedsearch/searchedge/SearchEdge.component';
-import SearchNode from '../../advancedsearch/searchnode/SearchNode.component';
-import HistoryNode from '../../historyNode/HistoryNode.component';
-import OverviewCustomEdge from '../../overviewschemaedge/OverviewSchemaEdge.component';
-import OverviewSchemaNode from '../../overviewschemanode/OverviewSchemaNode.component';
-import SchemaNode from '../../schemanode/SchemaNode.component';
 import {
-    PresentationChartBarIcon,
-    ViewfinderCircleIcon
-} from '@heroicons/react/24/outline';
+  Box,
+  HStack,
+  IconButton,
+  Link,
+  Tooltip,
+  useColorMode,
+} from "@chakra-ui/react";
+import {
+  PresentationChartBarIcon,
+  ViewfinderCircleIcon,
+} from "@heroicons/react/24/outline";
+import ReactFlow, { MiniMap } from "react-flow-renderer";
+import { useContext, useEffect, useMemo, useState } from "react";
+
+import AutoSizer from "react-virtualized-auto-sizer";
+import ConnectorNode from "components/feature/advancedsearch/connectornode/ConnectorNode.component";
+import CountsNode from "components/feature/advancedsearch/countsNode/Counts.component";
+import DatasetNode from "../../advancedsearch/datasetNode/Dataset.component";
+import FilterNode from "components/feature/advancedsearch/filternode/FilterNode.component";
+import HistoryNode from "../../historyNode/HistoryNode.component";
+import KeywordExtractionNode from "components/feature/advancedsearch/keywordextractionnode/KeywordExtractionNode.component";
+import OverviewCustomEdge from "../../overviewschemaedge/OverviewSchemaEdge.component";
+import OverviewSchemaNode from "../../overviewschemanode/OverviewSchemaNode.component";
+import ResultsNode from "components/feature/advancedsearch/resultsNode/ResultsNode.component";
+import { RootStoreContext } from "stores/RootStore";
+import SchemaEdge from "../../advancedsearch/searchedge/SearchEdge.component";
+import SchemaNode from "../../schemanode/SchemaNode.component";
+import SearchEdge from "components/feature/advancedsearch/searchedge/SearchEdge.component";
+import SearchNode from "../../advancedsearch/searchnode/SearchNode.component";
 
 export function HistoryFlow() {
-    const store = useContext(RootStoreContext);
-    const { colorMode } = useColorMode();
+  const store = useContext(RootStoreContext);
+  const { colorMode } = useColorMode();
 
-    const nodeTypes = useMemo(
-        () => ({
-            datasetNode: DatasetNode,
-            schemaNode: SchemaNode,
-            overviewSchemaNode: OverviewSchemaNode,
-            historyNode: HistoryNode,
-            searchNode: SearchNode,
-            connectorNode: ConnectorNode,
-            filterNode: FilterNode,
-            keywordExtractionNode: KeywordExtractionNode,
-            countsNode: CountsNode,
-            resultsNode: ResultsNode
-        }),
-        []
+  const nodeTypes = useMemo(
+    () => ({
+      datasetNode: DatasetNode,
+      schemaNode: SchemaNode,
+      overviewSchemaNode: OverviewSchemaNode,
+      historyNode: HistoryNode,
+      searchNode: SearchNode,
+      connectorNode: ConnectorNode,
+      filterNode: FilterNode,
+      keywordExtractionNode: KeywordExtractionNode,
+      countsNode: CountsNode,
+      resultsNode: ResultsNode,
+    }),
+    []
+  );
+
+  const edgeTypes = useMemo(
+    () => ({
+      schemaEdge: SchemaEdge,
+      overviewCustomEdge: OverviewCustomEdge,
+      searchEdge: SearchEdge,
+    }),
+    []
+  );
+
+  const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
+  const [historyEdges, setHistoryEdges] = useState(store.history.edges);
+
+  const [historyViewport, setHistoryViewport] = useState(null);
+
+  useEffect(() => {
+    store.history.generateHistoryNodes();
+  }, [store.history, colorMode]);
+
+  useEffect(() => {
+    setHistoryNodes(store.history.nodes);
+    setHistoryEdges(store.history.edges);
+  }, [store.history.edges, store.history.nodes]);
+
+  const zoomToActiveHistoryNode = () => {
+    const selectedNodePosition =
+      store.history.nodes[store.core.studyHistoryItemIndex].position;
+
+    historyViewport.setCenter(
+      selectedNodePosition.x + 100,
+      selectedNodePosition.y,
+      { duration: 0, zoom: 1 }
     );
+  };
 
-    const edgeTypes = useMemo(
-        () => ({
-            schemaEdge: SchemaEdge,
-            overviewCustomEdge: OverviewCustomEdge,
-            searchEdge: SearchEdge
-        }),
-        []
-    );
+  return (
+    <Box
+      height="100%"
+      minHeight="200px"
+      width="100%"
+      backgroundColor="whiteAlpha.200"
+      borderRadius="8px"
+      style={{ position: "relative" }}
+      id="HistoryFlow"
+    >
+      <AutoSizer>
+        {({ height, width }) => (
+          <ReactFlow
+            style={{
+              height: `${height}px`,
+              width: `${width}px`,
+            }}
+            nodes={historyNodes}
+            edges={historyEdges}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            snapToGrid={true}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            minZoom={0.2}
+            defaultZoom={1.25}
+            maxZoom={1.5}
+            onInit={(instance) => {
+              setHistoryViewport(instance);
 
-    const [historyNodes, setHistoryNodes] = useState(store.history.nodes);
-    const [historyEdges, setHistoryEdges] = useState(store.history.edges);
+              if (store.history.nodes[store.core.studyHistoryItemIndex]) {
+                const selectedNodePosition =
+                  store.history.nodes[store.core.studyHistoryItemIndex]
+                    .position;
 
-    const [historyViewport, setHistoryViewport] = useState(null);
+                instance.setCenter(
+                  selectedNodePosition.x + 100,
+                  selectedNodePosition.y,
+                  { duration: 0, zoom: 1 }
+                );
+              }
+            }}
+          >
+            <MiniMap
+              nodeColor={(node) =>
+                node.data.isActive
+                  ? "#3182ceeb"
+                  : colorMode === "light"
+                    ? "#c5c5c5"
+                    : "#323232"
+              }
+              nodeStrokeColor={(node) =>
+                node.data.isActive
+                  ? "#3182ceeb"
+                  : colorMode === "light"
+                    ? "#7bc5c5c57b7b"
+                    : "#323232"
+              }
+              nodeBorderRadius="15px"
+              maskColor={colorMode === "light" ? "#c5c5c5" : "#1a1a1a"}
+              style={{
+                backgroundColor: colorMode === "light" ? "#7b7b7b" : "#000000",
+                border: "1px solid #ffffff22",
+                borderRadius: "8px",
+              }}
+              nodeStrokeWidth={3}
+            />
+          </ReactFlow>
+        )}
+      </AutoSizer>
 
-    useEffect(() => {
-        store.history.generateHistoryNodes();
-    }, [store.history, colorMode]);
+      <HStack position="absolute" bottom="20px" left="20px" zIndex="20">
+        <Tooltip label="Navigate to current history node">
+          <IconButton
+            size="sm"
+            opacity="0.6"
+            transition="0.2s all ease-in-out"
+            _hover={{ opacity: 1 }}
+            icon={
+              <ViewfinderCircleIcon
+                style={{
+                  width: "14px",
+                  height: "14px",
+                }}
+              />
+            }
+            onClick={() => {
+              store.track.trackEvent(
+                JSON.stringify({
+                  area: "History panel",
+                }),
+                JSON.stringify({
+                  item_type: "Button",
+                }),
+                JSON.stringify({
+                  event_type: "Click",
+                  event_action: "Navigate to active history node",
+                })
+              );
 
-    useEffect(() => {
-        setHistoryNodes(store.history.nodes);
-        setHistoryEdges(store.history.edges);
-    }, [store.history.edges, store.history.nodes]);
+              zoomToActiveHistoryNode();
+            }}
+          />
+        </Tooltip>
 
-    const zoomToActiveHistoryNode = () => {
-        const selectedNodePosition =
-            store.history.nodes[store.core.studyHistoryItemIndex].position;
+        <Tooltip label="Open presentation up to active history item.">
+          <Link
+            size="sm"
+            opacity="0.6"
+            transition="0.2s all ease-in-out"
+            style={{
+              padding: "8px",
+              borderRadius: "5px",
+              backgroundColor: "#6e6e6e4f",
+              cursor: !store.core.studyIsSaved ? "not-allowed" : "pointer",
+              opacity: !store.core.studyIsSaved ? 0.6 : 1,
+            }}
+            _hover={{ opacity: 1 }}
+            onClick={(e) => {
+              if (!store.core.studyIsSaved) {
+                e.preventDefault();
+              }
 
-        historyViewport.setCenter(
-            selectedNodePosition.x + 100,
-            selectedNodePosition.y,
-            { duration: 0, zoom: 1 }
-        );
-    };
-
-    return (
-        <Box
-            height="100%"
-            minHeight="200px"
-            width="100%"
-            backgroundColor="whiteAlpha.200"
-            borderRadius="8px"
-            style={{ position: 'relative' }}
-            id="HistoryFlow"
-        >
-            <AutoSizer>
-                {({ height, width }) => (
-                    <ReactFlow
-                        style={{
-                            height: `${height}px`,
-                            width: `${width}px`
-                        }}
-                        nodes={historyNodes}
-                        edges={historyEdges}
-                        nodesDraggable={false}
-                        nodesConnectable={false}
-                        snapToGrid={true}
-                        nodeTypes={nodeTypes}
-                        edgeTypes={edgeTypes}
-                        minZoom={0.2}
-                        defaultZoom={1.25}
-                        maxZoom={1.5}
-                        onInit={instance => {
-                            setHistoryViewport(instance);
-
-                            if (
-                                store.history.nodes[
-                                    store.core.studyHistoryItemIndex
-                                ]
-                            ) {
-                                const selectedNodePosition =
-                                    store.history.nodes[
-                                        store.core.studyHistoryItemIndex
-                                    ].position;
-
-                                instance.setCenter(
-                                    selectedNodePosition.x + 100,
-                                    selectedNodePosition.y,
-                                    { duration: 0, zoom: 1 }
-                                );
-                            }
-                        }}
-                    >
-                        <MiniMap
-                            nodeColor={node =>
-                                node.data.isActive
-                                    ? '#3182ceeb'
-                                    : colorMode === 'light'
-                                      ? '#c5c5c5'
-                                      : '#323232'
-                            }
-                            nodeStrokeColor={node =>
-                                node.data.isActive
-                                    ? '#3182ceeb'
-                                    : colorMode === 'light'
-                                      ? '#7bc5c5c57b7b'
-                                      : '#323232'
-                            }
-                            nodeBorderRadius="15px"
-                            maskColor={
-                                colorMode === 'light' ? '#c5c5c5' : '#1a1a1a'
-                            }
-                            style={{
-                                backgroundColor:
-                                    colorMode === 'light'
-                                        ? '#7b7b7b'
-                                        : '#000000',
-                                border: '1px solid #ffffff22',
-                                borderRadius: '8px'
-                            }}
-                            nodeStrokeWidth={3}
-                        />
-                    </ReactFlow>
-                )}
-            </AutoSizer>
-
-            <HStack position="absolute" bottom="20px" left="20px" zIndex="20">
-                <Tooltip label="Navigate to current history node">
-                    <IconButton
-                        size="sm"
-                        opacity="0.6"
-                        transition="0.2s all ease-in-out"
-                        _hover={{ opacity: 1 }}
-                        icon={
-                            <ViewfinderCircleIcon
-                                style={{
-                                    width: '14px',
-                                    height: '14px'
-                                }}
-                            />
-                        }
-                        onClick={() => {
-                            store.track.trackEvent(
-                                JSON.stringify({
-                                    area: 'History panel'
-                                }),
-                                JSON.stringify({
-                                    item_type: 'Button'
-                                }),
-                                JSON.stringify({
-                                    event_type: 'Click',
-                                    event_action:
-                                        'Navigate to active history node'
-                                })
-                            );
-
-                            zoomToActiveHistoryNode();
-                        }}
-                    />
-                </Tooltip>
-
-                <Tooltip label="Open presentation up to active history item.">
-                    <Link
-                        size="sm"
-                        opacity="0.6"
-                        transition="0.2s all ease-in-out"
-                        style={{
-                            padding: '8px',
-                            borderRadius: '5px',
-                            backgroundColor: '#6e6e6e4f',
-                            cursor: !store.core.studyIsSaved
-                                ? 'not-allowed'
-                                : 'pointer',
-                            opacity: !store.core.studyIsSaved ? 0.6 : 1
-                        }}
-                        _hover={{ opacity: 1 }}
-                        onClick={e => {
-                            if (!store.core.studyIsSaved) {
-                                e.preventDefault();
-                            }
-
-                            store.track.trackEvent(
-                                JSON.stringify({
-                                    area: 'History panel'
-                                }),
-                                JSON.stringify({
-                                    item_type: 'Link'
-                                }),
-                                JSON.stringify({
-                                    event_type: 'Click',
-                                    event_action:
-                                        'Open presentation up to active history item'
-                                })
-                            );
-                        }}
-                        href={
-                            store.core.studyIsSaved
-                                ? `${store.core.getBasePresentURL()}?study=${
-                                      store.core.studyUuid
-                                  }&active_item=${
-                                      store.core.studyHistoryItemIndex
-                                  }`
-                                : ''
-                        }
-                        isExternal
-                    >
-                        <PresentationChartBarIcon
-                            style={{
-                                width: '14px',
-                                height: '14px'
-                            }}
-                        />
-                    </Link>
-                </Tooltip>
-            </HStack>
-        </Box>
-    );
+              store.track.trackEvent(
+                JSON.stringify({
+                  area: "History panel",
+                }),
+                JSON.stringify({
+                  item_type: "Link",
+                }),
+                JSON.stringify({
+                  event_type: "Click",
+                  event_action: "Open presentation up to active history item",
+                })
+              );
+            }}
+            href={
+              store.core.studyIsSaved
+                ? `${store.core.getBasePresentURL()}?study=${
+                    store.core.studyUuid
+                  }&active_item=${store.core.studyHistoryItemIndex}`
+                : ""
+            }
+            isExternal
+          >
+            <PresentationChartBarIcon
+              style={{
+                width: "14px",
+                height: "14px",
+              }}
+            />
+          </Link>
+        </Tooltip>
+      </HStack>
+    </Box>
+  );
 }

@@ -1,8 +1,8 @@
 import {
     Box,
     Button,
-    Heading,
     HStack,
+    Heading,
     IconButton,
     Kbd,
     Menu,
@@ -22,8 +22,8 @@ import {
     Textarea,
     Tooltip,
     Tr,
-    useColorMode,
-    VStack
+    VStack,
+    useColorMode
 } from '@chakra-ui/react';
 import { CameraIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
 import {
@@ -32,14 +32,13 @@ import {
     ChevronUpIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
-import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { useContext, useEffect, useRef, useState } from 'react';
 
-import { useKeyPress } from 'hooks/useKeyPress.hook';
+import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { RootStoreContext } from 'stores/RootStore';
 import { observer } from 'mobx-react';
 import { useCallback } from 'react';
-
-import { useContext, useEffect, useRef, useState } from 'react';
-import { RootStoreContext } from 'stores/RootStore';
+import { useKeyPress } from 'hooks/useKeyPress.hook';
 
 function CommentTextArea(props) {
     const store = useContext(RootStoreContext);

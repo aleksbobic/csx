@@ -1,7 +1,6 @@
 services:
   server:
     container_name: csxp_server
-    image: csxpi_server
     restart: unless-stopped
     build:
       context: ./
@@ -24,7 +23,6 @@ services:
     command: uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80 --limit-max-headers 8192
   app:
     container_name: csxp_app
-    image: csxpi_app
     restart: unless-stopped
     build:
       context: ./

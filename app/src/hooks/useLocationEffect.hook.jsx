@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 export function useLocationEffect(callback) {
-    const location = useLocation;
+  const location = useLocation;
 
-    useEffect(() => {
-        callback(location);
-    }, [location, callback]);
+  useEffect(() => {
+    callback(location);
+  }, [location, callback]);
 }

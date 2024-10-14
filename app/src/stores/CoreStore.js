@@ -1,527 +1,525 @@
-import axios from 'axios';
-import { makeAutoObservable } from 'mobx';
-import { uniqueNamesGenerator, animals, colors } from 'unique-names-generator';
-import { isEnvSet, safeRequest } from 'general.utils';
+import { animals, colors, uniqueNamesGenerator } from "unique-names-generator";
+import { isEnvSet, safeRequest } from "@/general.utils";
+
+import axios from "axios";
+import { makeAutoObservable } from "mobx";
 
 export class CoreStore {
-    availableDatasets = [];
-    demoMode = false;
-    demoNavigationData = [];
-    activeDemoIndex = 1;
-    errorDetails = null;
-    currentGraph = '';
-    userUuid = null;
-    studyUuid = null;
-    studyName = '';
-    studyDescription = '';
-    studyAuthor = '';
-    studyHistory = [];
-    studyIsEmpty = false;
-    studyHistoryItemIndex = 0;
-    studyIsSaved = false;
-    isStudyPublic = false;
-    studyPublicURL = '';
-    showCommentModal = false;
-    studies = [];
-    dataIsLoading = false;
-    hideCookieBanner = false;
-    trackingEnabled = false;
-    colorMode = null;
-    showCookieInfo = false;
-    isLeftSidePanelOpen = true;
-    isRightSidePanelOpen = false;
-    rightPanelType = '';
-    rightPanelTypeToOpen = null;
-    rightPanelWidth = 0;
-    surveyHidden = false;
-    surveyHistoryDepthTrigger = 3;
-    dataModificationMessage = null;
-    neverShowInteractionModal = false;
-    interactionModalClosed = false;
-    finishedHomeJoyride = false;
-    finishedAdvancedSearchJoyride = false;
-    finishedGraphJoyride = false;
+  availableDatasets = [];
+  demoMode = false;
+  demoNavigationData = [];
+  activeDemoIndex = 1;
+  errorDetails = null;
+  currentGraph = "";
+  userUuid = null;
+  studyUuid = null;
+  studyName = "";
+  studyDescription = "";
+  studyAuthor = "";
+  studyHistory = [];
+  studyIsEmpty = false;
+  studyHistoryItemIndex = 0;
+  studyIsSaved = false;
+  isStudyPublic = false;
+  studyPublicURL = "";
+  showCommentModal = false;
+  studies = [];
+  dataIsLoading = false;
+  hideCookieBanner = false;
+  trackingEnabled = false;
+  colorMode = null;
+  showCookieInfo = false;
+  isLeftSidePanelOpen = true;
+  isRightSidePanelOpen = false;
+  rightPanelType = "";
+  rightPanelTypeToOpen = null;
+  rightPanelWidth = 0;
+  surveyHidden = false;
+  surveyHistoryDepthTrigger = 3;
+  dataModificationMessage = null;
+  neverShowInteractionModal = false;
+  interactionModalClosed = false;
+  finishedHomeJoyride = false;
+  finishedAdvancedSearchJoyride = false;
+  finishedGraphJoyride = false;
 
-    visibleDimensions = { overview: [], detail: [] };
-    toastInfo = {
-        message: '',
-        type: 'info'
-    };
+  visibleDimensions = { overview: [], detail: [] };
+  toastInfo = {
+    message: "",
+    type: "info",
+  };
 
-    constructor(store) {
-        this.store = store;
-        this.userUuid = localStorage.getItem('useruuid');
+  constructor(store) {
+    this.store = store;
+    this.userUuid = localStorage.getItem("useruuid");
 
-        if (!this.userUuid) {
-            this.generateUUID();
-        }
-        this.getSavedStudies();
-        this.hideCookieBanner = this.getCookieBanner();
-        this.trackingEnabled =
-            localStorage.getItem('trackingenabled') === 'true';
-        this.surveyHidden = localStorage.getItem('surveyhidden') === 'true';
-        if (isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')) {
-            this.surveyHistoryDepthTrigger = parseInt(
-                isEnvSet('REACT_APP_SURVEY_SHOW_AFTER_HISTORY_DEPTH')
-            );
-        }
-
-        this.finishedHomeJoyride =
-            localStorage.getItem('finishedHomeJoyride') === 'true';
-        this.finishedAdvancedSearchJoyride =
-            localStorage.getItem('finishedAdvancedSearchJoyride') === 'true';
-        this.finishedGraphJoyride =
-            localStorage.getItem('finishedGraphJoyride') === 'true';
-
-        this.colorMode = localStorage.getItem('chakra-ui-color-mode');
-        this.getInteractionsModalDisplay();
-
-        makeAutoObservable(this, {}, { deep: true });
+    if (!this.userUuid) {
+      this.generateUUID();
+    }
+    this.getSavedStudies();
+    this.hideCookieBanner = this.getCookieBanner();
+    this.trackingEnabled = localStorage.getItem("trackingenabled") === "true";
+    this.surveyHidden = localStorage.getItem("surveyhidden") === "true";
+    if (isEnvSet("VITE_SURVEY_SHOW_AFTER_HISTORY_DEPTH")) {
+      this.surveyHistoryDepthTrigger = parseInt(
+        isEnvSet("VITE_SURVEY_SHOW_AFTER_HISTORY_DEPTH")
+      );
     }
 
-    getBasePresentURL = () => {
-        if (isEnvSet('REACT_APP_SERVER_PORT')) {
-            return 'http://localhost:8882/present';
-        } else {
-            return `${window.location.origin}/present`;
-        }
-    };
-
-    setFinishedHomeJoyride = value => {
-        this.finishedHomeJoyride = value;
-        localStorage.setItem('finishedHomeJoyride', value);
-    };
-    setFinishedAdvancedSearchJoyride = value => {
-        this.finishedAdvancedSearchJoyride = value;
-        localStorage.setItem('finishedAdvancedSearchJoyride', value);
-    };
-    setFinishedGraphJoyride = value => {
-        this.finishedGraphJoyride = value;
-        localStorage.setItem('finishedGraphJoyride', value);
-    };
-
-    resetJoyride = () => {
-        this.setFinishedHomeJoyride(false);
-        this.setFinishedAdvancedSearchJoyride(false);
-        this.setFinishedGraphJoyride(false);
-    };
-
-    setInteractionModalClosed = value => (this.interactionModalClosed = value);
-
-    setInteractionsModalDisplay = value => {
-        this.neverShowInteractionModal = value;
-
-        localStorage.setItem(
-            'neverShowInteractionsModal',
-            this.neverShowInteractionModal
-        );
-    };
-
-    getInteractionsModalDisplay = () => {
-        this.neverShowInteractionModal =
-            localStorage.getItem('neverShowInteractionsModal') === 'true';
-    };
-
-    addCommentToCurrentHistoryItem = comment => {
-        this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
-    };
-
-    setDataModificationMessage = message =>
-        (this.dataModificationMessage = message);
-
-    deleteCommentFromCurrentHistoryItem = id => {
-        const commentIndex = this.studyHistory[
-            this.studyHistoryItemIndex
-        ].comments.findIndex(comment => comment.id === id);
-
-        this.studyHistory[this.studyHistoryItemIndex].comments.splice(
-            commentIndex,
-            1
-        );
-    };
-
-    editCommentFromCurrentHistoryItem = (index, newComment) => {
-        this.studyHistory[this.studyHistoryItemIndex].comments[index] = {
-            ...this.studyHistory[this.studyHistoryItemIndex].comments[index],
-            ...newComment
-        };
-
-        this.studyHistory[this.studyHistoryItemIndex].comments = [
-            ...this.studyHistory[this.studyHistoryItemIndex].comments
-        ];
-    };
-
-    setSurveyHidden = val => {
-        this.surveyHidden = val;
-        localStorage.setItem('surveyhidden', val);
-    };
-
-    setStudyIsEmpty = val => (this.studyIsEmpty = val);
-
-    setRightPanelTypeToOpen = val => (this.rightPanelTypeToOpen = val);
-
-    setIsStudyPublic = val => (this.isStudyPublic = val);
-
-    toggleIsStudyPublic = async () => {
-        this.setIsStudyPublic(!this.isStudyPublic);
-
-        const params = {
-            public: this.isStudyPublic
-        };
-
-        const { response, error } = await safeRequest(
-            axios.patch(`studies/${this.studyUuid}`, params, {
-                headers: { user_id: this.userUuid }
-            })
-        );
-
-        if (error) {
-            this.handleRequestError(error);
-            return;
-        }
-
-        this.setStudyPublicURL(response.data);
-    };
-
-    setStudyPublicURL = val => (this.studyPublicURL = val);
-    setIsLeftSidePanelOpen = val => (this.isLeftSidePanelOpen = val);
-    setIsRightSidePanelOpen = val => (this.isRightSidePanelOpen = val);
-    setRightPanelType = val => (this.rightPanelType = val);
-
-    setRightPanelWidth = val => (this.rightPanelWidth = val);
-
-    setShowCookieInfo = val => (this.showCookieInfo = val);
-
-    setDataIsLoading = val => (this.dataIsLoading = val);
-
-    setShowCommentModal = val => (this.showCommentModal = val);
-
-    updateIsStudySaved = val => (this.studyIsSaved = val);
-
-    updateStudies = val => (this.studies = val);
-
-    setStudyName = name => (this.studyName = name);
-
-    setStudyAuthor = author => (this.studyAuthor = author);
-
-    setColorMode = val => (this.colorMode = val);
-
-    setErrorDetails = val => (this.errorDetails = val);
-
-    setStudyDescription = description => (this.studyDescription = description);
-    setStudyUuid = id => {
-        this.studyUuid = id;
-        localStorage.setItem('studyuuid', id);
-    };
-
-    setStudyQuery = () => {
-        this.store.search.setSearchQuery(
-            this.studyHistory[this.studyHistoryItemIndex].query
-        );
-    };
-
-    setStudyHistory = history => (this.studyHistory = history);
-
-    setStudyHistoryItemIndex = index => (this.studyHistoryItemIndex = index);
-
-    setStudyHistoryItemIndexById = id => {
-        for (let i = 0; i < this.studyHistory.length; i++) {
-            if (this.studyHistory[i].id === id) {
-                this.setStudyHistoryItemIndex(i);
-                break;
-            }
-        }
-    };
-
-    updateStudyName = async name => {
-        this.studyName = name;
-
-        const params = {
-            study_name: this.studyName
-        };
-
-        const { error } = await safeRequest(
-            axios.patch(`studies/${this.studyUuid}`, params, {
-                headers: { user_id: this.userUuid }
-            })
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        this.updateIsStudySaved(true);
-        this.getSavedStudies();
-    };
-
-    updateStudyAuthor = async author => {
-        this.studyAuthor = author;
-
-        const params = {
-            study_author: this.studyAuthor
-        };
-
-        const { error } = await safeRequest(
-            axios.patch(`studies/${this.studyUuid}`, params, {
-                headers: { user_id: this.userUuid }
-            })
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        this.updateIsStudySaved(true);
-        this.getSavedStudies();
-    };
-
-    updateStudyDescription = async description => {
-        this.studyDescription = description;
-
-        const params = {
-            study_description: this.studyDescription
-        };
-
-        const { error } = await safeRequest(
-            axios.patch(`studies/${this.studyUuid}`, params, {
-                headers: { user_id: this.userUuid }
-            })
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        this.updateIsStudySaved(true);
-        this.getSavedStudies();
-    };
-
-    setTrackingEnabled = val => {
-        this.trackingEnabled = val;
-        localStorage.setItem('trackingenabled', val);
-        if (val) {
-            this.store.track.initTracking();
-        }
-    };
-
-    setHideCookieBanner = () => {
-        this.hideCookieBanner = true;
-        localStorage.setItem('hidecookiebanner', true);
-    };
-
-    getCookieBanner = () => {
-        return localStorage.getItem('hidecookiebanner');
-    };
-
-    generateUUID = async () => {
-        const { response, error } = await safeRequest(
-            axios.get('utils/uuid', {
-                headers: {
-                    accept: 'application/json'
-                }
-            })
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        localStorage.setItem('useruuid', response.data);
-        this.userUuid = response.data;
-    };
-
-    generateStudyUUID = async () => {
-        this.studyName = uniqueNamesGenerator({
-            dictionaries: [colors, animals],
-            separator: ' ',
-            length: 2,
-            seed: this.studyUuid
-        });
-
-        this.studyDescription = '';
-
-        const { response, error } = await safeRequest(
-            axios.post(
-                'studies',
-                { study_name: this.studyName },
-                {
-                    headers: { user_id: this.userUuid }
-                }
-            )
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        localStorage.setItem('studyuuid', response.data);
-        this.setStudyUuid(response.data);
-
-        this.setStudyHistory([]);
-        this.setStudyHistoryItemIndex(0);
-    };
-
-    deleteStudy = async studyUuid => {
-        if ((!this.studyIsSaved && !studyUuid) || studyUuid) {
-            const studyID = studyUuid ? studyUuid : this.studyUuid;
-
-            if (studyID) {
-                const { error } = await safeRequest(
-                    axios.delete(`studies/${studyID}`, {
-                        headers: { user_id: this.userUuid },
-                        data: {}
-                    })
-                );
-
-                if (error) {
-                    this.store.core.handleRequestError(error);
-                    return;
-                }
-
-                if (studyUuid) {
-                    this.getSavedStudies();
-                }
-            }
-        }
-    };
-
-    saveStudy = async () => {
-        const params = {
-            study_name: this.studyName,
-            study_description: this.studyDescription,
-            study_author: this.studyAuthor
-        };
-
-        const { error } = await safeRequest(
-            axios.patch(`studies/${this.studyUuid}`, params, {
-                headers: { user_id: this.userUuid }
-            })
-        );
-
-        if (error) {
-            this.store.core.handleRequestError(error);
-            return;
-        }
-
-        this.updateIsStudySaved(true);
-    };
-
-    getSavedStudies = async () => {
-        if (this.userUuid) {
-            const { response, error } = await safeRequest(
-                axios.get('studies', { headers: { user_id: this.userUuid } })
-            );
-
-            if (error) {
-                this.store.core.handleRequestError(error);
-                return;
-            }
-
-            this.updateStudies(response.data);
-        }
-    };
-
-    setToastMessage = message => (this.toastInfo.message = message);
-    setToastType = toastType => (this.toastInfo.type = toastType);
-
-    setCurrentGraph = graphType => {
-        this.currentGraph = graphType;
-        this.store.graph.updateTableColumns();
-    };
-
-    setVisibleDimensions = dimensions => {
-        this.visibleDimensions[this.currentGraph] = dimensions;
-    };
-
-    resetVisibleDimensions = () => {
-        this.visibleDimensions = { overview: [], detail: [] };
-    };
-
-    setDemoMode = val => {
-        this.demoMode = val;
-    };
-
-    setActiveDemoIndex = val => {
-        this.activeDemoIndex = val;
-    };
-
-    setDemoNavigationData = data => {
-        this.demoNavigationData = data;
-    };
-
-    toggleVisibleDimension = dimension => {
-        if (this.visibleDimensions[this.currentGraph]) {
-            if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
-                this.visibleDimensions[this.currentGraph].splice(
-                    this.visibleDimensions[this.currentGraph].indexOf(
-                        dimension
-                    ),
-                    1
-                );
-            } else {
-                this.visibleDimensions[this.currentGraph].push(dimension);
-            }
-        }
-    };
-
-    setArrayAsVisibleDimensions = dimensions => {
-        this.visibleDimensions[this.currentGraph] = dimensions;
-    };
-
-    get isOverview() {
-        return this.currentGraph === 'overview';
+    this.finishedHomeJoyride =
+      localStorage.getItem("finishedHomeJoyride") === "true";
+    this.finishedAdvancedSearchJoyride =
+      localStorage.getItem("finishedAdvancedSearchJoyride") === "true";
+    this.finishedGraphJoyride =
+      localStorage.getItem("finishedGraphJoyride") === "true";
+
+    this.colorMode = localStorage.getItem("chakra-ui-color-mode");
+    this.getInteractionsModalDisplay();
+
+    makeAutoObservable(this, {}, { deep: true });
+  }
+
+  getBasePresentURL = () => {
+    if (isEnvSet("VITE_SERVER_PORT")) {
+      return "http://localhost:8882/present";
+    } else {
+      return `${window.location.origin}/present`;
     }
-    get isDetail() {
-        return this.currentGraph === 'detail';
+  };
+
+  setFinishedHomeJoyride = (value) => {
+    this.finishedHomeJoyride = value;
+    localStorage.setItem("finishedHomeJoyride", value);
+  };
+  setFinishedAdvancedSearchJoyride = (value) => {
+    this.finishedAdvancedSearchJoyride = value;
+    localStorage.setItem("finishedAdvancedSearchJoyride", value);
+  };
+  setFinishedGraphJoyride = (value) => {
+    this.finishedGraphJoyride = value;
+    localStorage.setItem("finishedGraphJoyride", value);
+  };
+
+  resetJoyride = () => {
+    this.setFinishedHomeJoyride(false);
+    this.setFinishedAdvancedSearchJoyride(false);
+    this.setFinishedGraphJoyride(false);
+  };
+
+  setInteractionModalClosed = (value) => (this.interactionModalClosed = value);
+
+  setInteractionsModalDisplay = (value) => {
+    this.neverShowInteractionModal = value;
+
+    localStorage.setItem(
+      "neverShowInteractionsModal",
+      this.neverShowInteractionModal
+    );
+  };
+
+  getInteractionsModalDisplay = () => {
+    this.neverShowInteractionModal =
+      localStorage.getItem("neverShowInteractionsModal") === "true";
+  };
+
+  addCommentToCurrentHistoryItem = (comment) => {
+    this.studyHistory[this.studyHistoryItemIndex].comments.push(comment);
+  };
+
+  setDataModificationMessage = (message) =>
+    (this.dataModificationMessage = message);
+
+  deleteCommentFromCurrentHistoryItem = (id) => {
+    const commentIndex = this.studyHistory[
+      this.studyHistoryItemIndex
+    ].comments.findIndex((comment) => comment.id === id);
+
+    this.studyHistory[this.studyHistoryItemIndex].comments.splice(
+      commentIndex,
+      1
+    );
+  };
+
+  editCommentFromCurrentHistoryItem = (index, newComment) => {
+    this.studyHistory[this.studyHistoryItemIndex].comments[index] = {
+      ...this.studyHistory[this.studyHistoryItemIndex].comments[index],
+      ...newComment,
+    };
+
+    this.studyHistory[this.studyHistoryItemIndex].comments = [
+      ...this.studyHistory[this.studyHistoryItemIndex].comments,
+    ];
+  };
+
+  setSurveyHidden = (val) => {
+    this.surveyHidden = val;
+    localStorage.setItem("surveyhidden", val);
+  };
+
+  setStudyIsEmpty = (val) => (this.studyIsEmpty = val);
+
+  setRightPanelTypeToOpen = (val) => (this.rightPanelTypeToOpen = val);
+
+  setIsStudyPublic = (val) => (this.isStudyPublic = val);
+
+  toggleIsStudyPublic = async () => {
+    this.setIsStudyPublic(!this.isStudyPublic);
+
+    const params = {
+      public: this.isStudyPublic,
+    };
+
+    const { response, error } = await safeRequest(
+      axios.patch(`studies/${this.studyUuid}`, params, {
+        headers: { user_id: this.userUuid },
+      })
+    );
+
+    if (error) {
+      this.handleRequestError(error);
+      return;
     }
 
-    handleRequestError = error => {
-        this.setErrorDetails(error);
+    this.setStudyPublicURL(response.data);
+  };
 
-        switch (error['type']) {
-            case 'response':
-                this?.store?.track?.trackEvent(
-                    'Global',
-                    'Response Error',
-                    JSON.stringify({
-                        url: error.url,
-                        method: error.method,
-                        statusCode: error.status
-                        // message: error.data.detail[0].msg
-                    })
-                );
+  setStudyPublicURL = (val) => (this.studyPublicURL = val);
+  setIsLeftSidePanelOpen = (val) => (this.isLeftSidePanelOpen = val);
+  setIsRightSidePanelOpen = (val) => (this.isRightSidePanelOpen = val);
+  setRightPanelType = (val) => (this.rightPanelType = val);
 
-                break;
-            case 'request':
-                this?.store?.track?.trackEvent(
-                    'Global',
-                    'Request Error',
-                    JSON.stringify({
-                        url: error.url,
-                        method: error.method,
-                        statusCode: error.status,
-                        state: error.state
-                    })
-                );
+  setRightPanelWidth = (val) => (this.rightPanelWidth = val);
 
-                break;
-            default:
-                this?.store?.track?.trackEvent(
-                    'Global',
-                    'Request setup error',
-                    JSON.stringify({
-                        url: error.url,
-                        method: error.method,
-                        message: error.message
-                    })
-                );
+  setShowCookieInfo = (val) => (this.showCookieInfo = val);
 
-                break;
-        }
+  setDataIsLoading = (val) => (this.dataIsLoading = val);
+
+  setShowCommentModal = (val) => (this.showCommentModal = val);
+
+  updateIsStudySaved = (val) => (this.studyIsSaved = val);
+
+  updateStudies = (val) => (this.studies = val);
+
+  setStudyName = (name) => (this.studyName = name);
+
+  setStudyAuthor = (author) => (this.studyAuthor = author);
+
+  setColorMode = (val) => (this.colorMode = val);
+
+  setErrorDetails = (val) => (this.errorDetails = val);
+
+  setStudyDescription = (description) => (this.studyDescription = description);
+  setStudyUuid = (id) => {
+    this.studyUuid = id;
+    localStorage.setItem("studyuuid", id);
+  };
+
+  setStudyQuery = () => {
+    this.store.search.setSearchQuery(
+      this.studyHistory[this.studyHistoryItemIndex].query
+    );
+  };
+
+  setStudyHistory = (history) => (this.studyHistory = history);
+
+  setStudyHistoryItemIndex = (index) => (this.studyHistoryItemIndex = index);
+
+  setStudyHistoryItemIndexById = (id) => {
+    for (let i = 0; i < this.studyHistory.length; i++) {
+      if (this.studyHistory[i].id === id) {
+        this.setStudyHistoryItemIndex(i);
+        break;
+      }
+    }
+  };
+
+  updateStudyName = async (name) => {
+    this.studyName = name;
+
+    const params = {
+      study_name: this.studyName,
     };
+
+    const { error } = await safeRequest(
+      axios.patch(`studies/${this.studyUuid}`, params, {
+        headers: { user_id: this.userUuid },
+      })
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    this.updateIsStudySaved(true);
+    this.getSavedStudies();
+  };
+
+  updateStudyAuthor = async (author) => {
+    this.studyAuthor = author;
+
+    const params = {
+      study_author: this.studyAuthor,
+    };
+
+    const { error } = await safeRequest(
+      axios.patch(`studies/${this.studyUuid}`, params, {
+        headers: { user_id: this.userUuid },
+      })
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    this.updateIsStudySaved(true);
+    this.getSavedStudies();
+  };
+
+  updateStudyDescription = async (description) => {
+    this.studyDescription = description;
+
+    const params = {
+      study_description: this.studyDescription,
+    };
+
+    const { error } = await safeRequest(
+      axios.patch(`studies/${this.studyUuid}`, params, {
+        headers: { user_id: this.userUuid },
+      })
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    this.updateIsStudySaved(true);
+    this.getSavedStudies();
+  };
+
+  setTrackingEnabled = (val) => {
+    this.trackingEnabled = val;
+    localStorage.setItem("trackingenabled", val);
+    if (val) {
+      this.store.track.initTracking();
+    }
+  };
+
+  setHideCookieBanner = () => {
+    this.hideCookieBanner = true;
+    localStorage.setItem("hidecookiebanner", true);
+  };
+
+  getCookieBanner = () => {
+    return localStorage.getItem("hidecookiebanner");
+  };
+
+  generateUUID = async () => {
+    const { response, error } = await safeRequest(
+      axios.get("utils/uuid", {
+        headers: {
+          accept: "application/json",
+        },
+      })
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    localStorage.setItem("useruuid", response.data);
+    this.userUuid = response.data;
+  };
+
+  generateStudyUUID = async () => {
+    this.studyName = uniqueNamesGenerator({
+      dictionaries: [colors, animals],
+      separator: " ",
+      length: 2,
+      seed: this.studyUuid,
+    });
+
+    this.studyDescription = "";
+
+    const { response, error } = await safeRequest(
+      axios.post(
+        "studies",
+        { study_name: this.studyName },
+        {
+          headers: { user_id: this.userUuid },
+        }
+      )
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    localStorage.setItem("studyuuid", response.data);
+    this.setStudyUuid(response.data);
+
+    this.setStudyHistory([]);
+    this.setStudyHistoryItemIndex(0);
+  };
+
+  deleteStudy = async (studyUuid) => {
+    if ((!this.studyIsSaved && !studyUuid) || studyUuid) {
+      const studyID = studyUuid ? studyUuid : this.studyUuid;
+
+      if (studyID) {
+        const { error } = await safeRequest(
+          axios.delete(`studies/${studyID}`, {
+            headers: { user_id: this.userUuid },
+            data: {},
+          })
+        );
+
+        if (error) {
+          this.store.core.handleRequestError(error);
+          return;
+        }
+
+        if (studyUuid) {
+          this.getSavedStudies();
+        }
+      }
+    }
+  };
+
+  saveStudy = async () => {
+    const params = {
+      study_name: this.studyName,
+      study_description: this.studyDescription,
+      study_author: this.studyAuthor,
+    };
+
+    const { error } = await safeRequest(
+      axios.patch(`studies/${this.studyUuid}`, params, {
+        headers: { user_id: this.userUuid },
+      })
+    );
+
+    if (error) {
+      this.store.core.handleRequestError(error);
+      return;
+    }
+
+    this.updateIsStudySaved(true);
+  };
+
+  getSavedStudies = async () => {
+    if (this.userUuid) {
+      const { response, error } = await safeRequest(
+        axios.get("studies", { headers: { user_id: this.userUuid } })
+      );
+
+      if (error) {
+        this.store.core.handleRequestError(error);
+        return;
+      }
+
+      this.updateStudies(response.data);
+    }
+  };
+
+  setToastMessage = (message) => (this.toastInfo.message = message);
+  setToastType = (toastType) => (this.toastInfo.type = toastType);
+
+  setCurrentGraph = (graphType) => {
+    this.currentGraph = graphType;
+    this.store.graph.updateTableColumns();
+  };
+
+  setVisibleDimensions = (dimensions) => {
+    this.visibleDimensions[this.currentGraph] = dimensions;
+  };
+
+  resetVisibleDimensions = () => {
+    this.visibleDimensions = { overview: [], detail: [] };
+  };
+
+  setDemoMode = (val) => {
+    this.demoMode = val;
+  };
+
+  setActiveDemoIndex = (val) => {
+    this.activeDemoIndex = val;
+  };
+
+  setDemoNavigationData = (data) => {
+    this.demoNavigationData = data;
+  };
+
+  toggleVisibleDimension = (dimension) => {
+    if (this.visibleDimensions[this.currentGraph]) {
+      if (this.visibleDimensions[this.currentGraph].includes(dimension)) {
+        this.visibleDimensions[this.currentGraph].splice(
+          this.visibleDimensions[this.currentGraph].indexOf(dimension),
+          1
+        );
+      } else {
+        this.visibleDimensions[this.currentGraph].push(dimension);
+      }
+    }
+  };
+
+  setArrayAsVisibleDimensions = (dimensions) => {
+    this.visibleDimensions[this.currentGraph] = dimensions;
+  };
+
+  get isOverview() {
+    return this.currentGraph === "overview";
+  }
+  get isDetail() {
+    return this.currentGraph === "detail";
+  }
+
+  handleRequestError = (error) => {
+    this.setErrorDetails(error);
+
+    switch (error["type"]) {
+      case "response":
+        this?.store?.track?.trackEvent(
+          "Global",
+          "Response Error",
+          JSON.stringify({
+            url: error.url,
+            method: error.method,
+            statusCode: error.status,
+            // message: error.data.detail[0].msg
+          })
+        );
+
+        break;
+      case "request":
+        this?.store?.track?.trackEvent(
+          "Global",
+          "Request Error",
+          JSON.stringify({
+            url: error.url,
+            method: error.method,
+            statusCode: error.status,
+            state: error.state,
+          })
+        );
+
+        break;
+      default:
+        this?.store?.track?.trackEvent(
+          "Global",
+          "Request setup error",
+          JSON.stringify({
+            url: error.url,
+            method: error.method,
+            message: error.message,
+          })
+        );
+
+        break;
+    }
+  };
 }
