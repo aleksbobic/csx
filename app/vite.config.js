@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import httpProxy from "http-proxy";
+import react from "@vitejs/plugin-react";
 
 httpProxy.createProxyServer();
 
@@ -16,12 +16,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": "/src",
+      src: "/src",
       components: "/src/components",
+      layouts: "/src/layouts",
       pages: "/src/pages",
       stores: "/src/stores",
       hooks: "/src/hooks",
       images: "/src/images",
+      utils: "/src/utils",
     },
   },
   server: {

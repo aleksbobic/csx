@@ -1,4 +1,4 @@
-import { isEnvFalse } from "@/general.utils";
+import { isEnvFalse } from "utils/general.utils";
 import { makeAutoObservable } from "mobx";
 
 export class TrackingStore {

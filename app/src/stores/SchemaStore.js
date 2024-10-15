@@ -1,5 +1,5 @@
 import { MarkerType } from "react-flow-renderer";
-import { generateNodePositions } from "@/schema.utils";
+import { generateNodePositions } from "utils/schema.utils";
 import { makeAutoObservable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 

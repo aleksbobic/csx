@@ -11,15 +11,15 @@ import {
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import ContextMenuComponent from "components/feature/contextmenu/ContextMenu.component";
-import GraphComponent from "components/feature/graph/Graph.component";
+import ContextMenuComponent from "components/contextmenu/ContextMenu.component";
+import GraphComponent from "components/graph/Graph.component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import InteractionsToast from "components/feature/interactionstoast/InteractionsToast.component";
+import InteractionsToast from "components/interactionstoast/InteractionsToast.component";
 import Joyride from "react-joyride";
 import { RootStoreContext } from "stores/RootStore";
-import { SurveyInfoModal } from "components/feature/surveyinfo/SurveyInfo.component";
-import WidgetModal from "components/interface/widgetmodal/WidgetModal.component";
-import { isEnvSet } from "@/general.utils";
+import { SurveyInfoModal } from "components/surveyinfo/SurveyInfo.component";
+import WidgetModal from "layouts/widgetmodal/WidgetModal.component";
+import { isEnvSet } from "utils/general.utils";
 import { observer } from "mobx-react";
 import queryString from "query-string";
 import { useBeforeunload } from "react-beforeunload";

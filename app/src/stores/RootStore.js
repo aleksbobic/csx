@@ -16,7 +16,7 @@ import { TrackingStore } from "./TrackingStore";
 import { WorkflowStore } from "./WorkflowStore";
 import axios from "axios";
 import { createContext } from "react";
-import { isEnvSet } from "@/general.utils";
+import { isEnvSet } from "utils/general.utils";
 
 export class RootStore {
   constructor() {

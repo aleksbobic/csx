@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import AdvancedSearchComponent from "components/feature/advancedsearch/AdvancedSearch.component";
+import AdvancedSearchComponent from "components/advancedsearch/AdvancedSearch.component";
 import { Flex } from "@chakra-ui/react";
 import Joyride from "react-joyride";
 import PropTypes from "prop-types";

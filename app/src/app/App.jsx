@@ -1,25 +1,20 @@
-import { Box, useColorMode, useToast } from "@chakra-ui/react";
-import LeftPanel from "components/interface/leftpanel/LeftPanel.component";
-import NavigationPanelComponent from "components/interface/navigation/NavigationPanel.component";
-import { observer } from "mobx-react";
-// import GraphPage from "pages/graph/Graph.page";
-// import HomePage from "pages/home/Home.page";
-// import SearchPage from "pages/search/Search.page";
-
-import { GraphPage, HomePage, SearchPage, PresentPage } from "pages";
-import { Helmet, HelmetProvider } from "react-helmet-async";
-
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.scss";
-
-import CommentModal from "components/feature/commentmodal/CommentModal.component";
-import CustomScroll from "components/feature/customscroll/CustomScroll.component";
-import { ErrorModal } from "components/feature/errorModal/ErrorModal.component";
-import { isEnvFalse, isEnvTrue } from "@/general.utils";
 import "overlayscrollbars/overlayscrollbars.css";
-// import PresentPage from "pages/present/Present.page";
+
+import { Box, useColorMode, useToast } from "@chakra-ui/react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { GraphPage, HomePage, PresentPage, SearchPage } from "pages";
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import { isEnvFalse, isEnvTrue } from "utils/general.utils";
 import { useCallback, useContext, useEffect, useRef } from "react";
+
+import CommentModal from "components/commentmodal/CommentModal.component";
+import CustomScroll from "components/customscroll/CustomScroll.component";
+import { ErrorModal } from "components/errorModal/ErrorModal.component";
+import LeftPanel from "layouts/leftpanel/LeftPanel.component";
+import NavigationPanelComponent from "layouts/navigation/NavigationPanel.component";
 import { RootStoreContext } from "stores/RootStore";
+import { observer } from "mobx-react";
 
 function CSX() {
   const { colorMode } = useColorMode();

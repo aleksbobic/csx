@@ -18,7 +18,7 @@ import {
 } from "chart.js";
 
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { capitaliseFirstLetter } from "@/general.utils";
+import { capitaliseFirstLetter } from "utils/general.utils";
 import { makeAutoObservable } from "mobx";
 import { schemeTableau10 } from "d3-scale-chromatic";
 import { v4 as uuidv4 } from "uuid";

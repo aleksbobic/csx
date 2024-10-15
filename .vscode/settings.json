@@ -1,8 +1,11 @@
 {
-    "python.formatting.provider": "none",
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true,
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    }
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports":"always"
+        },
+      },
+      "isort.args":["--profile", "black"],
+
 }

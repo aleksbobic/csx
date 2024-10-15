@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import logo from "images/logo.png";
 import { makeAutoObservable } from "mobx";
 import pptxgen from "pptxgenjs";
-import { safeRequest } from "@/general.utils";
+import { safeRequest } from "utils/general.utils";
 
 export class PresentStore {
   slides = [];

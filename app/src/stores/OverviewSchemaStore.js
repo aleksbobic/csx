@@ -1,4 +1,4 @@
-import { getSchemaElementPositions } from "@/schema.utils";
+import { getSchemaElementPositions } from "utils/schema.utils";
 import { makeAutoObservable } from "mobx";
 import { v4 as uuidv4 } from "uuid";
 

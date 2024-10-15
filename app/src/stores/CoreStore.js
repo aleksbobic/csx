@@ -1,5 +1,5 @@
 import { animals, colors, uniqueNamesGenerator } from "unique-names-generator";
-import { isEnvSet, safeRequest } from "@/general.utils";
+import { isEnvSet, safeRequest } from "utils/general.utils";
 
 import axios from "axios";
 import { makeAutoObservable } from "mobx";

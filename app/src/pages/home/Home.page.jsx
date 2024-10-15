@@ -16,23 +16,23 @@ import {
   useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
-import { isEnvFalse, isEnvTrue } from "@/general.utils";
+import { isEnvFalse, isEnvTrue } from "utils/general.utils";
 import { useCallback, useContext, useEffect, useState } from "react";
 
-import CookieInfo from "components/feature/home/cookieinfo/CookieInfo.component";
-import DatasetConfigModal from "components/interface/datasetconfigmodal/DatasetConfigModal.component";
-import DatasetElement from "components/feature/home/datasetgrid/datasetElement/DatasetElement.component";
-import DatasetGrid from "components/feature/home/datasetgrid/DatasetGrid.component";
-import EmptySearch from "components/feature/home/emptysearch/EmptySearch.component";
-import EmptyStudy from "components/feature/home/emptystudy/EmptyStudy.component";
-import FileUploadModal from "components/interface/fileuploadmodal/FileUploadModal.component";
-import Footer from "components/interface/footer/Footer.component";
+import CookieInfo from "components/home/cookieinfo/CookieInfo.component";
+import DatasetConfigModal from "layouts/datasetconfigmodal/DatasetConfigModal.component";
+import DatasetElement from "components/home/datasetgrid/datasetElement/DatasetElement.component";
+import DatasetGrid from "components/home/datasetgrid/DatasetGrid.component";
+import EmptySearch from "components/home/emptysearch/EmptySearch.component";
+import EmptyStudy from "components/home/emptystudy/EmptyStudy.component";
+import FileUploadModal from "layouts/fileuploadmodal/FileUploadModal.component";
+import Footer from "layouts/footer/Footer.component";
 import Joyride from "react-joyride";
 import PropTypes from "prop-types";
 import { RootStoreContext } from "stores/RootStore";
-import SearchBar from "components/feature/home/searchbar/SearchBar.component";
-import StudyGrid from "components/feature/home/studygrid/StudyGrid.component";
-import TutorialGrid from "components/feature/home/tutorialgrid/TutorialGrid.component";
+import SearchBar from "components/home/searchbar/SearchBar.component";
+import StudyGrid from "components/home/studygrid/StudyGrid.component";
+import TutorialGrid from "components/home/tutorialgrid/TutorialGrid.component";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "images/logo.png";
 import { observer } from "mobx-react";
