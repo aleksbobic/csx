@@ -32,7 +32,7 @@ import { isEnvFalse, isEnvSet } from "utils/general.utils";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 import { PresentationChartLineIcon } from "@heroicons/react/20/solid";
-import RightPanel from "../rightpanel/RightPanel.component";
+import RightPanel from "layouts/rightpanel/RightPanel.component";
 import { RootStoreContext } from "stores/RootStore";
 import logo from "images/logo.png";
 import { observer } from "mobx-react";

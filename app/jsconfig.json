@@ -9,7 +9,8 @@
         "stores/*": ["src/stores/*"],
         "hooks/*": ["src/hooks/*"],
         "images/*": ["src/images/*"],
-        "utils/*": ["src/utils/*"]
+        "utils/*": ["src/utils/*"],
+        "config/*": ["src/config/*"]
       }
     },
     "include": ["src"]

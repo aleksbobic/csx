@@ -24,6 +24,7 @@ export default defineConfig({
       hooks: "/src/hooks",
       images: "/src/images",
       utils: "/src/utils",
+      config: "/src/config",
     },
   },
   server: {

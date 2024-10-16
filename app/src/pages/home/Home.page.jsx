@@ -27,12 +27,13 @@ import EmptySearch from "components/home/emptysearch/EmptySearch.component";
 import EmptyStudy from "components/home/emptystudy/EmptyStudy.component";
 import FileUploadModal from "layouts/fileuploadmodal/FileUploadModal.component";
 import Footer from "layouts/footer/Footer.component";
-import Joyride from "react-joyride";
 import PropTypes from "prop-types";
 import { RootStoreContext } from "stores/RootStore";
 import SearchBar from "components/home/searchbar/SearchBar.component";
 import StudyGrid from "components/home/studygrid/StudyGrid.component";
 import TutorialGrid from "components/home/tutorialgrid/TutorialGrid.component";
+import UiGuide from "components/uiguide/UIGuide";
+import UiGuideHomeSteps from "config/uiguide.home";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import logo from "images/logo.png";
 import { observer } from "mobx-react";
@@ -158,7 +159,7 @@ function HomePage() {
           position="absolute"
           right="16px"
           top="16px"
-          // icon={<Close style={{ '--ggs': 0.7 }} />}
+          icon={<XMarkIcon style={{ width: "14px", height: "14px" }} />}
           transition="0.2s all ease-in-out"
           _hover={{ backgroundColor: "blackAlpha.50" }}
           onClick={() => {
@@ -233,34 +234,7 @@ function HomePage() {
     }, 500);
   }, [cookieToast, renderDarkCookie, store.core.hideCookieBanner]);
 
-  // useEffect(() => {
-  //     if (store.core.hideCookieBanner) {
-  //         cookieToast.closeAll();
-  //     } else {
-  //         if (colorMode === 'light') {
-  //             cookieToast.closeAll();
-  //             cookieToast({
-  //                 duration: null,
-  //                 render: () => renderLightCookie()
-  //             });
-  //         } else {
-  //             cookieToast.closeAll();
-  //             cookieToast({
-  //                 duration: null,
-  //                 render: () => renderDarkCookie()
-  //             });
-  //         }
-  //     }
-  // }, [
-  //     colorMode,
-  //     cookieToast,
-  //     renderDarkCookie,
-  //     renderLightCookie,
-  //     store.core.hideCookieBanner
-  // ]);
-
   useEffect(() => {
-    // console.log(store.core.hideCookieBanner, cookieToastVisible);
     if (!store.core.hideCookieBanner && !cookieToastVisible) {
       setCookieToastVisible(colorMode);
 
@@ -343,164 +317,16 @@ function HomePage() {
       backgroundColor={colorMode === "light" ? "white" : "#171A23"}
       paddingTop="150px"
     >
-      <Joyride
-        steps={[
-          {
-            target: "#Title",
-            placement: "center",
-            floaterProps: { hideArrow: true },
-            title: (
-              <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                Welcome!
-              </span>
-            ),
-            content: (
-              <div style={{ padding: "10px 20px" }}>
-                <p
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                  }}
-                >
-                  Welcome to Collaboration Spotting X 🥳! This is a new visual
-                  network analysis tool that enables searching, exploring,
-                  analysing and modeling your data 🪄. You can interact with the
-                  highlighted areas of this tutorial.{" "}
-                  <span
-                    style={{
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Make sure to perform all tasks mentioned in this tutorial.
-                  </span>
-                </p>
-                <ul
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                    marginTop: "10px",
-                  }}
-                >
-                  <li style={{ paddingBottom: "6px" }}>
-                    Continue this guide by{" "}
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        color: "#43a2fb",
-                      }}
-                    >
-                      clicking next 🚀
-                    </span>
-                    .
-                  </li>
-                </ul>
-              </div>
-            ),
-          },
-          {
-            target: "#Searchbar",
-            placement: "bottom",
-            title: (
-              <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                Search
-              </span>
-            ),
-            content: (
-              <div style={{ padding: "10px 20px" }}>
-                <p
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                  }}
-                >
-                  To search through a datasets you can use the search bar 🔎.
-                  You can select the dataset for searching in the left dropdown.
-                  The hint bellow the search bar provides information on the
-                  dataset feature used for search.
-                </p>
-                <ul
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                    marginTop: "10px",
-                  }}
-                >
-                  <li style={{ paddingBottom: "6px" }}>
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        color: "#43a2fb",
-                      }}
-                    >
-                      Click next
-                    </span>{" "}
-                    for the next step in this guide.
-                  </li>
-                </ul>
-              </div>
-            ),
-          },
-          {
-            target: "#DatasetGrid",
-            placement: "bottom",
-            title: (
-              <span style={{ fontSize: "18px", fontWeight: "bold" }}>
-                Datasets
-              </span>
-            ),
-            content: (
-              <div style={{ padding: "10px 20px" }}>
-                <p
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                  }}
-                >
-                  The dataset list displays all datasets available in CSX 📊.
-                  You can view full datasets(➡️) as well as launch the advanced
-                  search view (🔎).
-                </p>
-                <ul
-                  style={{
-                    textAlign: "left",
-                    fontSize: "14px",
-                    marginTop: "10px",
-                  }}
-                >
-                  <li style={{ paddingBottom: "6px" }}>
-                    <span
-                      style={{
-                        fontWeight: "bold",
-                        color: "#43a2fb",
-                      }}
-                    >
-                      Hover over the example dataset and click the 🔎 icon
-                    </span>{" "}
-                    for the next part of this tutorial.
-                  </li>
-                </ul>
-              </div>
-            ),
-          },
-        ]}
-        styles={{
-          options: {
-            backgroundColor: "#171A23",
-            textColor: "white",
-            primaryColor: "#43a2fb",
-            arrowColor: "#171A23",
-          },
-        }}
-        showProgress={true}
-        continuous={true}
-        spotlightClicks={true}
-        callback={(data) => {
+      <UiGuide
+        steps={UiGuideHomeSteps}
+        onFinish={(data) => {
           if (data.action === "reset") {
             store.core.setFinishedHomeJoyride(true);
           }
         }}
         run={!store.core.finishedHomeJoyride}
       />
+
       <FileUploadModal />
       <DatasetConfigModal />
       <Center width="100%" minH="200px" flexDir="column" position="relative">
