@@ -55,16 +55,16 @@ function LeftPanel() {
     onToggle();
 
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Left panel",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: `${isOpen ? "Open" : "Close"} left panel`,
-      })
+      }
     );
   };
 
@@ -378,16 +378,16 @@ function LeftPanel() {
           openSliderIfClosed();
 
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Left panel",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Open study info",
-            })
+            }
           );
         }}
         padding="8px"
@@ -431,16 +431,16 @@ function LeftPanel() {
           openSliderIfClosed();
 
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Left panel",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Open view tools",
-            })
+            }
           );
         }}
         _hover={{ bgColor: "whiteAlpha.200" }}
@@ -485,16 +485,16 @@ function LeftPanel() {
           openSliderIfClosed();
 
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Left panel",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Open modification tools",
-            })
+            }
           );
         }}
         _hover={{ bgColor: "whiteAlpha.200" }}
@@ -679,4 +679,5 @@ function LeftPanel() {
   );
 }
 
-export default observer(LeftPanel);
+const ObservedLeftPanel = observer(LeftPanel);
+export default ObservedLeftPanel;

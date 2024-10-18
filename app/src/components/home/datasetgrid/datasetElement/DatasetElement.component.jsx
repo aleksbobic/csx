@@ -108,18 +108,18 @@ function DatasetElement(props) {
               color={textColor}
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Home page",
                     sub_area: "Dataset grid",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Delete dataset",
                     event_value: props.dataset,
-                  })
+                  }
                 );
 
                 store.search.deleteDataset(props.dataset);
@@ -150,18 +150,18 @@ function DatasetElement(props) {
               color={textColor}
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Home page",
                     sub_area: "Dataset grid",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Open change default config modal",
                     event_value: props.dataset,
-                  })
+                  }
                 );
 
                 store.search.getConifg(props.dataset);
@@ -191,18 +191,18 @@ function DatasetElement(props) {
             }}
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Home page",
                   sub_area: "Dataset grid",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Open advanced search",
                   event_value: props.dataset,
-                })
+                }
               );
 
               navigateToAdvancedSearch(props.dataset);
@@ -233,18 +233,18 @@ function DatasetElement(props) {
               }}
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Home page",
                     sub_area: "Dataset grid",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "View entire dataset",
                     event_value: props.dataset,
-                  })
+                  }
                 );
 
                 props.onNavigate();

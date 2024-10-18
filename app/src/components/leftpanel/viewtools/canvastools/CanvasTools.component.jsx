@@ -21,7 +21,7 @@ import { RootStoreContext } from "stores/RootStore";
 import { observer } from "mobx-react";
 import { useContext } from "react";
 
-function CanvasTools() {
+const CanvasTools = () => {
   const store = useContext(RootStoreContext);
 
   return (
@@ -89,18 +89,18 @@ function CanvasTools() {
                       store.graphInstance.setPanSpeed(value);
 
                       store.track.trackEvent(
-                        JSON.stringify({
+                        {
                           area: "Left panel",
                           sub_area: "VIew tools",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           item_type: "Slider",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           event_type: "Slide",
                           event_action: "Change panning speed",
                           event_value: value,
-                        })
+                        }
                       );
                     }}
                   >
@@ -140,17 +140,17 @@ function CanvasTools() {
               }
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Left panel",
                     sub_area: "VIew tools",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Fit graph to view",
-                  })
+                  }
                 );
 
                 store.graphInstance.zoomToFit();
@@ -172,17 +172,17 @@ function CanvasTools() {
               }
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Left panel",
                     sub_area: "VIew tools",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Take screenshot",
-                  })
+                  }
                 );
                 store.graphInstance.takeScreenshot();
               }}
@@ -196,6 +196,7 @@ function CanvasTools() {
       </AccordionItem>
     </Accordion>
   );
-}
+};
 
-export default observer(CanvasTools);
+const ObservedCanvasTools = observer(CanvasTools);
+export default ObservedCanvasTools;

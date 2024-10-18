@@ -116,18 +116,18 @@ function StudyGrid(props) {
                       icon={<XMarkIcon style={{ "--ggs": "0.7" }} />}
                       onClick={() => {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Home page",
                             sub_area: "Study grid",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Button",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Click",
                             event_action: "Delete study",
                             event_value: study.study_uuid,
-                          })
+                          }
                         );
 
                         store.core.deleteStudy(study.study_uuid);
@@ -186,18 +186,18 @@ function StudyGrid(props) {
                       }}
                       onClick={() => {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Home page",
                             sub_area: "Study grid",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Button",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Click",
                             event_action: "Open study",
                             event_value: study.study_uuid,
-                          })
+                          }
                         );
                         openStudy(study.study_uuid);
                       }}
@@ -219,4 +219,5 @@ StudyGrid.propTypes = {
   onOpenStudy: PropTypes.func,
 };
 
-export default observer(StudyGrid);
+const ObservedStudyGrid = observer(StudyGrid);
+export default ObservedStudyGrid;

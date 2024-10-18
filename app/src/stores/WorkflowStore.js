@@ -171,18 +171,18 @@ export class WorkflowStore {
 
   deleteNode = (nodeID) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Advanced search",
         sub_area: "Node",
         sub_area_id: nodeID,
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Delete node",
-      })
+      }
     );
 
     this.nodes = [
@@ -687,18 +687,18 @@ export class WorkflowStore {
 
   onConnect = (connection) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Advanced search",
         sub_area: "Search canvas",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Edge",
         item_id: `e${connection.source}-${connection.target}`,
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Connect",
         event_action: "Add new edge",
-      })
+      }
     );
 
     const newConnection = {
@@ -739,18 +739,18 @@ export class WorkflowStore {
 
   removeEdge = (id) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Advanced search",
         sub_area: "Edge",
         sub_area_id: id,
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Remove edge",
-      })
+      }
     );
 
     const connection = this.edges.find((element) => element.id === id);
@@ -778,31 +778,31 @@ export class WorkflowStore {
 
   runWorkFlow = (resultsNodeId) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Advanced search",
         sub_area: "Node",
         sub_area_id: resultsNodeId,
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Run search",
-      })
+      }
     );
 
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Global",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: null,
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Enter study",
         event_value: this.store.core.studyUuid,
-      })
+      }
     );
 
     this.nodes = [...this.nodes];

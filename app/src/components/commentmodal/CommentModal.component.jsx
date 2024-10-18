@@ -36,16 +36,9 @@ function CommentModal() {
       store.comment.commentTrigger
     ) {
       store.track.trackEvent(
-        JSON.stringify({
-          area: "Graph area",
-        }),
-        JSON.stringify({
-          item_type: "Key",
-        }),
-        JSON.stringify({
-          event_type: "C+Shift",
-          event_action: "Open comment modal",
-        })
+        { area: "Graph area" },
+        { item_type: "Key" },
+        { event_type: "C+Shift", event_action: "Open comment modal" }
       );
 
       store.core.setShowCommentModal(true);
@@ -53,16 +46,9 @@ function CommentModal() {
 
     if (closeCommentModalKey && store.core.showCommentModal) {
       store.track.trackEvent(
-        JSON.stringify({
-          area: "Graph area",
-        }),
-        JSON.stringify({
-          item_type: "Key",
-        }),
-        JSON.stringify({
-          event_type: "Esc",
-          event_action: "Close comment modal",
-        })
+        { area: "Graph area" },
+        { item_type: "Key" },
+        { event_type: "Esc", event_action: "Close comment modal" }
       );
       setComment("");
       store.core.setShowCommentModal(false);
@@ -89,18 +75,13 @@ function CommentModal() {
       store.comment.commentTrigger
     ) {
       store.track.trackEvent(
-        JSON.stringify({
-          area: "Graph area",
-          sub_area: "Comment modal",
-        }),
-        JSON.stringify({
-          item_type: "Key",
-        }),
-        JSON.stringify({
+        { area: "Graph area", sub_area: "Comment modal" },
+        { item_type: "Key" },
+        {
           event_type: "Enter+Shift",
           event_action: "Submit comment",
           event_value: comment,
-        })
+        }
       );
 
       store.comment.addComment(comment);
@@ -159,18 +140,13 @@ function CommentModal() {
             store.comment.setChartToAttach(chart.id);
 
             store.track.trackEvent(
-              JSON.stringify({
-                area: "Graph area",
-                sub_area: "Comment modal",
-              }),
-              JSON.stringify({
-                item_type: "Button",
-              }),
-              JSON.stringify({
+              { area: "Graph area", sub_area: "Comment modal" },
+              { item_type: "Button" },
+              {
                 event_type: "Click",
                 event_action: "Attach chart",
                 event_value: chart.id,
-              })
+              }
             );
           }}
           _hover={{ textDecoration: "none", opacity: 1 }}
@@ -241,17 +217,9 @@ function CommentModal() {
               }
 
               store.track.trackEvent(
-                JSON.stringify({
-                  area: "Graph area",
-                  sub_area: "Comment modal",
-                }),
-                JSON.stringify({
-                  item_type: "Key",
-                }),
-                JSON.stringify({
-                  event_type: "Enter",
-                  event_action: "Open chart attach menu",
-                })
+                { area: "Graph area", sub_area: "Comment modal" },
+                { item_type: "Key" },
+                { event_type: "Enter", event_action: "Open chart attach menu" }
               );
             }}
             onClick={() => {
@@ -263,17 +231,9 @@ function CommentModal() {
               }
 
               store.track.trackEvent(
-                JSON.stringify({
-                  area: "Graph area",
-                  sub_area: "Comment modal",
-                }),
-                JSON.stringify({
-                  item_type: "Button",
-                }),
-                JSON.stringify({
-                  event_type: "Click",
-                  event_action: "Open chart attach menu",
-                })
+                { area: "Graph area", sub_area: "Comment modal" },
+                { item_type: "Button" },
+                { event_type: "Click", event_action: "Open chart attach menu" }
               );
             }}
             zIndex="2"
@@ -333,17 +293,9 @@ function CommentModal() {
               onClick={() => {
                 store.comment.removeChart();
                 store.track.trackEvent(
-                  JSON.stringify({
-                    area: "Graph area",
-                    sub_area: "Comment modal",
-                  }),
-                  JSON.stringify({
-                    item_type: "Button",
-                  }),
-                  JSON.stringify({
-                    event_type: "Click",
-                    event_action: "Remove chart",
-                  })
+                  { area: "Graph area", sub_area: "Comment modal" },
+                  { item_type: "Button" },
+                  { event_type: "Click", event_action: "Remove chart" }
                 );
               }}
               icon={
@@ -385,17 +337,12 @@ function CommentModal() {
                 store.comment.removeScreenshot();
 
                 store.track.trackEvent(
-                  JSON.stringify({
-                    area: "Graph area",
-                    sub_area: "Comment modal",
-                  }),
-                  JSON.stringify({
-                    item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  { area: "Graph area", sub_area: "Comment modal" },
+                  { item_type: "Button" },
+                  {
                     event_type: "Click",
                     event_action: "Remove graph screenshot",
-                  })
+                  }
                 );
               }}
               icon={
@@ -433,17 +380,9 @@ function CommentModal() {
               );
 
               store.track.trackEvent(
-                JSON.stringify({
-                  area: "Graph area",
-                  sub_area: "Comment modal",
-                }),
-                JSON.stringify({
-                  item_type: "Button",
-                }),
-                JSON.stringify({
-                  event_type: "Click",
-                  event_action: "Attach graph screenshot",
-                })
+                { area: "Graph area", sub_area: "Comment modal" },
+                { item_type: "Button" },
+                { event_type: "Click", event_action: "Attach graph screenshot" }
               );
             }}
             backgroundColor={
@@ -504,18 +443,13 @@ function CommentModal() {
           }
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
-                area: "Graph area",
-                sub_area: "Comment modal",
-              }),
-              JSON.stringify({
-                item_type: "Button",
-              }),
-              JSON.stringify({
+              { area: "Graph area", sub_area: "Comment modal" },
+              { item_type: "Button" },
+              {
                 event_type: "Click",
                 event_action: "Submit comment",
                 event_value: comment,
-              })
+              }
             );
             submitComment();
           }}
@@ -529,7 +463,11 @@ function CommentModal() {
     </HStack>
   );
 
-  return store.core.showCommentModal ? (
+  if (!store.core.showCommentModal) {
+    return <></>;
+  }
+
+  return (
     <Box
       width="500px"
       height="120px"
@@ -571,25 +509,16 @@ function CommentModal() {
         zIndex="2"
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
-              area: "Graph area",
-              sub_area: "Comment modal",
-            }),
-            JSON.stringify({
-              item_type: "Button",
-            }),
-            JSON.stringify({
-              event_type: "Click",
-              event_action: "Close comment modal",
-            })
+            { area: "Graph area", sub_area: "Comment modal" },
+            { item_type: "Button" },
+            { event_type: "Click", event_action: "Close comment modal" }
           );
           closeCommentModal();
         }}
       />
     </Box>
-  ) : (
-    <></>
   );
 }
 
-export default observer(CommentModal);
+const ObservedCommentModal = observer(CommentModal);
+export default ObservedCommentModal;

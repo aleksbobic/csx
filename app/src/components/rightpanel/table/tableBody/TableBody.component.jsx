@@ -75,18 +75,18 @@ function TableBody(props) {
           maxWidth="150px"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Results panel",
                 sub_area: "Results table",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Cell",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Zoom to node",
                 event_value: cell.value,
-              })
+              }
             );
 
             if (
@@ -151,18 +151,18 @@ function TableBody(props) {
             maxWidth="150px"
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Results panel",
                   sub_area: "Results table",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Cell",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Zoom to node",
                   event_value: cell.value,
-                })
+                }
               );
 
               if (
@@ -248,4 +248,5 @@ TableBody.propTypes = {
   rows: PropTypes.array,
 };
 
-export default observer(TableBody);
+const ObservedTableBody = observer(TableBody);
+export default ObservedTableBody;

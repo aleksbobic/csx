@@ -54,34 +54,34 @@ function ViewTools() {
                   setForceRunning(false);
 
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Left panel",
                       sub_area: "VIew tools",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Run force",
-                    })
+                    }
                   );
                 } else {
                   store.graphInstance.applyForce();
                   setForceRunning(true);
 
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Left panel",
                       sub_area: "VIew tools",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Stop force",
-                    })
+                    }
                   );
                 }
               }}
@@ -103,19 +103,19 @@ function ViewTools() {
               icon={<PlayIcon style={{ width: "14px", height: "14px" }} />}
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Left panel",
                     sub_area: "VIew tools",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: store.graphInstance.forceShouldIgnoreSelected
                       ? "Turn off layout simulation for selected nodes."
                       : "Turn on layout simulation for selected nodes.",
-                  })
+                  }
                 );
                 store.graphInstance.ignoreSelected(
                   !store.graphInstance.forceShouldIgnoreSelected
@@ -144,17 +144,17 @@ function ViewTools() {
                 store.graph.resetNodesPositions();
 
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Left panel",
                     sub_area: "VIew tools",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Reset layout",
-                  })
+                  }
                 );
               }}
               disabled={store.graphInstance.forceEngine}
@@ -196,4 +196,5 @@ function ViewTools() {
   );
 }
 
-export default observer(ViewTools);
+const ObservedViewTools = observer(ViewTools);
+export default ObservedViewTools;

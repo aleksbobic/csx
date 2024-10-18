@@ -58,17 +58,17 @@ function ModificationTools() {
                   size="sm"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "Modification tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Remove selected",
-                      })
+                      }
                     );
 
                     store.graph.removeSelection();
@@ -82,17 +82,17 @@ function ModificationTools() {
                   size="sm"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "Modification tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Remove invisible",
-                      })
+                      }
                     );
                     store.graph.trimNetwork();
                   }}
@@ -137,14 +137,14 @@ function ModificationTools() {
                   size="sm"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "Modification tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Broad expand",
                         event_value:
@@ -156,7 +156,7 @@ function ModificationTools() {
                               };
                             }
                           ),
-                      })
+                      }
                     );
 
                     store.graph.expandNetwork(
@@ -175,14 +175,14 @@ function ModificationTools() {
                   size="sm"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "Modification tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Narrow expand",
                         event_value:
@@ -194,7 +194,7 @@ function ModificationTools() {
                               };
                             }
                           ),
-                      })
+                      }
                     );
 
                     store.graph.expandNetwork(
@@ -229,4 +229,5 @@ function ModificationTools() {
   );
 }
 
-export default observer(ModificationTools);
+const ObservedModificationTools = observer(ModificationTools);
+export default ObservedModificationTools;

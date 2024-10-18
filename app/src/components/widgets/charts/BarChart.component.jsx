@@ -325,7 +325,7 @@ function BarChart({
             clickedValue = data.labels[points[0].index];
 
             dataIndex = index;
-          } catch (error) {
+          } catch {
             return;
           }
 
@@ -333,18 +333,18 @@ function BarChart({
 
           if ("nodeProperty" in data) {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.nodeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             if (chart.type.toLowerCase() === "grouped bar") {
@@ -362,18 +362,18 @@ function BarChart({
             }
           } else {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.edgeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             visibleNodeIds = store.graphInstance.filterEdgesWithValue(
@@ -422,7 +422,7 @@ function BarChart({
             ticks: {
               color: "white",
               diplay: isExpanded,
-              callback: function (value, index, ticks) {
+              callback: function (value) {
                 const stringValue = this.getLabelForValue(value);
                 if (stringValue) {
                   if (stringValue.length > 17) {
@@ -458,7 +458,7 @@ function BarChart({
             ticks: {
               color: "white",
               diplay: isExpanded,
-              callback: function (value, index, ticks) {
+              callback: function (value) {
                 const stringValue = this.getLabelForValue(value);
                 if (stringValue) {
                   if (stringValue.length > 17) {
@@ -538,5 +538,7 @@ BarChart.propTypes = {
   chartIndex: PropTypes.number,
   isExpanded: PropTypes.bool,
   isExample: PropTypes.bool,
+  settingsMode: PropTypes.bool,
 };
-export default observer(BarChart);
+const ObservedBarChart = observer(BarChart);
+export default ObservedBarChart;

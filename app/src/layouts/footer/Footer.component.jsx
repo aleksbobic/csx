@@ -136,17 +136,17 @@ function Footer() {
             color={textColor}
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Home page",
                   sub_area: "Footer",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Open tracking information panel",
-                })
+                }
               );
               store.core.setStudyIsEmpty(false);
               store.search.setSearchIsEmpty(false);
@@ -172,17 +172,17 @@ function Footer() {
               store.core.resetJoyride();
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Home page",
                   sub_area: "Footer",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Reset tutorial",
-                })
+                }
               );
             }}
           >

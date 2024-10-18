@@ -50,18 +50,18 @@ function GlobalFilter(props) {
           }
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Results panel",
                 sub_area: "Results table",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Search table",
                 event_value: globalFilterValue,
-              })
+              }
             );
 
             onChange();
@@ -78,4 +78,5 @@ GlobalFilter.propTypes = {
   setGlobalFilter: PropTypes.func,
 };
 
-export default observer(GlobalFilter);
+const ObservedGlobalFilter = observer(GlobalFilter);
+export default ObservedGlobalFilter;

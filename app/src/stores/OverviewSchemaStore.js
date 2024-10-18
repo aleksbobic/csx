@@ -163,18 +163,18 @@ export class OverviewSchemaStore {
     const newNodeId = uuidv4();
 
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Add new edge node",
         event_value: newNodeId,
-      })
+      }
     );
 
     this.nodes.push(this.generateNode(null, newNodeId));
@@ -186,18 +186,18 @@ export class OverviewSchemaStore {
 
   removeLinkNode = (id) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Remove edge node",
         event_value: id,
-      })
+      }
     );
 
     this.nodes = this.nodes.filter((node) => node.id !== id);
@@ -214,19 +214,19 @@ export class OverviewSchemaStore {
 
   setAnchor = (anchor) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
         sub_sub_area: "Anchor node",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Select element",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Change selection",
         event_action: "Change anchor",
         event_value: anchor,
-      })
+      }
     );
 
     this.anchor = anchor;
@@ -266,20 +266,20 @@ export class OverviewSchemaStore {
 
   setLink = (link, nodeId) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
         sub_sub_area: "Edge node",
         sub_sub_area_id: nodeId,
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Select element",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Change selection",
         event_action: "Change edge property",
         event_value: link,
-      })
+      }
     );
 
     if (this.links.includes(link)) {
@@ -357,19 +357,19 @@ export class OverviewSchemaStore {
 
   addProperty = (property) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
         sub_sub_area: "Anchor node",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Add anchor property",
         event_value: property,
-      })
+      }
     );
 
     this.anchorProperties.push(property);
@@ -383,19 +383,19 @@ export class OverviewSchemaStore {
 
   removeProperty = (property) => {
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Schema panel",
         sub_area: "Schema",
         sub_sub_area: "Anchor node",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Remove anchor property",
         event_value: property,
-      })
+      }
     );
 
     const propIndex = this.anchorProperties.indexOf(property);

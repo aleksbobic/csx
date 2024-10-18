@@ -54,21 +54,21 @@ function DatasetConfigColumns({ formType = "upload" }) {
         variant="filled"
         onChange={(val) => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Home page",
               sub_area:
                 formType === "modify"
                   ? "Dataset config modal"
                   : "Dataset upload modal",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Select element",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Change selection",
               event_action: `Change data type for ${column}`,
               event_value: val.target.value,
-            })
+            }
           );
 
           store.fileUpload.changeFileUplodColumnType(column, val.target.value);
@@ -156,21 +156,21 @@ function DatasetConfigColumns({ formType = "upload" }) {
                     maxWidth="176px"
                     onSubmit={(val) => {
                       store.track.trackEvent(
-                        JSON.stringify({
+                        {
                           area: "Home page",
                           sub_area:
                             formType === "modify"
                               ? "Dataset config modal"
                               : "Dataset upload modal",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           item_type: "Editable element",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           event_type: "Write",
                           event_action: `Change title for ${column}`,
                           event_value: val,
-                        })
+                        }
                       );
 
                       store.fileUpload.changeColumnName(column, val);
@@ -225,21 +225,21 @@ function DatasetConfigColumns({ formType = "upload" }) {
                   isChecked={store.fileUpload.fileUploadData.anchor === column}
                   onChange={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Home page",
                         sub_area:
                           formType === "modify"
                             ? "Dataset config modal"
                             : "Dataset upload modal",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Radio element",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Change selection",
                         event_action: "Change default node column",
                         event_value: column,
-                      })
+                      }
                     );
 
                     store.fileUpload.changeFileUplodAnchor(column);
@@ -276,21 +276,21 @@ function DatasetConfigColumns({ formType = "upload" }) {
                   isChecked={store.fileUpload.fileUploadData.link === column}
                   onChange={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Home page",
                         sub_area:
                           formType === "modify"
                             ? "Dataset config modal"
                             : "Dataset upload modal",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Radio element",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Change selection",
                         event_action: "Change default edge column",
                         event_value: column,
-                      })
+                      }
                     );
 
                     store.fileUpload.changeDefaultLink(column);
@@ -330,21 +330,21 @@ function DatasetConfigColumns({ formType = "upload" }) {
                   }
                   onChange={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Home page",
                         sub_area:
                           formType === "modify"
                             ? "Dataset config modal"
                             : "Dataset upload modal",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Radio element",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Change selection",
                         event_action: "Change default search column",
                         event_value: column,
-                      })
+                      }
                     );
 
                     store.fileUpload.changeDefaultSearch(column);

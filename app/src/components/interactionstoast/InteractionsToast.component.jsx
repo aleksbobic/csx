@@ -135,17 +135,17 @@ function InteractionsToast(props) {
           }
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Graph area",
                 sub_area: "Interactions toast",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Close interactions toast",
-              })
+              }
             );
             props.onClose();
           }}
@@ -159,19 +159,19 @@ function InteractionsToast(props) {
               store.core.setInteractionsModalDisplay(e.target.checked);
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Graph area",
                   sub_area: "Interactions toast",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Checkbox",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Check",
                   event_action: e.target.checked
                     ? "Never show again"
                     : "Show again",
-                })
+                }
               );
             }}
           >
@@ -187,4 +187,6 @@ InteractionsToast.propTypes = {
   onClose: PropTypes.func,
 };
 
-export default observer(InteractionsToast);
+const ObservedInteractionsToast = observer(InteractionsToast);
+
+export default ObservedInteractionsToast;

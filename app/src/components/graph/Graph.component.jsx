@@ -61,19 +61,19 @@ function Graph(props) {
 
   const onNodeRightClick = (node, event) => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Graph area",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Node",
         item_id: node.id,
         item_label: node.label,
         item_feature: node.feature,
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Open node context menu",
-      })
+      }
     );
 
     store.contextMenu.showContextMenu(node, event.clientX, event.clientY);
@@ -81,16 +81,16 @@ function Graph(props) {
 
   const onBackgroundRightClick = (event) => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Graph area",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Canvas",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Open canvas context menu",
-      })
+      }
     );
 
     store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
@@ -98,22 +98,22 @@ function Graph(props) {
 
   const onLinkRightClick = (link, event) => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Graph area",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Edge",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Open canvas context menu",
-      })
+      }
     );
 
     store.contextMenu.showCanvasContextMenu(event.clientX, event.clientY);
   };
 
-  const onNodeHover = (node, nodeout, event) => {
+  const onNodeHover = (node, nodeout) => {
     graphContainerElement.style.cursor = node ? "pointer" : "default";
 
     if (node) {
@@ -357,4 +357,5 @@ Graph.propTypes = {
   graphData: PropTypes.object,
 };
 
-export default observer(Graph);
+const ObservedGraph = observer(Graph);
+export default ObservedGraph;

@@ -19,7 +19,7 @@ import { observer } from "mobx-react";
 import { useResizeDetector } from "react-resize-detector";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
-function Serp({ hiddenColumns = [], data, columns, visibleProperties }) {
+function Serp({ data, visibleProperties }) {
   const store = useContext(RootStoreContext);
 
   const [listData, setListData] = useState([]);
@@ -44,7 +44,7 @@ function Serp({ hiddenColumns = [], data, columns, visibleProperties }) {
     try {
       new URL(string);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };
@@ -234,18 +234,18 @@ function Serp({ hiddenColumns = [], data, columns, visibleProperties }) {
                 .map((node) => node.id);
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Results panel",
                   sub_area: "Results list",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Navigate to entry",
                   event_value: listData[index]["entry"],
-                })
+                }
               );
 
               if (nodeIds.length > 1) {
@@ -280,7 +280,7 @@ function Serp({ hiddenColumns = [], data, columns, visibleProperties }) {
               }}
             >
               {listVirtualizer.getVirtualItems().length > 0 &&
-                listVirtualizer.getVirtualItems().map((virtualRow, index) => {
+                listVirtualizer.getVirtualItems().map((virtualRow) => {
                   return (
                     <Box
                       key={virtualRow?.key}
@@ -315,4 +315,5 @@ Serp.propTypes = {
   visibleProperties: PropTypes.array,
 };
 
-export default observer(Serp);
+const ObservedSerp = observer(Serp);
+export default ObservedSerp;

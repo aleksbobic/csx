@@ -381,17 +381,17 @@ export class StatsStore {
     const newChartId = uuidv4();
 
     this.store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Widget modal",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Add new widget",
         event_value: newChartId,
-      })
+      }
     );
 
     if (Object.keys(this.charts).includes(dataset)) {

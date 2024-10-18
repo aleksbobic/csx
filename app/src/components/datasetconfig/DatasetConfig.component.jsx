@@ -42,21 +42,19 @@ function DatasetConfig({ formType = "upload" }) {
             borderRadius="5px"
             onSubmit={(val) => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Home page",
                   sub_area:
                     formType === "modify"
                       ? "Dataset config modal"
                       : "Dataset upload modal",
-                }),
-                JSON.stringify({
-                  item_type: "Editable element",
-                }),
-                JSON.stringify({
+                },
+                { item_type: "Editable element" },
+                {
                   event_type: "Change selection",
                   event_action: "Change title",
                   event_value: val,
-                })
+                }
               );
 
               store.fileUpload.changeDatasetName(val);
@@ -138,4 +136,5 @@ DatasetConfig.propTypes = {
   formType: PropTypes.string,
 };
 
-export default observer(DatasetConfig);
+const ObservedDatasetConfig = observer(DatasetConfig);
+export default ObservedDatasetConfig;

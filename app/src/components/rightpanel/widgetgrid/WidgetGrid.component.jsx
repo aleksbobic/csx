@@ -112,16 +112,16 @@ function WidgetGrid({ types = ["all", "selection", "visible"] }) {
             borderRadius="xl"
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Widget grid",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Add new widget",
-                })
+                }
               );
 
               store.stats.toggleStatsModalVisiblity(true, types);
@@ -178,4 +178,5 @@ WidgetGrid.propTypes = {
   types: PropTypes.array,
 };
 
-export default observer(WidgetGrid);
+const ObservedWidgetGrid = observer(WidgetGrid);
+export default ObservedWidgetGrid;

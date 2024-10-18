@@ -18,7 +18,7 @@ import { RootStoreContext } from "stores/RootStore";
 import { observer } from "mobx-react";
 import { useContext } from "react";
 
-function TutorialGrid(props) {
+function TutorialGrid() {
   const { colorMode } = useColorMode();
   const textColor = useColorModeValue("black", "white");
   const store = useContext(RootStoreContext);
@@ -123,18 +123,18 @@ function TutorialGrid(props) {
                   height="100%"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Home page",
                         sub_area: "Tutorial grid",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Link",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Open tutorial",
                         event_value: tutorial.title,
-                      })
+                      }
                     );
                   }}
                   width="100%"
@@ -209,4 +209,5 @@ function TutorialGrid(props) {
   );
 }
 
-export default observer(TutorialGrid);
+const ObservedTutorialGrid = observer(TutorialGrid);
+export default ObservedTutorialGrid;

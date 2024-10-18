@@ -1,4 +1,9 @@
-import { isEnvFalse } from "utils/general.utils";
+import {
+  capitaliseFirstLetter,
+  isEnvFalse,
+  stringifyIfObject,
+} from "utils/general.utils";
+
 import { makeAutoObservable } from "mobx";
 
 export class TrackingStore {
@@ -6,13 +11,16 @@ export class TrackingStore {
     this.store = store;
     makeAutoObservable(this);
 
-    if (
-      isEnvFalse("VITE_DISABLE_TRACKING") &&
-      this.store.core.trackingEnabled
-    ) {
+    if (this.isTrackingEnabled()) {
       this.initTracking();
     }
   }
+
+  isTrackingEnabled = () => {
+    return (
+      isEnvFalse("VITE_DISABLE_TRACKING") && this.store.core.trackingEnabled
+    );
+  };
 
   initTracking = () => {
     window._paq = window._paq || [];
@@ -37,10 +45,7 @@ export class TrackingStore {
   };
 
   trackPageChange = () => {
-    if (
-      isEnvFalse("VITE_DISABLE_TRACKING") &&
-      this.store.core.trackingEnabled
-    ) {
+    if (this.isTrackingEnabled()) {
       const title =
         window.location.pathname.slice(1) === ""
           ? "home"
@@ -53,16 +58,19 @@ export class TrackingStore {
     }
   };
 
-  trackEvent = (event_category, event_action, event_data) => {
-    if (
-      isEnvFalse("VITE_DISABLE_TRACKING") &&
-      this.store.core.trackingEnabled
-    ) {
+  trackEvent = (eventCategory, eventAction, eventData) => {
+    if (this.isTrackingEnabled()) {
+      const strEventCategory = stringifyIfObject(eventCategory);
+      const strEventAction = capitaliseFirstLetter(
+        stringifyIfObject(eventAction)
+      );
+      const strEventData = stringifyIfObject(eventData);
+
       window._paq.push([
         "trackEvent",
-        event_category,
-        event_action.charAt(0).toUpperCase() + event_action.slice(1),
-        event_data,
+        strEventCategory,
+        strEventAction,
+        strEventData,
       ]);
     }
   };

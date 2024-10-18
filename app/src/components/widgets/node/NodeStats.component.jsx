@@ -203,20 +203,20 @@ function SelectedNodeList({
                   onClick={() => {
                     if (!demoData.length) {
                       store.track.trackEvent(
-                        JSON.stringify({
+                        {
                           area: "Widget",
                           area_id: chart.id,
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           item_type: "Button",
                           item_id: node.id,
                           item_label: node.label,
                           item_feature: node.feature,
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           event_type: "Click",
                           event_action: "Navigate to node",
-                        })
+                        }
                       );
 
                       store.graphInstance.zoomToFitByNodeId(node.id);
@@ -256,20 +256,20 @@ function SelectedNodeList({
                         onClick={() => {
                           if (!demoData.length) {
                             store.track.trackEvent(
-                              JSON.stringify({
+                              {
                                 area: "Widget",
                                 area_id: chart.id,
-                              }),
-                              JSON.stringify({
+                              },
+                              {
                                 item_type: "Button",
                                 item_id: node.id,
                                 item_label: node.label,
                                 item_feature: node.feature,
-                              }),
-                              JSON.stringify({
+                              },
+                              {
                                 event_type: "Click",
                                 event_action: "Deselect node",
-                              })
+                              }
                             );
 
                             const nodeIndex =
@@ -295,6 +295,9 @@ function SelectedNodeList({
 SelectedNodeList.propTypes = {
   isExpanded: PropTypes.bool,
   demoData: PropTypes.array,
+  chart: PropTypes.object,
+  settingsMode: PropTypes.bool,
 };
 
-export default observer(SelectedNodeList);
+const ObservedSelectedNodeList = observer(SelectedNodeList);
+export default ObservedSelectedNodeList;

@@ -23,17 +23,9 @@ function ContextMenu() {
     handler: () => {
       if (store.contextMenu.isVisible) {
         store.track.trackEvent(
-          JSON.stringify({
-            area: "Graph area",
-            sub_area: "Context menu",
-          }),
-          JSON.stringify({
-            item_type: "Outside",
-          }),
-          JSON.stringify({
-            event_type: "Click",
-            event_action: "Close context menu",
-          })
+          { area: "Graph area", sub_area: "Context menu" },
+          { item_type: "Outside" },
+          { event_type: "Click", event_action: "Close context menu" }
         );
 
         store.contextMenu.hideContextMenu();
@@ -47,17 +39,12 @@ function ContextMenu() {
     );
 
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Node context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
+      { area: "Graph area", sub_area: "Node context menu" },
+      { item_type: "Button" },
+      {
         event_type: "Click",
         event_action: `${nodeIndex !== -1 ? "Deselect" : "Select"} node`,
-      })
+      }
     );
 
     store.graph.toggleNodeSelection(store.contextMenu.originNode.id, nodeIndex);
@@ -66,17 +53,9 @@ function ContextMenu() {
 
   const deselectAllNodes = () => {
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Canvas context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
-        event_type: "Click",
-        event_action: "Deselect all nodes",
-      })
+      { area: "Graph area", sub_area: "Canvas context menu" },
+      { item_type: "Button" },
+      { event_type: "Click", event_action: "Deselect all nodes" }
     );
 
     const selectedNodes = [...store.graph.currentGraphData.selectedNodes];
@@ -94,17 +73,9 @@ function ContextMenu() {
 
   const expandGraph = () => {
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Node context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
-        event_type: "Click",
-        event_action: "Expand graph",
-      })
+      { area: "Graph area", sub_area: "Node context menu" },
+      { item_type: "Button" },
+      { event_type: "Click", event_action: "Expand graph" }
     );
 
     const node = store.graph.currentGraphData.nodes.filter(
@@ -117,17 +88,9 @@ function ContextMenu() {
 
   const expandGraphWithContext = () => {
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Node context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
-        event_type: "Click",
-        event_action: "Expand graph with context",
-      })
+      { area: "Graph area", sub_area: "Node context menu" },
+      { item_type: "Button" },
+      { event_type: "Click", event_action: "Expand graph with context" }
     );
 
     const node = store.graph.currentGraphData.nodes.filter(
@@ -142,21 +105,16 @@ function ContextMenu() {
     const componentId = store.contextMenu.originNode.component;
 
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Node context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
+      { area: "Graph area", sub_area: "Node context menu" },
+      { item_type: "Button" },
+      {
         event_type: "Click",
         event_action: `${
           !store.graph.currentGraphData.selectedComponents.includes(componentId)
             ? "Deselect"
             : "Select"
         } component`,
-      })
+      }
     );
 
     store.graph.selectComponent(componentId);
@@ -165,17 +123,9 @@ function ContextMenu() {
 
   const showDirectConnections = () => {
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Graph area",
-        sub_area: "Node context menu",
-      }),
-      JSON.stringify({
-        item_type: "Button",
-      }),
-      JSON.stringify({
-        event_type: "Click",
-        event_action: "Show direct connections",
-      })
+      { area: "Graph area", sub_area: "Node context menu" },
+      { item_type: "Button" },
+      { event_type: "Click", event_action: "Show direct connections" }
     );
 
     store.graphInstance.triggerSelfCentric();
@@ -254,17 +204,9 @@ function ContextMenu() {
               justifyContent="left"
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
-                    area: "Graph area",
-                    sub_area: "Node context menu",
-                  }),
-                  JSON.stringify({
-                    item_type: "Button",
-                  }),
-                  JSON.stringify({
-                    event_type: "Click",
-                    event_action: "Remove node",
-                  })
+                  { area: "Graph area", sub_area: "Node context menu" },
+                  { item_type: "Button" },
+                  { event_type: "Click", event_action: "Remove node" }
                 );
 
                 store.graph.removeSelection(store.contextMenu.originNode);
@@ -313,17 +255,9 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
-                      event_type: "Click",
-                      event_action: "Show all",
-                    })
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    { event_type: "Click", event_action: "Show all" }
                   );
 
                   store.graphInstance.toggleVisibleComponents(-1);
@@ -348,17 +282,9 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
-                      event_type: "Click",
-                      event_action: "Show selected",
-                    })
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    { event_type: "Click", event_action: "Show selected" }
                   );
 
                   store.graphInstance.triggerSelectedNodes();
@@ -392,17 +318,9 @@ function ContextMenu() {
                 justifyContent="left"
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Node context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
-                      event_type: "Click",
-                      event_action: "Fit graph to view",
-                    })
+                    { area: "Graph area", sub_area: "Node context menu" },
+                    { item_type: "Button" },
+                    { event_type: "Click", event_action: "Fit graph to view" }
                   );
 
                   store.graphInstance.zoomToFit();
@@ -417,17 +335,9 @@ function ContextMenu() {
                 justifyContent="left"
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Node context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
-                      event_type: "Click",
-                      event_action: "Take screenshot",
-                    })
+                    { area: "Graph area", sub_area: "Node context menu" },
+                    { item_type: "Button" },
+                    { event_type: "Click", event_action: "Take screenshot" }
                   );
 
                   store.graphInstance.takeScreenshot();
@@ -472,17 +382,12 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    {
                       event_type: "Click",
                       event_action: "Remove selected nodes",
-                    })
+                    }
                   );
 
                   store.graph.removeSelection();
@@ -505,17 +410,12 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    {
                       event_type: "Click",
                       event_action: "Remove not selected nodes",
-                    })
+                    }
                   );
 
                   store.graph.removeInverseSelection();
@@ -542,17 +442,9 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
-                      event_type: "Click",
-                      event_action: "Remove invisible",
-                    })
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    { event_type: "Click", event_action: "Remove invisible" }
                   );
                   store.graph.trimNetwork();
                   store.contextMenu.hideContextMenu();
@@ -580,56 +472,6 @@ function ContextMenu() {
               >
                 Expand
               </Text>
-              {/* <Button
-                                justifyContent="left"
-                                disabled={
-                                    store.graph.currentGraphData.selectedNodes
-                                        .length < 2
-                                }
-                                width="100%"
-                                _hover={{ backgroundColor: 'blue.500' }}
-                                _disabled={{
-                                    opacity: 0.5,
-                                    cursor: 'not-allowed',
-                                    _hover: {
-                                        backgroundColor: 'transparent'
-                                    }
-                                }}
-                                onClick={() => {
-                                    store.track.trackEvent(
-                                        JSON.stringify({
-                                            area: 'Graph area',
-                                            sub_area: 'Canvas context menu'
-                                        }),
-                                        JSON.stringify({
-                                            item_type: 'Button'
-                                        }),
-                                        JSON.stringify({
-                                            event_type: 'Click',
-                                            event_action: 'Broad expand',
-                                            event_value:
-                                                store.graph.currentGraphData.selectedNodes.map(
-                                                    node => {
-                                                        return {
-                                                            label: node.label,
-                                                            feature:
-                                                                node.feature
-                                                        };
-                                                    }
-                                                )
-                                        })
-                                    );
-
-                                    store.graph.expandNetwork(
-                                        store.graph.currentGraphData
-                                            .selectedNodes,
-                                        'or'
-                                    );
-                                    store.contextMenu.hideContextMenu();
-                                }}
-                            >
-                                Broad expand
-                            </Button> */}
               <Button
                 justifyContent="left"
                 disabled={store.graph.currentGraphData.selectedNodes.length < 2}
@@ -644,14 +486,9 @@ function ContextMenu() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
-                      area: "Graph area",
-                      sub_area: "Canvas context menu",
-                    }),
-                    JSON.stringify({
-                      item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    { area: "Graph area", sub_area: "Canvas context menu" },
+                    { item_type: "Button" },
+                    {
                       event_type: "Click",
                       event_action: "Narrow expand",
                       event_value:
@@ -663,7 +500,7 @@ function ContextMenu() {
                             };
                           }
                         ),
-                    })
+                    }
                   );
 
                   store.graph.expandNetwork(
@@ -693,14 +530,9 @@ function ContextMenu() {
                   }}
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
-                        area: "Graph area",
-                        sub_area: "Canvas context menu",
-                      }),
-                      JSON.stringify({
-                        item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      { area: "Graph area", sub_area: "Canvas context menu" },
+                      { item_type: "Button" },
+                      {
                         event_type: "Click",
                         event_action: "Narrow expand with context",
                         event_value:
@@ -712,7 +544,7 @@ function ContextMenu() {
                               };
                             }
                           ),
-                      })
+                      }
                     );
 
                     store.graph.expandNetwork(
@@ -801,4 +633,5 @@ function ContextMenu() {
   );
 }
 
-export default observer(ContextMenu);
+const ObservedContextMenu = observer(ContextMenu);
+export default ObservedContextMenu;

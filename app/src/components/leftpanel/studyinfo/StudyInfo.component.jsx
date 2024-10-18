@@ -49,18 +49,18 @@ function StudyInfo() {
             value={store.core.studyName}
             onSubmit={(val) => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Left panel",
                   sub_area: "Study info",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Editable element",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Write",
                   event_action: "Change study name",
                   event_value: val,
-                })
+                }
               );
 
               store.core.updateStudyName(val);
@@ -119,18 +119,18 @@ function StudyInfo() {
             value={store.core.studyDescription}
             onSubmit={(val) => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Left panel",
                   sub_area: "Study info",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Editable element",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Write",
                   event_action: "Change study description",
                   event_value: val,
-                })
+                }
               );
 
               store.core.updateStudyDescription(val);
@@ -163,18 +163,18 @@ function StudyInfo() {
             value={store.core.studyAuthor}
             onSubmit={(val) => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Left panel",
                   sub_area: "Study info",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Editable element",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Write",
                   event_action: "Change study author",
                   event_value: val,
-                })
+                }
               );
               store.core.updateStudyAuthor(val);
             }}
@@ -231,17 +231,17 @@ function StudyInfo() {
           disabled={store.core.studyIsSaved}
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Left panel",
                 sub_area: "Study info",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Save study",
-              })
+              }
             );
 
             store.core.saveStudy();
@@ -290,19 +290,19 @@ function StudyInfo() {
                 store.core.toggleIsStudyPublic();
 
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Left panel",
                     sub_area: "Study info",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Switch",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Toggle",
                     event_action: store.core.isStudyPublic
                       ? "Make presentation public"
                       : "Make presentation private",
-                  })
+                  }
                 );
               }}
             />
@@ -342,4 +342,5 @@ function StudyInfo() {
   );
 }
 
-export default observer(StudyInfo);
+const ObservedStudyInfo = observer(StudyInfo);
+export default ObservedStudyInfo;

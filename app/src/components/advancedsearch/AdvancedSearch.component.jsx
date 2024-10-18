@@ -45,12 +45,7 @@ import historyNode from "../historyNode/HistoryNode.component";
 import { observer } from "mobx-react";
 import { useNavigate } from "react-router-dom";
 
-function AdvancedSearch({
-  datasetSelectorDisabled = false,
-  placeholder = "Search through the selected dataset ...",
-  isPanel = false,
-  style,
-}) {
+function AdvancedSearch({ isPanel = false, style }) {
   const reactFlowWrapper = useRef(null);
   const store = useContext(RootStoreContext);
   const navigate = useNavigate();
@@ -146,19 +141,9 @@ function AdvancedSearch({
     const newNodeId = store.workflow.addNewAction(nodeType, position);
 
     store.track.trackEvent(
-      JSON.stringify({
-        area: "Advanced search",
-        sub_area: "Search canvas",
-      }),
-      JSON.stringify({
-        item_type: "Node",
-        item_id: `${newNodeId}`,
-        item_label: `${nodeType}`,
-      }),
-      JSON.stringify({
-        event_type: "Drop",
-        event_action: "Add new node",
-      })
+      { area: "Advanced search", sub_area: "Search canvas" },
+      { item_type: "Node", item_id: `${newNodeId}`, item_label: `${nodeType}` },
+      { event_type: "Drop", event_action: "Add new node" }
     );
   };
 
@@ -330,6 +315,8 @@ AdvancedSearch.propTypes = {
   datasetSelectorDisabled: PropTypes.bool,
   placeholder: PropTypes.string,
   isPanel: PropTypes.bool,
+  style: PropTypes.object,
 };
 
-export default observer(AdvancedSearch);
+const ObservedAdvancedSearch = observer(AdvancedSearch);
+export default ObservedAdvancedSearch;

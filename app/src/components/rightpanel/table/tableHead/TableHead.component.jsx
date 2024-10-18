@@ -51,17 +51,17 @@ function TableHead(props) {
               : `Sort descending by ${columnType}`;
 
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Results panel",
               sub_area: "Results table",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Header",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: eventData,
-            })
+            }
           );
         }}
         _hover={{ cursor: column.canSort ? "pointer" : "normal" }}
@@ -127,4 +127,5 @@ TableHead.propTypes = {
   headerGroups: PropTypes.array,
 };
 
-export default observer(TableHead);
+const ObservedTableHead = observer(TableHead);
+export default ObservedTableHead;

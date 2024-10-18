@@ -11,17 +11,17 @@ export function FileUploadArea() {
 
   const onDrop = async (files) => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Home page",
         sub_area: "Dataset grid",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "File upload area",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Drop",
         event_action: "Upload file",
-      })
+      }
     );
 
     store.fileUpload.uploadFile(files);

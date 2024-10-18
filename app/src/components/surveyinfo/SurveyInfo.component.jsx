@@ -29,19 +29,19 @@ export function SurveyInfoModal(props) {
     return getEnv("VITE_SURVEY_LINK");
   };
 
-  const closeSurvey = (actionText) => {
+  const closeSurvey = () => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Graph area",
         sub_area: "Survey modal",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Button",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Click",
         event_action: "Close survey modal",
-      })
+      }
     );
     props.onClose();
   };

@@ -15,17 +15,17 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
         mr={3}
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Home page",
               sub_area: "Dataset config modal",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Cancel config change",
-            })
+            }
           );
           store.fileUpload.changeConfigChangeModalVisiblity(false);
           store.fileUpload.resetFileUploadData();
@@ -38,17 +38,17 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
         backgroundColor="blue.500"
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Home page",
               sub_area: "Dataset config modal",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Update default config",
-            })
+            }
           );
 
           store.fileUpload.updateConfig();
@@ -66,17 +66,17 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
           variant="outline"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Home page",
                 sub_area: "Dataset upload modal",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Cancel dataset upload",
-              })
+              }
             );
             store.fileUpload.cancelFileUpload();
           }}
@@ -89,22 +89,22 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
           variant="outline"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Home page",
                 sub_area: "Dataset upload modal",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
                 item_label: "Prev",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Navigate to page",
                 event_value:
                   activeTab === 2
                     ? "default overview schema config"
                     : "data types and general config of dataset",
-              })
+              }
             );
 
             if (activeTab === 2) {
@@ -122,22 +122,22 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
           backgroundColor="blue.500"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Home page",
                 sub_area: "Dataset upload modal",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
                 item_label: "Next",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Navigate to page",
                 event_value:
                   activeTab === 0
                     ? "default overview schema config"
                     : "default detail schema config",
-              })
+              }
             );
 
             if (activeTab === 0) {
@@ -158,17 +158,17 @@ function DatasetConfigFooter({ formType = "upload", activeTab, setActiveTab }) {
           backgroundColor="blue.500"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Home page",
                 sub_area: "Dataset upload modal",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Set default configuration",
-              })
+              }
             );
 
             store.fileUpload.setDefaults();
@@ -191,4 +191,5 @@ DatasetConfigFooter.propTypes = {
   setActiveTab: PropTypes.func,
 };
 
-export default observer(DatasetConfigFooter);
+const ObservedDatasetConfigFooter = observer(DatasetConfigFooter);
+export default ObservedDatasetConfigFooter;

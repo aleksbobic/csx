@@ -349,7 +349,7 @@ function LineChart({
           try {
             const { index } = getElementAtEvent(chartRef.current, event)[0];
             dataIndex = index;
-          } catch (error) {
+          } catch {
             return;
           }
 
@@ -357,18 +357,18 @@ function LineChart({
 
           if ("nodeProperty" in data) {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.nodeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             visibleNodeIds = store.graphInstance.filterNodesWithValue(
@@ -377,18 +377,18 @@ function LineChart({
             );
           } else {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.edgeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             visibleNodeIds = store.graphInstance.filterEdgesWithValue(
@@ -438,7 +438,7 @@ function LineChart({
               color: "white",
               diplay: isExpanded,
 
-              callback: function (value, index, ticks) {
+              callback: function (value) {
                 const stringValue = this.getLabelForValue(value);
                 if (stringValue.length > 17) {
                   return `${stringValue.slice(0, 17)}...`;
@@ -469,7 +469,7 @@ function LineChart({
               color: "white",
               diplay: isExpanded,
               beginAtZero: true,
-              callback: function (value, index, ticks) {
+              callback: function (value) {
                 const stringValue = this.getLabelForValue(value);
                 if (stringValue.length > 17) {
                   return `${stringValue.slice(0, 17)}...`;
@@ -517,6 +517,8 @@ LineChart.propTypes = {
   chartIndex: PropTypes.number,
   isExpanded: PropTypes.bool,
   isExample: PropTypes.bool,
+  settingsMode: PropTypes.bool,
 };
 
-export default observer(LineChart);
+const ObservedLineChart = observer(LineChart);
+export default ObservedLineChart;

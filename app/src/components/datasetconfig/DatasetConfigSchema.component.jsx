@@ -56,18 +56,18 @@ function DatasetConfigSchema(props) {
               size="xs"
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Home page",
                     sub_area: "Dataset upload modal",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Delete default schema",
                     event_value: schema.name,
-                  })
+                  }
                 );
 
                 store.fileUpload.deleteDefaultSchema(
@@ -135,18 +135,18 @@ function DatasetConfigSchema(props) {
                   }
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Home page",
                         sub_area: "Dataset upload modal",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: `Save default schema for ${props.graphType} graph`,
                         event_value: schemaName,
-                      })
+                      }
                     );
 
                     store.fileUpload.addDefaultSchema(
@@ -187,4 +187,5 @@ DatasetConfigSchema.propTypes = {
   graphType: PropTypes.string,
 };
 
-export default observer(DatasetConfigSchema);
+const ObservedDatasetConfigSchema = observer(DatasetConfigSchema);
+export default ObservedDatasetConfigSchema;

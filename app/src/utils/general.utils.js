@@ -1,3 +1,11 @@
+export function stringifyIfObject(value) {
+  return typeof value === "object" ? JSON.stringify(value) : value;
+}
+
+export function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 export function isEnvTrue(name) {
   return import.meta.env[name] === "true";
 }

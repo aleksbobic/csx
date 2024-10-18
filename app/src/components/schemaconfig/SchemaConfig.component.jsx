@@ -187,17 +187,17 @@ function SchemaConfig(props) {
             }
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Schema config",
                   sub_area: "Schema",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Show all schema nodes",
-                })
+                }
               );
 
               schemaViewport.fitView();
@@ -213,4 +213,6 @@ SchemaConfig.propTypes = {
   graphType: PropTypes.string,
 };
 
-export default observer(SchemaConfig);
+const ObservedSchemaConfig = observer(SchemaConfig);
+
+export default ObservedSchemaConfig;

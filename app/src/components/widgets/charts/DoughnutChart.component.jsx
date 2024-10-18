@@ -237,7 +237,7 @@ function DoughnutChart({
           try {
             const { index } = getElementAtEvent(chartRef.current, event)[0];
             dataIndex = index;
-          } catch (error) {
+          } catch {
             return;
           }
 
@@ -245,18 +245,18 @@ function DoughnutChart({
 
           if ("nodeProperty" in data) {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.nodeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             visibleNodeIds = store.graphInstance.filterNodesWithValue(
@@ -265,18 +265,18 @@ function DoughnutChart({
             );
           } else {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Widget",
                 area_id: chart.id,
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Chart area",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: `Filter by ${data.edgeProperty}`,
                 event_value: data.labels[dataIndex],
-              })
+              }
             );
 
             visibleNodeIds = store.graphInstance.filterEdgesWithValue(
@@ -354,6 +354,8 @@ DoughnutChart.propTypes = {
   chartIndex: PropTypes.number,
   isExpanded: PropTypes.bool,
   isExample: PropTypes.bool,
+  settingsMode: PropTypes.bool,
 };
 
-export default observer(DoughnutChart);
+const ObservedDoughnutChart = observer(DoughnutChart);
+export default ObservedDoughnutChart;

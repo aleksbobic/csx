@@ -483,41 +483,29 @@ export class CoreStore {
 
     switch (error["type"]) {
       case "response":
-        this?.store?.track?.trackEvent(
-          "Global",
-          "Response Error",
-          JSON.stringify({
-            url: error.url,
-            method: error.method,
-            statusCode: error.status,
-            // message: error.data.detail[0].msg
-          })
-        );
+        this?.store?.track?.trackEvent("Global", "Response Error", {
+          url: error.url,
+          method: error.method,
+          statusCode: error.status,
+          // message: error.data.detail[0].msg
+        });
 
         break;
       case "request":
-        this?.store?.track?.trackEvent(
-          "Global",
-          "Request Error",
-          JSON.stringify({
-            url: error.url,
-            method: error.method,
-            statusCode: error.status,
-            state: error.state,
-          })
-        );
+        this?.store?.track?.trackEvent("Global", "Request Error", {
+          url: error.url,
+          method: error.method,
+          statusCode: error.status,
+          state: error.state,
+        });
 
         break;
       default:
-        this?.store?.track?.trackEvent(
-          "Global",
-          "Request setup error",
-          JSON.stringify({
-            url: error.url,
-            method: error.method,
-            message: error.message,
-          })
-        );
+        this?.store?.track?.trackEvent("Global", "Request setup error", {
+          url: error.url,
+          method: error.method,
+          message: error.message,
+        });
 
         break;
     }

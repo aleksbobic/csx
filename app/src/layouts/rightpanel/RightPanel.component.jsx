@@ -215,17 +215,17 @@ function RightPanel(props) {
           }
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Results panel",
                 sub_area: "Results list",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Open list options",
-              })
+              }
             );
           }}
           zIndex="3"
@@ -251,35 +251,35 @@ function RightPanel(props) {
               onChange={(e) => {
                 if (e.target.checked) {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Results panel",
                       sub_area: "Results list",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Checkbox",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Check",
                       event_action: "Show in list",
                       event_value: feature,
-                    })
+                    }
                   );
 
                   setVisibleProperties([...visibleProperties, feature]);
                 } else if (visibleProperties.length > 1) {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Results panel",
                       sub_area: "Results list",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Checkbox",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Check",
                       event_action: "Hide in list",
                       event_value: feature,
-                    })
+                    }
                   );
 
                   setVisibleProperties([
@@ -323,16 +323,16 @@ function RightPanel(props) {
                   opacity="0.5"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Results panel",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Check",
                         event_action: "Download data as CSV",
-                      })
+                      }
                     );
                   }}
                   transition="all 0.2 ease-in-out"
@@ -368,17 +368,17 @@ function RightPanel(props) {
                 _hover={{ opacity: 1 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Results panel",
                       sub_area: "Results list",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Switch to table view",
-                    })
+                    }
                   );
 
                   setUseList(false);
@@ -402,17 +402,17 @@ function RightPanel(props) {
                 _hover={{ opacity: 1 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Results panel",
                       sub_area: "Results list",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Switch to list view",
-                    })
+                    }
                   );
 
                   if (visibleProperties.length === 0) {

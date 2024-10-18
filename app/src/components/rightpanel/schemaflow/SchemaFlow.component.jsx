@@ -213,10 +213,10 @@ function SchemaFlow() {
                 store.track.trackEvent(
                   "Graph Area - Graph Controls",
                   "Button",
-                  JSON.stringify({
+                  {
                     type: "Click",
                     value: "Regenerate graph",
-                  })
+                  }
                 );
                 store.overviewSchema.setSchemaHasChanges(false);
                 store.schema.setSchemaHasChanges(false);
@@ -287,17 +287,17 @@ function SchemaFlow() {
             }
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Schema panel",
                   sub_area: "Schema",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Show all schema nodes",
-                })
+                }
               );
 
               schemaViewport.fitView();
@@ -309,4 +309,5 @@ function SchemaFlow() {
   );
 }
 
-export default observer(SchemaFlow);
+const ObservedSchemaFlow = observer(SchemaFlow);
+export default ObservedSchemaFlow;

@@ -46,17 +46,15 @@ function CommentComponent(props) {
   const renderMarkdownContent = () => (
     <ReactMarkdown
       className="comment"
-      children={props.comment.comment}
       remarkPlugins={[remarkGfm]}
       disallowedElements={["img", "a"]}
       style={{ width: "100%" }}
       components={{
-        code({ node, inline, className, children, ...props }) {
+        code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || "");
 
           return !inline && match ? (
             <SyntaxHighlighter
-              children={String(children).replace(/\n$/, "")}
               style={oneDark}
               language={match[1]}
               showLineNumbers={true}
@@ -81,7 +79,9 @@ function CommentComponent(props) {
                 },
               }}
               {...props}
-            />
+            >
+              {String(children).replace(/\n$/, "")}
+            </SyntaxHighlighter>
           ) : (
             <code
               className={colorMode === "light" ? "light" : "dark"}
@@ -92,7 +92,9 @@ function CommentComponent(props) {
           );
         },
       }}
-    />
+    >
+      {props.comment.comment}
+    </ReactMarkdown>
   );
 
   const renderCommentButtons = () => (
@@ -114,18 +116,18 @@ function CommentComponent(props) {
           backgroundColor={colorMode === "light" && "blackAlpha.200"}
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Comment area",
                 sub_area: "Comment list",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_acton: "Edit comment",
                 event_value: props.comment.id,
-              })
+              }
             );
 
             editComment(props.comment.id);
@@ -153,18 +155,18 @@ function CommentComponent(props) {
           variant="ghost"
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Comment area",
                 sub_area: "Comment list",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 action_type: "Delete comment",
                 event_value: props.comment.id,
-              })
+              }
             );
 
             store.comment.deleteComment(props.comment.id);
@@ -253,4 +255,5 @@ CommentComponent.propTypes = {
   commentIndex: PropTypes.number,
 };
 
-export default observer(CommentComponent);
+const ObservedCommentComponent = observer(CommentComponent);
+export default ObservedCommentComponent;

@@ -293,14 +293,14 @@ function SelectedComponentList({
                           _hover={{ opacity: 1 }}
                           onClick={() => {
                             store.track.trackEvent(
-                              JSON.stringify({
+                              {
                                 area: "Widget",
                                 area_id: chart.id,
-                              }),
-                              JSON.stringify({
+                              },
+                              {
                                 item_type: "Button",
-                              }),
-                              JSON.stringify({
+                              },
+                              {
                                 event_type: "Click",
                                 event_action:
                                   store.graphInstance.visibleComponents.includes(
@@ -309,7 +309,7 @@ function SelectedComponentList({
                                     ? "Hide component"
                                     : "Show component",
                                 event_value: component.id,
-                              })
+                              }
                             );
 
                             store.graphInstance.toggleVisibleComponents(
@@ -349,18 +349,18 @@ function SelectedComponentList({
                           onClick={() => {
                             if (!demoData.length) {
                               store.track.trackEvent(
-                                JSON.stringify({
+                                {
                                   area: "Widget",
                                   area_id: chart.id,
-                                }),
-                                JSON.stringify({
+                                },
+                                {
                                   item_type: "Button",
-                                }),
-                                JSON.stringify({
+                                },
+                                {
                                   event_type: "Click",
                                   event_action: "Deselect component",
                                   event_value: component.id,
-                                })
+                                }
                               );
 
                               store.graph.selectComponent(component.id);
@@ -381,6 +381,9 @@ function SelectedComponentList({
 SelectedComponentList.propTypes = {
   isExpanded: PropTypes.bool,
   demoData: PropTypes.array,
+  chart: PropTypes.object,
+  settingsMode: PropTypes.bool,
 };
 
-export default observer(SelectedComponentList);
+const ObservedSelectedComponentList = observer(SelectedComponentList);
+export default ObservedSelectedComponentList;

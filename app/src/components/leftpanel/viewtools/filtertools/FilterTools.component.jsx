@@ -83,18 +83,18 @@ function FilterTools() {
 
   const filterElements = (values) => {
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Left panel",
         sub_area: "VIew tools",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Slider",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Slide",
         event_action: "Filter elements by values",
         event_value: `Min: ${values[0]}, Max: ${values[1]}`,
-      })
+      }
     );
 
     if (
@@ -172,17 +172,17 @@ function FilterTools() {
                   size="sm"
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action: "Show selected nodes",
-                      })
+                      }
                     );
 
                     store.graphInstance.triggerSelectedNodes();
@@ -207,18 +207,18 @@ function FilterTools() {
                   }
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action:
                           "Show direct connections of selected nodes",
-                      })
+                      }
                     );
 
                     store.graphInstance.triggerMultiSelfCentric();
@@ -243,18 +243,18 @@ function FilterTools() {
                   }
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action:
                           "Show mutual connections of selected nodes",
-                      })
+                      }
                     );
                     store.graphInstance.triggerMultiSelfCentric(true);
                   }}
@@ -280,18 +280,18 @@ function FilterTools() {
                   }
                   onClick={() => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Button",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Click",
                         event_action:
                           "Show nodes in same search results as selected nodes",
-                      })
+                      }
                     );
                     store.graphInstance.triggerSameEntry(true);
                   }}
@@ -323,18 +323,18 @@ function FilterTools() {
                     store.graphInstance.setFilterProperty(e.target.value);
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Select element",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Change selection",
                         event_action: "Change feature used for filtering",
                         new_value: e.target.value,
-                      })
+                      }
                     );
                   }}
                   variant="filled"
@@ -429,4 +429,5 @@ function FilterTools() {
   );
 }
 
-export default observer(FilterTools);
+const ObservedFilterTools = observer(FilterTools);
+export default ObservedFilterTools;

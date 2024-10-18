@@ -516,17 +516,17 @@ function FileUploadModal() {
                   }
                   onSubmit={(val) => {
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Widget modal",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Editable element",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Write",
                         event_action: "Change title",
                         event_value: val,
-                      })
+                      }
                     );
 
                     store.stats.changeChartTitle(val);
@@ -579,17 +579,17 @@ function FileUploadModal() {
                       variant="filled"
                       onChange={(value) => {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Widget modal",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Select element",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Change selection",
                             event_action: "Change network elements",
                             event_value: value.target.value,
-                          })
+                          }
                         );
 
                         store.stats.changeChartNetworkElements(
@@ -624,17 +624,17 @@ function FileUploadModal() {
                     size="sm"
                     onChange={(value) => {
                       store.track.trackEvent(
-                        JSON.stringify({
+                        {
                           area: "Widget modal",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           item_type: "Select element",
-                        }),
-                        JSON.stringify({
+                        },
+                        {
                           event_type: "Change selection",
                           event_action: "Change element values",
                           event_value: value.target.value,
-                        })
+                        }
                       );
 
                       store.stats.changeChartElementValue(value.target.value);
@@ -671,17 +671,17 @@ function FileUploadModal() {
                       size="sm"
                       onChange={(value) => {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Widget modal",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Select element",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Change selection",
                             event_action: "Change group by values",
                             event_value: value.target.value,
-                          })
+                          }
                         );
 
                         store.stats.changeChartGroupByValues(
@@ -723,17 +723,17 @@ function FileUploadModal() {
                       size="sm"
                       onChange={(value) => {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Widget modal",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Select element",
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Change selection",
                             event_action: "Change show only values",
                             event_value: value.target.value,
-                          })
+                          }
                         );
 
                         store.stats.changeShowOnly(value.target.value);
@@ -801,17 +801,17 @@ function FileUploadModal() {
                 }}
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Widget modal",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Open widget sample",
                       event_value: entry,
-                    })
+                    }
                   );
                 }}
               >
@@ -946,16 +946,16 @@ function FileUploadModal() {
             icon={<XMarkIcon style={{ width: "14px", height: "14px" }} />}
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Widget modal",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Close widget modal",
-                })
+                }
               );
 
               store.stats.toggleStatsModalVisiblity(false);
@@ -984,4 +984,5 @@ function FileUploadModal() {
   );
 }
 
-export default observer(FileUploadModal);
+const ObservedFileUploadModal = observer(FileUploadModal);
+export default ObservedFileUploadModal;

@@ -55,18 +55,18 @@ function WidgetContainer(props) {
         }}
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Widget",
               area_id: props.chart.id,
               sub_area: "Widget container",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Remove widget",
-            })
+            }
           );
           store.stats.removeChart(props.chart.id);
         }}
@@ -97,18 +97,18 @@ function WidgetContainer(props) {
         }}
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Widget",
               area_id: props.chart.id,
               sub_area: "Widget container",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: isExpanded ? "Shrink widget" : "Expand widget",
-            })
+            }
           );
           setSettingsMode(false);
           if (isExpanded) {
@@ -138,18 +138,18 @@ function WidgetContainer(props) {
         }
         onClick={() => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Widget",
               area_id: props.chart.id,
               sub_area: "Widget container",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: !settingsMode ? "Open settings" : "Close settings",
-            })
+            }
           );
 
           setSettingsMode(!settingsMode);
@@ -225,6 +225,8 @@ WidgetContainer.propTypes = {
   chart: PropTypes.object,
   index: PropTypes.number,
   maxColSize: PropTypes.number,
+  children: PropTypes.node,
 };
 
-export default observer(WidgetContainer);
+const ObservedWidgetContainer = observer(WidgetContainer);
+export default ObservedWidgetContainer;

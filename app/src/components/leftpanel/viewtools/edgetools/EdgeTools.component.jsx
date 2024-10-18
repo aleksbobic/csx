@@ -74,18 +74,18 @@ function EdgeTools() {
               updateEdgeColorScheme(e.target.value);
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Left panel",
                   sub_area: "VIew tools",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Select element",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Change selection",
                   event_action: "Change edge color",
                   event_value: e.target.value,
-                })
+                }
               );
             }}
             variant="filled"
@@ -156,25 +156,25 @@ function EdgeTools() {
                   marginRight="10px"
                   isChecked={store.graphInstance.automaticEdgeOpacity}
                   value={store.graphInstance.automaticEdgeOpacity}
-                  onChange={(e) => {
+                  onChange={() => {
                     store.graphInstance.toggleAutomaticEdgeOpacity();
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Switch",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Toggle",
                         event_action: `Use ${
                           store.graphInstance.automaticEdgeOpacity
                             ? "automatic"
                             : "custom"
                         } edge opacity`,
-                      })
+                      }
                     );
                   }}
                 />
@@ -209,18 +209,18 @@ function EdgeTools() {
                     store.graphInstance.setCustomEdgeOpacity(value);
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Slider",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Slide",
                         event_action: "Change edge opacity",
                         event_value: value,
-                      })
+                      }
                     );
                   }}
                 >
@@ -283,18 +283,18 @@ function EdgeTools() {
                     store.graphInstance.setCustomEdgeCurvature(value * 0.1);
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Slider",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Slide",
                         event_action: "Change edge curvature",
                         event_value: value,
-                      })
+                      }
                     );
                   }}
                 >
@@ -349,19 +349,19 @@ function EdgeTools() {
                     store.graphInstance.toggleEdgeDirectionVisiblity();
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Switch",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Toggle",
                         event_action: store.graphInstance.edgeDirectionVisiblity
                           ? "Use directed edges"
                           : "Use undirected edges",
-                      })
+                      }
                     );
                   }}
                 />
@@ -375,4 +375,5 @@ function EdgeTools() {
   );
 }
 
-export default observer(EdgeTools);
+const ObservedEdgeTools = observer(EdgeTools);
+export default ObservedEdgeTools;

@@ -105,16 +105,16 @@ function HomePage() {
                 store.core.setTrackingEnabled(true);
 
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Global",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: null,
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Initialisation",
                     event_value: store.core.userUuid,
-                  })
+                  }
                 );
               }}
             >
@@ -429,4 +429,5 @@ HomePage.propTypes = {
   history: PropTypes.object,
 };
 
-export default observer(HomePage);
+const ObservedHomePage = observer(HomePage);
+export default ObservedHomePage;

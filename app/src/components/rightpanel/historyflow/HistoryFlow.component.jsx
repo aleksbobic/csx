@@ -175,16 +175,16 @@ export function HistoryFlow() {
             }
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "History panel",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Navigate to active history node",
-                })
+                }
               );
 
               zoomToActiveHistoryNode();
@@ -211,16 +211,16 @@ export function HistoryFlow() {
               }
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "History panel",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Link",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: "Open presentation up to active history item",
-                })
+                }
               );
             }}
             href={

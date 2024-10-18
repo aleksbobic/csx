@@ -1,11 +1,9 @@
 import {
   Box,
   Button,
-  Center,
   HStack,
   SlideFade,
   Text,
-  useColorMode,
   useToast,
 } from "@chakra-ui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -15,6 +13,7 @@ import ContextMenuComponent from "components/contextmenu/ContextMenu.component";
 import GraphComponent from "components/graph/Graph.component";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import InteractionsToast from "components/interactionstoast/InteractionsToast.component";
+import Loader from "components/loader/Loader.component";
 import { RootStoreContext } from "stores/RootStore";
 import { SurveyInfoModal } from "components/surveyinfo/SurveyInfo.component";
 import UiGuide from "components/uiguide/UIGuide";
@@ -23,7 +22,6 @@ import WidgetModal from "layouts/widgetmodal/WidgetModal.component";
 import { isEnvSet } from "utils/general.utils";
 import { observer } from "mobx-react";
 import queryString from "query-string";
-import { trio } from "ldrs";
 import { useBeforeunload } from "react-beforeunload";
 
 function GraphPage() {
@@ -35,7 +33,7 @@ function GraphPage() {
 
   const store = useContext(RootStoreContext);
   const location = useLocation();
-  const { colorMode } = useColorMode();
+
   const navigate = useNavigate();
   const surveyToastRef = useRef();
   const surveyToast = useToast();
@@ -181,10 +179,6 @@ function GraphPage() {
     store.core.surveyHistoryDepthTrigger,
   ]);
 
-  useEffect(() => {
-    trio.register();
-  });
-
   const showInteractionsToast = useCallback(() => {
     if (interactionsToastRef.current) {
       interactionsToast.close(interactionsToastRef.current);
@@ -303,16 +297,16 @@ function GraphPage() {
           _hover={{ backgroundColor: "blue.500" }}
           onClick={() => {
             store.track.trackEvent(
-              JSON.stringify({
+              {
                 area: "Graph area",
-              }),
-              JSON.stringify({
+              },
+              {
                 item_type: "Button",
-              }),
-              JSON.stringify({
+              },
+              {
                 event_type: "Click",
                 event_action: "Show all nodes",
-              })
+              }
             );
             store.graphInstance.toggleVisibleComponents(-1);
             store.graphInstance.setIsFiltered(false);
@@ -344,19 +338,7 @@ function GraphPage() {
 
       {showViewAll && renderViewAll()}
 
-      {showLoader && (
-        <Center
-          width="100%"
-          height="100%"
-          backgroundColor={colorMode === "light" ? "#efefef" : "#1A202C"}
-          position="fixed"
-          top="0"
-          left="0"
-          zIndex="2"
-        >
-          <l-trio size={30} color={"white"}></l-trio>
-        </Center>
-      )}
+      {showLoader && <Loader />}
 
       <GraphComponent
         graphData={

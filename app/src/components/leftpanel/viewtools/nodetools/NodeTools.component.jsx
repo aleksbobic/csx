@@ -44,18 +44,18 @@ function ViewTools() {
     );
 
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Left panel",
         sub_area: "VIew tools",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Select element",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Change selection",
         event_action: "Change label size",
         event_value: value,
-      })
+      }
     );
   };
 
@@ -117,18 +117,18 @@ function ViewTools() {
               updateColorScheme(e.target.value);
 
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Left panel",
                   sub_area: "VIew tools",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Select element",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Change selection",
                   event_action: "Change node color",
                   event_value: e.target.value,
-                })
+                }
               );
             }}
             variant="filled"
@@ -204,17 +204,17 @@ function ViewTools() {
                 }
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Left panel",
                       sub_area: "VIew tools",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Open node types with labels menu",
-                    })
+                    }
                   );
                 }}
                 zIndex="3"
@@ -252,34 +252,34 @@ function ViewTools() {
                       onChange={(e) => {
                         if (!e.target.checked) {
                           store.track.trackEvent(
-                            JSON.stringify({
+                            {
                               area: "Left panel",
                               sub_area: "VIew tools",
-                            }),
-                            JSON.stringify({
+                            },
+                            {
                               item_type: "Checkbox",
-                            }),
-                            JSON.stringify({
+                            },
+                            {
                               event_type: "Check",
                               event_action: "Hide labels",
                               event_value: feature,
-                            })
+                            }
                           );
                           store.graphInstance.removeLabelFeature(feature);
                         } else {
                           store.track.trackEvent(
-                            JSON.stringify({
+                            {
                               area: "Left panel",
                               sub_area: "VIew tools",
-                            }),
-                            JSON.stringify({
+                            },
+                            {
                               item_type: "Checkbox",
-                            }),
-                            JSON.stringify({
+                            },
+                            {
                               event_type: "Check",
                               event_action: "Show labels",
                               event_value: feature,
-                            })
+                            }
                           );
 
                           store.graphInstance.addLabelFeature(feature);
@@ -352,19 +352,19 @@ function ViewTools() {
                     store.graphInstance.toggleLabelVisibility();
 
                     store.track.trackEvent(
-                      JSON.stringify({
+                      {
                         area: "Left panel",
                         sub_area: "VIew tools",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         item_type: "Switch",
-                      }),
-                      JSON.stringify({
+                      },
+                      {
                         event_type: "Toggle",
                         event_action: `${
                           store.graphInstance.labels.isVisible ? "Show" : "Hide"
                         } labels`,
-                      })
+                      }
                     );
                   }}
                 />
@@ -401,21 +401,21 @@ function ViewTools() {
                   store.graphInstance.toggleOrphanNodeVisibility();
 
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Left panel",
                       sub_area: "VIew tools",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Switch",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Toggle",
                       event_action: `${
                         store.graphInstance.orphanNodeVisibility
                           ? "Show"
                           : "Hide"
                       } isolated nodes`,
-                    })
+                    }
                   );
                 }}
               />
@@ -428,4 +428,5 @@ function ViewTools() {
   );
 }
 
-export default observer(ViewTools);
+const ObservedViewTools = observer(ViewTools);
+export default ObservedViewTools;

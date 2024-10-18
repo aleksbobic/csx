@@ -22,7 +22,6 @@ import {
   ListBulletIcon,
   MagnifyingGlassIcon,
   MoonIcon,
-  NewspaperIcon,
   RectangleGroupIcon,
   SquaresPlusIcon,
   SunIcon,
@@ -100,17 +99,17 @@ function NavigationPanelComponent() {
       }
 
       store.track.trackEvent(
-        JSON.stringify({
+        {
           area: "Navbar",
-        }),
-        JSON.stringify({
+        },
+        {
           item_type: "Button",
-        }),
-        JSON.stringify({
+        },
+        {
           event_type: "Click",
           event_action: `${isOpen ? "Close" : "Open"} panel`,
           event_value: panel,
-        })
+        }
       );
     },
     [isOpen, onToggle, panelType, store.core, store.track]
@@ -171,17 +170,17 @@ function NavigationPanelComponent() {
               aria-label="Repeat last retrieval action"
               onClick={() => {
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Graph area",
                     sub_area: "Graph controls",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Button",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Repeat last retrieval action",
-                  })
+                  }
                 );
 
                 store.graph.runRepeatRetrieval();
@@ -205,19 +204,19 @@ function NavigationPanelComponent() {
             aria-label="Switch graph view"
             onClick={() => {
               store.track.trackEvent(
-                JSON.stringify({
+                {
                   area: "Graph area",
                   sub_area: "Graph controls",
-                }),
-                JSON.stringify({
+                },
+                {
                   item_type: "Button",
-                }),
-                JSON.stringify({
+                },
+                {
                   event_type: "Click",
                   event_action: `Switch to ${
                     store.core.currentGraph === "detail" ? "overview" : "detail"
                   } graph`,
-                })
+                }
               );
 
               store.graphInstance.setEdgeColorScheme("auto");
@@ -529,16 +528,16 @@ function NavigationPanelComponent() {
                 store.core.setShowCookieInfo(false);
 
                 store.track.trackEvent(
-                  JSON.stringify({
+                  {
                     area: "Navbar",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     item_type: "Logo",
-                  }),
-                  JSON.stringify({
+                  },
+                  {
                     event_type: "Click",
                     event_action: "Navigate home",
-                  })
+                  }
                 );
               }}
             >
@@ -582,73 +581,6 @@ function NavigationPanelComponent() {
               </Link>
             </Tooltip>
           )}
-          <Tooltip label="Visit the CSX wiki">
-            <Link
-              size="sm"
-              width={
-                !location.pathname.startsWith("/search") &&
-                !location.pathname.startsWith("/graph")
-                  ? "75px"
-                  : "40px"
-              }
-              height={
-                !location.pathname.startsWith("/search") &&
-                !location.pathname.startsWith("/graph")
-                  ? "auto"
-                  : "40px"
-              }
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius:
-                  !location.pathname.startsWith("/search") &&
-                  !location.pathname.startsWith("/graph")
-                    ? "7px"
-                    : "10px",
-                padding: "2px 5px",
-              }}
-              variant="ghost"
-              id="wiki"
-              onClick={() => {
-                store.track.trackEvent(
-                  JSON.stringify({
-                    area: "Navbar",
-                  }),
-                  JSON.stringify({
-                    item_type: "Button",
-                  }),
-                  JSON.stringify({
-                    event_type: "Click",
-                    event_action: "Open wiki",
-                  })
-                );
-              }}
-              transition="0.2s all ease-in-out"
-              href="https://csxapp.notion.site/Collaboration-Spotting-X-FAQ-ccace3dc0f384b1fac6b15a3499523ed"
-              target="_blank"
-              isExternal
-              _hover={{
-                textDecoration: "none",
-                backgroundColor: "blue.500",
-              }}
-            >
-              <NewspaperIcon
-                display="inline"
-                width="16px"
-                height="16px"
-                style={{
-                  marginRight:
-                    !location.pathname.startsWith("/search") &&
-                    !location.pathname.startsWith("/graph") &&
-                    "5px",
-                }}
-              />
-              {!location.pathname.startsWith("/search") &&
-                !location.pathname.startsWith("/graph") &&
-                "Wiki"}
-            </Link>
-          </Tooltip>
           {location.pathname.startsWith("/graph") && (
             <Tooltip label="Open presentation mode in new tab">
               <Link
@@ -672,16 +604,16 @@ function NavigationPanelComponent() {
                   }
 
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Navbar",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Open study presentation mode",
-                    })
+                    }
                   );
                 }}
                 transition="0.2s all ease-in-out"

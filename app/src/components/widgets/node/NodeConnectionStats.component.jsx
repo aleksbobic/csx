@@ -25,8 +25,6 @@ import { observer } from "mobx-react";
 function ConnectionStats({
   isExpanded = false,
   demoData = [],
-  connectionFeature = "all",
-  maxConnectionDegree = 2,
   chart,
   settingsMode,
 }) {
@@ -178,18 +176,18 @@ function ConnectionStats({
                 minWidth="210px"
                 onClick={() => {
                   store.track.trackEvent(
-                    JSON.stringify({
+                    {
                       area: "Widget",
                       area_id: chart.id,
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       item_type: "Button",
-                    }),
-                    JSON.stringify({
+                    },
+                    {
                       event_type: "Click",
                       event_action: "Set max degree level",
                       event_value: level,
-                    })
+                    }
                   );
 
                   store.graphInstance.filterNodesById(
@@ -369,20 +367,20 @@ function ConnectionStats({
                     onClick={() => {
                       if (!demoData.length) {
                         store.track.trackEvent(
-                          JSON.stringify({
+                          {
                             area: "Widget",
                             area_id: chart.id,
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             item_type: "Button",
                             item_id: node.id,
                             item_label: node.label,
                             item_feature: node.feature,
-                          }),
-                          JSON.stringify({
+                          },
+                          {
                             event_type: "Click",
                             event_action: "Navigate to node",
-                          })
+                          }
                         );
 
                         store.graphInstance.zoomToFitByNodeId(node.id);
@@ -405,6 +403,9 @@ ConnectionStats.propTypes = {
   demoData: PropTypes.array,
   connectionFeature: PropTypes.string,
   maxConnectionDegree: PropTypes.number,
+  chart: PropTypes.object,
+  settingsMode: PropTypes.bool,
 };
 
-export default observer(ConnectionStats);
+const ObservedConnectionStats = observer(ConnectionStats);
+export default ObservedConnectionStats;

@@ -41,18 +41,18 @@ function SearchBar({
     store.search.useDataset(e.target.value);
 
     store.track.trackEvent(
-      JSON.stringify({
+      {
         area: "Home page",
         sub_area: "Searchbar",
-      }),
-      JSON.stringify({
+      },
+      {
         item_type: "Select element",
-      }),
-      JSON.stringify({
+      },
+      {
         event_type: "Change selection",
         event_action: "Change dataset",
         event_value: store.search.currentDataset,
-      })
+      }
     );
 
     store.workflow.resetWorkflow();
@@ -112,31 +112,31 @@ function SearchBar({
         initialValues={{ search: "" }}
         onSubmit={(values) => {
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Home page",
               sub_area: "Searchbar",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: "Button",
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Click",
               event_action: "Search",
               event_value: values.search,
-            })
+            }
           );
 
           store.track.trackEvent(
-            JSON.stringify({
+            {
               area: "Global",
-            }),
-            JSON.stringify({
+            },
+            {
               item_type: null,
-            }),
-            JSON.stringify({
+            },
+            {
               event_type: "Enter study",
               event_value: store.core.studyUuid,
-            })
+            }
           );
 
           store.core.setStudyIsEmpty(false);
@@ -156,7 +156,7 @@ function SearchBar({
           navigate(`/graph?study=${store.core.studyUuid}`);
         }}
       >
-        {({ values, handleSubmit, setFieldValue }) => (
+        {({ handleSubmit, setFieldValue }) => (
           <Form
             onSubmit={handleSubmit}
             style={{ flexGrow: 1, position: "relative", zIndex: 2 }}
@@ -216,28 +216,26 @@ function SearchBar({
                 name="search"
                 getValue={(value) => setFieldValue("search", value)}
               />
-              <InputRightElement
-                children={
-                  <IconButton
-                    type="submit"
-                    width="40px"
-                    height="40px"
-                    borderLeftRadius="0"
-                    color={textColor}
-                    backgroundColor={
-                      colorMode === "light" ? "blackAlpha.50" : "whiteAlpha.100"
-                    }
-                    icon={
-                      <MagnifyingGlassIcon
-                        style={{
-                          width: "14px",
-                          height: "14px",
-                        }}
-                      />
-                    }
-                  />
-                }
-              />
+              <InputRightElement>
+                <IconButton
+                  type="submit"
+                  width="40px"
+                  height="40px"
+                  borderLeftRadius="0"
+                  color={textColor}
+                  backgroundColor={
+                    colorMode === "light" ? "blackAlpha.50" : "whiteAlpha.100"
+                  }
+                  icon={
+                    <MagnifyingGlassIcon
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                      }}
+                    />
+                  }
+                />
+              </InputRightElement>
             </InputGroup>
           </Form>
         )}
@@ -254,6 +252,8 @@ SearchBar.propTypes = {
   datasetSelectorDisabled: PropTypes.bool,
   placeholder: PropTypes.string,
   onSubmit: PropTypes.func,
+  style: PropTypes.object,
 };
 
-export default observer(SearchBar);
+const ObservedSearchBar = observer(SearchBar);
+export default ObservedSearchBar;
