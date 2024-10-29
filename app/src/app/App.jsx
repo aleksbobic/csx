@@ -7,6 +7,7 @@ import { GraphPage, HomePage, PresentPage, SearchPage } from "pages";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { isEnvFalse, isEnvTrue } from "utils/general.utils";
 import { useCallback, useContext, useEffect, useRef } from "react";
+import MapComponent from "src/components/map/Map.component"; // adding mapcomponent
 
 import CommentModal from "components/commentmodal/CommentModal.component";
 import CustomScroll from "components/customscroll/CustomScroll.component";
@@ -164,6 +165,8 @@ function CSX() {
               {isEnvFalse("VITE_DISABLE_ADVANCED_SEARCH") && (
                 <Route path="/search" label="search" element={<SearchPage />} />
               )}
+              {/* adding route for map  */}
+              <Route path="/map" label="map" element={<MapComponent />} />
             </Routes>
           </Box>
         </CustomScroll>

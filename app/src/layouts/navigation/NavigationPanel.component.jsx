@@ -25,8 +25,9 @@ import {
   RectangleGroupIcon,
   SquaresPlusIcon,
   SunIcon,
+  MapPinIcon, // added amp icon for map toggle button
 } from "@heroicons/react/24/outline";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom"; // adding usenavigate
 import { isEnvFalse, isEnvSet } from "utils/general.utils";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
@@ -45,6 +46,7 @@ function NavigationPanelComponent() {
   const bgColor = useColorModeValue("white", "black");
   const containerRef = useRef();
   const [timer, setTimer] = useState(null);
+  const navigate = useNavigate(); // Added useNavigate for navigation
 
   const edgeColorDark = location.pathname !== "/" ? "gray.900" : "transparent";
   const edgeColorLight = location.pathname !== "/" ? "gray.300" : "transparent";
@@ -446,6 +448,26 @@ function NavigationPanelComponent() {
               }}
               icon={
                 <ClockIcon
+                  style={{
+                    width: "14px",
+                    height: "14px",
+                  }}
+                />
+              }
+            />
+          </Tooltip>
+          <Tooltip label="Toggle map view">
+            <IconButton
+              border="none"
+              aria-label="Map view toggle"
+              id="mapviewtoggle"
+              color={colorMode === "light" ? "black" : "white"}
+              borderRadius="10px"
+              onClick={() => {
+                navigate("/map");
+              }}
+              icon={
+                <MapPinIcon
                   style={{
                     width: "14px",
                     height: "14px",
