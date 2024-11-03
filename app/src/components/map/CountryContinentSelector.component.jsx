@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, Input, Button } from "@chakra-ui/react";
 import countriesData from "./data/countries.json"; // Importing countries JSON data
-// import { SearchIcon } from "@chakra-ui/icons";
-import { HiSearch } from "react-icons/hi";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export default function CountryContinentSelector({ onSelect }) {
   const [filteredCountries, setFilteredCountries] = useState([]);
@@ -150,13 +149,10 @@ export default function CountryContinentSelector({ onSelect }) {
         variant="solid"
         size={{ base: "sm", md: "md" }}
       >
-        <HiSearch
+        <MagnifyingGlassIcon
           style={{
-            color: "purple",
-            fontSize: "3em",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            width: "2.5em",
+            height: "2.5em",
           }}
         />
       </Button>

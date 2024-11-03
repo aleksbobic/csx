@@ -136,11 +136,12 @@ function NavigationPanelComponent() {
       position="absolute"
       marginLeft={
         store.search.datasetTypes[store.search.currentDataset] === "api"
-          ? "-205px"
+          ? "-249px"
           : "-55px"
       }
       top="70px"
       id="graphutils"
+      // 205px
     >
       <HStack
         spacing="10px"
@@ -238,6 +239,27 @@ function NavigationPanelComponent() {
               ) : (
                 <FingerPrintIcon style={{ width: "14px", height: "14px" }} />
               )
+            }
+          />
+        </Tooltip>
+        <Tooltip label="Toggle map view">
+          <IconButton
+            border="none"
+            aria-label="Map view toggle"
+            id="mapviewtoggle"
+            size="sm"
+            color={colorMode === "light" ? "black" : "white"}
+            // borderRadius="10px"
+            onClick={() => {
+              navigate("/map");
+            }}
+            icon={
+              <MapPinIcon
+                style={{
+                  width: "14px",
+                  height: "14px",
+                }}
+              />
             }
           />
         </Tooltip>
@@ -456,7 +478,7 @@ function NavigationPanelComponent() {
               }
             />
           </Tooltip>
-          <Tooltip label="Toggle map view">
+          {/* <Tooltip label="Toggle map view">
             <IconButton
               border="none"
               aria-label="Map view toggle"
@@ -475,7 +497,7 @@ function NavigationPanelComponent() {
                 />
               }
             />
-          </Tooltip>
+          </Tooltip> */}
         </ButtonGroup>
       )}
 

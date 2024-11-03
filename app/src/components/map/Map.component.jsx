@@ -4,10 +4,10 @@ import DeckGL from "deck.gl";
 import { ScatterplotLayer, LineLayer } from "deck.gl";
 import { Box } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
+import { getEnv } from "src/utils/general.utils"; // Importing the getEnv function from the general.utils file
 // import NodeInfo from "./NodeInfo.component";
 
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoiYWhtYWRzYWRpbiIsImEiOiJjbTJseXBmNmEwaG45MmpxeWFvbTRpb2hzIn0.EBxlL-lKPuB48rO_LharvA";
+const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN"); // Fetching the MAPBOX_TOKEN from the .env file
 
 export default function MapComponent() {
   const initialViewState = {
