@@ -6,6 +6,7 @@ import SpriteText from "three-spritetext";
 import axios from "axios";
 import { format } from "date-fns";
 import { safeRequest } from "utils/general.utils";
+import countries from "../components/map/data/countries.json"; //New2-Import the countries data
 
 export class GraphStore {
   perspectives = [];
@@ -154,7 +155,7 @@ export class GraphStore {
 
     const currentGraphColorSchemas = Object.keys(
       this.store.graphInstance.nodeColorSchemeColors[
-        this.store.core.currentGraph
+      this.store.core.currentGraph
       ]
     );
 
@@ -165,21 +166,21 @@ export class GraphStore {
       case "node type":
         material.color.set(
           this.store.graphInstance.nodeColorSchemeColors[
-            this.store.core.currentGraph
+          this.store.core.currentGraph
           ]["node type"][node.feature]
         );
         break;
       case "degree":
         material.color.set(
           this.store.graphInstance.nodeColorSchemeColors[
-            this.store.core.currentGraph
+          this.store.core.currentGraph
           ]["degree"][node.neighbours.size]
         );
         break;
       case "component":
         const nodeColor =
           this.store.graphInstance.nodeColorSchemeColors[
-            this.store.core.currentGraph
+          this.store.core.currentGraph
           ]["component"][node.component];
 
         if (nodeColor) {
@@ -198,9 +199,9 @@ export class GraphStore {
         if (currentGraphColorSchemas.includes(selectedColorSchemaAttribute)) {
           material.color.set(
             this.store.graphInstance.nodeColorSchemeColors[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ][selectedColorSchemaAttribute][
-              node.properties[selectedColorSchemaAttribute]
+            node.properties[selectedColorSchemaAttribute]
             ]
           );
         } else {
@@ -222,6 +223,15 @@ export class GraphStore {
     mesh.scale.z = size;
     return [mesh, mesh.clone(false), mesh.clone(false)];
   };
+  //New2-Helper function to get a random country with coordinates
+  getRandomCountryLocation() {
+    const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+    return {
+      latitude: randomCountry.latlng[0],
+      longitude: randomCountry.latlng[1],
+    };
+  }
+  // end of new code
 
   generateNodeObjects = (nodes, graphType) => {
     const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
@@ -261,6 +271,17 @@ export class GraphStore {
         nodes[i].material,
         nodes[i].size
       );
+      //New2-Assign random location if x and y are missing
+      if (!nodes[i].x || !nodes[i].y) {
+        const { latitude, longitude } = this.getRandomCountryLocation();
+        nodes[i].latitude = latitude;
+        nodes[i].longitude = longitude;
+      }
+      // Store initial coordinates
+      nodes[i].initialLatitude = nodes[i].latitude;
+      nodes[i].initialLongitude = nodes[i].longitude;
+      // end of new code
+
 
       if (!nodes[i].x || !nodes[i].y) {
         const angle = Math.floor(Math.random() * 360);
@@ -354,7 +375,7 @@ export class GraphStore {
         for (let i = 0; i < data.meta.nodeCount; i++) {
           data.nodes[i].material.color.set(
             this.store.graphInstance.nodeColorSchemeColors[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ]["node type"][data.nodes[i].feature]
           );
         }
@@ -363,7 +384,7 @@ export class GraphStore {
         for (let i = 0; i < data.meta.nodeCount; i++) {
           data.nodes[i].material.color.set(
             this.store.graphInstance.nodeColorSchemeColors[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ]["degree"][data.nodes[i].neighbours.size]
           );
         }
@@ -372,7 +393,7 @@ export class GraphStore {
         for (let i = 0; i < data.meta.nodeCount; i++) {
           const nodeColor =
             this.store.graphInstance.nodeColorSchemeColors[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ]["component"][data.nodes[i].component];
 
           if (nodeColor) {
@@ -395,7 +416,7 @@ export class GraphStore {
         for (let i = 0; i < data.meta.nodeCount; i++) {
           data.nodes[i].material.color.set(
             this.store.graphInstance.nodeColorSchemeColors[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ][selectedSchema][data.nodes[i].properties[selectedSchema]]
           );
         }
@@ -413,13 +434,13 @@ export class GraphStore {
       "auto"
     ) {
       switch (
-        this.store.graphInstance.nodeColorScheme[this.store.core.currentGraph]
+      this.store.graphInstance.nodeColorScheme[this.store.core.currentGraph]
       ) {
         case "component":
           for (let i = 0; i < data.meta.linkCount; i++) {
             data.links[i].color =
               this.store.graphInstance.nodeColorSchemeColors[
-                this.store.core.currentGraph
+              this.store.core.currentGraph
               ]["component"][data.links[i].component];
           }
           break;
@@ -440,7 +461,7 @@ export class GraphStore {
       for (let i = 0; i < data.meta.linkCount; i++) {
         data.links[i].color =
           this.store.graphInstance.edgeColorSchemeColors[
-            this.store.core.currentGraph
+          this.store.core.currentGraph
           ]["weight"][data.links[i].weight];
       }
     } else if (
@@ -450,14 +471,14 @@ export class GraphStore {
       for (let i = 0; i < data.meta.linkCount; i++) {
         data.links[i].color =
           this.store.graphInstance.edgeColorSchemeColors[
-            this.store.core.currentGraph
+          this.store.core.currentGraph
           ]["feature types"][
-            data.links[i].connections.reduce((features, connection) => {
-              if (!features.includes(connection.feature)) {
-                features.push(connection.feature);
-              }
-              return features;
-            }, []).length
+          data.links[i].connections.reduce((features, connection) => {
+            if (!features.includes(connection.feature)) {
+              features.push(connection.feature);
+            }
+            return features;
+          }, []).length
           ];
       }
     }
@@ -489,8 +510,8 @@ export class GraphStore {
       this.currentGraphData.nodes[i].neighbourObjects = this.currentGraphData
         .nodes[i].neighbours
         ? [...this.currentGraphData.nodes[i].neighbours].map(
-            (neighbourId) => this.currentGraphData.nodeObjects[neighbourId]
-          )
+          (neighbourId) => this.currentGraphData.nodeObjects[neighbourId]
+        )
         : [];
     }
   };
@@ -847,12 +868,12 @@ export class GraphStore {
       ] !== "component"
         ? "#ffffff"
         : this.store.graphInstance.nodeColorSchemeColors[
-            this.store.core.currentGraph
-          ][
-            this.store.graphInstance.nodeColorScheme[
-              this.store.core.currentGraph
-            ]
-          ][edge.component];
+        this.store.core.currentGraph
+        ][
+        this.store.graphInstance.nodeColorScheme[
+        this.store.core.currentGraph
+        ]
+        ][edge.component];
     }
 
     if (this.store.graphInstance.selectedEdgeColorSchema === "weight") {
@@ -929,14 +950,14 @@ export class GraphStore {
         if (
           !["none", "component", "degree"].includes(
             this.store.graphInstance.nodeColorScheme[
-              this.store.core.currentGraph
+            this.store.core.currentGraph
             ]
           ) &&
           !response.meta.anchor_property_values.find(
             (entry) =>
               entry.property ===
               this.store.graphInstance.nodeColorScheme[
-                this.store.core.currentGraph
+              this.store.core.currentGraph
               ]
           )
         ) {

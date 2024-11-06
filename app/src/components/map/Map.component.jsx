@@ -1,96 +1,73 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Map } from "react-map-gl";
 import DeckGL from "deck.gl";
 import { ScatterplotLayer, LineLayer } from "deck.gl";
 import { Box } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
-import { getEnv } from "src/utils/general.utils"; // Importing the getEnv function from the general.utils file
-// import NodeInfo from "./NodeInfo.component";
+import { getEnv } from "src/utils/general.utils";
+import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
 
-const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN"); // Fetching the MAPBOX_TOKEN from the .env file
+const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
 export default function MapComponent() {
   const initialViewState = {
     longitude: 15.4395,
     latitude: 47.0707,
-    zoom: 1, // Zoom level set to 1 to start with the globe visible
-    minZoom: 0, // Allow zooming out as much as possible (globe view)
-    maxZoom: 20, // Adjust max zoom to limit maximum zoom in
+    zoom: 1,
+    minZoom: 0,
+    maxZoom: 20,
     pitch: 0,
     bearing: 0,
   };
 
-  // sample dtata for the nodes
-  const [data, setData] = useState([
-    {
-      position: [15.4395, 47.0707],
-      size: 1000,
-      description: "Technology University of Graz",
-      color: [0, 255, 0],
-    }, // Graz
-    {
-      position: [16.3738, 48.2082],
-      size: 800,
-      description: "Vienna - Capital City of Austria",
-      color: [0, 255, 0],
-    }, // Vienna
-    {
-      position: [13.0465, 47.8229],
-      size: 1200,
-      description: "Salzburg - Known for Mozart",
-      color: [0, 255, 0],
-    }, // Salzburg
-    {
-      position: [14.2858, 48.3069],
-      size: 1000,
-      description: "Linz - City by the Danube",
-      color: [0, 255, 0],
-    }, // Linz
-    {
-      position: [15.1002, 46.6168],
-      size: 900,
-      description: "Klagenfurt - Near Lake Wörthersee",
-      color: [0, 255, 0],
-    }, // Klagenfurt
-    {
-      position: [8.5417, 47.3769],
-      size: 1100,
-      description: "Aleks",
-      color: [0, 255, 0],
-    }, // Zurich (New Node)
-  ]);
-
-  // New connection data to connect Zurich to Graz
-  const connections = [
-    { source: [15.4395, 47.0707], target: [8.5417, 47.3769] }, // Graz to Zurich
-  ];
-
+  const { graph } = useStore(); //New2- Access graphStore through the root store
   const [viewState, setViewState] = useState(initialViewState);
 
+  //New2- Get nodes from graphStore and prepare them for display
+  //New2 Memoize nodes to avoid re-calculation on every render
+  const nodes = useMemo(
+    () =>
+      graph.currentGraphData.nodes.map((node) => ({
+        position: [node.longitude, node.latitude],
+        size: 1000, // Customize size if needed
+        description: node.label || "No description",
+        color: [0, 255, 0], // Default green color
+      })),
+    [graph.currentGraphData.nodes]
+  );
+
+  //New2- State to handle hover color changes
+  const [displayNodes, setDisplayNodes] = useState(nodes);
+
+  //New2- Update displayNodes on hover
   const handleHover = ({ object }) => {
     if (object) {
-      const updatedData = data.map((d) =>
-        d === object
-          ? { ...d, color: [255, 0, 0] }
-          : { ...d, color: [0, 255, 0] }
+      setDisplayNodes(
+        displayNodes.map((node) =>
+          node.position === object.position
+            ? { ...node, color: [128, 0, 128] } // Change color on hover
+            : { ...node, color: [0, 255, 0] }
+        )
       );
-      setData(updatedData);
     } else {
-      // Reset colors when not hovering over any object
-      setData(data.map((d) => ({ ...d, color: [0, 255, 0] })));
+      setDisplayNodes(
+        displayNodes.map((node) => ({ ...node, color: [0, 255, 0] }))
+      );
     }
   };
 
-  // Handle country or continent selection from the new component
   const handleSelection = (newViewState) => {
     setViewState(newViewState);
   };
 
+  useEffect(() => {
+    //New2- Sync displayNodes with nodes if graph data changes
+    setDisplayNodes(nodes);
+  }, [nodes]);
+
   return (
     <>
       <CountryContinentSelector onSelect={handleSelection} />
-      {/* <NodeInfo /> */}
-
       <DeckGL
         initialViewState={viewState}
         controller={true}
@@ -98,25 +75,16 @@ export default function MapComponent() {
           object && `Description: ${object.description}`
         }
         layers={[
-          // ScatterplotLayer for the nodes
           new ScatterplotLayer({
             id: "scatterplot-layer",
-            data,
+            data: displayNodes,
             getPosition: (d) => d.position,
             getRadius: (d) => d.size,
             getFillColor: (d) => d.color,
             pickable: true,
             onHover: handleHover,
           }),
-          // Sample lineLayer to connect Zurich and Graz
-          new LineLayer({
-            id: "line-layer",
-            data: connections,
-            getSourcePosition: (d) => d.source,
-            getTargetPosition: (d) => d.target,
-            getColor: [0, 255, 255],
-            getWidth: 1,
-          }),
+          // maybe lineLayer to connect nodes in the future
         ]}
       >
         <Map
