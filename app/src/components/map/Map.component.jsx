@@ -2,11 +2,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Map } from "react-map-gl";
 import DeckGL from "deck.gl";
 import { ScatterplotLayer, LineLayer } from "deck.gl";
-import { Box } from "@chakra-ui/react";
+import { Box, Button, Tooltip } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
 import { getEnv } from "src/utils/general.utils";
 import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
-
+import "mapbox-gl/dist/mapbox-gl.css";
+import { FingerPrintIcon } from "@heroicons/react/24/outline";
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
 export default function MapComponent() {
@@ -22,18 +23,33 @@ export default function MapComponent() {
 
   const { graph } = useStore(); //New2- Access graphStore through the root store
   const [viewState, setViewState] = useState(initialViewState);
+  const [viewType, setViewType] = useState("overview"); //New3- Track whether we’re in overview or detail view
 
-  //New2- Get nodes from graphStore and prepare them for display
-  //New2 Memoize nodes to avoid re-calculation on every render
+  // New3- swich beetwen overview and detail view
+  const toggleView = () => {
+    const newViewType = viewType === "overview" ? "detail" : "overview";
+    setViewType(newViewType);
+
+    // Pass the view type to CoreStore via setOverviewMode
+    graph.store.core.setOverviewMode(newViewType === "overview");
+  };
+
+  //New3 - Memoize nodes to avoid re-calculation on every render
   const nodes = useMemo(
     () =>
-      graph.currentGraphData.nodes.map((node) => ({
+      (graph.currentGraphData.nodes || []).map((node) => ({
         position: [node.longitude, node.latitude],
-        size: 1000, // Customize size if needed
+        size: 1000,
         description: node.label || "No description",
-        color: [0, 255, 0], // Default green color
+        color: [0, 255, 0],
       })),
-    [graph.currentGraphData.nodes]
+    [graph.currentGraphData.nodes, viewType]
+  );
+
+  //New3 - Memoize links using the updated getLinkCoordinates function
+  const links = useMemo(
+    () => graph.getLinkCoordinates(),
+    [graph.currentGraphData.links, viewType]
   );
 
   //New2- State to handle hover color changes
@@ -63,10 +79,18 @@ export default function MapComponent() {
   useEffect(() => {
     //New2- Sync displayNodes with nodes if graph data changes
     setDisplayNodes(nodes);
-  }, [nodes]);
+  }, [nodes, links]);
+
+  //New3- Log edge source and target positions on every edge change
+  useEffect(() => {
+    links.forEach((link) => {
+      console.log("Link source:", link.sourcePosition);
+      console.log("Link target:", link.targetPosition);
+    });
+  }, [links]);
 
   return (
-    <>
+    <Box as={"section"} overflowX={"hidden"}>
       <CountryContinentSelector onSelect={handleSelection} />
       <DeckGL
         initialViewState={viewState}
@@ -84,7 +108,16 @@ export default function MapComponent() {
             pickable: true,
             onHover: handleHover,
           }),
-          // maybe lineLayer to connect nodes in the future
+          // New3- Add LineLayer to display edges
+          new LineLayer({
+            id: "link-layer",
+            data: links,
+            getSourcePosition: (d) => d.sourcePosition,
+            getTargetPosition: (d) => d.targetPosition,
+            getColor: (d) => d.color || [211, 211, 211],
+            getWidth: (d) => d.width || 1.5,
+            pickable: false,
+          }),
         ]}
       >
         <Map
@@ -93,6 +126,33 @@ export default function MapComponent() {
           style={{ width: "100%", height: "100%" }}
         />
       </DeckGL>
-    </>
+      {/* New3- Add a button to switch between overview and detail view */}
+      <Box
+        position="absolute"
+        top={"5em"}
+        left={"0.5em"}
+        zIndex="1"
+        overflow={"hidden"}
+      >
+        <Tooltip
+          label={
+            viewType === "overview"
+              ? "Switch to detail view"
+              : "Switch to overview view"
+          }
+        >
+          <Button
+            id="switch-view"
+            onClick={toggleView}
+            colorScheme="purple"
+            color={"purple"}
+            size={{ base: "sm", md: "md" }}
+            aria-label="Switch view"
+          >
+            <Box as={FingerPrintIcon} w={6} h={6} />
+          </Button>
+        </Tooltip>
+      </Box>
+    </Box>
   );
 }

@@ -7,7 +7,6 @@ import axios from "axios";
 import { format } from "date-fns";
 import { safeRequest } from "utils/general.utils";
 import countries from "../components/map/data/countries.json"; //New2-Import the countries data
-
 export class GraphStore {
   perspectives = [];
   references = [];
@@ -233,6 +232,21 @@ export class GraphStore {
   }
   // end of new code
 
+
+  //New3 - Validation to assign lat/long if missing
+  validateNodeLocations = () => {
+    this.currentGraphData.nodes.forEach(node => {
+      if (node.latitude === undefined || node.longitude === undefined) {
+        const { latitude, longitude } = this.getRandomCountryLocation();
+        node.latitude = latitude;
+        node.longitude = longitude;
+        // console.warn(`Assigned random location to node ${node.id}`);
+      }
+      // console.log(`Node ${node.id}: latitude=${node.latitude}, longitude=${node.longitude}`);
+    });
+  };
+  // end of new code  
+
   generateNodeObjects = (nodes, graphType) => {
     const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
       color: new THREE.Color("white"),
@@ -271,13 +285,14 @@ export class GraphStore {
         nodes[i].material,
         nodes[i].size
       );
-      //New2-Assign random location if x and y are missing
-      if (!nodes[i].x || !nodes[i].y) {
+
+      //New3- Ensure all nodes have latitude and longitude if missing
+      if (nodes[i].latitude === undefined || nodes[i].longitude === undefined) {
         const { latitude, longitude } = this.getRandomCountryLocation();
         nodes[i].latitude = latitude;
         nodes[i].longitude = longitude;
+        // console.warn(`Assigned random location to node ${nodes[i].id}`);
       }
-      // Store initial coordinates
       nodes[i].initialLatitude = nodes[i].latitude;
       nodes[i].initialLongitude = nodes[i].longitude;
       // end of new code
@@ -322,9 +337,53 @@ export class GraphStore {
         }
       }
     }
+    //New3-Validate the node locations
+    this.validateNodeLocations();
+    // end of new code
 
     return nodes;
   };
+
+
+  //New3-Add a function to get link coordinates based on node positions
+  getLinkCoordinates() {
+    // console.log("Links in initial", this.currentGraphData.links);
+    const links = [];
+    this.currentGraphData.links.forEach(link => {
+      const sourceID = link.source?.id || link.source;
+      const targetID = link.target?.id || link.target;
+
+      const sourceNode = this.currentGraphData.nodes.find(node => node.id === sourceID);
+      const targetNode = this.currentGraphData.nodes.find(node => node.id === targetID);
+
+      if (
+        sourceNode?.longitude !== undefined && sourceNode?.latitude !== undefined &&
+        targetNode?.longitude !== undefined && targetNode?.latitude !== undefined
+      ) {
+        links.push({
+          sourcePosition: [sourceNode.longitude, sourceNode.latitude],
+          targetPosition: [targetNode.longitude, targetNode.latitude],
+          color: link.color || [204, 153, 255],
+          width: link.width || 1.5,
+        });
+      } else {
+        console.warn(`Missing position for link: sourceID=${sourceID}, targetID=${targetID}`);
+      }
+    });
+    // console.log("Links in final", links);
+    return links;
+  }
+  // end of new code
+
+
+
+  //New3 - Updated toggleOverviewDetail to refresh node/edge positions on switch
+  toggleOverviewDetail = (isOverview) => {
+    // Refresh node/edge positions without modifying currentGraphData directly
+    this.validateNodeLocations();
+    this.store.core.setOverviewMode(isOverview);
+  };
+  // end of new code
 
   setLabelColors = (color) => {
     for (let i = 0; i < this.graphData.meta.nodeCount; i++) {

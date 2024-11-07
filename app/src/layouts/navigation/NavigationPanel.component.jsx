@@ -242,6 +242,7 @@ function NavigationPanelComponent() {
             }
           />
         </Tooltip>
+        {/* added map toggle button */}
         <Tooltip label="Toggle map view">
           <IconButton
             border="none"

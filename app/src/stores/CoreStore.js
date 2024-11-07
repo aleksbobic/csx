@@ -2,7 +2,7 @@ import { animals, colors, uniqueNamesGenerator } from "unique-names-generator";
 import { isEnvSet, safeRequest } from "utils/general.utils";
 
 import axios from "axios";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, action } from "mobx";
 
 export class CoreStore {
   availableDatasets = [];
@@ -42,6 +42,7 @@ export class CoreStore {
   finishedHomeJoyride = false;
   finishedAdvancedSearchJoyride = false;
   finishedGraphJoyride = false;
+  isOverview = true; // New3- Track whether we’re in overview or detail view
 
   visibleDimensions = { overview: [], detail: [] };
   toastInfo = {
@@ -76,7 +77,9 @@ export class CoreStore {
     this.colorMode = localStorage.getItem("chakra-ui-color-mode");
     this.getInteractionsModalDisplay();
 
-    makeAutoObservable(this, {}, { deep: true });
+    makeAutoObservable(this, {
+      setOverviewMode: action, // New3- Make setOverviewMode an action
+    }, { deep: true });
   }
 
   getBasePresentURL = () => {
@@ -437,6 +440,12 @@ export class CoreStore {
   setVisibleDimensions = (dimensions) => {
     this.visibleDimensions[this.currentGraph] = dimensions;
   };
+  //New3 - this method is used to set the graph view
+  setOverviewMode = (isOverview) => {
+    this.isOverview = isOverview;
+    this.currentGraph = isOverview ? "overview" : "detail";
+  };
+  // end New3
 
   resetVisibleDimensions = () => {
     this.visibleDimensions = { overview: [], detail: [] };
