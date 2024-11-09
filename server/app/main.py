@@ -13,9 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 def get_application():
     app = FastAPI(
-        title="Collaboration Spotting X",
-        version="1.3.0",
-        openapi_url="" if not settings.show_docs else None,
+        title="Collaboration Spotting X", version="1.3.0", debug=settings.show_docs
     )
 
     app.include_router(util_router)
