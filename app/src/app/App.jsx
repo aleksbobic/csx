@@ -2,7 +2,7 @@ import "./App.scss";
 import "overlayscrollbars/overlayscrollbars.css";
 
 import { Box, useColorMode, useToast } from "@chakra-ui/react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { GraphPage, HomePage, PresentPage, SearchPage } from "pages";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 import { isEnvFalse, isEnvTrue } from "utils/general.utils";
@@ -13,6 +13,7 @@ import CustomScroll from "components/customscroll/CustomScroll.component";
 import { ErrorModal } from "components/errorModal/ErrorModal.component";
 import LeftPanel from "layouts/leftpanel/LeftPanel.component";
 import NavigationPanelComponent from "layouts/navigation/NavigationPanel.component";
+import NotFoundPage from "src/pages/notfound/notfound.page";
 import { RootStoreContext } from "stores/RootStore";
 import { observer } from "mobx-react";
 
@@ -124,7 +125,7 @@ function CSX() {
             backgroundColor: colorMode === "light" ? "white" : "#171A23",
           }}
         >
-          <NavigationPanelComponent />
+          {location.pathname !== "/404" && <NavigationPanelComponent />}
           <Box
             backgroundColor={colorMode === "light" ? "white" : "#171A23"}
             height="100%"
@@ -164,6 +165,9 @@ function CSX() {
               {isEnvFalse("VITE_DISABLE_ADVANCED_SEARCH") && (
                 <Route path="/search" label="search" element={<SearchPage />} />
               )}
+              <Route path="/404" element={<NotFoundPage />} />{" "}
+              {/* Define the /404 route */}
+              <Route path="*" element={<Navigate to="/404" />} />
             </Routes>
           </Box>
         </CustomScroll>
