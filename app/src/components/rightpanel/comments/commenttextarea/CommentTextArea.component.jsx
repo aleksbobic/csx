@@ -487,15 +487,14 @@ function CommentTextArea(props) {
         <Tooltip label={store.comment.chart ? "" : "Attach chart to comment."}>
           <MenuButton
             as={IconButton}
-            // icon={
-            //     <Chart
-            //         style={{
-            //             '--ggs': 0.7,
-            //             marginLeft: '5px',
-            //             marginBottom: '5px'
-            //         }}
-            //     />
-            // }
+            icon={
+              <ChartPieIcon
+                style={{
+                  width: "14px",
+                  height: "14px",
+                }}
+              />
+            }
             isDisabled={store.comment.chart}
             size="sm"
             opacity={1}

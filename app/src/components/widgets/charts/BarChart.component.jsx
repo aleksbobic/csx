@@ -136,13 +136,13 @@ function BarChart({
     if (demoData) {
       setData(demoData);
     } else {
-      const chart = store.stats.activeWidgets.find(
+      const chartObject = store.stats.activeWidgets.find(
         (widget) => widget.id === chart.id
       );
 
-      setChartConfig(chart);
+      setChartConfig(chartObject);
 
-      setData(getChartData(chart));
+      setData(getChartData(chartObject));
     }
   }, [
     chart.id,

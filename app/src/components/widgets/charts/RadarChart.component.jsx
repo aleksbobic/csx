@@ -98,7 +98,6 @@ function RadarChart({
       };
     },
     [
-      chart.id,
       store.core.isDetail,
       store.graph.currentGraphData.selectedComponents.length,
       store.graph.currentGraphData.selectedNodes.length,
@@ -127,12 +126,12 @@ function RadarChart({
         }),
       });
     } else {
-      const chart = store.stats.activeWidgets.find(
+      const chartObject = store.stats.activeWidgets.find(
         (widget) => widget.id === chart.id
       );
 
-      setChartConfig(chart);
-      setData(getChartData(chart));
+      setChartConfig(chartObject);
+      setData(getChartData(chartObject));
     }
   }, [
     getChartData,
@@ -248,7 +247,7 @@ function RadarChart({
             left: isExpanded ? 5 : 0,
           },
         },
-        onHover: (event, elements) => {
+        onHover: (event) => {
           event.native.target.style.cursor = "default";
         },
         scales: {
@@ -310,4 +309,5 @@ RadarChart.propTypes = {
   settingsMode: PropTypes.bool,
 };
 
-export default observer(RadarChart);
+const ObservedRadarChart = observer(RadarChart);
+export default ObservedRadarChart;

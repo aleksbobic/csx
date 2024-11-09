@@ -196,11 +196,10 @@ function CommentModal() {
           <MenuButton
             as={IconButton}
             icon={
-              <chart
+              <ChartPieIcon
                 style={{
-                  "--ggs": 0.7,
-                  marginLeft: "5px",
-                  marginBottom: "5px",
+                  width: "14px",
+                  height: "14px",
                 }}
               />
             }
