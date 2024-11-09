@@ -176,7 +176,7 @@ export class GraphStore {
           ]["degree"][node.neighbours.size]
         );
         break;
-      case "component":
+      case "component": {
         const nodeColor =
           this.store.graphInstance.nodeColorSchemeColors[
             this.store.core.currentGraph
@@ -191,6 +191,7 @@ export class GraphStore {
         }
 
         break;
+      }
       case "community":
         material.color.set(node.color);
         break;
@@ -603,7 +604,7 @@ export class GraphStore {
     }
 
     if (
-      !response.data.hasOwnProperty("graph") ||
+      !Object.prototype.hasOwnProperty.call(response.data, "graph") ||
       response.data?.nodes?.length === 0
     ) {
       this.graphData["isEmpty"] = true;
@@ -633,7 +634,7 @@ export class GraphStore {
         this.store.workflow.addNodesFromJSONQuery(
           JSON.parse(this.store.search.query)
         );
-      } catch (e) {
+      } catch {
         this.store.workflow.addNodesFromQuery(this.store.search.query);
       }
 
@@ -707,7 +708,7 @@ export class GraphStore {
       this.store.workflow.addNodesFromJSONQuery(
         JSON.parse(this.store.search.query)
       );
-    } catch (e) {
+    } catch {
       this.store.workflow.addNodesFromQuery(this.store.search.query);
     }
 
@@ -724,6 +725,10 @@ export class GraphStore {
   };
 
   getStudy = async (studyId) => {
+    if (!studyId) {
+      return;
+    }
+
     this.store.core.setDataIsLoading(true);
     const userId = this.store.core.userUuid;
 
@@ -806,7 +811,7 @@ export class GraphStore {
       this.store.workflow.addNodesFromJSONQuery(
         JSON.parse(this.store.search.query)
       );
-    } catch (e) {
+    } catch {
       this.store.workflow.addNodesFromQuery(this.store.search.query);
     }
 
