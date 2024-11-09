@@ -1,6 +1,7 @@
+from typing import List, Union
+
 from palettable.matplotlib import Plasma_10
-from palettable.tableau import Tableau_20, Tableau_10
-from typing import List, Tuple, cast, Any, Union
+from palettable.tableau import Tableau_10, Tableau_20
 
 
 def generate_rainbow_scale(values: List[Union[str, int, float]]) -> dict:
