@@ -64,7 +64,15 @@ export class GraphStore {
 
   constructor(store) {
     this.store = store;
-    makeAutoObservable(this, {}, { deep: true });
+    //New4: add action to set nodes
+    makeAutoObservable(this, {
+      setNodes: action,
+    }, { deep: true });
+  }
+
+  setNodes(nodes) {
+    this.currentGraphData.nodes = nodes;
+    this.store.geo.applyLayout(); // New4 - Apply layout after setting nodes
   }
 
   clearGraphId = () => {

@@ -17,6 +17,7 @@ import { WorkflowStore } from "./WorkflowStore";
 import axios from "axios";
 import { createContext } from "react";
 import { isEnvSet } from "utils/general.utils";
+import GeoStore from "./GeoStore"; // New4 - Import the geo store
 
 export class RootStore {
   constructor() {
@@ -25,6 +26,7 @@ export class RootStore {
     this.core = new CoreStore(this);
     this.schema = new SchemaStore(this);
     this.graph = new GraphStore(this);
+    this.geo = new GeoStore(this); // New4: Add GeoStore instance to the root store
     this.dataPanel = new DataPanelStore(this);
     this.controlPanel = new ControlPanelStore(this);
     this.search = new SearchStore(this);

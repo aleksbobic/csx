@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Map } from "react-map-gl";
 import DeckGL from "deck.gl";
 import { ScatterplotLayer, LineLayer } from "deck.gl";
-import { Box, Button, Tooltip } from "@chakra-ui/react";
+import { Box, Button, Tooltip, Select } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
 import { getEnv } from "src/utils/general.utils";
 import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
@@ -21,14 +21,18 @@ export default function MapComponent() {
     bearing: 0,
   };
 
-  const { graph } = useStore(); //New2- Access graphStore through the root store
+  const { graph, geo } = useStore(); //New2- Access graphStore through the root store, New4- Access geoStore through the root store for node positions
   const [viewState, setViewState] = useState(initialViewState);
   const [viewType, setViewType] = useState("overview"); //New3- Track whether we’re in overview or detail view
+  const [layoutKey, setLayoutKey] = useState(0); // New4- Track layout changes to force re-render
+  const [selectedLayout, setSelectedLayout] = useState("default"); //New4: Updated: Track selected layout
 
-  // New3- swich beetwen overview and detail view
+  //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
     const newViewType = viewType === "overview" ? "detail" : "overview";
     setViewType(newViewType);
+    setSelectedLayout("default"); // Updated: Reset to default layout on view switch
+    geo.setLayoutType("default"); // Updated: Apply default layout in GeoStore on view switch
 
     // Pass the view type to CoreStore via setOverviewMode
     graph.store.core.setOverviewMode(newViewType === "overview");
@@ -43,13 +47,13 @@ export default function MapComponent() {
         description: node.label || "No description",
         color: [0, 255, 0],
       })),
-    [graph.currentGraphData.nodes, viewType]
+    [graph.currentGraphData.nodes, viewType, layoutKey] // New4- Add layoutKey to trigger re-render
   );
 
   //New3 - Memoize links using the updated getLinkCoordinates function
   const links = useMemo(
     () => graph.getLinkCoordinates(),
-    [graph.currentGraphData.links, viewType]
+    [graph.currentGraphData.links, viewType, layoutKey] // New4- Add layoutKey to trigger re-render
   );
 
   //New2- State to handle hover color changes
@@ -76,18 +80,25 @@ export default function MapComponent() {
     setViewState(newViewState);
   };
 
-  useEffect(() => {
-    //New2- Sync displayNodes with nodes if graph data changes
-    setDisplayNodes(nodes);
-  }, [nodes, links]);
+  // New4- Update layout type in geoStore
+  const handleLayoutChange = (e) => {
+    const newLayoutType = e.target.value;
+    setSelectedLayout(newLayoutType); // Updated: Set selected layout state
+    geo.setLayoutType(newLayoutType); // New4- Update layout type in geoStore
+    setLayoutKey((prevKey) => prevKey + 1); // New4- Increment layoutKey to force re-render
+  };
 
-  //New3- Log edge source and target positions on every edge change
+  //New4: Updated: Update displayNodes whenever nodes or layout type changes
   useEffect(() => {
-    links.forEach((link) => {
-      console.log("Link source:", link.sourcePosition);
-      console.log("Link target:", link.targetPosition);
-    });
-  }, [links]);
+    setDisplayNodes(
+      (graph.currentGraphData.nodes || []).map((node) => ({
+        position: [node.longitude, node.latitude],
+        size: 1000,
+        description: node.label || "No description",
+        color: [0, 255, 0],
+      }))
+    );
+  }, [geo.layoutType, graph.currentGraphData.nodes]);
 
   return (
     <Box as={"section"} overflowX={"hidden"}>
@@ -129,10 +140,18 @@ export default function MapComponent() {
       {/* New3- Add a button to switch between overview and detail view */}
       <Box
         position="absolute"
-        top={"5em"}
+        top={"4em"}
         left={"0.5em"}
         zIndex="1"
         overflow={"hidden"}
+        display={"flex"}
+        flexDir={"row"}
+        gap={"0.5em"}
+        flexWrap={"wrap"}
+        alignItems={"center"}
+        justifyContent={"start"}
+        width={"15em"}
+        height={"auto"}
       >
         <Tooltip
           label={
@@ -148,10 +167,28 @@ export default function MapComponent() {
             color={"purple"}
             size={{ base: "sm", md: "md" }}
             aria-label="Switch view"
+            // flex={"1"}
           >
             <Box as={FingerPrintIcon} w={6} h={6} />
           </Button>
         </Tooltip>
+
+        {/* New4: Select component to choose layout */}
+        <Select
+          onChange={handleLayoutChange}
+          defaultValue="default"
+          placeholder="Select Layout"
+          size={{ base: "sm", md: "md" }}
+          colorScheme="purple"
+          color={"purple.600"}
+          focusBorderColor="purple.700"
+          borderColor={"purple.400"}
+          flex={"1"}
+        >
+          <option value="default">Default</option>
+          <option value="grid">Grid</option>
+          <option value="stack">Stack</option>
+        </Select>
       </Box>
     </Box>
   );
