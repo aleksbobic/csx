@@ -10,6 +10,7 @@ class GeoStore {
         this.store = store;
         makeAutoObservable(this);
         this.setInitialPositions();
+        this.calculateNodeDegrees();  // New6: Calculate node degrees and sizes upon initialization
     }
 
     setInitialPositions() {
@@ -73,6 +74,42 @@ class GeoStore {
             node.latitude = node.initialLatitude;
         });
     }
+    // New6: Calculate the degree of each node based on links and adjust node sizes
+    calculateNodeDegrees() {
+        const nodes = this.store.graph.currentGraphData.nodes;
+        const links = this.store.graph.currentGraphData.links;
+
+        // New6: Initialize degrees for each node
+        nodes.forEach(node => {
+            node.degree = 0;  // Initialize node degree to zero
+        });
+
+        // New6: Count the number of connections for each node
+        links.forEach(link => {
+            if (link.source && link.target) {
+                const sourceNode = nodes.find(n => n.id === link.source);
+                const targetNode = nodes.find(n => n.id === link.target);
+
+                if (sourceNode) sourceNode.degree += 1;
+                if (targetNode) targetNode.degree += 1;
+            }
+        });
+
+        // New6: Set size based on the degree of each node
+        nodes.forEach(node => {
+            node.size = this.calculateNodeSize(node.degree);
+        });
+    }
+
+    // New6: Calculate the size of a node based on its degree
+    calculateNodeSize(degree) {
+        const minSize = 5;  // Minimum node size
+        const maxSize = 20; // Maximum node size
+        const sizeScale = 0.5;  // Scale factor for degree
+
+        // New6: Calculate size based on degree, ensuring it stays within min and max bounds
+        return Math.min(maxSize, Math.max(minSize, minSize + degree * sizeScale));
+    }
 
     findOverlappingNodes(nodes) {
         const locationMap = new Map();
@@ -91,11 +128,15 @@ class GeoStore {
             const gridSize = Math.ceil(Math.sqrt(group.length));
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
+
             group.forEach((node, index) => {
                 const row = Math.floor(index / gridSize);
                 const col = index % gridSize;
-                node.longitude = baseLongitude + col * 0.04;
-                node.latitude = baseLatitude + row * 0.04;
+                const spacing = node.size * 0.00009; // Adjust spacing based on node size
+
+                // Calculate position with spacing based on size
+                node.longitude = baseLongitude + col * spacing;
+                node.latitude = baseLatitude + row * spacing;
             });
         });
     }
@@ -104,12 +145,18 @@ class GeoStore {
         overlappingNodes.forEach(group => {
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
+
             group.forEach((node, index) => {
-                node.longitude = baseLongitude;  // Keep the same longitude to align vertically
-                node.latitude = baseLatitude + index * 0.03;  // Adjust latitude increment to stack vertically
+                const spacing = node.size * 0.00009; // Adjust spacing based on node size
+
+                // Stack vertically with spacing based on size
+                node.longitude = baseLongitude;
+                node.latitude = baseLatitude + index * spacing;
             });
         });
     }
+
+
 }
 
 export default GeoStore;

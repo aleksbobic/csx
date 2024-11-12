@@ -14,11 +14,11 @@ export default function MapComponent() {
   const initialViewState = {
     longitude: 15.4395,
     latitude: 47.0707,
-    zoom: 1,
+    zoom: 4,
     minZoom: 0,
     maxZoom: 20,
-    pitch: 0,
-    bearing: 0,
+    pitch: 75, // Increase pitch
+    bearing: 30, // Rotate the map
   };
 
   const { graph, geo } = useStore(); //New2- Access graphStore through the root store, New4- Access geoStore through the root store for node positions
@@ -39,6 +39,7 @@ export default function MapComponent() {
   };
 
   // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
+  // New6: Update node size based on calculated size property in GeoStore
   const nodes = useMemo(() => {
     const groupedNodes = {};
     graph.currentGraphData.nodes.forEach((node) => {
@@ -54,7 +55,7 @@ export default function MapComponent() {
       const color = groupedNodes[key].length > 1 ? [255, 0, 0] : [0, 255, 0];
       return {
         position: [node.longitude, node.latitude],
-        size: 1000,
+        size: node.size, // New6: Use node.size calculated in GeoStore
         description: node.label || "No description",
         color,
       };
@@ -115,7 +116,7 @@ export default function MapComponent() {
             id: "scatterplot-layer",
             data: displayNodes,
             getPosition: (d) => d.position,
-            getRadius: (d) => d.size,
+            getRadius: (d) => d.size, // New6: Use dynamic size for each node
             getFillColor: (d) => d.color,
             pickable: true,
             onHover: handleHover,
@@ -127,7 +128,7 @@ export default function MapComponent() {
             getSourcePosition: (d) => d.sourcePosition,
             getTargetPosition: (d) => d.targetPosition,
             getColor: (d) => d.color || [211, 211, 211],
-            getWidth: (d) => d.width || 1.5,
+            getWidth: (d) => d.width || 0.5,
             pickable: false,
           }),
         ]}

@@ -387,7 +387,7 @@ export class GraphStore {
           sourcePosition: [sourceNode.longitude, sourceNode.latitude],
           targetPosition: [targetNode.longitude, targetNode.latitude],
           color: link.color || [204, 153, 255],
-          width: link.width || 1.5,
+          width: link.width || 0.5,
         });
       } else {
         console.warn(`Missing position for link: sourceID=${sourceID}, targetID=${targetID}`);
