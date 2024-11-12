@@ -38,17 +38,28 @@ export default function MapComponent() {
     graph.store.core.setOverviewMode(newViewType === "overview");
   };
 
-  //New3 - Memoize nodes to avoid re-calculation on every render
-  const nodes = useMemo(
-    () =>
-      (graph.currentGraphData.nodes || []).map((node) => ({
+  // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
+  const nodes = useMemo(() => {
+    const groupedNodes = {};
+    graph.currentGraphData.nodes.forEach((node) => {
+      const key = `${node.latitude},${node.longitude}`;
+      if (!groupedNodes[key]) {
+        groupedNodes[key] = [];
+      }
+      groupedNodes[key].push(node);
+    });
+
+    return (graph.currentGraphData.nodes || []).map((node) => {
+      const key = `${node.latitude},${node.longitude}`;
+      const color = groupedNodes[key].length > 1 ? [255, 0, 0] : [0, 255, 0];
+      return {
         position: [node.longitude, node.latitude],
         size: 1000,
         description: node.label || "No description",
-        color: [0, 255, 0],
-      })),
-    [graph.currentGraphData.nodes, viewType, layoutKey] // New4- Add layoutKey to trigger re-render
-  );
+        color,
+      };
+    });
+  }, [graph.currentGraphData.nodes, viewType, geo.layoutType, layoutKey]); // New4- Add layoutKey to trigger re-render
 
   //New3 - Memoize links using the updated getLinkCoordinates function
   const links = useMemo(
@@ -66,13 +77,11 @@ export default function MapComponent() {
         displayNodes.map((node) =>
           node.position === object.position
             ? { ...node, color: [128, 0, 128] } // Change color on hover
-            : { ...node, color: [0, 255, 0] }
+            : node
         )
       );
     } else {
-      setDisplayNodes(
-        displayNodes.map((node) => ({ ...node, color: [0, 255, 0] }))
-      );
+      setDisplayNodes(nodes); // Reset color on hover out
     }
   };
 
@@ -83,22 +92,14 @@ export default function MapComponent() {
   // New4- Update layout type in geoStore
   const handleLayoutChange = (e) => {
     const newLayoutType = e.target.value;
-    setSelectedLayout(newLayoutType); // Updated: Set selected layout state
-    geo.setLayoutType(newLayoutType); // New4- Update layout type in geoStore
-    setLayoutKey((prevKey) => prevKey + 1); // New4- Increment layoutKey to force re-render
+    setSelectedLayout(newLayoutType);
+    geo.setLayoutType(newLayoutType);
+    setLayoutKey((prevKey) => prevKey + 1); // Force re-render by updating layoutKey
   };
 
-  //New4: Updated: Update displayNodes whenever nodes or layout type changes
   useEffect(() => {
-    setDisplayNodes(
-      (graph.currentGraphData.nodes || []).map((node) => ({
-        position: [node.longitude, node.latitude],
-        size: 1000,
-        description: node.label || "No description",
-        color: [0, 255, 0],
-      }))
-    );
-  }, [geo.layoutType, graph.currentGraphData.nodes]);
+    setDisplayNodes(nodes);
+  }, [nodes, geo.layoutType, layoutKey]);
 
   return (
     <Box as={"section"} overflowX={"hidden"}>
@@ -176,8 +177,9 @@ export default function MapComponent() {
         {/* New4: Select component to choose layout */}
         <Select
           onChange={handleLayoutChange}
-          defaultValue="default"
+          // defaultValue="default"
           placeholder="Select Layout"
+          value={selectedLayout}
           size={{ base: "sm", md: "md" }}
           colorScheme="purple"
           color={"purple.600"}

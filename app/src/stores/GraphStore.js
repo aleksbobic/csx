@@ -70,9 +70,24 @@ export class GraphStore {
     }, { deep: true });
   }
 
+  // New5 - Assigns country latitude and longitude if available, with overlap for nodes within the same country
   setNodes(nodes) {
+    nodes.forEach(node => {
+      if (!node.latitude || !node.longitude) {
+        const countryData = countries.find(country => country.name.common === node.country);
+        if (countryData) {
+          node.latitude = countryData.latlng[0];
+          node.longitude = countryData.latlng[1];
+        } else {
+          // Assign random location if no country match found
+          const randomCountry = this.getRandomCountryLocation();
+          node.latitude = randomCountry.latitude;
+          node.longitude = randomCountry.longitude;
+        }
+      }
+    });
     this.currentGraphData.nodes = nodes;
-    this.store.geo.applyLayout(); // New4 - Apply layout after setting nodes
+    this.store.geo.applyLayout(); // New5 - Apply layout after setting nodes
   }
 
   clearGraphId = () => {
@@ -230,7 +245,7 @@ export class GraphStore {
     mesh.scale.z = size;
     return [mesh, mesh.clone(false), mesh.clone(false)];
   };
-  //New2-Helper function to get a random country with coordinates
+  // New5 - Adjusted random location assignment to fallback in case of missing country data
   getRandomCountryLocation() {
     const randomCountry = countries[Math.floor(Math.random() * countries.length)];
     return {
@@ -238,22 +253,18 @@ export class GraphStore {
       longitude: randomCountry.latlng[1],
     };
   }
-  // end of new code
 
 
-  //New3 - Validation to assign lat/long if missing
+  // New5 - Ensures that nodes have lat/long positions based on country, avoids re-randomization if already set
   validateNodeLocations = () => {
     this.currentGraphData.nodes.forEach(node => {
-      if (node.latitude === undefined || node.longitude === undefined) {
+      if (!node.latitude || !node.longitude) {
         const { latitude, longitude } = this.getRandomCountryLocation();
         node.latitude = latitude;
         node.longitude = longitude;
-        // console.warn(`Assigned random location to node ${node.id}`);
       }
-      // console.log(`Node ${node.id}: latitude=${node.latitude}, longitude=${node.longitude}`);
     });
-  };
-  // end of new code  
+  }
 
   generateNodeObjects = (nodes, graphType) => {
     const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
@@ -294,12 +305,16 @@ export class GraphStore {
         nodes[i].size
       );
 
-      //New3- Ensure all nodes have latitude and longitude if missing
-      if (nodes[i].latitude === undefined || nodes[i].longitude === undefined) {
+      // New5 - Set country-based latitude/longitude if available
+      const countryData = countries.find(country => country.name.common === nodes[i].country);
+      if (countryData && (!nodes[i].latitude || !nodes[i].longitude)) {
+        nodes[i].latitude = countryData.latlng[0];
+        nodes[i].longitude = countryData.latlng[1];
+      } else if (!nodes[i].latitude || !nodes[i].longitude) {
+        // Fallback to random location if no country data
         const { latitude, longitude } = this.getRandomCountryLocation();
         nodes[i].latitude = latitude;
         nodes[i].longitude = longitude;
-        // console.warn(`Assigned random location to node ${nodes[i].id}`);
       }
       nodes[i].initialLatitude = nodes[i].latitude;
       nodes[i].initialLongitude = nodes[i].longitude;
