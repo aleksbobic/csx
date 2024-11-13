@@ -10,7 +10,7 @@ class GeoStore {
         this.store = store;
         makeAutoObservable(this);
         this.setInitialPositions();
-        this.calculateNodeDegrees();  // New6: Calculate node degrees and sizes upon initialization
+        this.applyNodeSizes();  // new8: Apply node sizes directly from GraphStore
     }
 
     setInitialPositions() {
@@ -35,10 +35,13 @@ class GeoStore {
             return;
         }
 
-        // Check if we’re switching between grid and stack directly
-        if ((this.lastAppliedLayout === "grid" && this.layoutType === "stack") ||
-            (this.lastAppliedLayout === "stack" && this.layoutType === "grid")) {
+        // new7: Generalized reset logic for any direct transitions between custom layouts
+        const nonDefaultLayouts = ["grid", "stack", "circular", "doubleCircle", "sunflower"];
+        const requiresReset = nonDefaultLayouts.includes(this.lastAppliedLayout) &&
+            nonDefaultLayouts.includes(this.layoutType) &&
+            this.lastAppliedLayout !== this.layoutType;
 
+        if (requiresReset) {
             // Temporarily set to default layout
             this.resetToInitialPositions();  // Reset positions
             this.lastAppliedLayout = "default";  // Update last layout to "default"
@@ -60,6 +63,13 @@ class GeoStore {
             } else if (this.layoutType === "stack") {
                 this.applyStackLayout(overlappingNodes);
             }
+            else if (this.layoutType === "circular") {
+                this.applyCircularLayout(overlappingNodes); // new7: Call the circular layout function if layoutType is circular
+            } else if (this.layoutType === "doubleCircle") {  // new7: Double-Circle layout condition
+                this.applyDoubleCircleLayout(overlappingNodes); // new7: Call the double-circle layout function
+            } else if (this.layoutType === "sunflower") {  // new7: Condition for sunflower layout
+                this.applySunflowerPackingLayout(overlappingNodes);  // new7: Call sunflower packing function
+            }
         }
 
         // Update last applied layout and trigger UI reactivity
@@ -74,42 +84,16 @@ class GeoStore {
             node.latitude = node.initialLatitude;
         });
     }
-    // New6: Calculate the degree of each node based on links and adjust node sizes
-    calculateNodeDegrees() {
+    // new8: Function to apply node sizes directly from GraphStore
+    applyNodeSizes() {
         const nodes = this.store.graph.currentGraphData.nodes;
-        const links = this.store.graph.currentGraphData.links;
-
-        // New6: Initialize degrees for each node
         nodes.forEach(node => {
-            node.degree = 0;  // Initialize node degree to zero
-        });
-
-        // New6: Count the number of connections for each node
-        links.forEach(link => {
-            if (link.source && link.target) {
-                const sourceNode = nodes.find(n => n.id === link.source);
-                const targetNode = nodes.find(n => n.id === link.target);
-
-                if (sourceNode) sourceNode.degree += 1;
-                if (targetNode) targetNode.degree += 1;
+            if (node.size === undefined) {
+                node.size = 5;  // default size if not calculated
             }
         });
-
-        // New6: Set size based on the degree of each node
-        nodes.forEach(node => {
-            node.size = this.calculateNodeSize(node.degree);
-        });
     }
 
-    // New6: Calculate the size of a node based on its degree
-    calculateNodeSize(degree) {
-        const minSize = 5;  // Minimum node size
-        const maxSize = 20; // Maximum node size
-        const sizeScale = 0.5;  // Scale factor for degree
-
-        // New6: Calculate size based on degree, ensuring it stays within min and max bounds
-        return Math.min(maxSize, Math.max(minSize, minSize + degree * sizeScale));
-    }
 
     findOverlappingNodes(nodes) {
         const locationMap = new Map();
@@ -155,6 +139,70 @@ class GeoStore {
             });
         });
     }
+    // new7: Circular layout for overlapping nodes
+    applyCircularLayout(overlappingNodes) {
+        overlappingNodes.forEach(group => {
+            const baseLongitude = group[0].longitude;
+            const baseLatitude = group[0].latitude;
+            const radius = 0.0002 * group[0].size; // new7: Adjust radius based on node size or a fixed value
+            const angleStep = (2 * Math.PI) / group.length; // new7: Calculate equal angle spacing around the circle
+
+            group.forEach((node, index) => {
+                const angle = index * angleStep;
+                node.longitude = baseLongitude + radius * Math.cos(angle); // new7: Position each node on the circle
+                node.latitude = baseLatitude + radius * Math.sin(angle);   // new7: Position each node on the circle
+            });
+        });
+    }
+    // new7: Updated Double-Circle layout for multiple concentric circles
+    applyDoubleCircleLayout(overlappingNodes) {
+        overlappingNodes.forEach(group => {
+            const baseLongitude = group[0].longitude;
+            const baseLatitude = group[0].latitude;
+
+            const numRings = Math.ceil(group.length / 6);  // new7: Estimate number of rings based on node count
+            const angleStep = (2 * Math.PI) / 6;           // Fixed angle step per ring
+            const initialRadius = 0.0001 * group[0].size;  // Radius for the first (inner) circle
+
+            group.forEach((node, index) => {
+                // Determine the ring (inner, outer, next outer, etc.)
+                const ringIndex = Math.floor(index / 6);   // new7: Calculate which ring this node belongs to
+                const angle = (index % 6) * angleStep;     // Position around the ring
+
+                // Increase the radius for each successive ring
+                const radius = initialRadius + ringIndex * 0.0001 * group[0].size;  // new7: Expand radius for outer circles
+
+                node.longitude = baseLongitude + radius * Math.cos(angle);
+                node.latitude = baseLatitude + radius * Math.sin(angle);
+            });
+        });
+    }
+    // new7: Sunflower packing layout for overlapping nodes
+    applySunflowerPackingLayout(overlappingNodes) {
+        const goldenAngle = 2.399963;  // Approximately 137.5 degrees in radians, creates optimal spiral
+
+        overlappingNodes.forEach(group => {
+            const baseLongitude = group[0].longitude;
+            const baseLatitude = group[0].latitude;
+            const spacing = 0.00005 * group[0].size; // new7: Adjust spacing factor for radial spread
+
+            group.forEach((node, index) => {
+                // Calculate radius and angle for each node
+                const radius = spacing * Math.sqrt(index);   // new7: Increase radius based on index
+                const angle = index * goldenAngle;           // new7: Spread nodes using the golden angle
+
+                node.longitude = baseLongitude + radius * Math.cos(angle);
+                node.latitude = baseLatitude + radius * Math.sin(angle);
+
+                console.log(`Node ${node.label}: radius=${radius}, angle=${angle}`);
+            });
+        });
+    }
+
+
+
+
+
 
 
 }

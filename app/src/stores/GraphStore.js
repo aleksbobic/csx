@@ -87,6 +87,7 @@ export class GraphStore {
       }
     });
     this.currentGraphData.nodes = nodes;
+    this.calculateNodeDegreesAndSizes();  // new8: Recalculate node degrees and sizes
     this.store.geo.applyLayout(); // New5 - Apply layout after setting nodes
   }
 
@@ -407,6 +408,41 @@ export class GraphStore {
     this.store.core.setOverviewMode(isOverview);
   };
   // end of new code
+  // start of new8: Calculate and assign degree-based sizes for each node
+  calculateNodeDegreesAndSizes() {
+    const nodes = this.currentGraphData.nodes;
+    const links = this.currentGraphData.links;
+
+    // Initialize each node’s degree to zero
+    nodes.forEach(node => {
+      node.degree = 0;  // new8: Initialize degree
+    });
+
+    // Count links (degree) for each node
+    links.forEach(link => {
+      const sourceNode = nodes.find(n => n.id === link.source);
+      const targetNode = nodes.find(n => n.id === link.target);
+
+      if (sourceNode) sourceNode.degree += 1;
+      if (targetNode) targetNode.degree += 1;
+    });
+
+    // Calculate size based on the degree of each node
+    nodes.forEach(node => {
+      node.size = this.calculateNodeSize(node.degree);  // new8: Set size based on degree
+    });
+  }
+  // end of new code 8
+  // start of new code 8
+  // Place directly after calculateNodeDegreesAndSizes
+  calculateNodeSize(degree) {  // new8: Utility function to determine size based on degree
+    const minSize = 5;
+    const maxSize = 20;
+    const sizeScale = 2;
+    return Math.min(maxSize, Math.max(minSize, minSize + degree * sizeScale));
+  }
+  // end of new code 
+
 
   setLabelColors = (color) => {
     for (let i = 0; i < this.graphData.meta.nodeCount; i++) {

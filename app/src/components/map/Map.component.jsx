@@ -191,6 +191,9 @@ export default function MapComponent() {
           <option value="default">Default</option>
           <option value="grid">Grid</option>
           <option value="stack">Stack</option>
+          <option value="circular">Circular</option>
+          <option value="doubleCircle">Double-Circle</option>
+          <option value="sunflower">Sunflower</option>
         </Select>
       </Box>
     </Box>
