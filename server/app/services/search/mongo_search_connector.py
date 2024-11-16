@@ -76,7 +76,7 @@ class MongoSearchConnector(BaseSearchConnector):
         dataset_list = self.__convert_df_to_entries(dataset_config, dataset_pd)
         self.database[dataset_name].insert_many(dataset_list)
 
-    def get_all_datasets(self) -> List[str]:
+    def get_all_dataset_names(self) -> List[str]:
         return [name for name in self.database.list_collection_names()]
 
     def get_dataset_features(self, dataset_name: str) -> Union[dict, None]:
@@ -118,12 +118,14 @@ class MongoSearchConnector(BaseSearchConnector):
         search_results = list(
             self.database[dataset_name].find(
                 {
-                    feature: {"$eq": query}
-                    if features[feature] == "category"
-                    else {
-                        "$regex": query,
-                        "$options": "i",
-                    }
+                    feature: (
+                        {"$eq": query}
+                        if features[feature] == "category"
+                        else {
+                            "$regex": query,
+                            "$options": "i",
+                        }
+                    )
                     for feature in features
                 },
                 {},

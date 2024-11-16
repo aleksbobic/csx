@@ -1,12 +1,12 @@
 import uvicorn
 from app.api.endpoints.comment import router as comment_router
-from app.api.endpoints.dataset import router as dataset_router
 from app.api.endpoints.history import router as history_router
 from app.api.endpoints.public import router as public_router
 from app.api.endpoints.search import router as search_router
 from app.api.endpoints.study import router as study_router
 from app.api.endpoints.util import router as util_router
 from app.config import settings
+from app.dataset.router import router as dataset_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

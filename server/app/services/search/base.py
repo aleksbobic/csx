@@ -20,7 +20,7 @@ class BaseSearchConnector(ABC):
         pass
 
     @abstractmethod
-    def get_all_datasets(self) -> List[str]:
+    def get_all_dataset_names(self) -> List[str]:
         # Returns a list of all datasets
         pass
 

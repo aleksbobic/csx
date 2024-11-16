@@ -40,7 +40,7 @@ class ElasticSearchConnector(BaseSearchConnector):
 
         return dataset_index["mappings"]["properties"]
 
-    def get_all_datasets(self) -> List[str]:
+    def get_all_dataset_names(self) -> List[str]:
         return list(self.es.indices.get(index="*").keys())
 
     def delete_dataset(self, dataset_name: str) -> None:
