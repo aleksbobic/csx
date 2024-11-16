@@ -9,6 +9,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import {
   FingerPrintIcon,
   AdjustmentsHorizontalIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import NodeInfoComponent from "./NodeInfo.component"; // new9 - Import NodeInfoComponent
 import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRightPanel component
@@ -23,8 +24,8 @@ export default function MapComponent() {
     zoom: 4,
     minZoom: 0,
     maxZoom: 20,
-    pitch: 75, // Increase pitch
-    bearing: 30, // Rotate the map
+    pitch: 0, //new10 - for 2D view
+    bearing: 0, //new10 - for 2D view
   };
 
   const { graph, geo } = useStore(); //New2- Access graphStore through the root store, New4- Access geoStore through the root store for node positions
@@ -46,6 +47,8 @@ export default function MapComponent() {
   const [linkCurvature, setLinkCurvature] = useState(0); //New9 -  Curvature for links
   const [isRightPanelOpen, setRightPanelOpen] = useState(false); // New9 - State for showing/hiding the right panel
   const [layerKey, setLayerKey] = useState(0); // New9 - state to trigger layer refresh
+
+  const [isHeatmapVisible, setIsHeatmapVisible] = useState(false); // New10 - state for heatmap visibility
 
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
@@ -81,6 +84,8 @@ export default function MapComponent() {
     setLinkCurvature(value);
     setLayerKey((prev) => prev + 1);
   };
+  // new10 - Toggle function for heatmap visibility
+  const toggleHeatmap = () => setIsHeatmapVisible((prev) => !prev);
 
   // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
   // New6: Update node size based on calculated size property in GeoStore
@@ -218,6 +223,7 @@ export default function MapComponent() {
         displayNodes,
         handleHover,
         handleClick,
+        isHeatmapVisible, //new10 - Pass heatmap visibility state
       }),
     [
       nodes,
@@ -227,6 +233,7 @@ export default function MapComponent() {
       linkOpacity,
       linkCurvature,
       displayNodes,
+      isHeatmapVisible,
     ]
   );
 
@@ -245,6 +252,7 @@ export default function MapComponent() {
           mapboxAccessToken={MAPBOX_TOKEN}
           mapStyle="mapbox://styles/mapbox/dark-v11"
           style={{ width: "100%", height: "100%" }}
+          projection={"mercator"} // New10- Set projection to "mercator" for 2d view only
         />
       </DeckGL>
       <NodeInfoComponent // new9 - Integrate NodeInfoComponent for popover
@@ -266,7 +274,7 @@ export default function MapComponent() {
         flexWrap={"wrap"}
         alignItems={"center"}
         justifyContent={"start"}
-        width={"18em"}
+        width={"21em"}
         height={"auto"}
       >
         <Tooltip
@@ -301,6 +309,28 @@ export default function MapComponent() {
             aria-label="Toggle Right Panel"
           >
             <Box as={AdjustmentsHorizontalIcon} w={6} h={6} />
+          </Button>
+        </Tooltip>
+        {/*new10 - add a button to toggle heatmap visibility */}
+        <Tooltip
+          label={
+            isHeatmapVisible
+              ? "Hide Heatmap"
+              : "Show Heatmap (Density Visualization)"
+          }
+        >
+          <Button
+            id="toggle-heat-map"
+            colorScheme="purple"
+            color={"purple"}
+            size={{
+              base: "sm",
+              md: "md",
+            }}
+            aria-label="Toggle Heatmap"
+            onClick={toggleHeatmap}
+          >
+            <Box as={ChartBarIcon} w={6} h={6} />
           </Button>
         </Tooltip>
 

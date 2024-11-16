@@ -1,5 +1,5 @@
 import React from "react";
-import { ScatterplotLayer, PathLayer } from "deck.gl";
+import { ScatterplotLayer, PathLayer, HeatmapLayer } from "deck.gl";
 
 const LayersComponent = ({
   nodes = [],
@@ -11,6 +11,7 @@ const LayersComponent = ({
   displayNodes,
   handleHover,
   handleClick,
+  isHeatmapVisible, // New10 - prop to control heatmap visibility
 }) => {
   // new9 - Calculate control points for curved links
   const getCurvedPath = (source, target, curvature) => {
@@ -51,9 +52,20 @@ const LayersComponent = ({
     widthUnits: "pixels",
     pickable: false,
   });
+  // New10 - Heatmap Layer
+  const heatmapLayer = new HeatmapLayer({
+    id: "heatmap-layer",
+    data: nodes, // Use nodes data to visualize density
+    getPosition: (d) => d.position,
+    getWeight: (d) => 1, // Set uniform weight for simplicity
+    radiusPixels: 50, // can be adjusted as needed
+    intensity: 1, // can be adjusted as needed
+    threshold: 0.05, // can be adjusted as needed
+    visible: isHeatmapVisible, // Visibility controlled by isHeatmapVisible prop
+  });
 
   // new9 - Using .filter(Boolean) ensures that only valid layers are passed, avoiding potential errors.
-  return [scatterplotLayer, pathLayer].filter(Boolean);
+  return [scatterplotLayer, pathLayer, heatmapLayer].filter(Boolean);
 };
 
 export default LayersComponent;
