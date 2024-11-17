@@ -570,13 +570,10 @@ export class GraphStore {
         this.store.core.studyHistory[this.store.core.studyHistoryItemIndex].id;
     }
 
-    if (
-      graphType === "detail" &&
-      this.store.graph.graphData.selectedComponents.length
-    ) {
-      const entryArray = this.store.graph.graphData.components
+    if (graphType === "detail" && this.graphData.selectedComponents.length) {
+      const entryArray = this.graphData.components
         .filter((component) =>
-          this.store.graph.graphData.selectedComponents.includes(component.id)
+          this.graphData.selectedComponents.includes(component.id)
         )
         .reduce((entries, component) => entries.concat(component.entries), []);
 
@@ -745,33 +742,41 @@ export class GraphStore {
       return;
     }
 
-    if (response.data.empty) {
+    const study = {
+      ...JSON.parse(response.data),
+    };
+
+    study.study = study.study_name;
+    study.description = study.study_description;
+    study.author = study.study_author;
+
+    if (study.empty) {
       this.store.core.setStudyIsEmpty(true);
       return;
     }
 
-    if (response.data.history.length === 0) {
+    if (study.history.length === 0) {
       this.modifyStudy("overview");
       return;
     }
 
-    if (response.data.public) {
+    if (study.public) {
       this.store.core.setIsStudyPublic(true);
-      this.store.core.setStudyPublicURL(response.data.public_url);
+      this.store.core.setStudyPublicURL(study.public_url);
     }
 
     this.store.core.updateIsStudySaved(true);
-    this.store.core.setStudyName(response.data.name);
-    this.store.core.setStudyAuthor(response.data.author);
-    this.store.core.setStudyDescription(response.data.description);
-    this.store.core.setStudyHistory(response.data.history);
+    this.store.core.setStudyName(study.name);
+    this.store.core.setStudyAuthor(study.author);
+    this.store.core.setStudyDescription(study.description);
+    this.store.core.setStudyHistory(study.history);
     this.store.core.setStudyHistoryItemIndex(
       this.store.core.studyHistory.length - 1
     );
     this.store.core.setStudyQuery();
 
     this.store.search.useDataset(
-      this.store.search.datasets.indexOf(response.data.index)
+      this.store.search.datasets.indexOf(study.index)
     );
     this.store.workflow.resetWorkflow();
     this.store.overviewSchema.setAnchorProperties([]);
@@ -815,12 +820,11 @@ export class GraphStore {
       this.store.workflow.addNodesFromQuery(this.store.search.query);
     }
 
-    this.store.schema.populateStoreData();
     this.store.overviewSchema.populateStoreData();
 
     this.store.history.generateHistoryNodes();
 
-    this.handleRetrievedGraph(response.data.graph, historyGraphType, "");
+    this.handleRetrievedGraph(study.graph, historyGraphType, "");
   };
 
   getSearchGraph = (query, graphType, suuid) => {
@@ -1462,11 +1466,11 @@ export class GraphStore {
 
     if (
       this.store.core.currentGraph === "detail" &&
-      this.store.graph.graphData.selectedComponents.length
+      this.graphData.selectedComponents.length
     ) {
-      const entryArray = this.store.graph.graphData.components
+      const entryArray = this.graphData.components
         .filter((component) =>
-          this.store.graph.graphData.selectedComponents.includes(component.id)
+          this.graphData.selectedComponents.includes(component.id)
         )
         .reduce((entries, component) => entries.concat(component.entries), []);
 

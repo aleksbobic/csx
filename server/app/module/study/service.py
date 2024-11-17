@@ -1,15 +1,30 @@
-from typing import Dict, List, Literal
+import uuid
+from typing import Any, Dict, List, Literal
 
 import app.services.graph.graph as csx_graph
 import networkx as nx
 import pandas as pd
+from app.services.storage.base import BaseStorageConnector
 from app.types import ComparisonResults
+
+from . import utils as study_utils
 
 
 def compare_instances(
     cache_data: Dict, params: Dict, graph_type: Literal["overview", "detail"]
 ) -> ComparisonResults:
-    """Compare existing cache graph with set of given parameters"""
+    """
+    Compare existing cache graph with a set of given parameters.
+
+    Args:
+        cache_data (Dict): The existing cache data.
+        params (Dict): The parameters to compare against.
+        graph_type (Literal["overview", "detail"]): The type of graph.
+
+    Returns:
+        ComparisonResults: The result of the comparison.
+    """
+
     difference = None
     action = "from_cache"
     history_action = "initial search"
@@ -75,7 +90,26 @@ def generate_cache_data(
     elastic_json: Dict,
     study_id: str,
 ) -> Dict:
-    """Generate cache data"""
+    """
+    Generate cache data.
+
+    Args:
+        graph_type (Literal["overview", "detail"]): The type of graph.
+        cache_data (Dict[str, Any]): The existing cache data.
+        graph_data (Dict[str, Any]): The new graph data.
+        search_uuid (str): The search UUID.
+        index (str): The index.
+        query (str): The query.
+        dimensions (Dict[str, Any]): The dimensions.
+        table_data (List[Dict[str, Any]]): The table data.
+        results (pd.DataFrame): The results dataframe.
+        comparison_res (ComparisonResults): The comparison results.
+        elastic_json (Dict[str, Any]): The elastic JSON data.
+        study_id (str): The study ID.
+
+    Returns:
+        Dict[str, Any]: The generated cache data.
+    """
 
     if graph_type == "overview":
         overview = graph_data
@@ -108,37 +142,43 @@ def generate_cache_data(
 
 def enrich_cache_with_ng_graph(
     cache_data: Dict, graph_type: Literal["overview", "detail"]
-):
-    cache_data[graph_type]["meta"] = {
-        **cache_data[graph_type]["meta"],
-        "nx_graph": nx.to_dict_of_dicts(
-            csx_graph.from_graph_data(cache_data[graph_type])
-        ),
-    }
+) -> Dict[str, Any]:
+    """
+    Enrich the cache data with a NetworkX graph.
+
+    Args:
+        cache_data (Dict[str, Any]): The existing cache data.
+        graph_type (Literal["overview", "detail"]): The type of graph.
+
+    Returns:
+        Dict[str, Any]: The enriched cache data.
+    """
+    meta = cache_data[graph_type]["meta"]
+    nx_graph = nx.to_dict_of_dicts(csx_graph.from_graph_data(cache_data[graph_type]))
+
+    cache_data[graph_type]["meta"] = {**meta, "nx_graph": nx_graph}
 
     return cache_data
 
 
 def extract_history_items(study) -> List[dict]:
-    if study is None or "history" not in study or len(study["history"]) == 0:
+    """
+    Extract history items from a study.
+
+    Args:
+        study (Dict[str, Any]): The study dictionary.
+
+    Returns:
+        List[Dict[str, Any]]: The extracted history items.
+    """
+    if not study or "history" not in study or not study["history"]:
         return []
 
     return [
         {
             "id": str(item["item_id"]),
             "action": item["action"],
-            "comments": [
-                {
-                    "id": str(comment["_id"]),
-                    "comment": comment["comment"],
-                    "time": comment["time"],
-                    "screenshot": comment["screenshot"],
-                    "screenshot_width": comment["screenshot_width"],
-                    "screenshot_height": comment["screenshot_height"],
-                    "chart": comment["chart"],
-                }
-                for comment in item["comments"]
-            ],
+            "comments": study_utils.extract_comments(item["comments"]),
             "parent": str(item["parent"]),
             "query": item["query"],
             "graph_type": item["graph_type"],
@@ -155,3 +195,62 @@ def extract_history_items(study) -> List[dict]:
         }
         for item in study["history"]
     ]
+
+
+def get_study_details(
+    study: Dict[str, Any], storage: BaseStorageConnector
+) -> Dict[str, Any]:
+    """
+    Retrieve study details including history items and charts.
+
+    Args:
+        study (Dict[str, Any]): The study dictionary.
+        storage (BaseStorageConnector): The storage connector.
+
+    Returns:
+        Dict[str, Any]: The formatted study response.
+    """
+    try:
+        history_id = study["history"][-1]["item_id"]
+        charts = study["history"][-1]["charts"]
+        history_item = storage.get_history_item(history_id)
+        history = extract_history_items(study)
+    except (KeyError, IndexError) as e:
+        raise ValueError(f"Error retrieving study details: {e}")
+
+    return study_utils.format_study_response(study, history_item, history, charts)
+
+
+def update_study_settings(
+    study_id: str,
+    data: Dict[str, Any],
+    user_id: str,
+    study: Dict[str, Any],
+    storage: BaseStorageConnector,
+) -> str:
+    """
+    Update study settings and return public URL if public is set to true for the first time.
+
+    Args:
+        study_id (str): The ID of the study.
+        data (Dict[str, Any]): The study update data.
+        user_id (str): The ID of the user.
+        study (Dict[str, Any]): The current study.
+        storage (BaseStorageConnector): The storage connector.
+
+    Returns:
+        str: The public URL if updated, otherwise an empty string.
+    """
+    updated_settings = {**data, "saved": True}
+
+    if not study.get("public_url") and data.get("public"):
+        updated_settings["public_url"] = uuid.uuid4().hex
+    else:
+        updated_settings["public_url"] = study.get("public_url", "")
+
+    try:
+        storage.update_study_settings(study_id, user_id, updated_settings)
+    except Exception as e:
+        raise ValueError(f"Error updating study settings: {e}")
+
+    return updated_settings.get("public_url", "")

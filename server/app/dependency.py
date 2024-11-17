@@ -8,7 +8,7 @@ from app.services.search.external.openalex_connector import OpeanAlexSearchConne
 from app.services.search.mongo_search_connector import MongoSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from app.services.storage.mongo_storage_connector import MongoStorageConnector
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Header, HTTPException, status
 from typing_extensions import Annotated
 
 
@@ -69,25 +69,3 @@ def get_external_search_connector() -> (
     Generator[BaseExternalSearchConnector, None, None]
 ):
     yield OpeanAlexSearchConnector()
-
-
-def get_current_study(
-    study_id: str,
-    user_id: str = Depends(verify_user_exists),
-    storage: BaseStorageConnector = Depends(get_storage_connector),
-) -> dict:
-    """Get the study_id from the request header and verify that the study exists."""
-
-    if not study_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
-        )
-
-    study = storage.get_study(user_id, study_id)
-
-    if not study:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Study not found"
-        )
-
-    return study

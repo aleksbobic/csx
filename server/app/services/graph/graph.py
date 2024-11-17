@@ -4,10 +4,10 @@ import uuid
 from datetime import datetime
 from typing import Dict, Generator, List, Literal, cast
 
+import app.module.study.service as study_service
 import app.services.graph.components as csx_components
 import app.services.graph.edges as csx_edges
 import app.services.graph.nodes as csx_nodes
-import app.services.study.study as csx_study
 import networkx as nx
 import pandas as pd
 from app.services.storage.base import BaseStorageConnector
@@ -343,7 +343,7 @@ def get_graph_from_scratch(
         graph_data,
     )
 
-    cache_data = csx_study.generate_cache_data(
+    cache_data = study_service.generate_cache_data(
         graph_type,
         cache_data,
         graph_data,
@@ -358,7 +358,7 @@ def get_graph_from_scratch(
         study_id,
     )
 
-    cache_snapshot = csx_study.enrich_cache_with_ng_graph(cache_data, graph_type)
+    cache_snapshot = study_service.enrich_cache_with_ng_graph(cache_data, graph_type)
 
     storage.insert_history_item(
         study_id,

@@ -179,11 +179,13 @@ export class SearchStore {
 
     if (
       graphType === "detail" &&
-      this.store.graph.graphData.selectedComponents.length
+      this.store.graph.detailGraphData.selectedComponents.length
     ) {
-      const entryArray = this.store.graph.graphData.components
+      const entryArray = this.store.graph.detailGraphData.components
         .filter((component) =>
-          this.store.graph.graphData.selectedComponents.includes(component.id)
+          this.store.graph.detailGraphData.selectedComponents.includes(
+            component.id
+          )
         )
         .reduce((entries, component) => entries.concat(component.entries), []);
 

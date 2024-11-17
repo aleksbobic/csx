@@ -7,7 +7,7 @@ services:
     volumes:
       - ./server:/cs
     ports:
-      - 8881:80
+      - 8880:8880
       - 5678:5678 # for debugging
     environment:
       DISABLE_UPLOAD: "false"
@@ -26,7 +26,7 @@ services:
       context: ./
       dockerfile: docker/Dockerfile.app
     ports:
-      - 8882:3000
+      - 8882:8882
     volumes:
       - ./app:/home/node/csx
     depends_on:

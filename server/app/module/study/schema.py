@@ -14,18 +14,14 @@ class StudyUpdate(BaseModel):
     public: Optional[bool]
 
 
-class StudyDelete(BaseModel):
-    user_trigger: bool
-
-
 class Study(BaseModel):
+    study_name: str
+    study_description: str
+    study_author: str
+    public: bool
     graph: dict
-    name: str
-    description: str
-    author: str
     history: list
     index: str
     charts: list
     empty: bool
-    public: bool
     public_url: str

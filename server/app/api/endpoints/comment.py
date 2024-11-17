@@ -1,4 +1,4 @@
-from app.api.dependencies import get_storage_connector, verify_user_exists
+from app.dependency import get_storage_connector, verify_user_exists
 from app.schemas.comment import Comment
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status

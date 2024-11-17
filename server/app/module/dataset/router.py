@@ -1,12 +1,12 @@
 from typing import Dict
 
 import polars as pl
-from app.api.dependencies import (
+from app.config import settings
+from app.dependency import (
     get_external_search_connector,
     get_search_connector,
     get_storage_connector,
 )
-from app.config import settings
 from app.services.search.base import BaseSearchConnector
 from app.services.search.external.base import BaseExternalSearchConnector
 from app.services.storage.base import BaseStorageConnector
@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, sta
 from fastapi.responses import JSONResponse
 
 from . import service as ds_service
-from .schemas import DatasetSettings, DatasetSettingsFull
+from .schema import DatasetSettings, DatasetSettingsFull
 
 router = APIRouter(prefix="/datasets", tags=["datasets"])
 

@@ -3,10 +3,10 @@ from app.api.endpoints.comment import router as comment_router
 from app.api.endpoints.history import router as history_router
 from app.api.endpoints.public import router as public_router
 from app.api.endpoints.search import router as search_router
-from app.api.endpoints.study import router as study_router
 from app.api.endpoints.util import router as util_router
 from app.config import settings
-from app.dataset.router import router as dataset_router
+from app.module.dataset.router import router as dataset_router
+from app.module.study.router import router as study_router
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -39,4 +39,4 @@ def get_application():
 app = get_application()
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=80, log_level="debug", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8880, log_level="debug", reload=True)

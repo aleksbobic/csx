@@ -16,7 +16,7 @@ import { TrackingStore } from "./TrackingStore";
 import { WorkflowStore } from "./WorkflowStore";
 import axios from "axios";
 import { createContext } from "react";
-import { isEnvSet } from "utils/general.utils";
+import { getEnv } from "utils/general.utils";
 
 export class RootStore {
   constructor() {
@@ -40,11 +40,11 @@ export class RootStore {
   }
 
   initAxios = () => {
-    if (isEnvSet("VITE_SERVER_PORT")) {
-      axios.defaults.baseURL = `http://localhost:${isEnvSet(
-        "VITE_SERVER_PORT"
-      )}`;
+    if (getEnv("NODE_ENV") === "development") {
+      console.log("is development");
+      axios.defaults.baseURL = "http://localhost:8882/api";
     } else {
+      console.log("is production");
       axios.defaults.baseURL = `${window.location.origin}/api`;
     }
   };

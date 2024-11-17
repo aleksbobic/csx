@@ -15,6 +15,7 @@ export function SchemaList() {
         return (
           <Box
             minHeight="40px"
+            zIndex={10}
             minWidth="40px"
             key={`default_schema_${schema.id}`}
           >
@@ -71,9 +72,10 @@ export function SchemaList() {
       width="100%"
       position="absolute"
       top="60px"
-      left="0px"
+      left="0"
       padding="10px"
       paddingBottom="0"
+      zIndex={10}
     >
       <CustomScroll style={{ paddingBottom: "20px" }}>
         <HStack
@@ -81,6 +83,7 @@ export function SchemaList() {
           alignItems="flex-end"
           height="70px"
           paddingBottom="4px"
+          paddingLeft="10px"
         >
           <Text
             fontSize="xs"

@@ -6,7 +6,7 @@ from app.services.search.base import BaseSearchConnector
 from app.services.storage.base import BaseStorageConnector
 from fastapi import HTTPException, UploadFile, status
 
-from .schemas import DatasetSettingsFull
+from .schema import DatasetSettingsFull
 
 
 def delete_dataset_files(

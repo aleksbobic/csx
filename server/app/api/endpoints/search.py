@@ -1,5 +1,5 @@
 import app.services.search.autocomplete as csx_auto
-from app.api.dependencies import get_external_search_connector
+from app.dependency import get_external_search_connector
 from app.services.search.external.base import BaseExternalSearchConnector
 from fastapi import APIRouter, Depends, status
 

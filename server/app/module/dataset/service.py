@@ -10,7 +10,7 @@ from app.services.storage.base import BaseStorageConnector
 from fastapi import UploadFile
 
 from . import utils as ds_utils
-from .schemas import DatasetSettings, DatasetSettingsFull, FeatureDefaults
+from .schema import DatasetSettings, DatasetSettingsFull, FeatureDefaults
 
 
 def get_local_ds_props(

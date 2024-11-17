@@ -114,7 +114,11 @@ function GraphPage() {
       if (store.core.studyUuid === studyId) {
         if (
           !store.core.dataIsLoading &&
-          (store.graph.graphData.nodes.length === 0 || shouldReload())
+          ((store.core.isDetail &&
+            store.graph.detailGraphData.nodes.length === 0) ||
+            (store.core.isOverview &&
+              store.graph.graphData.nodes.length === 0) ||
+            shouldReload())
         ) {
           store.graph.modifyStudy(store.core.currentGraph);
         }

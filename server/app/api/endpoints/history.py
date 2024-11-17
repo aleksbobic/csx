@@ -4,16 +4,16 @@ import os
 import pickle
 from typing import List, Literal, Union
 
+import app.module.study.service as study_service
 import app.services.graph.graph as csx_graph
-import app.services.study.study as csx_study
 import pandas as pd
-from app.api.dependencies import (
-    get_current_study,
+from app.dependency import (
     get_external_search_connector,
     get_search_connector,
     get_storage_connector,
     verify_user_exists,
 )
+from app.module.study.dependency import get_current_study
 from app.schemas.history import (
     DeleteNodesData,
     ExpandNodesData,
@@ -26,7 +26,6 @@ from app.services.storage.base import BaseStorageConnector
 from app.utils.typecheck import isJson, isNumber
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-
 
 router = APIRouter(prefix="/studies/{study_id}/history", tags=["history"])
 
@@ -46,7 +45,7 @@ def delete_history_items(
 @router.get("", status_code=status.HTTP_200_OK)
 def get_study_history(study_id: str, study: dict = Depends(get_current_study)):
     if study:
-        history = csx_study.extract_history_items(study)
+        history = study_service.extract_history_items(study)
         return {
             "name": study["study_name"],
             "author": study["study_author"] if "study_author" in study else "",
@@ -84,7 +83,7 @@ def get_history_item(
 
     history_item = storage.get_history_item(history_id)
 
-    history = csx_study.extract_history_items(study)
+    history = study_service.extract_history_items(study)
 
     graph_type = [
         entry
@@ -246,7 +245,7 @@ def create_history_item(
     if graph_type == "overview":
         current_dimensions = links + [anchor]
 
-    comparison_res = csx_study.compare_instances(
+    comparison_res = study_service.compare_instances(
         cache_data,
         {
             "index": index,

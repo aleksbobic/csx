@@ -29,11 +29,13 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: 3000,
+    port: 8882,
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: "http://csx_server:8880",
         changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace("/api", ""),
         configure: (proxy) => {
           proxy.on("error", (err) => {
             console.log("proxy error", err);

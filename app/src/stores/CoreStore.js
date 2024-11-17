@@ -180,7 +180,7 @@ export class CoreStore {
       return;
     }
 
-    this.setStudyPublicURL(response.data);
+    this.setStudyPublicURL(response.data.public_url);
   };
 
   setStudyPublicURL = (val) => (this.studyPublicURL = val);
@@ -359,8 +359,8 @@ export class CoreStore {
       return;
     }
 
-    localStorage.setItem("studyuuid", response.data);
-    this.setStudyUuid(response.data);
+    localStorage.setItem("studyuuid", response.data.study_uuid);
+    this.setStudyUuid(response.data.study_uuid);
 
     this.setStudyHistory([]);
     this.setStudyHistoryItemIndex(0);
