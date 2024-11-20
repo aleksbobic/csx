@@ -1,8 +1,9 @@
 from app.dependency import get_storage_connector, verify_user_exists
-from app.schemas.comment import Comment
 from app.services.storage.base import BaseStorageConnector
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
+
+from .schema import Comment
 
 router = APIRouter(
     prefix=("/studies/{study_id}/history/{history_item_id}/comments"), tags=["comments"]
@@ -102,6 +103,7 @@ def edit_comment(
     Returns:
         Response: A response with status code 200 (OK).
     """
+
     try:
         storage.edit_comment(
             study_id, user_id, history_item_id, comment_id, **data.dict()

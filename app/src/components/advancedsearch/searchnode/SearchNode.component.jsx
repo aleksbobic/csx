@@ -199,8 +199,8 @@ const searchNode = ({ id, data, isConnectable }) => {
         }}
         _focus={{ opacity: 1 }}
         value={data.keyphrase}
-        min={data.featureHints[data.feature].min}
-        max={data.featureHints[data.feature].max}
+        min={data.featureHints[data.feature]?.min}
+        max={data.featureHints[data.feature]?.max}
       >
         <NumberInputField />
         <NumberInputStepper>

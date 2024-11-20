@@ -9,7 +9,7 @@ import { RootStoreContext } from "stores/RootStore";
 import { observer } from "mobx-react";
 import { useContext } from "react";
 
-function CommentsComponent(props) {
+function CommentsComponent() {
   const store = useContext(RootStoreContext);
   const { colorMode } = useColorMode();
 
@@ -48,4 +48,5 @@ function CommentsComponent(props) {
   );
 }
 
-export default observer(CommentsComponent);
+const ObservedCommentsComponent = observer(CommentsComponent);
+export default ObservedCommentsComponent;

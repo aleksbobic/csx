@@ -118,6 +118,10 @@ export class CommentStore {
   };
 
   deleteComment = async (id) => {
+    if (typeof id === "object" && "comment_id" in id) {
+      id = id.comment_id;
+    }
+
     const historyItemId =
       this.store.core.studyHistory[this.store.core.studyHistoryItemIndex].id;
     const studyId = this.store.core.studyUuid;
@@ -139,6 +143,14 @@ export class CommentStore {
 
   editComment = async (comment) => {
     const comment_time = format(new Date(), "H:mm do MMM yyyy OOOO");
+
+    if (
+      comment.id &&
+      typeof comment.id === "object" &&
+      "comment_id" in comment.id
+    ) {
+      comment.id = comment.id.comment_id;
+    }
 
     const params = {
       comment: comment,

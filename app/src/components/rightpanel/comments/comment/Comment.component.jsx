@@ -237,9 +237,10 @@ function CommentComponent(props) {
           {props.comment.chart && (
             <ChartPieIcon
               style={{
-                "--ggs": "0.7",
+                width: "16px",
+                height: "16px",
                 opacity: 0.5,
-                marginBottom: "2px",
+                marginBottom: "-3px",
               }}
             />
           )}
