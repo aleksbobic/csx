@@ -27,6 +27,28 @@ class GeoStore {
         this.lastAppliedLayout = type;  // New5: Update the last applied layout after each layout change
     }
 
+    // new8: Function to apply node sizes directly from GraphStore
+    // new13: update to be sure that node size is recalculated if it is not valid and make it compatble with graph store
+    applyNodeSizes() {
+        const nodes = this.store.graph.currentGraphData.nodes;
+
+        if (!nodes || nodes.length === 0) {
+            console.warn("No nodes available to apply sizes.");
+            return;
+        }
+
+        // Ensure node degrees and sizes are calculated before applying sizes
+        this.store.graph.calculateNodeDegreesAndSizes();
+
+        // Validate and set sizes
+        nodes.forEach(node => {
+            if (node.size === undefined || node.size <= 0) {
+                node.size = this.store.graph.calculateNodeSize(node.degree || 0);
+                // console.log(`geo Node ID: ${node.id}, Degree: ${node.degree}, Size Applied: ${node.size}`);
+            }
+        });
+    }
+
     applyLayout() {
         // this.store.graph.currentGraphData.nodes = [...nodes];  // New5: Trigger reactivity for UI update
         const nodes = this.store.graph.currentGraphData.nodes;
@@ -34,6 +56,9 @@ class GeoStore {
             console.warn("No nodes to layout");
             return;
         }
+
+        //new13: Check if degrees or sizes need to be recalculated
+        this.applyNodeSizes();
 
         // new7: Generalized reset logic for any direct transitions between custom layouts
         const nonDefaultLayouts = ["grid", "stack", "circular", "doubleCircle", "sunflower"];
@@ -84,16 +109,6 @@ class GeoStore {
             node.latitude = node.initialLatitude;
         });
     }
-    // new8: Function to apply node sizes directly from GraphStore
-    applyNodeSizes() {
-        const nodes = this.store.graph.currentGraphData.nodes;
-        nodes.forEach(node => {
-            if (node.size === undefined) {
-                node.size = 5;  // default size if not calculated
-            }
-        });
-    }
-
 
     findOverlappingNodes(nodes) {
         const locationMap = new Map();
@@ -116,7 +131,7 @@ class GeoStore {
             group.forEach((node, index) => {
                 const row = Math.floor(index / gridSize);
                 const col = index % gridSize;
-                const spacing = node.size * 0.00009; // Adjust spacing based on node size
+                const spacing = node.size * 0.00033; // Adjust spacing based on node size
 
                 // Calculate position with spacing based on size
                 node.longitude = baseLongitude + col * spacing;
@@ -194,7 +209,7 @@ class GeoStore {
                 node.longitude = baseLongitude + radius * Math.cos(angle);
                 node.latitude = baseLatitude + radius * Math.sin(angle);
 
-                console.log(`Node ${node.label}: radius=${radius}, angle=${angle}`);
+                // console.log(`Node ${node.label}: radius=${radius}, angle=${angle}`);
             });
         });
     }

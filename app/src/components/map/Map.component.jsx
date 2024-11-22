@@ -1,23 +1,20 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Map } from "react-map-gl";
 import DeckGL from "deck.gl";
-import { Box, Button, Tooltip, Select } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
 import { getEnv } from "src/utils/general.utils";
 import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
 import "mapbox-gl/dist/mapbox-gl.css";
-import {
-  FingerPrintIcon,
-  AdjustmentsHorizontalIcon,
-  ChartBarIcon,
-} from "@heroicons/react/24/outline";
 import NodeInfoComponent from "./NodeInfo.component"; // new9 - Import NodeInfoComponent
 import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRightPanel component
 import LayersComponent from "./MapLayers.component"; // New9- Import LayersComponent
+import MapControls from "./MapControls.component"; // New9 - Import MapControls component
+import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
 
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
-export default function MapComponent() {
+const MapComponent = observer(() => {
   const initialViewState = {
     longitude: 15.4395,
     latitude: 47.0707,
@@ -49,6 +46,9 @@ export default function MapComponent() {
   const [layerKey, setLayerKey] = useState(0); // New9 - state to trigger layer refresh
 
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(false); // New10 - state for heatmap visibility
+
+  const [isBundlingEnabled, setIsBundlingEnabled] = useState(false); // new11 - State to toggle link bundling
+  const [isProcessing, setIsProcessing] = useState(false); // new11 - State to track bundling processing
 
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
@@ -84,8 +84,19 @@ export default function MapComponent() {
     setLinkCurvature(value);
     setLayerKey((prev) => prev + 1);
   };
+
   // new10 - Toggle function for heatmap visibility
   const toggleHeatmap = () => setIsHeatmapVisible((prev) => !prev);
+
+  // new11 - Function to toggle link bundling with timeout for optimistic UI
+  const handleToggleBundling = () => {
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsBundlingEnabled(!isBundlingEnabled);
+      setLayerKey((prev) => prev + 1); // Increment key to refresh layers
+      setIsProcessing(false);
+    }, 0); // Allow immediate UI feedback
+  };
 
   // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
   // New6: Update node size based on calculated size property in GeoStore
@@ -98,7 +109,7 @@ export default function MapComponent() {
       }
       groupedNodes[key].push(node);
     });
-
+    graph.calculateNodeDegreesAndSizes(); //new13 - Ensure the function runs
     return (graph.currentGraphData.nodes || []).map((node) => {
       const key = `${node.latitude},${node.longitude}`;
       const color = groupedNodes[key].length > 1 ? [255, 0, 0] : [0, 255, 0];
@@ -117,7 +128,7 @@ export default function MapComponent() {
   //New3 - Memoize links using the updated getLinkCoordinates function
   const links = useMemo(
     () => graph.getLinkCoordinates(),
-    [graph.currentGraphData.links, viewType, layoutKey] // New4- Add layoutKey to trigger re-render
+    [graph.currentGraphData.links, viewType, layoutKey, isBundlingEnabled] // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
   );
 
   //New2- State to handle hover color changes
@@ -158,7 +169,7 @@ export default function MapComponent() {
       } else {
         // Open popover for a newly clicked node
         setActiveNode(object); // Update activeNode to the current node
-        setPopoverNode(object);
+        setPopoverNode(object); // Set the clicked node for the popover
         setPopoverOpen(true);
         setPopoverPosition({ x, y });
 
@@ -206,7 +217,9 @@ export default function MapComponent() {
   };
 
   // displayNodes is updated whenever nodes, geo.layoutType, or layoutKey changes
+  // new13: Update displayNodes when node sizes change
   useEffect(() => {
+    geo.applyNodeSizes(); //new13 - Ensure sizes are recalculated during node refresh
     setDisplayNodes(nodes);
   }, [nodes, geo.layoutType, layoutKey]);
 
@@ -224,6 +237,7 @@ export default function MapComponent() {
         handleHover,
         handleClick,
         isHeatmapVisible, //new10 - Pass heatmap visibility state
+        isBundlingEnabled, // new11 - Pass bundling state
       }),
     [
       nodes,
@@ -234,6 +248,7 @@ export default function MapComponent() {
       linkCurvature,
       displayNodes,
       isHeatmapVisible,
+      isBundlingEnabled, //new11 - Pass bundling state
     ]
   );
 
@@ -256,106 +271,21 @@ export default function MapComponent() {
         />
       </DeckGL>
       <NodeInfoComponent // new9 - Integrate NodeInfoComponent for popover
-        node={popoverNode}
+        node={popoverNode} // Pass the clicked node to NodeInfoComponent
         isOpen={isPopoverOpen}
         onClose={handlePopoverClose} // Close popover and reset node colors
         position={popoverPosition} // new9 - Pass position to NodeInfoComponent
       />
-      {/* New3- Add a button to switch between overview and detail view */}
-      <Box
-        position="absolute"
-        top={"4em"}
-        left={"0.5em"}
-        zIndex="1"
-        overflow={"hidden"}
-        display={"flex"}
-        flexDir={"row"}
-        gap={"0.5em"}
-        flexWrap={"wrap"}
-        alignItems={"center"}
-        justifyContent={"start"}
-        width={"21em"}
-        height={"auto"}
-      >
-        <Tooltip
-          label={
-            viewType === "overview"
-              ? "Switch to detail view"
-              : "Switch to overview view"
-          }
-        >
-          <Button
-            id="switch-view"
-            onClick={toggleView}
-            colorScheme="purple"
-            color={"purple"}
-            size={{ base: "sm", md: "md" }}
-            aria-label="Switch view"
-            // flex={"1"}
-          >
-            <Box as={FingerPrintIcon} w={6} h={6} />
-          </Button>
-        </Tooltip>
-        {/* new9 - add a button to toggle the right panel */}
-        <Tooltip
-          label={isRightPanelOpen ? "Close Right Panel" : "Open Right Panel"}
-        >
-          <Button
-            id="toggle-right-panel"
-            onClick={toggleRightPanel}
-            colorScheme="purple"
-            color={"purple"}
-            size={{ base: "sm", md: "md" }}
-            aria-label="Toggle Right Panel"
-          >
-            <Box as={AdjustmentsHorizontalIcon} w={6} h={6} />
-          </Button>
-        </Tooltip>
-        {/*new10 - add a button to toggle heatmap visibility */}
-        <Tooltip
-          label={
-            isHeatmapVisible
-              ? "Hide Heatmap"
-              : "Show Heatmap (Density Visualization)"
-          }
-        >
-          <Button
-            id="toggle-heat-map"
-            colorScheme="purple"
-            color={"purple"}
-            size={{
-              base: "sm",
-              md: "md",
-            }}
-            aria-label="Toggle Heatmap"
-            onClick={toggleHeatmap}
-          >
-            <Box as={ChartBarIcon} w={6} h={6} />
-          </Button>
-        </Tooltip>
-
-        {/* New4: Select component to choose layout */}
-        <Select
-          onChange={handleLayoutChange}
-          // defaultValue="default"
-          placeholder="Select Layout"
-          value={selectedLayout}
-          size={{ base: "sm", md: "md" }}
-          colorScheme="purple"
-          color={"purple.600"}
-          focusBorderColor="purple.700"
-          borderColor={"purple.400"}
-          flex={"1"}
-          borderRadius={"md"}
-        >
-          <option value="default">Default</option>
-          <option value="grid">Grid</option>
-          <option value="stack">Stack</option>
-          <option value="circular">Circular</option>
-          <option value="doubleCircle">Double-Circle</option>
-          <option value="sunflower">Sunflower</option>
-        </Select>
-      </Box>
+      <MapControls
+        viewType={viewType}
+        toggleView={toggleView}
+        isRightPanelOpen={isRightPanelOpen}
+        toggleRightPanel={toggleRightPanel}
+        isHeatmapVisible={isHeatmapVisible}
+        toggleHeatmap={toggleHeatmap}
+        selectedLayout={selectedLayout}
+        handleLayoutChange={handleLayoutChange}
+      />
       {/*new9 - add a right panel to control node and link properties */}
       {isRightPanelOpen && (
         <MapRightPanel
@@ -367,8 +297,11 @@ export default function MapComponent() {
           handleLinkOpacityChange={handleLinkOpacityChange} // Pass handler for link opacity
           linkCurvatureValue={linkCurvature}
           handleLinkCurvatureChange={handleLinkCurvatureChange} // Pass handler for link curvature
+          isBundlingEnabled={isBundlingEnabled} // new11 - Pass bundling state
+          handleToggleBundling={handleToggleBundling} // new11 - Pass handler for toggling bundling
         />
       )}
     </Box>
   );
-}
+});
+export default MapComponent;

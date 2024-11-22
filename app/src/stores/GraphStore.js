@@ -66,12 +66,14 @@ export class GraphStore {
     this.store = store;
     //New4: add action to set nodes
     makeAutoObservable(this, {
-      setNodes: action,
+      setNodes: action, // 13: Add action to set nodes
+      calculateNodeDegreesAndSizes: action, // 13: Add action to calculate node degrees and sizes
     }, { deep: true });
   }
 
   // New5 - Assigns country latitude and longitude if available, with overlap for nodes within the same country
   setNodes(nodes) {
+    // console.log("setNodes function called with nodes:", nodes);
     nodes.forEach(node => {
       if (!node.latitude || !node.longitude) {
         const countryData = countries.find(country => country.name.common === node.country);
@@ -86,8 +88,10 @@ export class GraphStore {
         }
       }
     });
-    this.currentGraphData.nodes = nodes;
-    this.calculateNodeDegreesAndSizes();  // new8: Recalculate node degrees and sizes
+    this.currentGraphData.nodes = nodes || [];
+    this.currentGraphData.links = this.currentGraphData.links || []; //new13: Ensure links are initialized
+    // console.log("Current Graph Data after setting nodes:", this.currentGraphData);
+    this.calculateNodeDegreesAndSizes();  // new13: Recalculate node degrees and sizes
     this.store.geo.applyLayout(); // New5 - Apply layout after setting nodes
   }
 
@@ -254,6 +258,7 @@ export class GraphStore {
       longitude: randomCountry.latlng[1],
     };
   }
+  // end of new code
 
 
   // New5 - Ensures that nodes have lat/long positions based on country, avoids re-randomization if already set
@@ -266,6 +271,7 @@ export class GraphStore {
       }
     });
   }
+  // end of new code
 
   generateNodeObjects = (nodes, graphType) => {
     const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
@@ -369,9 +375,40 @@ export class GraphStore {
   };
 
 
-  //New3-Add a function to get link coordinates based on node positions
-  getLinkCoordinates() {
-    // console.log("Links in initial", this.currentGraphData.links);
+  // //New3-Add a function to get link coordinates based on node positions
+  // getLinkCoordinates() {
+  //   // console.log("Links in initial", this.currentGraphData.links);
+  //   const links = [];
+  //   this.currentGraphData.links.forEach(link => {
+  //     const sourceID = link.source?.id || link.source;
+  //     const targetID = link.target?.id || link.target;
+
+  //     const sourceNode = this.currentGraphData.nodes.find(node => node.id === sourceID);
+  //     const targetNode = this.currentGraphData.nodes.find(node => node.id === targetID);
+
+  //     if (
+  //       sourceNode?.longitude !== undefined && sourceNode?.latitude !== undefined &&
+  //       targetNode?.longitude !== undefined && targetNode?.latitude !== undefined
+  //     ) {
+  //       links.push({
+  //         sourcePosition: [sourceNode.longitude, sourceNode.latitude],
+  //         targetPosition: [targetNode.longitude, targetNode.latitude],
+  //         color: link.color || [204, 153, 255],
+  //         width: link.width || 0.5,
+  //       });
+  //     } else {
+  //       console.warn(`Missing position for link: sourceID=${sourceID}, targetID=${targetID}`);
+  //     }
+  //   });
+  //   // console.log("Links in final", links);
+  //   return links;
+  // }
+  // // end of new code
+
+
+
+  // new13: Updated getLinkCoordinates to support link bundling and be compatible with the node size calculation
+  getLinkCoordinates(isBundlingEnabled = false) {
     const links = [];
     this.currentGraphData.links.forEach(link => {
       const sourceID = link.source?.id || link.source;
@@ -380,25 +417,39 @@ export class GraphStore {
       const sourceNode = this.currentGraphData.nodes.find(node => node.id === sourceID);
       const targetNode = this.currentGraphData.nodes.find(node => node.id === targetID);
 
-      if (
-        sourceNode?.longitude !== undefined && sourceNode?.latitude !== undefined &&
-        targetNode?.longitude !== undefined && targetNode?.latitude !== undefined
-      ) {
-        links.push({
-          sourcePosition: [sourceNode.longitude, sourceNode.latitude],
-          targetPosition: [targetNode.longitude, targetNode.latitude],
-          color: link.color || [204, 153, 255],
-          width: link.width || 0.5,
-        });
+      if (sourceNode && targetNode) {
+        if (isBundlingEnabled) {
+          // Calculate bundled path with control points
+          const midPoint = [
+            (sourceNode.longitude + targetNode.longitude) / 2,
+            (sourceNode.latitude + targetNode.latitude) / 2,
+          ];
+
+          links.push({
+            sourcePosition: [sourceNode.longitude, sourceNode.latitude],
+            targetPosition: [targetNode.longitude, targetNode.latitude],
+            controlPoints: [midPoint],
+            color: link.color || [204, 153, 255],
+            width: link.width || 0.5,
+          });
+        } else {
+          // Default straight-line links
+          links.push({
+            sourcePosition: [sourceNode.longitude, sourceNode.latitude],
+            targetPosition: [targetNode.longitude, targetNode.latitude],
+            color: link.color || [204, 153, 255],
+            width: link.width || 0.5,
+          });
+        }
       } else {
-        console.warn(`Missing position for link: sourceID=${sourceID}, targetID=${targetID}`);
+        console.warn(
+          `Missing position for link: sourceID=${sourceID}, targetID=${targetID}`
+        );
       }
     });
-    // console.log("Links in final", links);
     return links;
   }
-  // end of new code
-
+  // end of new code 13
 
 
   //New3 - Updated toggleOverviewDetail to refresh node/edge positions on switch
@@ -408,37 +459,65 @@ export class GraphStore {
     this.store.core.setOverviewMode(isOverview);
   };
   // end of new code
-  // start of new8: Calculate and assign degree-based sizes for each node
+
+
+  // new8: Calculate and assign degree-based sizes for each node
+  // new13: update in node size calculation 
+  // new13: Ensure consistency with links and calculate correct degrees
   calculateNodeDegreesAndSizes() {
+    // console.log("Recalculating node sizes and degrees...");
     const nodes = this.currentGraphData.nodes;
     const links = this.currentGraphData.links;
 
-    // Initialize each node’s degree to zero
+    if (!nodes.length || !links.length) {
+      console.warn("No nodes or links available for degree calculation.");
+      return;
+    }
+
+    // Reset degree and size for all nodes
     nodes.forEach(node => {
-      node.degree = 0;  // new8: Initialize degree
+      node.degree = 0; // Initialize degree
+      node.size = 5; // Default size
     });
 
-    // Count links (degree) for each node
+    // Iterate over links to calculate node degrees
     links.forEach(link => {
-      const sourceNode = nodes.find(n => n.id === link.source);
-      const targetNode = nodes.find(n => n.id === link.target);
+      // Match source and target nodes using their IDs
+      const sourceNode = nodes.find(n => n.id === (link.source?.id || link.source));
+      const targetNode = nodes.find(n => n.id === (link.target?.id || link.target));
 
-      if (sourceNode) sourceNode.degree += 1;
-      if (targetNode) targetNode.degree += 1;
+      if (sourceNode) {
+        sourceNode.degree += 1;
+      } else {
+        console.warn(`Source node not found for link:`, link);
+      }
+
+      if (targetNode) {
+        targetNode.degree += 1;
+      } else {
+        console.warn(`Target node not found for link:`, link);
+      }
     });
 
-    // Calculate size based on the degree of each node
+    // Dynamically set size based on degree
     nodes.forEach(node => {
-      node.size = this.calculateNodeSize(node.degree);  // new8: Set size based on degree
+      node.size = this.calculateNodeSize(node.degree);
+      // console.log(`Node ID: ${node.id}, Degree: ${node.degree}, Size: ${node.size}`);
     });
   }
-  // end of new code 8
-  // start of new code 8
+  // end of new code 8, 13
+
+
+  // start of new code 8,13
   // Place directly after calculateNodeDegreesAndSizes
+  // new13: update in node size calculation
   calculateNodeSize(degree) {  // new8: Utility function to determine size based on degree
+    // Define size scaling limits
     const minSize = 5;
     const maxSize = 20;
+    // Scale size based on degree with a fixed multiplier
     const sizeScale = 2;
+    // Ensure size remains within defined bounds
     return Math.min(maxSize, Math.max(minSize, minSize + degree * sizeScale));
   }
   // end of new code 

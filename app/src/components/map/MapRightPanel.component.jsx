@@ -7,6 +7,7 @@ import {
   SliderFilledTrack,
   SliderThumb,
   Text,
+  Switch,
 } from "@chakra-ui/react";
 
 export default function MapRightPanel({
@@ -18,6 +19,8 @@ export default function MapRightPanel({
   handleLinkOpacityChange,
   linkCurvatureValue,
   handleLinkCurvatureChange,
+  isBundlingEnabled,
+  handleToggleBundling,
 }) {
   return (
     <Box
@@ -36,8 +39,7 @@ export default function MapRightPanel({
     >
       <Box display={"flex"} flexDir={"column"} justifyContent={"center"}>
         <Text fontWeight="bold" mb={"1em"} borderBottom={"1px solid gray"}>
-          {" "}
-          Nodes{" "}
+          Nodes
         </Text>
         {/* Node Opacity Slider */}
         <Text fontWeight="bold" mb="2">
@@ -59,8 +61,7 @@ export default function MapRightPanel({
       </Box>
       <Box display={"flex"} flexDir={"column"} justifyContent={"center"}>
         <Text fontWeight="bold" mb={"1em"} borderBottom={"1px solid gray"}>
-          {" "}
-          Links{" "}
+          Links
         </Text>
         {/* Link Width Slider */}
         <Text fontWeight="bold" mt="4" mb="2">
@@ -115,6 +116,17 @@ export default function MapRightPanel({
           </SliderTrack>
           <SliderThumb boxSize={6} />
         </Slider>
+
+        {/*new11 Link Bundling Switch */}
+        <Text fontWeight="bold" mt="4" mb="2">
+          Link Bundling
+        </Text>
+        <Switch
+          size={"lg"}
+          isChecked={isBundlingEnabled}
+          onChange={handleToggleBundling}
+          colorScheme="purple"
+        />
       </Box>
     </Box>
   );
