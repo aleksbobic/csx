@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { ScatterplotLayer, PathLayer, HeatmapLayer } from "deck.gl";
-import { bundleLinks } from "./utils/linkBundling"; // new 12 - import link bundling function
 import { getCurvedPath } from "./utils/curvedPath"; // new 12 - import curved path function
 
 const LayersComponent = ({
@@ -16,8 +15,6 @@ const LayersComponent = ({
   isHeatmapVisible, // New10 - prop to control heatmap visibility
   isBundlingEnabled, //new11 - Toggle for link bundling
 }) => {
-  const bundledLinks = isBundlingEnabled ? bundleLinks(links) : links; //new11 - Bundle links if enabled or use original links
-
   // Use ScatterplotLayer to render nodes
   const scatterplotLayer = new ScatterplotLayer({
     id: "scatterplot-layer",
@@ -33,7 +30,7 @@ const LayersComponent = ({
   //new9 - Use PathLayer to render links with curvature
   const pathLayer = new PathLayer({
     id: "path-layer",
-    data: bundledLinks, // new 11 - Use bundled links if enabled
+    data: links, // 14 - changed to links as before
     getPath: (d) =>
       getCurvedPath(
         d.sourcePosition,

@@ -11,6 +11,7 @@ import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRight
 import LayersComponent from "./MapLayers.component"; // New9- Import LayersComponent
 import MapControls from "./MapControls.component"; // New9 - Import MapControls component
 import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
+import { bundleLinks } from "./utils/linkBundling"; // new 14 - import link bundling function
 
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
@@ -126,10 +127,14 @@ const MapComponent = observer(() => {
   }, [graph.currentGraphData.nodes, viewType, geo.layoutType, layoutKey]); // New4- Add layoutKey to trigger re-render
 
   //New3 - Memoize links using the updated getLinkCoordinates function
-  const links = useMemo(
-    () => graph.getLinkCoordinates(),
-    [graph.currentGraphData.links, viewType, layoutKey, isBundlingEnabled] // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
-  );
+  const links = useMemo(() => {
+    const rawLinks = graph.getLinkCoordinates(); //new 14 - Get raw link coordinates
+    if (isBundlingEnabled) {
+      const bundled = bundleLinks(rawLinks); //new14 - Apply bundling
+      return bundled;
+    }
+    return rawLinks;
+  }, [graph.currentGraphData.links, viewType, layoutKey, isBundlingEnabled]); // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
 
   //New2- State to handle hover color changes
   const [displayNodes, setDisplayNodes] = useState(nodes);

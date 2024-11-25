@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+const FIXED_SPACING = 0.0009; // Define a fixed spacing value
 
 class GeoStore {
     layoutType = "default";
@@ -122,6 +123,25 @@ class GeoStore {
         return Array.from(locationMap.values()).filter(group => group.length > 1);
     }
 
+    // applyGridLayout(overlappingNodes) {
+    //     overlappingNodes.forEach(group => {
+    //         const gridSize = Math.ceil(Math.sqrt(group.length));
+    //         const baseLongitude = group[0].longitude;
+    //         const baseLatitude = group[0].latitude;
+
+    //         group.forEach((node, index) => {
+    //             const row = Math.floor(index / gridSize);
+    //             const col = index % gridSize;
+    //             const spacing = node.size * 0.00033; // Adjust spacing based on node size
+
+    //             // Calculate position with spacing based on size
+    //             node.longitude = baseLongitude + col * spacing;
+    //             node.latitude = baseLatitude + row * spacing;
+    //         });
+    //     });
+    // }
+
+    // new 14 - update grid layout to use only fixed spacing for ui consistency
     applyGridLayout(overlappingNodes) {
         overlappingNodes.forEach(group => {
             const gridSize = Math.ceil(Math.sqrt(group.length));
@@ -131,85 +151,155 @@ class GeoStore {
             group.forEach((node, index) => {
                 const row = Math.floor(index / gridSize);
                 const col = index % gridSize;
-                const spacing = node.size * 0.00033; // Adjust spacing based on node size
 
-                // Calculate position with spacing based on size
-                node.longitude = baseLongitude + col * spacing;
-                node.latitude = baseLatitude + row * spacing;
+                node.longitude = baseLongitude + col * FIXED_SPACING;
+                node.latitude = baseLatitude + row * FIXED_SPACING;
             });
         });
     }
-
+    // new 14 - update stack layout to use only fixed spacing for ui consistency
     applyStackLayout(overlappingNodes) {
         overlappingNodes.forEach(group => {
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
 
             group.forEach((node, index) => {
-                const spacing = node.size * 0.00009; // Adjust spacing based on node size
-
-                // Stack vertically with spacing based on size
                 node.longitude = baseLongitude;
-                node.latitude = baseLatitude + index * spacing;
+                node.latitude = baseLatitude + index * FIXED_SPACING;
             });
         });
     }
-    // new7: Circular layout for overlapping nodes
+
+
+    // applyStackLayout(overlappingNodes) {
+    //     overlappingNodes.forEach(group => {
+    //         const baseLongitude = group[0].longitude;
+    //         const baseLatitude = group[0].latitude;
+
+    //         group.forEach((node, index) => {
+    //             const spacing = node.size * 0.00009; // Adjust spacing based on node size
+
+    //             // Stack vertically with spacing based on size
+    //             node.longitude = baseLongitude;
+    //             node.latitude = baseLatitude + index * spacing;
+    //         });
+    //     });
+    // }
+
+    // // new7: Circular layout for overlapping nodes
+    // applyCircularLayout(overlappingNodes) {
+    //     overlappingNodes.forEach(group => {
+    //         const baseLongitude = group[0].longitude;
+    //         const baseLatitude = group[0].latitude;
+    //         const radius = 0.0002 * group[0].size; // new7: Adjust radius based on node size or a fixed value
+    //         const angleStep = (2 * Math.PI) / group.length; // new7: Calculate equal angle spacing around the circle
+
+    //         group.forEach((node, index) => {
+    //             const angle = index * angleStep;
+    //             node.longitude = baseLongitude + radius * Math.cos(angle); // new7: Position each node on the circle
+    //             node.latitude = baseLatitude + radius * Math.sin(angle);   // new7: Position each node on the circle
+    //         });
+    //     });
+    // }
+
+    // new 14 - update circular layout to use only fixed spacing for ui consistency
     applyCircularLayout(overlappingNodes) {
         overlappingNodes.forEach(group => {
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
-            const radius = 0.0002 * group[0].size; // new7: Adjust radius based on node size or a fixed value
-            const angleStep = (2 * Math.PI) / group.length; // new7: Calculate equal angle spacing around the circle
+            const radius = FIXED_SPACING; // Fixed radius for the circle
+            const angleStep = (2 * Math.PI) / group.length;
 
             group.forEach((node, index) => {
                 const angle = index * angleStep;
-                node.longitude = baseLongitude + radius * Math.cos(angle); // new7: Position each node on the circle
-                node.latitude = baseLatitude + radius * Math.sin(angle);   // new7: Position each node on the circle
+                node.longitude = baseLongitude + radius * Math.cos(angle);
+                node.latitude = baseLatitude + radius * Math.sin(angle);
             });
         });
     }
-    // new7: Updated Double-Circle layout for multiple concentric circles
+
+
+    // // new7: Updated Double-Circle layout for multiple concentric circles
+    // applyDoubleCircleLayout(overlappingNodes) {
+    //     overlappingNodes.forEach(group => {
+    //         const baseLongitude = group[0].longitude;
+    //         const baseLatitude = group[0].latitude;
+
+    //         const numRings = Math.ceil(group.length / 6);  // new7: Estimate number of rings based on node count
+    //         const angleStep = (2 * Math.PI) / 6;           // Fixed angle step per ring
+    //         const initialRadius = 0.0001 * group[0].size;  // Radius for the first (inner) circle
+
+    //         group.forEach((node, index) => {
+    //             // Determine the ring (inner, outer, next outer, etc.)
+    //             const ringIndex = Math.floor(index / 6);   // new7: Calculate which ring this node belongs to
+    //             const angle = (index % 6) * angleStep;     // Position around the ring
+
+    //             // Increase the radius for each successive ring
+    //             const radius = initialRadius + ringIndex * 0.0001 * group[0].size;  // new7: Expand radius for outer circles
+
+    //             node.longitude = baseLongitude + radius * Math.cos(angle);
+    //             node.latitude = baseLatitude + radius * Math.sin(angle);
+    //         });
+    //     });
+    // }
+
+    // new 14 - update double circle layout to use only fixed spacing for ui consistency
     applyDoubleCircleLayout(overlappingNodes) {
         overlappingNodes.forEach(group => {
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
 
-            const numRings = Math.ceil(group.length / 6);  // new7: Estimate number of rings based on node count
-            const angleStep = (2 * Math.PI) / 6;           // Fixed angle step per ring
-            const initialRadius = 0.0001 * group[0].size;  // Radius for the first (inner) circle
+            const numRings = Math.ceil(group.length / 6);
+            const angleStep = (2 * Math.PI) / 6;
+            const initialRadius = FIXED_SPACING;
 
             group.forEach((node, index) => {
-                // Determine the ring (inner, outer, next outer, etc.)
-                const ringIndex = Math.floor(index / 6);   // new7: Calculate which ring this node belongs to
-                const angle = (index % 6) * angleStep;     // Position around the ring
-
-                // Increase the radius for each successive ring
-                const radius = initialRadius + ringIndex * 0.0001 * group[0].size;  // new7: Expand radius for outer circles
+                const ringIndex = Math.floor(index / 6);
+                const angle = (index % 6) * angleStep;
+                const radius = initialRadius + ringIndex * FIXED_SPACING;
 
                 node.longitude = baseLongitude + radius * Math.cos(angle);
                 node.latitude = baseLatitude + radius * Math.sin(angle);
             });
         });
     }
-    // new7: Sunflower packing layout for overlapping nodes
+
+    // // new7: Sunflower packing layout for overlapping nodes
+    // applySunflowerPackingLayout(overlappingNodes) {
+    //     const goldenAngle = 2.399963;  // Approximately 137.5 degrees in radians, creates optimal spiral
+
+    //     overlappingNodes.forEach(group => {
+    //         const baseLongitude = group[0].longitude;
+    //         const baseLatitude = group[0].latitude;
+    //         const spacing = 0.00005 * group[0].size; // new7: Adjust spacing factor for radial spread
+
+    //         group.forEach((node, index) => {
+    //             // Calculate radius and angle for each node
+    //             const radius = spacing * Math.sqrt(index);   // new7: Increase radius based on index
+    //             const angle = index * goldenAngle;           // new7: Spread nodes using the golden angle
+
+    //             node.longitude = baseLongitude + radius * Math.cos(angle);
+    //             node.latitude = baseLatitude + radius * Math.sin(angle);
+
+    //             // console.log(`Node ${node.label}: radius=${radius}, angle=${angle}`);
+    //         });
+    //     });
+    // }
+
+    // new 14 - update sunflower layout to use only fixed spacing for ui consistency
     applySunflowerPackingLayout(overlappingNodes) {
-        const goldenAngle = 2.399963;  // Approximately 137.5 degrees in radians, creates optimal spiral
+        const goldenAngle = 2.399963;
 
         overlappingNodes.forEach(group => {
             const baseLongitude = group[0].longitude;
             const baseLatitude = group[0].latitude;
-            const spacing = 0.00005 * group[0].size; // new7: Adjust spacing factor for radial spread
 
             group.forEach((node, index) => {
-                // Calculate radius and angle for each node
-                const radius = spacing * Math.sqrt(index);   // new7: Increase radius based on index
-                const angle = index * goldenAngle;           // new7: Spread nodes using the golden angle
+                const radius = FIXED_SPACING * Math.sqrt(index);
+                const angle = index * goldenAngle;
 
                 node.longitude = baseLongitude + radius * Math.cos(angle);
                 node.latitude = baseLatitude + radius * Math.sin(angle);
-
-                // console.log(`Node ${node.label}: radius=${radius}, angle=${angle}`);
             });
         });
     }
