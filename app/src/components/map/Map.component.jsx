@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Map } from "react-map-gl";
+import { Map, Source, Layer } from "react-map-gl";
 import DeckGL from "deck.gl";
 import { Box } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
@@ -12,6 +12,7 @@ import LayersComponent from "./MapLayers.component"; // New9- Import LayersCompo
 import MapControls from "./MapControls.component"; // New9 - Import MapControls component
 import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
 import { bundleLinks } from "./utils/linkBundling"; // new 14 - import link bundling function
+import LegendBox from "./LegendBox.component"; //new15 - Import LegendBox
 
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
@@ -26,7 +27,7 @@ const MapComponent = observer(() => {
     bearing: 0, //new10 - for 2D view
   };
 
-  const { graph, geo } = useStore(); //New2- Access graphStore through the root store, New4- Access geoStore through the root store for node positions
+  const { graph, geo, mapCluster } = useStore(); //New2- Access graphStore through the root store, New4- Access geoStore through the root store for node positions, New15 - Access mapClusterStore through the root store
   const [viewState, setViewState] = useState(initialViewState);
 
   const [viewType, setViewType] = useState("overview"); //New3- Track whether we’re in overview or detail view
@@ -50,6 +51,10 @@ const MapComponent = observer(() => {
 
   const [isBundlingEnabled, setIsBundlingEnabled] = useState(false); // new11 - State to toggle link bundling
   const [isProcessing, setIsProcessing] = useState(false); // new11 - State to track bundling processing
+
+  const [isClusteringEnabled, setIsClusteringEnabled] = useState(false); // New15 - state for clustering toggle
+  const [clusterRadius, setClusterRadius] = useState(mapCluster.clusterRadius); // New15 - state for cluster radius
+  const [isLegendVisible, setIsLegendVisible] = useState(false); //new15 - State for legend visibility
 
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
@@ -228,6 +233,39 @@ const MapComponent = observer(() => {
     setDisplayNodes(nodes);
   }, [nodes, geo.layoutType, layoutKey]);
 
+  // new15 - Update clustering when the clustering state changes
+  useEffect(() => {
+    if (isClusteringEnabled) {
+      mapCluster.updateClusteredNodes();
+    }
+  }, [isClusteringEnabled, graph.currentGraphData]);
+  // new15 - Toggle clustering
+  const toggleClustering = () => {
+    setIsClusteringEnabled(!isClusteringEnabled);
+  };
+  // new15 - Update cluster radius when it changes
+  const handleClusterRadiusChange = (radius) => {
+    setClusterRadius(radius);
+    mapCluster.setClusterRadius(radius);
+    mapCluster.updateClusteredNodes(); // Force the clustered nodes to refresh
+    setLayerKey((prev) => prev + 1); // Increment key to refresh layers
+  };
+  // new15 - Toggle legend visibility and pass node distribution
+  const toggleLegend = () => setIsLegendVisible((prev) => !prev);
+  // new15 - Get node distribution from mapCluster store
+  const nodeDistribution = useMemo(
+    () => mapCluster.nodeDistribution,
+    [graph.currentGraphData]
+  );
+  // new15 - Update node distribution when the graph data changes
+  useEffect(() => {
+    mapCluster.calculateNodeDistribution();
+  }, []);
+  // new15 - Update node distribution when the graph data changes
+  useEffect(() => {
+    mapCluster.calculateNodeDistribution();
+  }, [viewType, graph.currentGraphData]);
+
   // //new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
   const layers = useMemo(
     () =>
@@ -254,6 +292,7 @@ const MapComponent = observer(() => {
       displayNodes,
       isHeatmapVisible,
       isBundlingEnabled, //new11 - Pass bundling state
+      layerKey, //new9 - Add layerKey to force re-render when layers change
     ]
   );
 
@@ -273,7 +312,33 @@ const MapComponent = observer(() => {
           mapStyle="mapbox://styles/mapbox/dark-v11"
           style={{ width: "100%", height: "100%" }}
           projection={"mercator"} // New10- Set projection to "mercator" for 2d view only
-        />
+        >
+          {/*new 15 - Clustering Source and Layers */}
+          {isClusteringEnabled && (
+            <Source
+              id="clusters"
+              type="geojson"
+              data={{
+                type: "FeatureCollection",
+                features: mapCluster.clusteredNodes.map((node) => ({
+                  type: "Feature",
+                  geometry: { type: "Point", coordinates: node.position },
+                  properties: node.properties,
+                })),
+              }}
+              cluster={true}
+              clusterRadius={mapCluster.clusterRadius}
+              clusterMaxZoom={mapCluster.maxZoom}
+            />
+          )}
+          {isClusteringEnabled && (
+            <>
+              <Layer {...mapCluster.getClusterLayer()} />
+              <Layer {...mapCluster.getClusterCountLayer()} />
+              <Layer {...mapCluster.getUnclusteredPointLayer()} />
+            </>
+          )}
+        </Map>
       </DeckGL>
       <NodeInfoComponent // new9 - Integrate NodeInfoComponent for popover
         node={popoverNode} // Pass the clicked node to NodeInfoComponent
@@ -304,8 +369,16 @@ const MapComponent = observer(() => {
           handleLinkCurvatureChange={handleLinkCurvatureChange} // Pass handler for link curvature
           isBundlingEnabled={isBundlingEnabled} // new11 - Pass bundling state
           handleToggleBundling={handleToggleBundling} // new11 - Pass handler for toggling bundling
+          isClusteringEnabled={isClusteringEnabled} //new15 - Pass clustering state
+          handleToggleClustering={toggleClustering} //new15 - Pass clustering handler
+          clusterRadius={clusterRadius} //new15 - Pass cluster radius
+          handleClusterRadiusChange={handleClusterRadiusChange} //new15 - Pass cluster radius handler
+          isVisible={isLegendVisible} //new15 - Pass legend visibility state
+          toggleLegend={toggleLegend} //new15 - Pass legend visibility handler
         />
       )}
+      {/*new15 - add a legend box to show node distribution */}
+      <LegendBox distribution={nodeDistribution} isVisible={isLegendVisible} />
     </Box>
   );
 });

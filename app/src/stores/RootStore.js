@@ -18,6 +18,7 @@ import axios from "axios";
 import { createContext } from "react";
 import { isEnvSet } from "utils/general.utils";
 import GeoStore from "./GeoStore"; // New4 - Import the geo store
+import MapClusterStore from "./MapClusterStore"; // new15 - Import the MapClusterStore
 
 export class RootStore {
   constructor() {
@@ -27,6 +28,7 @@ export class RootStore {
     this.schema = new SchemaStore(this);
     this.graph = new GraphStore(this);
     this.geo = new GeoStore(this); // New4: Add GeoStore instance to the root store
+    this.mapCluster = new MapClusterStore(this); // new15 - Add MapClusterStore instance to the root store
     this.dataPanel = new DataPanelStore(this);
     this.controlPanel = new ControlPanelStore(this);
     this.search = new SearchStore(this);
