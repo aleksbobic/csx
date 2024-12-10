@@ -56,6 +56,9 @@ const MapComponent = observer(() => {
   const [clusterRadius, setClusterRadius] = useState(mapCluster.clusterRadius); // New15 - state for cluster radius
   const [isLegendVisible, setIsLegendVisible] = useState(false); //new15 - State for legend visibility
 
+  const [filteredData, setFilteredData] = useState(null); // NEW16: State to manage filtered nodes and links
+  const [isFiltered, setIsFiltered] = useState(false); // NEW16: Track whether the graph is filtered.
+
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
     const newViewType = viewType === "overview" ? "detail" : "overview";
@@ -106,6 +109,7 @@ const MapComponent = observer(() => {
 
   // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
   // New6: Update node size based on calculated size property in GeoStore
+  // new16: Memoize nodes to include filtering logic and compatibility with other features
   const nodes = useMemo(() => {
     const groupedNodes = {};
     graph.currentGraphData.nodes.forEach((node) => {
@@ -115,31 +119,58 @@ const MapComponent = observer(() => {
       }
       groupedNodes[key].push(node);
     });
-    graph.calculateNodeDegreesAndSizes(); //new13 - Ensure the function runs
-    return (graph.currentGraphData.nodes || []).map((node) => {
-      const key = `${node.latitude},${node.longitude}`;
-      const color = groupedNodes[key].length > 1 ? [255, 0, 0] : [0, 255, 0];
-      return {
+
+    // Ensure node sizes are calculated in GeoStore
+    graph.calculateNodeDegreesAndSizes();
+
+    // If filteredData is active, return only filtered nodes
+    if (filteredData?.nodes) {
+      return filteredData.nodes.map((node) => ({
+        ...node,
         position: [node.longitude, node.latitude],
-        size: node.size, // New6: Use node.size calculated in GeoStore
-        label: node.label || "No label",
-        feature: node.feature || "No feature",
-        frequency: node.frequency || 0,
-        searchResultCount: node.searchResultCount || 0,
-        color,
-      };
-    });
-  }, [graph.currentGraphData.nodes, viewType, geo.layoutType, layoutKey]); // New4- Add layoutKey to trigger re-render
+        color:
+          groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
+            ? [255, 0, 0]
+            : [0, 255, 0],
+      }));
+    }
+
+    // Otherwise, return all nodes
+    return (graph.currentGraphData.nodes || []).map((node) => ({
+      id: node.id, // new16 - Include node ID for direct connections
+      position: [node.longitude, node.latitude],
+      size: node.size,
+      label: node.label || "No label",
+      feature: node.feature || "No feature",
+      frequency: node.frequency || 0,
+      searchResultCount: node.searchResultCount || 0,
+      color:
+        groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
+          ? [255, 0, 0]
+          : [0, 255, 0],
+    }));
+  }, [graph.currentGraphData.nodes, filteredData, geo.layoutType, layoutKey]);
+  // end of updated code
 
   //New3 - Memoize links using the updated getLinkCoordinates function
+  // new16: Memoize links to include filtered data and bundling logic
   const links = useMemo(() => {
     const rawLinks = graph.getLinkCoordinates(); //new 14 - Get raw link coordinates
-    if (isBundlingEnabled) {
-      const bundled = bundleLinks(rawLinks); //new14 - Apply bundling
-      return bundled;
+
+    // If filteredData is active, return only filtered links
+    if (filteredData?.links) {
+      return filteredData.links;
     }
-    return rawLinks;
-  }, [graph.currentGraphData.links, viewType, layoutKey, isBundlingEnabled]); // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
+
+    // Apply bundling if enabled, otherwise return raw links
+    return isBundlingEnabled ? bundleLinks(rawLinks) : rawLinks;
+  }, [
+    graph.currentGraphData.links,
+    filteredData,
+    isBundlingEnabled,
+    layoutKey,
+  ]); // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
+  // end of updated code
 
   //New2- State to handle hover color changes
   const [displayNodes, setDisplayNodes] = useState(nodes);
@@ -171,6 +202,7 @@ const MapComponent = observer(() => {
   // new9 - Handle click on a node to show the popover of node details
   const handleClick = ({ object, x, y }) => {
     if (object) {
+      // console.log("Node clicked:", object); // Debug log for clicked node
       if (activeNode && activeNode.position === object.position) {
         // Close the popover if clicking the same node again
         setPopoverOpen(false);
@@ -219,11 +251,13 @@ const MapComponent = observer(() => {
   };
 
   // New4- Update layout type in geoStore
+  // new16: Adjust layout handling to ensure compatibility with filteredData
   const handleLayoutChange = (e) => {
     const newLayoutType = e.target.value;
     setSelectedLayout(newLayoutType);
     geo.setLayoutType(newLayoutType);
-    setLayoutKey((prevKey) => prevKey + 1); // Force re-render by updating layoutKey
+    setFilteredData(null); //new16 - Clear filteredData when changing layouts
+    setLayoutKey((prevKey) => prevKey + 1); // Trigger re-render with new layout
   };
 
   // displayNodes is updated whenever nodes, geo.layoutType, or layoutKey changes
@@ -266,23 +300,43 @@ const MapComponent = observer(() => {
     mapCluster.calculateNodeDistribution();
   }, [viewType, graph.currentGraphData]);
 
+  //new16 - Show Direct Connections for a Node
+  const showDirectConnections = (nodeId) => {
+    if (!nodeId) {
+      console.error("Invalid nodeId provided to showDirectConnections");
+      return;
+    }
+    const result = graph.getConnectedNodesAndLinks(nodeId);
+    // console.log("Filtered Links Before Setting:", result.links);
+
+    if (!result || result.nodes.length === 0) {
+      console.warn(`No connections found for node: ${nodeId}`);
+      setFilteredData(null); // Reset to ensure no invalid filtering persists
+      return;
+    }
+    // console.log(`Found connections for nodeId: ${nodeId}`, result);
+    setFilteredData(result); // Set filtered nodes and links
+    setLayerKey((prev) => prev + 1); // Force re-render
+
+    setIsFiltered(true); // NEW: Mark as filtered
+    setPopoverOpen(false); // NEW: Close the popover
+    setPopoverNode(null); // NEW: Reset popover node state
+    setActiveNode(null); // NEW: Reset active node
+  };
+
+  // Reset View to Default
+  const resetView = () => {
+    setFilteredData(null); // Clear filtering
+    setLayerKey((prev) => prev + 1); // Force re-render
+
+    setIsFiltered(false); // NEW: Reset filtered state
+  };
+
   // //new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
-  const layers = useMemo(
-    () =>
-      LayersComponent({
-        nodes,
-        links,
-        nodeOpacity,
-        linkWidth,
-        linkOpacity,
-        linkCurvature,
-        displayNodes,
-        handleHover,
-        handleClick,
-        isHeatmapVisible, //new10 - Pass heatmap visibility state
-        isBundlingEnabled, // new11 - Pass bundling state
-      }),
-    [
+  // new16 - Update layers when filteredData changes
+  const layers = useMemo(() => {
+    // console.log("Links passed to PathLayer:", links);
+    return LayersComponent({
       nodes,
       links,
       nodeOpacity,
@@ -290,11 +344,24 @@ const MapComponent = observer(() => {
       linkOpacity,
       linkCurvature,
       displayNodes,
-      isHeatmapVisible,
-      isBundlingEnabled, //new11 - Pass bundling state
-      layerKey, //new9 - Add layerKey to force re-render when layers change
-    ]
-  );
+      handleHover,
+      handleClick,
+      isHeatmapVisible, //new10 - Pass heatmap visibility state
+      isBundlingEnabled, // new11 - Pass bundling state
+    });
+  }, [
+    nodes,
+    links,
+    nodeOpacity,
+    linkWidth,
+    linkOpacity,
+    linkCurvature,
+    displayNodes,
+    isHeatmapVisible,
+    isBundlingEnabled, //new11 - Pass bundling state
+    layerKey, //new9 - Add layerKey to force re-render when layers change
+    filteredData, // new16 - Add filteredData to trigger re-render when filtering changes
+  ]);
 
   return (
     <Box as={"section"} overflowX={"hidden"}>
@@ -345,6 +412,7 @@ const MapComponent = observer(() => {
         isOpen={isPopoverOpen}
         onClose={handlePopoverClose} // Close popover and reset node colors
         position={popoverPosition} // new9 - Pass position to NodeInfoComponent
+        showDirectConnections={showDirectConnections} //new16: Pass function to show direct connections
       />
       <MapControls
         viewType={viewType}
@@ -355,6 +423,8 @@ const MapComponent = observer(() => {
         toggleHeatmap={toggleHeatmap}
         selectedLayout={selectedLayout}
         handleLayoutChange={handleLayoutChange}
+        resetView={resetView} //new16: Pass reset function to controls
+        isFiltered={isFiltered} // NEW16: Pass isFiltered to controls
       />
       {/*new9 - add a right panel to control node and link properties */}
       {isRightPanelOpen && (

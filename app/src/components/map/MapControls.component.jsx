@@ -5,6 +5,7 @@ import {
   FingerPrintIcon,
   AdjustmentsHorizontalIcon,
   ChartBarIcon,
+  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 
 const MapControls = ({
@@ -16,6 +17,8 @@ const MapControls = ({
   toggleHeatmap,
   selectedLayout,
   handleLayoutChange,
+  resetView, // NEW16: Pass the reset function for direct connections
+  isFiltered, // NEW16: Add isFiltered prop
 }) => {
   return (
     //  New3- Add a button to switch between overview and detail view
@@ -105,6 +108,21 @@ const MapControls = ({
         <option value="doubleCircle">Double-Circle</option>
         <option value="sunflower">Sunflower</option>
       </Select>
+      {/* NEW16: Add a reset button for direct connections */}
+      {isFiltered && (
+        <Tooltip label="Reset View to Default">
+          <Button
+            id="reset-view"
+            onClick={resetView}
+            colorScheme="purple"
+            color={"purple.700"}
+            size={{ base: "sm", md: "md" }}
+            aria-label="Reset View"
+          >
+            <Box as={ArrowUturnLeftIcon} w={6} h={6} />
+          </Button>
+        </Tooltip>
+      )}
     </Box>
   );
 };

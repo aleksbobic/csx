@@ -7,11 +7,18 @@ import {
   PopoverBody,
   IconButton,
   Text,
+  Button,
 } from "@chakra-ui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // new9 - NodeInfoComponent to display node details in a popover
-export default function NodeInfoComponent({ node, isOpen, onClose, position }) {
+export default function NodeInfoComponent({
+  node,
+  isOpen,
+  onClose,
+  position,
+  showDirectConnections, // NEW16: Pass the function to show direct connections
+}) {
   if (!isOpen || !node) return null;
   return (
     <Popover isOpen={isOpen} onClose={onClose}>
@@ -88,6 +95,14 @@ export default function NodeInfoComponent({ node, isOpen, onClose, position }) {
                   <Text color={"purple.400"}>searchResultCount: </Text>{" "}
                   <Text>{node.searchResultCount}</Text>
                 </Box>
+                <Button
+                  mt={2}
+                  colorScheme="purple"
+                  size="sm"
+                  onClick={() => showDirectConnections(node.id)}
+                >
+                  Show Direct Connections
+                </Button>
               </Box>
             </Box>
           )}

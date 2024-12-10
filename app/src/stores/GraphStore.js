@@ -522,6 +522,47 @@ export class GraphStore {
   }
   // end of new code 
 
+  // new16: add a function to find direct connected nodes and links
+  getConnectedNodesAndLinks(nodeId) {
+    const connectedNodes = [];
+    const connectedLinks = [];
+
+    const targetNode = this.currentGraphData.nodes.find((node) => node.id === nodeId);
+
+    if (!targetNode) {
+      console.warn(`Node with ID ${nodeId} not found in the graph.`);
+      return { nodes: connectedNodes, links: connectedLinks };
+    }
+
+    this.currentGraphData.links.forEach((link) => {
+      if (link.source.id === nodeId || link.target.id === nodeId) {
+        const sourceNode = this.currentGraphData.nodes.find((node) => node.id === link.source.id);
+        const targetNode = this.currentGraphData.nodes.find((node) => node.id === link.target.id);
+
+        if (sourceNode && targetNode) {
+          link.sourcePosition = [sourceNode.longitude, sourceNode.latitude];
+          link.targetPosition = [targetNode.longitude, targetNode.latitude];
+
+          connectedLinks.push({
+            ...link,
+            sourcePosition: link.sourcePosition,
+            targetPosition: link.targetPosition,
+          });
+
+          if (!connectedNodes.includes(sourceNode)) {
+            connectedNodes.push(sourceNode);
+          }
+          if (!connectedNodes.includes(targetNode)) {
+            connectedNodes.push(targetNode);
+          }
+        }
+      }
+    });
+
+    return { nodes: connectedNodes, links: connectedLinks };
+  }
+  // end of new code 16  
+
 
   setLabelColors = (color) => {
     for (let i = 0; i < this.graphData.meta.nodeCount; i++) {

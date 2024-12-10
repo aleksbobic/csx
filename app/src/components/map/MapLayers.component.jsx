@@ -31,13 +31,18 @@ const LayersComponent = ({
   const pathLayer = new PathLayer({
     id: "path-layer",
     data: links, // 14 - changed to links as before
-    getPath: (d) =>
-      getCurvedPath(
+    getPath: (d) => {
+      if (!d.sourcePosition || !d.targetPosition) {
+        console.warn(`Invalid link detected: ${d.id}`);
+        return null;
+      }
+      return getCurvedPath(
         d.sourcePosition,
         d.targetPosition,
         linkCurvature,
         d.controlPoints
-      ), //new11 - Use getCurvedPath to get curved path based on curvature
+      );
+    }, //new11 - Use getCurvedPath to get curved path based on curvature, new16 - warn if invalid link
     getColor: (d) => {
       // Solid gray for non-bundled links
       return isBundlingEnabled
