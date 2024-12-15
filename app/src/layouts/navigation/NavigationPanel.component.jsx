@@ -37,7 +37,7 @@ import { RootStoreContext } from "stores/RootStore";
 import logo from "images/logo.png";
 import { observer } from "mobx-react";
 
-function NavigationPanelComponent() {
+function NavigationPanelComponent({ toggleNavigationPanel }) {
   const store = useContext(RootStoreContext);
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onToggle } = useDisclosure();
@@ -100,6 +100,12 @@ function NavigationPanelComponent() {
         store.core.setIsRightSidePanelOpen(true);
       }
 
+      //new17: Ensure visibility is updated correctly for the map
+      if (location.pathname.startsWith("/map")) {
+        store.dataPanel.toggleVisiblity(); // Adjust based on store structure
+      }
+      //end of new17
+
       store.track.trackEvent(
         {
           area: "Navbar",
@@ -114,7 +120,7 @@ function NavigationPanelComponent() {
         }
       );
     },
-    [isOpen, onToggle, panelType, store.core, store.track]
+    [isOpen, onToggle, panelType, store.core, store.track, location.pathname]
   );
 
   useEffect(() => {
@@ -330,7 +336,9 @@ function NavigationPanelComponent() {
       paddingLeft="10px"
       borderColor={location.pathname !== "/present" ? edgeColor : "transparent"}
     >
-      {location.pathname.startsWith("/graph") && (
+      {/* new 17: adding map path  */}
+      {(location.pathname.startsWith("/graph") ||
+        location.pathname.startsWith("/map")) && (
         <ButtonGroup
           variant="outline"
           size="md"
@@ -358,6 +366,7 @@ function NavigationPanelComponent() {
                 background={panelType === "search" ? "whiteAlpha.200" : ""}
                 onClick={() => {
                   toggleDataPanel("search");
+                  toggleNavigationPanel("search"); //new17: added to toggle the panel in map view
                 }}
                 icon={
                   <MagnifyingGlassIcon
@@ -387,6 +396,7 @@ function NavigationPanelComponent() {
               background={panelType === "details" ? "whiteAlpha.200" : ""}
               onClick={() => {
                 toggleDataPanel("details");
+                toggleNavigationPanel("details"); //new17: added to toggle the details panel in map view
               }}
               icon={
                 <ChartBarIcon
@@ -414,6 +424,7 @@ function NavigationPanelComponent() {
               background={panelType === "results" ? "whiteAlpha.200" : ""}
               onClick={() => {
                 toggleDataPanel("results");
+                toggleNavigationPanel("results"); //new17: added to toggle the panel in map view
               }}
               icon={
                 <ListBulletIcon
@@ -441,6 +452,7 @@ function NavigationPanelComponent() {
               background={panelType === "schema" ? "whiteAlpha.200" : ""}
               onClick={() => {
                 toggleDataPanel("schema");
+                toggleNavigationPanel("schema"); //new17: added to toggle the panel in map view
               }}
               icon={
                 <RectangleGroupIcon
@@ -468,6 +480,7 @@ function NavigationPanelComponent() {
               background={panelType === "history" ? "whiteAlpha.200" : ""}
               onClick={() => {
                 toggleDataPanel("history");
+                toggleNavigationPanel("history"); //new17: added to toggle the panel in map view
               }}
               icon={
                 <ClockIcon
@@ -479,26 +492,6 @@ function NavigationPanelComponent() {
               }
             />
           </Tooltip>
-          {/* <Tooltip label="Toggle map view">
-            <IconButton
-              border="none"
-              aria-label="Map view toggle"
-              id="mapviewtoggle"
-              color={colorMode === "light" ? "black" : "white"}
-              borderRadius="10px"
-              onClick={() => {
-                navigate("/map");
-              }}
-              icon={
-                <MapPinIcon
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                  }}
-                />
-              }
-            />
-          </Tooltip> */}
         </ButtonGroup>
       )}
 

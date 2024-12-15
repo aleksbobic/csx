@@ -13,7 +13,8 @@ import MapControls from "./MapControls.component"; // New9 - Import MapControls 
 import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
 import { bundleLinks } from "./utils/linkBundling"; // new 14 - import link bundling function
 import LegendBox from "./LegendBox.component"; //new15 - Import LegendBox
-
+import RightPanel from "../../layouts/rightpanel/RightPanel.component"; // new17 - Import RightPanel component
+import NavigationPanelComponent from "../../layouts/navigation/NavigationPanel.component"; //new17 - Import NavigationPanel component
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
 const MapComponent = observer(() => {
@@ -58,6 +59,9 @@ const MapComponent = observer(() => {
 
   const [filteredData, setFilteredData] = useState(null); // NEW16: State to manage filtered nodes and links
   const [isFiltered, setIsFiltered] = useState(false); // NEW16: Track whether the graph is filtered.
+
+  const [isNavigationPanelOpen, setNavigationPanelOpen] = useState(false); //new17: State to track navigation panel visibility
+  const [panelType, setPanelType] = useState(""); //new17: Tracks which panel type to show
 
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
@@ -332,6 +336,17 @@ const MapComponent = observer(() => {
     setIsFiltered(false); // NEW: Reset filtered state
   };
 
+  // new17: Toggle Navigation Panel for Right Panel of navigation
+  const toggleNavigationPanel = (panel) => {
+    if (panelType === panel) {
+      setPanelType(""); // Close if the same panel is toggled
+      setNavigationPanelOpen(false);
+    } else {
+      setPanelType(panel);
+      setNavigationPanelOpen(true);
+    }
+  };
+
   // //new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
   // new16 - Update layers when filteredData changes
   const layers = useMemo(() => {
@@ -447,8 +462,31 @@ const MapComponent = observer(() => {
           toggleLegend={toggleLegend} //new15 - Pass legend visibility handler
         />
       )}
+
       {/*new15 - add a legend box to show node distribution */}
       <LegendBox distribution={nodeDistribution} isVisible={isLegendVisible} />
+
+      {/*new17: oppening navigation rightpanel in map  */}
+      <NavigationPanelComponent toggleNavigationPanel={toggleNavigationPanel} />
+      {isNavigationPanelOpen && (
+        <Box
+          width={{ base: "500px", lg: "500px", xl: "600px" }}
+          right={{
+            base: "0px",
+            lg: "0px",
+            xl: "0px",
+          }}
+          style={{
+            zIndex: 10,
+            position: "fixed",
+            top: 0,
+            height: "100%",
+            paddingTop: "60px",
+          }}
+        >
+          <RightPanel panelType={panelType} />
+        </Box>
+      )}
     </Box>
   );
 });
