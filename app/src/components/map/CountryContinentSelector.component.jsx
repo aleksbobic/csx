@@ -94,7 +94,7 @@ export default function CountryContinentSelector({ onSelect }) {
       p={2}
       borderRadius="md"
       boxShadow="lg"
-      zIndex="1000"
+      zIndex="1"
       borderWidth={"1px"}
       borderStyle={"solid"}
       borderColor={"purple.700"}
