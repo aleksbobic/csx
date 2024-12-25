@@ -20,8 +20,27 @@ import FilterTools from "components/leftpanel/viewtools/filtertools/FilterTools.
 import NodeTools from "components/leftpanel/viewtools/nodetools/NodeTools.component";
 import { RootStoreContext } from "stores/RootStore";
 import { observer } from "mobx-react";
+import MapTools from "./maptools/MapTools.component"; // new18: import MapTools component
 
-function ViewTools() {
+function ViewTools({
+  isMapPath, // Determine if /map path is active
+  nodeOpacityValue, // new18 - node opacity value
+  handleNodeOpacityChange, // new18 - handle node opacity change
+  linkWidthValue, // new18 - link width value
+  handleLinkWidthChange, // new18 - handle link width change
+  linkOpacityValue, // new18 - link opacity value
+  handleLinkOpacityChange, // new18 - handle link opacity change
+  linkCurvatureValue, // new18 - link curvature value
+  handleLinkCurvatureChange, // new18 - handle link curvature change
+  isBundlingEnabled, // new18 - is bundling enabled
+  handleToggleBundling, // new18 - handle toggle bundling
+  isClusteringEnabled, // new18 - is clustering enabled
+  handleToggleClustering, // new18 - handle toggle clustering
+  clusterRadius, // new18 - cluster radius
+  handleClusterRadiusChange, // new18 - handle cluster radius change
+  isVisible, // new18 - is legend visible
+  toggleLegend, // new18 - toggle legend
+}) {
   const store = useContext(RootStoreContext);
   const [forceRunning, setForceRunning] = useState(false);
   const { colorMode } = useColorMode();
@@ -179,6 +198,27 @@ function ViewTools() {
         <EdgeTools />
         <NodeTools />
         <FilterTools />
+        {/* new18: adding MapTools component to ViewTools */}
+        {isMapPath && (
+          <MapTools
+            nodeOpacityValue={nodeOpacityValue}
+            handleNodeOpacityChange={handleNodeOpacityChange}
+            linkWidthValue={linkWidthValue}
+            handleLinkWidthChange={handleLinkWidthChange}
+            linkOpacityValue={linkOpacityValue}
+            handleLinkOpacityChange={handleLinkOpacityChange}
+            linkCurvatureValue={linkCurvatureValue}
+            handleLinkCurvatureChange={handleLinkCurvatureChange}
+            isBundlingEnabled={isBundlingEnabled}
+            handleToggleBundling={handleToggleBundling}
+            isClusteringEnabled={isClusteringEnabled}
+            handleToggleClustering={handleToggleClustering}
+            clusterRadius={clusterRadius}
+            handleClusterRadiusChange={handleClusterRadiusChange}
+            isVisible={isVisible}
+            toggleLegend={toggleLegend}
+          />
+        )}
       </VStack>
       <VStack
         width="100%"

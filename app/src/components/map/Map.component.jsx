@@ -7,7 +7,7 @@ import { getEnv } from "src/utils/general.utils";
 import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
 import "mapbox-gl/dist/mapbox-gl.css";
 import NodeInfoComponent from "./NodeInfo.component"; // new9 - Import NodeInfoComponent
-import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRightPanel component
+// import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRightPanel component //new18 - Remove MapRightPanel import duo to new left panel
 import LayersComponent from "./MapLayers.component"; // New9- Import LayersComponent
 import MapControls from "./MapControls.component"; // New9 - Import MapControls component
 import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
@@ -15,6 +15,7 @@ import { bundleLinks } from "./utils/linkBundling"; // new 14 - import link bund
 import LegendBox from "./LegendBox.component"; //new15 - Import LegendBox
 import RightPanel from "../../layouts/rightpanel/RightPanel.component"; // new17 - Import RightPanel component
 import NavigationPanelComponent from "../../layouts/navigation/NavigationPanel.component"; //new17 - Import NavigationPanel component
+import LeftPanel from "../../layouts/leftpanel/LeftPanel.component"; //new18 - Import LeftPanel component
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
 const MapComponent = observer(() => {
@@ -45,7 +46,7 @@ const MapComponent = observer(() => {
   const [linkWidth, setLinkWidth] = useState(0.5); //New9 -  Width for links
   const [linkOpacity, setLinkOpacity] = useState(1); //New9 -  Opacity for links
   const [linkCurvature, setLinkCurvature] = useState(0); //New9 -  Curvature for links
-  const [isRightPanelOpen, setRightPanelOpen] = useState(false); // New9 - State for showing/hiding the right panel
+  // const [isRightPanelOpen, setRightPanelOpen] = useState(false); // New9 - State for showing/hiding the right panel // new17 - Remove right panel state due to left panel
   const [layerKey, setLayerKey] = useState(0); // New9 - state to trigger layer refresh
 
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(false); // New10 - state for heatmap visibility
@@ -63,6 +64,17 @@ const MapComponent = observer(() => {
   const [isNavigationPanelOpen, setNavigationPanelOpen] = useState(false); //new17: State to track navigation panel visibility
   const [panelType, setPanelType] = useState(""); //new17: Tracks which panel type to show
 
+  // // Ensure detail view data is loaded when switching to map view in detail mode
+  // useEffect(() => {
+  //   const fetchDetailViewData = async () => {
+  //     if (viewType === "detail") {
+  //       await graph.ensureDetailViewData(); // Preload detail data if needed
+  //     }
+  //   };
+
+  //   fetchDetailViewData();
+  // }, [viewType, graph]);
+
   //New4: Updated: Switch view and reset layout to "default" when switching views
   const toggleView = () => {
     const newViewType = viewType === "overview" ? "detail" : "overview";
@@ -74,8 +86,8 @@ const MapComponent = observer(() => {
     graph.store.core.setOverviewMode(newViewType === "overview");
   };
 
-  // New9 - Function to toggle right panel visibility
-  const toggleRightPanel = () => setRightPanelOpen(!isRightPanelOpen);
+  // // New9 - Function to toggle right panel visibility // new18 - Remove right panel toggle function due to left panel
+  // const toggleRightPanel = () => setRightPanelOpen(!isRightPanelOpen);
 
   // New9 - Handlers for opacity, width, and curvature changes
   const handleNodeOpacityChange = (value) => {
@@ -432,8 +444,8 @@ const MapComponent = observer(() => {
       <MapControls
         viewType={viewType}
         toggleView={toggleView}
-        isRightPanelOpen={isRightPanelOpen}
-        toggleRightPanel={toggleRightPanel}
+        // isRightPanelOpen={isRightPanelOpen} //new18 - Remove right panel state due to left panel
+        // toggleRightPanel={toggleRightPanel} //new18 - Remove right panel toggle function due to left panel
         isHeatmapVisible={isHeatmapVisible}
         toggleHeatmap={toggleHeatmap}
         selectedLayout={selectedLayout}
@@ -441,7 +453,7 @@ const MapComponent = observer(() => {
         resetView={resetView} //new16: Pass reset function to controls
         isFiltered={isFiltered} // NEW16: Pass isFiltered to controls
       />
-      {/*new9 - add a right panel to control node and link properties */}
+      {/* new9 - add a right panel to control node and link properties // new18 - Remove right panel due to left panel
       {isRightPanelOpen && (
         <MapRightPanel
           nodeOpacityValue={nodeOpacity}
@@ -461,7 +473,7 @@ const MapComponent = observer(() => {
           isVisible={isLegendVisible} //new15 - Pass legend visibility state
           toggleLegend={toggleLegend} //new15 - Pass legend visibility handler
         />
-      )}
+      )} */}
 
       {/*new15 - add a legend box to show node distribution */}
       <LegendBox distribution={nodeDistribution} isVisible={isLegendVisible} />
@@ -487,6 +499,26 @@ const MapComponent = observer(() => {
           <RightPanel panelType={panelType} />
         </Box>
       )}
+      {/*new 18: pass the props to left panel  */}
+      <LeftPanel
+        isMapPath={true} // Indicate it's in the map path
+        nodeOpacityValue={nodeOpacity}
+        handleNodeOpacityChange={handleNodeOpacityChange}
+        linkWidthValue={linkWidth}
+        handleLinkWidthChange={handleLinkWidthChange}
+        linkOpacityValue={linkOpacity}
+        handleLinkOpacityChange={handleLinkOpacityChange}
+        linkCurvatureValue={linkCurvature}
+        handleLinkCurvatureChange={handleLinkCurvatureChange}
+        isBundlingEnabled={isBundlingEnabled}
+        handleToggleBundling={handleToggleBundling}
+        isClusteringEnabled={isClusteringEnabled}
+        handleToggleClustering={toggleClustering}
+        clusterRadius={clusterRadius}
+        handleClusterRadiusChange={handleClusterRadiusChange}
+        isVisible={isLegendVisible}
+        toggleLegend={toggleLegend}
+      />
     </Box>
   );
 });

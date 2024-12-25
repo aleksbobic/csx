@@ -34,8 +34,26 @@ import StudyInfo from "components/leftpanel/studyinfo/StudyInfo.component";
 import ViewTools from "components/leftpanel/viewtools/ViewTools.component";
 import { observer } from "mobx-react";
 import { schemeYlOrRd } from "d3-scale-chromatic";
+import { useLocation } from "react-router-dom"; //new18- Import useLocation
 
-function LeftPanel() {
+function LeftPanel({
+  nodeOpacityValue, // new18: Add nodeOpacityValue
+  handleNodeOpacityChange, // new18: Add handleNodeOpacityChange
+  linkWidthValue, // new18: Add linkWidthValue
+  handleLinkWidthChange, // new18: Add handleLinkWidthChange
+  linkOpacityValue, // new18: Add linkOpacityValue
+  handleLinkOpacityChange, // new18: Add handleLinkOpacityChange
+  linkCurvatureValue, // new18: Add linkCurvatureValue
+  handleLinkCurvatureChange, // new18: Add handleLinkCurvatureChange
+  isBundlingEnabled, // new18: Add isBundlingEnabled
+  handleToggleBundling, // new18: Add handleToggleBundling
+  isClusteringEnabled, // new18: Add isClusteringEnabled
+  handleToggleClustering, // new18: Add handleToggleClustering
+  clusterRadius, // new18: Add clusterRadius
+  handleClusterRadiusChange, // new18: Add handleClusterRadiusChange
+  isVisible, // new18: Add isVisible
+  toggleLegend, // new18: Add isVisible and toggleLegend
+}) {
   const store = useContext(RootStoreContext);
   const { isOpen, onOpen, onToggle } = useDisclosure();
   const bgColor = useColorModeValue("white", "black");
@@ -43,6 +61,7 @@ function LeftPanel() {
   const tabInactiveColors = useColorModeValue("black", "white");
   const tabBorderColor = useColorModeValue("white", "black");
   const edgeColor = useColorModeValue("gray.300", "gray.900");
+  const location = useLocation(); //new18: Get the current location
 
   const legendBackgroundColor = useColorModeValue(
     "whiteAlpha.800",
@@ -579,7 +598,25 @@ function LeftPanel() {
             paddingRight: "0",
           }}
         >
-          <ViewTools />
+          <ViewTools
+            isMapPath={location.pathname === "/map"} // Pass isMapPath based on the route
+            nodeOpacityValue={nodeOpacityValue}
+            handleNodeOpacityChange={handleNodeOpacityChange}
+            linkWidthValue={linkWidthValue}
+            handleLinkWidthChange={handleLinkWidthChange}
+            linkOpacityValue={linkOpacityValue}
+            handleLinkOpacityChange={handleLinkOpacityChange}
+            linkCurvatureValue={linkCurvatureValue}
+            handleLinkCurvatureChange={handleLinkCurvatureChange}
+            isBundlingEnabled={isBundlingEnabled}
+            handleToggleBundling={handleToggleBundling}
+            isClusteringEnabled={isClusteringEnabled}
+            handleToggleClustering={handleToggleClustering}
+            clusterRadius={clusterRadius}
+            handleClusterRadiusChange={handleClusterRadiusChange}
+            isVisible={isVisible}
+            toggleLegend={toggleLegend}
+          />
         </CustomScroll>
       </TabPanel>
       <TabPanel
@@ -642,6 +679,7 @@ function LeftPanel() {
 
           {!store.core.dataIsLoading &&
             store.core.currentGraph &&
+            location.pathname !== "/map" && //new18: Hide color legend for the /map path
             (!["none", "component"].includes(
               store.graphInstance.selectedColorSchema
             ) ||

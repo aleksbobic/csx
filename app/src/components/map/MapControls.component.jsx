@@ -3,7 +3,6 @@ import React from "react";
 import { Box, Button, Tooltip, Select } from "@chakra-ui/react";
 import {
   FingerPrintIcon,
-  AdjustmentsHorizontalIcon,
   ChartBarIcon,
   ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
@@ -11,8 +10,8 @@ import {
 const MapControls = ({
   viewType,
   toggleView,
-  isRightPanelOpen,
-  toggleRightPanel,
+  // isRightPanelOpen, // new18 - remove the isRightPanelOpen prop due to the removal of the right panel
+  // toggleRightPanel, // new18 - remove the toggleRightPanel function due to the removal of the right panel
   isHeatmapVisible,
   toggleHeatmap,
   selectedLayout,
@@ -25,7 +24,7 @@ const MapControls = ({
     <Box
       position="absolute"
       top={"4em"}
-      left={"0.5em"}
+      right={"0.5em"} //new18 - change the postion of controls to the right due to the removal of the right panel
       zIndex="1"
       overflow={"hidden"}
       display={"flex"}
@@ -55,8 +54,8 @@ const MapControls = ({
           <Box as={FingerPrintIcon} w={6} h={6} />
         </Button>
       </Tooltip>
-      {/* new9 - add a button to toggle the right panel */}
-      <Tooltip
+      {/* new9 - add a button to toggle the right panel //new18- removing rightpanel button */}
+      {/* <Tooltip
         label={isRightPanelOpen ? "Close Right Panel" : "Open Right Panel"}
       >
         <Button
@@ -69,7 +68,7 @@ const MapControls = ({
         >
           <Box as={AdjustmentsHorizontalIcon} w={6} h={6} />
         </Button>
-      </Tooltip>
+      </Tooltip> */}
       {/*new10 - add a button to toggle heatmap visibility */}
       <Tooltip
         label={

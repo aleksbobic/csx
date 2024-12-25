@@ -9,7 +9,7 @@ export default function LegendBox({ distribution, isVisible }) {
     <Box
       position="absolute"
       bottom="6em"
-      left={"3em"}
+      right="3em" //ne18 - changed the position of the legend box regarding to the combination of the rightpanel and leftpanel
       bg="blackAlpha.600"
       p="4"
       borderRadius="md"

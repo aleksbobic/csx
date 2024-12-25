@@ -89,7 +89,7 @@ export default function CountryContinentSelector({ onSelect }) {
     <Box
       position="absolute"
       bottom={"0.5em"}
-      left="0.5em"
+      right={"0.5em"} //new18: change the position of the search bar relative to the combination of rightpanel and leftpanel
       bg="blackAlpha.800"
       p={2}
       borderRadius="md"

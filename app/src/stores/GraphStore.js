@@ -71,6 +71,20 @@ export class GraphStore {
     }, { deep: true });
   }
 
+  // async ensureDetailViewData() {
+  //   if (
+  //     !this.detailGraphData.nodes.length ||
+  //     !this.detailGraphData.links.length
+  //   ) {
+  //     console.log("Detail view data missing. Loading...");
+  //     await this.getSearchGraph(
+  //       this.graphData.meta.query, // Use the existing query to fetch data
+  //       "detail",
+  //       this.store.search.searchID
+  //     );
+  //   }
+  // }
+
   // New5 - Assigns country latitude and longitude if available, with overlap for nodes within the same country
   setNodes(nodes) {
     // console.log("setNodes function called with nodes:", nodes);

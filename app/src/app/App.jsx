@@ -166,7 +166,15 @@ function CSX() {
                 <Route path="/search" label="search" element={<SearchPage />} />
               )}
               {/* adding route for map  */}
-              <Route path="/map" label="map" element={<MapComponent />} />
+              <Route
+                path="/map"
+                label="map"
+                element={
+                  <>
+                    <MapComponent />
+                  </>
+                }
+              />
             </Routes>
           </Box>
         </CustomScroll>
