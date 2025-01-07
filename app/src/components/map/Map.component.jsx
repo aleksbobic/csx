@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Map, Source, Layer } from "react-map-gl";
 import DeckGL from "deck.gl";
-import { Box } from "@chakra-ui/react";
+import { Box, Spinner, Flex, Text } from "@chakra-ui/react";
 import CountryContinentSelector from "./CountryContinentSelector.component";
 import { getEnv } from "src/utils/general.utils";
 import { useStore } from "../../stores/hooks/useStore"; //New2-Import the custom hook to access the store
@@ -9,13 +9,15 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import NodeInfoComponent from "./NodeInfo.component"; // new9 - Import NodeInfoComponent
 // import MapRightPanel from "./MapRightPanel.component"; // New9 - Import MapRightPanel component //new18 - Remove MapRightPanel import duo to new left panel
 import LayersComponent from "./MapLayers.component"; // New9- Import LayersComponent
-import MapControls from "./MapControls.component"; // New9 - Import MapControls component
+// import MapControls from "./MapControls.component"; // New9 - Import MapControls component
 import { observer } from "mobx-react"; // new 13 - Import observer from mobx-react to make the component reactive with store changes
 import { bundleLinks } from "./utils/linkBundling"; // new 14 - import link bundling function
 import LegendBox from "./LegendBox.component"; //new15 - Import LegendBox
 import RightPanel from "../../layouts/rightpanel/RightPanel.component"; // new17 - Import RightPanel component
 import NavigationPanelComponent from "../../layouts/navigation/NavigationPanel.component"; //new17 - Import NavigationPanel component
 import LeftPanel from "../../layouts/leftpanel/LeftPanel.component"; //new18 - Import LeftPanel component
+import { useLocation } from "react-router-dom"; // new19: add useLocation to get the current URL
+
 const MAPBOX_TOKEN = getEnv("VITE_MAPBOX_TOKEN");
 
 const MapComponent = observer(() => {
@@ -64,26 +66,81 @@ const MapComponent = observer(() => {
   const [isNavigationPanelOpen, setNavigationPanelOpen] = useState(false); //new17: State to track navigation panel visibility
   const [panelType, setPanelType] = useState(""); //new17: Tracks which panel type to show
 
-  // // Ensure detail view data is loaded when switching to map view in detail mode
+  const location = useLocation(); // new19: get the current URL location
+  const searchParams = new URLSearchParams(location.search); // new19: get the search parameters from the URL
+  const studyId = searchParams.get("study"); // new19: get the study ID from the URL
+  const [isLoading, setIsLoading] = useState(false); //new 19: State for spinner
+
+  // Load study data when the component mounts
   // useEffect(() => {
-  //   const fetchDetailViewData = async () => {
-  //     if (viewType === "detail") {
-  //       await graph.ensureDetailViewData(); // Preload detail data if needed
-  //     }
-  //   };
+  //   if (studyId) {
+  //     graph.store.core.studyUuid = studyId; // Ensure it is set in the store
+  //     graph.loadStudyData(studyId); // Ensure the study data is loaded
+  //   } else {
+  //     console.warn("No study ID provided. Graph data may not load correctly.");
+  //   }
+  // }, [studyId]);
 
-  //   fetchDetailViewData();
-  // }, [viewType, graph]);
+  // new19: Load study data when the component mounts with spinner
+  useEffect(() => {
+    const loadGraphData = async () => {
+      setIsLoading(true); // Show spinner
+      try {
+        if (studyId) {
+          graph.store.core.studyUuid = studyId;
+          await graph.loadStudyData(studyId); // Load data
+        }
+      } catch (error) {
+        console.error("Error loading graph data:", error);
+      } finally {
+        setIsLoading(false); // Always hide spinner
+      }
+    };
 
-  //New4: Updated: Switch view and reset layout to "default" when switching views
-  const toggleView = () => {
+    loadGraphData();
+  }, [studyId]);
+
+  // //New4: Updated: Switch view and reset layout to "default" when switching views
+  // const toggleView = () => {
+  //   const newViewType = viewType === "overview" ? "detail" : "overview";
+  //   setViewType(newViewType);
+  //   setSelectedLayout("default"); // Updated: Reset to default layout on view switch
+  //   geo.setLayoutType("default"); // Updated: Apply default layout in GeoStore on view switch
+
+  //   // Pass the view type to CoreStore via setOverviewMode
+  //   graph.store.core.setOverviewMode(newViewType === "overview");
+  // };
+
+  // New4: Updated: Switch view and reset layout to "default" when switching views
+  // new19: Update the URL when switching views
+  const toggleView = async () => {
     const newViewType = viewType === "overview" ? "detail" : "overview";
     setViewType(newViewType);
-    setSelectedLayout("default"); // Updated: Reset to default layout on view switch
-    geo.setLayoutType("default"); // Updated: Apply default layout in GeoStore on view switch
+    setSelectedLayout("default"); // Reset to default layout on view switch
+    geo.setLayoutType("default"); // Apply default layout in GeoStore on view switch
+
+    // Ensure the URL reflects the new view with the study parameter
+    const currentStudyId = new URLSearchParams(window.location.search).get(
+      "study"
+    );
+    const newUrl = currentStudyId
+      ? `/map?study=${currentStudyId}&view=${newViewType}`
+      : `/map?view=${newViewType}`;
+
+    window.history.pushState(null, "", newUrl); // Update the browser URL without reloading
 
     // Pass the view type to CoreStore via setOverviewMode
     graph.store.core.setOverviewMode(newViewType === "overview");
+
+    // Use modifyStudy to ensure data is fetched and processed
+    try {
+      setIsLoading(true); // Show spinner while switching views
+      await graph.modifyStudy(newViewType); // Reuse the robust function from the graph store
+      setIsLoading(false); // Hide spinner after view switch
+    } catch (error) {
+      console.error("Failed to switch graph view:", error);
+      setIsLoading(false); // Hide spinner in case of error
+    }
   };
 
   // // New9 - Function to toggle right panel visibility // new18 - Remove right panel toggle function due to left panel
@@ -126,6 +183,52 @@ const MapComponent = observer(() => {
   // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
   // New6: Update node size based on calculated size property in GeoStore
   // new16: Memoize nodes to include filtering logic and compatibility with other features
+  // const nodes = useMemo(() => {
+  //   const groupedNodes = {};
+  //   graph.currentGraphData.nodes.forEach((node) => {
+  //     const key = `${node.latitude},${node.longitude}`;
+  //     if (!groupedNodes[key]) {
+  //       groupedNodes[key] = [];
+  //     }
+  //     groupedNodes[key].push(node);
+  //   });
+
+  //   // Ensure node sizes are calculated in GeoStore
+  //   graph.calculateNodeDegreesAndSizes();
+
+  //   // If filteredData is active, return only filtered nodes
+  //   if (filteredData?.nodes) {
+  //     return filteredData.nodes.map((node) => ({
+  //       ...node,
+  //       position: [node.longitude, node.latitude],
+  //       color:
+  //         groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
+  //           ? [255, 0, 0]
+  //           : [0, 255, 0],
+  //     }));
+  //   }
+
+  //   // Otherwise, return all nodes
+  //   return (graph.currentGraphData.nodes || []).map((node) => ({
+  //     id: node.id, // new16 - Include node ID for direct connections
+  //     position: [node.longitude, node.latitude],
+  //     size: node.size,
+  //     label: node.label || "No label",
+  //     feature: node.feature || "No feature",
+  //     frequency: node.frequency || 0,
+  //     searchResultCount: node.searchResultCount || 0,
+  //     color:
+  //       groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
+  //         ? [255, 0, 0]
+  //         : [0, 255, 0],
+  //   }));
+  // }, [graph.currentGraphData.nodes, filteredData, geo.layoutType, layoutKey]);
+  // // end of updated code
+
+  // new5 - Memoize nodes to avoid re-calculation on every render and highlight overlapping nodes
+  // New6: Update node size based on calculated size property in GeoStore
+  // new16: Memoize nodes to include filtering logic and compatibility with other features
+  // new19: Update nodes to include the study data and fixing copatibility with direct connections
   const nodes = useMemo(() => {
     const groupedNodes = {};
     graph.currentGraphData.nodes.forEach((node) => {
@@ -136,39 +239,24 @@ const MapComponent = observer(() => {
       groupedNodes[key].push(node);
     });
 
-    // Ensure node sizes are calculated in GeoStore
-    graph.calculateNodeDegreesAndSizes();
-
-    // If filteredData is active, return only filtered nodes
-    if (filteredData?.nodes) {
-      return filteredData.nodes.map((node) => ({
-        ...node,
+    return (filteredData?.nodes || graph.currentGraphData.nodes || []).map(
+      (node) => ({
+        id: node.id, // Preserve existing properties
         position: [node.longitude, node.latitude],
+        size: node.size,
+        label: node.label || "No label",
+        feature: node.feature || "No feature",
+        frequency: node.frequency || 0,
+        searchResultCount: node.searchResultCount || 0,
         color:
           groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
             ? [255, 0, 0]
-            : [0, 255, 0],
-      }));
-    }
-
-    // Otherwise, return all nodes
-    return (graph.currentGraphData.nodes || []).map((node) => ({
-      id: node.id, // new16 - Include node ID for direct connections
-      position: [node.longitude, node.latitude],
-      size: node.size,
-      label: node.label || "No label",
-      feature: node.feature || "No feature",
-      frequency: node.frequency || 0,
-      searchResultCount: node.searchResultCount || 0,
-      color:
-        groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
-          ? [255, 0, 0]
-          : [0, 255, 0],
-    }));
+            : [0, 255, 0], // Ensure a default color is always set
+      })
+    );
   }, [graph.currentGraphData.nodes, filteredData, geo.layoutType, layoutKey]);
-  // end of updated code
 
-  //New3 - Memoize links using the updated getLinkCoordinates function
+  // New3 - Memoize links using the updated getLinkCoordinates function
   // new16: Memoize links to include filtered data and bundling logic
   const links = useMemo(() => {
     const rawLinks = graph.getLinkCoordinates(); //new 14 - Get raw link coordinates
@@ -191,61 +279,108 @@ const MapComponent = observer(() => {
   //New2- State to handle hover color changes
   const [displayNodes, setDisplayNodes] = useState(nodes);
 
-  //New2- Update displayNodes on hover // new9 - update to consider popoverNode
+  // //New2- Update displayNodes on hover // new9 - update to consider popoverNode
+  // const handleHover = ({ object }) => {
+  //   if (!object && !popoverNode) {
+  //     setDisplayNodes(nodes); // Reset all colors if no node is hovered and no node is clicked
+  //   } else if (
+  //     object &&
+  //     (!popoverNode || popoverNode.position !== object.position)
+  //   ) {
+  //     // Only update color if hovering over a different node than the clicked one
+  //     setDisplayNodes(
+  //       displayNodes.map((node) =>
+  //         node.position === object.position
+  //           ? { ...node, color: [128, 0, 128] } // Change color on hover
+  //           : node.position === popoverNode?.position
+  //             ? { ...node, color: [128, 0, 128] } // Keep clicked node purple
+  //             : {
+  //                 ...node,
+  //                 color: nodes.find((n) => n.position === node.position).color,
+  //               }
+  //       )
+  //     );
+  //   }
+  // };
+
+  // New2- Update displayNodes on hover
+  // new9 - update to consider popoverNode
+  // new19: update it for fixing issue in a direct connection mode
   const handleHover = ({ object }) => {
-    if (!object && !popoverNode) {
-      setDisplayNodes(nodes); // Reset all colors if no node is hovered and no node is clicked
-    } else if (
-      object &&
-      (!popoverNode || popoverNode.position !== object.position)
-    ) {
-      // Only update color if hovering over a different node than the clicked one
-      setDisplayNodes(
-        displayNodes.map((node) =>
-          node.position === object.position
-            ? { ...node, color: [128, 0, 128] } // Change color on hover
-            : node.position === popoverNode?.position
-              ? { ...node, color: [128, 0, 128] } // Keep clicked node purple
-              : {
-                  ...node,
-                  color: nodes.find((n) => n.position === node.position).color,
-                }
-        )
-      );
+    if (!object) {
+      setDisplayNodes(nodes); // Reset colors if no object is hovered
+      return;
     }
+
+    setDisplayNodes(
+      nodes.map(
+        (node) =>
+          node.id === object.id
+            ? { ...node, color: [128, 0, 128] } // Highlight hovered node
+            : { ...node, color: node.color || [0, 255, 0] } // Use default color if missing
+      )
+    );
   };
 
-  // new9 - Handle click on a node to show the popover of node details
-  const handleClick = ({ object, x, y }) => {
-    if (object) {
-      // console.log("Node clicked:", object); // Debug log for clicked node
-      if (activeNode && activeNode.position === object.position) {
-        // Close the popover if clicking the same node again
-        setPopoverOpen(false);
-        setActiveNode(null); // Reset activeNode to close popover and avoid reopening
-        setPopoverNode(null); // Ensure popoverNode is also reset
-      } else {
-        // Open popover for a newly clicked node
-        setActiveNode(object); // Update activeNode to the current node
-        setPopoverNode(object); // Set the clicked node for the popover
-        setPopoverOpen(true);
-        setPopoverPosition({ x, y });
+  // // new9 - Handle click on a node to show the popover of node details
+  // const handleClick = ({ object, x, y }) => {
+  //   if (object) {
+  //     // console.log("Node clicked:", object); // Debug log for clicked node
+  //     if (activeNode && activeNode.position === object.position) {
+  //       // Close the popover if clicking the same node again
+  //       setPopoverOpen(false);
+  //       setActiveNode(null); // Reset activeNode to close popover and avoid reopening
+  //       setPopoverNode(null); // Ensure popoverNode is also reset
+  //     } else {
+  //       // Open popover for a newly clicked node
+  //       setActiveNode(object); // Update activeNode to the current node
+  //       setPopoverNode(object); // Set the clicked node for the popover
+  //       setPopoverOpen(true);
+  //       setPopoverPosition({ x, y });
 
-        // Update displayNodes to apply purple color only to the clicked node
-        setDisplayNodes(
-          displayNodes.map(
-            (node) =>
-              node.position === object.position
-                ? { ...node, color: [128, 0, 128] } // Highlight clicked node
-                : {
-                    ...node,
-                    color: nodes.find((n) => n.position === node.position)
-                      .color,
-                  } // Reset others to default
-          )
-        );
-      }
+  //       // Update displayNodes to apply purple color only to the clicked node
+  //       setDisplayNodes(
+  //         displayNodes.map(
+  //           (node) =>
+  //             node.position === object.position
+  //               ? { ...node, color: [128, 0, 128] } // Highlight clicked node
+  //               : {
+  //                   ...node,
+  //                   color: nodes.find((n) => n.position === node.position)
+  //                     .color,
+  //                 } // Reset others to default
+  //         )
+  //       );
+  //     }
+  //   }
+  // };
+
+  // new9 - Handle click on a node to show the popover of node details
+  // new19: update it for fixing issue in a directconnection mode
+  const handleClick = ({ object, x, y }) => {
+    if (!object) return;
+
+    if (activeNode?.id === object.id) {
+      setPopoverOpen(false);
+      setActiveNode(null);
+      setPopoverNode(null);
+      setDisplayNodes(nodes); // Reset colors on popover close
+      return;
     }
+
+    setActiveNode(object);
+    setPopoverNode(object);
+    setPopoverOpen(true);
+    setPopoverPosition({ x, y });
+
+    setDisplayNodes(
+      nodes.map(
+        (node) =>
+          node.id === object.id
+            ? { ...node, color: [128, 0, 128] } // Highlight clicked node
+            : { ...node, color: node.color || [0, 255, 0] } // Use default color if missing
+      )
+    );
   };
 
   //new9 - Disable tooltip if popover is open
@@ -316,7 +451,8 @@ const MapComponent = observer(() => {
     mapCluster.calculateNodeDistribution();
   }, [viewType, graph.currentGraphData]);
 
-  //new16 - Show Direct Connections for a Node
+  // new16 - Show Direct Connections for a Node
+  // new19: update it to be compatible with the changes related to url and study id
   const showDirectConnections = (nodeId) => {
     if (!nodeId) {
       console.error("Invalid nodeId provided to showDirectConnections");
@@ -331,7 +467,15 @@ const MapComponent = observer(() => {
       return;
     }
     // console.log(`Found connections for nodeId: ${nodeId}`, result);
-    setFilteredData(result); // Set filtered nodes and links
+    // setFilteredData(result); // Set filtered nodes and links
+    setFilteredData({
+      nodes: result.nodes.map((node) => ({
+        ...node,
+        position: [node.longitude, node.latitude],
+        color: [128, 0, 128], // Highlight direct connections
+      })),
+      links: result.links,
+    });
     setLayerKey((prev) => prev + 1); // Force re-render
 
     setIsFiltered(true); // NEW: Mark as filtered
@@ -339,6 +483,16 @@ const MapComponent = observer(() => {
     setPopoverNode(null); // NEW: Reset popover node state
     setActiveNode(null); // NEW: Reset active node
   };
+
+  // new19: handleing filtred data
+  useEffect(() => {
+    if (filteredData) {
+      console.log("Filtered Data Updated:", filteredData);
+      setDisplayNodes(filteredData.nodes || []);
+    } else {
+      setDisplayNodes(nodes);
+    }
+  }, [filteredData, nodes]);
 
   // Reset View to Default
   const resetView = () => {
@@ -359,7 +513,7 @@ const MapComponent = observer(() => {
     }
   };
 
-  // //new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
+  // new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
   // new16 - Update layers when filteredData changes
   const layers = useMemo(() => {
     // console.log("Links passed to PathLayer:", links);
@@ -392,48 +546,71 @@ const MapComponent = observer(() => {
 
   return (
     <Box as={"section"} overflowX={"hidden"}>
-      <CountryContinentSelector onSelect={handleSelection} />
-      <DeckGL
-        viewState={viewState} // Set current viewState here to persist location and zoom
-        onViewStateChange={({ viewState }) => setViewState(viewState)} // Track map position changes
-        controller={true}
-        getTooltip={getTooltip}
-        layers={layers} // New9 - Pass layers to DeckGL
-        key={layerKey} // New9 - Add key to force re-render when layers change
-      >
-        <Map
-          mapboxAccessToken={MAPBOX_TOKEN}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
-          style={{ width: "100%", height: "100%" }}
-          projection={"mercator"} // New10- Set projection to "mercator" for 2d view only
+      {isLoading && (
+        <Flex
+          id="spinner-overlay"
+          position="absolute"
+          top="0"
+          left="0"
+          width="100%"
+          height="100%"
+          background="rgba(0, 0, 0, 0.6)"
+          zIndex="1000"
+          align="center"
+          justify="center"
         >
-          {/*new 15 - Clustering Source and Layers */}
-          {isClusteringEnabled && (
-            <Source
-              id="clusters"
-              type="geojson"
-              data={{
-                type: "FeatureCollection",
-                features: mapCluster.clusteredNodes.map((node) => ({
-                  type: "Feature",
-                  geometry: { type: "Point", coordinates: node.position },
-                  properties: node.properties,
-                })),
-              }}
-              cluster={true}
-              clusterRadius={mapCluster.clusterRadius}
-              clusterMaxZoom={mapCluster.maxZoom}
-            />
-          )}
-          {isClusteringEnabled && (
-            <>
-              <Layer {...mapCluster.getClusterLayer()} />
-              <Layer {...mapCluster.getClusterCountLayer()} />
-              <Layer {...mapCluster.getUnclusteredPointLayer()} />
-            </>
-          )}
-        </Map>
-      </DeckGL>
+          <Spinner size="xl" color="white" />
+          <Text color="white" fontSize="lg" ml="1em">
+            Loading Graph...
+          </Text>
+        </Flex>
+      )}
+      <CountryContinentSelector onSelect={handleSelection} />
+      {!isLoading && (
+        <>
+          <DeckGL
+            viewState={viewState} // Set current viewState here to persist location and zoom
+            onViewStateChange={({ viewState }) => setViewState(viewState)} // Track map position changes
+            controller={true}
+            getTooltip={getTooltip}
+            layers={layers} // New9 - Pass layers to DeckGL
+            key={layerKey} // New9 - Add key to force re-render when layers change
+          >
+            <Map
+              mapboxAccessToken={MAPBOX_TOKEN}
+              mapStyle="mapbox://styles/mapbox/dark-v11"
+              style={{ width: "100%", height: "100%" }}
+              projection={"mercator"} // New10- Set projection to "mercator" for 2d view only
+            >
+              {/*new 15 - Clustering Source and Layers */}
+              {isClusteringEnabled && (
+                <Source
+                  id="clusters"
+                  type="geojson"
+                  data={{
+                    type: "FeatureCollection",
+                    features: mapCluster.clusteredNodes.map((node) => ({
+                      type: "Feature",
+                      geometry: { type: "Point", coordinates: node.position },
+                      properties: node.properties,
+                    })),
+                  }}
+                  cluster={true}
+                  clusterRadius={mapCluster.clusterRadius}
+                  clusterMaxZoom={mapCluster.maxZoom}
+                />
+              )}
+              {isClusteringEnabled && (
+                <>
+                  <Layer {...mapCluster.getClusterLayer()} />
+                  <Layer {...mapCluster.getClusterCountLayer()} />
+                  <Layer {...mapCluster.getUnclusteredPointLayer()} />
+                </>
+              )}
+            </Map>
+          </DeckGL>
+        </>
+      )}
       <NodeInfoComponent // new9 - Integrate NodeInfoComponent for popover
         node={popoverNode} // Pass the clicked node to NodeInfoComponent
         isOpen={isPopoverOpen}
@@ -441,7 +618,7 @@ const MapComponent = observer(() => {
         position={popoverPosition} // new9 - Pass position to NodeInfoComponent
         showDirectConnections={showDirectConnections} //new16: Pass function to show direct connections
       />
-      <MapControls
+      {/* <MapControls
         viewType={viewType}
         toggleView={toggleView}
         // isRightPanelOpen={isRightPanelOpen} //new18 - Remove right panel state due to left panel
@@ -452,7 +629,7 @@ const MapComponent = observer(() => {
         handleLayoutChange={handleLayoutChange}
         resetView={resetView} //new16: Pass reset function to controls
         isFiltered={isFiltered} // NEW16: Pass isFiltered to controls
-      />
+      /> */}
       {/* new9 - add a right panel to control node and link properties // new18 - Remove right panel due to left panel
       {isRightPanelOpen && (
         <MapRightPanel
@@ -478,9 +655,21 @@ const MapComponent = observer(() => {
       {/*new15 - add a legend box to show node distribution */}
       <LegendBox distribution={nodeDistribution} isVisible={isLegendVisible} />
 
-      {/*new17: oppening navigation rightpanel in map  */}
-      <NavigationPanelComponent toggleNavigationPanel={toggleNavigationPanel} />
-      {isNavigationPanelOpen && (
+      {/*new17: oppening navigation rightpanel in map
+      new19: pass the props to navigation panel
+        */}
+      <NavigationPanelComponent
+        toggleNavigationPanel={toggleNavigationPanel}
+        viewType={viewType}
+        toggleView={toggleView}
+        isHeatmapVisible={isHeatmapVisible}
+        toggleHeatmap={toggleHeatmap}
+        selectedLayout={selectedLayout}
+        handleLayoutChange={handleLayoutChange}
+        resetView={resetView}
+        isFiltered={isFiltered}
+      />
+      {/* {isNavigationPanelOpen && (
         <Box
           width={{ base: "500px", lg: "500px", xl: "600px" }}
           right={{
@@ -498,7 +687,7 @@ const MapComponent = observer(() => {
         >
           <RightPanel panelType={panelType} />
         </Box>
-      )}
+      )} */}
       {/*new 18: pass the props to left panel  */}
       <LeftPanel
         isMapPath={true} // Indicate it's in the map path

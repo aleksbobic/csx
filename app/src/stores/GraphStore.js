@@ -71,19 +71,6 @@ export class GraphStore {
     }, { deep: true });
   }
 
-  // async ensureDetailViewData() {
-  //   if (
-  //     !this.detailGraphData.nodes.length ||
-  //     !this.detailGraphData.links.length
-  //   ) {
-  //     console.log("Detail view data missing. Loading...");
-  //     await this.getSearchGraph(
-  //       this.graphData.meta.query, // Use the existing query to fetch data
-  //       "detail",
-  //       this.store.search.searchID
-  //     );
-  //   }
-  // }
 
   // New5 - Assigns country latitude and longitude if available, with overlap for nodes within the same country
   setNodes(nodes) {
@@ -536,7 +523,51 @@ export class GraphStore {
   }
   // end of new code 
 
+  // // new16: add a function to find direct connected nodes and links
+  // getConnectedNodesAndLinks(nodeId) {
+  //   const connectedNodes = [];
+  //   const connectedLinks = [];
+
+  //   const targetNode = this.currentGraphData.nodes.find((node) => node.id === nodeId);
+
+  //   if (!targetNode) {
+  //     console.warn(`Node with ID ${nodeId} not found in the graph.`);
+  //     return { nodes: connectedNodes, links: connectedLinks };
+  //   }
+
+  //   this.currentGraphData.links.forEach((link) => {
+  //     if (link.source.id === nodeId || link.target.id === nodeId) {
+  //       const sourceNode = this.currentGraphData.nodes.find((node) => node.id === link.source.id);
+  //       const targetNode = this.currentGraphData.nodes.find((node) => node.id === link.target.id);
+
+  //       if (sourceNode && targetNode) {
+  //         link.sourcePosition = [sourceNode.longitude, sourceNode.latitude];
+  //         link.targetPosition = [targetNode.longitude, targetNode.latitude];
+
+  //         connectedLinks.push({
+  //           ...link,
+  //           sourcePosition: link.sourcePosition,
+  //           targetPosition: link.targetPosition,
+  //         });
+
+  //         if (!connectedNodes.includes(sourceNode)) {
+  //           connectedNodes.push(sourceNode);
+  //         }
+  //         if (!connectedNodes.includes(targetNode)) {
+  //           connectedNodes.push(targetNode);
+  //         }
+  //       }
+  //     }
+  //   });
+
+  //   return { nodes: connectedNodes, links: connectedLinks };
+  // }
+  // // end of new code 16  
+
+
+
   // new16: add a function to find direct connected nodes and links
+  // new 19 - update it to make it compatible with the changes related to study id and url 
   getConnectedNodesAndLinks(nodeId) {
     const connectedNodes = [];
     const connectedLinks = [];
@@ -549,9 +580,12 @@ export class GraphStore {
     }
 
     this.currentGraphData.links.forEach((link) => {
-      if (link.source.id === nodeId || link.target.id === nodeId) {
-        const sourceNode = this.currentGraphData.nodes.find((node) => node.id === link.source.id);
-        const targetNode = this.currentGraphData.nodes.find((node) => node.id === link.target.id);
+      const sourceId = link.source.id || link.source;
+      const targetId = link.target.id || link.target;
+
+      if (sourceId === nodeId || targetId === nodeId) {
+        const sourceNode = this.currentGraphData.nodes.find((node) => node.id === sourceId);
+        const targetNode = this.currentGraphData.nodes.find((node) => node.id === targetId);
 
         if (sourceNode && targetNode) {
           link.sourcePosition = [sourceNode.longitude, sourceNode.latitude];
@@ -563,11 +597,22 @@ export class GraphStore {
             targetPosition: link.targetPosition,
           });
 
-          if (!connectedNodes.includes(sourceNode)) {
-            connectedNodes.push(sourceNode);
+          // Ensure all required properties are present
+          if (!connectedNodes.find((n) => n.id === sourceNode.id)) {
+            connectedNodes.push({
+              ...sourceNode,
+              position: [sourceNode.longitude, sourceNode.latitude],
+              size: sourceNode.size || 5,
+              color: sourceNode.color || [0, 0, 0],
+            });
           }
-          if (!connectedNodes.includes(targetNode)) {
-            connectedNodes.push(targetNode);
+          if (!connectedNodes.find((n) => n.id === targetNode.id)) {
+            connectedNodes.push({
+              ...targetNode,
+              position: [targetNode.longitude, targetNode.latitude],
+              size: targetNode.size || 5,
+              color: targetNode.color || [0, 0, 0],
+            });
           }
         }
       }
@@ -575,8 +620,7 @@ export class GraphStore {
 
     return { nodes: connectedNodes, links: connectedLinks };
   }
-  // end of new code 16  
-
+  // end of new code 16, 19
 
   setLabelColors = (color) => {
     for (let i = 0; i < this.graphData.meta.nodeCount; i++) {
@@ -1090,6 +1134,41 @@ export class GraphStore {
 
     this.handleRetrievedGraph(response.data.graph, historyGraphType, "");
   };
+
+  // // new19: Add a function to load study data for a given study ID
+  // loadStudyData = async (studyId) => {
+  //   if (!studyId) {
+  //     console.error("Study ID is required to load graph data.");
+  //     return;
+  //   }
+  //   console.log(`Loading study data for study ID: ${studyId}`);
+
+  //   try {
+  //     await this.getStudy(studyId); // Reuse existing method to fetch the study
+  //     console.log("Study data successfully loaded.");
+  //   } catch (error) {
+  //     console.error("Failed to load study data:", error);
+  //   }
+  // };
+
+  // new19: Add a function to load study data for a given study ID
+  loadStudyData = async (studyId) => {
+    if (!studyId) {
+      console.error("Study ID is required to load graph data.");
+      return;
+    }
+
+    try {
+      console.log(`Loading study data for study ID: ${studyId}`);
+      await this.getStudy(studyId); // Fetch study data
+      this.validateNodeLocations(); // Ensure node locations are set
+      this.calculateNodeDegreesAndSizes(); // Recalculate degrees and sizes
+      console.log("Study data successfully loaded.");
+    } catch (error) {
+      console.error("Failed to load study data:", error);
+    }
+  };
+  // end of new code 19
 
   getSearchGraph = (query, graphType, suuid) => {
     const visibleDimensions = this.store.core.visibleDimensions[graphType];

@@ -90,15 +90,16 @@ export default function CountryContinentSelector({ onSelect }) {
       position="absolute"
       bottom={"0.5em"}
       right={"0.5em"} //new18: change the position of the search bar relative to the combination of rightpanel and leftpanel
-      bg="blackAlpha.800"
+      background={"rgba(255, 255, 255, 0.1)"}
       p={2}
       borderRadius="md"
       boxShadow="lg"
       zIndex="1"
-      borderWidth={"1px"}
-      borderStyle={"solid"}
-      borderColor={"purple.700"}
-      color="purple.700"
+      // borderWidth={"1px"}
+      // borderStyle={"solid"}
+      // borderColor={"purple.700"}
+      // color="purple.700"
+      color={"gray.800"}
       display={"flex"}
       gap={2}
       alignItems={"center"}
@@ -108,9 +109,10 @@ export default function CountryContinentSelector({ onSelect }) {
         placeholder="Continent"
         as="select"
         onChange={handleContinentSelect}
-        color="purple.600"
-        borderColor="purple.500"
-        focusBorderColor="purple.700"
+        color={"gray.800"}
+        background={"white"}
+        colorScheme={"gray"}
+        // focusBorderColor="purple.700"
         size={{ base: "sm", md: "md" }}
         borderRadius={"lg"}
         _hover={{ borderColor: "purple.200" }}
@@ -128,9 +130,11 @@ export default function CountryContinentSelector({ onSelect }) {
         textTransform={"capitalize"}
         value={searchValue}
         onChange={handleCountryInputChange}
-        color="purple.600"
-        borderColor="purple.500"
-        focusBorderColor="purple.700"
+        // borderColor="purple.500"
+        // focusBorderColor="purple.700"
+        colorScheme={"gray"}
+        color={"gray.800"}
+        background={"white"}
         list="country-suggestions"
         display={"flex"}
         alignItems={"center"}
@@ -147,7 +151,9 @@ export default function CountryContinentSelector({ onSelect }) {
 
       <Button
         onClick={handleCountrySelect}
-        colorScheme="purple"
+        background={"rgba(255, 255, 255, 0.1)"}
+        color={"white"}
+        boxShadow={"md"}
         variant="solid"
         size={{ base: "sm", md: "md" }}
       >

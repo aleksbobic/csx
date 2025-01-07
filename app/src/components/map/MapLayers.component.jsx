@@ -20,7 +20,7 @@ const LayersComponent = ({
     id: "scatterplot-layer",
     data: displayNodes.length ? displayNodes : nodes,
     getPosition: (d) => d.position,
-    getRadius: (d) => d.size,
+    getRadius: (d) => d.size || 5,
     getFillColor: (d) => [...d.color.slice(0, 3), nodeOpacity * 255],
     pickable: true,
     onHover: handleHover,

@@ -12,6 +12,7 @@ import {
   useColorMode,
   useColorModeValue,
   useDisclosure,
+  Stack,
 } from "@chakra-ui/react";
 import {
   ChartBarIcon,
@@ -26,6 +27,7 @@ import {
   SquaresPlusIcon,
   SunIcon,
   MapPinIcon, // added amp icon for map toggle button
+  ArrowUturnLeftIcon, // added back to graph button
 } from "@heroicons/react/24/outline";
 import { NavLink, useLocation, useNavigate } from "react-router-dom"; // adding usenavigate
 import { isEnvFalse, isEnvSet } from "utils/general.utils";
@@ -37,7 +39,20 @@ import { RootStoreContext } from "stores/RootStore";
 import logo from "images/logo.png";
 import { observer } from "mobx-react";
 
-function NavigationPanelComponent({ toggleNavigationPanel }) {
+import MapControls from "src/components/map/MapControls.component"; // new19: including mapcontrols in the graphutils
+
+function NavigationPanelComponent({
+  toggleNavigationPanel,
+  // new19: add props for mapcontrols
+  viewType,
+  toggleView,
+  isHeatmapVisible,
+  toggleHeatmap,
+  selectedLayout,
+  handleLayoutChange,
+  resetView,
+  isFiltered,
+}) {
   const store = useContext(RootStoreContext);
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onToggle } = useDisclosure();
@@ -137,142 +152,294 @@ function NavigationPanelComponent({ toggleNavigationPanel }) {
     store.graph.updateNodeColor(colorMode === "light" ? "dark" : "light");
   };
 
-  const renderGraphUtils = () => (
-    <Box
-      position="absolute"
-      marginLeft={
-        store.search.datasetTypes[store.search.currentDataset] === "api"
-          ? "-249px"
-          : "-55px"
-      }
-      top="70px"
-      id="graphutils"
-      // 205px
-    >
-      <HStack
-        spacing="10px"
-        backgroundColor="transparent"
-        padding="5px 6px"
-        borderRadius="8px"
+  // const renderGraphUtils = () => (
+  //   <Box
+  //     position="absolute"
+  //     marginLeft={
+  //       store.search.datasetTypes[store.search.currentDataset] === "api"
+  //         ? "-249px"
+  //         : "-55px"
+  //     }
+  //     top="70px"
+  //     id="graphutils"
+  //     // 205px
+  //   >
+  //     <HStack
+  //       spacing="10px"
+  //       backgroundColor="transparent"
+  //       padding="5px 6px"
+  //       borderRadius="8px"
+  //     >
+  //       {store.search.datasetTypes[store.search.currentDataset] === "api" && (
+  //         <Tooltip label="Get more data using the last expansion action">
+  //           <Button
+  //             id="repeatlastretrievalaction"
+  //             size="sm"
+  //             isDisabled={!store.graph.repeatRetrieval}
+  //             _disabled={{
+  //               background: "transparent",
+  //               opacity: 0.5,
+  //               cursor: "default",
+  //             }}
+  //             background="purple.500"
+  //             opacity="0.7"
+  //             _hover={{
+  //               opacity: 1,
+  //               _disabled: {
+  //                 opacity: 0.5,
+  //                 cursor: "default",
+  //               },
+  //             }}
+  //             border="none"
+  //             aria-label="Repeat last retrieval action"
+  //             onClick={() => {
+  //               store.track.trackEvent(
+  //                 {
+  //                   area: "Graph area",
+  //                   sub_area: "Graph controls",
+  //                 },
+  //                 {
+  //                   item_type: "Button",
+  //                 },
+  //                 {
+  //                   event_type: "Click",
+  //                   event_action: "Repeat last retrieval action",
+  //                 }
+  //               );
+
+  //               store.graph.runRepeatRetrieval();
+  //             }}
+  //           >
+  //             Get more data <SquaresPlusIcon width="16px" height="16px" />
+  //           </Button>
+  //         </Tooltip>
+  //       )}
+  //       <Tooltip
+  //         label={
+  //           store.core.currentGraph === "detail"
+  //             ? "View overview graph"
+  //             : "View detail graph"
+  //         }
+  //       >
+  //         <IconButton
+  //           id="switchgraphviewbutton"
+  //           size="sm"
+  //           border="none"
+  //           aria-label="Switch graph view"
+  //           onClick={() => {
+  //             store.track.trackEvent(
+  //               {
+  //                 area: "Graph area",
+  //                 sub_area: "Graph controls",
+  //               },
+  //               {
+  //                 item_type: "Button",
+  //               },
+  //               {
+  //                 event_type: "Click",
+  //                 event_action: `Switch to ${
+  //                   store.core.currentGraph === "detail" ? "overview" : "detail"
+  //                 } graph`,
+  //               }
+  //             );
+
+  //             store.graphInstance.setEdgeColorScheme("auto");
+
+  //             store.graph.modifyStudy(
+  //               store.core.currentGraph === "detail" ? "overview" : "detail"
+  //             );
+  //           }}
+  //           icon={
+  //             store.core.currentGraph === "detail" ? (
+  //               <GlobeAltIcon
+  //                 style={{
+  //                   width: "14px",
+  //                   height: "14px",
+  //                 }}
+  //               />
+  //             ) : (
+  //               <FingerPrintIcon style={{ width: "14px", height: "14px" }} />
+  //             )
+  //           }
+  //         />
+  //       </Tooltip>
+  //       {/* added map toggle button */}
+  //       <Tooltip label="Toggle map view">
+  //         <IconButton
+  //           border="none"
+  //           aria-label="Map view toggle"
+  //           id="mapviewtoggle"
+  //           size="sm"
+  //           color={colorMode === "light" ? "black" : "white"}
+  //           // borderRadius="10px"
+  //           onClick={() => {
+  //             navigate("/map");
+  //           }}
+  //           icon={
+  //             <MapPinIcon
+  //               style={{
+  //                 width: "14px",
+  //                 height: "14px",
+  //               }}
+  //             />
+  //           }
+  //         />
+  //       </Tooltip>
+  //     </HStack>
+  //   </Box>
+  // );
+
+  // new19 - updated graphutils including mapcontrols
+  const renderGraphUtils = () => {
+    const isMapView = location.pathname.startsWith("/map");
+    const isGraphView = location.pathname.startsWith("/graph");
+
+    return (
+      <Box
+        position="absolute"
+        marginLeft={
+          isGraphView
+            ? store.search.datasetTypes[store.search.currentDataset] === "api"
+              ? "-249px"
+              : "-55px"
+            : isMapView
+              ? store.search.datasetTypes[store.search.currentDataset] === "api"
+                ? { base: "-320px", md: "-600px" }
+                : "-100px"
+              : "0px" // Default margin for other views, if any
+        }
+        top="70px"
+        id="graphutils"
       >
-        {store.search.datasetTypes[store.search.currentDataset] === "api" && (
-          <Tooltip label="Get more data using the last expansion action">
-            <Button
-              id="repeatlastretrievalaction"
-              size="sm"
-              isDisabled={!store.graph.repeatRetrieval}
-              _disabled={{
-                background: "transparent",
-                opacity: 0.5,
-                cursor: "default",
-              }}
-              background="purple.500"
-              opacity="0.7"
-              _hover={{
-                opacity: 1,
-                _disabled: {
+        <Stack
+          spacing="10px"
+          direction={"row"}
+          backgroundColor={isMapView ? "rgba(36, 36, 36, 0.4)" : "transparent"}
+          padding="8px 12px"
+          borderRadius="8px"
+          boxShadow={isMapView ? "2xl" : "none"}
+          wrap={"wrap"}
+          alignItems={"center"}
+          flex={isMapView ? 1 : 0}
+          display={"flex"}
+          width={isMapView ? { base: "300px", md: "auto" } : "auto"}
+        >
+          {/* Existing GraphUtils Buttons */}
+          {store.search.datasetTypes[store.search.currentDataset] === "api" && (
+            <Tooltip label="Get more data using the last expansion action">
+              <Button
+                id="repeatlastretrievalaction"
+                size="sm"
+                isDisabled={!store.graph.repeatRetrieval}
+                background="purple.500"
+                opacity="0.7"
+                // color="white"
+                _hover={{ opacity: 1 }}
+                _disabled={{
                   opacity: 0.5,
                   cursor: "default",
-                },
-              }}
-              border="none"
-              aria-label="Repeat last retrieval action"
-              onClick={() => {
-                store.track.trackEvent(
-                  {
-                    area: "Graph area",
-                    sub_area: "Graph controls",
-                  },
-                  {
-                    item_type: "Button",
-                  },
-                  {
-                    event_type: "Click",
-                    event_action: "Repeat last retrieval action",
-                  }
-                );
-
-                store.graph.runRepeatRetrieval();
-              }}
-            >
-              Get more data <SquaresPlusIcon width="16px" height="16px" />
-            </Button>
-          </Tooltip>
-        )}
-        <Tooltip
-          label={
-            store.core.currentGraph === "detail"
-              ? "View overview graph"
-              : "View detail graph"
-          }
-        >
-          <IconButton
-            id="switchgraphviewbutton"
-            size="sm"
-            border="none"
-            aria-label="Switch graph view"
-            onClick={() => {
-              store.track.trackEvent(
-                {
-                  area: "Graph area",
-                  sub_area: "Graph controls",
-                },
-                {
-                  item_type: "Button",
-                },
-                {
-                  event_type: "Click",
-                  event_action: `Switch to ${
-                    store.core.currentGraph === "detail" ? "overview" : "detail"
-                  } graph`,
-                }
-              );
-
-              store.graphInstance.setEdgeColorScheme("auto");
-
-              store.graph.modifyStudy(
-                store.core.currentGraph === "detail" ? "overview" : "detail"
-              );
-            }}
-            icon={
-              store.core.currentGraph === "detail" ? (
-                <GlobeAltIcon
-                  style={{
-                    width: "14px",
-                    height: "14px",
-                  }}
-                />
-              ) : (
-                <FingerPrintIcon style={{ width: "14px", height: "14px" }} />
-              )
-            }
-          />
-        </Tooltip>
-        {/* added map toggle button */}
-        <Tooltip label="Toggle map view">
-          <IconButton
-            border="none"
-            aria-label="Map view toggle"
-            id="mapviewtoggle"
-            size="sm"
-            color={colorMode === "light" ? "black" : "white"}
-            // borderRadius="10px"
-            onClick={() => {
-              navigate("/map");
-            }}
-            icon={
-              <MapPinIcon
-                style={{
-                  width: "14px",
-                  height: "14px",
+                  background: "transparent",
                 }}
+                onClick={() => store.graph.runRepeatRetrieval()}
+              >
+                Get more data <SquaresPlusIcon width="16px" height="16px" />
+              </Button>
+            </Tooltip>
+          )}
+
+          {/* Switch Graph View Button */}
+          {!isMapView && (
+            <Tooltip
+              label={
+                store.core.currentGraph === "detail"
+                  ? "View overview graph"
+                  : "View detail graph"
+              }
+            >
+              <IconButton
+                id="switchgraphviewbutton"
+                size="sm"
+                // background="purple.500"
+                // color="white"
+                // _hover={{ background: "purple.600" }}
+                border={"none"}
+                aria-label="Switch graph view"
+                onClick={() => {
+                  store.graph.modifyStudy(
+                    store.core.currentGraph === "detail" ? "overview" : "detail"
+                  );
+                }}
+                icon={
+                  store.core.currentGraph === "detail" ? (
+                    <GlobeAltIcon style={{ width: "14px", height: "14px" }} />
+                  ) : (
+                    <FingerPrintIcon
+                      style={{ width: "14px", height: "14px" }}
+                    />
+                  )
+                }
               />
-            }
-          />
-        </Tooltip>
-      </HStack>
-    </Box>
-  );
+            </Tooltip>
+          )}
+
+          {/* Map View Toggle or Back to Graph */}
+          {isMapView ? (
+            <Tooltip label="Back to Graph View">
+              <Button
+                size="sm"
+                // background="purple.500"
+                // color="white"
+                border={"none"}
+                aria-label="Back to Graph View"
+                id="backtograph"
+                color={colorMode === "light" ? "black" : "white"}
+                // _hover={{ background: "purple.600" }}
+                onClick={() => navigate(`/graph?study=${store.core.studyUuid}`)}
+              >
+                Back to Graph <ArrowUturnLeftIcon width="16px" height="16px" />
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip label="Toggle map view">
+              <IconButton
+                size="sm"
+                // background="purple.500"
+                color={colorMode === "light" ? "black" : "white"}
+                border={"none"}
+                aria-label="Map view toggle"
+                id="mapviewtoggle"
+                // _hover={{ background: "purple.600" }}
+                onClick={() => navigate(`/map?study=${store.core.studyUuid}`)}
+                icon={<MapPinIcon style={{ width: "14px", height: "14px" }} />}
+              />
+            </Tooltip>
+          )}
+
+          {/* Map Controls for Map View */}
+          {isMapView && (
+            <Box
+              order={{ base: 1, md: 0 }}
+              flex={3}
+              display={"flex"}
+              marginTop={{ base: "10px", md: 0 }}
+            >
+              <MapControls
+                viewType={viewType}
+                toggleView={toggleView}
+                isHeatmapVisible={isHeatmapVisible}
+                toggleHeatmap={toggleHeatmap}
+                selectedLayout={selectedLayout}
+                handleLayoutChange={handleLayoutChange}
+                resetView={resetView}
+                isFiltered={isFiltered}
+              />
+            </Box>
+          )}
+        </Stack>
+      </Box>
+    );
+  };
+  // end of new19
 
   const renderHoverData = () => (
     <VStack
@@ -680,7 +847,7 @@ function NavigationPanelComponent({ toggleNavigationPanel }) {
           {renderToggles()}
         </HStack>
       </Box>
-      {location.pathname.startsWith("/graph") && (
+      {/* {location.pathname.startsWith("/graph") && (
         <Box
           ref={containerRef}
           width={{ base: "500px", lg: "500px", xl: "600px" }}
@@ -692,6 +859,30 @@ function NavigationPanelComponent({ toggleNavigationPanel }) {
           style={{
             zIndex: 10,
 
+            position: "fixed",
+            top: 0,
+            height: "100%",
+            paddingTop: "60px",
+          }}
+        >
+          {renderGraphUtils()}
+          {renderViewUtils()}
+          <RightPanel panelType={panelType} />
+        </Box>
+      )} */}
+      {/* new19: update to iclude the graphutils and viewutils also in the map view */}
+      {(location.pathname.startsWith("/graph") ||
+        location.pathname.startsWith("/map")) && (
+        <Box
+          ref={containerRef}
+          width={{ base: "500px", lg: "500px", xl: "600px" }}
+          right={{
+            base: isOpen ? "0x" : "-500px",
+            lg: isOpen ? "0px" : "-500px",
+            xl: isOpen ? "0px" : "-600px",
+          }}
+          style={{
+            zIndex: 10,
             position: "fixed",
             top: 0,
             height: "100%",
