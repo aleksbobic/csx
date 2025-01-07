@@ -133,6 +133,7 @@ export default function CountryContinentSelector({ onSelect }) {
         // borderColor="purple.500"
         // focusBorderColor="purple.700"
         colorScheme={"gray"}
+        _placeholder={{ color: "gray.800" }}
         color={"gray.800"}
         background={"white"}
         list="country-suggestions"
