@@ -5,8 +5,11 @@ import { action, makeAutoObservable } from "mobx";
 import SpriteText from "three-spritetext";
 import axios from "axios";
 import { format } from "date-fns";
-import { safeRequest } from "utils/general.utils";
+import { safeRequest, getEnv } from "utils/general.utils";
 import countries from "../components/map/data/countries.json"; //New2-Import the countries data
+import cityData from "../components/map/data/worldcities.json"; // new20 : import city data
+import institutionLocations from "../components/map/data/data_clean.json"; // new20 : import institution locations
+const mapboxToken = getEnv("VITE_MAPBOX_TOKEN");
 export class GraphStore {
   perspectives = [];
   references = [];
@@ -64,37 +67,13 @@ export class GraphStore {
 
   constructor(store) {
     this.store = store;
+    this.hideNoLocationNodes = false; // NEW20: Track hide toggle state
     //New4: add action to set nodes
     makeAutoObservable(this, {
-      setNodes: action, // 13: Add action to set nodes
       calculateNodeDegreesAndSizes: action, // 13: Add action to calculate node degrees and sizes
     }, { deep: true });
   }
 
-
-  // New5 - Assigns country latitude and longitude if available, with overlap for nodes within the same country
-  setNodes(nodes) {
-    // console.log("setNodes function called with nodes:", nodes);
-    nodes.forEach(node => {
-      if (!node.latitude || !node.longitude) {
-        const countryData = countries.find(country => country.name.common === node.country);
-        if (countryData) {
-          node.latitude = countryData.latlng[0];
-          node.longitude = countryData.latlng[1];
-        } else {
-          // Assign random location if no country match found
-          const randomCountry = this.getRandomCountryLocation();
-          node.latitude = randomCountry.latitude;
-          node.longitude = randomCountry.longitude;
-        }
-      }
-    });
-    this.currentGraphData.nodes = nodes || [];
-    this.currentGraphData.links = this.currentGraphData.links || []; //new13: Ensure links are initialized
-    // console.log("Current Graph Data after setting nodes:", this.currentGraphData);
-    this.calculateNodeDegreesAndSizes();  // new13: Recalculate node degrees and sizes
-    this.store.geo.applyLayout(); // New5 - Apply layout after setting nodes
-  }
 
   clearGraphId = () => {
     this.graphData.meta.graphID = null;
@@ -251,28 +230,162 @@ export class GraphStore {
     mesh.scale.z = size;
     return [mesh, mesh.clone(false), mesh.clone(false)];
   };
-  // New5 - Adjusted random location assignment to fallback in case of missing country data
-  getRandomCountryLocation() {
-    const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+
+  //new20 : function to extract geo keywords from text
+  extractGeoKeywords(text) {
+    if (!text) return [];
+    const commonStopwords = ["university", "research", "institute", "department", "of", "and", "the", "for"];
+    return text
+      .toLowerCase()
+      .split(/\s|,|\.|-/)
+      .filter(word => word.length > 2 && !commonStopwords.includes(word));
+  }
+
+  //new20: function to get location from author institution|(by Alex)
+  getGeoLocationForNode(node) {
+    const associatedEntry = this.graphData.tableData.filter(
+      (row) => row.entry === node.entries[0]
+    )[0];
+
+    // console.log(node.feature, associatedEntry);
+
+    if (
+      [
+        "authors",
+        "author_ids",
+        "author_institutions",
+        "author_countries",
+      ].includes(node.feature)
+    ) {
+      const valueLocation = associatedEntry[node.feature].indexOf(node.label);
+
+      const affiliationInstitutionId =
+        associatedEntry?.institution_ids[valueLocation];
+
+      const institutionLocationData = institutionLocations.find(
+        (inst) => inst.id === affiliationInstitutionId
+      );
+
+      if (institutionLocationData) {
+        return {
+          latitude: institutionLocationData.lat,
+          longitude: institutionLocationData.long,
+          isRealLocation: true,
+        };
+      }
+    }
+
+    const firstAuthorAffiliationInstitution =
+      associatedEntry?.institution_ids[0];
+
+    const institutionLocationData = institutionLocations.find(
+      (inst) => inst.id === firstAuthorAffiliationInstitution
+    );
+
+    if (institutionLocationData) {
+      return {
+        latitude: institutionLocationData.lat,
+        longitude: institutionLocationData.long,
+        isRealLocation: true,
+      };
+    }
+
+    const noLocationLatitude = 0;
+    const noLocationLongitude = 0;
+
     return {
-      latitude: randomCountry.latlng[0],
-      longitude: randomCountry.latlng[1],
+      latitude: parseFloat(noLocationLatitude),
+      longitude: parseFloat(noLocationLongitude),
+      isRealLocation: false,
     };
   }
-  // end of new code
 
 
-  // New5 - Ensures that nodes have lat/long positions based on country, avoids re-randomization if already set
-  validateNodeLocations = () => {
-    this.currentGraphData.nodes.forEach(node => {
+
+  // async validateNodeLocations() {
+  //   for (let i = 0; i < this.currentGraphData.nodes.length; i++) {
+  //     if (!this.currentGraphData.nodes[i].latitude || !this.currentGraphData.nodes[i].longitude) {
+  //       const geoLocation = this.getGeoLocationForNode(this.currentGraphData.nodes[i]);
+  //       this.currentGraphData.nodes[i].latitude = geoLocation.latitude;
+  //       this.currentGraphData.nodes[i].longitude = geoLocation.longitude;
+  //     }
+
+  //     this.currentGraphData.nodes[i].initialLatitude = this.currentGraphData.nodes[i].latitude;
+  //     this.currentGraphData.nodes[i].initialLongitude = this.currentGraphData.nodes[i].longitude;
+  //   }
+
+  //   this.updateNodeVisibility(); // Ensure visibility logic is applied after validation
+  // }
+
+  //new20: updated validateNodeLocations to handle missing locations
+  async validateNodeLocations() {
+    const nodes = this.currentGraphData.nodes;
+
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+
       if (!node.latitude || !node.longitude) {
-        const { latitude, longitude } = this.getRandomCountryLocation();
-        node.latitude = latitude;
-        node.longitude = longitude;
+        const geoLocation = this.getGeoLocationForNode(node);
+        node.latitude = geoLocation.latitude;
+        node.longitude = geoLocation.longitude;
       }
-    });
+
+      // Store initial positions (but only once)
+      if (
+        node.initialLatitude === undefined ||
+        node.initialLongitude === undefined
+      ) {
+        node.initialLatitude = node.latitude;
+        node.initialLongitude = node.longitude;
+      }
+
+      // Mark whether the node originally had no real location
+      node.hasNoLocation = node.latitude === 0 && node.longitude === 0;
+    }
+
+    this.updateNodeVisibility(); // apply visibility right after
   }
-  // end of new code
+
+
+
+
+  //new20: Toggle the state to hide or show nodes without valid locations
+  toggleHideNoLocationNodes = () => {
+    this.hideNoLocationNodes = !this.hideNoLocationNodes;
+    this.updateNodeVisibility();
+  };
+
+
+
+  //new20: update node visibility based on the hideNoLocationNodes state
+  updateNodeVisibility = () => {
+    const nodes = this.currentGraphData.nodes;
+    const links = this.currentGraphData.links;
+
+    const visibleNodeIds = nodes
+      .filter((node) => !this.hideNoLocationNodes || !node.hasNoLocation)
+      .map((node) => node.id);
+
+    nodes.forEach((node) => {
+      node.visible = this.hideNoLocationNodes
+        ? !node.hasNoLocation
+        : true;
+    });
+
+    links.forEach((link) => {
+      const sourceId = link.source.id || link.source;
+      const targetId = link.target.id || link.target;
+
+      link.visible =
+        visibleNodeIds.includes(sourceId) &&
+        visibleNodeIds.includes(targetId);
+    });
+  };
+
+
+
+
+
 
   generateNodeObjects = (nodes, graphType) => {
     const meshBasicMaterialTemplate = new THREE.MeshBasicMaterial({
@@ -313,20 +426,37 @@ export class GraphStore {
         nodes[i].size
       );
 
-      // New5 - Set country-based latitude/longitude if available
-      const countryData = countries.find(country => country.name.common === nodes[i].country);
-      if (countryData && (!nodes[i].latitude || !nodes[i].longitude)) {
-        nodes[i].latitude = countryData.latlng[0];
-        nodes[i].longitude = countryData.latlng[1];
-      } else if (!nodes[i].latitude || !nodes[i].longitude) {
-        // Fallback to random location if no country data
-        const { latitude, longitude } = this.getRandomCountryLocation();
-        nodes[i].latitude = latitude;
-        nodes[i].longitude = longitude;
-      }
+      // // New5 - Set country-based latitude/longitude if available
+      // const countryData = countries.find(country => country.name.common === nodes[i].country);
+      // if (countryData && (!nodes[i].latitude || !nodes[i].longitude)) {
+      //   nodes[i].latitude = countryData.latlng[0];
+      //   nodes[i].longitude = countryData.latlng[1];
+      // } else if (!nodes[i].latitude || !nodes[i].longitude) {
+      //   // Fallback to random location if no country data
+      //   const { latitude, longitude } = this.getRandomCountryLocation();
+      //   nodes[i].latitude = latitude;
+      //   nodes[i].longitude = longitude;
+      // }
+      // nodes[i].initialLatitude = nodes[i].latitude;
+      // nodes[i].initialLongitude = nodes[i].longitude;
+      // // end of new code
+
+      // if (!nodes[i].latitude || !nodes[i].longitude) {
+      //   const { latitude, longitude } = this.getFallbackLocation(nodes[i]);
+      //   nodes[i].latitude = latitude;
+      //   nodes[i].longitude = longitude;
+      // }
+
+
+      if (!nodes[i].latitude || !nodes[i].longitude) {
+        const geoLocation = this.getGeoLocationForNode(nodes[i]);
+        nodes[i].latitude = geoLocation.latitude;
+        nodes[i].longitude = geoLocation.longitude;
+      } // new20 : if location is missing, get it from the institution data
+
       nodes[i].initialLatitude = nodes[i].latitude;
       nodes[i].initialLongitude = nodes[i].longitude;
-      // end of new code
+
 
 
       if (!nodes[i].x || !nodes[i].y) {
@@ -524,6 +654,7 @@ export class GraphStore {
   // end of new code 
 
   // // new16: add a function to find direct connected nodes and links
+  // // new 19 - update it to make it compatible with the changes related to study id and url 
   // getConnectedNodesAndLinks(nodeId) {
   //   const connectedNodes = [];
   //   const connectedLinks = [];
@@ -536,9 +667,12 @@ export class GraphStore {
   //   }
 
   //   this.currentGraphData.links.forEach((link) => {
-  //     if (link.source.id === nodeId || link.target.id === nodeId) {
-  //       const sourceNode = this.currentGraphData.nodes.find((node) => node.id === link.source.id);
-  //       const targetNode = this.currentGraphData.nodes.find((node) => node.id === link.target.id);
+  //     const sourceId = link.source.id || link.source;
+  //     const targetId = link.target.id || link.target;
+
+  //     if (sourceId === nodeId || targetId === nodeId) {
+  //       const sourceNode = this.currentGraphData.nodes.find((node) => node.id === sourceId);
+  //       const targetNode = this.currentGraphData.nodes.find((node) => node.id === targetId);
 
   //       if (sourceNode && targetNode) {
   //         link.sourcePosition = [sourceNode.longitude, sourceNode.latitude];
@@ -550,11 +684,22 @@ export class GraphStore {
   //           targetPosition: link.targetPosition,
   //         });
 
-  //         if (!connectedNodes.includes(sourceNode)) {
-  //           connectedNodes.push(sourceNode);
+  //         // Ensure all required properties are present
+  //         if (!connectedNodes.find((n) => n.id === sourceNode.id)) {
+  //           connectedNodes.push({
+  //             ...sourceNode,
+  //             position: [sourceNode.longitude, sourceNode.latitude],
+  //             size: sourceNode.size || 5,
+  //             color: sourceNode.color || [0, 0, 0],
+  //           });
   //         }
-  //         if (!connectedNodes.includes(targetNode)) {
-  //           connectedNodes.push(targetNode);
+  //         if (!connectedNodes.find((n) => n.id === targetNode.id)) {
+  //           connectedNodes.push({
+  //             ...targetNode,
+  //             position: [targetNode.longitude, targetNode.latitude],
+  //             size: targetNode.size || 5,
+  //             color: targetNode.color || [0, 0, 0],
+  //           });
   //         }
   //       }
   //     }
@@ -562,20 +707,19 @@ export class GraphStore {
 
   //   return { nodes: connectedNodes, links: connectedLinks };
   // }
-  // // end of new code 16  
+  // // end of new code 16, 19
 
-
-
-  // new16: add a function to find direct connected nodes and links
-  // new 19 - update it to make it compatible with the changes related to study id and url 
+  //new20: Filter direct connections and ignore hidden nodes and links
   getConnectedNodesAndLinks(nodeId) {
     const connectedNodes = [];
     const connectedLinks = [];
 
-    const targetNode = this.currentGraphData.nodes.find((node) => node.id === nodeId);
+    const targetNode = this.currentGraphData.nodes.find(
+      (node) => node.id === nodeId && node.visible
+    );
 
     if (!targetNode) {
-      console.warn(`Node with ID ${nodeId} not found in the graph.`);
+      console.warn(`Node with ID ${nodeId} not found or is hidden.`);
       return { nodes: connectedNodes, links: connectedLinks };
     }
 
@@ -583,44 +727,36 @@ export class GraphStore {
       const sourceId = link.source.id || link.source;
       const targetId = link.target.id || link.target;
 
+      const sourceNode = this.currentGraphData.nodes.find(
+        (node) => node.id === sourceId && node.visible
+      );
+      const targetNode = this.currentGraphData.nodes.find(
+        (node) => node.id === targetId && node.visible
+      );
+
+      if (!sourceNode || !targetNode) return; // Skip hidden nodes and links
+
       if (sourceId === nodeId || targetId === nodeId) {
-        const sourceNode = this.currentGraphData.nodes.find((node) => node.id === sourceId);
-        const targetNode = this.currentGraphData.nodes.find((node) => node.id === targetId);
+        // connectedLinks.push(link);
+        connectedLinks.push({
+          ...link,
+          sourcePosition: [sourceNode.longitude, sourceNode.latitude],
+          targetPosition: [targetNode.longitude, targetNode.latitude],
+        });
 
-        if (sourceNode && targetNode) {
-          link.sourcePosition = [sourceNode.longitude, sourceNode.latitude];
-          link.targetPosition = [targetNode.longitude, targetNode.latitude];
+        if (!connectedNodes.find((n) => n.id === sourceNode.id)) {
+          connectedNodes.push(sourceNode);
+        }
 
-          connectedLinks.push({
-            ...link,
-            sourcePosition: link.sourcePosition,
-            targetPosition: link.targetPosition,
-          });
-
-          // Ensure all required properties are present
-          if (!connectedNodes.find((n) => n.id === sourceNode.id)) {
-            connectedNodes.push({
-              ...sourceNode,
-              position: [sourceNode.longitude, sourceNode.latitude],
-              size: sourceNode.size || 5,
-              color: sourceNode.color || [0, 0, 0],
-            });
-          }
-          if (!connectedNodes.find((n) => n.id === targetNode.id)) {
-            connectedNodes.push({
-              ...targetNode,
-              position: [targetNode.longitude, targetNode.latitude],
-              size: targetNode.size || 5,
-              color: targetNode.color || [0, 0, 0],
-            });
-          }
+        if (!connectedNodes.find((n) => n.id === targetNode.id)) {
+          connectedNodes.push(targetNode);
         }
       }
     });
 
     return { nodes: connectedNodes, links: connectedLinks };
   }
-  // end of new code 16, 19
+
 
   setLabelColors = (color) => {
     for (let i = 0; i < this.graphData.meta.nodeCount; i++) {

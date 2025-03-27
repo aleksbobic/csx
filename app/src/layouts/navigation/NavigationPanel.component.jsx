@@ -304,7 +304,7 @@ function NavigationPanelComponent({
               : "-55px"
             : isMapView
               ? store.search.datasetTypes[store.search.currentDataset] === "api"
-                ? { base: "-320px", md: "-600px" }
+                ? { base: "-320px", md: "-660px" }
                 : "-100px"
               : "0px" // Default margin for other views, if any
         }
@@ -422,6 +422,7 @@ function NavigationPanelComponent({
               flex={3}
               display={"flex"}
               marginTop={{ base: "10px", md: 0 }}
+              wrap={"wrap"}
             >
               <MapControls
                 viewType={viewType}

@@ -40,6 +40,8 @@ function ViewTools({
   handleClusterRadiusChange, // new18 - handle cluster radius change
   isVisible, // new18 - is legend visible
   toggleLegend, // new18 - toggle legend
+  hideNoLocationNodes, // NEW20: hide nodes without location
+  handleToggleHideNoLocationNodes, // NEW20: handle hide nodes without location
 }) {
   const store = useContext(RootStoreContext);
   const [forceRunning, setForceRunning] = useState(false);
@@ -217,6 +219,8 @@ function ViewTools({
             handleClusterRadiusChange={handleClusterRadiusChange}
             isVisible={isVisible}
             toggleLegend={toggleLegend}
+            hideNoLocationNodes={hideNoLocationNodes} // NEW20: hide nodes without location
+            handleToggleHideNoLocationNodes={handleToggleHideNoLocationNodes} // NEW20: handle hide nodes without location
           />
         )}
       </VStack>

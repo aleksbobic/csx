@@ -34,6 +34,8 @@ function MapTools({
   handleClusterRadiusChange,
   isVisible,
   toggleLegend,
+  hideNoLocationNodes, // NEW20: hide nodes without location
+  handleToggleHideNoLocationNodes, // NEW20: hide nodes without location
 }) {
   return (
     <Accordion
@@ -196,6 +198,17 @@ function MapTools({
                 Node Distribution
               </Text>
               <Switch size="sm" isChecked={isVisible} onChange={toggleLegend} />
+            </Box>
+            {/* // hide nodes without location  */}
+            <Box w="100%">
+              <Text fontSize="sm" fontWeight="semibold">
+                Hide Nodes Without Location
+              </Text>
+              <Switch
+                size="sm"
+                isChecked={hideNoLocationNodes}
+                onChange={handleToggleHideNoLocationNodes}
+              />
             </Box>
           </VStack>
         </AccordionPanel>

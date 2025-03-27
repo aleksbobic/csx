@@ -49,14 +49,20 @@ class GeoStore {
             }
         });
     }
-
+    // new20: updated to be synced with the node visibility
     applyLayout() {
+        this.resetToInitialPositions();
         // this.store.graph.currentGraphData.nodes = [...nodes];  // New5: Trigger reactivity for UI update
-        const nodes = this.store.graph.currentGraphData.nodes;
+        const nodes = this.store.graph.currentGraphData.nodes.filter(
+            (node) => !this.store.graph.hideNoLocationNodes || !node.hasNoLocation
+        );
         if (!nodes || nodes.length === 0) {
             console.warn("No nodes to layout");
             return;
         }
+
+        //  Ensure all nodes have valid initial positions before applying layout
+        this.setInitialPositions();
 
         //new13: Check if degrees or sizes need to be recalculated
         this.applyNodeSizes();
@@ -100,16 +106,42 @@ class GeoStore {
 
         // Update last applied layout and trigger UI reactivity
         this.lastAppliedLayout = this.layoutType;
+        this.store.graph.updateNodeVisibility();
         this.store.graph.currentGraphData.nodes = [...nodes];
     }
 
+
+
+
+
+
+
+
+    // resetToInitialPositions() {
+    //     const nodes = this.store.graph.currentGraphData.nodes;
+    //     nodes.forEach(node => {
+    //         node.longitude = node.initialLongitude;
+    //         node.latitude = node.initialLatitude;
+    //     });
+    // }
+
+    //new20: updated to be synced with the node visibility
     resetToInitialPositions() {
         const nodes = this.store.graph.currentGraphData.nodes;
-        nodes.forEach(node => {
-            node.longitude = node.initialLongitude;
-            node.latitude = node.initialLatitude;
+
+        nodes.forEach((node) => {
+            if (node.hasNoLocation) {
+                node.latitude = 0;
+                node.longitude = 0;
+            } else if (node.initialLatitude !== undefined && node.initialLongitude !== undefined) {
+                node.latitude = node.initialLatitude;
+                node.longitude = node.initialLongitude;
+            }
         });
     }
+
+
+
 
     findOverlappingNodes(nodes) {
         const locationMap = new Map();

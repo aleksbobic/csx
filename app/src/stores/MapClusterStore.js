@@ -37,7 +37,12 @@ class MapClusterStore {
 
     updateClusteredNodes() {
         const graphData = this.rootStore.graph.currentGraphData; // Access currentGraphData (overview or detail)
-        const nodes = graphData.nodes || [];
+        // const nodes = graphData.nodes || [];
+        //  Exclude hidden nodes AND (0,0) nodes
+        const nodes = (graphData.nodes || []).filter(
+            n => n.visible && !(n.latitude === 0 && n.longitude === 0)
+        ); //new20: Modified to hidden nodes
+
 
         this.clusteredNodes = nodes.map((node) => ({
             id: node.id,
@@ -53,7 +58,9 @@ class MapClusterStore {
     // new15 - calculateNodeDistribution
     calculateNodeDistribution() {
         const graphData = this.rootStore.graph.currentGraphData;
-        const nodes = graphData.nodes || [];
+        // const nodes = graphData.nodes || [];
+        const nodes = (graphData.nodes || []).filter(n => n.visible); // new20: modified to consider hidden nodes
+
 
         // Group nodes by continent
         const continentCounts = nodes.reduce((acc, node) => {

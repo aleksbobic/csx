@@ -71,6 +71,9 @@ const MapComponent = observer(() => {
   const studyId = searchParams.get("study"); // new19: get the study ID from the URL
   const [isLoading, setIsLoading] = useState(false); //new 19: State for spinner
 
+  // new20 - state to track toggle of hideNoLocationNodes
+  const [hideNoLocationNodes, setHideNoLocationNodes] = useState(false);
+
   // Load study data when the component mounts
   // useEffect(() => {
   //   if (studyId) {
@@ -238,9 +241,13 @@ const MapComponent = observer(() => {
       }
       groupedNodes[key].push(node);
     });
-
-    return (filteredData?.nodes || graph.currentGraphData.nodes || []).map(
-      (node) => ({
+    // new20: updated to consider the nodes with (0,0) coordinates
+    return (filteredData?.nodes || graph.currentGraphData.nodes || [])
+      .filter(
+        (node) =>
+          !hideNoLocationNodes || node.latitude !== 0 || node.longitude !== 0
+      )
+      .map((node) => ({
         id: node.id, // Preserve existing properties
         position: [node.longitude, node.latitude],
         size: node.size,
@@ -252,29 +259,66 @@ const MapComponent = observer(() => {
           groupedNodes[`${node.latitude},${node.longitude}`]?.length > 1
             ? [255, 0, 0]
             : [0, 255, 0], // Ensure a default color is always set
-      })
-    );
-  }, [graph.currentGraphData.nodes, filteredData, geo.layoutType, layoutKey]);
+      }));
+  }, [
+    graph.currentGraphData.nodes,
+    filteredData,
+    hideNoLocationNodes,
+    geo.layoutType,
+    layoutKey,
+  ]);
 
-  // New3 - Memoize links using the updated getLinkCoordinates function
-  // new16: Memoize links to include filtered data and bundling logic
+  // // New3 - Memoize links using the updated getLinkCoordinates function
+  // // new16: Memoize links to include filtered data and bundling logic
+  // const links = useMemo(() => {
+  //   const rawLinks = graph.getLinkCoordinates(); //new 14 - Get raw link coordinates
+
+  //   // If filteredData is active, return only filtered links
+  //   if (filteredData?.links) {
+  //     return filteredData.links;
+  //   }
+
+  //   // Apply bundling if enabled, otherwise return raw links
+  //   return isBundlingEnabled ? bundleLinks(rawLinks) : rawLinks;
+  // }, [
+  //   graph.currentGraphData.links,
+  //   filteredData,
+  //   isBundlingEnabled,
+  //   layoutKey,
+  // ]); // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
+  // // end of updated code
+
   const links = useMemo(() => {
-    const rawLinks = graph.getLinkCoordinates(); //new 14 - Get raw link coordinates
-
-    // If filteredData is active, return only filtered links
-    if (filteredData?.links) {
-      return filteredData.links;
+    // new20: If filtered, skip spatial filtering – just return the filtered links directly
+    if (Array.isArray(filteredData?.links)) {
+      return isBundlingEnabled
+        ? bundleLinks(filteredData.links)
+        : filteredData.links;
     }
 
-    // Apply bundling if enabled, otherwise return raw links
-    return isBundlingEnabled ? bundleLinks(rawLinks) : rawLinks;
+    // new20. Otherwise, use full graph and apply (0,0) filtering
+    const rawLinks = graph.getLinkCoordinates();
+
+    const filteredLinks = (rawLinks || []).filter((link) => {
+      const [sourceLng, sourceLat] = link.sourcePosition || [null, null];
+      const [targetLng, targetLat] = link.targetPosition || [null, null];
+
+      const isSourceValid =
+        !hideNoLocationNodes || sourceLat !== 0 || sourceLng !== 0;
+      const isTargetValid =
+        !hideNoLocationNodes || targetLat !== 0 || targetLng !== 0;
+
+      return isSourceValid && isTargetValid;
+    });
+
+    return isBundlingEnabled ? bundleLinks(filteredLinks) : filteredLinks;
   }, [
     graph.currentGraphData.links,
     filteredData,
     isBundlingEnabled,
+    hideNoLocationNodes,
     layoutKey,
-  ]); // New4- Add layoutKey to trigger re-render, new11 - Add isBundlingEnabled to trigger re-render
-  // end of updated code
+  ]);
 
   //New2- State to handle hover color changes
   const [displayNodes, setDisplayNodes] = useState(nodes);
@@ -407,6 +451,7 @@ const MapComponent = observer(() => {
     const newLayoutType = e.target.value;
     setSelectedLayout(newLayoutType);
     geo.setLayoutType(newLayoutType);
+    graph.updateNodeVisibility(); //new20: Ensure hidden nodes stay hidden after layout changes
     setFilteredData(null); //new16 - Clear filteredData when changing layouts
     setLayoutKey((prevKey) => prevKey + 1); // Trigger re-render with new layout
   };
@@ -442,10 +487,7 @@ const MapComponent = observer(() => {
     () => mapCluster.nodeDistribution,
     [graph.currentGraphData]
   );
-  // new15 - Update node distribution when the graph data changes
-  useEffect(() => {
-    mapCluster.calculateNodeDistribution();
-  }, []);
+
   // new15 - Update node distribution when the graph data changes
   useEffect(() => {
     mapCluster.calculateNodeDistribution();
@@ -453,35 +495,33 @@ const MapComponent = observer(() => {
 
   // new16 - Show Direct Connections for a Node
   // new19: update it to be compatible with the changes related to url and study id
+  // new20: update it to be sync with nodes real coordinates
   const showDirectConnections = (nodeId) => {
-    if (!nodeId) {
-      console.error("Invalid nodeId provided to showDirectConnections");
-      return;
-    }
     const result = graph.getConnectedNodesAndLinks(nodeId);
-    // console.log("Filtered Links Before Setting:", result.links);
 
     if (!result || result.nodes.length === 0) {
-      console.warn(`No connections found for node: ${nodeId}`);
-      setFilteredData(null); // Reset to ensure no invalid filtering persists
+      setFilteredData(null);
       return;
     }
-    // console.log(`Found connections for nodeId: ${nodeId}`, result);
-    // setFilteredData(result); // Set filtered nodes and links
-    setFilteredData({
-      nodes: result.nodes.map((node) => ({
-        ...node,
-        position: [node.longitude, node.latitude],
-        color: [128, 0, 128], // Highlight direct connections
-      })),
-      links: result.links,
-    });
-    setLayerKey((prev) => prev + 1); // Force re-render
 
-    setIsFiltered(true); // NEW: Mark as filtered
-    setPopoverOpen(false); // NEW: Close the popover
-    setPopoverNode(null); // NEW: Reset popover node state
-    setActiveNode(null); // NEW: Reset active node
+    const nodeIds = result.nodes.map((n) => n.id);
+
+    const filteredLinks = (result.links || []).filter((link) => {
+      const sourceId = link.source?.id || link.source;
+      const targetId = link.target?.id || link.target;
+      return nodeIds.includes(sourceId) && nodeIds.includes(targetId);
+    });
+
+    setFilteredData({
+      nodes: result.nodes,
+      links: filteredLinks,
+    });
+
+    setIsFiltered(true); //  Mark filtered state
+    setPopoverOpen(false); //  Close node popover if open
+    setPopoverNode(null); //  Clear node data
+    setActiveNode(null); //  Deselect any active node
+    setLayerKey((prev) => prev + 1); //  Force re-render
   };
 
   // new19: handleing filtred data
@@ -512,6 +552,36 @@ const MapComponent = observer(() => {
       setNavigationPanelOpen(true);
     }
   };
+
+  // new20 - Handler to toggle node visibility(nodes with (0,0) coordinates)
+  const handleToggleHideNoLocationNodes = () => {
+    setHideNoLocationNodes((prev) => {
+      const newState = !prev;
+
+      //  When toggle is activated or deactivated, force layout back to default
+      if (geo.layoutType !== "default") {
+        geo.setLayoutType("default");
+        geo.applyLayout(); // apply default layout right away
+        setSelectedLayout("default");
+      }
+
+      graph.toggleHideNoLocationNodes(); // re-evaluates visibility
+      setLayerKey((prev) => prev + 1); // trigger map redraw
+
+      return newState;
+    });
+  };
+
+  //new20: refresh the view when the hideNoLocationNodes changes
+  useEffect(() => {
+    setDisplayNodes(nodes); // Refresh displayed nodes
+    setLayerKey((prev) => prev + 1); // Ensure layers are refreshed after toggle
+  }, [nodes, hideNoLocationNodes, filteredData]);
+
+  //new20: reset the view for rendering links
+  useEffect(() => {
+    setLayerKey((prev) => prev + 1); // Trigger re-render for links
+  }, [links]);
 
   // new9 - Update layers whenever any relevant state (opacity, width, curvature) changes
   // new16 - Update layers when filteredData changes
@@ -570,7 +640,18 @@ const MapComponent = observer(() => {
         <>
           <DeckGL
             viewState={viewState} // Set current viewState here to persist location and zoom
-            onViewStateChange={({ viewState }) => setViewState(viewState)} // Track map position changes
+            // onViewStateChange={({ viewState }) => setViewState(viewState)} // Track map position changes
+            onViewStateChange={(e) => {
+              if (e.interactionState.isZooming) {
+                setViewState({
+                  ...viewState,
+                  ...e.viewState,
+                  transitionDuration: 0,
+                });
+              } else {
+                setViewState({ ...viewState, ...e.viewState });
+              }
+            }} //new20: Update viewState on zoom(suggested by @Aleks)
             controller={true}
             getTooltip={getTooltip}
             layers={layers} // New9 - Pass layers to DeckGL
@@ -707,6 +788,8 @@ const MapComponent = observer(() => {
         handleClusterRadiusChange={handleClusterRadiusChange}
         isVisible={isLegendVisible}
         toggleLegend={toggleLegend}
+        hideNoLocationNodes={hideNoLocationNodes} // NEW20: Pass hideNoLocationNodes state
+        handleToggleHideNoLocationNodes={handleToggleHideNoLocationNodes} // NEW20: Pass handler for toggling hideNoLocationNodes
       />
     </Box>
   );

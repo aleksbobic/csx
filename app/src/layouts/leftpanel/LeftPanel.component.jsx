@@ -53,6 +53,8 @@ function LeftPanel({
   handleClusterRadiusChange, // new18: Add handleClusterRadiusChange
   isVisible, // new18: Add isVisible
   toggleLegend, // new18: Add isVisible and toggleLegend
+  hideNoLocationNodes, // new20: Add hideNoLocationNodes
+  handleToggleHideNoLocationNodes, // new20: Add handleToggleHideNoLocationNodes
 }) {
   const store = useContext(RootStoreContext);
   const { isOpen, onOpen, onToggle } = useDisclosure();
@@ -616,6 +618,8 @@ function LeftPanel({
             handleClusterRadiusChange={handleClusterRadiusChange}
             isVisible={isVisible}
             toggleLegend={toggleLegend}
+            hideNoLocationNodes={hideNoLocationNodes} // NEW20: hide nodes without location
+            handleToggleHideNoLocationNodes={handleToggleHideNoLocationNodes} // NEW20: handle hide nodes without location
           />
         </CustomScroll>
       </TabPanel>
