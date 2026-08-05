@@ -113,7 +113,7 @@ function AdvancedSearch({
 
     useEffect(() => {
         if (store.workflow.shouldRunWorkflow) {
-            navigate(`/graph?study=${store.core.studyUuid}`);
+            navigate(`/graph/detail?study=${store.core.studyUuid}`);
         }
     }, [
         navigate,
